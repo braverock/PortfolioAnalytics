@@ -338,23 +338,34 @@ function(R,portfolioreturns, yeargrid )
         # Risk Reduction utility functions
         # for utility function
         # w' = min(modifiedVaR(p=0.95))
-        minmodVaR  = which.min(portfolioreturns[[yearname]][,"modifiedVaR.95...period"])
+        #minmodVaR  = which.min(portfolioreturns[[yearname]][,"modifiedVaR.95...period"])
         minmodVaRi = which.min(portfolioreturns[[yearname]][,"modifiedVaR.95...inception"])
 
         # for utility function
         # w' = max(return/modifiedVaR) for both modifiedVaR.period and modifiedVaR.inception
-        modSharpe  = which.max(portfolioreturns[[yearname]][,"Annualized.Return"]/portfolioreturns[[yearname]][,"modifiedVaR.95...period"])
+        #modSharpe  = which.max(portfolioreturns[[yearname]][,"Annualized.Return"]/portfolioreturns[[yearname]][,"modifiedVaR.95...period"])
         modSharpei = which.max(portfolioreturns[[yearname]][,"Annualized.Return"]/portfolioreturns[[yearname]][,"modifiedVaR.95...inception"])
 
         # for utility function
         # w' = min(modifiedVaR(p=0.95)) such that return is greater than the benchmark
-        returnoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"Annualized.Return"]>=cumulativeReturn(R[infrom:into,13])),"modifiedVaR.95...period"])
-        if (length(returnoverBM)==0) { returnoverBM = NA }
+        minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"Annualized.Return"]>=cumulativeReturn(R[infrom:into,13])),"modifiedVaR.95...period"])
+        if (length(minVaRretoverBM)==0) { minVaRretoverBM = NA }
 
         #for utility function
-        #w' = max(return) such that modifiedVaR is less than modifiedVar(benchmark)
-        maxmodVaRRet=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"modifiedVaR.95...period"]<modifiedVaR(R[infrom:into,13],p=0.95)),"Annualized.Return"])
-        if (length(maxmodVaRRet)==0) { maxmodVaRRet = NA }
+        #w' = max(return) such that modifiedVaR is less than modifiedVaR(benchmark)
+        maxmodVaRltBM=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"modifiedVaR.95...period"]<modifiedVaR(R[infrom:into,13],p=0.95)),"Annualized.Return"])
+        if (length(maxmodVaRltBM)==0) { maxmodVaRltBM = NA }
+
+        #add utility functions tor Equal weighted portfolio benchmark
+        # for utility function
+        # w' = min(modifiedVaR(p=0.95)) such that return is greater than equal weighted portfolio
+        minVaRretoverEW = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"Annualized.Return"]>=portfolioreturns[[yearname]][40063,"Annualized.Return"]),"modifiedVaR.95...period"])
+        if (length(minVaRretoverEW)==0) { minVaRretoverEW = NA }
+
+        #for utility function
+        #w' = max(return) such that modifiedVaR is less than modifiedVaR(equal weighted)
+        maxmodVaRltEW=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"modifiedVaR.95...period"]<portfolioreturns[[yearname]][40063,"Annualized.Return"]),"Annualized.Return"])
+        if (length(maxmodVaRltEW)==0) { maxmodVaRltEW = NA }
 
 
         # construct a data structure that holds each result for this row
@@ -364,7 +375,7 @@ function(R,portfolioreturns, yeargrid )
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind( minmodVaR, minmodVaRi, modSharpe, modSharpei, returnoverBM, maxmodVaRRet)
+        resultrow = cbind(minmodVaRi, modSharpei, minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW)
 
         rownames(resultrow) = outname
 
