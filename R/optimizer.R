@@ -1,7 +1,13 @@
 # Optimizer Functions
 
-# Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
+################################################################################
+#
+# CONFIDENTIAL, NOT FOR DISTRIBUTION
+#
+################################################################################
 
+# Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
+# $Id: optimizer.R,v 1.7 2006-09-12 14:37:43 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -589,3 +595,32 @@ function (R, weightgrid, yeargrid, backtestweights)
 # ------------------------------------------------------------------------------
 # GeometricReturn
 # use annualizedReturn or cumulativeReturn from Peter Carl in performance-analytics.R
+
+###############################################################################
+# $Log: not supported by cvs2svn $
+# Revision 1.6 2006-09-12 09:31:37 brian
+# - snapshot 2006-09-05 15:36
+# - add functions and tweak existing to better handle larger data sets, cutting data
+#
+# Revision 1.5 2006-09-12 09:29:12 brian
+# - snapshot 2006-08-30 19:03
+# - add functions for conthly compounding returns
+#
+# Revision 1.4 2006-09-12 09:28:01 brian
+# - snapshot 2006-08-29 23:01
+# - add equal weighted utility functions
+# 
+# Revision 1.3 2006-09-12 09:27:00 brian
+# - snapshot 2006-08-29 21:58
+# - Add functions to actually perform the backtest
+#   using the results of the brute force statistics
+#   generated on all possible portfolios.
+# 
+# Revision 1.2 2006-09-12 09:25:06 brian
+# - snapshot 2006-08-29
+# - add BruteForcePortfolios, WeightedReturns, and other small utility functions
+#
+# Revision 1.1 2006-09-12 09:23:14 brian
+# - initial revision 2006-08-28
+# Bug 840
+###############################################################################
