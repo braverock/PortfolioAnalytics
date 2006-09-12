@@ -198,7 +198,8 @@ function (R, weightgrid, from, to)
 
         # 3yr annualizedReturn
         # look back three years and calculate annualized mean return
-
+        # use annualizedReturn fn instead of cumulativeReturn
+        threeyrannualreturn = NA
 
         # modifiedVaR(95%) from pfolioReturn
         mVaR = modifiedVaR(returns, p=0.95)
@@ -208,15 +209,17 @@ function (R, weightgrid, from, to)
 
         # Expected Shortfall
         # commented because it isn't useful in our analyses
-        # ES = CVaRplus(returns, weights = NULL, alpha = 0.05)[1]
+        ES = CVaRplus(returns, weights = NULL, alpha = 0.05)[1]
 
         # maxDrawdown
         mddlist= maxdrawdown(returns)
 
         # Annualized Sharpe Ratio since inception
+        annualSharpe=NA
 
         # 3yr Annualized Sharpe Ratio
         # look back three years and calculate annualized Sharpe ratio
+        threeyrannualSharpe=NA
 
         # construct a data structure that holds each result for this row
         if (row==1) {
@@ -347,6 +350,10 @@ function(R,portfolioreturns, yeargrid )
         modSharpei = which.max(portfolioreturns[[yearname]][,"Annualized.Return"]/portfolioreturns[[yearname]][,"modifiedVaR.95...inception"])
 
         # for utility function
+        # w' = max(return/Max.Drawdown)
+        ReturnOverDrawdown = which.max(portfolioreturns[[yearname]][,"Annualized.Return"]/portfolioreturns[[yearname]][,"Max.Drawdown"])
+
+        # for utility function
         # w' = min(modifiedVaR(p=0.95)) such that return is greater than the benchmark
         minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"Annualized.Return"]>=cumulativeReturn(R[infrom:into,13])),"modifiedVaR.95...period"])
         if (length(minVaRretoverBM)==0) { minVaRretoverBM = NA }
@@ -375,7 +382,7 @@ function(R,portfolioreturns, yeargrid )
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind(minmodVaRi, modSharpei, minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW)
+        resultrow = cbind(minmodVaRi, modSharpei, ReturnOverDrawdown, minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW)
 
         rownames(resultrow) = outname
 
@@ -416,6 +423,7 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Annualized.Retur
 
         #get funky with the backtest array
         backtestrow=t(portfolioreturns[[yearname]][t(backtestresults[yearname,]),"Annualized.Return"])
+
         #print(backtestrow)
         colnames(backtestrow)=colnames(backtestresults)
 
@@ -431,6 +439,103 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Annualized.Retur
     } # end rows loop
 
     #Result:
+    result
+
+}
+
+# ------------------------------------------------------------------------------
+#MonthlyBacktestResults =
+# use pfolioReturn(returnarray,weightingvector) from fPortfolio
+MonthlyBacktestResults =
+function (R, weightgrid, yeargrid, backtestweights)
+{ # @author Brian G. Peterson
+
+    # R             data structure of returns
+    # weightgrid    each row contains one weighting vector, same number of columns as your returns
+    # from          where to cut the beginning of the return stream
+    # to            where to cut the end of the return stream
+    #
+    # @returns      data frame where each row has the same index number as a weighting vector,
+    #               and each column is one of your metrics from inside this function
+
+    # Setup:
+    rows=nrow(backtestweights)-1
+    ##rows=nrow(yeargrid)
+    testcols=ncol(backtestweights)
+    result=NA
+
+    # data type conditionals
+    # cut the return series for from:to
+    if (class(R) == "timeSeries") {
+        R = R@Data
+    } else {
+        R = R
+    }
+
+    if (ncol(weightgrid) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
+
+
+    # Function:
+    for(row in 1:rows) {
+        yearname    = rownames(backtestweights[row,])
+#        print(paste("YEAR:",yearname))
+        yearrow = yeargrid[yearname,]
+        #print(paste("YROW:",yearrow))
+        from      = yeargrid [yearname,1]
+        #print (from)
+        to        = yeargrid [yearname,2]
+        #print(to)
+##	print(paste("GOT TO AND FROM",to,from))
+        #ok, we're looping on year.
+        # for each year, we need to apply the weights in our backtest results to the portfolio and get a monthly return
+
+
+        for (col in 1:testcols) {
+
+            w = as.numeric(weightgrid[backtestweights[row,col],])
+##	    print("W IS")
+##	    print(w)
+            # pfolioReturn
+            colreturn=pfolioReturn(R[from:to,],w)
+##	    print("RETURN")
+##            print (colreturn)
+            if (col==1) {
+                #create data.frame
+                resultcol=data.frame(Value=colreturn)
+            } else {
+                mycol=data.frame(Value=colreturn)
+                resultcol=cbind(resultcol,mycol)
+            }
+        }
+##	print(testcols)
+##	print(colnames(backtestweights))
+##	print(ncol(resultcol))
+	colnames(resultcol)=colnames(backtestweights)
+##	print("RESULTCOL")
+##	print(resultcol)
+        # construct a data structure that holds each result for this row
+        if (row==1) {
+                #create data.frame
+                result=data.frame(resultcol)
+        } else {
+		resultrow=data.frame(resultcol)
+		 result    = rbind(result,resultrow)
+	}
+#        print(resultcol)
+        # first cbind the columns
+##        resultrow = resultcol
+        #print(resultrow)
+        #rownames(resultrow) = row
+
+        # then rbind the rows
+##        result    = rbind(result,resultrow)
+
+    } #end rows loop
+
+    # set pretty labels for the columns
+    # colnames(result)=c("Annualized Return","modifiedVaR(95%)-period","modifiedVaR(95%)-inception","Max Drawdown")
+
+    # Return Value:
     result
 
 }
