@@ -196,6 +196,10 @@ function (R, weightgrid, from, to)
         # cumulative geometric Return for the period
         annualReturn=cumulativeReturn(returns)
 
+        # 3yr annualizedReturn
+        # look back three years and calculate annualized mean return
+
+
         # modifiedVaR(95%) from pfolioReturn
         mVaR = modifiedVaR(returns, p=0.95)
 
@@ -203,10 +207,16 @@ function (R, weightgrid, from, to)
         mVaRi = modifiedVaR(historicalreturns, p=0.95)
 
         # Expected Shortfall
-        ES = CVaRplus(returns, weights = NULL, alpha = 0.05)[1]
+        # commented because it isn't useful in our analyses
+        # ES = CVaRplus(returns, weights = NULL, alpha = 0.05)[1]
 
         # maxDrawdown
         mddlist= maxdrawdown(returns)
+
+        # Annualized Sharpe Ratio since inception
+
+        # 3yr Annualized Sharpe Ratio
+        # look back three years and calculate annualized Sharpe ratio
 
         # construct a data structure that holds each result for this row
         if (row==1) {
@@ -214,16 +224,18 @@ function (R, weightgrid, from, to)
                 result=data.frame()
                 resultrow=data.frame()
         }
-        # first cbind
+        # first cbind the columns
         resultrow = cbind( annualReturn, mVaR, mVaRi, mddlist$maxdrawdown, ES )
 
         rownames(resultrow) = row
 
-        # then rbind
+        # then rbind the rows
         result    = rbind(result,resultrow)
 
     } #end rows loop
-    colnames(result)=c("Annualized Return","modifiedVaR(95%)-period","modifiedVaR(95%)-inception","Max Drawdown","Expected Shortfall")
+
+    # set pretty labels for the columns
+    colnames(result)=c("Annualized Return","modifiedVaR(95%)-period","modifiedVaR(95%)-inception","Max Drawdown")
 
     # Return Value:
     result
@@ -263,14 +275,154 @@ function(R,weightgrid,yeargrid)
         resultarray = WeightedReturns(R, weightgrid, from, to)
 
         # then write a CSV
-        write.table(resultarray, file = paste(yearname,".csv",sep=""), append = FALSE, quote = TRUE, sep = ",",
+        write.table(resultarray, file = paste(yearname,".csv",sep=""),
+            append = FALSE, quote = TRUE, sep = ",",
             eol = "\n", na = "NA", dec = ".", row.names = TRUE,
             col.names = TRUE, qmethod = "escape")
+
         print(yearname)
-        print(resultarray)
+        # print(resultarray)
     }  # end row loop
 }
 
+# ------------------------------------------------------------------------------
+BacktestData =
+function()
+{ # @author Brian G. Peterson
+
+    # Description:
+    #
+    # complete brute force hackjob to get out of sample results
+
+    # Setup:
+    WR1997=read.table("1997.csv",header=TRUE, row.names = 1,sep = ",")
+    WR1998=read.table("1998.csv",header=TRUE, row.names = 1,sep = ",")
+    WR1999=read.table("1999.csv",header=TRUE, row.names = 1,sep = ",")
+    WR2000=read.table("2000.csv",header=TRUE, row.names = 1,sep = ",")
+    WR2001=read.table("2001.csv",header=TRUE, row.names = 1,sep = ",")
+    WR2002=read.table("2002.csv",header=TRUE, row.names = 1,sep = ",")
+    WR2003=read.table("2003.csv",header=TRUE, row.names = 1,sep = ",")
+    WR2004=read.table("2004.csv",header=TRUE, row.names = 1,sep = ",")
+    WR2005=read.table("2005.csv",header=TRUE, row.names = 1,sep = ",")
+
+    result=list(WR1997,WR1998,WR1999,WR2000,WR2001,WR2002,WR2003,WR2004,WR2005)
+    names(result)<-c("1997","1998","1999","2000","2001","2002","2003","2004","2005")
+
+    #Return:
+    result
+}
+
+# ------------------------------------------------------------------------------
+Backtest =
+function(R,portfolioreturns, yeargrid )
+{
+
+    rows=nrow(yeargrid)
+
+    # Function:
+    for (rnum in 2:rows) {
+        insample    = yeargrid[rnum-1,]
+        outofsample = yeargrid[rnum,]
+        infrom      = insample [,1]
+        into        = insample [,2]
+        outfrom     = outofsample [,1]
+        outto       = outofsample [,2]
+        yearname    = rownames(insample)
+        outname     = rownames(outofsample)
+
+        # print(outname)
+
+        #Check Utility fn for insample , and apply to out of sample row
+
+        ##################################
+        # Risk Reduction utility functions
+        # for utility function
+        # w' = min(modifiedVaR(p=0.95))
+        minmodVaR  = which.min(portfolioreturns[[yearname]][,"modifiedVaR.95...period"])
+        minmodVaRi = which.min(portfolioreturns[[yearname]][,"modifiedVaR.95...inception"])
+
+        # for utility function
+        # w' = max(return/modifiedVaR) for both modifiedVaR.period and modifiedVaR.inception
+        modSharpe  = which.max(portfolioreturns[[yearname]][,"Annualized.Return"]/portfolioreturns[[yearname]][,"modifiedVaR.95...period"])
+        modSharpei = which.max(portfolioreturns[[yearname]][,"Annualized.Return"]/portfolioreturns[[yearname]][,"modifiedVaR.95...inception"])
+
+        # for utility function
+        # w' = min(modifiedVaR(p=0.95)) such that return is greater than the benchmark
+        returnoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"Annualized.Return"]>=cumulativeReturn(R[infrom:into,13])),"modifiedVaR.95...period"])
+        if (length(returnoverBM)==0) { returnoverBM = NA }
+
+        #for utility function
+        #w' = max(return) such that modifiedVaR is less than modifiedVar(benchmark)
+        maxmodVaRRet=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"modifiedVaR.95...period"]<modifiedVaR(R[infrom:into,13],p=0.95)),"Annualized.Return"])
+        if (length(maxmodVaRRet)==0) { maxmodVaRRet = NA }
+
+
+        # construct a data structure that holds each result for this row
+        if (rnum==2) {
+                #create data.frame
+                result=data.frame()
+                resultrow=data.frame()
+        }
+        # first cbind the columns
+        resultrow = cbind( minmodVaR, minmodVaRi, modSharpe, modSharpei, returnoverBM, maxmodVaRRet)
+
+        rownames(resultrow) = outname
+
+        # then rbind the rows
+        result    = rbind(result,resultrow)
+        # print(resultarray)
+    }  # end row loop
+
+    # Result:
+    result
+}
+
+# ------------------------------------------------------------------------------
+backtestDisplay =
+function (R, portfolioreturns, yeargrid, backtestresults, show="Annualized.Return" )
+{ # a function by Brian G. Peterson
+
+    rows=nrow(yeargrid)-1
+
+    # Function:
+    for (rnum in 2:rows) {
+        yearrow = yeargrid[rnum,]
+        from      = yearrow [,1]
+        to        = yearrow [,2]
+        yearname    = rownames(yearrow)
+
+        # construct a data structure that holds each result for this row
+        if (rnum==1) {
+                #create data.frame
+                result=data.frame()
+                resultrow=data.frame()
+        }
+        #if(rnum==rows){return}
+
+        # now build our results
+        FoFIndex      = cumulativeReturn (R[from:to,13]) #do something spiffy to show the same stats for FoHF index
+        EqualWeighted = portfolioreturns[[yearname]][40063,show]
+
+        #get funky with the backtest array
+        backtestrow=t(portfolioreturns[[yearname]][t(backtestresults[yearname,]),"Annualized.Return"])
+        #print(backtestrow)
+        colnames(backtestrow)=colnames(backtestresults)
+
+        # first cbind the columns
+        resultrow = cbind( FoFIndex, EqualWeighted, backtestrow)
+
+        rownames(resultrow) = yearname
+
+        # then rbind the rows
+        result    = rbind(result,resultrow)
+        # print(resultarray)
+
+    } # end rows loop
+
+    #Result:
+    result
+
+}
 
 # ------------------------------------------------------------------------------
 # GeometricReturn
