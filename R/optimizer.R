@@ -6,18 +6,16 @@
 ################################################################################
 # FUNCTIONS:
 #
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
+# BruteForcePortfolios (R,weightgrid,yeargrid)
+# BacktestData ()
+# Backtest (R,portfolioreturns, yeargrid, cutat=1000000 )
+# weight.grid (columnnames, seqstart=.05, seqend=.25, seqstep=.05)
+# maxdrawdown (R)
+# cut.returns (R, cutrow, startrow=1)
+# weighttest (weightgrid, test=1)
+# WeightedReturns (R, weightgrid, from, to)
+# backtestDisplay (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Return" )
+# MonthlyBacktestResults (R, weightgrid, yeargrid, backtestweights)
 #
 ################################################################################
 
@@ -31,6 +29,8 @@ if(!require("fPortfolio", quietly=TRUE)) {
 if(!require("tseries", quietly=TRUE)) {
     stop("package", sQuote("tseries"), "is needed.  Stopping")
 }
+# also needs Peter Carl's "performance-analytics.R"
+# do we always source it?
 
 # ------------------------------------------------------------------------------
 weight.grid =
@@ -158,7 +158,7 @@ function (R, weightgrid, from, to)
     # exhaustive analytics on each of your candidates later, rather than on the
     # entire set of all possible portfolios.
     #
-    # R             data structure of returns
+    # R             data structure of historical returns
     # weightgrid    each row contains one weighting vector, same number of columns as your returns
     # from          where to cut the beginning of the return stream
     # to            where to cut the end of the return stream
@@ -194,32 +194,42 @@ function (R, weightgrid, from, to)
         historicalreturns=pfolioReturn(fullR,w)
 
         # cumulative geometric Return for the period
-        annualReturn=cumulativeReturn(returns)
+        cumReturn=cumulativeReturn(returns)
+        threeyrfrom = from-24
+        if (threeyrfrom < 1 ) threeyrfrom = 1
+        threeyrreturns = pfolioReturn(fullR[threeyrfrom:to,],w)
 
-        # 3yr annualizedReturn
+        # 3yr  Mean Return
         # look back three years and calculate annualized mean return
         # use annualizedReturn fn instead of cumulativeReturn
-        threeyrannualreturn = NA
+        ThreeYrMeanReturn = mean(threeyrreturns)
 
         # modifiedVaR(95%) from pfolioReturn
-        mVaR = modifiedVaR(returns, p=0.95)
+        PeriodmodVaR = modifiedVaR(returns, p=0.95)
 
         # modifiedVaR(95%) from pfolioReturn since inception
-        mVaRi = modifiedVaR(historicalreturns, p=0.95)
+        InceptionmodVaR = modifiedVaR(historicalreturns, p=0.95)
 
         # Expected Shortfall
         # commented because it isn't useful in our analyses
-        ES = CVaRplus(returns, weights = NULL, alpha = 0.05)[1]
+        # ES = CVaRplus(returns, weights = NULL, alpha = 0.05)[1]
 
         # maxDrawdown
         mddlist= maxdrawdown(returns)
 
-        # Annualized Sharpe Ratio since inception
-        annualSharpe=NA
+        # Sharpe Ratio in period
+        PeriodSharpe=sharpeRatio(returns)
 
-        # 3yr Annualized Sharpe Ratio
+        # Sharpe Ratio since inception
+        InceptionSharpe=sharpeRatio(historicalreturns)
+
+        # 3yr trailing Sharpe Ratio
         # look back three years and calculate annualized Sharpe ratio
-        threeyrannualSharpe=NA
+        ThreeYrSharpe=sharpeRatio(threeyrreturns)
+
+        # Omega
+        # Looks back to inception
+        Omega = omega (historicalreturns)
 
         # construct a data structure that holds each result for this row
         if (row==1) {
@@ -228,7 +238,8 @@ function (R, weightgrid, from, to)
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind( annualReturn, mVaR, mVaRi, mddlist$maxdrawdown, ES )
+        resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, InceptionmodVaR, mddlist$maxdrawdown,
+                             PeriodSharpe, ThreeYrSharpe, InceptionSharpe, Omega )
 
         rownames(resultrow) = row
 
@@ -238,7 +249,8 @@ function (R, weightgrid, from, to)
     } #end rows loop
 
     # set pretty labels for the columns
-    colnames(result)=c("Annualized Return","modifiedVaR(95%)-period","modifiedVaR(95%)-inception","Max Drawdown")
+    colnames(result)=c("Cumulative Return","Mean Return,3 yr","modifiedVaR,period","modifiedVaR,inception","Max Drawdown",
+                        "Sharpe,period","Sharpe,3 yr","Sharpe,inception","Omega")
 
     # Return Value:
     result
@@ -283,7 +295,7 @@ function(R,weightgrid,yeargrid)
             eol = "\n", na = "NA", dec = ".", row.names = TRUE,
             col.names = TRUE, qmethod = "escape")
 
-        print(yearname)
+        print( paste("Completed",yearname,":",date()) )
         # print(resultarray)
     }  # end row loop
 }
@@ -317,9 +329,30 @@ function()
 
 # ------------------------------------------------------------------------------
 Backtest =
-function(R,portfolioreturns, yeargrid )
+function(R,portfolioreturns, yeargrid, cutat=1000000 )
 {
+    # Description:
+    #
+    # complete brute force hackjob to get out of sample results
+    #
+    # Given a set of historical returns R, and a set of portfolio retrurns calculated from
+    # the BruteForcePortfolios function, we can now apply several utility functions to
+    # find the best portgolio out of the universe of all sample portfolios.
+    #
+    # Basically, we find and in-sample solution to each utility function, and store the
+    # weighting vector for that portfolio as our strategic weight for use out of sample.
+    # by testing several utility functions, we can examine the models for bias, and determine
+    # which utility function produces the most acceptable out of sample results.
+    #
+    # R                 data frame of historical returns
+    #
+    # portfolioreturns  list of data frames of set of returns for all possible portfolios
+    #                   (output of BruteForcePortfolios function)
+    #
+    # yeargrid
 
+
+    # Setup:
     rows=nrow(yeargrid)
 
     # Function:
@@ -332,6 +365,10 @@ function(R,portfolioreturns, yeargrid )
         outto       = outofsample [,2]
         yearname    = rownames(insample)
         outname     = rownames(outofsample)
+        portfoliorows=nrow(portfolioreturns[[yearname]])
+        if (cutat<portfoliorows) {
+            portfoliorows=cutat
+        }
 
         # print(outname)
 
@@ -341,40 +378,61 @@ function(R,portfolioreturns, yeargrid )
         # Risk Reduction utility functions
         # for utility function
         # w' = min(modifiedVaR(p=0.95))
-        #minmodVaR  = which.min(portfolioreturns[[yearname]][,"modifiedVaR.95...period"])
-        minmodVaRi = which.min(portfolioreturns[[yearname]][,"modifiedVaR.95...inception"])
+        #minmodVaR  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"])
+        minmodVaRi = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.inception"])
 
         # for utility function
         # w' = max(return/modifiedVaR) for both modifiedVaR.period and modifiedVaR.inception
-        #modSharpe  = which.max(portfolioreturns[[yearname]][,"Annualized.Return"]/portfolioreturns[[yearname]][,"modifiedVaR.95...period"])
-        modSharpei = which.max(portfolioreturns[[yearname]][,"Annualized.Return"]/portfolioreturns[[yearname]][,"modifiedVaR.95...inception"])
+        #modSharpe  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"])
+        modSharpei = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.inception"])
 
         # for utility function
         # w' = max(return/Max.Drawdown)
-        ReturnOverDrawdown = which.max(portfolioreturns[[yearname]][,"Annualized.Return"]/portfolioreturns[[yearname]][,"Max.Drawdown"])
+        ReturnOverDrawdown = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"Max.Drawdown"])
+
+        # for utility function
+        # w' = max(return)
+        maxReturn = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"])
 
         # for utility function
         # w' = min(modifiedVaR(p=0.95)) such that return is greater than the benchmark
-        minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"Annualized.Return"]>=cumulativeReturn(R[infrom:into,13])),"modifiedVaR.95...period"])
-        if (length(minVaRretoverBM)==0) { minVaRretoverBM = NA }
+        minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=cumulativeReturn(R[infrom:into,13])),"modifiedVaR.period"])
+        if (length(minVaRretoverBM)==0) { minVaRretoverBM = maxReturn }
 
         #for utility function
         #w' = max(return) such that modifiedVaR is less than modifiedVaR(benchmark)
-        maxmodVaRltBM=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"modifiedVaR.95...period"]<modifiedVaR(R[infrom:into,13],p=0.95)),"Annualized.Return"])
+        maxmodVaRltBM=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"]<modifiedVaR(R[infrom:into,13],p=0.95)),"Cumulative.Return"])
         if (length(maxmodVaRltBM)==0) { maxmodVaRltBM = NA }
 
         #add utility functions tor Equal weighted portfolio benchmark
         # for utility function
         # w' = min(modifiedVaR(p=0.95)) such that return is greater than equal weighted portfolio
-        minVaRretoverEW = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"Annualized.Return"]>=portfolioreturns[[yearname]][40063,"Annualized.Return"]),"modifiedVaR.95...period"])
+        minVaRretoverEW = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=portfolioreturns[[yearname]][1,"Cumulative.Return"]),"modifiedVaR.period"])
         if (length(minVaRretoverEW)==0) { minVaRretoverEW = NA }
 
         #for utility function
         #w' = max(return) such that modifiedVaR is less than modifiedVaR(equal weighted)
-        maxmodVaRltEW=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][,"modifiedVaR.95...period"]<portfolioreturns[[yearname]][40063,"Annualized.Return"]),"Annualized.Return"])
+        maxmodVaRltEW=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"]<portfolioreturns[[yearname]][1,"Cumulative.Return"]),"Cumulative.Return"])
         if (length(maxmodVaRltEW)==0) { maxmodVaRltEW = NA }
 
+        #for utility function
+        #w' = max(omega)
+        maxOmega = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Omega"])
 
+        #for utility function
+        #w' = max(Sharpe.period)
+        maxPeriodSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.period"])
+
+        #for utility function
+        #w' = max(Sharpe.period)
+        max3yrSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.3.yr"])
+
+        #for utility function
+        #w' = max(Sharpe.inception)
+        maxInceptionSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.inception"])
+
+
+        ########## end of utility functions ##########
         # construct a data structure that holds each result for this row
         if (rnum==2) {
                 #create data.frame
@@ -382,7 +440,9 @@ function(R,portfolioreturns, yeargrid )
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind(minmodVaRi, modSharpei, ReturnOverDrawdown, minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW)
+        resultrow = cbind(minmodVaRi, modSharpei, ReturnOverDrawdown, maxOmega, maxReturn,
+                           minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW,
+                           maxPeriodSharpe, max3yrSharpe, maxInceptionSharpe )
 
         rownames(resultrow) = outname
 
@@ -397,17 +457,17 @@ function(R,portfolioreturns, yeargrid )
 
 # ------------------------------------------------------------------------------
 backtestDisplay =
-function (R, portfolioreturns, yeargrid, backtestresults, show="Annualized.Return" )
+function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Return" )
 { # a function by Brian G. Peterson
 
     rows=nrow(yeargrid)-1
 
     # Function:
     for (rnum in 2:rows) {
-        yearrow = yeargrid[rnum,]
+        yearrow   = yeargrid[rnum,]
         from      = yearrow [,1]
         to        = yearrow [,2]
-        yearname    = rownames(yearrow)
+        yearname  = rownames(yearrow)
 
         # construct a data structure that holds each result for this row
         if (rnum==1) {
@@ -419,10 +479,10 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Annualized.Retur
 
         # now build our results
         FoFIndex      = cumulativeReturn (R[from:to,13]) #do something spiffy to show the same stats for FoHF index
-        EqualWeighted = portfolioreturns[[yearname]][40063,show]
+        EqualWeighted = portfolioreturns[[yearname]][1,show]
 
         #get funky with the backtest array
-        backtestrow=t(portfolioreturns[[yearname]][t(backtestresults[yearname,]),"Annualized.Return"])
+        backtestrow=t(portfolioreturns[[yearname]][t(backtestresults[yearname,]),"Cumulative.Return"])
 
         #print(backtestrow)
         colnames(backtestrow)=colnames(backtestresults)
@@ -477,63 +537,49 @@ function (R, weightgrid, yeargrid, backtestweights)
 
     # Function:
     for(row in 1:rows) {
-        yearname    = rownames(backtestweights[row,])
-#        print(paste("YEAR:",yearname))
-        yearrow = yeargrid[yearname,]
-        #print(paste("YROW:",yearrow))
+        yearname  = rownames(backtestweights[row,])
+        yearrow   = yeargrid[yearname,]
         from      = yeargrid [yearname,1]
-        #print (from)
         to        = yeargrid [yearname,2]
-        #print(to)
-##	print(paste("GOT TO AND FROM",to,from))
-        #ok, we're looping on year.
-        # for each year, we need to apply the weights in our backtest results to the portfolio and get a monthly return
 
+        # ok, we're looping on year.
+        # for each year, we need to apply the weights in our backtest results to the portfolio and get a monthly return
 
         for (col in 1:testcols) {
 
             w = as.numeric(weightgrid[backtestweights[row,col],])
-##	    print("W IS")
-##	    print(w)
+
             # pfolioReturn
             colreturn=pfolioReturn(R[from:to,],w)
-##	    print("RETURN")
-##            print (colreturn)
+
             if (col==1) {
+                # add the edhec returns
+                # edhec = NA
+
+                # add the equal weighted portfolios
+                equalweight = pfolioReturn(R[from:to,],as.numeric(weightgrid[1,]))
+                #colnames(equalweight)="EqualWeighted"
+
                 #create data.frame
-                resultcol=data.frame(Value=colreturn)
-            } else {
-                mycol=data.frame(Value=colreturn)
-                resultcol=cbind(resultcol,mycol)
+                resultcol=data.frame(Value=equalweight)
             }
+
+            mycol=data.frame(Value=colreturn)
+            resultcol=cbind(resultcol,mycol)
+
         }
-##	print(testcols)
-##	print(colnames(backtestweights))
-##	print(ncol(resultcol))
-	colnames(resultcol)=colnames(backtestweights)
-##	print("RESULTCOL")
-##	print(resultcol)
-        # construct a data structure that holds each result for this row
+        colnames(resultcol)=c("EqualWeighted",colnames(backtestweights))
         if (row==1) {
                 #create data.frame
                 result=data.frame(resultcol)
         } else {
-		resultrow=data.frame(resultcol)
-		 result    = rbind(result,resultrow)
-	}
-#        print(resultcol)
-        # first cbind the columns
-##        resultrow = resultcol
-        #print(resultrow)
-        #rownames(resultrow) = row
-
-        # then rbind the rows
-##        result    = rbind(result,resultrow)
+            resultrow = data.frame(resultcol)
+            result    = rbind(result,resultrow)
+        }
 
     } #end rows loop
 
-    # set pretty labels for the columns
-    # colnames(result)=c("Annualized Return","modifiedVaR(95%)-period","modifiedVaR(95%)-inception","Max Drawdown")
+    # set pretty labels for things eventually
 
     # Return Value:
     result
