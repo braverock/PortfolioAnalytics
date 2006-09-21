@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.7 2006-09-12 14:37:43 brian Exp $
+# $Id: optimizer.R,v 1.8 2006-09-21 13:43:39 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -285,6 +285,7 @@ function(R,weightgrid,yeargrid)
     rows=nrow(yeargrid)
 
     # Function:
+    print( paste("Started:",date()) )
     for (rnum in 1:rows) {
         row = yeargrid[rnum,]
         yearname=rownames(row)
@@ -598,6 +599,11 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.7  2006/09/12 14:37:43  brian
+# - add CVS tags
+# - add CVS log
+# - add confidentiality notice to top of file
+#
 # Revision 1.6 2006-09-12 09:31:37 brian
 # - snapshot 2006-09-05 15:36
 # - add functions and tweak existing to better handle larger data sets, cutting data
@@ -609,13 +615,13 @@ function (R, weightgrid, yeargrid, backtestweights)
 # Revision 1.4 2006-09-12 09:28:01 brian
 # - snapshot 2006-08-29 23:01
 # - add equal weighted utility functions
-# 
+#
 # Revision 1.3 2006-09-12 09:27:00 brian
 # - snapshot 2006-08-29 21:58
 # - Add functions to actually perform the backtest
 #   using the results of the brute force statistics
 #   generated on all possible portfolios.
-# 
+#
 # Revision 1.2 2006-09-12 09:25:06 brian
 # - snapshot 2006-08-29
 # - add BruteForcePortfolios, WeightedReturns, and other small utility functions
