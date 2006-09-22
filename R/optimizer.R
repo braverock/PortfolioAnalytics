@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.9 2006-09-22 12:45:45 brian Exp $
+# $Id: optimizer.R,v 1.10 2006-09-22 15:30:44 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -471,11 +471,17 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
 }
 
 # ------------------------------------------------------------------------------
-backtestDisplay =
-function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Return" )
+BacktestDisplay =
+function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Return", benchmarkreturns )
 { # a function by Brian G. Peterson
 
+    # Description:
+    #
+
+    # Setup:
     rows=nrow(yeargrid)-1
+
+    benchmarkreturns = as.vector(benchmarkreturns)
 
     # Function:
     for (rnum in 2:rows) {
@@ -493,7 +499,7 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Retur
         #if(rnum==rows){return}
 
         # now build our results
-        FoFIndex      = cumulativeReturn (R[from:to,13]) #do something spiffy to show the same stats for FoHF index
+        Benchmark     = cumulativeReturn (benchmarkreturns[from:to]) #do something spiffy to show the same stats for FoHF index
         EqualWeighted = portfolioreturns[[yearname]][1,show]
 
         #get funky with the backtest array
@@ -503,7 +509,7 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Retur
         colnames(backtestrow)=colnames(backtestresults)
 
         # first cbind the columns
-        resultrow = cbind( FoFIndex, EqualWeighted, backtestrow)
+        resultrow = cbind( Benchmark, EqualWeighted, backtestrow)
 
         rownames(resultrow) = yearname
 
@@ -607,6 +613,10 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.9  2006/09/22 12:45:45  brian
+# - add separate vector for benckmarkreturns to Backtest fn
+# - better describe inputs to Backtest fn in comments
+#
 # Revision 1.8  2006/09/21 13:43:39  brian
 # - add start timestamp for Backtest function
 #
