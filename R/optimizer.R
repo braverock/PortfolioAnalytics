@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.8 2006-09-21 13:43:39 brian Exp $
+# $Id: optimizer.R,v 1.9 2006-09-22 12:45:45 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -336,7 +336,7 @@ function()
 
 # ------------------------------------------------------------------------------
 Backtest =
-function(R,portfolioreturns, yeargrid, cutat=1000000 )
+function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
 {
     # Description:
     #
@@ -356,11 +356,19 @@ function(R,portfolioreturns, yeargrid, cutat=1000000 )
     # portfolioreturns  list of data frames of set of returns for all possible portfolios
     #                   (output of BruteForcePortfolios function)
     #
-    # yeargrid
+    # yeargrid          list of from/to vectors for the periods we want to backtest over
+    #
+    # cutat             numerical index to stop comparing the portfolioreturns at.
+    #                   used to slice the weighted returns at particular weight
+    #
+    # benchmarkreturns  return vector for benchmark, should match the dates on
+    #                   the in-sample portfolio returns
 
 
     # Setup:
     rows=nrow(yeargrid)
+
+    benchmarkreturns = as.vector(benchmarkreturns)
 
     # Function:
     for (rnum in 2:rows) {
@@ -403,15 +411,15 @@ function(R,portfolioreturns, yeargrid, cutat=1000000 )
 
         # for utility function
         # w' = min(modifiedVaR(p=0.95)) such that return is greater than the benchmark
-        minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=cumulativeReturn(R[infrom:into,13])),"modifiedVaR.period"])
+        minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=cumulativeReturn(benchmarkreturns[infrom:into])),"modifiedVaR.period"])
         if (length(minVaRretoverBM)==0) { minVaRretoverBM = maxReturn }
 
         #for utility function
         #w' = max(return) such that modifiedVaR is less than modifiedVaR(benchmark)
-        maxmodVaRltBM=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"]<modifiedVaR(R[infrom:into,13],p=0.95)),"Cumulative.Return"])
+        maxmodVaRltBM=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"]<modifiedVaR(benchmarkreturns[infrom:into],p=0.95)),"Cumulative.Return"])
         if (length(maxmodVaRltBM)==0) { maxmodVaRltBM = NA }
 
-        #add utility functions tor Equal weighted portfolio benchmark
+        #add utility functions tor Equal weighted portfolio
         # for utility function
         # w' = min(modifiedVaR(p=0.95)) such that return is greater than equal weighted portfolio
         minVaRretoverEW = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=portfolioreturns[[yearname]][1,"Cumulative.Return"]),"modifiedVaR.period"])
@@ -599,6 +607,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.8  2006/09/21 13:43:39  brian
+# - add start timestamp for Backtest function
+#
 # Revision 1.7  2006/09/12 14:37:43  brian
 # - add CVS tags
 # - add CVS log
