@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.10 2006-09-22 15:30:44 brian Exp $
+# $Id: optimizer.R,v 1.11 2006-09-26 12:07:04 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -177,6 +177,9 @@ function (R, weightgrid, from, to)
 
     result=NA
 
+    if (from < 1) from = 1
+    if (to > rows) to = rows
+
     # data type conditionals
     # cut the return series for from:to
     if (class(R) == "timeSeries") {
@@ -200,10 +203,18 @@ function (R, weightgrid, from, to)
         historicalreturns=pfolioReturn(fullR,w)
 
         # cumulative geometric Return for the period
+        if (any(is.na(returns))) {
+            print( paste("NA's in: ",row, " ",w," ", returns) )
+            browser()
+        }
         cumReturn=cumulativeReturn(returns)
         threeyrfrom = from-24
         if (threeyrfrom < 1 ) threeyrfrom = 1
         threeyrreturns = pfolioReturn(fullR[threeyrfrom:to,],w)
+        if (any(is.na(threeyrreturns))) {
+            print( paste("NA's in: ",row, " ",w," ",threeyrreturns ) )
+            browser()
+        }
 
         # 3yr  Mean Return
         # look back three years and calculate annualized mean return
@@ -235,7 +246,7 @@ function (R, weightgrid, from, to)
 
         # Omega
         # Looks back to inception
-        Omega = omega (historicalreturns)
+        # Omega = omega (historicalreturns)
 
         # construct a data structure that holds each result for this row
         if (row==1) {
@@ -245,7 +256,7 @@ function (R, weightgrid, from, to)
         }
         # first cbind the columns
         resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, InceptionmodVaR, mddlist$maxdrawdown,
-                             PeriodSharpe, ThreeYrSharpe, InceptionSharpe, Omega )
+                             PeriodSharpe, ThreeYrSharpe, InceptionSharpe )
 
         rownames(resultrow) = row
 
@@ -256,7 +267,7 @@ function (R, weightgrid, from, to)
 
     # set pretty labels for the columns
     colnames(result)=c("Cumulative Return","Mean Return,3 yr","modifiedVaR,period","modifiedVaR,inception","Max Drawdown",
-                        "Sharpe,period","Sharpe,3 yr","Sharpe,inception","Omega")
+                        "Sharpe,period","Sharpe,3 yr","Sharpe,inception")
 
     # Return Value:
     result
@@ -291,6 +302,9 @@ function(R,weightgrid,yeargrid)
         yearname=rownames(row)
         from = row [,1]
         to   = row [,2]
+
+        if (   1  > from ) from = 1
+        if ( rows > to   ) to   = rows
 
         # construct a data structure that holds each result for this year
         # first cbind
@@ -432,7 +446,7 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
 
         #for utility function
         #w' = max(omega)
-        maxOmega = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Omega"])
+        #maxOmega = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Omega"])
 
         #for utility function
         #w' = max(Sharpe.period)
@@ -455,7 +469,7 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind(minmodVaRi, modSharpei, ReturnOverDrawdown, maxOmega, maxReturn,
+        resultrow = cbind(minmodVaRi, modSharpei, ReturnOverDrawdown, maxReturn,
                            minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW,
                            maxPeriodSharpe, max3yrSharpe, maxInceptionSharpe )
 
@@ -613,6 +627,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.10  2006/09/22 15:30:44  brian
+# - add separate vector to BacktestDisplay fn for benchmark returns
+#
 # Revision 1.9  2006/09/22 12:45:45  brian
 # - add separate vector for benckmarkreturns to Backtest fn
 # - better describe inputs to Backtest fn in comments
