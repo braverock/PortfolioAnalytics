@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.12 2006-09-26 21:53:41 brian Exp $
+# $Id: optimizer.R,v 1.13 2006-09-26 23:42:53 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -436,13 +436,13 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
         #for utility function
         #w' = max(return) such that modifiedVaR is less than modifiedVaR(benchmark)
         maxmodVaRltBM=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"]<modifiedVaR(benchmarkreturns[infrom:into],p=0.95)),"Cumulative.Return"])
-        if (length(maxmodVaRltBM)==0) { maxmodVaRltBM = NA }
+        if (length(maxmodVaRltBM)==0) { maxmodVaRltBM = 1 }
 
         #add utility functions tor Equal weighted portfolio
         # for utility function
         # w' = min(modifiedVaR(p=0.95)) such that return is greater than equal weighted portfolio
         minVaRretoverEW = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=portfolioreturns[[yearname]][1,"Cumulative.Return"]),"modifiedVaR.period"])
-        if (length(minVaRretoverEW)==0) { minVaRretoverEW = NA }
+        if (length(minVaRretoverEW)==0) { minVaRretoverEW = 1 }
 
         #for utility function
         #w' = max(return) such that modifiedVaR is less than modifiedVaR(equal weighted)
@@ -498,12 +498,12 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Retur
     #
 
     # Setup:
-    rows=nrow(yeargrid)-1
+    rows=nrow(yeargrid)-1  #hack to deal with incomplete data in current year
 
     benchmarkreturns = as.vector(benchmarkreturns)
 
     # Function:
-    for (rnum in 2:rows) {
+    for (rnum in 1:rows) {
         yearrow   = yeargrid[rnum,]
         from      = yearrow [,1]
         to        = yearrow [,2]
@@ -519,7 +519,9 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Retur
 
         # now build our results
         Benchmark     = cumulativeReturn (benchmarkreturns[from:to]) #do something spiffy to show the same stats for FoHF index
-        EqualWeighted = portfolioreturns[[yearname]][1,show]
+
+        # don't need this anymore since we put it in the backtest column grid
+        # EqualWeighted = portfolioreturns[[yearname]][1,show]
 
         #get funky with the backtest array
         backtestrow=t(portfolioreturns[[yearname]][t(backtestresults[yearname,]),"Cumulative.Return"])
@@ -528,7 +530,7 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Retur
         colnames(backtestrow)=colnames(backtestresults)
 
         # first cbind the columns
-        resultrow = cbind( Benchmark, EqualWeighted, backtestrow)
+        resultrow = cbind( Benchmark, backtestrow)
 
         rownames(resultrow) = yearname
 
@@ -637,6 +639,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.12  2006/09/26 21:53:41  brian
+# - more fixes for NA's in data
+#
 # Revision 1.11  2006/09/26 12:07:04  brian
 #  - add more NA handlinf and data series size checks
 #  - comment out Omega for speed for now
