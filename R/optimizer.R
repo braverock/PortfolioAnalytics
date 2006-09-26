@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.11 2006-09-26 12:07:04 brian Exp $
+# $Id: optimizer.R,v 1.12 2006-09-26 21:53:41 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -183,7 +183,7 @@ function (R, weightgrid, from, to)
     # data type conditionals
     # cut the return series for from:to
     if (class(R) == "timeSeries") {
-        fullR = R@Data[1,to]
+        fullR = R@Data[1:to,]
         R = R@Data[from:to,]
     } else {
         fullR = R[1:to,]
@@ -204,16 +204,16 @@ function (R, weightgrid, from, to)
 
         # cumulative geometric Return for the period
         if (any(is.na(returns))) {
-            print( paste("NA's in: ",row, " ",w," ", returns) )
-            browser()
+            print( paste("NA's in returns: ",row, " ",w," from ", from) )
+            #browser()
         }
         cumReturn=cumulativeReturn(returns)
         threeyrfrom = from-24
         if (threeyrfrom < 1 ) threeyrfrom = 1
         threeyrreturns = pfolioReturn(fullR[threeyrfrom:to,],w)
         if (any(is.na(threeyrreturns))) {
-            print( paste("NA's in: ",row, " ",w," ",threeyrreturns ) )
-            browser()
+            print( paste("NA's in threeyrreturns: ",row, " ",w," from ",from ) )
+            #browser()
         }
 
         # 3yr  Mean Return
@@ -403,6 +403,11 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
 
         #Check Utility fn for insample , and apply to out of sample row
 
+
+
+        # add Equalweighted
+        EqualWeighted = 1
+
         ##################################
         # Risk Reduction utility functions
         # for utility function
@@ -469,7 +474,7 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind(minmodVaRi, modSharpei, ReturnOverDrawdown, maxReturn,
+        resultrow = cbind(EqualWeighted, minmodVaRi, modSharpei, ReturnOverDrawdown, maxReturn,
                            minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW,
                            maxPeriodSharpe, max3yrSharpe, maxInceptionSharpe )
 
@@ -545,13 +550,18 @@ MonthlyBacktestResults =
 function (R, weightgrid, yeargrid, backtestweights)
 { # @author Brian G. Peterson
 
-    # R             data structure of returns
-    # weightgrid    each row contains one weighting vector, same number of columns as your returns
-    # from          where to cut the beginning of the return stream
-    # to            where to cut the end of the return stream
+    # R                 data structure of component returns
+    #
+    # weightgrid        each row contains one weighting vector, same number of columns as your returns
+    #
+    # yeargrid          list of from/to vectors for the periods we want to backtest over
+    #
+    # backtestweights
     #
     # @returns      data frame where each row has the same index number as a weighting vector,
     #               and each column is one of your metrics from inside this function
+    #
+    # @example      myreturns=MonthlyBacktestResults(edhec.returns[,1:10], weightingvectors, yeargrid, backtest)
 
     # Setup:
     rows=nrow(backtestweights)-1
@@ -627,6 +637,10 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.11  2006/09/26 12:07:04  brian
+#  - add more NA handlinf and data series size checks
+#  - comment out Omega for speed for now
+#
 # Revision 1.10  2006/09/22 15:30:44  brian
 # - add separate vector to BacktestDisplay fn for benchmark returns
 #
