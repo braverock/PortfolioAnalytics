@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.13 2006-09-26 23:42:53 brian Exp $
+# $Id: optimizer.R,v 1.14 2006-10-12 17:42:48 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -451,7 +451,7 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
 
         #for utility function
         #w' = max(omega)
-        #maxOmega = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Omega"])
+        maxOmega = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Omega"])
 
         #for utility function
         #w' = max(Sharpe.period)
@@ -476,7 +476,7 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
         # first cbind the columns
         resultrow = cbind(EqualWeighted, minmodVaRi, modSharpei, ReturnOverDrawdown, maxReturn,
                            minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW,
-                           maxPeriodSharpe, max3yrSharpe, maxInceptionSharpe )
+                           maxPeriodSharpe, max3yrSharpe, maxInceptionSharpe, maxOmega )
 
         rownames(resultrow) = outname
 
@@ -639,6 +639,11 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.13  2006/09/26 23:42:53  brian
+# - add Equalweighted as column in Backtest vector fns
+# - clean up NA handling in utility functions
+# - add more error handling
+#
 # Revision 1.12  2006/09/26 21:53:41  brian
 # - more fixes for NA's in data
 #
