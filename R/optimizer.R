@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.14 2006-10-12 17:42:48 brian Exp $
+# $Id: optimizer.R,v 1.15 2006-11-28 02:52:03 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -31,6 +31,9 @@ if(!require("fBasics", quietly=TRUE)) {
 }
 if(!require("fPortfolio", quietly=TRUE)) {
     stop("package", sQuote("fPortfolio"), "is needed.  Stopping")
+}
+if(!require("fOptions", quietly=TRUE)) {
+    stop("package", sQuote("fBasics"), "is needed.  Stopping")
 }
 if(!require("tseries", quietly=TRUE)) {
     stop("package", sQuote("tseries"), "is needed.  Stopping")
@@ -227,6 +230,9 @@ function (R, weightgrid, from, to)
         # modifiedVaR(95%) from pfolioReturn since inception
         InceptionmodVaR = modifiedVaR(historicalreturns, p=0.95)
 
+        # modifiedVaR(95%) from pfolioReturn since inception
+        ThreeYrmodVaR = modifiedVaR(threeyrreturns, p=0.95)
+
         # Expected Shortfall
         # commented because it isn't useful in our analyses
         # ES = CVaRplus(returns, weights = NULL, alpha = 0.05)[1]
@@ -246,7 +252,7 @@ function (R, weightgrid, from, to)
 
         # Omega
         # Looks back to inception
-        # Omega = omega (historicalreturns)
+        Omega = omega (historicalreturns)
 
         # construct a data structure that holds each result for this row
         if (row==1) {
@@ -255,8 +261,8 @@ function (R, weightgrid, from, to)
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, InceptionmodVaR, mddlist$maxdrawdown,
-                             PeriodSharpe, ThreeYrSharpe, InceptionSharpe )
+        resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, InceptionmodVaR, ThreeYrmodVaR, mddlist$maxdrawdown,
+                             PeriodSharpe, ThreeYrSharpe, InceptionSharpe, Omega )
 
         rownames(resultrow) = row
 
@@ -266,8 +272,8 @@ function (R, weightgrid, from, to)
     } #end rows loop
 
     # set pretty labels for the columns
-    colnames(result)=c("Cumulative Return","Mean Return,3 yr","modifiedVaR,period","modifiedVaR,inception","Max Drawdown",
-                        "Sharpe,period","Sharpe,3 yr","Sharpe,inception")
+    colnames(result)=c("Cumulative Return","Mean Return,3 yr","modifiedVaR,period","modifiedVaR,inception","modifiedVaR,3yr","Max Drawdown",
+                        "Sharpe,period","Sharpe,3 yr","Sharpe,inception", "Omega")
 
     # Return Value:
     result
@@ -418,6 +424,7 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
         # for utility function
         # w' = max(return/modifiedVaR) for both modifiedVaR.period and modifiedVaR.inception
         #modSharpe  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"])
+        modSharpe3yr  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.3yr"])
         modSharpei = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.inception"])
 
         # for utility function
@@ -474,7 +481,7 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind(EqualWeighted, minmodVaRi, modSharpei, ReturnOverDrawdown, maxReturn,
+        resultrow = cbind(EqualWeighted, minmodVaRi, modSharpei, modSharpe3yr, ReturnOverDrawdown, maxReturn,
                            minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW,
                            maxPeriodSharpe, max3yrSharpe, maxInceptionSharpe, maxOmega )
 
@@ -639,6 +646,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.14  2006/10/12 17:42:48  brian
+# - put back omega utility fn
+#
 # Revision 1.13  2006/09/26 23:42:53  brian
 # - add Equalweighted as column in Backtest vector fns
 # - clean up NA handling in utility functions
