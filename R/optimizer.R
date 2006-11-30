@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.15 2006-11-28 02:52:03 brian Exp $
+# $Id: optimizer.R,v 1.16 2006-11-30 00:24:11 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -203,7 +203,8 @@ function (R, weightgrid, from, to)
 
         # pfolioReturn
         returns=pfolioReturn(R,w)
-        historicalreturns=pfolioReturn(fullR,w)
+        # pfolioReturn, since inception
+        #historicalreturns=pfolioReturn(fullR,w)
 
         # cumulative geometric Return for the period
         if (any(is.na(returns))) {
@@ -228,7 +229,7 @@ function (R, weightgrid, from, to)
         PeriodmodVaR = modifiedVaR(returns, p=0.95)
 
         # modifiedVaR(95%) from pfolioReturn since inception
-        InceptionmodVaR = modifiedVaR(historicalreturns, p=0.95)
+        # InceptionmodVaR = modifiedVaR(historicalreturns, p=0.95)
 
         # modifiedVaR(95%) from pfolioReturn since inception
         ThreeYrmodVaR = modifiedVaR(threeyrreturns, p=0.95)
@@ -244,15 +245,19 @@ function (R, weightgrid, from, to)
         PeriodSharpe=sharpeRatio(returns)
 
         # Sharpe Ratio since inception
-        InceptionSharpe=sharpeRatio(historicalreturns)
+        # InceptionSharpe=sharpeRatio(historicalreturns)
 
         # 3yr trailing Sharpe Ratio
         # look back three years and calculate annualized Sharpe ratio
         ThreeYrSharpe=sharpeRatio(threeyrreturns)
 
         # Omega
-        # Looks back to inception
-        Omega = omega (historicalreturns)
+        # Looks back three years
+        Omega = omega (as.vector(threeyrreturns),method="simple" )
+
+        # Standard Deviation
+        StdDev = sd(returns, na.rm = TRUE)
+        ThreeYrStdDev = sd(threeyrreturns, na.rm = TRUE)
 
         # construct a data structure that holds each result for this row
         if (row==1) {
@@ -261,8 +266,8 @@ function (R, weightgrid, from, to)
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, InceptionmodVaR, ThreeYrmodVaR, mddlist$maxdrawdown,
-                             PeriodSharpe, ThreeYrSharpe, InceptionSharpe, Omega )
+        resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, ThreeYrmodVaR, mddlist$maxdrawdown,
+                             PeriodSharpe, ThreeYrSharpe, Omega, StdDev, ThreeYrStdDev )
 
         rownames(resultrow) = row
 
@@ -272,8 +277,8 @@ function (R, weightgrid, from, to)
     } #end rows loop
 
     # set pretty labels for the columns
-    colnames(result)=c("Cumulative Return","Mean Return,3 yr","modifiedVaR,period","modifiedVaR,inception","modifiedVaR,3yr","Max Drawdown",
-                        "Sharpe,period","Sharpe,3 yr","Sharpe,inception", "Omega")
+    colnames(result)=c("Cumulative Return","Mean Return,3 yr","modifiedVaR,period","modifiedVaR,3yr","Max Drawdown",
+                        "Sharpe,period","Sharpe,3 yr", "Omega", "Std Dev","Std Dev,3yr" )
 
     # Return Value:
     result
@@ -418,14 +423,15 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
         # Risk Reduction utility functions
         # for utility function
         # w' = min(modifiedVaR(p=0.95))
-        #minmodVaR  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"])
-        minmodVaRi = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.inception"])
+        minmodVaR  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"])
+        #minmodVaRi = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.inception"])
+        minmodVaR3y  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.3yr"])
 
         # for utility function
         # w' = max(return/modifiedVaR) for both modifiedVaR.period and modifiedVaR.inception
         #modSharpe  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"])
         modSharpe3yr  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.3yr"])
-        modSharpei = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.inception"])
+        #modSharpei = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.inception"])
 
         # for utility function
         # w' = max(return/Max.Drawdown)
@@ -465,12 +471,12 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
         maxPeriodSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.period"])
 
         #for utility function
-        #w' = max(Sharpe.period)
+        #w' = max(Sharpe.3.yr)
         max3yrSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.3.yr"])
 
         #for utility function
         #w' = max(Sharpe.inception)
-        maxInceptionSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.inception"])
+        #maxInceptionSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.inception"])
 
 
         ########## end of utility functions ##########
@@ -531,7 +537,7 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Retur
         # EqualWeighted = portfolioreturns[[yearname]][1,show]
 
         #get funky with the backtest array
-        backtestrow=t(portfolioreturns[[yearname]][t(backtestresults[yearname,]),"Cumulative.Return"])
+        backtestrow=t(portfolioreturns[[yearname]][t(backtestresults[yearname,]),show])
 
         #print(backtestrow)
         colnames(backtestrow)=colnames(backtestresults)
@@ -640,12 +646,18 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 }
 
+
 # ------------------------------------------------------------------------------
 # GeometricReturn
 # use annualizedReturn or cumulativeReturn from Peter Carl in performance-analytics.R
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.15  2006/11/28 02:52:03  brian
+# - add 3yr modSharpe and 3yr modVaR
+# - add fOptions require for Omega
+# Bug 840
+#
 # Revision 1.14  2006/10/12 17:42:48  brian
 # - put back omega utility fn
 #
