@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.16 2006-11-30 00:24:11 brian Exp $
+# $Id: optimizer.R,v 1.17 2006-12-02 12:54:53 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -302,6 +302,19 @@ function(R,weightgrid,yeargrid)
     # computational work in one pass, and then reuse the data set over and over again
     # in multiple analytic tests, methods, or hypotheses for choosing in-sample results
     # to use as out-of-sample weights.
+    #
+    # @todo add optional subdirectory tp keep different backtests apart
+    #
+    # R                 data frame of historical returns
+    #
+    # weightgrid  list of data frames of set of returns for all possible portfolios
+    #                   (output of BruteForcePortfolios function)
+    #
+    # yeargrid          list of from/to vectors for the periods we want to backtest over
+    #
+    # Return:
+    # portfolioreturns  list of data frames of set of returns for all possible portfolios
+    #                   (output of BruteForcePortfolios function)
 
     # Setup:
     rows=nrow(yeargrid)
@@ -334,26 +347,38 @@ function(R,weightgrid,yeargrid)
 
 # ------------------------------------------------------------------------------
 BacktestData =
-function()
+function(yeargrid)
 { # @author Brian G. Peterson
 
     # Description:
     #
-    # complete brute force hackjob to get out of sample results
+    # load the data into a list suitable for use by Backtest and BacktestDisplay functions
+    # use the yeargrid used by BruteForcePortfolios to figure out which files to load
+    #
+    # @todo add optional subdirectory tp keep different backtests apart
+    #
+    # yeargrid          list of from/to vectors for the periods we've run the backtest over
+    #                   yeargrid will have one row for the last out of sample year,
+    #                   which is not calculated by BruteForcePortfolios
 
-    # Setup:
-    WR1997=read.table("1997.csv",header=TRUE, row.names = 1,sep = ",")
-    WR1998=read.table("1998.csv",header=TRUE, row.names = 1,sep = ",")
-    WR1999=read.table("1999.csv",header=TRUE, row.names = 1,sep = ",")
-    WR2000=read.table("2000.csv",header=TRUE, row.names = 1,sep = ",")
-    WR2001=read.table("2001.csv",header=TRUE, row.names = 1,sep = ",")
-    WR2002=read.table("2002.csv",header=TRUE, row.names = 1,sep = ",")
-    WR2003=read.table("2003.csv",header=TRUE, row.names = 1,sep = ",")
-    WR2004=read.table("2004.csv",header=TRUE, row.names = 1,sep = ",")
-    WR2005=read.table("2005.csv",header=TRUE, row.names = 1,sep = ",")
+    # Function:
+    rows=nrow(yeargrid)-1 # take out the out of sample year, for which there is no data
 
-    result=list(WR1997,WR1998,WR1999,WR2000,WR2001,WR2002,WR2003,WR2004,WR2005)
-    names(result)<-c("1997","1998","1999","2000","2001","2002","2003","2004","2005")
+    for (rnum in 1:rows) {
+        row = yeargrid[rnum,]
+        yearname=rownames(row)
+        # print(yearname)
+        currentyeardata  = read.table(paste(yearname,".csv",sep=""),header=TRUE, row.names = 1,sep = ",")
+        if (rnum==1) {
+            #create e,ty list, as c() doesn't work the way you would expect with a list
+            result=vector("list")
+        }
+
+        #assign each year into the list using the yearname as the index
+        result[[yearname]]=currentyeardata
+
+    }
+    names(result) = t(rownames(yeargrid[1:rows,]))
 
     #Return:
     result
@@ -653,6 +678,11 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.16  2006/11/30 00:24:11  brian
+# - remove 'inception' statistics from BruteForcePortfolios and Backtest fns
+# - fix error in 'show' parameter of BacktestDisplay fn
+# Bug 840
+#
 # Revision 1.15  2006/11/28 02:52:03  brian
 # - add 3yr modSharpe and 3yr modVaR
 # - add fOptions require for Omega
