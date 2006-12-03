@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.17 2006-12-02 12:54:53 brian Exp $
+# $Id: optimizer.R,v 1.18 2006-12-03 17:42:02 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -298,7 +298,7 @@ function(R,weightgrid,yeargrid)
     # We slice the computation into these years or rolling periods,
     # and store the results separately, because each of these rolling periods will
     # have one solution for each possible weighting vector.  By generating them and
-    # storing them for all weighting vecotrs in every period, you can do all the hard
+    # storing them for all weighting vectors in every period, you can do all the hard
     # computational work in one pass, and then reuse the data set over and over again
     # in multiple analytic tests, methods, or hypotheses for choosing in-sample results
     # to use as out-of-sample weights.
@@ -307,8 +307,7 @@ function(R,weightgrid,yeargrid)
     #
     # R                 data frame of historical returns
     #
-    # weightgrid  list of data frames of set of returns for all possible portfolios
-    #                   (output of BruteForcePortfolios function)
+    # weightgrid        each row contains one weighting vector, same number of columns as your returns
     #
     # yeargrid          list of from/to vectors for the periods we want to backtest over
     #
@@ -450,7 +449,7 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
         # w' = min(modifiedVaR(p=0.95))
         minmodVaR  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"])
         #minmodVaRi = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.inception"])
-        minmodVaR3y  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.3yr"])
+        minmodVaR3yr  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.3yr"])
 
         # for utility function
         # w' = max(return/modifiedVaR) for both modifiedVaR.period and modifiedVaR.inception
@@ -512,9 +511,9 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind(EqualWeighted, minmodVaRi, modSharpei, modSharpe3yr, ReturnOverDrawdown, maxReturn,
+        resultrow = cbind(EqualWeighted, minmodVaR, minmodVaR3yr, modSharpe3yr, ReturnOverDrawdown, maxReturn,
                            minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW,
-                           maxPeriodSharpe, max3yrSharpe, maxInceptionSharpe, maxOmega )
+                           maxPeriodSharpe, max3yrSharpe, maxOmega )
 
         rownames(resultrow) = outname
 
@@ -533,7 +532,33 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Retur
 { # a function by Brian G. Peterson
 
     # Description:
+    # This function lets us use the output of the Backtest() function to do some
+    # comparative analysis of how each utility function performed out of sample.
+    # It takes as input all the component parts, and shows a single summary statistic
+    # for each out of sample period for each utility function.  Periods are rows,
+    # utility functions are columns in the output.
+    # Eventually, we'll want to make this more sophisticated, and return a
+    # data structure with *all* the summary statistics for each out-of-sample portfolio,
+    # but this works for now.
     #
+    # R                 data frame of historical returns
+    #
+    # portfolioreturns  list of data frames of set of returns for all possible portfolios
+    #                   (output of BruteForcePortfolios function)
+    #
+    # yeargrid          list of from/to vectors for the periods we've run the backtest over
+    #                   yeargrid will have one row for the last out of sample year,
+    #                   which is not calculated by BruteForcePortfolios
+    #
+    # backtestresults   data frame of set of weighting vectors for each
+    #                   utility function in each year/period
+    #                   (output of Backtest function)
+    #
+    # show              column name to display from portfolioreturns row
+    #                   corresponding to weighting vector
+    #
+    # benchmarkreturns  return vector for benchmark, should match the dates on
+    #                   the in-sample portfolio returns
 
     # Setup:
     rows=nrow(yeargrid)-1  #hack to deal with incomplete data in current year
@@ -582,6 +607,77 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Retur
     result
 
 }
+
+# ------------------------------------------------------------------------------
+BacktestWeightDisplay =
+function(backtestresults, yeargrid, weightgrid, R)
+{ # @author Brian G. Peterson
+
+    # Description:
+    # Display the weights chosen for each year/period for each utility function.
+    #
+    # backtestresults   data frame of set of weighting vectors for each
+    #                   utility function in each year/period
+    #                   (output of Backtest function)
+    #
+    # yeargrid          list of from/to vectors for the periods we've run the backtest over
+    #                   yeargrid will have one row for the last out of sample year,
+    #                   which is not calculated by BruteForcePortfolios
+    #
+    # weightgrid        each row contains one weighting vector, same number of columns as your returns
+    #
+    # R                 data frame of historical returns
+    #
+    # Return:
+    # list of years/periods with each period containing a data frame of weights by utiltiy function
+
+    # Setup:
+    rows=nrow(yeargrid)-1 # take out the first in-sample year
+
+    cols = ncol(backtestresults) # get the number of utility functions
+    componentnames = colnames(R)
+    utilitynames   = colnames (backtestresults)
+
+    # Function:
+    # first loop on out of sample years/periods
+    for (rnum in 2:rows) {
+        row = yeargrid[rnum,]
+        yearname=rownames(row)
+        # print(yearname)
+        if (rnum==2) {
+            #create empty list, as c() doesn't work the way you would expect with a list
+            result=vector("list")
+        }
+
+        # now loop on all the utility functions
+        for (col in 1:cols) {
+            weightingvectornum = backtestresults[rnum,col]
+            #print (weightingvectornum)
+            weightingvector    = weightgrid[weightingvectornum,]
+            print (weightingvector)
+            utilityname=colnames(backtestresults[rnum,col])
+            print (utilityname)
+            utilityrow = c(t(weightingvector),utilityname)
+            #rownames(utilityrow)=rownames(weightingvector)
+            #print(utilityrow)
+            if (col==1){
+                currentyeardata=data.frame(utilityrow=utilityrow)
+            } else {
+                currentyeardata=rbind(currentyeardata,utilityrow)
+            }
+        } # end utility functions loop
+
+        colnames(currentyeardata)=c(componentnames,"Utility Function")
+        #assign each year into the list using the yearname as the index
+        result[[yearname]]=currentyeardata
+
+    } # end years/periods loop
+    names(result) = t(rownames(yeargrid[2:rows,]))
+
+    #Return:
+    result
+}
+
 
 # ------------------------------------------------------------------------------
 #MonthlyBacktestResults =
@@ -678,6 +774,11 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.17  2006/12/02 12:54:53  brian
+# - modify BacktestData() fn to take a 'yeargrid' that matches
+#    yeargrid from BruteForcePortfolios and loads those portfolios
+# Bug 840
+#
 # Revision 1.16  2006/11/30 00:24:11  brian
 # - remove 'inception' statistics from BruteForcePortfolios and Backtest fns
 # - fix error in 'show' parameter of BacktestDisplay fn
