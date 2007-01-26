@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.18 2006-12-03 17:42:02 brian Exp $
+# $Id: optimizer.R,v 1.19 2007-01-26 13:24:02 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -354,7 +354,7 @@ function(yeargrid)
     # load the data into a list suitable for use by Backtest and BacktestDisplay functions
     # use the yeargrid used by BruteForcePortfolios to figure out which files to load
     #
-    # @todo add optional subdirectory tp keep different backtests apart
+    # @todo add optional subdirectory to keep different backtests apart
     #
     # yeargrid          list of from/to vectors for the periods we've run the backtest over
     #                   yeargrid will have one row for the last out of sample year,
@@ -774,6 +774,12 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.18  2006/12/03 17:42:02  brian
+# - adjust utility functions in Backtest() to match 3yr statistices from BruteForcePortfolios
+# - add more descriptive comments to BacktestDisplay()
+# - add BacktestWeightDisplay() fn, not yet complete
+# Bug 840
+#
 # Revision 1.17  2006/12/02 12:54:53  brian
 # - modify BacktestData() fn to take a 'yeargrid' that matches
 #    yeargrid from BruteForcePortfolios and loads those portfolios
