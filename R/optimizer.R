@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.19 2007-01-26 13:24:02 brian Exp $
+# $Id: optimizer.R,v 1.20 2007-01-30 15:54:57 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -225,14 +225,14 @@ function (R, weightgrid, from, to)
         # use annualizedReturn fn instead of cumulativeReturn
         ThreeYrMeanReturn = mean(threeyrreturns)
 
-        # modifiedVaR(95%) from pfolioReturn
-        PeriodmodVaR = modifiedVaR(returns, p=0.95)
+        # VaR.CornishFisher(95%) from pfolioReturn
+        PeriodmodVaR = VaR.CornishFisher(returns, p=0.95)
 
-        # modifiedVaR(95%) from pfolioReturn since inception
-        # InceptionmodVaR = modifiedVaR(historicalreturns, p=0.95)
+        # VaR.CornishFisher(95%) from pfolioReturn since inception
+        # InceptionmodVaR = VaR.CornishFisher(historicalreturns, p=0.95)
 
-        # modifiedVaR(95%) from pfolioReturn since inception
-        ThreeYrmodVaR = modifiedVaR(threeyrreturns, p=0.95)
+        # VaR.CornishFisher(95%) from pfolioReturn since inception
+        ThreeYrmodVaR = VaR.CornishFisher(threeyrreturns, p=0.95)
 
         # Expected Shortfall
         # commented because it isn't useful in our analyses
@@ -277,7 +277,7 @@ function (R, weightgrid, from, to)
     } #end rows loop
 
     # set pretty labels for the columns
-    colnames(result)=c("Cumulative Return","Mean Return,3 yr","modifiedVaR,period","modifiedVaR,3yr","Max Drawdown",
+    colnames(result)=c("Cumulative Return","Mean Return,3 yr","VaR.CornishFisher,period","VaR.CornishFisher,3yr","Max Drawdown",
                         "Sharpe,period","Sharpe,3 yr", "Omega", "Std Dev","Std Dev,3yr" )
 
     # Return Value:
@@ -446,16 +446,16 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
         ##################################
         # Risk Reduction utility functions
         # for utility function
-        # w' = min(modifiedVaR(p=0.95))
-        minmodVaR  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"])
-        #minmodVaRi = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.inception"])
-        minmodVaR3yr  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.3yr"])
+        # w' = min(VaR.CornishFisher(p=0.95))
+        minmodVaR  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"])
+        #minmodVaRi = which.min(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.inception"])
+        minmodVaR3yr  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.3yr"])
 
         # for utility function
-        # w' = max(return/modifiedVaR) for both modifiedVaR.period and modifiedVaR.inception
-        #modSharpe  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"])
-        modSharpe3yr  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.3yr"])
-        #modSharpei = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.inception"])
+        # w' = max(return/VaR.CornishFisher) for both VaR.CornishFisher.period and VaR.CornishFisher.inception
+        #modSharpe  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"])
+        modSharpe3yr  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.3yr"])
+        #modSharpei = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.inception"])
 
         # for utility function
         # w' = max(return/Max.Drawdown)
@@ -466,24 +466,24 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
         maxReturn = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"])
 
         # for utility function
-        # w' = min(modifiedVaR(p=0.95)) such that return is greater than the benchmark
-        minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=cumulativeReturn(benchmarkreturns[infrom:into])),"modifiedVaR.period"])
+        # w' = min(VaR.CornishFisher(p=0.95)) such that return is greater than the benchmark
+        minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=cumulativeReturn(benchmarkreturns[infrom:into])),"VaR.CornishFisher.period"])
         if (length(minVaRretoverBM)==0) { minVaRretoverBM = maxReturn }
 
         #for utility function
-        #w' = max(return) such that modifiedVaR is less than modifiedVaR(benchmark)
-        maxmodVaRltBM=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"]<modifiedVaR(benchmarkreturns[infrom:into],p=0.95)),"Cumulative.Return"])
+        #w' = max(return) such that VaR.CornishFisher is less than VaR.CornishFisher(benchmark)
+        maxmodVaRltBM=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"]<VaR.CornishFisher(benchmarkreturns[infrom:into],p=0.95)),"Cumulative.Return"])
         if (length(maxmodVaRltBM)==0) { maxmodVaRltBM = 1 }
 
         #add utility functions tor Equal weighted portfolio
         # for utility function
-        # w' = min(modifiedVaR(p=0.95)) such that return is greater than equal weighted portfolio
-        minVaRretoverEW = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=portfolioreturns[[yearname]][1,"Cumulative.Return"]),"modifiedVaR.period"])
+        # w' = min(VaR.CornishFisher(p=0.95)) such that return is greater than equal weighted portfolio
+        minVaRretoverEW = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=portfolioreturns[[yearname]][1,"Cumulative.Return"]),"VaR.CornishFisher.period"])
         if (length(minVaRretoverEW)==0) { minVaRretoverEW = 1 }
 
         #for utility function
-        #w' = max(return) such that modifiedVaR is less than modifiedVaR(equal weighted)
-        maxmodVaRltEW=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"modifiedVaR.period"]<portfolioreturns[[yearname]][1,"Cumulative.Return"]),"Cumulative.Return"])
+        #w' = max(return) such that VaR.CornishFisher is less than VaR.CornishFisher(equal weighted)
+        maxmodVaRltEW=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"]<portfolioreturns[[yearname]][1,"Cumulative.Return"]),"Cumulative.Return"])
         if (length(maxmodVaRltEW)==0) { maxmodVaRltEW = NA }
 
         #for utility function
@@ -774,6 +774,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.19  2007/01/26 13:24:02  brian
+# - fix typo
+#
 # Revision 1.18  2006/12/03 17:42:02  brian
 # - adjust utility functions in Backtest() to match 3yr statistices from BruteForcePortfolios
 # - add more descriptive comments to BacktestDisplay()
