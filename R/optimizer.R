@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.20 2007-01-30 15:54:57 brian Exp $
+# $Id: optimizer.R,v 1.21 2007-01-31 18:23:16 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -211,7 +211,7 @@ function (R, weightgrid, from, to)
             print( paste("NA's in returns: ",row, " ",w," from ", from) )
             #browser()
         }
-        cumReturn=cumulativeReturn(returns)
+        cumReturn=Return.cumulative(returns)
         threeyrfrom = from-24
         if (threeyrfrom < 1 ) threeyrfrom = 1
         threeyrreturns = pfolioReturn(fullR[threeyrfrom:to,],w)
@@ -222,7 +222,7 @@ function (R, weightgrid, from, to)
 
         # 3yr  Mean Return
         # look back three years and calculate annualized mean return
-        # use annualizedReturn fn instead of cumulativeReturn
+        # use Return.annualized fn instead of Return.cumulative
         ThreeYrMeanReturn = mean(threeyrreturns)
 
         # VaR.CornishFisher(95%) from pfolioReturn
@@ -242,18 +242,18 @@ function (R, weightgrid, from, to)
         mddlist= maxdrawdown(returns)
 
         # Sharpe Ratio in period
-        PeriodSharpe=sharpeRatio(returns)
+        PeriodSharpe=SharpeRatio(returns)
 
         # Sharpe Ratio since inception
-        # InceptionSharpe=sharpeRatio(historicalreturns)
+        # InceptionSharpe=SharpeRatio(historicalreturns)
 
         # 3yr trailing Sharpe Ratio
         # look back three years and calculate annualized Sharpe ratio
-        ThreeYrSharpe=sharpeRatio(threeyrreturns)
+        ThreeYrSharpe=SharpeRatio(threeyrreturns)
 
         # Omega
         # Looks back three years
-        Omega = omega (as.vector(threeyrreturns),method="simple" )
+        omega = Omega (as.vector(threeyrreturns),method="simple" )
 
         # Standard Deviation
         StdDev = sd(returns, na.rm = TRUE)
@@ -267,7 +267,7 @@ function (R, weightgrid, from, to)
         }
         # first cbind the columns
         resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, ThreeYrmodVaR, mddlist$maxdrawdown,
-                             PeriodSharpe, ThreeYrSharpe, Omega, StdDev, ThreeYrStdDev )
+                             PeriodSharpe, ThreeYrSharpe, omega, StdDev, ThreeYrStdDev )
 
         rownames(resultrow) = row
 
@@ -453,9 +453,9 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
 
         # for utility function
         # w' = max(return/VaR.CornishFisher) for both VaR.CornishFisher.period and VaR.CornishFisher.inception
-        #modSharpe  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"])
-        modSharpe3yr  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.3yr"])
-        #modSharpei = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.inception"])
+        #SharpeRatio.modified  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"])
+        SharpeRatio.modified3yr  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.3yr"])
+        #SharpeRatio.modifiedi = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.inception"])
 
         # for utility function
         # w' = max(return/Max.Drawdown)
@@ -467,7 +467,7 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
 
         # for utility function
         # w' = min(VaR.CornishFisher(p=0.95)) such that return is greater than the benchmark
-        minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=cumulativeReturn(benchmarkreturns[infrom:into])),"VaR.CornishFisher.period"])
+        minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=Return.cumulative(benchmarkreturns[infrom:into])),"VaR.CornishFisher.period"])
         if (length(minVaRretoverBM)==0) { minVaRretoverBM = maxReturn }
 
         #for utility function
@@ -511,7 +511,7 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind(EqualWeighted, minmodVaR, minmodVaR3yr, modSharpe3yr, ReturnOverDrawdown, maxReturn,
+        resultrow = cbind(EqualWeighted, minmodVaR, minmodVaR3yr, SharpeRatio.modified3yr, ReturnOverDrawdown, maxReturn,
                            minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW,
                            maxPeriodSharpe, max3yrSharpe, maxOmega )
 
@@ -581,7 +581,7 @@ function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Retur
         #if(rnum==rows){return}
 
         # now build our results
-        Benchmark     = cumulativeReturn (benchmarkreturns[from:to]) #do something spiffy to show the same stats for FoHF index
+        Benchmark     = Return.cumulative (benchmarkreturns[from:to]) #do something spiffy to show the same stats for FoHF index
 
         # don't need this anymore since we put it in the backtest column grid
         # EqualWeighted = portfolioreturns[[yearname]][1,show]
@@ -770,10 +770,13 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 # ------------------------------------------------------------------------------
 # GeometricReturn
-# use annualizedReturn or cumulativeReturn from Peter Carl in performance-analytics.R
+# use Return.annualized or Return.cumulative from Peter Carl in performance-analytics.R
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.20  2007/01/30 15:54:57  brian
+# - cascade function name standardization from extra_moments.R
+#
 # Revision 1.19  2007/01/26 13:24:02  brian
 # - fix typo
 #
@@ -794,7 +797,7 @@ function (R, weightgrid, yeargrid, backtestweights)
 # Bug 840
 #
 # Revision 1.15  2006/11/28 02:52:03  brian
-# - add 3yr modSharpe and 3yr modVaR
+# - add 3yr SharpeRatio.modified and 3yr modVaR
 # - add fOptions require for Omega
 # Bug 840
 #
