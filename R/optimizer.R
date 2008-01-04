@@ -6,8 +6,8 @@
 #
 ################################################################################
 
-# Copyright 2006 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.21 2007-01-31 18:23:16 brian Exp $
+# Copyright 2006-2008 Brian G. Peterson , Aaron van Meerten, Peter Carl
+# $Id: optimizer.R,v 1.22 2008-01-04 14:27:07 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -33,13 +33,14 @@ if(!require("fPortfolio", quietly=TRUE)) {
     stop("package", sQuote("fPortfolio"), "is needed.  Stopping")
 }
 if(!require("fOptions", quietly=TRUE)) {
-    stop("package", sQuote("fBasics"), "is needed.  Stopping")
+    stop("package", sQuote("fOptions"), "is needed.  Stopping")
 }
 if(!require("tseries", quietly=TRUE)) {
     stop("package", sQuote("tseries"), "is needed.  Stopping")
 }
-# also needs Peter Carl's "performance-analytics.R"
-# do we always source it?
+if(!require("PerformanceAnalytics", quietly=TRUE)) {
+    stop("package", sQuote("PerformanceAnalytics"), "is needed.  Stopping")
+}
 
 # ------------------------------------------------------------------------------
 weight.grid =
@@ -71,21 +72,21 @@ function (columnnames, seqstart=.05, seqend=.25, seqstep=.05)
 }
 
 # ------------------------------------------------------------------------------
-maxdrawdown
-function (x)
-{ # adapted from package "tseries"
-    if (NCOL(x) > 1)
-        stop("x is not a vector or univariate time series")
-    if (any(is.na(x)))
-        stop("NAs in x")
-    cmaxx <- cummax(x) - x
-    mdd <- max(cmaxx)
-    to <- which(mdd == cmaxx)
-    from <- double(NROW(to))
-    for (i in 1:NROW(to)) from[i] <- max(which(cmaxx[1:to[i]] ==
-        0))
-    return(list(maxdrawdown = mdd, from = from, to = to))
-}
+# maxdrawdown
+# function (x)
+# { # adapted from package "tseries"
+#     if (NCOL(x) > 1)
+#         stop("x is not a vector or univariate time series")
+#     if (any(is.na(x)))
+#         stop("NAs in x")
+#     cmaxx <- cummax(x) - x
+#     mdd <- max(cmaxx)
+#     to <- which(mdd == cmaxx)
+#     from <- double(NROW(to))
+#     for (i in 1:NROW(to)) from[i] <- max(which(cmaxx[1:to[i]] ==
+#         0))
+#     return(list(maxdrawdown = mdd, from = from, to = to))
+# }
 
 # ------------------------------------------------------------------------------
 cut.returns =
@@ -132,10 +133,11 @@ function (weightgrid, test=1)
 }
 
 # ------------------------------------------------------------------------------
+# @todo: add methods() to parameterize
 #WeightedReturns =
 # use pfolioReturn(returnarray,weightingvector) from fPortfolio
 WeightedReturns =
-function (R, weightgrid, from, to)
+function (R, weightgrid, from, to
 { # @author Brian G. Peterson
 
     # Description:
@@ -239,7 +241,7 @@ function (R, weightgrid, from, to)
         # ES = CVaRplus(returns, weights = NULL, alpha = 0.05)[1]
 
         # maxDrawdown
-        mddlist= maxdrawdown(returns)
+        mddlist= maxDrawdown(returns)
 
         # Sharpe Ratio in period
         PeriodSharpe=SharpeRatio(returns)
@@ -266,7 +268,7 @@ function (R, weightgrid, from, to)
                 resultrow=data.frame()
         }
         # first cbind the columns
-        resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, ThreeYrmodVaR, mddlist$maxdrawdown,
+        resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, ThreeYrmodVaR, mddlist,
                              PeriodSharpe, ThreeYrSharpe, omega, StdDev, ThreeYrStdDev )
 
         rownames(resultrow) = row
@@ -286,8 +288,9 @@ function (R, weightgrid, from, to)
 }
 
 # ------------------------------------------------------------------------------
+# # @todo: add methods() to parameterize
 BruteForcePortfolios =
-function(R,weightgrid,yeargrid)
+function(R,weightgrid,yeargrid )
 { # @author Brian G. Peterson
 
     # Description:
@@ -331,7 +334,7 @@ function(R,weightgrid,yeargrid)
 
         # construct a data structure that holds each result for this year
         # first cbind
-        resultarray = WeightedReturns(R, weightgrid, from, to)
+        resultarray = WeightedReturns(R, weightgrid, from, to, methods=methods)
 
         # then write a CSV
         write.table(resultarray, file = paste(yearname,".csv",sep=""),
@@ -774,6 +777,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.21  2007/01/31 18:23:16  brian
+# - cascade function name standardization from performance-analytics.R
+#
 # Revision 1.20  2007/01/30 15:54:57  brian
 # - cascade function name standardization from extra_moments.R
 #
