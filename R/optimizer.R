@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.22 2008-01-04 14:27:07 brian Exp $
+# $Id: optimizer.R,v 1.23 2008-01-05 04:49:25 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -26,6 +26,9 @@
 ################################################################################
 
 # Check to see if the required libraries are loaded
+if(!require("PerformanceAnalytics", quietly=TRUE)) {
+    stop("package", sQuote("PerformanceAnalytics"), "is needed.  Stopping")
+}
 if(!require("fBasics", quietly=TRUE)) {
     stop("package", sQuote("fBasics"), "is needed.  Stopping")
 }
@@ -37,9 +40,6 @@ if(!require("fOptions", quietly=TRUE)) {
 }
 if(!require("tseries", quietly=TRUE)) {
     stop("package", sQuote("tseries"), "is needed.  Stopping")
-}
-if(!require("PerformanceAnalytics", quietly=TRUE)) {
-    stop("package", sQuote("PerformanceAnalytics"), "is needed.  Stopping")
 }
 
 # ------------------------------------------------------------------------------
@@ -72,6 +72,7 @@ function (columnnames, seqstart=.05, seqend=.25, seqstep=.05)
 }
 
 # ------------------------------------------------------------------------------
+# placed in PerformanceAnalytics, deprecated here
 # maxdrawdown
 # function (x)
 # { # adapted from package "tseries"
@@ -134,10 +135,16 @@ function (weightgrid, test=1)
 
 # ------------------------------------------------------------------------------
 # @todo: add methods() to parameterize
+# @todo: replace pfolioReturn(returnarray,weightingvector) from fPortfolio
+#        use updated Return.cumulative
+# @todo: use zoo rollapply in BruteForcePortfolios() fn
 #WeightedReturns =
-# use pfolioReturn(returnarray,weightingvector) from fPortfolio
 WeightedReturns =
-function (R, weightgrid, from, to
+function (R, weightgrid, from, to,
+          methods=c( cumReturn, ThreeYrMeanReturn, PeriodGVaR, ThreeYrGVaR,
+                    PeriodmodVaR, ThreeYrmodVaR, ES, ThreeYrES, modES, ThreeYrmodES, maxdd,
+                    PeriodSharpe, ThreeYrSharpe, InceptionSharpe, omega, StdDev, ThreeYrStdDev )
+          , p=0.95, ... )
 { # @author Brian G. Peterson
 
     # Description:
@@ -194,14 +201,27 @@ function (R, weightgrid, from, to
         fullR = R[1:to,]
         R = R[from:to,]
     }
+    # should probably change this part to use zoo's rollapply to create the various groupings
 
     if (ncol(weightgrid) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
     # Function:
     for(row in 1:rows) {
+        # at some point consider parallelizing this by using a clustered apply
+        # to call a sub-function so that this could get distributed
+        # to multiple processor cores or threads
 
         w = as.numeric(weightgrid[row,])
         # test each row in the weighting vectors against the right dates in the return collection
+
+        # construct a data structure that holds each result for this row
+        if (row==1) {
+                #create data.frame
+                result=data.frame()
+                resultrow=data.frame()
+                rownames=data.frame()
+        }
+
 
         # pfolioReturn
         returns=pfolioReturn(R,w)
@@ -210,7 +230,7 @@ function (R, weightgrid, from, to
 
         # cumulative geometric Return for the period
         if (any(is.na(returns))) {
-            print( paste("NA's in returns: ",row, " ",w," from ", from) )
+            print( paste("NA\'s in returns: ",row, " ",w," from ", from) )
             #browser()
         }
         cumReturn=Return.cumulative(returns)
@@ -218,7 +238,7 @@ function (R, weightgrid, from, to
         if (threeyrfrom < 1 ) threeyrfrom = 1
         threeyrreturns = pfolioReturn(fullR[threeyrfrom:to,],w)
         if (any(is.na(threeyrreturns))) {
-            print( paste("NA's in threeyrreturns: ",row, " ",w," from ",from ) )
+            print( paste("NA\'s in threeyrreturns: ",row, " ",w," from ",from ) )
             #browser()
         }
 
@@ -227,49 +247,99 @@ function (R, weightgrid, from, to
         # use Return.annualized fn instead of Return.cumulative
         ThreeYrMeanReturn = mean(threeyrreturns)
 
-        # VaR.CornishFisher(95%) from pfolioReturn
-        PeriodmodVaR = VaR.CornishFisher(returns, p=0.95)
-
-        # VaR.CornishFisher(95%) from pfolioReturn since inception
-        # InceptionmodVaR = VaR.CornishFisher(historicalreturns, p=0.95)
-
-        # VaR.CornishFisher(95%) from pfolioReturn since inception
-        ThreeYrmodVaR = VaR.CornishFisher(threeyrreturns, p=0.95)
-
-        # Expected Shortfall
-        # commented because it isn't useful in our analyses
-        # ES = CVaRplus(returns, weights = NULL, alpha = 0.05)[1]
-
-        # maxDrawdown
-        mddlist= maxDrawdown(returns)
-
-        # Sharpe Ratio in period
-        PeriodSharpe=SharpeRatio(returns)
-
-        # Sharpe Ratio since inception
-        # InceptionSharpe=SharpeRatio(historicalreturns)
-
-        # 3yr trailing Sharpe Ratio
-        # look back three years and calculate annualized Sharpe ratio
-        ThreeYrSharpe=SharpeRatio(threeyrreturns)
-
-        # Omega
-        # Looks back three years
-        omega = Omega (as.vector(threeyrreturns),method="simple" )
-
-        # Standard Deviation
-        StdDev = sd(returns, na.rm = TRUE)
-        ThreeYrStdDev = sd(threeyrreturns, na.rm = TRUE)
-
-        # construct a data structure that holds each result for this row
-        if (row==1) {
-                #create data.frame
-                result=data.frame()
-                resultrow=data.frame()
+        # I've decided to always show cumReturns and threeyrreturns
+        resultrow=cbind(resultrow,cumReturn)
+        colnames(resultrow)="return.cumulative"
+        for (method in methods) {
+            switch(method,
+                PeriodGVaR = {
+                    # VaR.traditional
+                    PeriodGVaR = VaR.traditional(returns, p=p, ...=...)
+                    # do something nice with the names
+                    colnames(PeriodGVaR)="GVaR.period"
+                    resultrow= cbind(resultrow,GVaR)
+                },
+                ThreeYrGVaR = {
+                    # VaR.traditional
+                    ThreeYrGVaR = VaR.traditional(threeyrreturns, p=p, ...=...)
+                    # do something nice with the names
+                    colnames(PeriodGVaR)="GVaR.period"
+                    resultrow= cbind(resultrow,ThreeYrGVaR)
+                },
+                PeriodmodVaR = {
+                    # VaR.CornishFisher(95%) from pfolioReturn
+                    PeriodmodVaR = VaR.CornishFisher(returns, p=p, ...=...)
+                    resultrow= cbind(resultrow,PeriodmodVaR)
+                },
+                InceptionmodVaR = {
+                    # VaR.CornishFisher(95%) from pfolioReturn since inception
+                    InceptionmodVaR = VaR.CornishFisher(historicalreturns, p=p, ...=...)
+                    resultrow= cbind(resultrow,InceptionmodVaR)
+                },
+                ThreeYrmodVaR = {
+                    # VaR.CornishFisher(95%) from pfolioReturn since inception
+                    ThreeYrmodVaR = VaR.CornishFisher(threeyrreturns, p=p, ...=...)
+                    resultrow= cbind(resultrow,ThreeYrmodVaR)
+                },
+                ES = {
+                    # Expected Shortfall
+                    # replace with GES function from Boudt, et al 2007
+                    ES = CVaRplus(returns, weights = NULL, alpha =1-p, ...=...)[1]
+                    resultrow= cbind(resultrow,ES)
+                },
+                ThreeYrES = {
+                    # Expected Shortfall
+                    # replace with GES function from Boudt, et al 2007
+                    ThreeYrES = CVaRplus(returns, weights = NULL, alpha =1-p, ...=...)[1]
+                    resultrow= cbind(resultrow,ThreeYrES)
+                },
+                modES = {
+                    # Modified Expected Shortfall
+                    # use modES function from Boudt, et al 2007
+                    modES = ES.modified(returns, alpha = 1-p, ...=...)
+                    resultrow= cbind(resultrow,modES)
+                },
+                ThreeYrmodES = {
+                    # Modified Expected Shortfall
+                    # use modES function from Boudt, et al 2007
+                    ThreeYrmodES = ES.modified(threeyrreturns, alpha = 1-p, ...=...)
+                },
+                maxdd = {
+                    # maxDrawdown
+                    maxdd= maxDrawdown(returns)
+                },
+                PeriodSharpe = {
+                    # Sharpe Ratio in period
+                    PeriodSharpe=SharpeRatio(returns)
+                },
+                InceptionSharpe = {
+                    # Sharpe Ratio since inception
+                    InceptionSharpe=SharpeRatio(historicalreturns)
+                },
+                ThreeYrSharpe = {
+                    # 3yr trailing Sharpe Ratio
+                    # look back three years and calculate annualized Sharpe ratio
+                    ThreeYrSharpe=SharpeRatio(threeyrreturns)
+                },
+                omega = {
+                    # Omega
+                    # Looks back three years
+                    omega = Omega (as.vector(threeyrreturns),method="simple" )
+                },
+                StdDev = {
+                    # Standard Deviation
+                    StdDev = sd(returns, na.rm = TRUE)
+                },
+                ThreeYrStdDev = {
+                    # Standard Deviation
+                    ThreeYrStdDev = sd(threeyrreturns, na.rm = TRUE)
+                } # end switch on methods
+            )
         }
+
         # first cbind the columns
-        resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, ThreeYrmodVaR, mddlist,
-                             PeriodSharpe, ThreeYrSharpe, omega, StdDev, ThreeYrStdDev )
+        #resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, ThreeYrmodVaR, maxdd,
+        #PeriodSharpe, ThreeYrSharpe, omega, StdDev, ThreeYrStdDev )
 
         rownames(resultrow) = row
 
@@ -288,9 +358,14 @@ function (R, weightgrid, from, to
 }
 
 # ------------------------------------------------------------------------------
-# # @todo: add methods() to parameterize
+# @todo: add methods() to parameterize
+# @todo: use zoo rollapply in BruteForcePortfolios() fn
 BruteForcePortfolios =
-function(R,weightgrid,yeargrid )
+function(R,weightgrid,yeargrid,
+            methods=c( cumReturn, ThreeYrMeanReturn, PeriodGVaR, ThreeYrGVaR,
+                    PeriodmodVaR, ThreeYrmodVaR, ES, ThreeYrES, modES, ThreeYrmodES, maxdd,
+                    PeriodSharpe, ThreeYrSharpe, InceptionSharpe, omega, StdDev, ThreeYrStdDev, p=0.95, ... )
+        )
 { # @author Brian G. Peterson
 
     # Description:
@@ -334,7 +409,7 @@ function(R,weightgrid,yeargrid )
 
         # construct a data structure that holds each result for this year
         # first cbind
-        resultarray = WeightedReturns(R, weightgrid, from, to, methods=methods)
+        resultarray = WeightedReturns(R, weightgrid, from, to, methods=methods, p=p, ...=...)
 
         # then write a CSV
         write.table(resultarray, file = paste(yearname,".csv",sep=""),
@@ -777,6 +852,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.22  2008/01/04 14:27:07  brian
+# - convert to use functions from package PerformanceAnalytics
+#
 # Revision 1.21  2007/01/31 18:23:16  brian
 # - cascade function name standardization from performance-analytics.R
 #
