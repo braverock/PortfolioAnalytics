@@ -1,5 +1,18 @@
+###############################################################################
+# Functions to use the Rdonlp2 library to perform local maxima/minima search
+# to refine the optimal criteria identified by brute force search.
+#
+# These methods take output from the functions in optimizer.R and then
+# perform sequential quadratic programming to find better optimal portfolios.
+#
+# Copyright (c) 2008 Kris boudt and Brian G. Peterson
+# Kindly contact the authors for permission to use these functions
+###############################################################################
+# $Id: localsearch.R,v 1.3 2008-01-16 13:40:38 brian Exp $
+###############################################################################
 
-setwd("Y:/VaR/Cadiz/programs")
+
+# setwd("Y:/VaR/Cadiz/programs")
 library("PerformanceAnalytics")
 library("Rdonlp2");
 
@@ -15,28 +28,28 @@ library("Rdonlp2");
 # edhec[,13]: Funds.of.Funds
 
 
-names = c( "2000", "2001", "2002","2003","2004","2005","2006") 
+names = c( "2000", "2001", "2002","2003","2004","2005","2006")
 
-# Because we require a training sample of at least 3 years, 
-# and the data is availaible from 1997, 
+# Because we require a training sample of at least 3 years,
+# and the data is availaible from 1997,
 # the first year we can calculate mean/risk analytics for is the year 2000
 
 
 localsearch = function(R, weightgrid, from, to, names, cMin,
                criteria=c( "StdDev" , "SR.StdDev" ,
-                        "GVaR", "SR.GVaR", "mVaR", "SR.mVaR", 
+                        "GVaR", "SR.GVaR", "mVaR", "SR.mVaR",
                         "GES", "SR.GES", "mES", "SR.mES",   ... ),p=0.95,
                lowerbound = NA, upperbound = NA)
 { # @author Kris Boudt and Brian G. Peterson
 
     # Description:
     #
-    # Performs a loop over the names.csv files (as many files as there are strings in names) 
-    # These files must be such that each row corresponds to the portfolio weight vector in the 
-    # respective row of weightgrid. Each column corresponds to an optimization criterion given 
-    # in correct order in methods 
+    # Performs a loop over the names.csv files (as many files as there are strings in names)
+    # These files must be such that each row corresponds to the portfolio weight vector in the
+    # respective row of weightgrid. Each column corresponds to an optimization criterion given
+    # in correct order in methods
     #
-    # @todo 
+    # @todo
     #
     # R                 data frame of historical returns
     #
@@ -44,7 +57,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
     #
     # names             vector holding the names of the .csv files to be read
     #
-    # criteria	      the criterion to be optimized 
+    # criteria	      the criterion to be optimized
     #
     # minormax          indicates whether the criterion should be minimized or maximized
     #
@@ -76,7 +89,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
     # Estimation of the return mean vector, covariance, coskewness and cokurtosis matrix
 
     fullR = R[1:to,];
-    R = R[from:to,] ; in.sample.T = dim(R)[1]; 
+    R = R[from:to,] ; in.sample.T = dim(R)[1];
 
     mu = apply( R , 2 , 'mean' )
     sigma = cov(R)
@@ -99,7 +112,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
 
         c=0;
         for( criterion in criteria ){
-            c = c+1; 
+            c = c+1;
             switch( criterion,
                 StdDev = {
                    # to be minimized
@@ -108,19 +121,19 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
 
                    StdDevfun = function(w){
-                       return(  sqrt( t(w)%*%sigma%*%w  ))   
+                       return(  sqrt( t(w)%*%sigma%*%w  ))
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=StdDevfun  , lin.upper = upperbound , lin.lower = lowerbound )
-                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  & 
+                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
-                       if( localoptim$fx < global.best){ 
+                       if( localoptim$fx < global.best){
                             global.best = localoptim$fx ;  global.best.weight = localoptim$par };
                    }#end loop over local minima
                  },
                  SR.StdDev = {
-                   # to be maximized 
+                   # to be maximized
                    best=sort( Y[,c],index.return=T,decreasing=T)$ix;
                    bestweights = weightgrid[1:cMin , ];
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
@@ -130,15 +143,15 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.StdDevfun , lin.upper = upperbound , lin.lower = lowerbound )
-                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  & 
+                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
-                       if( -localoptim$fx > global.best){ 
+                       if( -localoptim$fx > global.best){
                             global.best = -localoptim$fx ;  global.best.weight = localoptim$par };
                    }#end loop over local minima
-                 },      
+                 },
                 GVaR = {
-                   # minimization criterion 
+                   # minimization criterion
                    best=sort( Y[,c],index.return=T,decreasing=F)$ix;
                    bestweights = weightgrid[1:cMin , ];
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
@@ -148,15 +161,15 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=GVaRfun  , lin.upper = upperbound , lin.lower = lowerbound )
-                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  & 
+                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
-                       if( localoptim$fx < global.best){ 
+                       if( localoptim$fx < global.best){
                             global.best = localoptim$fx;  global.best.weight = localoptim$par };
                    }#end loop over local minima
                  },
                  SR.GVaR = {
-                   # to be maximized 
+                   # to be maximized
                    best=sort( Y[,c],index.return=T,decreasing=T)$ix;
                    bestweights = weightgrid[1:cMin , ];
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
@@ -167,99 +180,99 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.GVaRfun , lin.upper = upperbound , lin.lower = lowerbound )
-                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  & 
+                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
-                       if( -localoptim$fx > global.best){ 
+                       if( -localoptim$fx > global.best){
                             global.best = -localoptim$fx;  global.best.weight = localoptim$par };
                    }#end loop over local minima
-                 },     
+                 },
                 mVaR = {
-                   # minimization criterion 
+                   # minimization criterion
                    best=sort( Y[,c],index.return=T,decreasing=F)$ix;
                    bestweights = weightgrid[1:cMin , ];
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
 
                    mVaRfun = function(w){
-                      pm4 = t(w)%*%M4%*%(w%x%w%x%w) ; pm3 = t(w)%*%M3%*%(w%x%w) ; pm2 =  t(w)%*%sigma%*%w ; 
+                      pm4 = t(w)%*%M4%*%(w%x%w%x%w) ; pm3 = t(w)%*%M3%*%(w%x%w) ; pm2 =  t(w)%*%sigma%*%w ;
                       skew = pm3 / pm2^(3/2);
                       exkurt = pm4 / pm2^(2) - 3; z = qnorm(alpha);
-                      h = z + (1/6)*(z^2 -1)*skew 
-                      h = h + (1/24)*(z^3 - 3*z)*exkurt - (1/36)*(2*z^3 - 5*z)*skew^2; 
+                      h = z + (1/6)*(z^2 -1)*skew
+                      h = h + (1/24)*(z^3 - 3*z)*exkurt - (1/36)*(2*z^3 - 5*z)*skew^2;
                       return (- (t(w)%*%mu) - h*sqrt( pm2  ) )
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=mVaRfun  , lin.upper = upperbound , lin.lower = lowerbound )
-                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  & 
+                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
-                       if( localoptim$fx < global.best){ 
+                       if( localoptim$fx < global.best){
                             global.best = localoptim$fx;  global.best.weight = localoptim$par };
                    }#end loop over local minima
                  },
                  SR.mVaR = {
-                   # to be maximized 
+                   # to be maximized
                    best=sort( Y[,c],index.return=T,decreasing=T)$ix;
                    bestweights = weightgrid[1:cMin , ];
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
 
                    NegSR.mVaRfun = function(w){
-                      pm4 = t(w)%*%M4%*%(w%x%w%x%w) ; pm3 = t(w)%*%M3%*%(w%x%w) ; pm2 =  t(w)%*%sigma%*%w ; 
+                      pm4 = t(w)%*%M4%*%(w%x%w%x%w) ; pm3 = t(w)%*%M3%*%(w%x%w) ; pm2 =  t(w)%*%sigma%*%w ;
                       skew = pm3 / pm2^(3/2);
                       exkurt = pm4 / pm2^(2) - 3; z = qnorm(alpha);
-                      h = z + (1/6)*(z^2 -1)*skew 
-                      h = h + (1/24)*(z^3 - 3*z)*exkurt - (1/36)*(2*z^3 - 5*z)*skew^2; 
+                      h = z + (1/6)*(z^2 -1)*skew
+                      h = h + (1/24)*(z^3 - 3*z)*exkurt - (1/36)*(2*z^3 - 5*z)*skew^2;
                       mVaR =  (- (t(w)%*%mu) - h*sqrt( pm2  ) )
                       return( - mean( R%*%weights ) / mVaR    )
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.mVaRfun , lin.upper = upperbound , lin.lower = lowerbound )
-                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  & 
+                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
-                       if( -localoptim$fx > global.best){ 
+                       if( -localoptim$fx > global.best){
                             global.best = -localoptim$fx;  global.best.weight = localoptim$par };
                    }#end loop over local minima
                  },
                 GES = {
-                   # minimization criterion 
+                   # minimization criterion
                    best=sort( Y[,c],index.return=T,decreasing=F)$ix;
                    bestweights = weightgrid[1:cMin , ];
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
 
                    GESfun = function(w){
                       return (- (t(w)%*%mu) + dnorm(qnorm(alpha))*sqrt(t(w)%*%sigma%*%w)/alpha )
-                   } 
+                   }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=GESfun  , lin.upper = upperbound , lin.lower = lowerbound )
-                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  & 
+                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
-                       if( localoptim$fx < global.best){ 
+                       if( localoptim$fx < global.best){
                             global.best = local.min;  global.best.weight = localoptim$par };
                    }#end loop over local minima
                  },
                  SR.GES = {
-                   # to be maximized 
+                   # to be maximized
                    best=sort( Y[,c],index.return=T,decreasing=T)$ix;
                    bestweights = weightgrid[1:cMin , ];
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
 
                    NegSR.GESfun = function(w){
-                       GES = - (t(w)%*%mu) + dnorm(qnorm(alpha))*sqrt(t(w)%*%sigma%*%w)/alpha 
+                       GES = - (t(w)%*%mu) + dnorm(qnorm(alpha))*sqrt(t(w)%*%sigma%*%w)/alpha
                        return( - (t(w)%*%mu) / GES    )
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.GESfun , lin.upper = upperbound , lin.lower = lowerbound )
-                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  & 
+                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
-                       if( -localoptim$fx > global.best){ 
+                       if( -localoptim$fx > global.best){
                             global.best = -localoptim$fx;  global.best.weight = localoptim$par };
                    }#end loop over local minima
-                 },  
+                 },
                  mES = {
-                   # minimization criterion 
+                   # minimization criterion
                    best=sort( Y[,c],index.return=T,decreasing=F)$ix;
                    bestweights = weightgrid[1:cMin , ];
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
@@ -275,7 +288,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                         I = fullprod*dnorm(h);
 
                         for(i in c(1:pstar) )
-                        { 
+                        {
                            prod = 1;
                            for(j in c(1:i) ){
                               prod = prod*(2*j)  }
@@ -286,7 +299,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                         for(j in c(0:pstar) ) {
                              fullprod = fullprod*( (2*j)+1 ) }
                         I = -fullprod*pnorm(h);
-                        for(i in c(0:pstar) ){ 
+                        for(i in c(0:pstar) ){
                            prod = 1;
                            for(j in c(0:i) ){
                               prod = prod*( (2*j) + 1 )}
@@ -295,11 +308,11 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                        return(I) }
 
                      mESfun = function(w){
-                       pm4 = t(w)%*%M4%*%(w%x%w%x%w) ; pm3 = t(w)%*%M3%*%(w%x%w) ; pm2 =  t(w)%*%sigma%*%w ; 
+                       pm4 = t(w)%*%M4%*%(w%x%w%x%w) ; pm3 = t(w)%*%M3%*%(w%x%w) ; pm2 =  t(w)%*%sigma%*%w ;
                        skew = pm3 / pm2^(3/2);
                        exkurt = pm4 / pm2^(2) - 3; z = qnorm(alpha);
-                       h = z + (1/6)*(z^2 -1)*skew 
-                       h = h + (1/24)*(z^3 - 3*z)*exkurt - (1/36)*(2*z^3 - 5*z)*skew^2; 
+                       h = z + (1/6)*(z^2 -1)*skew
+                       h = h + (1/24)*(z^3 - 3*z)*exkurt - (1/36)*(2*z^3 - 5*z)*skew^2;
 
                        E = dnorm(h)
                        E = E + (1/24)*(   Ipower(4,h) - 6*Ipower(2,h) + 3*dnorm(h)   )*exkurt
@@ -311,15 +324,15 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=mESfun  , lin.upper = upperbound , lin.lower = lowerbound )
-                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  & 
+                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
-                       if( localoptim$fx < global.best){ 
+                       if( localoptim$fx < global.best){
                             global.best = localoptim$fx;  global.best.weight = localoptim$par };
                    }#end loop over local minima
                  },
                  SR.mES = {
-                   # to be maximized 
+                   # to be maximized
                    best=sort( Y[,c],index.return=T,decreasing=T)$ix;
                    bestweights = weightgrid[1:cMin , ];
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
@@ -334,7 +347,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                         I = fullprod*dnorm(h);
 
                         for(i in c(1:pstar) )
-                        { 
+                        {
                            prod = 1;
                            for(j in c(1:i) ){
                               prod = prod*(2*j)  }
@@ -345,7 +358,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                         for(j in c(0:pstar) ) {
                              fullprod = fullprod*( (2*j)+1 ) }
                         I = -fullprod*pnorm(h);
-                        for(i in c(0:pstar) ){ 
+                        for(i in c(0:pstar) ){
                            prod = 1;
                            for(j in c(0:i) ){
                               prod = prod*( (2*j) + 1 )}
@@ -354,11 +367,11 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                        return(I) }
 
                      NegSR.mESfun = function(w){
-                       pm4 = t(w)%*%M4%*%(w%x%w%x%w) ; pm3 = t(w)%*%M3%*%(w%x%w) ; pm2 =  t(w)%*%sigma%*%w ; 
+                       pm4 = t(w)%*%M4%*%(w%x%w%x%w) ; pm3 = t(w)%*%M3%*%(w%x%w) ; pm2 =  t(w)%*%sigma%*%w ;
                        skew = pm3 / pm2^(3/2);
                        exkurt = pm4 / pm2^(2) - 3; z = qnorm(alpha);
-                       h = z + (1/6)*(z^2 -1)*skew 
-                       h = h + (1/24)*(z^3 - 3*z)*exkurt - (1/36)*(2*z^3 - 5*z)*skew^2; 
+                       h = z + (1/6)*(z^2 -1)*skew
+                       h = h + (1/24)*(z^3 - 3*z)*exkurt - (1/36)*(2*z^3 - 5*z)*skew^2;
 
                        E = dnorm(h)
                        E = E + (1/24)*(   Ipower(4,h) - 6*Ipower(2,h) + 3*dnorm(h)   )*exkurt
@@ -370,25 +383,29 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.mESfun , lin.upper = upperbound , lin.lower = lowerbound )
-                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  & 
+                       if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
-                       if( -localoptim$fx > global.best){ 
+                       if( -localoptim$fx > global.best){
                             global.best = -localoptim$fx;  global.best.weight = localoptim$par };
                    }#end loop over local minima
                  }
              )#end function that finds out which criterion to optimize and does the optimization
              out[ (c-1)*cPeriods + i, ] = globalbest;
-        }#end loop over optimization criteria 
-    }#end loop over .csv files containing the years 
+        }#end loop over optimization criteria
+    }#end loop over .csv files containing the years
 
 
-    # Output save 
+    # Output save
     for( i in c(1:cCriteria) ){
         criterion = criteria[i];
         write.table( out[c( ((i-1)*cPeriods+1)  : (i*cPeriods)  ),] , file = paste(criterion,".csv",sep=""),
             append = FALSE, quote = TRUE, sep = ",",
             eol = "\n", na = "NA", dec = ".", row.names = TRUE,
             col.names = TRUE, qmethod = "escape")
-    } 
+    }
 }
+
+###############################################################################
+# $Log: not supported by cvs2svn $
+###############################################################################
