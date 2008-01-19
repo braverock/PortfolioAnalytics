@@ -8,7 +8,7 @@
 # Copyright (c) 2008 Kris Boudt and Brian G. Peterson
 # Kindly contact the authors for permission to use these functions
 ###############################################################################
-# $Id: localsearch.R,v 1.6 2008-01-19 16:00:05 kris Exp $
+# $Id: localsearch.R,v 1.7 2008-01-19 23:53:33 brian Exp $
 ###############################################################################
 
 
@@ -55,7 +55,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
     print("");
 
     R = checkData(R, method="matrix");
-    weightgrid = checkData(R, method="matrix");
+    weightgrid = checkData(weightgrid, method="matrix");
 
     # Load the function donlp2
     library("Rdonlp2")
@@ -123,7 +123,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=StdDevfun  , par.upper = upperbound , par.lower = lowerbound,
-                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1)) 
+                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
                        if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
@@ -142,7 +142,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.StdDevfun , par.upper = upperbound , par.lower = lowerbound,
-                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1)) 
+                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
                        if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
@@ -161,7 +161,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=GVaRfun  , par.upper = upperbound , par.lower = lowerbound,
-                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1)) 
+                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
                        if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
@@ -181,7 +181,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.GVaRfun , par.upper = upperbound , par.lower = lowerbound,
-                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1)) 
+                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
                        if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
@@ -249,7 +249,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=GESfun , par.upper = upperbound , par.lower = lowerbound,
-                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1)) 
+                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
                        if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
@@ -269,7 +269,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.GESfun, par.upper = upperbound , par.lower = lowerbound,
-                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1)) 
+                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
                        if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
@@ -330,7 +330,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=mESfun  , par.upper = upperbound , par.lower = lowerbound,
-                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1)) 
+                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
                        if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
@@ -427,6 +427,9 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.6  2008/01/19 16:00:05  kris
+# *** empty log message ***
+#
 
 # Revision 1.4  2008/01/19 13:40:38  Kris
 # - add checkData functionality
