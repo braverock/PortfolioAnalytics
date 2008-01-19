@@ -8,11 +8,11 @@
 # Copyright (c) 2008 Kris Boudt and Brian G. Peterson
 # Kindly contact the authors for permission to use these functions
 ###############################################################################
-# $Id: localsearch.R,v 1.5 2008-01-19 11:18:30 kris Exp $
+# $Id: localsearch.R,v 1.6 2008-01-19 16:00:05 kris Exp $
 ###############################################################################
 
 
-localsearch = function(R, weightgrid, from, to, names, cMin,
+localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                criteria=c( "StdDev" , "SR.StdDev" ,
                         "GVaR", "SR.GVaR", "mVaR", "SR.mVaR",
                         "GES", "SR.GES", "mES", "SR.mES",   ...), columns.crit, p=0.95,
@@ -63,7 +63,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
     # Create a matrix that will hold for each method and each vector the best weights
 
     cAssets = ncol(weightgrid);
-    cPeriods = length(names);
+    cPeriods = length(names.input);
     cCriteria = length(criteria);
 
     out = matrix(  rep(0, cCriteria*cPeriods*cAssets) , ncol= cAssets );
@@ -83,7 +83,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
     for( per in c(1:cPeriods) ){
 
        print("-----------New period----------------------")
-       print(names[per]);
+       print(names.input[per]);
        print("--------------------------------------------")
        print("")
        in.sample.R = R[from[per]:to[per],] ; in.sample.T = dim(in.sample.R)[1];
@@ -100,7 +100,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
        M3 = 1/in.sample.T*M3
        M4 = 1/in.sample.T*M4
 
-        Y = read.csv( file = paste( names[per],".csv",sep=""),
+        Y = read.csv( file = paste( names.input[per],".csv",sep=""),
             header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
         Y = Y[,columns.crit]
         c=0;
@@ -401,7 +401,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
              )#end function that finds out which criterion to optimize and does the optimization
 
              print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-             print(c("end optimization of criterion",criterion,"for period",names[per]))
+             print(c("end optimization of criterion",criterion,"for period",names.input[per]))
              print("Local search has improved the objective function from");
              print(Y[best[1],c] );
              print("to");
@@ -418,7 +418,7 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
     # Output save
     for( i in c(1:cCriteria) ){
         criterion = criteria[i];
-        write.table( out[c( ((i-1)*cPeriods+1)  : (i*cPeriods)  ),] , file = paste(criterion,".csv",sep=""),
+        write.table( out[c( ((i-1)*cPeriods+1)  : (i*cPeriods)  ),] , file = paste(names.output[i],".csv",sep=""),
             append = FALSE, quote = TRUE, sep = ",",
             eol = "\n", na = "NA", dec = ".", row.names = TRUE,
             col.names = TRUE, qmethod = "escape")
