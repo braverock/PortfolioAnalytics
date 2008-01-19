@@ -8,7 +8,7 @@
 # Copyright (c) 2008 Kris Boudt and Brian G. Peterson
 # Kindly contact the authors for permission to use these functions
 ###############################################################################
-# $Id: localsearch.R,v 1.4 2008-01-17 21:24:59 kris Exp $
+# $Id: localsearch.R,v 1.5 2008-01-19 11:18:30 kris Exp $
 ###############################################################################
 
 
@@ -28,9 +28,9 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
     #
     # @todo
     #
-    # R                 data frame of historical returns
+    # R                 matrix holding historical returns
     #
-    # weightgrid        each row contains one weighting vector, same number of columns as your returns
+    # weightgrid        matrix each row contains one weighting vector, same number of columns as your returns
     #
     # names             vector holding the names of the .csv files to be read
     #
@@ -49,6 +49,13 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
     # For each criterion a .csv file is saved holding for each period in `names' the best weight vector
 
 
+    print("Local optimization of portfolio risk using a SQP solver")
+    print("Constraints: sum of weights=1 and user can specify bound constraints")
+    print("--------------------------------------------------------------------")
+    print("");
+
+    R = checkData(R, method="matrix");
+    weightgrid = checkData(R, method="matrix");
 
     # Load the function donlp2
     library("Rdonlp2")
@@ -73,11 +80,13 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
 
 
 
-    for( i in c(1:cPeriods) ){
+    for( per in c(1:cPeriods) ){
 
-       print(names[i]);
-
-       in.sample.R = R[from[i]:to[i],] ; in.sample.T = dim(in.sample.R)[1];
+       print("-----------New period----------------------")
+       print(names[per]);
+       print("--------------------------------------------")
+       print("")
+       in.sample.R = R[from[per]:to[per],] ; in.sample.T = dim(in.sample.R)[1];
        mu = apply( in.sample.R , 2 , 'mean' )
        sigma = cov(in.sample.R)
        M3 = matrix(rep(0,cAssets^3),nrow=cAssets,ncol=cAssets^2)
@@ -91,14 +100,18 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
        M3 = 1/in.sample.T*M3
        M4 = 1/in.sample.T*M4
 
-        Y = read.csv( file = paste( names[i],".csv",sep=""),
+        Y = read.csv( file = paste( names[per],".csv",sep=""),
             header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
         Y = Y[,columns.crit]
         c=0;
-        for( criterion in criteria ){
-            print(criterion);
-            c = c+1;
-            switch( criterion,
+
+        for( c in c(1:cCriteria) ){
+             criterion = criteria[c]
+             print("-----------New criterion----------------------")
+             print(criterion);
+             print("----------------------------------------------")
+             print("")
+             switch( criterion,
                 StdDev = {
                    # to be minimized
                    best=sort( Y[,c],index.return=T,decreasing=F)$ix;
@@ -383,15 +396,23 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
                        if( -localoptim$fx > global.best){
                             global.best = -localoptim$fx;  global.best.weight = localoptim$par };
-                   }#end loop over local minima
+                   }#end loop over local minima, indexed by k=1,...,cMin
                  }
              )#end function that finds out which criterion to optimize and does the optimization
-             print(((c-1)*cPeriods + i));
-             out[ ((c-1)*cPeriods + i), ] = global.best.weight;
-             print(out);
+
+             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+             print(c("end optimization of criterion",criterion,"for period",names[per]))
+             print("Local search has improved the objective function from");
+             print(Y[best[1],c] );
+             print("to");
+             print( global.best );
+
+             out[ ((c-1)*cPeriods + per), ] = global.best.weight;
              # first cPeriods rows correspond to cCriteria[1] and so on
-        }#end loop over optimization criteria
-    }#end loop over .csv files containing the years
+
+        }#end loop over optimization criteria; indexed by c=1,...,cCriteria
+
+    }#end loop over .csv files containing the years; indexed by per=1,...,cPeriods
 
 
     # Output save
@@ -407,6 +428,8 @@ localsearch = function(R, weightgrid, from, to, names, cMin,
 ###############################################################################
 # $Log: not supported by cvs2svn $
 
+# Revision 1.4  2008/01/19 13:40:38  Kris
+# - add checkData functionality
 # Revision 1.4  2008/01/17 13:40:38  Kris
 # - fix some bugs
 # - check on real data
