@@ -6,8 +6,8 @@
 #
 ################################################################################
 
-# Copyright 2006-2008 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.29 2008-01-20 13:48:37 brian Exp $
+# Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
+# $Id: optimizer.R,v 1.30 2008-01-20 13:49:39 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -853,6 +853,10 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.29  2008/01/20 13:48:37  brian
+# - fix syntax error
+# - update methods to reflect changes to multivariate moments
+#
 # Revision 1.28  2008/01/20 13:35:34  brian
 # - add missing brace in switch statement
 #
