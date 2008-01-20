@@ -7,19 +7,19 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.24 2008-01-19 16:48:01 brian Exp $
+# $Id: optimizer.R,v 1.25 2008-01-20 05:02:17 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
 #
 # BruteForcePortfolios (R,weightgrid,yeargrid)
 # BacktestData ()
-# Backtest (R,portfolioreturns, yeargrid, cutat=1000000 )
+# Backtest (R,portfolioreturns, yeargrid, cutat=1000000, methods, p, ... )
 # weight.grid (columnnames, seqstart=.05, seqend=.25, seqstep=.05)
 # maxdrawdown (R)
 # cut.returns (R, cutrow, startrow=1)
 # weighttest (weightgrid, test=1)
-# WeightedReturns (R, weightgrid, from, to)
+# WeightedReturns (R, weightgrid, from, to, methods, p, ...)
 # backtestDisplay (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Return" )
 # MonthlyBacktestResults (R, weightgrid, yeargrid, backtestweights)
 #
@@ -29,65 +29,7 @@
 if(!require("PerformanceAnalytics", quietly=TRUE)) {
     stop("package", sQuote("PerformanceAnalytics"), "is needed.  Stopping")
 }
-if(!require("fBasics", quietly=TRUE)) {
-    stop("package", sQuote("fBasics"), "is needed.  Stopping")
-}
-if(!require("fPortfolio", quietly=TRUE)) {
-    stop("package", sQuote("fPortfolio"), "is needed.  Stopping")
-}
-if(!require("fOptions", quietly=TRUE)) {
-    stop("package", sQuote("fOptions"), "is needed.  Stopping")
-}
-if(!require("tseries", quietly=TRUE)) {
-    stop("package", sQuote("tseries"), "is needed.  Stopping")
-}
-
-# ------------------------------------------------------------------------------
-weight.grid =
-function (columnnames, seqstart=.05, seqend=.25, seqstep=.05)
-{   # @author Aaron van Meerten
-
-    # Description:
-
-    # Function loosely based on expand.grid
-    #
-    # Generate and returns a grid of weighting vectors
-    # containing all unique combinations
-    # of seq parameters where rowsum = 1
-    #
-    # columnnames = vector of names for the grid columns
-    # seqstart = start/from value for seq()
-    # seqend = end/to value for seq()
-    # seqstep = step/by value for seq()
-    #
-    # we will use seq(seqstart, seqend, seqstep)
-    #
-
-    # FUNCTION:
-
-    result = NA
-
-    # Return Value:
-    result
-}
-
-# ------------------------------------------------------------------------------
-# placed in PerformanceAnalytics, deprecated here
-# maxdrawdown
-# function (x)
-# { # adapted from package "tseries"
-#     if (NCOL(x) > 1)
-#         stop("x is not a vector or univariate time series")
-#     if (any(is.na(x)))
-#         stop("NAs in x")
-#     cmaxx <- cummax(x) - x
-#     mdd <- max(cmaxx)
-#     to <- which(mdd == cmaxx)
-#     from <- double(NROW(to))
-#     for (i in 1:NROW(to)) from[i] <- max(which(cmaxx[1:to[i]] ==
-#         0))
-#     return(list(maxdrawdown = mdd, from = from, to = to))
-# }
+source("optim_functions.R")
 
 # ------------------------------------------------------------------------------
 cut.returns =
@@ -102,8 +44,6 @@ function (R, cutrow, startrow=1)
     # Return Value:
     result
 }
-
-
 
 # ------------------------------------------------------------------------------
 weighttest =
@@ -134,7 +74,6 @@ function (weightgrid, test=1)
 }
 
 # ------------------------------------------------------------------------------
-# @todo: add methods() to parameterize
 # @todo: replace pfolioReturn(returnarray,weightingvector) from fPortfolio
 #        use updated Return.cumulative
 # @todo: use zoo rollapply in BruteForcePortfolios() fn
@@ -212,6 +151,11 @@ function (R, weightgrid, from, to,
     }
     # should probably change this part to use zoo's rollapply to create the various groupings
 
+    if ( p >= 0.51 ) {
+        # looks like p was a percent like .99
+        p = 1-p
+    }
+
     if (ncol(weightgrid) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
     # Function:
@@ -233,7 +177,7 @@ function (R, weightgrid, from, to,
 
 
         # pfolioReturn
-        returns=pfolioReturn(R,w)
+        # returns=pfolioReturn(R,w)
         # pfolioReturn, since inception
         #historicalreturns=pfolioReturn(fullR,w)
 
@@ -242,10 +186,10 @@ function (R, weightgrid, from, to,
             print( paste("NA\'s in returns: ",row, " ",w," from ", from) )
             #browser()
         }
-        cumReturn=Return.cumulative(returns)
+        #cumReturn=Return.cumulative(returns)
         threeyrfrom = from-24
         if (threeyrfrom < 1 ) threeyrfrom = 1
-        threeyrreturns = pfolioReturn(fullR[threeyrfrom:to,],w)
+        #threeyrreturns = pfolioReturn(fullR[threeyrfrom:to,],w)
         if (any(is.na(threeyrreturns))) {
             print( paste("NA\'s in threeyrreturns: ",row, " ",w," from ",from ) )
             #browser()
@@ -257,8 +201,62 @@ function (R, weightgrid, from, to,
         ThreeYrMeanReturn = mean(threeyrreturns)
 
         # I've decided to always show cumReturns(period)
-        resultrow=cbind(resultrow,cumReturn)
-        colnames(resultrow)="return.cumulative"
+        #resultrow=cbind(resultrow,cumReturn)
+        #colnames(resultrow)="return.cumulative"
+
+       # copied from localsearch.R
+
+       cAssets = ncol(weightgrid);
+
+       in.sample.R = R[from:to,] ; in.sample.T = dim(in.sample.R)[1];
+       mu = apply( in.sample.R , 2 , 'mean' )
+       meanR = (t(w)%*%mu)
+       sigma = cov(in.sample.R)
+       StdDevR = sqrt( t(w)%*%sigma%*%w  )
+       M3 = matrix(rep(0,cAssets^3),nrow=cAssets,ncol=cAssets^2)
+       M4 = matrix(rep(0,cAssets^4),nrow=cAssets,ncol=cAssets^3)
+       for(t in c(1:in.sample.T))
+       {
+          centret = as.numeric(matrix(in.sample.R[t,]-mu,nrow=cAssets,ncol=1))
+          M3 = M3 + ( centret%*%t(centret) )%x%t(centret)
+          M4 = M4 + ( centret%*%t(centret) )%x%t(centret)%x%t(centret)
+       }
+       M3 = 1/in.sample.T*M3
+       M4 = 1/in.sample.T*M4
+
+       in.sample.R.3yr = R[threeyrfrom:to,] ; in.sample.T = dim(in.sample.R)[1];
+       mu.3yr = apply( in.sample.R , 2 , 'mean' )
+       meanR.3yr = (t(w)%*%mu)
+       sigma.3yr = cov(in.sample.R)
+       StdDevR.3yr = sqrt( t(w)%*%sigma%*%w  )
+       M3.3yr = matrix(rep(0,cAssets^3),nrow=cAssets,ncol=cAssets^2)
+       M4.3yr = matrix(rep(0,cAssets^4),nrow=cAssets,ncol=cAssets^3)
+       for(t in c(1:in.sample.T))
+       {
+          centret = as.numeric(matrix(in.sample.R[t,]-mu,nrow=cAssets,ncol=1))
+          M3.3yr = M3.3yr + ( centret%*%t(centret) )%x%t(centret)
+          M4.3yr = M4.3yr + ( centret%*%t(centret) )%x%t(centret)%x%t(centret)
+       }
+       M3.3yr = 1/in.sample.T*M3.3yr
+       M4.3yr = 1/in.sample.T*M4.3yr
+
+
+       in.sample.R.inception = R[1:to,] ; in.sample.T = dim(in.sample.R)[1];
+       mu.inception = apply( in.sample.R , 2 , 'mean' )
+       meanR.inception = (t(w)%*%mu)
+       sigma.inception = cov(in.sample.R)
+       StdDevR.inception = sqrt( t(w)%*%sigma%*%w  )
+       M3.inception = matrix(rep(0,cAssets^3),nrow=cAssets,ncol=cAssets^2)
+       M4.inception = matrix(rep(0,cAssets^4),nrow=cAssets,ncol=cAssets^3)
+       for(t in c(1:in.sample.T))
+       {
+          centret = as.numeric(matrix(in.sample.R[t,]-mu,nrow=cAssets,ncol=1))
+          M3.inception = M3.inception + ( centret%*%t(centret) )%x%t(centret)
+          M4.inception = M4.inception + ( centret%*%t(centret) )%x%t(centret)%x%t(centret)
+       }
+       M3.inception = 1/in.sample.T*M3.inception
+       M4.inception = 1/in.sample.T*M4.inception
+
         for (method in methods) {
             switch(method,
                 PeriodGVaR = {
@@ -406,7 +404,6 @@ function (R, weightgrid, from, to,
 }
 
 # ------------------------------------------------------------------------------
-# @todo: add methods() to parameterize
 # @todo: use zoo rollapply in BruteForcePortfolios() fn
 BruteForcePortfolios =
 function(R,weightgrid,yeargrid,
@@ -901,6 +898,10 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.24  2008/01/19 16:48:01  brian
+# - fix column name issues
+# - add period, inception, and 3yr for each method
+#
 # Revision 1.23  2008/01/05 04:49:25  brian
 # - add 'methods' argument to parameterize WeightedReturns and BrutForcePortfolios functions
 # - not yet tested, may have issues with column names
