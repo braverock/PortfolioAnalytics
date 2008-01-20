@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.39 2008-01-20 19:55:33 brian Exp $
+# $Id: optimizer.R,v 1.40 2008-01-20 21:05:45 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -128,23 +128,23 @@ function (R, weightgrid, from, to,
     # Setup:
     # there's a risk here is sampling from weightgrid that
     # your row names and numbers won;t match, need to be careful
-    rows=nrow(weightgrid)
-
-    if (from < 1) from = 1
-    if (to > rows) to = rows
 
     # data type conditionals
     # cut the return series for from:to
     if (class(R) == "timeSeries") {
         R = R@Data
     }
-    # should probably change this part to use zoo's rollapply to create the various groupings
+
+    if (from < 1) from = 1
+    if (to > nrow(R)) to = nrow(R)
+
 
     if (ncol(weightgrid) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
-    result=data.frame(row.names=rownames(weightgrid))
+    result=NULL
 
     # Compute multivariate moments
+    # should probably change this part to use zoo's rollapply to create the various groupings
 
     threeyrfrom = to - 36; #for monthly data
     if (threeyrfrom < 1 ) threeyrfrom = 1
@@ -167,20 +167,21 @@ function (R, weightgrid, from, to,
     M3.3yr = M3.MM(R.3yr);
     M4.3yr = M4.MM(R.3yr);
 
+    rows=nrow(weightgrid)
     # Function:
-    for(row in 1:rows) {
+    for(row in rownames(weightgrid)) {
         # this would be for(n in c(2,5,10,20,50)) for a sampled weighting vector
 
         # at some point consider parallelizing this by using a clustered apply
         # to call a sub-function so that this could get distributed
         # to multiple processor cores or threads
 
-        w = as.numeric(weightgrid[row,])
-        # test each row in the weighting vectors against the right dates in the return collection
-
         # construct a data structure that holds each result for this row
         resultrow=data.frame(row.names = row)
         rownames(resultrow)=rownames(weightgrid[row,])
+
+        w = as.numeric(weightgrid[row,])
+        # test each row in the weighting vectors against the right dates in the return collection
 
        # problem of NAs? Not solved yet !!!!
        # should really solve this by calling checkData in ButeForcePortfolios
@@ -306,7 +307,11 @@ function (R, weightgrid, from, to,
             )#end switch function
         }# end loop over methods
 
-
+        if (is.null(result)){
+               result=matrix(nrow=nrow(weightgrid),ncol=ncol(resultrow))
+               result=as.data.frame(result)
+               rownames(result)=rownames(weightgrid)
+        }
         # then rbind the rows
         # result    = rbind(result,resultrow)
         result[rownames(resultrow),]=resultrow
@@ -818,6 +823,10 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.39  2008/01/20 19:55:33  brian
+# - create empty result var dataframe with right names for resultrows
+# - assign resultrow by index to avoid memcopy problem
+#
 # Revision 1.38  2008/01/20 17:22:15  brian
 # - fix row.names in initialization of resultrow data.frame
 #
