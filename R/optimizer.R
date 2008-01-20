@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.32 2008-01-20 14:53:05 brian Exp $
+# $Id: optimizer.R,v 1.33 2008-01-20 14:54:55 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -80,9 +80,9 @@ function (weightgrid, test=1)
 #WeightedReturns =
 WeightedReturns =
 function (R, weightgrid, from, to,
-          methods=c( PeriodGVaR, ThreeYrGVaR, InceptionGVaR, PeriodmodVaR, ThreeYrmodVaR, InceptionmodVaR,
-                     PeriodGES, ThreeYrGES, InceptionGES, PeriodmodES, ThreeYrmodES, InceptionmodES,
-                     maxdd, omega, PeriodStdDev, ThreeYrStdDev, InceptionStdDev )
+          methods=c( "PeriodGVaR", "ThreeYrGVaR", "InceptionGVaR", "PeriodmodVaR", "ThreeYrmodVaR", "InceptionmodVaR",
+                     "PeriodGES", "ThreeYrGES", "InceptionGES", "PeriodmodES", "ThreeYrmodES", "InceptionmodES",
+                     "maxdd", "omega", "PeriodStdDev", "ThreeYrStdDev", "InceptionStdDev" )
           , p=0.95, ... )
 { # @author Brian G. Peterson and Kris Boudt
 
@@ -144,7 +144,7 @@ function (R, weightgrid, from, to,
     # cut the return series for from:to
     if (class(R) == "timeSeries") {
         R = R@Data
-    } 
+    }
     # should probably change this part to use zoo's rollapply to create the various groupings
 
     # if ( p >= 0.51 ) {
@@ -337,9 +337,9 @@ function (R, weightgrid, from, to,
 # @todo: use zoo rollapply in BruteForcePortfolios() fn
 BruteForcePortfolios =
 function(R,weightgrid,yeargrid,
-          methods=c( PeriodGVaR, ThreeYrGVaR, InceptionGVaR, PeriodmodVaR, ThreeYrmodVaR, InceptionmodVaR,
-                     PeriodGES, ThreeYrGES, InceptionGES, PeriodmodES, ThreeYrmodES, InceptionmodES,
-                     maxdd, omega, PeriodStdDev, ThreeYrStdDev, InceptionStdDev )
+          methods=c( "PeriodGVaR", "ThreeYrGVaR", "InceptionGVaR", "PeriodmodVaR", "ThreeYrmodVaR", "InceptionmodVaR",
+                     "PeriodGES", "ThreeYrGES", "InceptionGES", "PeriodmodES", "ThreeYrmodES", "InceptionmodES",
+                     "maxdd", "omega", "PeriodStdDev", "ThreeYrStdDev", "InceptionStdDev" )
          , p=0.95, ...
         )
 { # @author Brian G. Peterson
@@ -828,6 +828,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.32  2008/01/20 14:53:05  brian
+# - fix syntax errors and handling of inception, threeyr, form, to
+#
 # Revision 1.31  2008/01/20 13:55:44  brian
 # - fix syntax error in switch on InceptionStdDev (missing comma)
 #
