@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.37 2008-01-20 17:08:24 kris Exp $
+# $Id: optimizer.R,v 1.38 2008-01-20 17:22:15 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -175,7 +175,7 @@ function (R, weightgrid, from, to,
         # test each row in the weighting vectors against the right dates in the return collection
 
         # construct a data structure that holds each result for this row
-        resultrow=data.frame(rownames = row)
+        resultrow=data.frame(row.names = row)
 
        # problem of NAs? Not solved yet !!!!
        # should really solve this by calling checkData in ButeForcePortfolios
@@ -186,7 +186,7 @@ function (R, weightgrid, from, to,
 
         mean.inception = mean.MM( w , mu.inception );
         mean.period = mean.MM( w , mu.period) ;
-        mean.3yr = mean.MM( w , mu.3yr ) ; 
+        mean.3yr = mean.MM( w , mu.3yr ) ;
 
         for (method in methods) {
             switch(method,
@@ -216,7 +216,7 @@ function (R, weightgrid, from, to,
                 },
                 PeriodGVaR = {
                     PeriodGVaR = GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
-                    PeriodSRGVaR = mean.period/PeriodGVaR 
+                    PeriodSRGVaR = mean.period/PeriodGVaR
                     colnames(PeriodGVaR)="GVaR.period"
                     colnames(PeriodSRGVaR)="SR.GVaR.period"
                     resultrow= cbind(resultrow,PeriodGVaR,PeriodSRGVaR)
@@ -230,14 +230,14 @@ function (R, weightgrid, from, to,
                 },
                 InceptionGVaR = {
                     InceptionGVaR = GVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
-                    InceptionSRGVaR = mean.inception/InceptionGVaR 
+                    InceptionSRGVaR = mean.inception/InceptionGVaR
                     colnames(InceptionGVaR)="GVaR.inception"
                     colnames(InceptionSRGVaR)="SR.GVaR.inception"
                     resultrow= cbind(resultrow,InceptionGVaR,InceptionSRGVaR)
                 },
                 PeriodmodVaR = {
                     PeriodmodVaR = mVaR.MM(w=w, mu=mu.period, sigma = sigma.period, M3=M3.period , M4 =M4.period , p=p )
-                    PeriodSRmodVaR = mean.period/PeriodmodVaR 
+                    PeriodSRmodVaR = mean.period/PeriodmodVaR
                     colnames(PeriodmodVaR)="modVaR.period"
                     colnames(PeriodSRmodVaR)="SR.modVaR.period"
                     resultrow= cbind(resultrow,PeriodmodVaR,PeriodSRmodVaR)
@@ -265,7 +265,7 @@ function (R, weightgrid, from, to,
                 },
                 PeriodGES = {
                     PeriodGES = GES.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
-                    PeriodSRGES =  mean.period/PeriodGES 
+                    PeriodSRGES =  mean.period/PeriodGES
                     colnames(PeriodGES)="GES.period"
                     colnames(PeriodSRGES)="SR.GES.period"
                     resultrow= cbind(resultrow,PeriodGES,PeriodSRGES)
@@ -279,7 +279,7 @@ function (R, weightgrid, from, to,
                 },
                 PeriodmodES = {
                     PeriodmodES = mES.MM(w=w, mu=mu.period, sigma = sigma.period, M3=M3.period , M4 =M4.period , p=p )
-                    PeriodSRmodES =  mean.period/PeriodmodES 
+                    PeriodSRmodES =  mean.period/PeriodmodES
                     colnames(PeriodmodES)="modES.period"
                     colnames(PeriodSRmodES)="SR.modES.period"
                     resultrow= cbind(resultrow,PeriodmodES,PeriodSRmodES)
@@ -817,6 +817,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.37  2008/01/20 17:08:24  kris
+# Compute SR more efficiently
+#
 # Revision 1.36  2008/01/20 16:30:50  brian
 # - move multivariate moment calculations outside the row loop
 #
