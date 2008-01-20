@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.27 2008-01-20 12:07:24 kris Exp $
+# $Id: optimizer.R,v 1.28 2008-01-20 13:35:34 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -208,19 +208,19 @@ function (R, weightgrid, from, to,
        if (threeyrfrom < 1 ) threeyrfrom = 1
 
        R.inception = R[1:to , ];
-       mu.inception = apply(R.inception,2,'mean'); 
+       mu.inception = apply(R.inception,2,'mean');
        sigma.inception = cov(R.inception);
        M3.inception = M3.MM(R.inception);
        M4.inception = M4.MM(R.inception);
 
        R.period = R[from:to, ];
-       mu.period =  apply(R.period,2,'mean'); 
+       mu.period =  apply(R.period,2,'mean');
        sigma.period = cov(R.period);
        M3.period = M3.MM(R.period);
        M4.period = M4.MM(R.period);
 
-       R.3yr = R[ threeyrfrom:to, ]; 
-       mu.3yr = apply(R.3yr,2,'mean'); 
+       R.3yr = R[ threeyrfrom:to, ];
+       mu.3yr = apply(R.3yr,2,'mean');
        sigma.3yr = cov(R.3yr);
        M3.3yr = M3.MM(R.3yr);
        M4.3yr = M4.MM(R.3yr);
@@ -333,7 +333,8 @@ function (R, weightgrid, from, to,
                     colnames(InceptionmodES)="modES.inception"
                     colnames(InceptionSRmodES)="SR.modES.inception"
                     resultrow= cbind(resultrow,InceptionmodES,InceptionSRmodES)
-            )#end switch function 
+                }
+            )#end switch function
         }# end loop over methods
 
         # first cbind the columns
@@ -852,6 +853,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.27  2008/01/20 12:07:24  kris
+# - Changed function definitions in optim_functions.R and updated the function calls in optimizer.R to these functions
+#
 # Revision 1.26  2008/01/20 06:23:12  brian
 # - convert GVaR functions
 #
