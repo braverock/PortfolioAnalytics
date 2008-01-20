@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.31 2008-01-20 13:55:44 brian Exp $
+# $Id: optimizer.R,v 1.32 2008-01-20 14:53:05 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -143,12 +143,8 @@ function (R, weightgrid, from, to,
     # data type conditionals
     # cut the return series for from:to
     if (class(R) == "timeSeries") {
-        fullR = R@Data[1:to,]
-        R = R@Data[from:to,]
-    } else {
-        fullR = R[1:to,]
-        R = R[from:to,]
-    }
+        R = R@Data
+    } 
     # should probably change this part to use zoo's rollapply to create the various groupings
 
     # if ( p >= 0.51 ) {
@@ -175,36 +171,15 @@ function (R, weightgrid, from, to,
                 rownames=data.frame()
         }
 
-
-
-        # In the optimizer code, we do not need the calculate the portfolio returns, I would remove it:
-
-        # pfolioReturn
-        # returns=pfolioReturn(R,w)
-        # pfolioReturn, since inception
-        #historicalreturns=pfolioReturn(fullR,w)
-        #cumReturn=Return.cumulative(returns)
-        # 3yr  Mean Return
-        # look back three years and calculate annualized mean return
-        # use Return.annualized fn instead of Return.cumulative
-        ThreeYrMeanReturn = mean(threeyrreturns)
-        # I've decided to always show cumReturns(period)
-        #resultrow=cbind(resultrow,cumReturn)
-        #colnames(resultrow)="return.cumulative"
-
-
-
-
-
        # problem of NAs? Not solved yet !!!!
-       # if (any(is.na(returns))) {
-       #     print( paste("NA\'s in returns: ",row, " ",w," from ", from) )
-       #     #browser()
-       # }
+       if (any(is.na(R))) {
+            print( paste("NA\'s in returns: ",row, " ",w," from ", from) )
+            #browser()
+       }
 
        # Compute multivariate moments
 
-       threeyrfrom = from-36; #for monthly data
+       threeyrfrom = from-24; #for monthly data
        if (threeyrfrom < 1 ) threeyrfrom = 1
 
        R.inception = R[1:to , ];
@@ -853,6 +828,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.31  2008/01/20 13:55:44  brian
+# - fix syntax error in switch on InceptionStdDev (missing comma)
+#
 # Revision 1.30  2008/01/20 13:49:39  brian
 # - add Kris to copyright line
 #
