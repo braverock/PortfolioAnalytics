@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.25 2008-01-20 05:02:17 brian Exp $
+# $Id: optimizer.R,v 1.26 2008-01-20 06:23:12 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -261,21 +261,30 @@ function (R, weightgrid, from, to,
             switch(method,
                 PeriodGVaR = {
                     # VaR.traditional
-                    PeriodGVaR = VaR.traditional(returns, p=p, ...=...)
+                    # PeriodGVaR = VaR.traditional(returns, p=p, ...=...)
+                    PeriodGVaR = GVaRfun(w, sigma, meanR, p )
+                    SRGVaR = SR.GVaRfun(w sigma, meanR, p )
                     colnames(PeriodGVaR)="GVaR.period"
-                    resultrow= cbind(resultrow,GVaR)
+                    colnames(SRGVaR)="SR.GVaR.period"
+                    resultrow= cbind(resultrow,GVaR,SRGVaR)
                 },
                 ThreeYrGVaR = {
                     # VaR.traditional
-                    ThreeYrGVaR = VaR.traditional(threeyrreturns, p=p, ...=...)
-                    colnames(PeriodGVaR)="GVaR.3yr"
-                    resultrow= cbind(resultrow,ThreeYrGVaR)
+                    #ThreeYrGVaR = VaR.traditional(threeyrreturns, p=p, ...=...)
+                    ThreeYrVaR = GVaRfun(w, sigma.3yr, meanR.3yr, p )
+                    ThreeYrSRGVaR = SR.GVaRfun(w, sigma.3yr, meanR.3yr, p )
+                    colnames(ThreeYrGVaR)="GVaR.3yr"
+                    colnames(ThreeYrSRGVaR)="SR.GVaR.3yr"
+                    resultrow= cbind(resultrow,ThreeYrGVaR,ThreeYrSRGVaR)
                 },
                 InceptionGVaR = {
                     # VaR.traditional
-                    InceptionGVaR = VaR.traditional(historicalreturns, p=p, ...=...)
+                    # InceptionGVaR = VaR.traditional(historicalreturns, p=p, ...=...)
+                    InceptionVaR = GVaRfun(w, sigma.inception, meanR.inception, p )
+                    InceptionSRGVaR = SR.GVaRfun(w, sigma.inception, meanR.inception, p )
                     colnames(InceptionGVaR)="GVaR.inception"
-                    resultrow= cbind(resultrow,InceptionGVaR)
+                    colnames(InceptionSRGVaR)="SR.GVaR.inception"
+                    resultrow= cbind(resultrow,InceptionGVaR,InceptionSRGVaR)
                 },
                 PeriodmodVaR = {
                     # VaR.CornishFisher(95%) from pfolioReturn
@@ -336,25 +345,25 @@ function (R, weightgrid, from, to,
                     colnames(maxdd) = "maxdd"
                     resultrow= cbind(resultrow,maxdd)
                 },
-                PeriodSharpe = {
-                    # Sharpe Ratio in period
-                    PeriodSharpe=SharpeRatio(returns)
-                    colnames(PeriodSharpe) = "SD.period"
-                    resultrow= cbind(resultrow,PeriodSharpe)
-                },
-                InceptionSharpe = {
-                    # Sharpe Ratio since inception
-                    InceptionSharpe=SharpeRatio(historicalreturns)
-                    colnames(InceptionSharpe) = "SD.inception"
-                    resultrow= cbind(resultrow,InceptionSharpe)
-                },
-                ThreeYrSharpe = {
-                    # 3yr trailing Sharpe Ratio
-                    # look back three years and calculate annualized Sharpe ratio
-                    ThreeYrSharpe=SharpeRatio(threeyrreturns)
-                    colnames(ThreeYrSharpe) = "SR.3yr"
-                    resultrow= cbind(resultrow,ThreeYrSharpe)
-                },
+#                 PeriodSharpe = {
+#                     # Sharpe Ratio in period
+#                     PeriodSharpe=SharpeRatio(returns)
+#                     colnames(PeriodSharpe) = "SD.period"
+#                     resultrow= cbind(resultrow,PeriodSharpe)
+#                 },
+#                 InceptionSharpe = {
+#                     # Sharpe Ratio since inception
+#                     InceptionSharpe=SharpeRatio(historicalreturns)
+#                     colnames(InceptionSharpe) = "SD.inception"
+#                     resultrow= cbind(resultrow,InceptionSharpe)
+#                 },
+#                 ThreeYrSharpe = {
+#                     # 3yr trailing Sharpe Ratio
+#                     # look back three years and calculate annualized Sharpe ratio
+#                     ThreeYrSharpe=SharpeRatio(threeyrreturns)
+#                     colnames(ThreeYrSharpe) = "SR.3yr"
+#                     resultrow= cbind(resultrow,ThreeYrSharpe)
+#                 },
                 omega = {
                     # Omega
                     # Looks back three years
@@ -898,6 +907,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.25  2008/01/20 05:02:17  brian
+# - add in centered moments and standard variables for period, inception, and 3yr series
+#
 # Revision 1.24  2008/01/19 16:48:01  brian
 # - fix column name issues
 # - add period, inception, and 3yr for each method
