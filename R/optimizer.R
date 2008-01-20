@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.26 2008-01-20 06:23:12 brian Exp $
+# $Id: optimizer.R,v 1.27 2008-01-20 12:07:24 kris Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -81,10 +81,10 @@ function (weightgrid, test=1)
 WeightedReturns =
 function (R, weightgrid, from, to,
           methods=c( cumReturn, ThreeYrMeanReturn, PeriodGVaR, ThreeYrGVaR, InceptionGVaR
-                    PeriodmodVaR, ThreeYrmodVaR, InceptionmodVaR, PeriodES, ThreeYrES, InceptionES, PeriodmodES, ThreeYrmodES, InceptionmodES, maxdd,
+                    PeriodmodVaR, ThreeYrmodVaR, InceptionmodVaR, PeriodGES, ThreeYrGES, InceptionGES, PeriodmodES, ThreeYrmodES, InceptionmodES, maxdd,
                     PeriodSharpe, ThreeYrSharpe, InceptionSharpe, omega, PeriodStdDev, ThreeYrStdDev, InceptionStdDev )
           , p=0.95, ... )
-{ # @author Brian G. Peterson
+{ # @author Brian G. Peterson and Kris Boudt
 
     # Description:
     # This is the workhorse of the backtest architecture.
@@ -151,10 +151,10 @@ function (R, weightgrid, from, to,
     }
     # should probably change this part to use zoo's rollapply to create the various groupings
 
-    if ( p >= 0.51 ) {
-        # looks like p was a percent like .99
-        p = 1-p
-    }
+    # if ( p >= 0.51 ) {
+    #    # looks like p was a percent like .99
+    #    p = 1-p
+    # }
 
     if (ncol(weightgrid) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
@@ -176,221 +176,165 @@ function (R, weightgrid, from, to,
         }
 
 
+
+        # In the optimizer code, we do not need the calculate the portfolio returns, I would remove it:
+
         # pfolioReturn
         # returns=pfolioReturn(R,w)
         # pfolioReturn, since inception
         #historicalreturns=pfolioReturn(fullR,w)
-
-        # cumulative geometric Return for the period
-        if (any(is.na(returns))) {
-            print( paste("NA\'s in returns: ",row, " ",w," from ", from) )
-            #browser()
-        }
         #cumReturn=Return.cumulative(returns)
-        threeyrfrom = from-24
-        if (threeyrfrom < 1 ) threeyrfrom = 1
-        #threeyrreturns = pfolioReturn(fullR[threeyrfrom:to,],w)
-        if (any(is.na(threeyrreturns))) {
-            print( paste("NA\'s in threeyrreturns: ",row, " ",w," from ",from ) )
-            #browser()
-        }
-
         # 3yr  Mean Return
         # look back three years and calculate annualized mean return
         # use Return.annualized fn instead of Return.cumulative
         ThreeYrMeanReturn = mean(threeyrreturns)
-
         # I've decided to always show cumReturns(period)
         #resultrow=cbind(resultrow,cumReturn)
         #colnames(resultrow)="return.cumulative"
 
-       # copied from localsearch.R
-
-       cAssets = ncol(weightgrid);
-
-       in.sample.R = R[from:to,] ; in.sample.T = dim(in.sample.R)[1];
-       mu = apply( in.sample.R , 2 , 'mean' )
-       meanR = (t(w)%*%mu)
-       sigma = cov(in.sample.R)
-       StdDevR = sqrt( t(w)%*%sigma%*%w  )
-       M3 = matrix(rep(0,cAssets^3),nrow=cAssets,ncol=cAssets^2)
-       M4 = matrix(rep(0,cAssets^4),nrow=cAssets,ncol=cAssets^3)
-       for(t in c(1:in.sample.T))
-       {
-          centret = as.numeric(matrix(in.sample.R[t,]-mu,nrow=cAssets,ncol=1))
-          M3 = M3 + ( centret%*%t(centret) )%x%t(centret)
-          M4 = M4 + ( centret%*%t(centret) )%x%t(centret)%x%t(centret)
-       }
-       M3 = 1/in.sample.T*M3
-       M4 = 1/in.sample.T*M4
-
-       in.sample.R.3yr = R[threeyrfrom:to,] ; in.sample.T = dim(in.sample.R)[1];
-       mu.3yr = apply( in.sample.R , 2 , 'mean' )
-       meanR.3yr = (t(w)%*%mu)
-       sigma.3yr = cov(in.sample.R)
-       StdDevR.3yr = sqrt( t(w)%*%sigma%*%w  )
-       M3.3yr = matrix(rep(0,cAssets^3),nrow=cAssets,ncol=cAssets^2)
-       M4.3yr = matrix(rep(0,cAssets^4),nrow=cAssets,ncol=cAssets^3)
-       for(t in c(1:in.sample.T))
-       {
-          centret = as.numeric(matrix(in.sample.R[t,]-mu,nrow=cAssets,ncol=1))
-          M3.3yr = M3.3yr + ( centret%*%t(centret) )%x%t(centret)
-          M4.3yr = M4.3yr + ( centret%*%t(centret) )%x%t(centret)%x%t(centret)
-       }
-       M3.3yr = 1/in.sample.T*M3.3yr
-       M4.3yr = 1/in.sample.T*M4.3yr
 
 
-       in.sample.R.inception = R[1:to,] ; in.sample.T = dim(in.sample.R)[1];
-       mu.inception = apply( in.sample.R , 2 , 'mean' )
-       meanR.inception = (t(w)%*%mu)
-       sigma.inception = cov(in.sample.R)
-       StdDevR.inception = sqrt( t(w)%*%sigma%*%w  )
-       M3.inception = matrix(rep(0,cAssets^3),nrow=cAssets,ncol=cAssets^2)
-       M4.inception = matrix(rep(0,cAssets^4),nrow=cAssets,ncol=cAssets^3)
-       for(t in c(1:in.sample.T))
-       {
-          centret = as.numeric(matrix(in.sample.R[t,]-mu,nrow=cAssets,ncol=1))
-          M3.inception = M3.inception + ( centret%*%t(centret) )%x%t(centret)
-          M4.inception = M4.inception + ( centret%*%t(centret) )%x%t(centret)%x%t(centret)
-       }
-       M3.inception = 1/in.sample.T*M3.inception
-       M4.inception = 1/in.sample.T*M4.inception
+
+
+       # problem of NAs? Not solved yet !!!!
+       # if (any(is.na(returns))) {
+       #     print( paste("NA\'s in returns: ",row, " ",w," from ", from) )
+       #     #browser()
+       # }
+
+       # Compute multivariate moments
+
+       threeyrfrom = from-36; #for monthly data
+       if (threeyrfrom < 1 ) threeyrfrom = 1
+
+       R.inception = R[1:to , ];
+       mu.inception = apply(R.inception,2,'mean'); 
+       sigma.inception = cov(R.inception);
+       M3.inception = M3.MM(R.inception);
+       M4.inception = M4.MM(R.inception);
+
+       R.period = R[from:to, ];
+       mu.period =  apply(R.period,2,'mean'); 
+       sigma.period = cov(R.period);
+       M3.period = M3.MM(R.period);
+       M4.period = M4.MM(R.period);
+
+       R.3yr = R[ threeyrfrom:to, ]; 
+       mu.3yr = apply(R.3yr,2,'mean'); 
+       sigma.3yr = cov(R.3yr);
+       M3.3yr = M3.MM(R.3yr);
+       M4.3yr = M4.MM(R.3yr);
+
 
         for (method in methods) {
             switch(method,
+                PeriodStdDev = {
+                    # Standard Deviation
+                    PeriodStdDev = StdDev.MM(w,sigma=sigma.period)
+                    PeriodSRStdDev = SR.StdDev.MM(w,mu=mu.period,sigma=sigma.period)
+                    colnames(PeriodStdDev) = "SD.period"
+                    colnames(PeriodSRStdDev)="SR.StdDev.period"
+                    resultrow= cbind(resultrow,PeriodSRStdDev)
+                },
+                ThreeYrStdDev = {
+                    # Standard Deviation
+                    ThreeYrStdDev = StdDev.MM(w,sigma=sigma.3yr)
+                    ThreeYrSRStdDev = SR.StdDev.MM(w,mu=mu.3yr,sigma=sigma.3yr)
+                    colnames(ThreeYrStdDev) = "Sd.3yr"
+                    resultrow= cbind(resultrow,ThreeYrStdDev,ThreeYrSRStdDev)
+                } # end switch on methods
+                InceptionStdDev = {
+                    # Standard Deviation
+                    InceptionStdDev = StdDev.MM(w,sigma=sigma.inception)
+                    InceptionSRStdDev = SR.StdDev.MM(w,mu=mu.inception,sigma=sigma.inception)
+                    colnames(InceptionStdDev) = "SD.inception"
+                    resultrow= cbind(resultrow,InceptionStdDev, InceptionSRStdDev)
+                },
                 PeriodGVaR = {
-                    # VaR.traditional
-                    # PeriodGVaR = VaR.traditional(returns, p=p, ...=...)
-                    PeriodGVaR = GVaRfun(w, sigma, meanR, p )
-                    SRGVaR = SR.GVaRfun(w sigma, meanR, p )
+                    PeriodGVaR = GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    PeriodSRGVaR = SR.GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
                     colnames(PeriodGVaR)="GVaR.period"
-                    colnames(SRGVaR)="SR.GVaR.period"
-                    resultrow= cbind(resultrow,GVaR,SRGVaR)
+                    colnames(PeriodSRGVaR)="SR.GVaR.period"
+                    resultrow= cbind(resultrow,PeriodGVaR,PeriodSRGVaR)
                 },
                 ThreeYrGVaR = {
-                    # VaR.traditional
-                    #ThreeYrGVaR = VaR.traditional(threeyrreturns, p=p, ...=...)
-                    ThreeYrVaR = GVaRfun(w, sigma.3yr, meanR.3yr, p )
-                    ThreeYrSRGVaR = SR.GVaRfun(w, sigma.3yr, meanR.3yr, p )
+                    ThreeYrVaR = GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    ThreeYrSRGVaR =  SR.GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
                     colnames(ThreeYrGVaR)="GVaR.3yr"
                     colnames(ThreeYrSRGVaR)="SR.GVaR.3yr"
                     resultrow= cbind(resultrow,ThreeYrGVaR,ThreeYrSRGVaR)
                 },
                 InceptionGVaR = {
-                    # VaR.traditional
-                    # InceptionGVaR = VaR.traditional(historicalreturns, p=p, ...=...)
-                    InceptionVaR = GVaRfun(w, sigma.inception, meanR.inception, p )
-                    InceptionSRGVaR = SR.GVaRfun(w, sigma.inception, meanR.inception, p )
+                    InceptionGVaR = GVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
+                    InceptionSRGVaR =  SR.GVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
                     colnames(InceptionGVaR)="GVaR.inception"
                     colnames(InceptionSRGVaR)="SR.GVaR.inception"
                     resultrow= cbind(resultrow,InceptionGVaR,InceptionSRGVaR)
                 },
                 PeriodmodVaR = {
-                    # VaR.CornishFisher(95%) from pfolioReturn
-                    PeriodmodVaR = VaR.CornishFisher(returns, p=p, ...=...)
-                    colnames(PeriodmodVaR)="mVaR.period"
-                    resultrow= cbind(resultrow,PeriodmodVaR)
+                    PeriodmodVaR = mVaR.MM(w=w, mu=mu.period, sigma = sigma.period, M3=M3.period , M4 =M4.period , p=p )
+                    PeriodSRmodVaR = SR.mVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    colnames(PeriodmodVaR)="modVaR.period"
+                    colnames(PeriodSRmodVaR)="SR.modVaR.period"
+                    resultrow= cbind(resultrow,PeriodmodVaR,PeriodSRmodVaR)
                 },
                 InceptionmodVaR = {
-                    # VaR.CornishFisher(95%) from pfolioReturn since inception
-                    InceptionmodVaR = VaR.CornishFisher(historicalreturns, p=p, ...=...)
-                    colnames(InceptionmodVaR) = "mVaR.inception"
-                    resultrow= cbind(resultrow,InceptionmodVaR)
+                    InceptionmodVaR = mVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, M3=M3.inception , M4 =M4.inception , p=p )
+                    InceptionSRmodVaR = SR.mVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
+                    colnames(InceptionmodVaR)="modVaR.inception"
+                    colnames(InceptionSRmodVaR)="SR.modVaR.inception"
+                    resultrow= cbind(resultrow,InceptionmodVaR,InceptionSRmodVaR)
                 },
                 ThreeYrmodVaR = {
-                    # VaR.CornishFisher(95%) from pfolioReturn since inception
-                    ThreeYrmodVaR = VaR.CornishFisher(threeyrreturns, p=p, ...=...)
-                    colnames(ThreeYrmodVaR) = "mVaR.3yr"
-                    resultrow= cbind(resultrow,ThreeYrmodVaR)
+                    ThreeYrmodVaR = mVaR.MM(w=w, mu=mu.period, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr, p=p )
+                    ThreeYrSRmodVaR = SR.mVaR.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, p=p )
+                    colnames(ThreeYrmodVaR)="modVaR.3yr"
+                    colnames(ThreeYrSRmodVaR)="SR.modVaR.3yr"
+                    resultrow= cbind(resultrow,ThreeYrmodVaR,ThreeYrSRmodVaR)
                 },
-                InceptionES = {
-                    # Expected Shortfall
-                    # replace with GES function from Boudt, et al 2007
-                    InceptionES = CVaRplus(historicalreturns, weights = NULL, alpha =1-p, ...=...)[1]
-                    colnames(InceptionES) = "ES.inception"
-                    resultrow= cbind(resultrow,InceptionES)
+                InceptionGES = {
+                    InceptionGES = GES.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
+                    InceptionSRGES = SR.GES.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
+                    colnames(InceptionGES)="GES.inception"
+                    colnames(InceptionSRGES)="SR.GES.inception"
+                    resultrow= cbind(resultrow,InceptionGES,InceptionSRGES)
                 },
-                ThreeYrES = {
-                    # Expected Shortfall
-                    # replace with GES function from Boudt, et al 2007
-                    ThreeYrES = CVaRplus(threeyrreturns, weights = NULL, alpha =1-p, ...=...)[1]
-                    colnames(ThreeYrES) = "ES.3yr"
-                    resultrow= cbind(resultrow,ThreeYrES)
+                PeriodGES = {
+                    PeriodGES = GES.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    PeriodSRGES = SR.GES.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    colnames(PeriodGES)="GES.period"
+                    colnames(PeriodSRGES)="SR.GES.period"
+                    resultrow= cbind(resultrow,PeriodGES,PeriodSRGES)
+                },
+                ThreeYrGES = {
+                    ThreeYrGES = GES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, p=p )
+                    ThreeYrSRGES = SR.GES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, p=p )
+                    colnames(ThreeYrGES)="GES.3yr"
+                    colnames(ThreeYrSRGES)="SR.GES.3yr"
+                    resultrow= cbind(resultrow,ThreeYrGES,ThreeYrSRGES)
                 },
                 PeriodmodES = {
-                    # Modified Expected Shortfall
-                    # use modES function from Boudt, et al 2007
-                    PeriodmodES = ES.modified(returns, alpha = 1-p, ...=...)
-                    colnames(PeriodmodES) = "mES.period"
-                    resultrow= cbind(resultrow,periodmodES)
+                    PeriodmodES = mES.MM(w=w, mu=mu.period, sigma = sigma.period, M3=M3.period , M4 =M4.period , p=p )
+                    PeriodSRmodES = SR.mES.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    colnames(PeriodmodES)="modES.period"
+                    colnames(PeriodSRmodES)="SR.modES.period"
+                    resultrow= cbind(resultrow,PeriodmodES,PeriodSRmodES)
                 },
                 ThreeYrmodES = {
-                    # Modified Expected Shortfall
-                    # use modES function from Boudt, et al 2007
-                    ThreeYrmodES = ES.modified(threeyrreturns, alpha = 1-p, ...=...)
-                    colnames() = "mES.3yr"
-                    resultrow= cbind(resultrow,)
+                    ThreeYrmodES = mES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr , p=p )
+                    ThreeYrSRmodES = SR.mES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, p=p )
+                    colnames(ThreeYrmodES)="modES.3yr"
+                    colnames(ThreeYrSRmodES)="SR.modES.3yr"
+                    resultrow= cbind(resultrow,ThreeYrmodES,ThreeYrSRmodES)
                 },
                 InceptionmodES = {
-                    # Modified Expected Shortfall
-                    # use modES function from Boudt, et al 2007
-                    InceptionYrmodES = ES.modified(historicalreturns, alpha = 1-p, ...=...)
-                    colnames(InceptionmodES) = "mES.inception"
-                    resultrow= cbind(resultrow,)
-                },
-                maxdd = {
-                    # maxDrawdown
-                    maxdd= maxDrawdown(returns)
-                    colnames(maxdd) = "maxdd"
-                    resultrow= cbind(resultrow,maxdd)
-                },
-#                 PeriodSharpe = {
-#                     # Sharpe Ratio in period
-#                     PeriodSharpe=SharpeRatio(returns)
-#                     colnames(PeriodSharpe) = "SD.period"
-#                     resultrow= cbind(resultrow,PeriodSharpe)
-#                 },
-#                 InceptionSharpe = {
-#                     # Sharpe Ratio since inception
-#                     InceptionSharpe=SharpeRatio(historicalreturns)
-#                     colnames(InceptionSharpe) = "SD.inception"
-#                     resultrow= cbind(resultrow,InceptionSharpe)
-#                 },
-#                 ThreeYrSharpe = {
-#                     # 3yr trailing Sharpe Ratio
-#                     # look back three years and calculate annualized Sharpe ratio
-#                     ThreeYrSharpe=SharpeRatio(threeyrreturns)
-#                     colnames(ThreeYrSharpe) = "SR.3yr"
-#                     resultrow= cbind(resultrow,ThreeYrSharpe)
-#                 },
-                omega = {
-                    # Omega
-                    # Looks back three years
-                    omega = Omega (as.vector(threeyrreturns),method="simple" )
-                    colnames(Omega) = "Omega"
-                    resultrow= cbind(resultrow,Omega)
-                },
-                PeriodStdDev = {
-                    # Standard Deviation
-                    PeriodStdDev = sd(returns, na.rm = TRUE)
-                    colnames(PeriodStdDev) = "SD.period"
-                    resultrow= cbind(resultrow,PeriodStdDev)
-                },
-                ThreeYrStdDev = {
-                    # Standard Deviation
-                    ThreeYrStdDev = sd(threeyrreturns, na.rm = TRUE)
-                    colnames(ThreeYrStdDev) = "Sd.3yr"
-                    resultrow= cbind(resultrow,ThreeYrStdDev)
-                } # end switch on methods
-                InceptionStdDev = {
-                    # Standard Deviation
-                    InceptionStdDev = sd(historicalreturns, na.rm = TRUE)
-                    colnames(InceptionStdDev) = "SD.inception"
-                    resultrow= cbind(resultrow,InceptionStdDev)
-                },
-            )
-        }
+                    InceptionmodES = mES.MM(w=w, mu=mu.inception, sigma = sigma.inception, M3=M3.inception , M4 =M4.inception, p=p )
+                    InceptionSRmodES = SR.mES.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
+                    colnames(InceptionmodES)="modES.inception"
+                    colnames(InceptionSRmodES)="SR.modES.inception"
+                    resultrow= cbind(resultrow,InceptionmodES,InceptionSRmodES)
+            )#end switch function 
+        }# end loop over methods
 
         # first cbind the columns
         #resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, ThreeYrmodVaR, maxdd,
@@ -411,6 +355,7 @@ function (R, weightgrid, from, to,
     result
 
 }
+
 
 # ------------------------------------------------------------------------------
 # @todo: use zoo rollapply in BruteForcePortfolios() fn
@@ -907,6 +852,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.26  2008/01/20 06:23:12  brian
+# - convert GVaR functions
+#
 # Revision 1.25  2008/01/20 05:02:17  brian
 # - add in centered moments and standard variables for period, inception, and 3yr series
 #
