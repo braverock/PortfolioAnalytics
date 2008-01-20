@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.38 2008-01-20 17:22:15 brian Exp $
+# $Id: optimizer.R,v 1.39 2008-01-20 19:55:33 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -126,6 +126,8 @@ function (R, weightgrid, from, to,
     # @todo don't recalculate if Period and ThreeYr or Inception and ThreeYr are the same
 
     # Setup:
+    # there's a risk here is sampling from weightgrid that
+    # your row names and numbers won;t match, need to be careful
     rows=nrow(weightgrid)
 
     if (from < 1) from = 1
@@ -140,7 +142,7 @@ function (R, weightgrid, from, to,
 
     if (ncol(weightgrid) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
-    result=data.frame()
+    result=data.frame(row.names=rownames(weightgrid))
 
     # Compute multivariate moments
 
@@ -167,6 +169,8 @@ function (R, weightgrid, from, to,
 
     # Function:
     for(row in 1:rows) {
+        # this would be for(n in c(2,5,10,20,50)) for a sampled weighting vector
+
         # at some point consider parallelizing this by using a clustered apply
         # to call a sub-function so that this could get distributed
         # to multiple processor cores or threads
@@ -176,6 +180,7 @@ function (R, weightgrid, from, to,
 
         # construct a data structure that holds each result for this row
         resultrow=data.frame(row.names = row)
+        rownames(resultrow)=rownames(weightgrid[row,])
 
        # problem of NAs? Not solved yet !!!!
        # should really solve this by calling checkData in ButeForcePortfolios
@@ -301,14 +306,10 @@ function (R, weightgrid, from, to,
             )#end switch function
         }# end loop over methods
 
-        # first cbind the columns
-        #resultrow = cbind( cumReturn, ThreeYrMeanReturn, PeriodmodVaR, ThreeYrmodVaR, maxdd,
-        #PeriodSharpe, ThreeYrSharpe, omega, StdDev, ThreeYrStdDev )
-
-        rownames(resultrow) = row
 
         # then rbind the rows
-        result    = rbind(result,resultrow)
+        # result    = rbind(result,resultrow)
+        result[rownames(resultrow),]=resultrow
 
     } #end rows loop
 
@@ -817,6 +818,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.38  2008/01/20 17:22:15  brian
+# - fix row.names in initialization of resultrow data.frame
+#
 # Revision 1.37  2008/01/20 17:08:24  kris
 # Compute SR more efficiently
 #
