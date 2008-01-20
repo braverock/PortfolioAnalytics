@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.33 2008-01-20 14:54:55 brian Exp $
+# $Id: optimizer.R,v 1.34 2008-01-20 16:14:53 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -154,6 +154,8 @@ function (R, weightgrid, from, to,
 
     if (ncol(weightgrid) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
+    result=data.frame()
+
     # Function:
     for(row in 1:rows) {
         # at some point consider parallelizing this by using a clustered apply
@@ -164,18 +166,14 @@ function (R, weightgrid, from, to,
         # test each row in the weighting vectors against the right dates in the return collection
 
         # construct a data structure that holds each result for this row
-        if (row==1) {
-                #create data.frame
-                result=data.frame()
-                resultrow=data.frame()
-                rownames=data.frame()
-        }
+        resultrow=data.frame(rownames = row)
 
        # problem of NAs? Not solved yet !!!!
-       if (any(is.na(R))) {
-            print( paste("NA\'s in returns: ",row, " ",w," from ", from) )
-            #browser()
-       }
+       # should really solve this by calling checkData in ButeForcePortfolios
+       #if (any(is.na(R))) {
+       #     print( paste("NA\'s in returns: ",row, " ",w," from ", from) )
+       #     #browser()
+       #}
 
        # Compute multivariate moments
 
@@ -209,7 +207,7 @@ function (R, weightgrid, from, to,
                     PeriodSRStdDev = SR.StdDev.MM(w,mu=mu.period,sigma=sigma.period)
                     colnames(PeriodStdDev) = "SD.period"
                     colnames(PeriodSRStdDev)="SR.StdDev.period"
-                    resultrow= cbind(resultrow,PeriodSRStdDev)
+                    resultrow= cbind(resultrow,PeriodStdDev,PeriodSRStdDev)
                 },
                 ThreeYrStdDev = {
                     # Standard Deviation
@@ -828,6 +826,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.33  2008/01/20 14:54:55  brian
+# - quote methods
+#
 # Revision 1.32  2008/01/20 14:53:05  brian
 # - fix syntax errors and handling of inception, threeyr, form, to
 #
