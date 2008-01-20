@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.36 2008-01-20 16:30:50 brian Exp $
+# $Id: optimizer.R,v 1.37 2008-01-20 17:08:24 kris Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -125,17 +125,8 @@ function (R, weightgrid, from, to,
     #
     # @todo don't recalculate if Period and ThreeYr or Inception and ThreeYr are the same
 
-# NOTE: Kris:
-    # Ideally, the .csv files coming from the brute force would have
-    # variance, SR.variance , GVaR, SR.GVaR, modVaR, SR.modVaR,
-    # GES, SR.GES, modES, SR.modES
-    # (that is the different optimization criteria) in columns
-
-
     # Setup:
     rows=nrow(weightgrid)
-
-    result=NA
 
     if (from < 1) from = 1
     if (to > rows) to = rows
@@ -147,18 +138,13 @@ function (R, weightgrid, from, to,
     }
     # should probably change this part to use zoo's rollapply to create the various groupings
 
-    # if ( p >= 0.51 ) {
-    #    # looks like p was a percent like .99
-    #    p = 1-p
-    # }
-
     if (ncol(weightgrid) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
     result=data.frame()
 
     # Compute multivariate moments
 
-    threeyrfrom = from-24; #for monthly data
+    threeyrfrom = to - 36; #for monthly data
     if (threeyrfrom < 1 ) threeyrfrom = 1
 
     R.inception = R[1:to , ];
@@ -198,110 +184,116 @@ function (R, weightgrid, from, to,
        #     #browser()
        #}
 
+        mean.inception = mean.MM( w , mu.inception );
+        mean.period = mean.MM( w , mu.period) ;
+        mean.3yr = mean.MM( w , mu.3yr ) ; 
+
         for (method in methods) {
             switch(method,
                 PeriodStdDev = {
                     # Standard Deviation
                     PeriodStdDev = StdDev.MM(w,sigma=sigma.period)
-                    PeriodSRStdDev = SR.StdDev.MM(w,mu=mu.period,sigma=sigma.period)
-                    colnames(PeriodStdDev) = "SD.period"
+                    PeriodSRStdDev = mean.period/ PeriodStdDev
+                    colnames(PeriodStdDev) = "StdDev.period"
                     colnames(PeriodSRStdDev)="SR.StdDev.period"
                     resultrow= cbind(resultrow,PeriodStdDev,PeriodSRStdDev)
                 },
                 ThreeYrStdDev = {
                     # Standard Deviation
                     ThreeYrStdDev = StdDev.MM(w,sigma=sigma.3yr)
-                    ThreeYrSRStdDev = SR.StdDev.MM(w,mu=mu.3yr,sigma=sigma.3yr)
-                    colnames(ThreeYrStdDev) = "Sd.3yr"
+                    ThreeYrSRStdDev = mean.3yr/ThreeYrStdDev;
+                    colnames(PeriodStdDev) = "StdDev.3yr"
+                    colnames(ThreeYrStdDev) = "SR.StdDev.3yr"
                     resultrow= cbind(resultrow,ThreeYrStdDev,ThreeYrSRStdDev)
                 },
                 InceptionStdDev = {
                     # Standard Deviation
                     InceptionStdDev = StdDev.MM(w,sigma=sigma.inception)
-                    InceptionSRStdDev = SR.StdDev.MM(w,mu=mu.inception,sigma=sigma.inception)
-                    colnames(InceptionStdDev) = "SD.inception"
+                    InceptionSRStdDev = mean.inception/InceptionStdDev
+                    colnames(InceptionStdDev) = "StdDev.inception"
+                    colnames(InceptionSRStdDev) = "SR.StdDev.inception"
                     resultrow= cbind(resultrow,InceptionStdDev, InceptionSRStdDev)
                 },
                 PeriodGVaR = {
                     PeriodGVaR = GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
-                    PeriodSRGVaR = SR.GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    PeriodSRGVaR = mean.period/PeriodGVaR 
                     colnames(PeriodGVaR)="GVaR.period"
                     colnames(PeriodSRGVaR)="SR.GVaR.period"
                     resultrow= cbind(resultrow,PeriodGVaR,PeriodSRGVaR)
                 },
                 ThreeYrGVaR = {
                     ThreeYrVaR = GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
-                    ThreeYrSRGVaR =  SR.GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    ThreeYrSRGVaR =  mean.3yr/ThreeYrGVaR
                     colnames(ThreeYrGVaR)="GVaR.3yr"
                     colnames(ThreeYrSRGVaR)="SR.GVaR.3yr"
                     resultrow= cbind(resultrow,ThreeYrGVaR,ThreeYrSRGVaR)
                 },
                 InceptionGVaR = {
                     InceptionGVaR = GVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
-                    InceptionSRGVaR =  SR.GVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
+                    InceptionSRGVaR = mean.inception/InceptionGVaR 
                     colnames(InceptionGVaR)="GVaR.inception"
                     colnames(InceptionSRGVaR)="SR.GVaR.inception"
                     resultrow= cbind(resultrow,InceptionGVaR,InceptionSRGVaR)
                 },
                 PeriodmodVaR = {
                     PeriodmodVaR = mVaR.MM(w=w, mu=mu.period, sigma = sigma.period, M3=M3.period , M4 =M4.period , p=p )
-                    PeriodSRmodVaR = SR.mVaR.MM(w=w, mu=mu.period, sigma = sigma.period, M3=M3.period , M4 =M4.period , p=p )
+                    PeriodSRmodVaR = mean.period/PeriodmodVaR 
                     colnames(PeriodmodVaR)="modVaR.period"
                     colnames(PeriodSRmodVaR)="SR.modVaR.period"
                     resultrow= cbind(resultrow,PeriodmodVaR,PeriodSRmodVaR)
                 },
                 InceptionmodVaR = {
                     InceptionmodVaR = mVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, M3=M3.inception , M4 =M4.inception , p=p )
-                    InceptionSRmodVaR = SR.mVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, M3=M3.inception , M4 =M4.inception ,  p=p )
+                    InceptionSRmodVaR = mean.inception/InceptionmodVaR
                     colnames(InceptionmodVaR)="modVaR.inception"
                     colnames(InceptionSRmodVaR)="SR.modVaR.inception"
                     resultrow= cbind(resultrow,InceptionmodVaR,InceptionSRmodVaR)
                 },
                 ThreeYrmodVaR = {
                     ThreeYrmodVaR = mVaR.MM(w=w, mu=mu.period, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr, p=p )
-                    ThreeYrSRmodVaR = SR.mVaR.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr, p=p )
+                    ThreeYrSRmodVaR = mean.3yr/ThreeYrmodVaR
                     colnames(ThreeYrmodVaR)="modVaR.3yr"
                     colnames(ThreeYrSRmodVaR)="SR.modVaR.3yr"
                     resultrow= cbind(resultrow,ThreeYrmodVaR,ThreeYrSRmodVaR)
                 },
                 InceptionGES = {
                     InceptionGES = GES.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
-                    InceptionSRGES = SR.GES.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
+                    InceptionSRGES = mean.inception/InceptionGES
                     colnames(InceptionGES)="GES.inception"
                     colnames(InceptionSRGES)="SR.GES.inception"
                     resultrow= cbind(resultrow,InceptionGES,InceptionSRGES)
                 },
                 PeriodGES = {
                     PeriodGES = GES.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
-                    PeriodSRGES = SR.GES.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    PeriodSRGES =  mean.period/PeriodGES 
                     colnames(PeriodGES)="GES.period"
                     colnames(PeriodSRGES)="SR.GES.period"
                     resultrow= cbind(resultrow,PeriodGES,PeriodSRGES)
                 },
                 ThreeYrGES = {
                     ThreeYrGES = GES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, p=p )
-                    ThreeYrSRGES = SR.GES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, p=p )
+                    ThreeYrSRGES = mean.3yr/ThreeYrGES
                     colnames(ThreeYrGES)="GES.3yr"
                     colnames(ThreeYrSRGES)="SR.GES.3yr"
                     resultrow= cbind(resultrow,ThreeYrGES,ThreeYrSRGES)
                 },
                 PeriodmodES = {
                     PeriodmodES = mES.MM(w=w, mu=mu.period, sigma = sigma.period, M3=M3.period , M4 =M4.period , p=p )
-                    PeriodSRmodES = SR.mES.MM(w=w, mu=mu.period, sigma = sigma.period,  M3=M3.period , M4 =M4.period , p=p )
+                    PeriodSRmodES =  mean.period/PeriodmodES 
                     colnames(PeriodmodES)="modES.period"
                     colnames(PeriodSRmodES)="SR.modES.period"
                     resultrow= cbind(resultrow,PeriodmodES,PeriodSRmodES)
                 },
                 ThreeYrmodES = {
                     ThreeYrmodES = mES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr , p=p )
-                    ThreeYrSRmodES = SR.mES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr , p=p )
+                    ThreeYrSRmodES = mean.3yr/ThreeYrmodES
                     colnames(ThreeYrmodES)="modES.3yr"
                     colnames(ThreeYrSRmodES)="SR.modES.3yr"
                     resultrow= cbind(resultrow,ThreeYrmodES,ThreeYrSRmodES)
                 },
                 InceptionmodES = {
                     InceptionmodES = mES.MM(w=w, mu=mu.inception, sigma = sigma.inception, M3=M3.inception , M4 =M4.inception, p=p )
-                    InceptionSRmodES = SR.mES.MM(w=w, mu=mu.inception, sigma = sigma.inception, M3=M3.inception , M4 =M4.inception, p=p )
+                    InceptionSRmodES = mean.inception/InceptionmodES
                     colnames(InceptionmodES)="modES.inception"
                     colnames(InceptionSRmodES)="SR.modES.inception"
                     resultrow= cbind(resultrow,InceptionmodES,InceptionSRmodES)
@@ -825,6 +817,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.36  2008/01/20 16:30:50  brian
+# - move multivariate moment calculations outside the row loop
+#
 # Revision 1.35  2008/01/20 16:26:21  brian
 # - add M3 and M4 moments to parameters for all modSR function calls
 #
