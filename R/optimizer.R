@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.40 2008-01-20 21:05:45 brian Exp $
+# $Id: optimizer.R,v 1.41 2008-01-20 21:13:59 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -311,6 +311,7 @@ function (R, weightgrid, from, to,
                result=matrix(nrow=nrow(weightgrid),ncol=ncol(resultrow))
                result=as.data.frame(result)
                rownames(result)=rownames(weightgrid)
+               colnames(result)=colnames(resultrow)
         }
         # then rbind the rows
         # result    = rbind(result,resultrow)
@@ -823,6 +824,10 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.40  2008/01/20 21:05:45  brian
+# - change to create structure with correct number of rows and columns on first pass
+# - avoids warnings  about replacing 0-element row with x-element row
+#
 # Revision 1.39  2008/01/20 19:55:33  brian
 # - create empty result var dataframe with right names for resultrows
 # - assign resultrow by index to avoid memcopy problem
