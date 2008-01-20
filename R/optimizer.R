@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.30 2008-01-20 13:49:39 brian Exp $
+# $Id: optimizer.R,v 1.31 2008-01-20 13:55:44 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -242,7 +242,7 @@ function (R, weightgrid, from, to,
                     ThreeYrSRStdDev = SR.StdDev.MM(w,mu=mu.3yr,sigma=sigma.3yr)
                     colnames(ThreeYrStdDev) = "Sd.3yr"
                     resultrow= cbind(resultrow,ThreeYrStdDev,ThreeYrSRStdDev)
-                } # end switch on methods
+                },
                 InceptionStdDev = {
                     # Standard Deviation
                     InceptionStdDev = StdDev.MM(w,sigma=sigma.inception)
@@ -853,6 +853,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.30  2008/01/20 13:49:39  brian
+# - add Kris to copyright line
+#
 # Revision 1.29  2008/01/20 13:48:37  brian
 # - fix syntax error
 # - update methods to reflect changes to multivariate moments
