@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.34 2008-01-20 16:14:53 brian Exp $
+# $Id: optimizer.R,v 1.35 2008-01-20 16:26:21 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -246,21 +246,21 @@ function (R, weightgrid, from, to,
                 },
                 PeriodmodVaR = {
                     PeriodmodVaR = mVaR.MM(w=w, mu=mu.period, sigma = sigma.period, M3=M3.period , M4 =M4.period , p=p )
-                    PeriodSRmodVaR = SR.mVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    PeriodSRmodVaR = SR.mVaR.MM(w=w, mu=mu.period, sigma = sigma.period, M3=M3.period , M4 =M4.period , p=p )
                     colnames(PeriodmodVaR)="modVaR.period"
                     colnames(PeriodSRmodVaR)="SR.modVaR.period"
                     resultrow= cbind(resultrow,PeriodmodVaR,PeriodSRmodVaR)
                 },
                 InceptionmodVaR = {
                     InceptionmodVaR = mVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, M3=M3.inception , M4 =M4.inception , p=p )
-                    InceptionSRmodVaR = SR.mVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
+                    InceptionSRmodVaR = SR.mVaR.MM(w=w, mu=mu.inception, sigma = sigma.inception, M3=M3.inception , M4 =M4.inception ,  p=p )
                     colnames(InceptionmodVaR)="modVaR.inception"
                     colnames(InceptionSRmodVaR)="SR.modVaR.inception"
                     resultrow= cbind(resultrow,InceptionmodVaR,InceptionSRmodVaR)
                 },
                 ThreeYrmodVaR = {
                     ThreeYrmodVaR = mVaR.MM(w=w, mu=mu.period, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr, p=p )
-                    ThreeYrSRmodVaR = SR.mVaR.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, p=p )
+                    ThreeYrSRmodVaR = SR.mVaR.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr, p=p )
                     colnames(ThreeYrmodVaR)="modVaR.3yr"
                     colnames(ThreeYrSRmodVaR)="SR.modVaR.3yr"
                     resultrow= cbind(resultrow,ThreeYrmodVaR,ThreeYrSRmodVaR)
@@ -288,21 +288,21 @@ function (R, weightgrid, from, to,
                 },
                 PeriodmodES = {
                     PeriodmodES = mES.MM(w=w, mu=mu.period, sigma = sigma.period, M3=M3.period , M4 =M4.period , p=p )
-                    PeriodSRmodES = SR.mES.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    PeriodSRmodES = SR.mES.MM(w=w, mu=mu.period, sigma = sigma.period,  M3=M3.period , M4 =M4.period , p=p )
                     colnames(PeriodmodES)="modES.period"
                     colnames(PeriodSRmodES)="SR.modES.period"
                     resultrow= cbind(resultrow,PeriodmodES,PeriodSRmodES)
                 },
                 ThreeYrmodES = {
                     ThreeYrmodES = mES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr , p=p )
-                    ThreeYrSRmodES = SR.mES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, p=p )
+                    ThreeYrSRmodES = SR.mES.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr , p=p )
                     colnames(ThreeYrmodES)="modES.3yr"
                     colnames(ThreeYrSRmodES)="SR.modES.3yr"
                     resultrow= cbind(resultrow,ThreeYrmodES,ThreeYrSRmodES)
                 },
                 InceptionmodES = {
                     InceptionmodES = mES.MM(w=w, mu=mu.inception, sigma = sigma.inception, M3=M3.inception , M4 =M4.inception, p=p )
-                    InceptionSRmodES = SR.mES.MM(w=w, mu=mu.inception, sigma = sigma.inception, p=p )
+                    InceptionSRmodES = SR.mES.MM(w=w, mu=mu.inception, sigma = sigma.inception, M3=M3.inception , M4 =M4.inception, p=p )
                     colnames(InceptionmodES)="modES.inception"
                     colnames(InceptionSRmodES)="SR.modES.inception"
                     resultrow= cbind(resultrow,InceptionmodES,InceptionSRmodES)
@@ -826,6 +826,10 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.34  2008/01/20 16:14:53  brian
+# - initialize result outside the loop in WeightedReturns
+# - initialize resultrow to have one row
+#
 # Revision 1.33  2008/01/20 14:54:55  brian
 # - quote methods
 #
