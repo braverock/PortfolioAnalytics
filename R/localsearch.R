@@ -8,7 +8,7 @@
 # Copyright (c) 2008 Kris Boudt and Brian G. Peterson
 # Kindly contact the authors for permission to use these functions
 ###############################################################################
-# $Id: localsearch.R,v 1.7 2008-01-19 23:53:33 brian Exp $
+# $Id: localsearch.R,v 1.8 2008-01-20 18:18:24 kris Exp $
 ###############################################################################
 
 
@@ -176,8 +176,8 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    global.best = Y[best[1],c] ; global.best.weight = bestweights[1,];
 
                    NegSR.GVaRfun = function(w){
-                       GVaR = - (t(w)%*%mu) - qnorm(p)*sqrt( t(w)%*%sigma%*%w  )
-                       return( - mean( R%*%weights ) / GVaR    )
+                       GVaR = - (t(w)%*%mu) - qnorm(alpha)*sqrt( t(w)%*%sigma%*%w  )
+                       return( - (t(w)%*%mu) / GVaR    )
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.GVaRfun , par.upper = upperbound , par.lower = lowerbound,
@@ -226,7 +226,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                       h = z + (1/6)*(z^2 -1)*skew
                       h = h + (1/24)*(z^3 - 3*z)*exkurt - (1/36)*(2*z^3 - 5*z)*skew^2;
                       mVaR =  (- (t(w)%*%mu) - h*sqrt( pm2  ) )
-                      return( - mean( R%*%weights ) / mVaR    )
+                      return( - (t(w)%*%mu) / mVaR    )
                    }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.mVaRfun , par.upper = upperbound , par.lower = lowerbound,
@@ -371,9 +371,10 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                               prod = prod*( (2*j) + 1 )}
                           I = I + (fullprod/prod)*(h^(  (2*i) + 1))*dnorm(h) }
                        }
-                       return(I) }
+                       return(I) 
+                   }
 
-                     NegSR.mESfun = function(w){
+                   NegSR.mESfun = function(w){
                        pm4 = t(w)%*%M4%*%(w%x%w%x%w) ; pm3 = t(w)%*%M3%*%(w%x%w) ; pm2 =  t(w)%*%sigma%*%w ;
                        skew = pm3 / pm2^(3/2);
                        exkurt = pm4 / pm2^(2) - 3; z = qnorm(alpha);
@@ -388,9 +389,10 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                        mES = - (t(w)%*%mu) - sqrt(pm2)*min(-E,h)
                        return ( - (t(w)%*%mu) / mES )
                    }
+                   
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.mESfun , par.upper = upperbound , par.lower = lowerbound,
-                                          A=matrix(rep(1,6),nrow=1,ncol=6),lin.lower=c(1),lin.upper=c(1))
+                                          A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
                        if(  (localoptim$message != "KT-conditions satisfied, no further correction computed")  &
                             (localoptim$message != "computed correction small, regular case") &
                             (localoptim$message != "stepsizeselection: x (almost) feasible, dir. deriv. very small" ) ){next;}
@@ -407,7 +409,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
              print("to");
              print( global.best );
 
-             out[ ((c-1)*cPeriods + per), ] = global.best.weight;
+             out[ ((c-1)*cPeriods + per), ] = as.vector(global.best.weight);
              # first cPeriods rows correspond to cCriteria[1] and so on
 
         }#end loop over optimization criteria; indexed by c=1,...,cCriteria
@@ -418,7 +420,7 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
     # Output save
     for( i in c(1:cCriteria) ){
         criterion = criteria[i];
-        write.table( out[c( ((i-1)*cPeriods+1)  : (i*cPeriods)  ),] , file = paste(names.output[i],".csv",sep=""),
+        write.table( matrix( out[c( ((i-1)*cPeriods+1)  : (i*cPeriods)  ),] ,ncol=cAssets) , file = paste(names.output[i],".csv",sep=""),
             append = FALSE, quote = TRUE, sep = ",",
             eol = "\n", na = "NA", dec = ".", row.names = TRUE,
             col.names = TRUE, qmethod = "escape")
@@ -427,6 +429,9 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.7  2008/01/19 23:53:33  brian
+# - fix checkData for weightgrid
+#
 # Revision 1.6  2008/01/19 16:00:05  kris
 # *** empty log message ***
 #

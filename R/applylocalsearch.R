@@ -34,9 +34,8 @@ weightgrid = read.csv( file = "weightingvectors_11_instr_5to50.csv" ,
 # while the larger numbers of portfolios available with lower weights should lead to more balanced and favorable results.
 
 weightgrid = weightgrid[c(1:91543),]
-weightgrid = read.table("weights10.txt",sep=",");
-weightgrid = as.matrix(weightgrid);
 
+weightgrid = weightgrid[c(1:1000),]
 lowerbound = rep(0.05,11);
 upperbound = rep(0.35,11);
 
@@ -46,26 +45,38 @@ upperbound = rep(0.35,11);
 # and the data is availaible from 1997,
 # the first year we can calculate mean/risk analytics for is the year 2000
 
-from = rep(1,2);
-to = c(96, 108);
+from = rep(1);
+to = c(36);
 
-# 4. Specify the optimization criteria and in which column they are
-# Available criteria =c( "StdDev" , "SR.StdDev" ,"GVaR", "SR.GVaR", "mVaR", "SR.mVaR", "GES", "SR.GES", "mES", "SR.mES",   ... )
-criteria = c("mVaR","GES")
-columns.crit = c(3,5);
 
-# 5. Specify the names of the input and output files
+# 4. Specify the names of the input and output files
 
-names.input = c( "2004" , "2005" )
+# names.input = c( "2004" , "2005" )
+names.input = c( "2000.subset"  )
+
 # 2004.csv is the input file containing for that year in column the criteria
 
-names.output = c("mVaR_inception", "GES_inception")
+names.output = c("GVaR.inception","SR.GVaR.inception","modVaR.inception","SR.modVaR.inception",
+   "GES.inception","SR.GES.inception","modES.inception","SR.modES.inception","StdDev.inception","SR.StdDev.inception")
 # mVaR_inception.csv will be the output file containing for that criterion, for each year the optimal weights
+
+
+# 5. Specify the optimization criteria and in which column they are
+# Available criteria =c( "StdDev" , "SR.StdDev" ,"GVaR", "SR.GVaR", "mVaR", "SR.mVaR", "GES", "SR.GES", "mES", "SR.mES",   ... )
+
+criteria = c( "StdDev" , "SR.StdDev" ,"GVaR", "SR.GVaR", "mVaR", "SR.mVaR", "GES", "SR.GES", "mES", "SR.mES" )
+
+columns.crit = c(2:11);
+
+#output = read.csv( file = paste(names.input[1],".csv",sep=""), header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
+#summary(output[columns.crit])
+
+
 
 
 # 6. Optimization: number of starting values to try
 
-cMin = 5;
+cMin = 2;
 
 localsearch(R=R, weightgrid=weightgrid, from=from, to=to, names.input=names.input, names.output=names.output, cMin=cMin,
                criteria=criteria, columns.crit=columns.crit, p=0.95,
