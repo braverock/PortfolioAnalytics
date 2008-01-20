@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.41 2008-01-20 21:13:59 brian Exp $
+# $Id: optimizer.R,v 1.42 2008-01-20 23:07:58 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -308,14 +308,15 @@ function (R, weightgrid, from, to,
         }# end loop over methods
 
         if (is.null(result)){
-               result=matrix(nrow=nrow(weightgrid),ncol=ncol(resultrow))
-               result=as.data.frame(result)
+               result=matrix(nrow=nrow(weightgrid),ncol=ncol(resultrow),byrow=TRUE)
                rownames(result)=rownames(weightgrid)
                colnames(result)=colnames(resultrow)
         }
+
+        # print( paste("Completed row: ",rownames(resultrow),":",date()) )
         # then rbind the rows
         # result    = rbind(result,resultrow)
-        result[rownames(resultrow),]=resultrow
+        result[rownames(resultrow),]=as.matrix(resultrow)
 
     } #end rows loop
 
@@ -824,6 +825,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.41  2008/01/20 21:13:59  brian
+# - set colnames on result var when we create the object
+#
 # Revision 1.40  2008/01/20 21:05:45  brian
 # - change to create structure with correct number of rows and columns on first pass
 # - avoids warnings  about replacing 0-element row with x-element row
