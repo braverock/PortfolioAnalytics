@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson , Aaron van Meerten, Peter Carl
-# $Id: optimizer.R,v 1.28 2008-01-20 13:35:34 brian Exp $
+# $Id: optimizer.R,v 1.29 2008-01-20 13:48:37 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -80,9 +80,9 @@ function (weightgrid, test=1)
 #WeightedReturns =
 WeightedReturns =
 function (R, weightgrid, from, to,
-          methods=c( cumReturn, ThreeYrMeanReturn, PeriodGVaR, ThreeYrGVaR, InceptionGVaR
-                    PeriodmodVaR, ThreeYrmodVaR, InceptionmodVaR, PeriodGES, ThreeYrGES, InceptionGES, PeriodmodES, ThreeYrmodES, InceptionmodES, maxdd,
-                    PeriodSharpe, ThreeYrSharpe, InceptionSharpe, omega, PeriodStdDev, ThreeYrStdDev, InceptionStdDev )
+          methods=c( PeriodGVaR, ThreeYrGVaR, InceptionGVaR, PeriodmodVaR, ThreeYrmodVaR, InceptionmodVaR,
+                     PeriodGES, ThreeYrGES, InceptionGES, PeriodmodES, ThreeYrmodES, InceptionmodES,
+                     maxdd, omega, PeriodStdDev, ThreeYrStdDev, InceptionStdDev )
           , p=0.95, ... )
 { # @author Brian G. Peterson and Kris Boudt
 
@@ -362,9 +362,9 @@ function (R, weightgrid, from, to,
 # @todo: use zoo rollapply in BruteForcePortfolios() fn
 BruteForcePortfolios =
 function(R,weightgrid,yeargrid,
-          methods=c( cumReturn, ThreeYrMeanReturn, PeriodGVaR, ThreeYrGVaR, InceptionGVaR
-                    PeriodmodVaR, ThreeYrmodVaR, InceptionmodVaR, PeriodES, ThreeYrES, InceptionES, PeriodmodES, ThreeYrmodES, InceptionmodES, maxdd,
-                    PeriodSharpe, ThreeYrSharpe, InceptionSharpe, omega, PeriodStdDev, ThreeYrStdDev, InceptionStdDev )
+          methods=c( PeriodGVaR, ThreeYrGVaR, InceptionGVaR, PeriodmodVaR, ThreeYrmodVaR, InceptionmodVaR,
+                     PeriodGES, ThreeYrGES, InceptionGES, PeriodmodES, ThreeYrmodES, InceptionmodES,
+                     maxdd, omega, PeriodStdDev, ThreeYrStdDev, InceptionStdDev )
          , p=0.95, ...
         )
 { # @author Brian G. Peterson
@@ -853,6 +853,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.28  2008/01/20 13:35:34  brian
+# - add missing brace in switch statement
+#
 # Revision 1.27  2008/01/20 12:07:24  kris
 # - Changed function definitions in optim_functions.R and updated the function calls in optimizer.R to these functions
 #
