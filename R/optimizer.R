@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.35 2008-01-20 16:26:21 brian Exp $
+# $Id: optimizer.R,v 1.36 2008-01-20 16:30:50 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -156,6 +156,29 @@ function (R, weightgrid, from, to,
 
     result=data.frame()
 
+    # Compute multivariate moments
+
+    threeyrfrom = from-24; #for monthly data
+    if (threeyrfrom < 1 ) threeyrfrom = 1
+
+    R.inception = R[1:to , ];
+    mu.inception = apply(R.inception,2,'mean');
+    sigma.inception = cov(R.inception);
+    M3.inception = M3.MM(R.inception);
+    M4.inception = M4.MM(R.inception);
+
+    R.period = R[from:to, ];
+    mu.period =  apply(R.period,2,'mean');
+    sigma.period = cov(R.period);
+    M3.period = M3.MM(R.period);
+    M4.period = M4.MM(R.period);
+
+    R.3yr = R[ threeyrfrom:to, ];
+    mu.3yr = apply(R.3yr,2,'mean');
+    sigma.3yr = cov(R.3yr);
+    M3.3yr = M3.MM(R.3yr);
+    M4.3yr = M4.MM(R.3yr);
+
     # Function:
     for(row in 1:rows) {
         # at some point consider parallelizing this by using a clustered apply
@@ -174,30 +197,6 @@ function (R, weightgrid, from, to,
        #     print( paste("NA\'s in returns: ",row, " ",w," from ", from) )
        #     #browser()
        #}
-
-       # Compute multivariate moments
-
-       threeyrfrom = from-24; #for monthly data
-       if (threeyrfrom < 1 ) threeyrfrom = 1
-
-       R.inception = R[1:to , ];
-       mu.inception = apply(R.inception,2,'mean');
-       sigma.inception = cov(R.inception);
-       M3.inception = M3.MM(R.inception);
-       M4.inception = M4.MM(R.inception);
-
-       R.period = R[from:to, ];
-       mu.period =  apply(R.period,2,'mean');
-       sigma.period = cov(R.period);
-       M3.period = M3.MM(R.period);
-       M4.period = M4.MM(R.period);
-
-       R.3yr = R[ threeyrfrom:to, ];
-       mu.3yr = apply(R.3yr,2,'mean');
-       sigma.3yr = cov(R.3yr);
-       M3.3yr = M3.MM(R.3yr);
-       M4.3yr = M4.MM(R.3yr);
-
 
         for (method in methods) {
             switch(method,
@@ -826,6 +825,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.35  2008/01/20 16:26:21  brian
+# - add M3 and M4 moments to parameters for all modSR function calls
+#
 # Revision 1.34  2008/01/20 16:14:53  brian
 # - initialize result outside the loop in WeightedReturns
 # - initialize resultrow to have one row
