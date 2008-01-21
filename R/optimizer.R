@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.54 2008-01-21 17:50:24 brian Exp $
+# $Id: optimizer.R,v 1.55 2008-01-21 23:40:42 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -315,6 +315,7 @@ function (R, weightgrid, from, to,
                     colnames(InceptionSRmodES)="SR.modES.inception"
                     resultrow= cbind(resultrow,InceptionmodES,InceptionSRmodES)
                 }
+                # @todo put maxdrawdown, opmega back, think about others
             )#end switch function
         }# end loop over methods
 
@@ -328,18 +329,6 @@ function (R, weightgrid, from, to,
         # then rbind the rows
         # result    = rbind(result,resultrow)
         result[as.character(row),]=as.matrix(resultrow)
-
-        #         switch( rownames(resultrow),
-        #             "10000" = { print (paste("Row 10000 completed: ", date())) },
-        #             "20000" = { print (paste("Row 20000 completed: ", date())) },
-        #             "30000" = { print (paste("Row 30000 completed: ", date())) },
-        #             "40000" = { print (paste("Row 40000 completed: ", date())) },
-        #             "50000" = { print (paste("Row 50000 completed: ", date())) },
-        #             "60000" = { print (paste("Row 60000 completed: ", date())) },
-        #             "70000" = { print (paste("Row 70000 completed: ", date())) },
-        #             "80000" = { print (paste("Row 80000 completed: ", date())) },
-        #             "90000" = { print (paste("Row 90000 completed: ", date())) }
-        #         )
 
     } #end rows loop
           resultlist[[srow]] <- result
@@ -504,15 +493,15 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
 
     # Function:
     for (rnum in 2:rows) {
-        insample    = rownames(yeargrid[rnum-1,])
-        outofsample = rownames(yeargrid[rnum,])
-        yearname    = insample
-        outname     = outofsample
+        insample    = yeargrid[rnum-1,]
+        outofsample = yeargrid[rnum,]
+        yearname    = rownames(insample)
+        outname     = rownames(outofsample)
         #         infrom      = insample [,1]
         #         into        = insample [,2]
         #         outfrom     = outofsample [,1]
         #         outto       = outofsample [,2]
-        portfoliorows=nrow(bfresults[[yearname]])
+        portfoliorows=nrow(bfresults[[1]])
         if (cutat<portfoliorows) {
             portfoliorows=cutat
         }
@@ -520,7 +509,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
 
         #Check Utility fn for insample , and apply to out of sample row
 
-        for (coln in colnames(bfresults[[yearname]])) {
+        for (coln in colnames(bfresults[[insample]])) {
             ##################################
             # Risk/Reward maximization utility functions
             # for utility function
@@ -537,7 +526,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
                                 "SR.modES.period", "SR.modES.3yr", "SR.modES.inception")){
                 if (maxmethod==coln){
                     # return the max of the BF in-sample results for that column
-                    result[outname,coln]= rownames(bfresults[which.max(bfresults[[yearname]][1:portfoliorows,coln]),])
+                    result[outname,coln]= rownames(bfresults[which.max(bfresults[[insample]][1:portfoliorows,coln]),])
                 }
             }
 
@@ -555,7 +544,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
                                 "modES.period", "modES.3yr", "modES.inception")){
                 if (minmethod==coln){
                    # return the min of the BF in-sample results for that column
-                    result[outname,coln]= rownames(bfresults[which.min(bfresults[[yearname]][1:portfoliorows,coln]),])
+                    result[outname,coln]= rownames(bfresults[which.min(bfresults[[insample]][1:portfoliorows,coln]),])
                 }
             }
         }
@@ -895,6 +884,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.54  2008/01/21 17:50:24  brian
+# - partial fix, Backtest fn still not working around lines 515-518
+#
 # Revision 1.53  2008/01/21 17:24:09  brian
 # - adjust use of rownames for insample/outofsample in Backtest fn
 #
