@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.44 2008-01-21 03:02:19 brian Exp $
+# $Id: optimizer.R,v 1.45 2008-01-21 03:26:32 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -174,9 +174,8 @@ function (R, weightgrid, from, to,
     resultlist=vector("list", 3)
     for (srow in 1:3) {
         weightgridsave=weightgrid
-        weightgrid=weightgrid[subsetrows[srow,1]:subsetrows[srow,2],]
-        rownames(weightgrid)=rownames(weightgridsave[subsetrows[srow,1]:subsetrows[srow,2],])
-        #browser()
+        weightgrid=weightgrid[subsetrows[srow,1]:subsetrows[srow,2],,drop=FALSE]
+
     for(row in rownames(weightgrid)) {
         # this would be for(n in c(2,5,10,20,50)) for a sampled weighting vector
 
@@ -345,11 +344,6 @@ function (R, weightgrid, from, to,
     } #end subset loop
 
     result=rbind(resultlist[[1]],resultlist[[2]],resultlist[[3]])
-    rownames(result)=rownames(weightgrid)
-    browser()
-    # set pretty labels for the columns
-    #     colnames(result)=c("Cumulative Return","Mean Return,3 yr","VaR.CornishFisher,period","VaR.CornishFisher,3yr","Max Drawdown",
-    #                    "Sharpe,period","Sharpe,3 yr", "Omega", "Std Dev","Std Dev,3yr" )
 
     # Return Value:
     result
@@ -852,6 +846,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.44  2008/01/21 03:02:19  brian
+# - add ugly outer loop hack so this will work
+#
 # Revision 1.43  2008/01/21 01:39:15  brian
 # - add switch and print statements for debug
 #
