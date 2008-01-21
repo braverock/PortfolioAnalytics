@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.47 2008-01-21 04:41:47 brian Exp $
+# $Id: optimizer.R,v 1.48 2008-01-21 13:49:09 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -167,6 +167,14 @@ function (R, weightgrid, from, to,
 
     rows=nrow(weightgrid)
     # Function:
+    # this outer loop makes me very angry.
+    # R seems to hang and never return  on very large matrices or data.frame's
+    # to get around this, we subset the data into chunks that R can handle,
+    # we then run the inner for loop against these, and reassemble the list
+    # into a single structure at the end.
+    #
+    # if we *must* do this to work around limitations in R, perhaps we can
+    # figure out how to examine the length of weightgrid and subset it automatically
     subsetrows= matrix(c(1,31000,31001,62000,62001,rows), nrow=3,byrow=TRUE)
     # subsetrows= matrix(c(1,10,11,20,21,30), nrow=3,byrow=TRUE)
     resultlist=vector("list", 3)
@@ -233,7 +241,7 @@ function (R, weightgrid, from, to,
                     resultrow= cbind(resultrow,PeriodGVaR,PeriodSRGVaR)
                 },
                 ThreeYrGVaR = {
-                    ThreeYrVaR = GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    ThreeYrGVaR = GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
                     ThreeYrSRGVaR =  mean.3yr/ThreeYrGVaR
                     colnames(ThreeYrGVaR)="GVaR.3yr"
                     colnames(ThreeYrSRGVaR)="SR.GVaR.3yr"
@@ -844,6 +852,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.47  2008/01/21 04:41:47  brian
+# - fix naming and assignment of results in subsets
+#
 # Revision 1.46  2008/01/21 03:58:58  brian
 # - move weightgridsave out of the outer loopy
 #
