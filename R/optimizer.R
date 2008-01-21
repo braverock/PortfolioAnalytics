@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.46 2008-01-21 03:58:58 brian Exp $
+# $Id: optimizer.R,v 1.47 2008-01-21 04:41:47 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -141,8 +141,6 @@ function (R, weightgrid, from, to,
 
     if (ncol(weightgrid) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
-    result=NULL
-
     # Compute multivariate moments
     # should probably change this part to use zoo's rollapply to create the various groupings
 
@@ -170,11 +168,12 @@ function (R, weightgrid, from, to,
     rows=nrow(weightgrid)
     # Function:
     subsetrows= matrix(c(1,31000,31001,62000,62001,rows), nrow=3,byrow=TRUE)
-    #subsetrows= matrix(c(1,10,11,20,21,30), nrow=3,byrow=TRUE)
+    # subsetrows= matrix(c(1,10,11,20,21,30), nrow=3,byrow=TRUE)
     resultlist=vector("list", 3)
     weightgridsave=weightgrid
     for (srow in 1:3) {
         weightgrid=weightgrid[subsetrows[srow,1]:subsetrows[srow,2],,drop=FALSE]
+        result=NULL
 
     for(row in rownames(weightgrid)) {
         # this would be for(n in c(2,5,10,20,50)) for a sampled weighting vector
@@ -185,7 +184,6 @@ function (R, weightgrid, from, to,
 
         # construct a data structure that holds each result for this row
         resultrow=data.frame(row.names = row)
-        rownames(resultrow)=rownames(weightgrid[row,])
 
         w = as.numeric(weightgrid[row,])
         # test each row in the weighting vectors against the right dates in the return collection
@@ -323,7 +321,7 @@ function (R, weightgrid, from, to,
         # print( paste("Completed row: ",rownames(resultrow),":",date()) )
         # then rbind the rows
         # result    = rbind(result,resultrow)
-        result[rownames(row),]=as.matrix(resultrow)
+        result[as.character(row),]=as.matrix(resultrow)
 
         #         switch( rownames(resultrow),
         #             "10000" = { print (paste("Row 10000 completed: ", date())) },
@@ -846,6 +844,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.46  2008/01/21 03:58:58  brian
+# - move weightgridsave out of the outer loopy
+#
 # Revision 1.45  2008/01/21 03:26:32  brian
 # - add drop=FALSE to subsetting of weightgrid to preserve rownames
 #
