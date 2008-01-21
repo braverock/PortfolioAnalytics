@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.45 2008-01-21 03:26:32 brian Exp $
+# $Id: optimizer.R,v 1.46 2008-01-21 03:58:58 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -172,8 +172,8 @@ function (R, weightgrid, from, to,
     subsetrows= matrix(c(1,31000,31001,62000,62001,rows), nrow=3,byrow=TRUE)
     #subsetrows= matrix(c(1,10,11,20,21,30), nrow=3,byrow=TRUE)
     resultlist=vector("list", 3)
+    weightgridsave=weightgrid
     for (srow in 1:3) {
-        weightgridsave=weightgrid
         weightgrid=weightgrid[subsetrows[srow,1]:subsetrows[srow,2],,drop=FALSE]
 
     for(row in rownames(weightgrid)) {
@@ -846,6 +846,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.45  2008/01/21 03:26:32  brian
+# - add drop=FALSE to subsetting of weightgrid to preserve rownames
+#
 # Revision 1.44  2008/01/21 03:02:19  brian
 # - add ugly outer loop hack so this will work
 #
