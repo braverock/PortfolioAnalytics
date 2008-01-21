@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.48 2008-01-21 13:49:09 brian Exp $
+# $Id: optimizer.R,v 1.49 2008-01-21 13:52:46 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -221,7 +221,7 @@ function (R, weightgrid, from, to,
                     # Standard Deviation
                     ThreeYrStdDev = StdDev.MM(w,sigma=sigma.3yr)
                     ThreeYrSRStdDev = mean.3yr/ThreeYrStdDev;
-                    colnames(PeriodStdDev) = "StdDev.3yr"
+                    colnames(ThreeYrStdDev) = "StdDev.3yr"
                     colnames(ThreeYrStdDev) = "SR.StdDev.3yr"
                     resultrow= cbind(resultrow,ThreeYrStdDev,ThreeYrSRStdDev)
                 },
@@ -852,6 +852,10 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.48  2008/01/21 13:49:09  brian
+# - fix typo in ThreeYrGVaR method in WeightedReturns
+# - add comments on the subsetting method we had to use to make this work on large weightgrid
+#
 # Revision 1.47  2008/01/21 04:41:47  brian
 # - fix naming and assignment of results in subsets
 #
