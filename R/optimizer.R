@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.51 2008-01-21 17:16:12 brian Exp $
+# $Id: optimizer.R,v 1.52 2008-01-21 17:18:38 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -498,7 +498,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
     benchmarkreturns = as.vector(benchmarkreturns)
 
     # construct a matrix for the results that's the same size and labels as the input list
-    result=matrix(nrow=length(bfresults.inception),ncol=ncol(bfresults[[1]])
+    result=matrix(nrow=length(bfresults.inception),ncol=ncol(bfresults[[1]]))
     rownames(result)=names(bfresults)
     colnames(result)=colnames(bfresults[[1]])
 
@@ -895,6 +895,10 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.51  2008/01/21 17:16:12  brian
+# - add matrix for reult to Backtest fn
+# - change max and min tests in Backtest fn to insert rowname of weighting vector rather than array index
+#
 # Revision 1.50  2008/01/21 16:31:36  brian
 # - revise Backtest function to have utility functions for maximizing and minimizing lists
 # - still need to initialize the result matrix
