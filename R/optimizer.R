@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.52 2008-01-21 17:18:38 brian Exp $
+# $Id: optimizer.R,v 1.53 2008-01-21 17:24:09 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -504,14 +504,14 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
 
     # Function:
     for (rnum in 2:rows) {
-        insample    = yeargrid[rnum-1,]
-        outofsample = yeargrid[rnum,]
+        insample    = rownames(yeargrid[rnum-1,])
+        outofsample = rownames(yeargrid[rnum,])
+        yearname    = insample
+        outname     = outofsample
         #         infrom      = insample [,1]
         #         into        = insample [,2]
         #         outfrom     = outofsample [,1]
         #         outto       = outofsample [,2]
-        yearname    = rownames(insample)
-        outname     = rownames(outofsample)
         portfoliorows=nrow(bfresults[[yearname]])
         if (cutat<portfoliorows) {
             portfoliorows=cutat
@@ -895,6 +895,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.52  2008/01/21 17:18:38  brian
+# - fix typo in matrix assignment
+#
 # Revision 1.51  2008/01/21 17:16:12  brian
 # - add matrix for reult to Backtest fn
 # - change max and min tests in Backtest fn to insert rowname of weighting vector rather than array index
