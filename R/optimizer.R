@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.42 2008-01-20 23:07:58 brian Exp $
+# $Id: optimizer.R,v 1.43 2008-01-21 01:39:15 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -317,6 +317,18 @@ function (R, weightgrid, from, to,
         # then rbind the rows
         # result    = rbind(result,resultrow)
         result[rownames(resultrow),]=as.matrix(resultrow)
+
+        switch( rownames(resultrow),
+            "10000" = { print (paste("Row 10000 completed: ", date())) },
+            "20000" = { print (paste("Row 20000 completed: ", date())) },
+            "30000" = { print (paste("Row 30000 completed: ", date())) },
+            "40000" = { print (paste("Row 40000 completed: ", date())) },
+            "50000" = { print (paste("Row 50000 completed: ", date())) },
+            "60000" = { print (paste("Row 60000 completed: ", date())) },
+            "70000" = { print (paste("Row 70000 completed: ", date())) },
+            "80000" = { print (paste("Row 80000 completed: ", date())) },
+            "90000" = { print (paste("Row 90000 completed: ", date())) }
+        )
 
     } #end rows loop
 
@@ -825,6 +837,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.42  2008/01/20 23:07:58  brian
+# - use matrix for results to avoid data.frame factor BS
+#
 # Revision 1.41  2008/01/20 21:13:59  brian
 # - set colnames on result var when we create the object
 #
