@@ -6,8 +6,8 @@
 #
 ################################################################################
 
-# Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.53 2008-01-21 17:24:09 brian Exp $
+# Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
+# $Id: optimizer.R,v 1.54 2008-01-21 17:50:24 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -498,7 +498,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
     benchmarkreturns = as.vector(benchmarkreturns)
 
     # construct a matrix for the results that's the same size and labels as the input list
-    result=matrix(nrow=length(bfresults.inception),ncol=ncol(bfresults[[1]]))
+    result=matrix(nrow=length(bfresults),ncol=ncol(bfresults[[1]]))
     rownames(result)=names(bfresults)
     colnames(result)=colnames(bfresults[[1]])
 
@@ -895,6 +895,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.53  2008/01/21 17:24:09  brian
+# - adjust use of rownames for insample/outofsample in Backtest fn
+#
 # Revision 1.52  2008/01/21 17:18:38  brian
 # - fix typo in matrix assignment
 #
