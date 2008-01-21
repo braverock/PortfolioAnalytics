@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.50 2008-01-21 16:31:36 brian Exp $
+# $Id: optimizer.R,v 1.51 2008-01-21 17:16:12 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -498,6 +498,9 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
     benchmarkreturns = as.vector(benchmarkreturns)
 
     # construct a matrix for the results that's the same size and labels as the input list
+    result=matrix(nrow=length(bfresults.inception),ncol=ncol(bfresults[[1]])
+    rownames(result)=names(bfresults)
+    colnames(result)=colnames(bfresults[[1]])
 
     # Function:
     for (rnum in 2:rows) {
@@ -514,7 +517,6 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
             portfoliorows=cutat
         }
 
-        # print(outname)
 
         #Check Utility fn for insample , and apply to out of sample row
 
@@ -535,7 +537,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
                                 "SR.modES.period", "SR.modES.3yr", "SR.modES.inception")){
                 if (maxmethod==coln){
                     # return the max of the BF in-sample results for that column
-                    result[[outname]][,coln]= which.max(bfresults[[yearname]][1:portfoliorows,coln])
+                    result[outname,coln]= rownames(bfresults[which.max(bfresults[[yearname]][1:portfoliorows,coln]),])
                 }
             }
 
@@ -553,7 +555,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
                                 "modES.period", "modES.3yr", "modES.inception")){
                 if (minmethod==coln){
                    # return the min of the BF in-sample results for that column
-                    result[[outname]][,coln]= which.min(bfresults[[yearname]][1:portfoliorows,coln])
+                    result[outname,coln]= rownames(bfresults[which.min(bfresults[[yearname]][1:portfoliorows,coln]),])
                 }
             }
         }
@@ -893,6 +895,10 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.50  2008/01/21 16:31:36  brian
+# - revise Backtest function to have utility functions for maximizing and minimizing lists
+# - still need to initialize the result matrix
+#
 # Revision 1.49  2008/01/21 13:52:46  brian
 # - fix typo in ThreeYrStdDev method in WeightedReturns
 #
