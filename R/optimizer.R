@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.49 2008-01-21 13:52:46 brian Exp $
+# $Id: optimizer.R,v 1.50 2008-01-21 16:31:36 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -184,8 +184,6 @@ function (R, weightgrid, from, to,
         result=NULL
 
     for(row in rownames(weightgrid)) {
-        # this would be for(n in c(2,5,10,20,50)) for a sampled weighting vector
-
         # at some point consider parallelizing this by using a clustered apply
         # to call a sub-function so that this could get distributed
         # to multiple processor cores or threads
@@ -408,8 +406,10 @@ function(R,weightgrid,yeargrid,
         if ( rows > to   ) to   = rows
 
         # construct a data structure that holds each result for this year
-        # first cbind
         resultarray = WeightedReturns(R, weightgrid, from, to, methods=methods, p=p, ...=...)
+        # at some point parallelize the call to WeightedReturns by using a clustered apply
+        # to call WeightedReturns so that this could get distributed
+        # to multiple processor cores or threads
 
         # then write a CSV
         write.table(resultarray, file = paste(yearname,".csv",sep=""),
@@ -463,7 +463,7 @@ function(yeargrid)
 
 # ------------------------------------------------------------------------------
 Backtest =
-function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
+function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
 {
     # Description:
     #
@@ -473,14 +473,14 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
     # the BruteForcePortfolios function, we can now apply several utility functions to
     # find the best portfolio out of the universe of all sample portfolios.
     #
-    # Basically, we find and in-sample solution to each utility function, and store the
+    # Basically, we find an in-sample solution to each utility function, and store the
     # weighting vector for that portfolio as our strategic weight for use out of sample.
     # by testing several utility functions, we can examine the models for bias, and determine
     # which utility function produces the most acceptable out of sample results.
     #
     # R                 data frame of historical returns
     #
-    # portfolioreturns  list of data frames of set of returns for all possible portfolios
+    # bfresults         list of data frames of set of utility fn results for all possible portfolios
     #                   (output of BruteForcePortfolios function)
     #
     # yeargrid          list of from/to vectors for the periods we want to backtest over
@@ -497,17 +497,19 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
 
     benchmarkreturns = as.vector(benchmarkreturns)
 
+    # construct a matrix for the results that's the same size and labels as the input list
+
     # Function:
     for (rnum in 2:rows) {
         insample    = yeargrid[rnum-1,]
         outofsample = yeargrid[rnum,]
-        infrom      = insample [,1]
-        into        = insample [,2]
-        outfrom     = outofsample [,1]
-        outto       = outofsample [,2]
+        #         infrom      = insample [,1]
+        #         into        = insample [,2]
+        #         outfrom     = outofsample [,1]
+        #         outto       = outofsample [,2]
         yearname    = rownames(insample)
         outname     = rownames(outofsample)
-        portfoliorows=nrow(portfolioreturns[[yearname]])
+        portfoliorows=nrow(bfresults[[yearname]])
         if (cutat<portfoliorows) {
             portfoliorows=cutat
         }
@@ -516,88 +518,127 @@ function(R,portfolioreturns, yeargrid, cutat=1000000, benchmarkreturns )
 
         #Check Utility fn for insample , and apply to out of sample row
 
+        for (coln in colnames(bfresults[[yearname]])) {
+            ##################################
+            # Risk/Reward maximization utility functions
+            # for utility function
+            # w' = max(meanreturn/riskmeasure)
+            #
+            # These are the Sharpe Ratio and modified Sharpe Ratio methods
+            #
+            # These utility functions are called "Constant Relative Risk Aversion (CRRA)" (verify this!)
+            ##################################
+            for (maxmethod in c("SR.StdDev.period", "SR.StdDev.3yr", "SR.StdDev.inception",
+                                "SR.GVaR.period", "SR.GVaR.3yr", "SR.GVaR.inception",
+                                "SR.modVaR.period", "SR.modVaR.inception", "SR.modVaR.3yr",
+                                "SR.GES.inception", "SR.GES.period", "SR.GES.3yr",
+                                "SR.modES.period", "SR.modES.3yr", "SR.modES.inception")){
+                if (maxmethod==coln){
+                    # return the max of the BF in-sample results for that column
+                    result[[outname]][,coln]= which.max(bfresults[[yearname]][1:portfoliorows,coln])
+                }
+            }
 
+            ##################################
+            # Risk Reduction utility functions
+            # for utility function
+            # w' = min(riskmeasure)
+            #
+            # These utility functions are called "Constant Absolute Risk Aversion (CARA)"
+            ##################################
+            for (minmethod in c("StdDev.period", "StdDev.3yr", "StdDev.inception",
+                                "GVaR.period", "GVaR.3yr", "GVaR.inception",
+                                "modVaR.period", "modVaR.inception", "modVaR.3yr",
+                                "GES.inception", "GES.period", "GES.3yr",
+                                "modES.period", "modES.3yr", "modES.inception")){
+                if (minmethod==coln){
+                   # return the min of the BF in-sample results for that column
+                    result[[outname]][,coln]= which.min(bfresults[[yearname]][1:portfoliorows,coln])
+                }
+            }
+        }
 
         # add Equalweighted
-        EqualWeighted = 1
+        # EqualWeighted = 1
 
-        ##################################
-        # Risk Reduction utility functions
-        # for utility function
-        # w' = min(VaR.CornishFisher(p=0.95))
-        minmodVaR  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"])
-        #minmodVaRi = which.min(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.inception"])
-        minmodVaR3yr  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.3yr"])
+        #         ##################################
+        #         # Risk Reduction utility functions
+        #         # for utility function
+        #         # w' = min(VaR.CornishFisher(p=0.95))
+        #         minmodVaR  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"])
+        #         #minmodVaRi = which.min(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.inception"])
+        #         minmodVaR3yr  = which.min(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.3yr"])
+        #
+        #         # for utility function
+        #         # w' = max(return/VaR.CornishFisher) for both VaR.CornishFisher.period and VaR.CornishFisher.inception
+        #         #SharpeRatio.modified  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"])
+        #         SharpeRatio.modified3yr  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.3yr"])
+        #         #SharpeRatio.modifiedi = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.inception"])
+        #
+        #         # for utility function
+        #         # w' = max(return/Max.Drawdown)
+        #         ReturnOverDrawdown = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"Max.Drawdown"])
+        #
+        #         # for utility function
+        #         # w' = max(return)
+        #         maxReturn = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"])
+        #
+        #         # for utility function
+        #         # w' = min(VaR.CornishFisher(p=0.95)) such that return is greater than the benchmark
+        #         minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=Return.cumulative(benchmarkreturns[infrom:into])),"VaR.CornishFisher.period"])
+        #         if (length(minVaRretoverBM)==0) { minVaRretoverBM = maxReturn }
+        #
+        #         #for utility function
+        #         #w' = max(return) such that VaR.CornishFisher is less than VaR.CornishFisher(benchmark)
+        #         maxmodVaRltBM=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"]<VaR.CornishFisher(benchmarkreturns[infrom:into],p=0.95)),"Cumulative.Return"])
+        #         if (length(maxmodVaRltBM)==0) { maxmodVaRltBM = 1 }
+        #
+        #         #add utility functions tor Equal weighted portfolio
+        #         # for utility function
+        #         # w' = min(VaR.CornishFisher(p=0.95)) such that return is greater than equal weighted portfolio
+        #         minVaRretoverEW = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=portfolioreturns[[yearname]][1,"Cumulative.Return"]),"VaR.CornishFisher.period"])
+        #         if (length(minVaRretoverEW)==0) { minVaRretoverEW = 1 }
+        #
+        #         #for utility function
+        #         #w' = max(return) such that VaR.CornishFisher is less than VaR.CornishFisher(equal weighted)
+        #         maxmodVaRltEW=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"]<portfolioreturns[[yearname]][1,"Cumulative.Return"]),"Cumulative.Return"])
+        #         if (length(maxmodVaRltEW)==0) { maxmodVaRltEW = NA }
+        #
+        #         #for utility function
+        #         #w' = max(omega)
+        #         maxOmega = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Omega"])
+        #
+        #         #for utility function
+        #         #w' = max(Sharpe.period)
+        #         maxPeriodSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.period"])
+        #
+        #         #for utility function
+        #         #w' = max(Sharpe.3.yr)
+        #         max3yrSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.3.yr"])
+        #
+        #         #for utility function
+        #         #w' = max(Sharpe.inception)
+        #         #maxInceptionSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.inception"])
+        #
+        #
+        #         ########## end of utility functions ##########
+        #         # construct a data structure that holds each result for this row
+        #         if (rnum==2) {
+        #                 #create data.frame
+        #                 result=data.frame()
+        #                 resultrow=data.frame()
+        #         }
+        #         # first cbind the columns
+        #         resultrow = cbind(EqualWeighted, minmodVaR, minmodVaR3yr, SharpeRatio.modified3yr, ReturnOverDrawdown, maxReturn,
+        #                            minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW,
+        #                            maxPeriodSharpe, max3yrSharpe, maxOmega )
+        #
+        #         rownames(resultrow) = outname
+        #
+        #         # then rbind the rows
+        #         result    = rbind(result,resultrow)
+        #         # print(resultarray)
 
-        # for utility function
-        # w' = max(return/VaR.CornishFisher) for both VaR.CornishFisher.period and VaR.CornishFisher.inception
-        #SharpeRatio.modified  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"])
-        SharpeRatio.modified3yr  = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.3yr"])
-        #SharpeRatio.modifiedi = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.inception"])
-
-        # for utility function
-        # w' = max(return/Max.Drawdown)
-        ReturnOverDrawdown = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]/portfolioreturns[[yearname]][1:portfoliorows,"Max.Drawdown"])
-
-        # for utility function
-        # w' = max(return)
-        maxReturn = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"])
-
-        # for utility function
-        # w' = min(VaR.CornishFisher(p=0.95)) such that return is greater than the benchmark
-        minVaRretoverBM = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=Return.cumulative(benchmarkreturns[infrom:into])),"VaR.CornishFisher.period"])
-        if (length(minVaRretoverBM)==0) { minVaRretoverBM = maxReturn }
-
-        #for utility function
-        #w' = max(return) such that VaR.CornishFisher is less than VaR.CornishFisher(benchmark)
-        maxmodVaRltBM=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"]<VaR.CornishFisher(benchmarkreturns[infrom:into],p=0.95)),"Cumulative.Return"])
-        if (length(maxmodVaRltBM)==0) { maxmodVaRltBM = 1 }
-
-        #add utility functions tor Equal weighted portfolio
-        # for utility function
-        # w' = min(VaR.CornishFisher(p=0.95)) such that return is greater than equal weighted portfolio
-        minVaRretoverEW = which.min(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"Cumulative.Return"]>=portfolioreturns[[yearname]][1,"Cumulative.Return"]),"VaR.CornishFisher.period"])
-        if (length(minVaRretoverEW)==0) { minVaRretoverEW = 1 }
-
-        #for utility function
-        #w' = max(return) such that VaR.CornishFisher is less than VaR.CornishFisher(equal weighted)
-        maxmodVaRltEW=which.max(portfolioreturns[[yearname]][which(portfolioreturns[[yearname]][1:portfoliorows,"VaR.CornishFisher.period"]<portfolioreturns[[yearname]][1,"Cumulative.Return"]),"Cumulative.Return"])
-        if (length(maxmodVaRltEW)==0) { maxmodVaRltEW = NA }
-
-        #for utility function
-        #w' = max(omega)
-        maxOmega = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Omega"])
-
-        #for utility function
-        #w' = max(Sharpe.period)
-        maxPeriodSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.period"])
-
-        #for utility function
-        #w' = max(Sharpe.3.yr)
-        max3yrSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.3.yr"])
-
-        #for utility function
-        #w' = max(Sharpe.inception)
-        #maxInceptionSharpe = which.max(portfolioreturns[[yearname]][1:portfoliorows,"Sharpe.inception"])
-
-
-        ########## end of utility functions ##########
-        # construct a data structure that holds each result for this row
-        if (rnum==2) {
-                #create data.frame
-                result=data.frame()
-                resultrow=data.frame()
-        }
-        # first cbind the columns
-        resultrow = cbind(EqualWeighted, minmodVaR, minmodVaR3yr, SharpeRatio.modified3yr, ReturnOverDrawdown, maxReturn,
-                           minVaRretoverBM, maxmodVaRltBM, minVaRretoverEW, maxmodVaRltEW,
-                           maxPeriodSharpe, max3yrSharpe, maxOmega )
-
-        rownames(resultrow) = outname
-
-        # then rbind the rows
-        result    = rbind(result,resultrow)
-        # print(resultarray)
     }  # end row loop
 
     # Result:
@@ -852,6 +893,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.49  2008/01/21 13:52:46  brian
+# - fix typo in ThreeYrStdDev method in WeightedReturns
+#
 # Revision 1.48  2008/01/21 13:49:09  brian
 # - fix typo in ThreeYrGVaR method in WeightedReturns
 # - add comments on the subsetting method we had to use to make this work on large weightgrid
