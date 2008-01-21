@@ -12,7 +12,8 @@ summary(R);
 # 2. Load the weight vectors
 
 weightgrid = read.csv( file = "weightingvectors_11_instr_5to50.csv" ,
-               header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
+               header = FALSE,  sep = ",", na.strings = "NA", dec = ".")
+# header is FALSE, otherwise you skip 1 weight vector
 
 # For the 11 instrument portfolios, the portfolios are ordered in increasing concentration.
 # The breakdown for the grid search is like this:
@@ -35,7 +36,6 @@ weightgrid = read.csv( file = "weightingvectors_11_instr_5to50.csv" ,
 
 weightgrid = weightgrid[c(1:91543),]
 
-weightgrid = weightgrid[c(1:1000),]
 lowerbound = rep(0.05,11);
 upperbound = rep(0.35,11);
 
@@ -45,38 +45,39 @@ upperbound = rep(0.35,11);
 # and the data is availaible from 1997,
 # the first year we can calculate mean/risk analytics for is the year 2000
 
-from = rep(1);
-to = c(36);
+from = rep(1,8);
+to = seq( from= 3*12 , to = 10*12 , by=12 );
 
 
 # 4. Specify the names of the input and output files
 
-# names.input = c( "2004" , "2005" )
-names.input = c( "2000.subset"  )
+names.input = c( "1999","2000","2001","2002","2003","2004","2005","2006"  )
 
 # 2004.csv is the input file containing for that year in column the criteria
 
 names.output = c("GVaR.inception","SR.GVaR.inception","modVaR.inception","SR.modVaR.inception",
    "GES.inception","SR.GES.inception","modES.inception","SR.modES.inception","StdDev.inception","SR.StdDev.inception")
+
 # mVaR_inception.csv will be the output file containing for that criterion, for each year the optimal weights
 
 
 # 5. Specify the optimization criteria and in which column they are
 # Available criteria =c( "StdDev" , "SR.StdDev" ,"GVaR", "SR.GVaR", "mVaR", "SR.mVaR", "GES", "SR.GES", "mES", "SR.mES",   ... )
 
-criteria = c( "StdDev" , "SR.StdDev" ,"GVaR", "SR.GVaR", "mVaR", "SR.mVaR", "GES", "SR.GES", "mES", "SR.mES" )
+criteria = c( "GVaR", "SR.GVaR", "mVaR", "SR.mVaR", "GES", "SR.GES", "mES", "SR.mES" ,  "StdDev" , "SR.StdDev")
 
-columns.crit = c(2:11);
+columns.crit = c(1:10);
 
-#output = read.csv( file = paste(names.input[1],".csv",sep=""), header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
-#summary(output[columns.crit])
+# output = read.csv( file = paste(names.input[1],".csv",sep=""), header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
+# summary(output)
+# summary(output[columns.crit])
 
 
 
 
 # 6. Optimization: number of starting values to try
 
-cMin = 2;
+cMin = 10;
 
 localsearch(R=R, weightgrid=weightgrid, from=from, to=to, names.input=names.input, names.output=names.output, cMin=cMin,
                criteria=criteria, columns.crit=columns.crit, p=0.95,
