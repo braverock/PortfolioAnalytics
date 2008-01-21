@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Ktris Boudt
-# $Id: optimizer.R,v 1.43 2008-01-21 01:39:15 brian Exp $
+# $Id: optimizer.R,v 1.44 2008-01-21 03:02:19 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -169,6 +169,14 @@ function (R, weightgrid, from, to,
 
     rows=nrow(weightgrid)
     # Function:
+    subsetrows= matrix(c(1,31000,31001,62000,62001,rows), nrow=3,byrow=TRUE)
+    #subsetrows= matrix(c(1,10,11,20,21,30), nrow=3,byrow=TRUE)
+    resultlist=vector("list", 3)
+    for (srow in 1:3) {
+        weightgridsave=weightgrid
+        weightgrid=weightgrid[subsetrows[srow,1]:subsetrows[srow,2],]
+        rownames(weightgrid)=rownames(weightgridsave[subsetrows[srow,1]:subsetrows[srow,2],])
+        #browser()
     for(row in rownames(weightgrid)) {
         # this would be for(n in c(2,5,10,20,50)) for a sampled weighting vector
 
@@ -316,22 +324,29 @@ function (R, weightgrid, from, to,
         # print( paste("Completed row: ",rownames(resultrow),":",date()) )
         # then rbind the rows
         # result    = rbind(result,resultrow)
-        result[rownames(resultrow),]=as.matrix(resultrow)
+        result[rownames(row),]=as.matrix(resultrow)
 
-        switch( rownames(resultrow),
-            "10000" = { print (paste("Row 10000 completed: ", date())) },
-            "20000" = { print (paste("Row 20000 completed: ", date())) },
-            "30000" = { print (paste("Row 30000 completed: ", date())) },
-            "40000" = { print (paste("Row 40000 completed: ", date())) },
-            "50000" = { print (paste("Row 50000 completed: ", date())) },
-            "60000" = { print (paste("Row 60000 completed: ", date())) },
-            "70000" = { print (paste("Row 70000 completed: ", date())) },
-            "80000" = { print (paste("Row 80000 completed: ", date())) },
-            "90000" = { print (paste("Row 90000 completed: ", date())) }
-        )
+        #         switch( rownames(resultrow),
+        #             "10000" = { print (paste("Row 10000 completed: ", date())) },
+        #             "20000" = { print (paste("Row 20000 completed: ", date())) },
+        #             "30000" = { print (paste("Row 30000 completed: ", date())) },
+        #             "40000" = { print (paste("Row 40000 completed: ", date())) },
+        #             "50000" = { print (paste("Row 50000 completed: ", date())) },
+        #             "60000" = { print (paste("Row 60000 completed: ", date())) },
+        #             "70000" = { print (paste("Row 70000 completed: ", date())) },
+        #             "80000" = { print (paste("Row 80000 completed: ", date())) },
+        #             "90000" = { print (paste("Row 90000 completed: ", date())) }
+        #         )
 
     } #end rows loop
+          resultlist[[srow]] <- result
+          weightgrid=weightgridsave
+          print(paste("Row ",subsetrows[srow,2]," completed ",date()))
+    } #end subset loop
 
+    result=rbind(resultlist[[1]],resultlist[[2]],resultlist[[3]])
+    rownames(result)=rownames(weightgrid)
+    browser()
     # set pretty labels for the columns
     #     colnames(result)=c("Cumulative Return","Mean Return,3 yr","VaR.CornishFisher,period","VaR.CornishFisher,3yr","Max Drawdown",
     #                    "Sharpe,period","Sharpe,3 yr", "Omega", "Std Dev","Std Dev,3yr" )
@@ -837,6 +852,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.43  2008/01/21 01:39:15  brian
+# - add switch and print statements for debug
+#
 # Revision 1.42  2008/01/20 23:07:58  brian
 # - use matrix for results to avoid data.frame factor BS
 #
