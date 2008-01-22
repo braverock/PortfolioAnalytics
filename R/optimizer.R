@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.56 2008-01-22 02:10:20 brian Exp $
+# $Id: optimizer.R,v 1.57 2008-01-22 02:58:56 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -486,9 +486,9 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
 
     benchmarkreturns = as.vector(benchmarkreturns)
 
-    # construct a matrix for the results that's the same size and labels as the input list
-    result=matrix(nrow=length(bfresults),ncol=ncol(bfresults[[1]]))
-    rownames(result)=names(bfresults)
+    # construct a matrix for the results that's the same size and labels as the input lists
+    result=matrix(nrow=nrow(yeargrid[-1,]),ncol=ncol(bfresults[[1]]))
+    rownames(result)=rownames(yeargrid[-1,])
     colnames(result)=colnames(bfresults[[1]])
     colns= colnames(bfresults[[1]])
     portfoliorows=nrow(bfresults[[1]])
@@ -497,7 +497,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
     }
 
     # Function:
-    for (rnum in 1:rows) {
+    for (rnum in 1:(rows-1)) {
         insample    = yeargrid[rnum,]
         outofsample = yeargrid[rnum+1,]
         yearname    = rownames(insample)
@@ -540,7 +540,6 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
                                 "GES.inception", "GES.period", "GES.3yr",
                                 "modES.period", "modES.3yr", "modES.inception")){
                 if (minmethod==coln){
-                    #browser()
                    # return the min of the BF in-sample results for that column
                     result[outname,coln]= rownames(inresults[which.min(inresults[1:portfoliorows,coln]),])
                 }
@@ -884,6 +883,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.56  2008/01/22 02:10:20  brian
+# -working much better, Backtest fn still fails with a subscriupt out of bounds error on some data
+#
 # Revision 1.55  2008/01/21 23:40:42  brian
 # - adjust the way we reference list elements to do it numberically.  apparently it's not easy to reference by a string
 #
