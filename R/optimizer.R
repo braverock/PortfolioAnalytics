@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.55 2008-01-21 23:40:42 brian Exp $
+# $Id: optimizer.R,v 1.56 2008-01-22 02:10:20 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -482,7 +482,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
 
 
     # Setup:
-    rows=nrow(yeargrid)
+    rows=nrow(yeargrid-1)
 
     benchmarkreturns = as.vector(benchmarkreturns)
 
@@ -490,26 +490,23 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
     result=matrix(nrow=length(bfresults),ncol=ncol(bfresults[[1]]))
     rownames(result)=names(bfresults)
     colnames(result)=colnames(bfresults[[1]])
+    colns= colnames(bfresults[[1]])
+    portfoliorows=nrow(bfresults[[1]])
+    if (cutat<portfoliorows) {
+        portfoliorows=cutat
+    }
 
     # Function:
-    for (rnum in 2:rows) {
-        insample    = yeargrid[rnum-1,]
-        outofsample = yeargrid[rnum,]
+    for (rnum in 1:rows) {
+        insample    = yeargrid[rnum,]
+        outofsample = yeargrid[rnum+1,]
         yearname    = rownames(insample)
         outname     = rownames(outofsample)
-        #         infrom      = insample [,1]
-        #         into        = insample [,2]
-        #         outfrom     = outofsample [,1]
-        #         outto       = outofsample [,2]
-        portfoliorows=nrow(bfresults[[1]])
-        if (cutat<portfoliorows) {
-            portfoliorows=cutat
-        }
-
+        inresults   = bfresults[[yearname]][1:portfoliorows,]
 
         #Check Utility fn for insample , and apply to out of sample row
-
-        for (coln in colnames(bfresults[[insample]])) {
+        print(paste("Starting",yearname,date()))
+        for (coln in colns) {
             ##################################
             # Risk/Reward maximization utility functions
             # for utility function
@@ -526,9 +523,9 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
                                 "SR.modES.period", "SR.modES.3yr", "SR.modES.inception")){
                 if (maxmethod==coln){
                     # return the max of the BF in-sample results for that column
-                    result[outname,coln]= rownames(bfresults[which.max(bfresults[[insample]][1:portfoliorows,coln]),])
+                    result[outname,coln]= rownames(inresults[which.max(inresults[1:portfoliorows,coln]),])
                 }
-            }
+            } #end maxmethod
 
             ##################################
             # Risk Reduction utility functions
@@ -543,11 +540,14 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
                                 "GES.inception", "GES.period", "GES.3yr",
                                 "modES.period", "modES.3yr", "modES.inception")){
                 if (minmethod==coln){
+                    #browser()
                    # return the min of the BF in-sample results for that column
-                    result[outname,coln]= rownames(bfresults[which.min(bfresults[[insample]][1:portfoliorows,coln]),])
+                    result[outname,coln]= rownames(inresults[which.min(inresults[1:portfoliorows,coln]),])
                 }
-            }
-        }
+            } #end minmethod
+        } # end columns loop
+
+        print(paste("Completed",yearname,date()))
 
         # add Equalweighted
         # EqualWeighted = 1
@@ -884,6 +884,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.55  2008/01/21 23:40:42  brian
+# - adjust the way we reference list elements to do it numberically.  apparently it's not easy to reference by a string
+#
 # Revision 1.54  2008/01/21 17:50:24  brian
 # - partial fix, Backtest fn still not working around lines 515-518
 #
