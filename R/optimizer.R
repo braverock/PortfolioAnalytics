@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.57 2008-01-22 02:58:56 brian Exp $
+# $Id: optimizer.R,v 1.58 2008-01-22 20:33:49 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -144,7 +144,7 @@ function (R, weightgrid, from, to,
     # Compute multivariate moments
     # should probably change this part to use zoo's rollapply to create the various groupings
 
-    threeyrfrom = to - 36; #for monthly data
+    threeyrfrom = to - 35; #for monthly data 36-35=1 for three year period
     if (threeyrfrom < 1 ) threeyrfrom = 1
 
     R.inception = R[1:to , ];
@@ -883,6 +883,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.57  2008/01/22 02:58:56  brian
+# - Backtest fn now tested and working with new output of BruteForcePortfolios->BacktestData
+#
 # Revision 1.56  2008/01/22 02:10:20  brian
 # -working much better, Backtest fn still fails with a subscriupt out of bounds error on some data
 #
