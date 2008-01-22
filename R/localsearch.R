@@ -8,11 +8,11 @@
 # Copyright (c) 2008 Kris Boudt and Brian G. Peterson
 # Kindly contact the authors for permission to use these functions
 ###############################################################################
-# $Id: localsearch.R,v 1.9 2008-01-21 11:13:39 kris Exp $
+# $Id: localsearch.R,v 1.10 2008-01-22 18:51:15 kris Exp $
 ###############################################################################
 
 
-localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
+localsearch = function(R, weightgrid, from, to, names.input, names.output, names.assets, cMin,
                criteria=c( "StdDev" , "SR.StdDev" ,
                         "GVaR", "SR.GVaR", "mVaR", "SR.mVaR",
                         "GES", "SR.GES", "mES", "SR.mES",   ...), columns.crit, p=0.95,
@@ -122,7 +122,8 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    StdDevfun = function(w){
                        return(  sqrt( t(w)%*%sigma%*%w  ))
                    }
-                   if( abs( ( global.best - StdDevfun(global.best.weight) )/StdDevfun(global.best.weight)    )>0.05    ){print("error StdDev definition")}
+                   if( abs( ( global.best - StdDevfun(global.best.weight) )/StdDevfun(global.best.weight)    )>0.05    ){
+                       print("error StdDev definition"); break;}
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=StdDevfun  , par.upper = upperbound , par.lower = lowerbound,
                                           A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
@@ -142,7 +143,8 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    NegSR.StdDevfun = function(w){
                        return( - (t(w)%*%mu) / sqrt( t(w)%*%sigma%*%w  )    )
                    }
-                   if( abs( ( global.best - NegSR.StdDevfun(global.best.weight) )/NegSR.StdDevfun(global.best.weight)    )>0.05    ){print("error SR.StdDev definition")}
+                   if( abs( ( global.best - NegSR.StdDevfun(global.best.weight) )/NegSR.StdDevfun(global.best.weight)    )>0.05    ){
+                        print("error SR.StdDev definition"); break; }
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.StdDevfun , par.upper = upperbound , par.lower = lowerbound,
                                           A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
@@ -160,9 +162,10 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    global.best = Y[best[1],c] ; global.best.weight = as.numeric(matrix(bestweights[1,],ncol=1));
 
                    GVaRfun = function(w){
-                      return (- (t(w)%*%mu) - qnorm(p)*sqrt( t(w)%*%sigma%*%w  ) )
+                      return (- (t(w)%*%mu) - qnorm(alpha)*sqrt( t(w)%*%sigma%*%w  ) )
                    }
-                   if( abs( ( global.best - GVaRfun(global.best.weight) )/GVaRfun(global.best.weight)    )>0.05    ){print("error GVaR definition")}
+                   if( abs( ( global.best - GVaRfun(global.best.weight) )/GVaRfun(global.best.weight)    )>0.05    ){
+                       print("error GVaR definition");break;}
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=GVaRfun  , par.upper = upperbound , par.lower = lowerbound,
                                           A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
@@ -183,7 +186,8 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                        GVaR = - (t(w)%*%mu) - qnorm(alpha)*sqrt( t(w)%*%sigma%*%w  )
                        return( - (t(w)%*%mu) / GVaR    )
                    }
-                   if( abs( ( global.best - NegSR.GVaRfun(global.best.weight) )/NegSR.GVaRfun(global.best.weight)    )>0.05    ){print("error SR GVaR definition")}
+                   if( abs( ( global.best - NegSR.GVaRfun(global.best.weight) )/NegSR.GVaRfun(global.best.weight)    )>0.05    ){
+                        print("error SR GVaR definition");break;}
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.GVaRfun , par.upper = upperbound , par.lower = lowerbound,
                                           A=matrix(rep(1,cAssets),nrow=1,ncol=cAssets),lin.lower=c(1),lin.upper=c(1))
@@ -208,7 +212,8 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                       h = h + (1/24)*(z^3 - 3*z)*exkurt - (1/36)*(2*z^3 - 5*z)*skew^2;
                       return (- (t(w)%*%mu) - h*sqrt( pm2  ) )
                    }
-                   if( abs( ( global.best - mVaRfun(global.best.weight) )/mVaRfun(global.best.weight)    )>0.05    ){print("error mVaR definition")}
+                   if( abs( ( global.best - mVaRfun(global.best.weight) )/mVaRfun(global.best.weight)    )>0.05    ){
+                      print("error mVaR definition");break;}
 
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=mVaRfun  , par.upper = upperbound , par.lower = lowerbound,
@@ -235,7 +240,8 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                       mVaR =  (- (t(w)%*%mu) - h*sqrt( pm2  ) )
                       return( - (t(w)%*%mu) / mVaR    )
                    }
-                   if( abs( ( global.best - NegSR.mVaRfun(global.best.weight) )/NegSR.mVaRfun(global.best.weight)    )>0.05    ){print("error SR mVaR definition")}
+                   if( abs( ( global.best - NegSR.mVaRfun(global.best.weight) )/NegSR.mVaRfun(global.best.weight)    )>0.05    ){
+                        print("error SR mVaR definition");break}
 
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.mVaRfun , par.upper = upperbound , par.lower = lowerbound,
@@ -256,7 +262,8 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                    GESfun = function(w){
                       return (- (t(w)%*%mu) + dnorm(qnorm(alpha))*sqrt(t(w)%*%sigma%*%w)/alpha )
                    }
-                   if( abs( ( global.best - GESfun(global.best.weight) )/GESfun(global.best.weight)    )>0.05    ){print("error GES definition")}
+                   if( abs( ( global.best - GESfun(global.best.weight) )/GESfun(global.best.weight)    )>0.05    ){
+                       print("error GES definition"); break; }
 
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=GESfun , par.upper = upperbound , par.lower = lowerbound,
@@ -278,7 +285,8 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                        GES = - (t(w)%*%mu) + dnorm(qnorm(alpha))*sqrt(t(w)%*%sigma%*%w)/alpha
                        return( - (t(w)%*%mu) / GES    )
                    }
-                   if( abs( ( global.best - NegSR.GESfun(global.best.weight) )/NegSR.GESfun(global.best.weight)    )>0.05    ){print("error SR GES definition")}
+                   if( abs( ( global.best - NegSR.GESfun(global.best.weight) )/NegSR.GESfun(global.best.weight)    )>0.05    ){
+                        print("error SR GES definition"); break; }
 
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.GESfun, par.upper = upperbound , par.lower = lowerbound,
@@ -341,7 +349,8 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
 
                        return (- (t(w)%*%mu) - sqrt(pm2)*min(-E,h) )
                    }
-                   if( abs( ( global.best - mESfun(global.best.weight) )/mESfun(global.best.weight)    )>0.05    ){print("error mES definition")}
+                   if( abs( ( global.best - mESfun(global.best.weight) )/mESfun(global.best.weight)    )>0.05    ){
+                        print("error mES definition"); break; }
 
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=mESfun  , par.upper = upperbound , par.lower = lowerbound,
@@ -404,7 +413,8 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
                        mES = - (t(w)%*%mu) - sqrt(pm2)*min(-E,h)
                        return ( - (t(w)%*%mu) / mES )
                    }
-                   if( abs( ( global.best - NegSR.mESfun(global.best.weight) )/NegSR.mESfun(global.best.weight)    )>0.05    ){print("error SR mES definition")}
+                   if( abs( ( global.best - NegSR.mESfun(global.best.weight) )/NegSR.mESfun(global.best.weight)    )>0.05    ){
+                      print("error SR mES definition"); break; }
 
                    for( k in c(1:cMin) ){
                        localoptim = donlp2( par=bestweights[k,] , fn=NegSR.mESfun , par.upper = upperbound , par.lower = lowerbound,
@@ -436,7 +446,10 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
     # Output save
     for( i in c(1:cCriteria) ){
         criterion = criteria[i];
-        write.table( matrix( out[c( ((i-1)*cPeriods+1)  : (i*cPeriods)  ),] ,ncol=cAssets) , file = paste(names.output[i],".csv",sep=""),
+        output = as.data.frame( out[c( ((i-1)*cPeriods+1)  : (i*cPeriods)  ),] );
+        rownames(output) = names.input;
+        colnames(output) = names.assets;
+        write.table( output , file = paste(names.output[i],".csv",sep=""),
             append = FALSE, quote = TRUE, sep = ",",
             eol = "\n", na = "NA", dec = ".", row.names = TRUE,
             col.names = TRUE, qmethod = "escape")
@@ -445,6 +458,9 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, cMin,
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.9  2008/01/21 11:13:39  kris
+# Fixed mistakes, built in checks that verify compatibility between grid of weights, the criteria values obtained by the grid search and the local search code
+#
 # Revision 1.7  2008/01/19 23:53:33  brian
 # - fix checkData for weightgrid
 #

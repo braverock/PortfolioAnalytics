@@ -9,6 +9,8 @@ source("localsearch.R")
 R=as.matrix(edhec[,c(2:12)]);
 summary(R);
 
+names.assets =colnames(edhec[,c(2:12)]);
+
 # 2. Load the weight vectors
 
 weightgrid = read.csv( file = "weightingvectors_11_instr_5to50.csv" ,
@@ -34,10 +36,11 @@ weightgrid = read.csv( file = "weightingvectors_11_instr_5to50.csv" ,
 # overly concentrated "corner" portfolios in the optimization, 
 # while the larger numbers of portfolios available with lower weights should lead to more balanced and favorable results.
 
-weightgrid = weightgrid[c(1:91543),]
+# weightgrid = weightgrid[c(1:91543),] 
+weightgrid = weightgrid[c(1:89233),] # 30\%
 
 lowerbound = rep(0.05,11);
-upperbound = rep(0.35,11);
+upperbound = rep(0.30,11);
 
 # 3. Specify the estimation period
 
@@ -45,20 +48,25 @@ upperbound = rep(0.35,11);
 # and the data is availaible from 1997,
 # the first year we can calculate mean/risk analytics for is the year 2000
 
-from = rep(1,8);
 to = seq( from= 3*12 , to = 10*12 , by=12 );
 
-
-# 4. Specify the names of the input and output files
-
-names.input = c( "1999","2000","2001","2002","2003","2004","2005","2006"  )
-
-# 2004.csv is the input file containing for that year in column the criteria
-
-names.output = c("GVaR.inception","SR.GVaR.inception","modVaR.inception","SR.modVaR.inception",
-   "GES.inception","SR.GES.inception","modES.inception","SR.modES.inception","StdDev.inception","SR.StdDev.inception")
-
-# mVaR_inception.csv will be the output file containing for that criterion, for each year the optimal weights
+ind3yr=F
+if(ind3yr){
+   from = to-3*12+1
+   # 4. Specify the names of the input and output files
+   names.input = c( "1999.3yr","2000.3yr","2001.3yr","2002.3yr","2003.3yr","2004.3yr","2005.3yr","2006.3yr"  )
+   # 2004.3yr.csv is the input file containing for that year in column the criteria
+   names.output = c("GVaR.3yr","SR.GVaR.3yr","modVaR.3yr","SR.modVaR.3yr",
+      "GES.3yr","SR.GES.3yr","modES.3yr","SR.modES.3yr","StdDev.3yr","SR.StdDev.3yr")
+}else{
+   from=rep(1,8)
+   # 4. Specify the names of the input and output files
+   names.input = c( "1999","2000","2001","2002","2003","2004","2005","2006"  )
+   # 2004.csv is the input file containing for that year in column the criteria
+   names.output = c("GVaR.inception","SR.GVaR.inception","modVaR.inception","SR.modVaR.inception",
+      "GES.inception","SR.GES.inception","modES.inception","SR.modES.inception","StdDev.inception","SR.StdDev.inception")
+   # mVaR_inception.csv will be the output file containing for that criterion, for each year the optimal weights
+}
 
 
 # 5. Specify the optimization criteria and in which column they are
@@ -77,11 +85,10 @@ columns.crit = c(1:10);
 
 # 6. Optimization: number of starting values to try
 
-cMin = 10;
+cMin = 10;  # at least 2
 
-localsearch(R=R, weightgrid=weightgrid, from=from, to=to, names.input=names.input, names.output=names.output, cMin=cMin,
-               criteria=criteria, columns.crit=columns.crit, p=0.95,
-               lowerbound = lowerbound, upperbound = upperbound)
+localsearch(R=R, weightgrid=weightgrid, from=from, to=to, names.input=names.input, names.output=names.output, names.assets = names.assets, 
+            cMin=cMin, criteria=criteria, columns.crit=columns.crit, p=0.95, lowerbound = lowerbound, upperbound = upperbound)
 
 
 
