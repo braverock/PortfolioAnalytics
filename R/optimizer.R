@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.59 2008-01-23 11:04:17 brian Exp $
+# $Id: optimizer.R,v 1.60 2008-01-23 17:34:17 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -719,7 +719,7 @@ function (R, portfolioreturns, yeargrid, backtestresults, show=NULL, benchmarkre
 
 # ------------------------------------------------------------------------------
 BacktestWeightDisplay =
-function(backtestresults, yeargrid, weightgrid, R)
+function(backtestresults, weightgrid)
 { # @author Brian G. Peterson
 
     # Description:
@@ -729,59 +729,37 @@ function(backtestresults, yeargrid, weightgrid, R)
     #                   utility function in each year/period
     #                   (output of Backtest function)
     #
+    # weightgrid        each row contains one weighting vector,
+    #                   same number of columns as your returns
+    #                   you probably want to have the column names of the weightgrid match your asset names
+    #
     # yeargrid          list of from/to vectors for the periods we've run the backtest over
     #                   yeargrid will have one row for the last out of sample year,
     #                   which is not calculated by BruteForcePortfolios
-    #
-    # weightgrid        each row contains one weighting vector, same number of columns as your returns
-    #
-    # R                 data frame of historical returns
     #
     # Return:
     # list of years/periods with each period containing a data frame of weights by utiltiy function
 
     # Setup:
-    rows=nrow(yeargrid)-1 # take out the first in-sample year
 
     cols = ncol(backtestresults) # get the number of utility functions
-    componentnames = colnames(R)
-    utilitynames   = colnames (backtestresults)
+
+    result=vector("list")
 
     # Function:
-    # first loop on out of sample years/periods
-    for (rnum in 2:rows) {
-        row = yeargrid[rnum,]
-        yearname=rownames(row)
-        # print(yearname)
-        if (rnum==2) {
-            #create empty list, as c() doesn't work the way you would expect with a list
-            result=vector("list")
+
+    for (row in 1:nrow(backtestresults)){
+        # print(rownames(backtestresults[row,,drop=FALSE]))
+        resultmatrix=matrix(nrow=ncol(backtestresults),ncol=ncol(weightgrid),byrow=TRUE )
+        colnames(resultmatrix)=colnames(weightgrid)
+        rownames(resultmatrix)=colnames(backtestresults)
+        for (col in 1:ncol(backtestresults)){
+            resultmatrix[col,1:ncol(weightgrid)]=t(weightgrid[backtestresults[row,col],])
         }
-
-        # now loop on all the utility functions
-        for (col in 1:cols) {
-            weightingvectornum = backtestresults[rnum,col]
-            #print (weightingvectornum)
-            weightingvector    = weightgrid[weightingvectornum,]
-            #print (weightingvector)
-            utilityname=colnames(backtestresults[rnum,col])
-            #print (utilityname)
-            utilityrow = c(t(weightingvector),utilityname)
-            #rownames(utilityrow)=rownames(weightingvector)
-            #print(utilityrow)
-            if (col==1){
-                currentyeardata=data.frame(utilityrow=utilityrow)
-            } else {
-                currentyeardata=rbind(currentyeardata,utilityrow)
-            }
-        } # end utility functions loop
-
-        colnames(currentyeardata)=c(componentnames,"Utility Function")
-        #assign each year into the list using the yearname as the index
-        result[[yearname]]=currentyeardata
-
-    } # end years/periods loop
-    names(result) = t(rownames(yeargrid[2:rows,]))
+        yearname=rownames(backtestresults[row,,drop=F])
+        browser()
+        result[[yearname]]=resultmatrix
+    }
 
     #Return:
     result
@@ -883,6 +861,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.59  2008/01/23 11:04:17  brian
+# - fix 3yr/period confusion in two ThreeYr utility functions in WeightedPortfolios
+#
 # Revision 1.58  2008/01/22 20:33:49  brian
 # - update three yr to to-35 for proper 36 month window
 #
