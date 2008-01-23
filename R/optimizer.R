@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.62 2008-01-23 21:46:44 brian Exp $
+# $Id: optimizer.R,v 1.63 2008-01-23 21:48:35 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -904,12 +904,11 @@ pfolioReturn <- function (R, weights=NULL, wealth.index = FALSE, method = c("com
     wealthindex=apply(wealthindex.weighted,1,sum)
 
     if (!wealth.index){
+        wealthindex=rbind(1,wealthindex)
         if(method=="simple"){
-            wealthindex=rbind(1,wealthindex)
             result = t(wealthindex/lag(wealthindex,-1) - 1)
         }
         if(method=="compound") {
-            wealthindex=rbind(1,wealthindex)
             result = t(diff(log(wealthindex)))
         }
         colnames(result)="portfolio.weightedreturns"
@@ -923,6 +922,10 @@ pfolioReturn <- function (R, weights=NULL, wealth.index = FALSE, method = c("com
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.62  2008/01/23 21:46:44  brian
+# - update to not lose first period in return stream
+# - add column names to make clear what the output is
+#
 # Revision 1.61  2008/01/23 20:32:52  brian
 # - replacement pfolioReturn function to calculate weighted returns
 #
