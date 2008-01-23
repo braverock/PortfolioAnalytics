@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.60 2008-01-23 17:34:17 brian Exp $
+# $Id: optimizer.R,v 1.61 2008-01-23 20:32:52 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -856,8 +856,61 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 
 # ------------------------------------------------------------------------------
-# GeometricReturn
-# use Return.annualized or Return.cumulative from Peter Carl in performance-analytics.R
+# pfolioReturn - replaces RMetrics pfolioReturn fn
+
+pfolioReturn <- function (R, weights=NULL, wealth.index = FALSE, method = c("compound","simple")) {
+
+    # Function to calculate weighted portfolio returns
+    #
+    # R                 data structure of component returns
+    #
+    # weights           usually a numeric vector which has the length of the number
+    #                   of  assets. The weights measures the normalized weights of
+    #                   the  individual assets. By default 'NULL', then an equally
+    #                   weighted set of assets is assumed.
+    #
+    # method:           "simple", "compound"
+    #
+    # wealth.index      if wealth.index is TRUE, return a wealth index, if false, return a return vector for each period
+
+    # Setup:
+    R=checkData(R,method="zoo")
+
+    method = method[1]
+
+    if (is.null(weights)){
+        # set up an equal weighted portfolio
+        weights = t(rep(1/ncol(R), ncol(R)))
+    }
+
+    if (ncol(weights) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
+
+    wealthindex.assets=cumprod(1+R)
+    wealthindex.weighted = matrix(nrow=nrow(R),ncol=ncol(R))
+    colnames(wealthindex.weighted)=colnames(wealthindex.assets)
+    rownames(wealthindex.weighted)=rownames(wealthindex.assets)
+
+    #Function:
+
+    for (col in 1:ncol(weights)){
+        wealthindex.weighted[,col]=weights[,col]*wealthindex.assets[,col]
+    }
+    wealthindex=apply(wealthindex.weighted,1,sum)
+
+    if (!wealth.index){
+        if(method=="simple"){
+            result = wealthindex/lag(wealthindex,-1) - 1
+        }
+        if(method=="compound") {
+            result = diff(log(wealthindex))
+        }
+
+    } else {
+        result = wealthindex
+    }
+
+    result
+}
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
