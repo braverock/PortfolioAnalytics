@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.58 2008-01-22 20:33:49 brian Exp $
+# $Id: optimizer.R,v 1.59 2008-01-23 11:04:17 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -239,7 +239,7 @@ function (R, weightgrid, from, to,
                     resultrow= cbind(resultrow,PeriodGVaR,PeriodSRGVaR)
                 },
                 ThreeYrGVaR = {
-                    ThreeYrGVaR = GVaR.MM(w=w, mu=mu.period, sigma = sigma.period, p=p )
+                    ThreeYrGVaR = GVaR.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, p=p )
                     ThreeYrSRGVaR =  mean.3yr/ThreeYrGVaR
                     colnames(ThreeYrGVaR)="GVaR.3yr"
                     colnames(ThreeYrSRGVaR)="SR.GVaR.3yr"
@@ -267,7 +267,7 @@ function (R, weightgrid, from, to,
                     resultrow= cbind(resultrow,InceptionmodVaR,InceptionSRmodVaR)
                 },
                 ThreeYrmodVaR = {
-                    ThreeYrmodVaR = mVaR.MM(w=w, mu=mu.period, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr, p=p )
+                    ThreeYrmodVaR = mVaR.MM(w=w, mu=mu.3yr, sigma = sigma.3yr, M3=M3.3yr , M4 =M4.3yr, p=p )
                     ThreeYrSRmodVaR = mean.3yr/ThreeYrmodVaR
                     colnames(ThreeYrmodVaR)="modVaR.3yr"
                     colnames(ThreeYrSRmodVaR)="SR.modVaR.3yr"
@@ -637,7 +637,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
 
 # ------------------------------------------------------------------------------
 BacktestDisplay =
-function (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Return", benchmarkreturns )
+function (R, portfolioreturns, yeargrid, backtestresults, show=NULL, benchmarkreturns )
 { # a function by Brian G. Peterson
 
     # Description:
@@ -763,9 +763,9 @@ function(backtestresults, yeargrid, weightgrid, R)
             weightingvectornum = backtestresults[rnum,col]
             #print (weightingvectornum)
             weightingvector    = weightgrid[weightingvectornum,]
-            print (weightingvector)
+            #print (weightingvector)
             utilityname=colnames(backtestresults[rnum,col])
-            print (utilityname)
+            #print (utilityname)
             utilityrow = c(t(weightingvector),utilityname)
             #rownames(utilityrow)=rownames(weightingvector)
             #print(utilityrow)
@@ -883,6 +883,9 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.58  2008/01/22 20:33:49  brian
+# - update three yr to to-35 for proper 36 month window
+#
 # Revision 1.57  2008/01/22 02:58:56  brian
 # - Backtest fn now tested and working with new output of BruteForcePortfolios->BacktestData
 #
