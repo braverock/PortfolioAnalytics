@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.61 2008-01-23 20:32:52 brian Exp $
+# $Id: optimizer.R,v 1.62 2008-01-23 21:46:44 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -872,6 +872,8 @@ pfolioReturn <- function (R, weights=NULL, wealth.index = FALSE, method = c("com
     # method:           "simple", "compound"
     #
     # wealth.index      if wealth.index is TRUE, return a wealth index, if false, return a return vector for each period
+    #
+    # @todo method doesn't really do anything right now.  the calculation of the price series would be different for simple than compound
 
     # Setup:
     R=checkData(R,method="zoo")
@@ -885,13 +887,17 @@ pfolioReturn <- function (R, weights=NULL, wealth.index = FALSE, method = c("com
 
     if (ncol(weights) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
+    #Function:
+
+    # construct the wealth index of unweighted assets
     wealthindex.assets=cumprod(1+R)
+
+    # build a structure for our weighted results
     wealthindex.weighted = matrix(nrow=nrow(R),ncol=ncol(R))
     colnames(wealthindex.weighted)=colnames(wealthindex.assets)
     rownames(wealthindex.weighted)=rownames(wealthindex.assets)
 
-    #Function:
-
+    # weight the results
     for (col in 1:ncol(weights)){
         wealthindex.weighted[,col]=weights[,col]*wealthindex.assets[,col]
     }
@@ -899,14 +905,17 @@ pfolioReturn <- function (R, weights=NULL, wealth.index = FALSE, method = c("com
 
     if (!wealth.index){
         if(method=="simple"){
-            result = wealthindex/lag(wealthindex,-1) - 1
+            wealthindex=rbind(1,wealthindex)
+            result = t(wealthindex/lag(wealthindex,-1) - 1)
         }
         if(method=="compound") {
-            result = diff(log(wealthindex))
+            wealthindex=rbind(1,wealthindex)
+            result = t(diff(log(wealthindex)))
         }
-
+        colnames(result)="portfolio.weightedreturns"
     } else {
-        result = wealthindex
+        result = t(t(wealthindex))
+        colnames(result)="portfolio.wealthindex"
     }
 
     result
@@ -914,6 +923,9 @@ pfolioReturn <- function (R, weights=NULL, wealth.index = FALSE, method = c("com
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.61  2008/01/23 20:32:52  brian
+# - replacement pfolioReturn function to calculate weighted returns
+#
 # Revision 1.59  2008/01/23 11:04:17  brian
 # - fix 3yr/period confusion in two ThreeYr utility functions in WeightedPortfolios
 #
