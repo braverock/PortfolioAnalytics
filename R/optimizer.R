@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.67 2008-01-24 22:10:01 brian Exp $
+# $Id: optimizer.R,v 1.68 2008-01-24 23:59:38 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -636,7 +636,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
 
 # ------------------------------------------------------------------------------
 BacktestDisplay =
-function (R, portfolioreturns, yeargrid, backtestresults, benchmarkreturns )
+function (R, bfresults, yeargrid, backtestresults, benchmarkreturns )
 { # a function by Brian G. Peterson
 
     # Description:
@@ -651,12 +651,14 @@ function (R, portfolioreturns, yeargrid, backtestresults, benchmarkreturns )
     #
     # R                 data frame of historical returns
     #
-    # portfolioreturns  list of data frames of set of returns for all possible portfolios
+    # bfresults      list of data frames of set of returns for all possible portfolios
     #                   (output of BruteForcePortfolios function)
     #
     # yeargrid          list of from/to vectors for the periods we've run the backtest over
     #                   yeargrid will have one row for the last out of sample year,
     #                   which is not calculated by BruteForcePortfolios
+    #
+    # weightgrid        each row contains one weighting vector, same number of columns as your returns
     #
     # backtestresults   data frame of set of weighting vectors for each
     #                   utility function in each year/period
@@ -669,6 +671,10 @@ function (R, portfolioreturns, yeargrid, backtestresults, benchmarkreturns )
     cols = ncol(backtestresults) # get the number of utility functions
 
     # add column for equal weighted portfolio in backtestresults
+    # probably rep 1 for number of rows, and cbind
+    equalcol= t(t(rep(1,nrow(backtestresults))))
+    colnames(equalcol)="Equal.Weighted"
+    backtestresults=cbind(backtestresults,as.matrix(equalcol))
 
     result=vector("list")
 
@@ -676,30 +682,35 @@ function (R, portfolioreturns, yeargrid, backtestresults, benchmarkreturns )
 
     for (row in 1:(nrow(backtestresults)-1)){
         yearrow   = backtestresults[row,,drop=FALSE]
-        from      = yearrow [,1]
-        to        = yearrow [,2]
+        from      = yeargrid [row,1]
+        to        = yeargrid [row,2]
         yearname  = rownames(backtestresults[row,,drop=F])
-        targetweightvector = backtestresults[row,col]
-        targetweights = weightgrid[targetweightvector,]
+
         # print(rownames(backtestresults[row,,drop=FALSE]))
 
-        resultcols = ncol(backtestresults)+3
+        resultcols = ncol(backtestresults)+2
         resultmatrix=matrix(nrow=ncol(backtestresults),ncol=resultcols,byrow=TRUE )
-        colnames(resultmatrix)=c("Return.Portfolio","skewness","kurtosis",colnames(backtestresults))
+        colnames(resultmatrix)=c("Return.Portfolio","skewness","kurtosis",colnames(backtestresults)[-(resultcols-2)])
         rownames(resultmatrix)=colnames(backtestresults)
-
-        # calc Return of the portfolio using Portfolio.Return function
-
-        # calc skewness
-
-        # calc kurtosis
 
         for (col in 1:ncol(backtestresults)){
             tcols=resultcols-3
             targetportfolio= backtestresults[row,col]
-            # browser()
-            resultmatrix[col,4:resultcols]=as.matrix(portfolioreturns[[yearname]][targetportfolio,1:(resultcols-3)])
+            resultmatrix[col,4:resultcols]=as.matrix(bfresults[[yearname]][targetportfolio,1:(resultcols-3)])
+            # calc Return of the portfolio using Portfolio.Return function
+            pwealth=Return.portfolio(R[from:to,], weights=weightgrid[targetportfolio,], wealth.index = TRUE)
+            preturn=t(diff(log(pwealth)))
+            totalreturn=pwealth[length(pwealth)]-1
+            pwealth=rbind(1,pwealth)
+            # calc skewness
+            pskew=skewness(as.vector(preturn))[1]
+            # calc kurtosis
+            pkurt=kurtosis(as.vector(preturn))[1]
+            resultmatrix[col,1]=totalreturn
+            resultmatrix[col,2]=pskew
+            resultmatrix[col,3]=pkurt
         }
+        # @todo add row for benchmark portfolios
 
         #browser()
         result[[yearname]]=resultmatrix
@@ -985,6 +996,10 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.67  2008/01/24 22:10:01  brian
+# - working version of BacktestDisplay fn
+#   - still needs Return, skewness, kurtosis
+#
 # Revision 1.66  2008/01/24 01:51:12  brian
 # - resolve conflicts from editing in two directories
 #
