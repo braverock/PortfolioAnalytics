@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.66 2008-01-24 01:51:12 brian Exp $
+# $Id: optimizer.R,v 1.67 2008-01-24 22:10:01 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -80,7 +80,8 @@ WeightedPortfolioUtility =
 function (R, weightgrid, from, to,
           methods=c( "PeriodGVaR", "ThreeYrGVaR", "InceptionGVaR", "PeriodmodVaR", "ThreeYrmodVaR", "InceptionmodVaR",
                      "PeriodGES", "ThreeYrGES", "InceptionGES", "PeriodmodES", "ThreeYrmodES", "InceptionmodES",
-                     "maxdd", "omega", "PeriodStdDev", "ThreeYrStdDev", "InceptionStdDev" )
+                     "PeriodStdDev", "ThreeYrStdDev", "InceptionStdDev",
+                     "PeriodReturn", "maxdd", "omega" )
           , p=0.95, ... )
 { # @author Brian G. Peterson and Kris Boudt
 
@@ -313,7 +314,7 @@ function (R, weightgrid, from, to,
                     colnames(InceptionSRmodES)="SR.modES.inception"
                     resultrow= cbind(resultrow,InceptionmodES,InceptionSRmodES)
                 }
-                # @todo put maxdrawdown, opmega back, think about others
+                # @todo put Return.portfolio, maxdrawdown, omega back, think about others
             )#end switch function
         }# end loop over methods
 
@@ -635,7 +636,7 @@ function(R,bfresults, yeargrid, cutat=1000000, benchmarkreturns )
 
 # ------------------------------------------------------------------------------
 BacktestDisplay =
-function (R, portfolioreturns, yeargrid, backtestresults, show=NULL, benchmarkreturns )
+function (R, portfolioreturns, yeargrid, backtestresults, benchmarkreturns )
 { # a function by Brian G. Peterson
 
     # Description:
@@ -673,16 +674,17 @@ function (R, portfolioreturns, yeargrid, backtestresults, show=NULL, benchmarkre
 
     # Function:
 
-    for (row in 1:nrow(backtestresults)){
-        yearrow   = backtestresults[rnum,,drop=FALSE]
+    for (row in 1:(nrow(backtestresults)-1)){
+        yearrow   = backtestresults[row,,drop=FALSE]
         from      = yearrow [,1]
         to        = yearrow [,2]
         yearname  = rownames(backtestresults[row,,drop=F])
-        targetweightvector = backtestresults[rol,col]
+        targetweightvector = backtestresults[row,col]
         targetweights = weightgrid[targetweightvector,]
         # print(rownames(backtestresults[row,,drop=FALSE]))
 
-        resultmatrix=matrix(nrow=ncol(backtestresults),ncol=ncol(backtestresults)+3,byrow=TRUE )
+        resultcols = ncol(backtestresults)+3
+        resultmatrix=matrix(nrow=ncol(backtestresults),ncol=resultcols,byrow=TRUE )
         colnames(resultmatrix)=c("Return.Portfolio","skewness","kurtosis",colnames(backtestresults))
         rownames(resultmatrix)=colnames(backtestresults)
 
@@ -693,10 +695,13 @@ function (R, portfolioreturns, yeargrid, backtestresults, show=NULL, benchmarkre
         # calc kurtosis
 
         for (col in 1:ncol(backtestresults)){
-            resultmatrix[col+3,1:ncol(backtestresults)]=portfolioreturns[[yearname]][backtestresults[row,col]]
+            tcols=resultcols-3
+            targetportfolio= backtestresults[row,col]
+            # browser()
+            resultmatrix[col,4:resultcols]=as.matrix(portfolioreturns[[yearname]][targetportfolio,1:(resultcols-3)])
         }
 
-        # browser()
+        #browser()
         result[[yearname]]=resultmatrix
     }
 
@@ -916,6 +921,7 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, method = c(
     # Setup:
     R=checkData(R,method="zoo")
 
+    # take only the first method
     method = method[1]
 
     if (is.null(weights)){
@@ -927,10 +933,14 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, method = c(
 
     #Function:
 
-    # construct the wealth index of unweighted assets
-    # this needs additional handling for the simple vs compound case
-    # code here is for compound returns only
-    wealthindex.assets=cumprod(1+R)
+
+    if(method=="simple"){
+        stop("Calculating wealth index for simple returns not yet supported.")
+    }
+    if(method=="compound") {
+        # construct the wealth index of unweighted assets
+        wealthindex.assets=cumprod(1+R)
+    }
 
     # build a structure for our weighted results
     wealthindex.weighted = matrix(nrow=nrow(R),ncol=ncol(R))
@@ -946,7 +956,7 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, method = c(
     # Peter suggests adding an option for "contribution" to this function
     # that would show the contribution to the returns in each period.
     # this would take the wealthindex.weighted series, and normalize the
-    # contribution in each period (calulate simple returns in each periods and normalize them to sum to 100%)
+    # contribution in each period (calulate simple returns in each period and normalize them to sum to 100%)
     # these columns could then be cbind'd to result as additional columns
 
     if (!wealth.index){
@@ -963,12 +973,6 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, method = c(
         colnames(result)="portfolio.wealthindex"
     }
 
-    # Peter suggests adding a "contribution" option that would show the
-    # contribution to the total return by each aset by each period.
-    # this will require normalizing each row of wealthindex.weighted into
-    # percentage contributions.  Each row will add to 1.
-    # these results may be cbind'd to the result time series before returning
-
     result
 } # end function Return.portfolio
 
@@ -981,6 +985,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.66  2008/01/24 01:51:12  brian
+# - resolve conflicts from editing in two directories
+#
 # Revision 1.65  2008/01/24 01:48:29  brian
 # - lay groundwork for rewriting BacktestDisplay fn
 #
@@ -995,6 +1002,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 # Revision 1.62  2008/01/23 21:46:44  brian
 # - update to not lose first period in return stream
 # - add column names to make clear what the output is
+#
+# Revision 1.60 2008-01-23 05:34 brian
+# - new version of BacktestWeightDisplay works with output of Backtest fn
 #
 # Revision 1.61  2008/01/23 20:32:52  brian
 # - replacement pfolioReturn function to calculate weighted returns
