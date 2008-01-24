@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.63 2008-01-23 21:48:35 brian Exp $
+# $Id: optimizer.R,v 1.64 2008-01-24 00:13:43 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -856,9 +856,11 @@ function (R, weightgrid, yeargrid, backtestweights)
 
 
 # ------------------------------------------------------------------------------
-# pfolioReturn - replaces RMetrics pfolioReturn fn
+# Return.portfolio - replaces RMetrics pfolioReturn fn
+# move this function and the pfolioReturn wrapper into Performanceanalytics and remove from this file
 
-pfolioReturn <- function (R, weights=NULL, wealth.index = FALSE, method = c("compound","simple")) {
+Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, method = c("compound","simple"))
+{ # @author Brian G. Peterson
 
     # Function to calculate weighted portfolio returns
     #
@@ -903,6 +905,12 @@ pfolioReturn <- function (R, weights=NULL, wealth.index = FALSE, method = c("com
     }
     wealthindex=apply(wealthindex.weighted,1,sum)
 
+    # Peter suggests adding an option for "contribution" to this function
+    # that would show the contribution to the returns in each period.
+    # this would take the wealthindex.weighted series, and normalize the
+    # contribution in each period (calulate simple returns in each periods and normalize them to sum to 100%)
+    # these columns could then be cbind'd to result as additional columns
+
     if (!wealth.index){
         wealthindex=rbind(1,wealthindex)
         if(method=="simple"){
@@ -917,11 +925,22 @@ pfolioReturn <- function (R, weights=NULL, wealth.index = FALSE, method = c("com
         colnames(result)="portfolio.wealthindex"
     }
 
+
     result
+} # end function Return.portfolio
+
+pfolioReturn <- function (x, weights=NULL, ...)
+{ # @author Brian G. Peterson
+  # pfolioReturn - replaces RMetrics pfolioReturn fn
+
+    Return.portfolio(R=x, weights=weights, ...=...)
 }
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.63  2008/01/23 21:48:35  brian
+# - move rbind outside inner if statements to remove dup code
+#
 # Revision 1.62  2008/01/23 21:46:44  brian
 # - update to not lose first period in return stream
 # - add column names to make clear what the output is
