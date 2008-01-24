@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.65 2008-01-24 01:48:29 brian Exp $
+# $Id: optimizer.R,v 1.66 2008-01-24 01:51:12 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -822,7 +822,7 @@ function (R, weightgrid, yeargrid, backtestweights)
     # @example      myreturns=MonthlyBacktestResults(edhec.returns[,1:10], weightingvectors, yeargrid, backtest)
 
     # Setup:
-    rows=nrow(backtestweights)-1
+    rows=nrow(backtestweights)-1 # hack for out of sample year at end
     ##rows=nrow(yeargrid)
     testcols=ncol(backtestweights)
     result=NA
@@ -895,7 +895,7 @@ function (R, weightgrid, yeargrid, backtestweights)
 # move this function and the pfolioReturn wrapper into Performanceanalytics and remove from this file
 
 Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, method = c("compound","simple"))
-{ # @author Brian G. Peterson
+{   # @author Brian G. Peterson
 
     # Function to calculate weighted portfolio returns
     #
@@ -910,7 +910,8 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, method = c(
     #
     # wealth.index      if wealth.index is TRUE, return a wealth index, if false, return a return vector for each period
     #
-    # @todo method doesn't really do anything right now.  the calculation of the price series would be different for simple than compound
+    # @todo method param doesn't really do anything right now.  the calculation of the price series would be different for simple than compound
+    # @todo add contribution
 
     # Setup:
     R=checkData(R,method="zoo")
@@ -927,6 +928,8 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, method = c(
     #Function:
 
     # construct the wealth index of unweighted assets
+    # this needs additional handling for the simple vs compound case
+    # code here is for compound returns only
     wealthindex.assets=cumprod(1+R)
 
     # build a structure for our weighted results
@@ -960,19 +963,27 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, method = c(
         colnames(result)="portfolio.wealthindex"
     }
 
+    # Peter suggests adding a "contribution" option that would show the
+    # contribution to the total return by each aset by each period.
+    # this will require normalizing each row of wealthindex.weighted into
+    # percentage contributions.  Each row will add to 1.
+    # these results may be cbind'd to the result time series before returning
 
     result
 } # end function Return.portfolio
 
 pfolioReturn <- function (x, weights=NULL, ...)
-{ # @author Brian G. Peterson
-  # pfolioReturn - replaces RMetrics pfolioReturn fn
+{   # @author Brian G. Peterson
+    # pfolioReturn wrapper - replaces RMetrics pfolioReturn fn
 
     Return.portfolio(R=x, weights=weights, ...=...)
 }
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.65  2008/01/24 01:48:29  brian
+# - lay groundwork for rewriting BacktestDisplay fn
+#
 # Revision 1.64  2008/01/24 00:13:43  brian
 # - rename pfolioReturn fn Return.portfolio
 # - create wrapper for RMetrics pfolioReturn fn for compatibility
