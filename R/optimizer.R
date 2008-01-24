@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.64 2008-01-24 00:13:43 brian Exp $
+# $Id: optimizer.R,v 1.65 2008-01-24 01:48:29 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -19,7 +19,7 @@
 # maxdrawdown (R)
 # cut.returns (R, cutrow, startrow=1)
 # weighttest (weightgrid, test=1)
-# WeightedReturns (R, weightgrid, from, to, methods, p, ...)
+# WeightedPortfolioUtility (R, weightgrid, from, to, methods, p, ...)
 # backtestDisplay (R, portfolioreturns, yeargrid, backtestresults, show="Cumulative.Return" )
 # MonthlyBacktestResults (R, weightgrid, yeargrid, backtestweights)
 #
@@ -74,11 +74,9 @@ function (weightgrid, test=1)
 }
 
 # ------------------------------------------------------------------------------
-# @todo: replace pfolioReturn(returnarray,weightingvector) from fPortfolio
-#        use updated Return.cumulative
 # @todo: use zoo rollapply in BruteForcePortfolios() fn
-#WeightedReturns =
-WeightedReturns =
+#WeightedPortfolioUtility =
+WeightedPortfolioUtility =
 function (R, weightgrid, from, to,
           methods=c( "PeriodGVaR", "ThreeYrGVaR", "InceptionGVaR", "PeriodmodVaR", "ThreeYrmodVaR", "InceptionmodVaR",
                      "PeriodGES", "ThreeYrGES", "InceptionGES", "PeriodmodES", "ThreeYrmodES", "InceptionmodES",
@@ -395,9 +393,9 @@ function(R,weightgrid,yeargrid,
         if ( rows > to   ) to   = rows
 
         # construct a data structure that holds each result for this year
-        resultarray = WeightedReturns(R, weightgrid, from, to, methods=methods, p=p, ...=...)
-        # at some point parallelize the call to WeightedReturns by using a clustered apply
-        # to call WeightedReturns so that this could get distributed
+        resultarray = WeightedPortfolioUtility(R, weightgrid, from, to, methods=methods, p=p, ...=...)
+        # at some point parallelize the call to WeightedPortfolioUtility by using a clustered apply
+        # to call WeightedPortfolioUtility so that this could get distributed
         # to multiple processor cores or threads
 
         # then write a CSV
@@ -663,57 +661,94 @@ function (R, portfolioreturns, yeargrid, backtestresults, show=NULL, benchmarkre
     #                   utility function in each year/period
     #                   (output of Backtest function)
     #
-    # show              column name to display from portfolioreturns row
-    #                   corresponding to weighting vector
-    #
     # benchmarkreturns  return vector for benchmark, should match the dates on
     #                   the in-sample portfolio returns
 
-    # Setup:
-    rows=nrow(yeargrid)-1  #hack to deal with incomplete data in current year
 
-    benchmarkreturns = as.vector(benchmarkreturns)
+    cols = ncol(backtestresults) # get the number of utility functions
+
+    # add column for equal weighted portfolio in backtestresults
+
+    result=vector("list")
 
     # Function:
-    for (rnum in 1:rows) {
-        yearrow   = yeargrid[rnum,]
+
+    for (row in 1:nrow(backtestresults)){
+        yearrow   = backtestresults[rnum,,drop=FALSE]
         from      = yearrow [,1]
         to        = yearrow [,2]
-        yearname  = rownames(yearrow)
+        yearname  = rownames(backtestresults[row,,drop=F])
+        targetweightvector = backtestresults[rol,col]
+        targetweights = weightgrid[targetweightvector,]
+        # print(rownames(backtestresults[row,,drop=FALSE]))
 
-        # construct a data structure that holds each result for this row
-        if (rnum==1) {
-                #create data.frame
-                result=data.frame()
-                resultrow=data.frame()
+        resultmatrix=matrix(nrow=ncol(backtestresults),ncol=ncol(backtestresults)+3,byrow=TRUE )
+        colnames(resultmatrix)=c("Return.Portfolio","skewness","kurtosis",colnames(backtestresults))
+        rownames(resultmatrix)=colnames(backtestresults)
+
+        # calc Return of the portfolio using Portfolio.Return function
+
+        # calc skewness
+
+        # calc kurtosis
+
+        for (col in 1:ncol(backtestresults)){
+            resultmatrix[col+3,1:ncol(backtestresults)]=portfolioreturns[[yearname]][backtestresults[row,col]]
         }
-        #if(rnum==rows){return}
 
-        # now build our results
-        Benchmark     = Return.cumulative (benchmarkreturns[from:to]) #do something spiffy to show the same stats for FoHF index
+        # browser()
+        result[[yearname]]=resultmatrix
+    }
 
-        # don't need this anymore since we put it in the backtest column grid
-        # EqualWeighted = portfolioreturns[[yearname]][1,show]
-
-        #get funky with the backtest array
-        backtestrow=t(portfolioreturns[[yearname]][t(backtestresults[yearname,]),show])
-
-        #print(backtestrow)
-        colnames(backtestrow)=colnames(backtestresults)
-
-        # first cbind the columns
-        resultrow = cbind( Benchmark, backtestrow)
-
-        rownames(resultrow) = yearname
-
-        # then rbind the rows
-        result    = rbind(result,resultrow)
-        # print(resultarray)
-
-    } # end rows loop
-
-    #Result:
+    #Return:
     result
+
+    #################################################################################################
+#     # Setup:
+#     rows=nrow(yeargrid)-1  #hack to deal with incomplete data in current year
+#
+#     benchmarkreturns = as.vector(benchmarkreturns)
+#
+#     # Function:
+#     for (rnum in 1:rows) {
+#         yearrow   = yeargrid[rnum,]
+#         from      = yearrow [,1]
+#         to        = yearrow [,2]
+#         yearname  = rownames(yearrow)
+#
+#         # construct a data structure that holds each result for this row
+#         if (rnum==1) {
+#                 #create data.frame
+#                 result=data.frame()
+#                 resultrow=data.frame()
+#         }
+#         #if(rnum==rows){return}
+#
+#         # now build our results
+#         Benchmark     = Return.cumulative (benchmarkreturns[from:to]) #do something spiffy to show the same stats for FoHF index
+#
+#         # don't need this anymore since we put it in the backtest column grid
+#         # EqualWeighted = portfolioreturns[[yearname]][1,show]
+#
+#         #get funky with the backtest array
+#         backtestrow=t(portfolioreturns[[yearname]][t(backtestresults[yearname,]),show])
+#
+#         #print(backtestrow)
+#         colnames(backtestrow)=colnames(backtestresults)
+#
+#         # first cbind the columns
+#         resultrow = cbind( Benchmark, backtestrow)
+#
+#         rownames(resultrow) = yearname
+#
+#         # then rbind the rows
+#         result    = rbind(result,resultrow)
+#         # print(resultarray)
+#
+#     } # end rows loop
+#
+#     #Result:
+#     result
 
 }
 
@@ -757,7 +792,7 @@ function(backtestresults, weightgrid)
             resultmatrix[col,1:ncol(weightgrid)]=t(weightgrid[backtestresults[row,col],])
         }
         yearname=rownames(backtestresults[row,,drop=F])
-        browser()
+        # browser()
         result[[yearname]]=resultmatrix
     }
 
@@ -938,6 +973,11 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.64  2008/01/24 00:13:43  brian
+# - rename pfolioReturn fn Return.portfolio
+# - create wrapper for RMetrics pfolioReturn fn for compatibility
+# - add notes about contribution of assets to portfolio return
+#
 # Revision 1.63  2008/01/23 21:48:35  brian
 # - move rbind outside inner if statements to remove dup code
 #
@@ -981,10 +1021,10 @@ pfolioReturn <- function (x, weights=NULL, ...)
 # - still need to initialize the result matrix
 #
 # Revision 1.49  2008/01/21 13:52:46  brian
-# - fix typo in ThreeYrStdDev method in WeightedReturns
+# - fix typo in ThreeYrStdDev method in WeightedPortfolioUtility
 #
 # Revision 1.48  2008/01/21 13:49:09  brian
-# - fix typo in ThreeYrGVaR method in WeightedReturns
+# - fix typo in ThreeYrGVaR method in WeightedPortfolioUtility
 # - add comments on the subsetting method we had to use to make this work on large weightgrid
 #
 # Revision 1.47  2008/01/21 04:41:47  brian
@@ -1029,7 +1069,7 @@ pfolioReturn <- function (x, weights=NULL, ...)
 # - add M3 and M4 moments to parameters for all modSR function calls
 #
 # Revision 1.34  2008/01/20 16:14:53  brian
-# - initialize result outside the loop in WeightedReturns
+# - initialize result outside the loop in WeightedPortfolioUtility
 # - initialize resultrow to have one row
 #
 # Revision 1.33  2008/01/20 14:54:55  brian
@@ -1065,7 +1105,7 @@ pfolioReturn <- function (x, weights=NULL, ...)
 # - add period, inception, and 3yr for each method
 #
 # Revision 1.23  2008/01/05 04:49:25  brian
-# - add 'methods' argument to parameterize WeightedReturns and BrutForcePortfolios functions
+# - add 'methods' argument to parameterize WeightedPortfolioUtility and BrutForcePortfolios functions
 # - not yet tested, may have issues with column names
 #
 # Revision 1.22  2008/01/04 14:27:07  brian
@@ -1151,7 +1191,7 @@ pfolioReturn <- function (x, weights=NULL, ...)
 #
 # Revision 1.2 2006-09-12 09:25:06 brian
 # - snapshot 2006-08-29
-# - add BruteForcePortfolios, WeightedReturns, and other small utility functions
+# - add BruteForcePortfolios, WeightedPortfolioUtility, and other small utility functions
 #
 # Revision 1.1 2006-09-12 09:23:14 brian
 # - initial revision 2006-08-28
