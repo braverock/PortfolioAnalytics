@@ -3,18 +3,21 @@ setwd("Y:/VaR/Cadiz/programs")
 library("PerformanceAnalytics")
 library("Rdonlp2");
 source("localsearch.R")
+detach(package:fEcofin)
 
 # 1. Load return data
 
-R=as.matrix(edhec[,c(2:12)]);
+R=edhec[,1:11]
 summary(R);
 
-names.assets =colnames(edhec[,c(2:12)]);
+names.assets =colnames(edhec[,1:11]);
 
 # 2. Load the weight vectors
 
 weightgrid = read.csv( file = "weightingvectors_11_instr_5to50.csv" ,
                header = FALSE,  sep = ",", na.strings = "NA", dec = ".")
+colnames(weightgrid)=colnames(edhec[,2:12])
+
 # header is FALSE, otherwise you skip 1 weight vector
 
 # For the 11 instrument portfolios, the portfolios are ordered in increasing concentration.
@@ -52,7 +55,7 @@ to = seq( from= 3*12 , to = 10*12 , by=12 );
 
 ind3yr=F
 if(ind3yr){
-   from = to-3*12+1
+   from = to-35
    # 4. Specify the names of the input and output files
    names.input = c( "1999.3yr","2000.3yr","2001.3yr","2002.3yr","2003.3yr","2004.3yr","2005.3yr","2006.3yr"  )
    # 2004.3yr.csv is the input file containing for that year in column the criteria
@@ -92,3 +95,10 @@ localsearch(R=R, weightgrid=weightgrid, from=from, to=to, names.input=names.inpu
 
 
 
+# create equalweighted
+cAssets = 11; cYears=length(names.input)
+output = as.data.frame( matrix( rep(1/cAssets, cAssets*cYears) , nrow=cYears)  );
+rownames(output) = names.input;
+colnames(output) = names.assets;
+write.table( output , file = "equalweighted.csv", append = FALSE, quote = TRUE, sep = ",", eol = "\n", na = "NA", dec = ".", row.names = TRUE,
+            col.names = TRUE, qmethod = "escape")

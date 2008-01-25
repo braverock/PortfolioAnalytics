@@ -8,7 +8,7 @@
 # Copyright (c) 2008 Kris Boudt and Brian G. Peterson
 # Kindly contact the authors for permission to use these functions
 ###############################################################################
-# $Id: localsearch.R,v 1.10 2008-01-22 18:51:15 kris Exp $
+# $Id: localsearch.R,v 1.11 2008-01-25 16:51:58 kris Exp $
 ###############################################################################
 
 
@@ -456,8 +456,125 @@ localsearch = function(R, weightgrid, from, to, names.input, names.output, names
     }
 }
 
+MonthlyReturns.LocalSearch =
+function (R, criteria, from =37, to=120, by=12, method = c("compound") )
+{ # @author Brian G. Peterson, Kris Boudt
+
+    # R                 data structure of component returns
+    #
+    # methods           vector containing the names of the csv files holding the portfolio weights 
+    #
+    # from, to          Monthly returns are computed for R[from:to,]  
+    #
+    # by                Frequency of changing portfolio weights
+    #
+
+    # Setup:
+    result=NULL
+    resultcols=NULL
+
+    # data type conditionals
+    # cut the return series for from:to
+    if (class(R) == "timeSeries") {
+        R = R@Data
+    } else {
+        R = R
+    }
+    R=checkData(R,method="zoo")
+    cRebalancing = ceiling( (to-from+1)/12);
+
+
+
+    for(meth in method){
+        result=c()
+        # Loop over the different optimisation criteria
+
+        for(criterion in criteria){
+        preturn=c();
+        weights = read.csv( file = paste( criterion,".csv",sep=""),
+                 header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
+        if (ncol(weights) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
+        for (row in 1:cRebalancing){
+               start = from+(row-1)*by;
+               end = min(from + row*by - 1,to);
+               preturn=c(preturn,Return.portfolio2( R[start:end,], weights=weights[row,], wealth.index = FALSE,method=meth) )
+           }
+           result = cbind(result, preturn)
+        }
+        colnames(result)=methods
+        rownames(result)=seq(from=from,to=to,by=1)
+        LSmonthlyportreturns=result
+        save(LSmonthlyportreturns, file=paste( meth ,".returns.LS.Rdata" , sep="")  )
+        write.table( result , file = paste( meth ,".returns.LS.csv" , sep="") ,
+            append = FALSE, quote = TRUE, sep = ",",
+            eol = "\n", na = "NA", dec = ".", row.names = TRUE,
+            col.names = TRUE, qmethod = "escape")
+    }
+
+    # Return Value:
+    # result
+
+}
+
+Return.portfolio2 <- function (R, weights=NULL, wealth.index = FALSE, method = c("compound","simple"))
+{   # @author Brian G. Peterson
+    # Setup:
+    R=checkData(R,method="zoo")
+
+    # take only the first method
+    method = method[1]
+
+    if (is.null(weights)){
+        # set up an equal weighted portfolio
+        weights = t(rep(1/ncol(R), ncol(R)))
+    }
+
+    if (ncol(weights) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
+
+    #Function:
+
+
+    if(method=="simple"){
+        stop("Calculating wealth index for simple returns not yet supported.")
+    }
+    if(method=="compound") {
+        # construct the wealth index of unweighted assets
+        wealthindex.assets=cumprod(1+R)
+    }
+
+    # build a structure for our weighted results
+    wealthindex.weighted = matrix(nrow=nrow(R),ncol=ncol(R))
+    colnames(wealthindex.weighted)=colnames(wealthindex.assets)
+    rownames(wealthindex.weighted)=rownames(wealthindex.assets)
+
+    # weight the results
+    for (col in 1:ncol(weights)){
+        wealthindex.weighted[,col]=weights[,col]*wealthindex.assets[,col]
+    }
+    wealthindex=apply(wealthindex.weighted,1,sum)
+
+    if (!wealth.index){
+        wealthindex=cbind(1,wealthindex)
+        wealthindex=rbind(1,wealthindex)
+        wealthindex=wealthindex[,-1]
+        # result=Return.calculate(wealthindex, method = method)
+        result=CalculateReturns(wealthindex, method = method)
+        colnames(result)="portfolio.weightedreturns"
+    } else {
+        result = t(t(wealthindex))
+        colnames(result)="portfolio.wealthindex"
+    }
+
+    result
+} # end function Return.portfolio
+
+
+
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.10  2008/01/22 18:51:15  kris
+# Corrected mistake in GVaR definition of localsearch.R and added row and columnnames to output
+#
 # Revision 1.9  2008/01/21 11:13:39  kris
 # Fixed mistakes, built in checks that verify compatibility between grid of weights, the criteria values obtained by the grid search and the local search code
 #
