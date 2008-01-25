@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.69 2008-01-25 01:28:54 brian Exp $
+# $Id: optimizer.R,v 1.70 2008-01-25 02:14:06 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -824,7 +824,7 @@ function (R, weightgrid, yeargrid, backtestresults)
             # look up the weighting vector of the target protfolio
             targetportfolio= backtestresults[row,col]
             # calc Return of the portfolio using Portfolio.Return function
-            preturn=Return.portfolio(R[from:to,], weights=weightgrid[targetportfolio,], wealth.index = FALSE)
+            preturn=Return.portfolio(R[from:to,], weights=weightgrid[targetportfolio,], wealth.index = FALSE,method="compound")
             if (col==1) {
                 #create data.frame
                 resultcols=preturn
@@ -833,7 +833,12 @@ function (R, weightgrid, yeargrid, backtestresults)
             }
             # @todo add col for benchmark portfolios
         }
-        result=rbind(result,resultcols)
+        if (row==1) {
+            #create data.frame
+            result=resultcols
+        } else {
+            result=rbind(result,resultcols)
+        }
         print(paste("Ending",yearname,date()))
     }
 
@@ -910,13 +915,10 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, method = c(
     # these columns could then be cbind'd to result as additional columns
 
     if (!wealth.index){
+        wealthindex=cbind(1,wealthindex)
         wealthindex=rbind(1,wealthindex)
-        if(method=="simple"){
-            result = t(wealthindex/lag(wealthindex,-1) - 1)
-        }
-        if(method=="compound") {
-            result = t(diff(log(wealthindex)))
-        }
+        wealthindex=wealthindex[,-1]
+        result=Return.calculate(wealthindex, method = method)
         colnames(result)="portfolio.weightedreturns"
     } else {
         result = t(t(wealthindex))
@@ -935,6 +937,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.69  2008/01/25 01:28:54  brian
+# - complete function MonthlyBacktestResults
+#
 # Revision 1.68  2008/01/24 23:59:38  brian
 # - add Return, skewness, kurtosis to BacktestDisplay
 # - always display results for equal weighted portfolio
