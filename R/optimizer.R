@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.68 2008-01-24 23:59:38 brian Exp $
+# $Id: optimizer.R,v 1.69 2008-01-25 01:28:54 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -699,9 +699,9 @@ function (R, bfresults, yeargrid, backtestresults, benchmarkreturns )
             resultmatrix[col,4:resultcols]=as.matrix(bfresults[[yearname]][targetportfolio,1:(resultcols-3)])
             # calc Return of the portfolio using Portfolio.Return function
             pwealth=Return.portfolio(R[from:to,], weights=weightgrid[targetportfolio,], wealth.index = TRUE)
-            preturn=t(diff(log(pwealth)))
             totalreturn=pwealth[length(pwealth)]-1
             pwealth=rbind(1,pwealth)
+            preturn=t(diff(log(pwealth)))
             # calc skewness
             pskew=skewness(as.vector(preturn))[1]
             # calc kurtosis
@@ -710,7 +710,9 @@ function (R, bfresults, yeargrid, backtestresults, benchmarkreturns )
             resultmatrix[col,2]=pskew
             resultmatrix[col,3]=pkurt
         }
+
         # @todo add row for benchmark portfolios
+        # Call WeightedPortfolioUtility with weight of 1?
 
         #browser()
         result[[yearname]]=resultmatrix
@@ -718,53 +720,6 @@ function (R, bfresults, yeargrid, backtestresults, benchmarkreturns )
 
     #Return:
     result
-
-    #################################################################################################
-#     # Setup:
-#     rows=nrow(yeargrid)-1  #hack to deal with incomplete data in current year
-#
-#     benchmarkreturns = as.vector(benchmarkreturns)
-#
-#     # Function:
-#     for (rnum in 1:rows) {
-#         yearrow   = yeargrid[rnum,]
-#         from      = yearrow [,1]
-#         to        = yearrow [,2]
-#         yearname  = rownames(yearrow)
-#
-#         # construct a data structure that holds each result for this row
-#         if (rnum==1) {
-#                 #create data.frame
-#                 result=data.frame()
-#                 resultrow=data.frame()
-#         }
-#         #if(rnum==rows){return}
-#
-#         # now build our results
-#         Benchmark     = Return.cumulative (benchmarkreturns[from:to]) #do something spiffy to show the same stats for FoHF index
-#
-#         # don't need this anymore since we put it in the backtest column grid
-#         # EqualWeighted = portfolioreturns[[yearname]][1,show]
-#
-#         #get funky with the backtest array
-#         backtestrow=t(portfolioreturns[[yearname]][t(backtestresults[yearname,]),show])
-#
-#         #print(backtestrow)
-#         colnames(backtestrow)=colnames(backtestresults)
-#
-#         # first cbind the columns
-#         resultrow = cbind( Benchmark, backtestrow)
-#
-#         rownames(resultrow) = yearname
-#
-#         # then rbind the rows
-#         result    = rbind(result,resultrow)
-#         # print(resultarray)
-#
-#     } # end rows loop
-#
-#     #Result:
-#     result
 
 }
 
@@ -821,7 +776,7 @@ function(backtestresults, weightgrid)
 #MonthlyBacktestResults =
 # use pfolioReturn(returnarray,weightingvector) from fPortfolio
 MonthlyBacktestResults =
-function (R, weightgrid, yeargrid, backtestweights)
+function (R, weightgrid, yeargrid, backtestresults)
 { # @author Brian G. Peterson
 
     # R                 data structure of component returns
@@ -830,18 +785,13 @@ function (R, weightgrid, yeargrid, backtestweights)
     #
     # yeargrid          list of from/to vectors for the periods we want to backtest over
     #
-    # backtestweights
-    #
-    # @returns      data frame where each row has the same index number as a weighting vector,
-    #               and each column is one of your metrics from inside this function
-    #
-    # @example      myreturns=MonthlyBacktestResults(edhec.returns[,1:10], weightingvectors, yeargrid, backtest)
+    # backtestresults   data frame of set of weighting vectors for each
+    #                   utility function in each year/period
+    #                   (output of Backtest function)
 
     # Setup:
-    rows=nrow(backtestweights)-1 # hack for out of sample year at end
-    ##rows=nrow(yeargrid)
-    testcols=ncol(backtestweights)
-    result=NA
+    result=NULL
+    resultcols=NULL
 
     # data type conditionals
     # cut the return series for from:to
@@ -853,52 +803,41 @@ function (R, weightgrid, yeargrid, backtestweights)
 
     if (ncol(weightgrid) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
+    # add column for equal weighted portfolio in backtestresults
+    # probably rep 1 for number of rows, and cbind
+    equalcol= t(t(rep(1,nrow(backtestresults))))
+    colnames(equalcol)="Equal.Weighted"
+    backtestresults=cbind(backtestresults,as.matrix(equalcol))
 
-    # Function:
-    for(row in 1:rows) {
-        yearname  = rownames(backtestweights[row,])
-        yearrow   = yeargrid[yearname,]
-        from      = yeargrid [yearname,1]
-        to        = yeargrid [yearname,2]
-
+    result=data.frame()
+    for (row in 1:(nrow(backtestresults)-1)){
         # ok, we're looping on year.
         # for each year, we need to apply the weights in our backtest results to the portfolio and get a monthly return
+        yearrow   = backtestresults[row,,drop=FALSE]
+        yearname  = rownames(backtestresults[row,,drop=F])
+        from      = yeargrid [yearname,1]
+        to        = yeargrid [yearname,2]
+        print(paste("Starting",yearname,date()))
+        resultcols=NULL
 
-        for (col in 1:testcols) {
-
-            w = as.numeric(weightgrid[backtestweights[row,col],])
-
-            # pfolioReturn
-            colreturn=pfolioReturn(R[from:to,],w)
-
+        for (col in 1:ncol(backtestresults)){
+            # look up the weighting vector of the target protfolio
+            targetportfolio= backtestresults[row,col]
+            # calc Return of the portfolio using Portfolio.Return function
+            preturn=Return.portfolio(R[from:to,], weights=weightgrid[targetportfolio,], wealth.index = FALSE)
             if (col==1) {
-                # add the edhec returns
-                # edhec = NA
-
-                # add the equal weighted portfolios
-                equalweight = pfolioReturn(R[from:to,],as.numeric(weightgrid[1,]))
-                #colnames(equalweight)="EqualWeighted"
-
                 #create data.frame
-                resultcol=data.frame(Value=equalweight)
+                resultcols=preturn
+            } else {
+                resultcols=cbind(resultcols,preturn)
             }
-
-            mycol=data.frame(Value=colreturn)
-            resultcol=cbind(resultcol,mycol)
-
+            # @todo add col for benchmark portfolios
         }
-        colnames(resultcol)=c("EqualWeighted",colnames(backtestweights))
-        if (row==1) {
-                #create data.frame
-                result=data.frame(resultcol)
-        } else {
-            resultrow = data.frame(resultcol)
-            result    = rbind(result,resultrow)
-        }
+        result=rbind(result,resultcols)
+        print(paste("Ending",yearname,date()))
+    }
 
-    } #end rows loop
-
-    # set pretty labels for things eventually
+    colnames(result)=colnames(backtestresults)
 
     # Return Value:
     result
@@ -996,6 +935,10 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.68  2008/01/24 23:59:38  brian
+# - add Return, skewness, kurtosis to BacktestDisplay
+# - always display results for equal weighted portfolio
+#
 # Revision 1.67  2008/01/24 22:10:01  brian
 # - working version of BacktestDisplay fn
 #   - still needs Return, skewness, kurtosis
