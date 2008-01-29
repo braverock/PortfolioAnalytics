@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.73 2008-01-29 18:23:20 brian Exp $
+# $Id: optimizer.R,v 1.74 2008-01-29 20:16:21 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -941,11 +941,11 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
     if (contribution==TRUE){
         # show the contribution to the returns in each period.
         ncols = ncol(R)
-        contributionlist=apply (R,1, function(x,weightgrid){ as.vector(x* weights)},weights=weights)
+        contributionlist=apply (R,1, function(x,weights){ as.vector(x* weights)},weights=weights)
         # apply creates a list for some reason, turn it back into a matrix
         contributionmatrix=matrix(nrow=nrow(R),ncol=ncols)
-        for(row in 1:nrow(R)){
-            contributionmatrix[row,1:ncols]=contributionlist[[row]]
+        for(row in 1:length(contributionlist)){
+            contributionmatrix[row,]=t(t(contributionlist[[row]]))
         }
         rownames(contributionmatrix)=rownames(R)
         colnames(contributionmatrix)=colnames(R)
@@ -968,6 +968,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.73  2008/01/29 18:23:20  brian
+# - add contribution to Return.portfolio
+#
 # Revision 1.72  2008/01/29 02:59:24  brian
 # - comment browser() command
 #
