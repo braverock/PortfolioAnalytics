@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.70 2008-01-25 02:14:06 brian Exp $
+# $Id: optimizer.R,v 1.71 2008-01-29 02:58:30 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -754,18 +754,34 @@ function(backtestresults, weightgrid)
 
     # Function:
 
-    for (row in 1:nrow(backtestresults)){
-        # print(rownames(backtestresults[row,,drop=FALSE]))
-        resultmatrix=matrix(nrow=ncol(backtestresults),ncol=ncol(weightgrid),byrow=TRUE )
-        colnames(resultmatrix)=colnames(weightgrid)
-        rownames(resultmatrix)=colnames(backtestresults)
-        for (col in 1:ncol(backtestresults)){
-            resultmatrix[col,1:ncol(weightgrid)]=t(weightgrid[backtestresults[row,col],])
+    for (col in 1:ncol(backtestresults)){
+        # we're looping on each column in the backtest results (objective functions)
+        resultmatrix=matrix(nrow=ncol(weightgrid),ncol=nrow(backtestresults),byrow=TRUE )
+        colnames(resultmatrix)=rownames(backtestresults) # years
+        rownames(resultmatrix)=colnames(weightgrid)      # instruments
+        for (row in 1:nrow(backtestresults)){
+            # now loop on years
+            resultmatrix[1:ncol(weightgrid),row]=t(weightgrid[backtestresults[row,col],])
         }
-        yearname=rownames(backtestresults[row,,drop=F])
-        # browser()
-        result[[yearname]]=resultmatrix
+        objname=colnames(backtestresults[,col,drop=F])
+        browser()
+        result[[objname]]=resultmatrix
     }
+
+    # @todo put a method in here or something to let the user decide how to arrange
+    # arrange list by years with rows as objective functions and columns as instruments
+    #     for (row in 1:nrow(backtestresults)){
+    #         # print(rownames(backtestresults[row,,drop=FALSE]))
+    #         resultmatrix=matrix(nrow=ncol(backtestresults),ncol=ncol(weightgrid),byrow=TRUE )
+    #         colnames(resultmatrix)=colnames(weightgrid)
+    #         rownames(resultmatrix)=colnames(backtestresults)
+    #         for (col in 1:ncol(backtestresults)){
+    #             resultmatrix[col,1:ncol(weightgrid)]=t(weightgrid[backtestresults[row,col],])
+    #         }
+    #         yearname=rownames(backtestresults[row,,drop=F])
+    #         # browser()
+    #         result[[yearname]]=resultmatrix
+    #     }
 
     #Return:
     result
@@ -937,6 +953,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.70  2008/01/25 02:14:06  brian
+# - fix errors in data frrame/matrix handling in Return generating functions
+#
 # Revision 1.69  2008/01/25 01:28:54  brian
 # - complete function MonthlyBacktestResults
 #
