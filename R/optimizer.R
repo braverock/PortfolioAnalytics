@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.71 2008-01-29 02:58:30 brian Exp $
+# $Id: optimizer.R,v 1.72 2008-01-29 02:59:24 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -764,7 +764,7 @@ function(backtestresults, weightgrid)
             resultmatrix[1:ncol(weightgrid),row]=t(weightgrid[backtestresults[row,col],])
         }
         objname=colnames(backtestresults[,col,drop=F])
-        browser()
+        #browser()
         result[[objname]]=resultmatrix
     }
 
@@ -953,6 +953,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.71  2008/01/29 02:58:30  brian
+# - reverse output of BacktestWeightDisplay fn to make it easier to graph weights.
+#
 # Revision 1.70  2008/01/25 02:14:06  brian
 # - fix errors in data frrame/matrix handling in Return generating functions
 #
