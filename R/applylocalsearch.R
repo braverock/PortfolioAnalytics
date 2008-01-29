@@ -4,7 +4,7 @@ library("PerformanceAnalytics")
 library("Rdonlp2");
 source("localsearch.R")
 detach(package:fEcofin)
-
+data("edhec")
 # 1. Load return data
 
 R=edhec[,1:11]
@@ -39,11 +39,11 @@ colnames(weightgrid)=colnames(edhec[,2:12])
 # overly concentrated "corner" portfolios in the optimization, 
 # while the larger numbers of portfolios available with lower weights should lead to more balanced and favorable results.
 
-# weightgrid = weightgrid[c(1:91543),] 
-weightgrid = weightgrid[c(1:89233),] # 30\%
+weightgrid = weightgrid[c(1:91543),]  # 30\%
+#weightgrid = weightgrid[c(1:89233),]
 
-lowerbound = rep(0.05,11);
-upperbound = rep(0.30,11);
+lowerbound = rep(0.025,11);
+upperbound = rep(0.35,11);
 
 # 3. Specify the estimation period
 
@@ -53,7 +53,7 @@ upperbound = rep(0.30,11);
 
 to = seq( from= 3*12 , to = 10*12 , by=12 );
 
-ind3yr=F
+ind3yr=T
 if(ind3yr){
    from = to-35
    # 4. Specify the names of the input and output files
@@ -91,7 +91,7 @@ columns.crit = c(1:10);
 cMin = 10;  # at least 2
 
 localsearch(R=R, weightgrid=weightgrid, from=from, to=to, names.input=names.input, names.output=names.output, names.assets = names.assets, 
-            cMin=cMin, criteria=criteria, columns.crit=columns.crit, p=0.95, lowerbound = lowerbound, upperbound = upperbound)
+            cMin=cMin, criteria=criteria, columns.crit=columns.crit, p=0.95, lowerbound = lowerbound, upperbound = upperbound, EW=F)
 
 
 
