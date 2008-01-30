@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.75 2008-01-30 23:25:54 brian Exp $
+# $Id: optimizer.R,v 1.76 2008-01-30 23:34:00 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -929,14 +929,14 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
 
         # weighted cumulative returns
         weightedcumcont=t(apply (wealthindex.assets,1, function(x,weights){ as.vector((x-1)* weights)},weights=weights))
-        weightedreturns=t(diff(rbind(0,weightedcumcont)))
-#        colnames(weightedreturns)=colnames(wealthindex.assets)
+        weightedreturns=diff(rbind(0,weightedcumcont))
+#       colnames(weightedreturns)=colnames(wealthindex.assets)
 #        rownames(weightedreturns)=rownames(wealthindex.assets)
     }
 
     if (!wealth.index){
-        result=apply(weightedreturns,1,sum)
-#        colnames(result)="portfolio.returns"
+        result=as.matrix(apply(weightedreturns,1,sum),ncol=1)
+        colnames(result)="portfolio.returns"
     } else {
 #         result = t(t(wealthindex))
 #         colnames(result)="portfolio.wealthindex"
