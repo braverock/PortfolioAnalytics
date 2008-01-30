@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.74 2008-01-29 20:16:21 brian Exp $
+# $Id: optimizer.R,v 1.75 2008-01-30 23:25:54 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -909,7 +909,8 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
 
     if(method=="simple"){
         stop("Calculating wealth index for simple returns not yet supported.")
-        wealthindex=t(t(apply(R * weights, 1, sum)))
+        #weighted simple returns
+        weightedreturns=t(t(apply(R * weights, 1, sum)))
     }
     if(method=="compound") {
         # construct the wealth index of unweighted assets
@@ -917,43 +918,46 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
 
         # build a structure for our weighted results
         wealthindex.weighted = matrix(nrow=nrow(R),ncol=ncol(R))
-        colnames(wealthindex.weighted)=colnames(wealthindex.assets)
-        rownames(wealthindex.weighted)=rownames(wealthindex.assets)
+#        colnames(wealthindex.weighted)=colnames(wealthindex.assets)
+#        rownames(wealthindex.weighted)=rownames(wealthindex.assets)
 
         # weight the results
-        for (col in 1:ncol(weights)){
-            wealthindex.weighted[,col]=weights[,col]*wealthindex.assets[,col]
-        }
-        wealthindex=apply(wealthindex.weighted,1,sum)
+        #         for (col in 1:ncol(weights)){
+        #             wealthindex.weighted[,col]=weights[,col]*wealthindex.assets[,col]
+        #         }
+        #         wealthindex=apply(wealthindex.weighted,1,sum)
+
+        # weighted cumulative returns
+        weightedcumcont=t(apply (wealthindex.assets,1, function(x,weights){ as.vector((x-1)* weights)},weights=weights))
+        weightedreturns=t(diff(rbind(0,weightedcumcont)))
+#        colnames(weightedreturns)=colnames(wealthindex.assets)
+#        rownames(weightedreturns)=rownames(wealthindex.assets)
     }
 
     if (!wealth.index){
-        wealthindex=cbind(1,wealthindex)
-        wealthindex=rbind(1,wealthindex)
-        wealthindex=wealthindex[,-1]
-        result=Return.calculate(wealthindex, method = method)
-        colnames(result)="portfolio.weightedreturns"
+        result=apply(weightedreturns,1,sum)
+#        colnames(result)="portfolio.returns"
     } else {
-        result = t(t(wealthindex))
-        colnames(result)="portfolio.wealthindex"
+#         result = t(t(wealthindex))
+#         colnames(result)="portfolio.wealthindex"
     }
 
     if (contribution==TRUE){
         # show the contribution to the returns in each period.
-        ncols = ncol(R)
-        contributionlist=apply (R,1, function(x,weights){ as.vector(x* weights)},weights=weights)
-        # apply creates a list for some reason, turn it back into a matrix
-        contributionmatrix=matrix(nrow=nrow(R),ncol=ncols)
-        for(row in 1:length(contributionlist)){
-            contributionmatrix[row,]=t(t(contributionlist[[row]]))
-        }
-        rownames(contributionmatrix)=rownames(R)
-        colnames(contributionmatrix)=colnames(R)
-        # perhaps add a normalized option in the future
-        # this would take the wealthindex.weighted series, and normalize the
-        # contribution in each period (calulate simple returns in each period and normalize them to sum to 100%)
-        # these columns could then be cbind'd to result as additional columns
-        result=cbind(result,contributionmatrix)
+#         ncols = ncol(R)
+#         contributionlist=apply (R,1, function(x,weights){ as.vector(x* weights)},weights=weights)
+#         # apply creates a list for some reason, turn it back into a matrix
+#         contributionmatrix=matrix(nrow=nrow(R),ncol=ncols)
+#         for(row in 1:length(contributionlist)){
+#             contributionmatrix[row,]=t(t(contributionlist[[row]]))
+#         }
+#         rownames(contributionmatrix)=rownames(R)
+#         colnames(contributionmatrix)=colnames(R)
+#         # perhaps add a normalized option in the future
+#         # this would take the wealthindex.weighted series, and normalize the
+#         # contribution in each period (calulate simple returns in each period and normalize them to sum to 100%)
+#         # these columns could then be cbind'd to result as additional columns
+        result=cbind(result,weightedreturns)
     }
 
     result
@@ -968,6 +972,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.74  2008/01/29 20:16:21  brian
+# - fixed, tested contribution option for Return.portfolio fn
+#
 # Revision 1.73  2008/01/29 18:23:20  brian
 # - add contribution to Return.portfolio
 #
