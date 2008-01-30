@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.76 2008-01-30 23:34:00 brian Exp $
+# $Id: optimizer.R,v 1.77 2008-01-30 23:41:54 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -837,7 +837,7 @@ function (R, weightgrid, yeargrid, backtestresults)
         resultcols=NULL
 
         for (col in 1:ncol(backtestresults)){
-            # look up the weighting vector of the target protfolio
+            # look up the weighting vector of the target portfolio
             targetportfolio= backtestresults[row,col]
             # calc Return of the portfolio using Portfolio.Return function
             preturn=Return.portfolio(R[from:to,], weights=weightgrid[targetportfolio,], wealth.index = FALSE,method="compound")
@@ -908,7 +908,7 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
 
 
     if(method=="simple"){
-        stop("Calculating wealth index for simple returns not yet supported.")
+        # stop("Calculating wealth index for simple returns not yet supported.")
         #weighted simple returns
         weightedreturns=t(t(apply(R * weights, 1, sum)))
     }
@@ -930,7 +930,7 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
         # weighted cumulative returns
         weightedcumcont=t(apply (wealthindex.assets,1, function(x,weights){ as.vector((x-1)* weights)},weights=weights))
         weightedreturns=diff(rbind(0,weightedcumcont))
-#       colnames(weightedreturns)=colnames(wealthindex.assets)
+        colnames(weightedreturns)=colnames(wealthindex.assets)
 #        rownames(weightedreturns)=rownames(wealthindex.assets)
     }
 
@@ -938,26 +938,12 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
         result=as.matrix(apply(weightedreturns,1,sum),ncol=1)
         colnames(result)="portfolio.returns"
     } else {
-#         result = t(t(wealthindex))
-#         colnames(result)="portfolio.wealthindex"
+        stop("This is broken right now.  Calculate your wealth index from the return series.")
     }
 
     if (contribution==TRUE){
         # show the contribution to the returns in each period.
-#         ncols = ncol(R)
-#         contributionlist=apply (R,1, function(x,weights){ as.vector(x* weights)},weights=weights)
-#         # apply creates a list for some reason, turn it back into a matrix
-#         contributionmatrix=matrix(nrow=nrow(R),ncol=ncols)
-#         for(row in 1:length(contributionlist)){
-#             contributionmatrix[row,]=t(t(contributionlist[[row]]))
-#         }
-#         rownames(contributionmatrix)=rownames(R)
-#         colnames(contributionmatrix)=colnames(R)
-#         # perhaps add a normalized option in the future
-#         # this would take the wealthindex.weighted series, and normalize the
-#         # contribution in each period (calulate simple returns in each period and normalize them to sum to 100%)
-#         # these columns could then be cbind'd to result as additional columns
-        result=cbind(result,weightedreturns)
+        result=cbind(weightedreturns,result)
     }
 
     result
@@ -972,6 +958,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.76  2008/01/30 23:34:00  brian
+# - add rowname for cumulative returns
+#
 # Revision 1.74  2008/01/29 20:16:21  brian
 # - fixed, tested contribution option for Return.portfolio fn
 #
