@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.81 2008-01-31 02:10:32 brian Exp $
+# $Id: optimizer.R,v 1.82 2008-01-31 04:16:24 peter Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -871,7 +871,7 @@ Return.portfolio.multiweight <- function (R, weights, yeargrid, ...){
     weights=checkData(weights,method="matrix")
 
     # take only the first method
-    method = method[1]
+#     method = method[1]
 
     # then loop:
     for (row in 1:nrow(yeargrid)){
@@ -978,6 +978,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.81  2008/01/31 02:10:32  brian
+# - pass ... instead of method argument in Return.portfolio.multiweights
+#
 # Revision 1.80  2008/01/31 01:23:00  brian
 # - add as.vector in method simle for weights in Return.portfolio
 #   - **not sure the simple method works properly**
