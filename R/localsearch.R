@@ -8,7 +8,7 @@
 # Copyright (c) 2008 Kris Boudt and Brian G. Peterson
 # Kindly contact the authors for permission to use these functions
 ###############################################################################
-# $Id: localsearch.R,v 1.12 2008-01-29 08:30:04 kris Exp $
+# $Id: localsearch.R,v 1.13 2008-01-31 13:51:11 kris Exp $
 ###############################################################################
 
 
@@ -576,44 +576,43 @@ function (R, criteria, from =37, to=120, by=12, method = c("compound") )
 
 
 
-    for(meth in method){
-        result=c()
-        # Loop over the different optimisation criteria
+    result.compound=c()
+    result.simple=c()
+     # Loop over the different optimisation criteria
 
-        for(criterion in criteria){
-        preturn=c();
+     for(criterion in criteria){
+        pcompoundreturn=psimplereturn=c();
         weights = read.csv( file = paste( criterion,".csv",sep=""),
                  header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
         if (ncol(weights) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
+        portfoliovalue = 1;
         for (row in 1:cRebalancing){
                start = from+(row-1)*by;
                end = min(from + row*by - 1,to);
-               preturn=c(preturn,Return.portfolio2( R[start:end,], weights=weights[row,], wealth.index = FALSE,method=meth) )
-           }
-           result = cbind(result, preturn)
+               wealthindex = cumvalue( R[start:end,], weights=weights[row,] )
+               compoundreturns = portfoliovalue*wealthindex - 1;
+               pcompoundreturn=c(pcompoundreturn, compoundreturns )
+               portfoliovalue = portfoliovalue*wealthindex[12]
+               simplereturns = c(wealthindex[1],wealthindex[2:12]/wealthindex[1:11] ) - 1;
+               psimplereturn = c( psimplereturn , simplereturns ); 
         }
-        colnames(result)= criteria
-        rownames(result)= rownames(R)[from:to]
-        LSmonthlyportreturns=result
-        save(LSmonthlyportreturns, file=paste( meth ,".returns.LS.Rdata" , sep="")  )
-        write.table( result , file = paste( meth ,".returns.LS.csv" , sep="") ,
-            append = FALSE, quote = TRUE, sep = ",",
-            eol = "\n", na = "NA", dec = ".", row.names = TRUE,
-            col.names = TRUE, qmethod = "escape")
-    }
+        result.compound = cbind(result.compound, pcompoundreturn)
+        result.simple = cbind(result.simple, psimplereturn)
+     }
+     colnames(result.compound)=  colnames(result.simple) = criteria
+     rownames(result.compound)=  rownames(result.simple) = rownames(R)[from:to]
+     LSmonthlyportcompoundreturns = result.compound
+     LSmonthlyportsimplereturns = result.simple
 
-    # Return Value:
-    # result
+     save(LSmonthlyportcompoundreturns, file="compoundreturns.Rdata"   )
 
+     save(LSmonthlyportcompoundreturns, file="simplereturns.Rdata"  )
 }
 
-Return.portfolio2 <- function (R, weights=NULL, wealth.index = FALSE, method = c("compound","simple"))
-{   # @author Brian G. Peterson
+cumvalue <- function (R, weights=NULL)
+{   # @author Brian G. Peterson,Kris Boudt
     # Setup:
     R=checkData(R,method="zoo")
-
-    # take only the first method
-    method = method[1]
 
     if (is.null(weights)){
         # set up an equal weighted portfolio
@@ -622,16 +621,7 @@ Return.portfolio2 <- function (R, weights=NULL, wealth.index = FALSE, method = c
 
     if (ncol(weights) != ncol(R)) stop ("The Weighting Vector and Return Collection do not have the same number of Columns.")
 
-    #Function:
-
-
-    if(method=="simple"){
-        stop("Calculating wealth index for simple returns not yet supported.")
-    }
-    if(method=="compound") {
-        # construct the wealth index of unweighted assets
-        wealthindex.assets=cumprod(1+R)
-    }
+    wealthindex.assets= cumprod( 1+R )  
 
     # build a structure for our weighted results
     wealthindex.weighted = matrix(nrow=nrow(R),ncol=ncol(R))
@@ -644,21 +634,8 @@ Return.portfolio2 <- function (R, weights=NULL, wealth.index = FALSE, method = c
     }
     wealthindex=apply(wealthindex.weighted,1,sum)
 
-    if (!wealth.index){
-        wealthindex=cbind(1,wealthindex)
-        wealthindex=rbind(1,wealthindex)
-        wealthindex=wealthindex[,-1]
-        # result=Return.calculate(wealthindex, method = method)
-        result=CalculateReturns(wealthindex, method = method)
-        colnames(result)="portfolio.weightedreturns"
-    } else {
-        result = t(t(wealthindex))
-        colnames(result)="portfolio.wealthindex"
-    }
-
-    result
-} # end function Return.portfolio
-
+    return(wealthindex)
+} # end 
 
 
 ###############################################################################
