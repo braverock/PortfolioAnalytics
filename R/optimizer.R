@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.79 2008-01-31 01:15:07 brian Exp $
+# $Id: optimizer.R,v 1.80 2008-01-31 01:23:00 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -930,7 +930,7 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
     if(method=="simple"){
         # stop("Calculating wealth index for simple returns not yet supported.")
         #weighted simple returns
-        weightedreturns=t(t(apply(R * weights, 1, sum)))
+        weightedreturns=t(t(apply(R * as.vector(weights), 1, sum)))
     }
     if(method=="compound") {
         # construct the wealth index of unweighted assets
@@ -978,6 +978,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.79  2008/01/31 01:15:07  brian
+# - add method argument to Return.portfolio.multiweights
+#
 # Revision 1.78  2008/01/31 00:48:49  brian
 # - add new function Return.portfolio.multiweight
 #
