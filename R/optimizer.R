@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.77 2008-01-30 23:41:54 brian Exp $
+# $Id: optimizer.R,v 1.78 2008-01-31 00:48:49 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -865,7 +865,24 @@ function (R, weightgrid, yeargrid, backtestresults)
 
 }
 
+Return.portfolio.multiweight <- function (R, weights, yeargrid){
+    result=data.frame()
 
+    weights=checkData(weights,method="matrix")
+
+    # then loop:
+    for (row in 1:nrow(yeargrid)){
+        from =yeargrid[row,1]
+        to = yeargrid[row,2]
+        resultreturns=Return.portfolio(R[from:to,],weights=t(weights[row,]))
+        # the [,-1] takes out the weighted returns, which you don't care
+        # about for contribution, although you may care about it for
+        # graphing, and want to pull it into another var
+
+        result=rbind(result,resultreturns)
+    }
+    result
+}
 # ------------------------------------------------------------------------------
 # Return.portfolio - replaces RMetrics pfolioReturn fn
 # move this function and the pfolioReturn wrapper into Performanceanalytics and remove from this file
@@ -958,6 +975,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.77  2008/01/30 23:41:54  brian
+# - add contributions as output again to Return.portfolio
+#
 # Revision 1.76  2008/01/30 23:34:00  brian
 # - add rowname for cumulative returns
 #
