@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.80 2008-01-31 01:23:00 brian Exp $
+# $Id: optimizer.R,v 1.81 2008-01-31 02:10:32 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -865,7 +865,7 @@ function (R, weightgrid, yeargrid, backtestresults)
 
 }
 
-Return.portfolio.multiweight <- function (R, weights, yeargrid, method = c("compound","simple")){
+Return.portfolio.multiweight <- function (R, weights, yeargrid, ...){
     result=data.frame()
 
     weights=checkData(weights,method="matrix")
@@ -877,7 +877,7 @@ Return.portfolio.multiweight <- function (R, weights, yeargrid, method = c("comp
     for (row in 1:nrow(yeargrid)){
         from =yeargrid[row,1]
         to = yeargrid[row,2]
-        resultreturns=Return.portfolio(R[from:to,],weights=t(weights[row,]),method=method)
+        resultreturns=Return.portfolio(R[from:to,],weights=t(weights[row,]),...=...)
         # the [,-1] takes out the weighted returns, which you don't care
         # about for contribution, although you may care about it for
         # graphing, and want to pull it into another var
@@ -978,6 +978,10 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.80  2008/01/31 01:23:00  brian
+# - add as.vector in method simle for weights in Return.portfolio
+#   - **not sure the simple method works properly**
+#
 # Revision 1.79  2008/01/31 01:15:07  brian
 # - add method argument to Return.portfolio.multiweights
 #
