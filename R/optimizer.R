@@ -1,4 +1,4 @@
-# Optimizer Functions
+3# Optimizer Functions
 
 ################################################################################
 #
@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.78 2008-01-31 00:48:49 brian Exp $
+# $Id: optimizer.R,v 1.79 2008-01-31 01:15:07 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -865,16 +865,19 @@ function (R, weightgrid, yeargrid, backtestresults)
 
 }
 
-Return.portfolio.multiweight <- function (R, weights, yeargrid){
+Return.portfolio.multiweight <- function (R, weights, yeargrid, method = c("compound","simple")){
     result=data.frame()
 
     weights=checkData(weights,method="matrix")
+
+    # take only the first method
+    method = method[1]
 
     # then loop:
     for (row in 1:nrow(yeargrid)){
         from =yeargrid[row,1]
         to = yeargrid[row,2]
-        resultreturns=Return.portfolio(R[from:to,],weights=t(weights[row,]))
+        resultreturns=Return.portfolio(R[from:to,],weights=t(weights[row,]),method=method)
         # the [,-1] takes out the weighted returns, which you don't care
         # about for contribution, although you may care about it for
         # graphing, and want to pull it into another var
@@ -975,6 +978,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.78  2008/01/31 00:48:49  brian
+# - add new function Return.portfolio.multiweight
+#
 # Revision 1.77  2008/01/30 23:41:54  brian
 # - add contributions as output again to Return.portfolio
 #
