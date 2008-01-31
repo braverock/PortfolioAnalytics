@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.83 2008-01-31 12:21:50 brian Exp $
+# $Id: optimizer.R,v 1.84 2008-01-31 17:31:00 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -877,7 +877,9 @@ Return.portfolio.multiweight <- function (R, weights, yeargrid, ...){
     for (row in 1:nrow(yeargrid)){
         from =yeargrid[row,1]
         to = yeargrid[row,2]
-        resultreturns=Return.portfolio(R[from:to,],weights=t(weights[row,]),...=...)
+        if(row==1){ startingwealth=1 }
+        resultreturns=Return.portfolio(R[from:to,],weights=t(weights[row,]), startingwealth=startingwealth, ...=...)
+        startingwealth=resultreturns[nrow(resultreturns),"portfolio.wealthindex"]
         # the [,-1] takes out the weighted returns, which you don't care
         # about for contribution, although you may care about it for
         # graphing, and want to pull it into another var
@@ -890,7 +892,7 @@ Return.portfolio.multiweight <- function (R, weights, yeargrid, ...){
 # Return.portfolio - replaces RMetrics pfolioReturn fn
 # move this function and the pfolioReturn wrapper into Performanceanalytics and remove from this file
 
-Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contribution=FALSE, method = c("compound","simple"))
+Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contribution=FALSE, method = c("compound","simple"), startingwealth=1)
 {   # @author Brian G. Peterson
 
     # Function to calculate weighted portfolio returns
@@ -929,7 +931,7 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
 
 #    if(method=="compound") {
         # construct the wealth index of unweighted assets
-        wealthindex.assets=cumprod(1+R)
+        wealthindex.assets=cumprod(startingwealth+R)
 
         # I don't currently think that the weighted wealth index is the correct route
         # I'll uncomment this and leave it in here so that we can compare
@@ -945,13 +947,13 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
         wealthindex=apply(wealthindex.weighted,1,sum)
 
         # weighted cumulative returns
-        weightedcumcont=t(apply (wealthindex.assets,1, function(x,weights){ as.vector((x-1)* weights)},weights=weights))
+        weightedcumcont=t(apply (wealthindex.assets,1, function(x,weights){ as.vector((x-startingwealth)* weights)},weights=weights))
         weightedreturns=diff(rbind(0,weightedcumcont))
         colnames(weightedreturns)=colnames(wealthindex.assets)
         #browser()
-        wealthindex=cumprod(1+as.matrix(apply(weightedreturns,1,sum),ncol=1))
+        wealthindex=matrix(cumprod(startingwealth + as.matrix(apply(weightedreturns,1, sum), ncol = 1)),ncol=1)
         # or, the equivalent
-        #wealthindex=matrix(1+apply(weightedcumcont,1,sum),ncol=1)
+        #wealthindex=matrix(startingwealth+apply(weightedcumcont,1,sum),ncol=1)
 #   }
 
     if(method=="simple"){
@@ -990,6 +992,10 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.83  2008/01/31 12:21:50  brian
+# - add wealth index calcs back in
+# - uncomment the old wealthindex.weighted for comparison
+#
 # Revision 1.82  2008/01/31 04:16:24  peter
 # - removed method line from Return.portfolio.multiweight
 #
