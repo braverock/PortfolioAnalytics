@@ -7,7 +7,7 @@
 ################################################################################
 
 # Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.82 2008-01-31 04:16:24 peter Exp $
+# $Id: optimizer.R,v 1.83 2008-01-31 12:21:50 brian Exp $
 
 ################################################################################
 # FUNCTIONS:
@@ -927,38 +927,50 @@ Return.portfolio <- function (R, weights=NULL, wealth.index = FALSE, contributio
     #Function:
 
 
-    if(method=="simple"){
-        # stop("Calculating wealth index for simple returns not yet supported.")
-        #weighted simple returns
-        weightedreturns=t(t(apply(R * as.vector(weights), 1, sum)))
-    }
-    if(method=="compound") {
+#    if(method=="compound") {
         # construct the wealth index of unweighted assets
         wealthindex.assets=cumprod(1+R)
 
+        # I don't currently think that the weighted wealth index is the correct route
+        # I'll uncomment this and leave it in here so that we can compare
         # build a structure for our weighted results
         wealthindex.weighted = matrix(nrow=nrow(R),ncol=ncol(R))
-#        colnames(wealthindex.weighted)=colnames(wealthindex.assets)
-#        rownames(wealthindex.weighted)=rownames(wealthindex.assets)
+        colnames(wealthindex.weighted)=colnames(wealthindex.assets)
+        rownames(wealthindex.weighted)=rownames(wealthindex.assets)
 
         # weight the results
-        #         for (col in 1:ncol(weights)){
-        #             wealthindex.weighted[,col]=weights[,col]*wealthindex.assets[,col]
-        #         }
-        #         wealthindex=apply(wealthindex.weighted,1,sum)
+        for (col in 1:ncol(weights)){
+            wealthindex.weighted[,col]=weights[,col]*wealthindex.assets[,col]
+        }
+        wealthindex=apply(wealthindex.weighted,1,sum)
 
         # weighted cumulative returns
         weightedcumcont=t(apply (wealthindex.assets,1, function(x,weights){ as.vector((x-1)* weights)},weights=weights))
         weightedreturns=diff(rbind(0,weightedcumcont))
         colnames(weightedreturns)=colnames(wealthindex.assets)
-#        rownames(weightedreturns)=rownames(wealthindex.assets)
+        #browser()
+        wealthindex=cumprod(1+as.matrix(apply(weightedreturns,1,sum),ncol=1))
+        # or, the equivalent
+        #wealthindex=matrix(1+apply(weightedcumcont,1,sum),ncol=1)
+#   }
+
+    if(method=="simple"){
+        # stop("Calculating wealth index for simple returns not yet supported.")
+        #weighted simple returns
+        # probably need to add 1 to the column before doing this
+        weightedreturns=Return.calculate(wealthindex,method="simple")
     }
+
+        # uncomment this to test
+        #browser()
 
     if (!wealth.index){
         result=as.matrix(apply(weightedreturns,1,sum),ncol=1)
         colnames(result)="portfolio.returns"
     } else {
-        stop("This is broken right now.  Calculate your wealth index from the return series.")
+        # stop("This is broken right now.  Calculate your wealth index from the return series.")
+        result=wealthindex
+        colnames(result)="portfolio.wealthindex"
     }
 
     if (contribution==TRUE){
@@ -978,6 +990,9 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.82  2008/01/31 04:16:24  peter
+# - removed method line from Return.portfolio.multiweight
+#
 # Revision 1.81  2008/01/31 02:10:32  brian
 # - pass ... instead of method argument in Return.portfolio.multiweights
 #
