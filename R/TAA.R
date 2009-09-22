@@ -117,3 +117,17 @@ TAA = function( R , minreturn = 0.05,
  
    return( bestw  )
 }
+
+###############################################################################
+# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+#
+# Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id: TAA.R,v 1.2 2009-09-22 21:18:59 peter Exp $
+#
+###############################################################################
+# $Log: not supported by cvs2svn $
+###############################################################################
