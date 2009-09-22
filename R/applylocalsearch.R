@@ -104,15 +104,18 @@ write.table( output , file = "equalweighted.csv", append = FALSE, quote = TRUE, 
             col.names = TRUE, qmethod = "escape")
 
 ###############################################################################
-# R (http://r-project.org/) Grid Search Methods for Optimization of Portfolios
+# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
 # Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: applylocalsearch.R,v 1.9 2009-09-22 21:24:14 peter Exp $
+# $Id: applylocalsearch.R,v 1.10 2009-09-22 21:26:16 peter Exp $
 #
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.9  2009-09-22 21:24:14  peter
+# - applied cvs log and licensing details
+#
 ###############################################################################
