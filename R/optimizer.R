@@ -981,17 +981,20 @@ pfolioReturn <- function (x, weights=NULL, ...)
     Return.portfolio(R=x, weights=weights, ...=...)
 }
 ###############################################################################
-# R (http://r-project.org/) Grid Search Methods for Optimization of Portfolios
+# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
 # Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: optimizer.R,v 1.85 2009-09-22 21:21:37 peter Exp $
+# $Id: optimizer.R,v 1.86 2009-09-22 21:25:57 peter Exp $
 #
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.85  2009-09-22 21:21:37  peter
+# - added licensing details
+#
 # Revision 1.84  2008-01-31 17:31:00  brian
 # - add startingweight to contribution calc
 #
