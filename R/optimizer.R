@@ -1,13 +1,4 @@
-3# Optimizer Functions
-
-################################################################################
-#
-# CONFIDENTIAL, NOT FOR DISTRIBUTION
-#
-################################################################################
-
-# Copyright 2006-2008 Brian G. Peterson, Peter Carl, Kris Boudt
-# $Id: optimizer.R,v 1.84 2008-01-31 17:31:00 brian Exp $
+# Optimizer Functions
 
 ################################################################################
 # FUNCTIONS:
@@ -989,9 +980,21 @@ pfolioReturn <- function (x, weights=NULL, ...)
 
     Return.portfolio(R=x, weights=weights, ...=...)
 }
-
+###############################################################################
+# R (http://r-project.org/) Grid Search Methods for Optimization of Portfolios
+#
+# Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id: optimizer.R,v 1.85 2009-09-22 21:21:37 peter Exp $
+#
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.84  2008-01-31 17:31:00  brian
+# - add startingweight to contribution calc
+#
 # Revision 1.83  2008/01/31 12:21:50  brian
 # - add wealth index calcs back in
 # - uncomment the old wealthindex.weighted for comparison

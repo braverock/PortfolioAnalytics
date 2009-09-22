@@ -4,11 +4,6 @@
 #
 # These methods take output from the functions in optimizer.R and then
 # perform sequential quadratic programming to find better optimal portfolios.
-#
-# Copyright (c) 2008 Kris Boudt and Brian G. Peterson
-# Kindly contact the authors for permission to use these functions
-###############################################################################
-# $Id: localsearch.R,v 1.13 2008-01-31 13:51:11 kris Exp $
 ###############################################################################
 
 
@@ -637,9 +632,21 @@ cumvalue <- function (R, weights=NULL)
     return(wealthindex)
 } # end 
 
-
+###############################################################################
+# R (http://r-project.org/) Grid Search Methods for Optimization of Portfolios
+#
+# Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id: localsearch.R,v 1.14 2009-09-22 21:22:48 peter Exp $
+#
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.13  2008-01-31 13:51:11  kris
+# Corrected portfolio return calculations
+#
 # Revision 1.10  2008/01/22 18:51:15  kris
 # Corrected mistake in GVaR definition of localsearch.R and added row and columnnames to output
 #
