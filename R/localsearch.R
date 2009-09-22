@@ -633,17 +633,20 @@ cumvalue <- function (R, weights=NULL)
 } # end 
 
 ###############################################################################
-# R (http://r-project.org/) Grid Search Methods for Optimization of Portfolios
+# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
 # Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: localsearch.R,v 1.14 2009-09-22 21:22:48 peter Exp $
+# $Id: localsearch.R,v 1.15 2009-09-22 21:26:33 peter Exp $
 #
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.14  2009-09-22 21:22:48  peter
+# - added licensing details
+#
 # Revision 1.13  2008-01-31 13:51:11  kris
 # Corrected portfolio return calculations
 #
