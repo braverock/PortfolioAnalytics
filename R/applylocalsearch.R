@@ -102,3 +102,17 @@ rownames(output) = names.input;
 colnames(output) = names.assets;
 write.table( output , file = "equalweighted.csv", append = FALSE, quote = TRUE, sep = ",", eol = "\n", na = "NA", dec = ".", row.names = TRUE,
             col.names = TRUE, qmethod = "escape")
+
+###############################################################################
+# R (http://r-project.org/) Grid Search Methods for Optimization of Portfolios
+#
+# Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id: applylocalsearch.R,v 1.9 2009-09-22 21:24:14 peter Exp $
+#
+###############################################################################
+# $Log: not supported by cvs2svn $
+###############################################################################
