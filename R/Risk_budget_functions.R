@@ -121,12 +121,20 @@ MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcr
     # check
     out = list(weights=outw , mean_ret=sum( outw*mu ) , risk=prisk(outw) , perc_risk_contr= percriskcontrib(outw) )
     names(out$perc_risk_contr)<-colnames(R)
+
+    # include some standard measures
+    out$sd  = stddevfun(w,mu=mu,sigma=sigma)
+    out$VaR = MVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)
+    out$ES  = operMESfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)
+    # @TODO: change these to use PerformanceAnalytics functions
+    
     if(includeDEoutput){out$DEoutput=minw}
     end_t<-Sys.time()
     print(c("elapsed time: ",end_t-start_t,":diff: ",diff, ":mean: ", out$mean_ret, ":",percriskcontribcriterion,":", out$risk, ":risk_target :", Riskupper ))
     return(out)
 }
 
+###############################################################################
 
 MinMaxPercCVaRconportfolio = function( minriskcriterion = "mES" , percriskcontribcriterion = "mES" , 
                      R = NULL, mu = NULL , sigma = NULL, resSigma = NULL ,M3=NULL,M4=NULL, alpha = 0.05, alphariskbudget = 0.05,
@@ -1158,10 +1166,13 @@ TwoVarPlot <- function(xvar, y1var, y2var, labels, noincs = 5,marks=c(1,2), legp
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: Risk_budget_functions.R,v 1.3 2009-10-26 20:35:14 brian Exp $
+# $Id: Risk_budget_functions.R,v 1.4 2009-10-26 20:58:23 brian Exp $
 #
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.3  2009-10-26 20:35:14  brian
+# - add footer
+#
 # revision 1.2
 # date: 2009-10-26 14:59:18 -0500;  author: brian;  state: Exp;  lines: +130 -1;  commitid: UA16jzVbLRP9a59u;
 # - add new version of MaxReturnRBconportfolio modified to
