@@ -1,3 +1,132 @@
+MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcriterion = "mES" , R = NULL,
+                     mu = NULL , sigma = NULL, resSigma = NULL ,M3=NULL,M4=NULL,
+                     alpha = 0.05, alphariskbudget = 0.05,
+                     lower = NULL , upper = NULL, Riskupper = NULL, RBlower = NULL , RBupper = NULL, precision = 1e-3 , weights=NULL,
+                     controlDE = list( VTR = 0 , NP=200 ) , includeDEoutput=FALSE, ... ){
+
+     start_t<-Sys.time()
+     # This function produces the portfolio that minimimizes "mincriterion" subject to mincriterion < maxvalu
+     # Either the multivariate return series is given or estimates of the mean, covariance, coskewness or cokurtosis
+     require(zoo); require(PerformanceAnalytics);   require(DEoptim)
+     # Example:
+     # MaxReturnRBconportfolio(R=zoo(matrix( rnorm(400) , ncol=4 ),order.by=c(1:100)),RBupper=rep(0.3,4))
+     # library(PerformanceAnalytics); data(edhec); MaxReturnRBconportfolio(R=edhec[,c(5,6,7,9)], Riskupper = 0.0065, RBlower=rep(0.225,4),RBupper=rep(0.275,4) )
+
+     NP = controlDE$NP
+     if( !is.null(R) ){
+          cleanR = clean.boudt2( R , alpha = alphariskbudget )[[1]];
+          T = nrow(R);N=ncol(R)
+          mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+          sigma = cov(R);
+          M3 = matrix(rep(0,N^3),nrow=N,ncol=N^2)
+          M4 = matrix(rep(0,N^4),nrow=N,ncol=N^3)
+
+          for(t in c(1:T)){
+             centret = as.vector(R[t,])-mu;
+             M3 = M3 + ( centret%*%t(centret) )%x%t(centret)
+             M4 = M4 + ( centret%*%t(centret) )%x%t(centret)%x%t(centret)
+         }
+         M3 = M3/T; M4 = M4/T;
+     }else{ N = length(mu) }
+
+     if (is.null(weights)) {
+         w = rep(1/N,N)
+     } else {
+         w = weights
+     }
+
+     if( is.null(lower) ){ lower = rep(0,N) }         ; if( is.null(upper) ){ upper = rep(1,N) }
+     if( is.null(RBlower) ){ RBlower = rep(-Inf,N) }  ; if( is.null(RBupper) ){ RBupper = rep(Inf,N) }
+     if( is.null(Riskupper) ){ Riskupper = Inf }
+
+     if( is.null(resSigma) ){
+         switch( percriskcontribcriterion ,
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                GVaR   = { percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
+                GES    = { percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
+                mVaR   = { percriskcontrib = function(w){ cont = PortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
+                mES    = { percriskcontrib = function(w){ cont = operPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)[[3]] ; return( cont ) }}
+        ) #end function that finds out which percentage risk contribution criterion to use
+         switch( minriskcriterion ,
+                StdDev = { prisk = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
+                GVaR   = { prisk = function(w){ return( gausVaRfun(w,alpha=alpha,mu=mu,sigma=sigma) ) }},
+                GES    = { prisk = function(w){ return( gausESfun(w,mu=mu,alpha=alpha,sigma=sigma) )  }},
+                mVaR   = { prisk = function(w){ return( MVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4) )}},
+                mES    = { prisk = function(w){ return( operMESfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)) }}
+        ) #end function that finds out which risk function to minimize
+     }else{ # when garch model is used
+         switch( percriskcontribcriterion ,
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                GVaR   = { percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
+                GES    = { percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
+                mVaR   = { percriskcontrib = function(w){ cont = resPortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
+                mES    = { percriskcontrib = function(w){ cont = resoperPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont ) }}
+        ) #end function that finds out which percentage risk contribution criterion to use
+         switch( minriskcriterion ,
+                StdDev = { prisk = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
+                GVaR   = { prisk = function(w){ return( gausVaRfun(w,alpha=alpha,mu=mu,sigma=sigma) ) }},
+                GES    = { prisk = function(w){ return( gausESfun(w,mu=mu,alpha=alpha,sigma=sigma) )  }},
+                mVaR   = { prisk = function(w){ return( resMVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }},
+                mES    = { prisk = function(w){ return( resoperMESfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }}
+        ) #end function that finds out which risk function to minimize
+    }
+    objective = function( w ){
+#        w = matrix( c( w , 1-sum(w) ) , ncol=1) # assume a cash asset
+        # force weights to 1
+        w <- (1/sum(w))*w
+        N = length(w);
+        percrisk = percriskcontrib( w );
+        out = -sum( w*mu ) #needs to be maximized
+        # add full investment constraint:
+        penalty = 1e6;
+        #out = out + penalty*( ((1-sum(w))>upper[N]) | ((1-sum(w))<lower[N]) )
+        # penalize weights outside my constraints
+        out = out + sum(w[which(w>upper[1:N])]-upper[which(w>upper[1:N])])*penalty
+        out = out + sum(lower[which(w<lower[1:N])]-w[which(w<lower[1:N])])*penalty
+        # add minimum risk constraint
+        if(  prisk(w) > Riskupper ){ out = out + penalty*( prisk(w) - Riskupper) }
+        # add risk budget constraint
+        out = out + penalty*sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
+        # add weight constraint penalty, turn this into configuration from constraints
+        #if(sum(w)>1.05) out = pout + penalty*1-abs()
+        #return
+        return(out)
+    }
+
+    print( "lower weight constraints:" ); print(lower) ; print( "upper weight constraints:" ); print( upper ) ;
+    print( "upper constraint on risk:" ); print( Riskupper ) ;
+    print( "lower perc risk budgets constraints:"); print(RBlower); print( "upper risk budget constraints:" ); print( RBupper) ;
+
+
+#     minw = DEoptim( objective ,  lower = lower[1:(N-1)] , upper = upper[1:(N-1)] , control = controlDE, ...)
+     minw = DEoptim( objective ,  lower = lower[1:N] , upper = upper[1:N] , control = controlDE, ...)
+#     minw = DEoptim( objective , control = controlDE, ...)
+
+    fvalues = minw$member$bestvalit
+    diff = as.vector( quantile(fvalues,0.05) - quantile(fvalues,1/length(fvalues)) )
+#     if( diff>0 ){
+#          print(c("diff",diff))
+#          #browser()
+#          pop = minw$member$pop
+# #         minw = DEoptim( objective ,  lower = lower[1:(N-1)] , upper = upper[1:(N-1)] , control = list( itermax = 150, initial=pop ),... )
+#          minw = DEoptim( objective ,  lower = lower[1:N] , upper = upper[1:N] , control = list( itermax = 150, initial=pop, NP=NP ),... )
+#          fvalues = minw$member$bestvalit
+#          diff = as.vector( quantile(fvalues,0.05) - quantile(fvalues,1/length(fvalues)) )
+#     }
+    outw = as.vector( minw$optim$bestmem)
+    outw = (1/sum(outw))*outw # normalize weights to 1
+    names(outw) = colnames(R)
+    # outw = as.vector(c( minw$optim$bestmem , 1-sum(minw$optim$bestmem) )) ; #full investment constraint
+    # names(outw) = c(colnames(R),"cash")
+    # check
+    out = list(weights=outw , mean_ret=sum( outw*mu ) , risk=prisk(outw) , perc_risk_contr= percriskcontrib(outw) )
+    names(out$perc_risk_contr)<-colnames(R)
+    if(includeDEoutput){out$DEoutput=minw}
+    end_t<-Sys.time()
+    print(c("elapsed time: ",end_t-start_t,":diff: ",diff, ":mean: ", out$mean_ret, ":risk :", out$risk, ":risk_target :", Riskupper ))
+    return(out)
+}
+
 
 MinMaxPercCVaRconportfolio = function( minriskcriterion = "mES" , percriskcontribcriterion = "mES" , 
                      R = NULL, mu = NULL , sigma = NULL, resSigma = NULL ,M3=NULL,M4=NULL, alpha = 0.05, alphariskbudget = 0.05,
@@ -104,7 +233,7 @@ MinMaxPercCVaRconportfolio = function( minriskcriterion = "mES" , percriskcontri
 
 
 
-MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcriterion = "mES" , R = NULL, mu = NULL , sigma = NULL, resSigma = NULL ,M3=NULL,M4=NULL, 
+MaxReturnRBconportfolio.original = function( minriskcriterion = "mES" , percriskcontribcriterion = "mES" , R = NULL, mu = NULL , sigma = NULL, resSigma = NULL ,M3=NULL,M4=NULL,
                      alpha = 0.05, alphariskbudget = 0.05,
                      lower = NULL , upper = NULL, Riskupper = NULL, RBlower = NULL , RBupper = NULL, precision = 1e-3 , 
                      controlDE = list( VTR = 0 , NP=200 )  ){
