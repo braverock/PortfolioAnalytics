@@ -123,7 +123,7 @@ MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcr
     names(out$perc_risk_contr)<-colnames(R)
     if(includeDEoutput){out$DEoutput=minw}
     end_t<-Sys.time()
-    print(c("elapsed time: ",end_t-start_t,":diff: ",diff, ":mean: ", out$mean_ret, ":risk :", out$risk, ":risk_target :", Riskupper ))
+    print(c("elapsed time: ",end_t-start_t,":diff: ",diff, ":mean: ", out$mean_ret, ":",percriskcontribcriterion,":", out$risk, ":risk_target :", Riskupper ))
     return(out)
 }
 
@@ -1150,4 +1150,27 @@ TwoVarPlot <- function(xvar, y1var, y2var, labels, noincs = 5,marks=c(1,2), legp
    legend(legpos[1], legpos[2], legend=leglabs, pch=marks, bty="n")
 }
 
-
+###############################################################################
+# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+#
+# Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id: Risk_budget_functions.R,v 1.3 2009-10-26 20:35:14 brian Exp $
+#
+###############################################################################
+# $Log: not supported by cvs2svn $
+# revision 1.2
+# date: 2009-10-26 14:59:18 -0500;  author: brian;  state: Exp;  lines: +130 -1;  commitid: UA16jzVbLRP9a59u;
+# - add new version of MaxReturnRBconportfolio modified to
+#   - work with C version of DEoptim
+#   - not have a cash instrument assumption
+#   - optionally include DEoptim intermediate results
+# ----------------------------
+# revision 1.1
+# date: 2009-10-26 12:22:03 -0500;  author: peter;  state: Exp;  commitid: Aq1plzcy283Ii49u;
+# - Kris' first draft code 2009-08-15
+# - based on code from Brian from ~2006-2008
+###############################################################################
