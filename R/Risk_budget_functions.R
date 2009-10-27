@@ -41,32 +41,32 @@ MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcr
 
      if( is.null(resSigma) ){
          switch( percriskcontribcriterion ,
-                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,sigma=sigma)[[3]] ; return( cont  ) }},
                 GVaR   = { percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
                 GES    = { percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
                 mVaR   = { percriskcontrib = function(w){ cont = PortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
                 mES    = { percriskcontrib = function(w){ cont = operPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)[[3]] ; return( cont ) }}
         ) #end function that finds out which percentage risk contribution criterion to use
          switch( minriskcriterion ,
-                StdDev = { prisk = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
+                StdDev = { prisk = function(w){ return( StdDevfun(w,sigma=sigma) ) }},
                 GVaR   = { prisk = function(w){ return( gausVaRfun(w,alpha=alpha,mu=mu,sigma=sigma) ) }},
                 GES    = { prisk = function(w){ return( gausESfun(w,mu=mu,alpha=alpha,sigma=sigma) )  }},
-                mVaR   = { prisk = function(w){ return( MVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4) )}},
+                mVaR   = { prisk = function(w){ return( mVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4) )}},
                 mES    = { prisk = function(w){ return( operMESfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)) }}
         ) #end function that finds out which risk function to minimize
      }else{ # when garch model is used
          switch( percriskcontribcriterion ,
-                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,sigma=sigma)[[3]] ; return( cont  ) }},
                 GVaR   = { percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
                 GES    = { percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
                 mVaR   = { percriskcontrib = function(w){ cont = resPortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
                 mES    = { percriskcontrib = function(w){ cont = resoperPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont ) }}
         ) #end function that finds out which percentage risk contribution criterion to use
          switch( minriskcriterion ,
-                StdDev = { prisk = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
+                StdDev = { prisk = function(w){ return( StdDevfun(w,sigma=sigma) ) }},
                 GVaR   = { prisk = function(w){ return( gausVaRfun(w,alpha=alpha,mu=mu,sigma=sigma) ) }},
                 GES    = { prisk = function(w){ return( gausESfun(w,mu=mu,alpha=alpha,sigma=sigma) )  }},
-                mVaR   = { prisk = function(w){ return( resMVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }},
+                mVaR   = { prisk = function(w){ return( resmVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }},
                 mES    = { prisk = function(w){ return( resoperMESfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }}
         ) #end function that finds out which risk function to minimize
     }
@@ -123,9 +123,9 @@ MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcr
     names(out$perc_risk_contr)<-colnames(R)
 
     # include some standard measures
-    out$sd  = stddevfun(w,mu=mu,sigma=sigma)
-    out$VaR = MVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)
-    out$ES  = operMESfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)
+    out$sd  = StdDevfun(outw,sigma=sigma)
+    out$VaR = mVaRfun(outw,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)
+    out$ES  = operMESfun(outw,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)
     # @TODO: change these to use PerformanceAnalytics functions
     
     if(includeDEoutput){out$DEoutput=minw}
@@ -171,32 +171,32 @@ MinMaxPercCVaRconportfolio = function( minriskcriterion = "mES" , percriskcontri
 
      if( is.null(resSigma) ){ 
          switch( percriskcontribcriterion ,
-                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,sigma=sigma)[[3]] ; return( cont  ) }},
                 GVaR   = { percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
                 GES    = { percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
                 mVaR   = { percriskcontrib = function(w){ cont = PortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
                 mES    = { percriskcontrib = function(w){ cont = operPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)[[3]] ; return( cont ) }}
         ) #end function that finds out which percentage risk contribution criterion to use
          switch( minriskcriterion ,
-                StdDev = { prisk = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
+                StdDev = { prisk = function(w){ return( StdDevfun(w,sigma=sigma) ) }},
                 GVaR   = { prisk = function(w){ return( gausVaRfun(w,alpha=alpha,mu=mu,sigma=sigma) ) }},
                 GES    = { prisk = function(w){ return( gausESfun(w,mu=mu,alpha=alpha,sigma=sigma) )  }},
-                mVaR   = { prisk = function(w){ return( MVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4) )}},
+                mVaR   = { prisk = function(w){ return( mVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4) )}},
                 mES    = { prisk = function(w){ return( operMESfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)) }}
         ) #end function that finds out which risk function to minimize
      }else{ # when garch model is used
          switch( percriskcontribcriterion ,
-                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,sigma=sigma)[[3]] ; return( cont  ) }},
                 GVaR   = { percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
                 GES    = { percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
                 mVaR   = { percriskcontrib = function(w){ cont = resPortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
                 mES    = { percriskcontrib = function(w){ cont = resoperPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont ) }}
         ) #end function that finds out which percentage risk contribution criterion to use
          switch( minriskcriterion ,
-                StdDev = { prisk = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
+                StdDev = { prisk = function(w){ return( StdDevfun(w,sigma=sigma) ) }},
                 GVaR   = { prisk = function(w){ return( gausVaRfun(w,alpha=alpha,mu=mu,sigma=sigma) ) }},
                 GES    = { prisk = function(w){ return( gausESfun(w,mu=mu,alpha=alpha,sigma=sigma) )  }},
-                mVaR   = { prisk = function(w){ return( resMVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }},
+                mVaR   = { prisk = function(w){ return( resmVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }},
                 mES    = { prisk = function(w){ return( resoperMESfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }}
         ) #end function that finds out which risk function to minimize
     }
@@ -274,32 +274,32 @@ MaxReturnRBconportfolio.original = function( minriskcriterion = "mES" , percrisk
 
      if( is.null(resSigma) ){ 
          switch( percriskcontribcriterion ,
-                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,sigma=sigma)[[3]] ; return( cont  ) }},
                 GVaR   = { percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
                 GES    = { percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
                 mVaR   = { percriskcontrib = function(w){ cont = PortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
                 mES    = { percriskcontrib = function(w){ cont = operPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)[[3]] ; return( cont ) }}
         ) #end function that finds out which percentage risk contribution criterion to use
          switch( minriskcriterion ,
-                StdDev = { prisk = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
+                StdDev = { prisk = function(w){ return( StdDevfun(w,sigma=sigma) ) }},
                 GVaR   = { prisk = function(w){ return( gausVaRfun(w,alpha=alpha,mu=mu,sigma=sigma) ) }},
                 GES    = { prisk = function(w){ return( gausESfun(w,mu=mu,alpha=alpha,sigma=sigma) )  }},
-                mVaR   = { prisk = function(w){ return( MVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4) )}},
+                mVaR   = { prisk = function(w){ return( mVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4) )}},
                 mES    = { prisk = function(w){ return( operMESfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)) }}
         ) #end function that finds out which risk function to minimize
      }else{ # when garch model is used
          switch( percriskcontribcriterion ,
-                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,sigma=sigma)[[3]] ; return( cont  ) }},
                 GVaR   = { percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
                 GES    = { percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
                 mVaR   = { percriskcontrib = function(w){ cont = resPortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
                 mES    = { percriskcontrib = function(w){ cont = resoperPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont ) }}
         ) #end function that finds out which percentage risk contribution criterion to use
          switch( minriskcriterion ,
-                StdDev = { prisk = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
+                StdDev = { prisk = function(w){ return( StdDevfun(w,sigma=sigma) ) }},
                 GVaR   = { prisk = function(w){ return( gausVaRfun(w,alpha=alpha,mu=mu,sigma=sigma) ) }},
                 GES    = { prisk = function(w){ return( gausESfun(w,mu=mu,alpha=alpha,sigma=sigma) )  }},
-                mVaR   = { prisk = function(w){ return( resMVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }},
+                mVaR   = { prisk = function(w){ return( resmVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }},
                 mES    = { prisk = function(w){ return( resoperMESfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }}
         ) #end function that finds out which risk function to minimize
     }
@@ -374,32 +374,32 @@ MinRiskRBconportfolio = function( mincriterion = "mES" , percriskcontribcriterio
 
      if( is.null(resSigma) ){ 
          switch( percriskcontribcriterion ,
-                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,sigma=sigma)[[3]] ; return( cont  ) }},
                 GVaR = {percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
                 GES = {percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
                 mVaR = {percriskcontrib = function(w){ cont = PortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
                 mES = {percriskcontrib = function(w){ cont = operPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)[[3]] ; return( cont ) }}
         ) #end function that finds out which percentage risk contribution criterion to use
          switch( mincriterion ,
-                StdDev = { obj = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
+                StdDev = { obj = function(w){ return( StdDevfun(w,sigma=sigma) ) }},
                 GVaR   = { obj = function(w){ return( gausVaRfun(w,alpha=alpha,mu=mu,sigma=sigma) ) }},
                 GES    = { obj = function(w){ return( gausESfun(w,mu=mu,alpha=alpha,sigma=sigma) )  }},
-                mVaR   = { obj = function(w){ return( MVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4) )}},
+                mVaR   = { obj = function(w){ return( mVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4) )}},
                 mES    = { obj = function(w){ return( operMESfun(w,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)) }}
         ) #end function that finds out which risk function to minimize
      }else{ # when garch model is used
          switch( percriskcontribcriterion ,
-                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,sigma=sigma)[[3]] ; return( cont  ) }},
                 GVaR = {percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
                 GES = {percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
                 mVaR = {percriskcontrib = function(w){ cont = resPortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
                 mES = {percriskcontrib = function(w){ cont = resoperPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont ) }}
         ) #end function that finds out which percentage risk contribution criterion to use
          switch( mincriterion ,
-                StdDev = { obj = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
+                StdDev = { obj = function(w){ return( StdDevfun(w,sigma=sigma) ) }},
                 GVaR   = { obj = function(w){ return( gausVaRfun(w,alpha=alpha,mu=mu,sigma=sigma) ) }},
                 GES    = { obj = function(w){ return( gausESfun(w,mu=mu,alpha=alpha,sigma=sigma) )  }},
-                mVaR   = { obj = function(w){ return( resMVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }},
+                mVaR   = { obj = function(w){ return( resmVaRfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }},
                 mES    = { obj = function(w){ return( resoperMESfun(w,mu=mu,alpha=alpha,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)) }}
         ) #end function that finds out which risk function to minimize
     }
@@ -596,7 +596,7 @@ findportfolio.dynamic = function(R, from, to, names.input = NA,  names.assets,
        if(strategy=="equalweighted"){
            sol1 = rep(1/cAssets,cAssets);
            switch( percriskcontribcriterion ,
-                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,mu=mu,sigma=sigma)[[3]] ; return( cont  ) }},
+                StdDev = { percriskcontrib = function(w){ cont = Portsd(w,sigma=sigma)[[3]] ; return( cont  ) }},
                 GVaR = {percriskcontrib = function(w){ cont =  PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)[[3]] ; return( cont ) }},
                 GES = {percriskcontrib = function(w){ cont =  PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)[[3]] ; return( cont  ) }},
                 mVaR = {percriskcontrib = function(w){ cont = resPortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,resSigma=resSigma,M3=M3,M4=M4)[[3]] ; return( cont  ) }},
@@ -1166,10 +1166,13 @@ TwoVarPlot <- function(xvar, y1var, y2var, labels, noincs = 5,marks=c(1,2), legp
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: Risk_budget_functions.R,v 1.4 2009-10-26 20:58:23 brian Exp $
+# $Id: Risk_budget_functions.R,v 1.5 2009-10-27 00:45:20 brian Exp $
 #
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.4  2009-10-26 20:58:23  brian
+# - and standard measures to output
+#
 # Revision 1.3  2009-10-26 20:35:14  brian
 # - add footer
 #
