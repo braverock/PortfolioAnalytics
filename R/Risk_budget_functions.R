@@ -93,9 +93,9 @@ MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcr
         return(out)
     }
 
-    print( "lower weight constraints:" ); print(lower) ; print( "upper weight constraints:" ); print( upper ) ;
-    print( "upper constraint on risk:" ); print( Riskupper ) ;
-    print( "lower perc risk budgets constraints:"); print(RBlower); print( "upper risk budget constraints:" ); print( RBupper) ;
+#     print( "lower weight constraints:" ); print(lower) ; print( "upper weight constraints:" ); print( upper ) ;
+#     print( "upper constraint on risk:" ); print( Riskupper ) ;
+#     print( "lower perc risk budgets constraints:"); print(RBlower); print( "upper risk budget constraints:" ); print( RBupper) ;
 
 
 #     minw = DEoptim( objective ,  lower = lower[1:(N-1)] , upper = upper[1:(N-1)] , control = controlDE, ...)
@@ -119,18 +119,22 @@ MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcr
     # outw = as.vector(c( minw$optim$bestmem , 1-sum(minw$optim$bestmem) )) ; #full investment constraint
     # names(outw) = c(colnames(R),"cash")
     # check
-    out = list(weights=outw , mean_ret=sum( outw*mu ) , risk=prisk(outw) , perc_risk_contr= percriskcontrib(outw) )
+    out = list(weights=outw , perc_risk_contr= percriskcontrib(outw) )
     names(out$perc_risk_contr)<-colnames(R)
 
     # include some standard measures
-    out$sd  = StdDevfun(outw,sigma=sigma)
-    out$VaR = mVaRfun(outw,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)
-    out$ES  = operMESfun(outw,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)
+    out$stats=c(sum( outw*mu ) , StdDevfun(outw,sigma=sigma), mVaRfun(outw,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4), operMESfun(outw,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4))
+    names(out$stats)<-c("mean_ret","Std. Dev.","mVaR","mES")
+    #     out$sd  = StdDevfun(outw,sigma=sigma)
+    #     out$VaR = mVaRfun(outw,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)
+    #     out$ES  = operMESfun(outw,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4)
     # @TODO: change these to use PerformanceAnalytics functions
+    out$targets<-c(minriskcriterion,Riskupper,percriskcontribcriterion)
+    names(out$targets)<-c("Risk Fn","Risk Target","Risk Contribution Fn")
     
     if(includeDEoutput){out$DEoutput=minw}
     end_t<-Sys.time()
-    print(c("elapsed time: ",end_t-start_t,":diff: ",diff, ":mean: ", out$mean_ret, ":",percriskcontribcriterion,":", out$risk, ":risk_target :", Riskupper ))
+    print(c("elapsed time:",end_t-start_t,":",diff, ":stats: ", out$stats, ":targets:",out$targets))
     return(out)
 }
 
@@ -1166,10 +1170,13 @@ TwoVarPlot <- function(xvar, y1var, y2var, labels, noincs = 5,marks=c(1,2), legp
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: Risk_budget_functions.R,v 1.5 2009-10-27 00:45:20 brian Exp $
+# $Id: Risk_budget_functions.R,v 1.6 2009-10-27 15:53:45 brian Exp $
 #
 ###############################################################################
 # $Log: not supported by cvs2svn $
+# Revision 1.5  2009-10-27 00:45:20  brian
+# - fix mVaR and StdDev objectives
+#
 # Revision 1.4  2009-10-26 20:58:23  brian
 # - and standard measures to output
 #
