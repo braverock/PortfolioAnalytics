@@ -1,0 +1,14 @@
+Package: optimizer
+Type: Package
+Title: Econometric tools for performance and risk analysis.
+Version: 0.0.1
+Date: 2009-10-31
+Author: Peter Carl, Brian G. Peterson
+Maintainer: Brian G. Peterson <brian@braverock.com>
+Description: Portfolio optimization routines.
+Depends: R (>= 2.9.0), zoo, xts (>= 0.6-8), Performanceanalytics (>=1.0.0)
+Suggests: quantmod
+License: GPL
+URL: http://braverock.com/R/
+Copyright: (c) 2004-2009
+Contributors: Kris Boudt
