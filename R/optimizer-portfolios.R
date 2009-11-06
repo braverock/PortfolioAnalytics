@@ -33,7 +33,7 @@ generatesequence <- function (min=.01, max=1, by=min/max , min_mult=1, max_mult=
 }
 
 
-randomize_portfolio <- function (seed, weight_seq, min_mult=-Inf,max_mult=Inf, min_sum=.99, max_sum=1.01, max_permutations=100, rounding=3) 
+randomize_portfolio <- function (seed, weight_seq, min_mult=-Inf,max_mult=Inf, min_sum=.99, max_sum=1.01, max_permutations=100, rounding=3)
 { # @author: Peter Carl, Brian Peterson (based on an idea by Pat Burns)
   # generate random permutations of a portfolio seed meeting your constraints on the weights of each asset
   # set the portfolio to the seed
@@ -66,14 +66,14 @@ randomize_portfolio <- function (seed, weight_seq, min_mult=-Inf,max_mult=Inf, m
         i = 1
         while (sum(tportfolio)<=min_sum & i<=length(tportfolio)) {
           # randomly permute and increase a random portfolio element
-          cur_val<-tportfolio[random_index[i]]
-          cur_index<-i
+          cur_index<-random_index[i]
+          cur_val <- tportfolio[cur_index]
             if (length(weight_seq[(weight_seq>=cur_val)&(weight_seq<=cur_val*max_mult)])>1)
             {
               # randomly sample one of the larger weights
               tportfolio[cur_index]<-sample(weight_seq[(weight_seq>=cur_val)&(weight_seq<=cur_val*max_mult)],1)
               # print(paste("new val:",tportfolio[cur_index]))
-            } else { 
+            } else {
               if (length(weight_seq[(weight_seq>=cur_val)&(weight_seq<=cur_val*max_mult)]) == 1) {
                 tportfolio[cur_index]<-weight_seq[(weight_seq>=cur_val)&(weight_seq<=cur_val*max_mult)]
               }
@@ -82,8 +82,8 @@ randomize_portfolio <- function (seed, weight_seq, min_mult=-Inf,max_mult=Inf, m
         } # end increase loop
         while (sum(tportfolio)>=max_sum & i<=length(tportfolio)) {
           # randomly permute and decrease a random portfolio element
-          cur_val<-tportfolio[random_index[i]]
-          cur_index<-i
+          cur_index<-random_index[i]
+          cur_val <- tportfolio[cur_index]
             if (length(weight_seq<=cur_val & weight_seq>=cur_val*min_mult )>1) {
               tportfolio[cur_index]<-sample(weight_seq[which(weight_seq<=cur_val & weight_seq>=cur_val*min_mult )],1)
             } else {
@@ -145,7 +145,7 @@ random_walk_portfolios <- function (seed, weight_seq, permutations=100, ...)
 #TODO: write a function that uses the fn's above to generate an arbitrary number of random portfolios
 # currently, you can do this pretty easily with a one-line loop
 # random_walk_portfolios(seed,seq,permutations=100)
-# or 
+# or
 
 # start_t <- Sys.time(); s<-foreach(seed=iter(weights, by='row'),.combine=rbind) %dopar% random_walk_portfolios(seed,xseq,permutations=10000); end_t <- Sys.time(); save.image(); start_t-end_t;
 
@@ -159,12 +159,12 @@ random_portfolios <- function(n=1000, nassets=NULL, seed=NULL, nseeds=nportfolio
 
   # generate a seed if we didn't get one.  Use zeroes
   if (is.null(seed) | nrow(seed)<nseeds) {
-    #if(is.null(seed)) 
+    #if(is.null(seed))
         # generate new seeds
 
         # start with equal weight
 
-        # 
+        #
   }
 
   for (i in 1:nrow(seed)){
