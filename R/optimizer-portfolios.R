@@ -1,3 +1,15 @@
+###############################################################################
+# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+#
+# Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id: optimizer.R,v 1.86 2009-09-22 21:25:57 peter Exp $
+#
+###############################################################################
+
 # functions to build portfolios for use by the optimizer
 
 # this code may be made obsolete by the advanced (non-linear, MIP) fPortfolio optimizers, but for now, they are beta code at best
