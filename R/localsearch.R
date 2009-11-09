@@ -640,7 +640,7 @@ cumvalue <- function (R, weights=NULL)
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: localsearch.R,v 1.15 2009-09-22 21:26:33 peter Exp $
+# $Id$
 #
 ###############################################################################
 # $Log: not supported by cvs2svn $

@@ -1190,7 +1190,7 @@ TwoVarPlot <- function(xvar, y1var, y2var, labels, noincs = 5,marks=c(1,2), legp
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: Risk_budget_functions.R,v 1.6 2009-10-27 15:53:45 brian Exp $
+# $Id$
 #
 ###############################################################################
 # $Log: Risk_budget_functions.R,v $

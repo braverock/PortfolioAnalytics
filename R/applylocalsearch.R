@@ -111,7 +111,7 @@ write.table( output , file = "equalweighted.csv", append = FALSE, quote = TRUE, 
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: applylocalsearch.R,v 1.10 2009-09-22 21:26:16 peter Exp $
+# $Id$
 #
 ###############################################################################
 # $Log: not supported by cvs2svn $

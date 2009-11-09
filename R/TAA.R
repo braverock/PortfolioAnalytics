@@ -126,7 +126,7 @@ TAA = function( R , minreturn = 0.05,
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: TAA.R,v 1.2 2009-09-22 21:18:59 peter Exp $
+# $Id$
 #
 ###############################################################################
 # $Log: not supported by cvs2svn $

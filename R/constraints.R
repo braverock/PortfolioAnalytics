@@ -36,3 +36,30 @@ contraint_v1 <- function(nassets=NULL,minc,maxc,min_mult=NULL,max_mult=NULL)
     )
   )
 }
+
+modify_constraint <- function(constraints, ...){
+  if (is.null(constraints) | class(constraints)!="constraint"){
+    stop("you must pass in an object of class constraints to modify")
+  }
+  if (hasArg(nassets)){
+    warning("changing number of assets may modify other constraints")
+    constraints$nassets<-nassets
+  }
+  if(hasArg(min)) {
+    if (is.vector(min) & length(min)!=nassets){
+      warning(paste("length of min !=",nassets))
+      if (length(min)<nassets) {stop("length of min must be equal to lor longer than nassets")}
+      constraints$min<-min[1:nassets]
+    }
+  }
+  if(hasArg(max)) {
+    if (is.vector(max) & length(max)!=nassets){
+      warning(paste("length of max !=",nassets))
+      if (length(max)<nassets) {stop("length of max must be equal to lor longer than nassets")}
+      constraints$max<-max[1:nassets]
+    }
+  }
+  if(hasArg(min_mult)){constrains$min_mult=min_mult}
+  if(hasArg(max_mult)){constrains$max_mult=max_mult}
+  return(constraints)
+}
