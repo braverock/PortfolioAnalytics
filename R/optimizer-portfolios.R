@@ -12,25 +12,12 @@
 
 # functions to build portfolios for use by the optimizer
 
-# this code may be made obsolete by the advanced (non-linear, MIP) fPortfolio optimizers, but for now, they are beta code at best
+# this code may be made obsolete by the advanced (non-linear, MIP) fPortfolio or roi optimizers, but for now, they are beta code at best
 
 # require(LSPM) # for the un-exported .nPri functions
 # generate all feasible portfolios
 #LSPM:::.nPri(n=13,r=45,i=n^r,replace=TRUE)
 # not likely to actually BE feasible for any portfolio of real size, but I'll write the grid generator anyway that will generate all the permutations, and kick out only the feasible portfolios
-
-# assume a structure that includes column names for each asset
-# constraints should be a list by constraint type
-# we have min/max constraints on each asset
-# constraint <- function (x){
-# 
-# structure( list(L   = L,
-#                   dir = dir,
-#                   rhs = rhs,
-#                   n_L_constraints = n_L_constraints),
-#             class = c("L_constraint", "constraint"))
-# }
-# ultimately, I'd like to have a real portfolio class, and real constraints classes, but for now we can build Burns-style random portfolios by specifying our box constriants
 
 
 # random portfolios
@@ -51,10 +38,9 @@ randomize_portfolio <- function (seed, weight_seq, min_mult=-Inf,max_mult=Inf, m
   portfolio=as.vector(seed)
   rownames(portfolio)<-NULL
   weight_seq=as.vector(weight_seq)
-# initialize our loop
+  # initialize our loop
   permutations=1
-  #while portfolio is between min/max sum and we have not reached max_permutations
-  #while(permutations<=max_permutations){
+
     # create a temporary portfolio so we don't return a non-feasible portfolio
     tportfolio=portfolio
     # first randomly permute each element of the temporary portfolio
@@ -66,7 +52,8 @@ randomize_portfolio <- function (seed, weight_seq, min_mult=-Inf,max_mult=Inf, m
        tportfolio[cur_index]<-sample(weight_seq[(weight_seq>=cur_val*min_mult) & (weight_seq<=cur_val*max_mult)],1)
     }
       
-    while ((sum(tportfolio)<=min_sum | sum(tportfolio)>=max_sum) & permutations<=max_permutations) {
+  #while portfolio is between min/max sum and we have not reached max_permutations
+  while ((sum(tportfolio)<=min_sum | sum(tportfolio)>=max_sum) & permutations<=max_permutations) {
         permutations=permutations+1
         # check our box constraints on total portfolio weight
         # reduce(increase) total portfolio size till you get a match
@@ -106,9 +93,7 @@ randomize_portfolio <- function (seed, weight_seq, min_mult=-Inf,max_mult=Inf, m
         } # end decrease loop
     } # end final walk towards the edges
 
-#     if ((sum(tportfolio)>=min_sum & sum(tportfolio)<=max_sum & permutations<=max_permutations) | permutations <= max_permutations/10) {
-      portfolio<-tportfolio
-#     }
+  portfolio<-tportfolio
 
   colnames(portfolio)<-colnames(seed)
   if (sum(portfolio)<=min_sum | sum(tportfolio)>=max_sum){
@@ -147,7 +132,7 @@ random_walk_portfolios <- function (seed, weight_seq, permutations=100, ...)
   return(result)
 }
 
-# EXAMPLE: start_t<- Sys.time(); x=random_walk_portfolios(rep(1/5,5), generatesequence(min=0.01, max=0.30, by=0.01), max_permutations=500, permutations=5000, min_sum=.99, max_sum=1.01); end_t<-Sys.time(); start_t-end_t;
+# EXAMPLE: start_t<- Sys.time(); x=random_walk_portfolios(rep(1/5,5), generatesequence(min=0.01, max=0.30, by=0.01), max_permutations=500, permutations=5000, min_sum=.99, max_sum=1.01); end_t<-Sys.time(); end_t-start_t;
 # > nrow(unique(x))
 # [1] 4906
 # > which(rowSums(x)<.99 | rowSums(x)>1.01)
@@ -184,4 +169,4 @@ random_portfolios <- function(n=1000, nassets=NULL, seed=NULL, nseeds=nportfolio
   
 }
 
-# TODO: write a function for random trades that only makes n trades and increases/decreases other lelemnts to compensate.
+# TODO: write a function for random trades that only makes n trades and increases/decreases other elements to compensate.
