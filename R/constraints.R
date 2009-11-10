@@ -10,10 +10,12 @@
 #
 ###############################################################################
 
-constraint <- function(assets=NULL,min=NULL,max=NULL,min_mult=NULL,max_mult=NULL)
+constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_sum,weight_seq)
 { # based on GPL R-Forge pkg roi by Stefan Thuessel,Kurt Hornik,David Meyer
-  if (is.null(assets) & (is.null(min) | !length(min)>1) & (is.null(max)| !length(max)>1)) {
-    stop("You must either specify the assets or pass a vector for both min and max")
+  if (hasArg(min) & hasArg(max)) {
+    if (is.null(assets) & (!length(min)>1) & (!length(max)>1)) {
+      stop("You must either specify the assets or pass a vector for both min and max")
+    }
   }
 
   if(!is.null(assets)){
@@ -25,22 +27,29 @@ constraint <- function(assets=NULL,min=NULL,max=NULL,min_mult=NULL,max_mult=NULL
       }
     }
     if(is.character(assets)){
-      names(assets)<-assets  # set names, so that other code can access it,
-      # and doesn't have to know about the character vector
       nassets=length(assets)
+      assetnames=assets
+      warning("assuming equal weighted seed portfolio")
+      assets<-rep(1/nassets,nassets)
+      names(assets)<-assetnames  # set names, so that other code can access it,
+      # and doesn't have to know about the character vector
+      # print(assets)
+    }
+    # if assets is a named vector, we'll assume it is current weights
+  }
+
+  if(hasArg(min) | hasArg(max)) {
+    if (length(min)>1 & length(max)>1){
+      if (length(min)!=length(max)) { stop("length of min and max must be the same") }
+    } else {
+      warning("min and max not passed in as vectors, replicating min and max to length of length(assets)")
+      min <- rep(min,nassets)
+      max <- rep(max,nassets)
     }
   }
 
-  if (length(min)>1 & length(max)>1){
-    if (length(min)!=length(max)) { stop("length of min and max must be the same") }
-  } else {
-    warning("min and max not passed in as vectors, replicating min and max to length of length(assets)")
-    min <- rep(min,nassets)
-    max <- rep(max,nassets)
-  }
-
-  if(!is.null(min_mult) | !is.null(max_mult)) {
-    if (is.vector(min_mult) & is.vector(max_mult)){
+  if(hasArg(min_mult) | hasArg(max_mult)) {
+    if (length(min_mult)>1 & length(max_mult)>1){
       if (length(min_mult)!=length(max_mult) ) { stop("length of min_mult and max_mult must be the same") }
     } else {
       warning("min_mult and max_mult not passed in as vectors, replicating min_mult and max_mult to length of assets vector")
@@ -51,27 +60,36 @@ constraint <- function(assets=NULL,min=NULL,max=NULL,min_mult=NULL,max_mult=NULL
   
   if (!is.null(names(assets))) {
     assetnames<-names(assets)
-    if(!is.null(min)){
+    if(hasArg(min)){
       names(min)<-assetnames
       names(max)<-assetnames
+    } else {
+      min = NULL
+      max = NULL
     }
-    if(!is.null(min_mult)){
+    if(hasArg(min_mult)){
       names(min_mult)<-assetnames
       names(max_mult)<-assetnames
+    } else {
+      min_mult = NULL
+      max_mult = NULL
     }
   }
   ## now structure and return
-  structure(
+  return(structure(
     list(
       assets = assets,
       min = min,
       max = max,
       min_mult = min_mult,
       max_mult = max_mult,
+      min_sum  = min_sum,
+      max_sum  = max_sum,
+      weight_seq = weight_seq,
       objectives = list()
     ),
     class=c("v1_constraint","constraint")
-  )
+  ))
 }
 
 is.constraint <- function( x ) {
