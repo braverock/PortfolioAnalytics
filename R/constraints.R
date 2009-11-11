@@ -57,7 +57,12 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
       max_mult = rep(max_mult,nassets)
     }
   }
-  
+
+  if(!hasArg(min_sum) | !hasArg(max_sum)) {
+    min_sum = NULL
+    max_sum = NULL 
+  }
+
   if (!is.null(names(assets))) {
     assetnames<-names(assets)
     if(hasArg(min)){
