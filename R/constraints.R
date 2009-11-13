@@ -20,16 +20,25 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
 
   if(!is.null(assets)){
     if(is.numeric(assets)){
-      nassets=assets
-      #we passed in a number of assets, so we need to name them and create the vector
-      for(i in 1:assets){
-        assets[i]<-paste("Asset",i,sep=".")
+      if (length(assets) == 1) {
+        nassets=assets
+        #we passed in a number of assets, so we need to create the vector
+        cat("assuming equal weighted seed portfolio")
+        assets<-rep(1/nassets,nassets)
+      } else {
+        nassets = length(assets)
+      }
+      # and now we may need to name them
+      if (is.null(names(assets))) {
+        for(i in 1:length(assets)){
+          names(assets)[i]<-paste("Asset",i,sep=".")
+        }
       }
     }
     if(is.character(assets)){
       nassets=length(assets)
       assetnames=assets
-      warning("assuming equal weighted seed portfolio")
+      cat("assuming equal weighted seed portfolio")
       assets<-rep(1/nassets,nassets)
       names(assets)<-assetnames  # set names, so that other code can access it,
       # and doesn't have to know about the character vector
@@ -42,7 +51,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
     if (length(min)>1 & length(max)>1){
       if (length(min)!=length(max)) { stop("length of min and max must be the same") }
     } else {
-      warning("min and max not passed in as vectors, replicating min and max to length of length(assets)")
+      cat("min and max not passed in as vectors, replicating min and max to length of length(assets)")
       min <- rep(min,nassets)
       max <- rep(max,nassets)
     }
@@ -52,7 +61,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
     if (length(min_mult)>1 & length(max_mult)>1){
       if (length(min_mult)!=length(max_mult) ) { stop("length of min_mult and max_mult must be the same") }
     } else {
-      warning("min_mult and max_mult not passed in as vectors, replicating min_mult and max_mult to length of assets vector")
+      cat("min_mult and max_mult not passed in as vectors, replicating min_mult and max_mult to length of assets vector")
       min_mult = rep(min_mult,nassets)
       max_mult = rep(max_mult,nassets)
     }
@@ -91,7 +100,8 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
       min_sum  = min_sum,
       max_sum  = max_sum,
       weight_seq = weight_seq,
-      objectives = list()
+      objectives = list(),
+      call = match.call()
     ),
     class=c("v1_constraint","constraint")
   ))
@@ -101,31 +111,45 @@ is.constraint <- function( x ) {
   inherits( x, "constraint" )
 }
 
-
-modify_constraint <- function(constraints, ...){
-  if (is.null(constraints) | class(constraints)!="constraint"){
+# can we use the generic update.default function?
+update.constraint <- function(constraints, ...){
+  if (is.null(constraints) | !is.constraint(constraints)){
     stop("you must pass in an object of class constraints to modify")
   }
-  if (hasArg(nassets)){
-    warning("changing number of assets may modify other constraints")
-    constraints$nassets<-nassets
+  call <- object$call
+  if (is.null(call))
+      stop("need an object with call component")
+  extras <- match.call(expand.dots = FALSE)$...
+#   if (!missing(formula.))
+#       call$formula <- update.formula(formula(object), formula.)
+  if (length(extras)) {
+      existing <- !is.na(match(names(extras), names(call)))
+      for (a in names(extras)[existing]) call[[a]] <- extras[[a]]
+      if (any(!existing)) {
+          call <- c(as.list(call), extras[!existing])
+          call <- as.call(call)
+      }
   }
-  if(hasArg(min)) {
-    if (is.vector(min) & length(min)!=nassets){
-      warning(paste("length of min !=",nassets))
-      if (length(min)<nassets) {stop("length of min must be equal to lor longer than nassets")}
-      constraints$min<-min[1:nassets]
-    }
-  }
-  if(hasArg(max)) {
-    if (is.vector(max) & length(max)!=nassets){
-      warning(paste("length of max !=",nassets))
-      if (length(max)<nassets) {stop("length of max must be equal to lor longer than nassets")}
-      constraints$max<-max[1:nassets]
-    }
-  }
-  if(hasArg(min_mult)){constrains$min_mult=min_mult}
-  if(hasArg(max_mult)){constrains$max_mult=max_mult}
+#   if (hasArg(nassets)){
+#     warning("changing number of assets may modify other constraints")
+#     constraints$nassets<-nassets
+#   }
+#   if(hasArg(min)) {
+#     if (is.vector(min) & length(min)!=nassets){
+#       warning(paste("length of min !=",nassets))
+#       if (length(min)<nassets) {stop("length of min must be equal to lor longer than nassets")}
+#       constraints$min<-min[1:nassets]
+#     }
+#   }
+#   if(hasArg(max)) {
+#     if (is.vector(max) & length(max)!=nassets){
+#       warning(paste("length of max !=",nassets))
+#       if (length(max)<nassets) {stop("length of max must be equal to lor longer than nassets")}
+#       constraints$max<-max[1:nassets]
+#     }
+#   }
+#   if(hasArg(min_mult)){constrains$min_mult=min_mult}
+#   if(hasArg(max_mult)){constrains$max_mult=max_mult}
   return(constraints)
 }
 
