@@ -106,8 +106,8 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... , p=.95){
   )
 }
 
-risk_budget_objective <- function(name, enabled=FALSE, ... , ){
-
+risk_budget_objective <- function(name, enabled=FALSE, ... ){
+  #if( is.null(RBlower) ){ RBlower = rep(-Inf,N) }  ; if( is.null(RBupper) ){ RBupper = rep(Inf,N) }
 }
 
 KB_RBpaper_objective = function( w ){

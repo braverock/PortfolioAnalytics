@@ -1,8 +1,8 @@
-setwd("Y:/VaR/Cadiz/programs")
 
 library("PerformanceAnalytics")
-library("Rdonlp2");
-source("localsearch.R")
+#library("Rdonlp2");
+warning("this code requires package Rdonlp2, which is no longer on CRAN due to licencing issues")
+#source("localsearch.R")
 detach(package:fEcofin)
 data("edhec")
 # 1. Load return data

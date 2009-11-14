@@ -1,3 +1,15 @@
+###############################################################################
+# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+#
+# Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id$
+#
+###############################################################################
+
 MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcriterion = "mES" , R = NULL,
                      mu = NULL , sigma = NULL, resSigma = NULL ,M3=NULL,M4=NULL,
                      alpha = 0.05, alphariskbudget = 0.05,

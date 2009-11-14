@@ -20,7 +20,7 @@
 if(!require("PerformanceAnalytics", quietly=TRUE)) {
     stop("package", sQuote("PerformanceAnalytics"), "is needed.  Stopping")
 }
-source("optim_functions.R")
+#source("optim_functions.R")
 
 # ------------------------------------------------------------------------------
 cut.returns =

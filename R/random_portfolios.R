@@ -64,7 +64,7 @@ randomize_portfolio <- function (rpconstraints=constraint(assets=10,
        tportfolio[cur_index]<-sample(weight_seq[(weight_seq>=cur_val*min_mult) & (weight_seq<=cur_val*max_mult)],1)
     }
       
-  #while portfolio is between min/max sum and we have not reached max_permutations
+  #while portfolio is outside min/max sum and we have not reached max_permutations
   while ((sum(tportfolio)<=min_sum | sum(tportfolio)>=max_sum) & permutations<=max_permutations) {
         permutations=permutations+1
         # check our box constraints on total portfolio weight
@@ -103,7 +103,7 @@ randomize_portfolio <- function (rpconstraints=constraint(assets=10,
             }
           i=i+1 # increment our counter
         } # end decrease loop
-    } # end final walk towards the edges
+  } # end final walk towards the edges
 
   portfolio<-tportfolio
 
