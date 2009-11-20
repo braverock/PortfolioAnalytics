@@ -10,74 +10,14 @@
 #
 ###############################################################################
 
-constrained_objective <- function(w, constraints, R, mu, sigma, M3, M4)
-{ #@author: Brian Peterson, Peter Carl
-
-    # function to calculate a numeric return value for a portfolio based on a set of constraints,
-    # we'll try to make as few assumptions as possible, and only run objectives that are required by the user
-
-    penalty = 1e4;
-    N = length(w);
-    
-    # check for valid constraints
-    if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
-
-    # check that the constraints and the weighting vector have the same length
-    if (N != length(constraints$assets)){
-      warning("length of constraints asset list and weights vector do not match, results may be bogus")
-    }
-
-    out = -sum( w*mu ) #needs to be maximized
-
-    if(!is.null(contraints$min_sum) | !is.null(constraints$max_sum)){
-      # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
-      # we'll normalize the weights passed in to whichever boundry condition has been violated
-      # NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
-      # might violate your constraints, so you'd need to renormalize them after optimizing
-      # we'll create functions for that so the user is less likely to mess it up.
-      
-      if(is.null(constraints$max_sum)) {
-        max_sum=1
-      } else {
-        max_sum=constraints$max_sum
-      }
-
-      if(is.null(constraints$min_sum)) {
-        min_sum=1
-      } else {
-        min_sum=constraints$min_sum
-      }
-
-      if(sum(w)>max_sum) { w<-(max_sum/sum(w))*w } # normalize to max_sum
-
-      if(sum(w)<min_sum) { w<-(min_sum/sum(w))*w } # normalize to min_sum
-    } # end min_sum and max_sum normalization
-
-    # penalize weights outside my constraints
-    out = out + sum(w[which(w>upper[1:N])]-upper[which(w>upper[1:N])])*penalty
-    out = out + sum(lower[which(w<lower[1:N])]-w[which(w<lower[1:N])])*penalty
-
-    if(is.null(constraints$objectives)) {
-      stop("no objectives specified in constraints")
-    } else{
-      for (objective in constraints$objectives){
-        switch(name,
-
-        ) # end objective switch
-      } # end loop over objectives
-    } # end objectives processing
-
-    #print(paste("output of objective function",out))
-
-    #return
-    return(out)
-}
-
-objective<-function(name , enabled=FALSE , ...){
-  if(is.null(name)) stop("you must specify an objective name")
+objective<-function(name , enabled=FALSE , ..., multiplier=1){
+  if(!hasArg(name)) stop("you must specify an objective name")
+  if (hasArg(name)) if(is.null(name)) stop("you must specify an objective name")
+  
   ## now structure and return
   return(structure( list(name = name,
-                         enabled = enabled
+                       enabled = enabled,
+                       multiplier = multiplier
                         ),
                     class="objective"
                   ) # end structure
@@ -88,57 +28,150 @@ is.objective <- function( x ) {
   inherits( x, "objective" )
 }
 
-portfolio_risk_objective <- function(name, enabled=FALSE, ... , p=.95){
-  Objective <- objective(name,enabled)
+add.objective <- function(constraints, type, name, enabled=FALSE, ...)
+{
+    if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
+
+    if (!hasArg(name)) stop("you must supply a name for the objective")
+    if (!hasArg(type)) stop("you must supply a type of objective to create")
+    if (!hasArg(enabled)) enabled=FALSE
+    
+
+    assets=constraints$assets
+    
+    tmp_objective=NULL
+    
+    switch(type,
+        return=, return_objective=
+          {tmp_objective = return_objective(name=name,
+                                            enabled=enabled,
+                                            if (hasArg(target)) target=target else target = NULL,
+                                            if (hasArg(multiplier)) multiplier=multiplier else multiplier = 1,
+                                            ... = ...
+                                            )
+          },
+
+        risk=, portfiolio_risk=, portfolio_risk_objective =
+          {tmp_objective = portfolio_risk_objective(name=name,
+                                                    enabled=enabled,
+                                                    if (hasArg(p)) p=p else p=.95,
+                                                    if (hasArg(multiplier)) multiplier=multiplier else multiplier = 1,
+                                                    if (hasArg(target)) target=target else target = NULL,
+                                                    ...=...
+                                                   )
+          },
+
+        risk_budget=, risk_budget_objective=
+          {tmp_objective = risk_budget_objective(name=name,
+                                                 enabled=enabled,
+                                                 if (hasArg(p)) p=p else p=.95,
+                                                 if (hasArg(multiplier)) multiplier=multiplier else multiplier = 1,
+                                                 if (hasArg(target)) target=target else target = NULL,
+                                                 ...=...
+                                                )
+          },
+          
+        null =
+          {return(constraints)} # got nothing, default to simply returning
+    ) # end objective type switch
+    if(is.objective(tmp_objective)) {
+       constraints$objectives[[(length(constraints$objectives)+1)]]<-tmp_objective
+    }
+    return(constraints)
+}
+
+return_objective <- function(name, enabled=FALSE, ... ,multiplier=1, target=NULL)
+{
+  if(!hasArg(target)) target = NULL
+  if(!hasArg(multiplier)) multiplier=1
+  if(!hasArg(method)) method = NULL
+  Objective <- objective(name=name,enabled=enabled, multiplier=multiplier)
+  ##' if target is null, we'll try to maximize the return metric
+  ##' if target is set, we'll try to meet or exceed the metric, penalizing a shortfall
+  ## now structure and return
+  return(structure( list(name = Objective$name,
+                         enabled = Objective$enabled,
+                         method = method,
+                         multiplier= Objective$multiplier,
+                         target=target
+                      ), # end of list
+                    class=c("return_objective","objective")
+                  ) # end structure
+  )
+  
+} # end return_objective constructor
+
+portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, target=NULL, p=.95)
+{
+  Objective <- objective(name=name,enabled=enabled, multiplier=multiplier)
+  ##' if target is null, we'll try to minimize the risk metric
   if (!is.numeric(p)) stop("your p value must be numeric")
   if (p>1) stop("p must be less than 1")
   if (p<0) stop("p must be greater than zero")
+  if(!hasArg(clean)) clean = NULL
+  if(!hasArg(method)) method = NULL
+  if(!hasArg(portfolio_method)) portfolio_method = NULL
+  if(!hasArg(target)) target = NULL
+  if(!hasArg(multiplier)) multiplier=1
+  
   ## now structure and return
   return(structure( list(name = Objective$name,
                          enabled = Objective$enabled,
                          p = p,
-                         if(hasArg(clean)) clean = clean,
-                         if(hasArg(method)) method = method,
-                         if(hasArg(portfolio_method)) portfolio_method = portfolio_method,
-                        ),
+                         clean = clean,
+                         method = method,
+                         portfolio_method = portfolio_method,
+                         multiplier= Objective$multiplier,
+                         target=target
+                      ), # end of list
                     class=c("portfolio_risk_objective","objective")
                   ) # end structure
   )
-}
+} # end portfolio_risk_objective constructor
 
-risk_budget_objective <- function(name, enabled=FALSE, ... ){
+risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1, target=NULL, p=.95, min_prisk, max_prisk )
+{
+  if(!hasArg(target)) target=NULL
+  Objective <- portfolio_risk_objective(name=name,enabled=enabled,p=p,target=target, multiplier=multiplier, ...=...)
+  
   #if( is.null(RBlower) ){ RBlower = rep(-Inf,N) }  ; if( is.null(RBupper) ){ RBupper = rep(Inf,N) }
-}
+  nassets=length(assets)
+  if(hasArg(min_prisk) & hasArg(max_prisk)) {
+    if (length(min_prisk)>1 & length(max_prisk)>1){
+      if (length(min_prisk)!=length(max_prisk)) { stop("length of min_prisk and max_prisk must be the same") }
+    }
+  }
+  if(hasArg(min_prisk)){
+    if (length(min_prisk)==1) {
+      min_prisk <- rep(min_prisk,nassets)
+      names(min_prisk)<-names(assets)
+    }
+    if (length(min_prisk)!=nassets) stop(paste("length of min_prisk must be equal to 1 or the number of assets",nassets))
+  }
+  if(hasArg(max_prisk)){
+    if (length(max_prisk)==1) {
+      max_prisk <- rep(max_prisk,nassets)
+      names(max_prisk)<-names(assets)
+    }
+    if (length(max_prisk)!=nassets) stop(paste("length of max_prisk must be equal to 1 or the number of assets",nassets))
+  }
+  
+  if(!hasArg(max_prisk)) max_prisk = NULL
+  if(!hasArg(min_prisk)) min_prisk = NULL
+  
+  return(structure( list(name = Objective$name,
+                         enabled = Objective$enabled,
+                         p = Objective$p,
+                         clean = Objective$clean,
+                         method = Objective$method,
+                         portfolio_method = Objective$portfolio_method,
+                         target= Objective$target,
+                         multiplier= Objective$multiplier,
+                         min_prisk = min_prisk,
+                         max_prisk = max_prisk
+                      ), # end of list
+                    class=c("risk_budget_objective","objective")
+                  ) # end structure
+  )
+} # end risk_budget_objective constructor
 
-KB_RBpaper_objective = function( w ){
-
-    #        w = matrix( c( w , 1-sum(w) ) , ncol=1) # assume a cash asset
-
-    # add weight constraint penalty, turn this into configuration from constraints
-    # force weights to 1
-    w <- (1/sum(w))*w
-    N = length(w);
-    percrisk = percriskcontrib( w );
-    out = -sum( w*mu ) #needs to be maximized
-    # add full investment constraint:
-    penalty = 1e4;
-    #out = out + penalty*( ((1-sum(w))>upper[N]) | ((1-sum(w))<lower[N]) )
-    # penalize weights outside my constraints
-    out = out + sum(w[which(w>upper[1:N])]-upper[which(w>upper[1:N])])*penalty
-    out = out + sum(lower[which(w<lower[1:N])]-w[which(w<lower[1:N])])*penalty
-
-    ##########
-    # add portfolio risk constraint
-    prw=prisk(w)
-    # full penalty for violating risk upper limit
-    if(  prw > Riskupper ){ out = out + penalty*( prw - Riskupper) }
-    # half penalty for risk lower than target
-    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
-
-    # add risk budget constraint
-    out = out + penalty*sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
-    #print(paste("output of objective function",out))
-
-    #return
-    return(out)
-}
