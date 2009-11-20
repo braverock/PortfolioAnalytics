@@ -23,7 +23,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
       if (length(assets) == 1) {
         nassets=assets
         #we passed in a number of assets, so we need to create the vector
-        cat("assuming equal weighted seed portfolio")
+        message("assuming equal weighted seed portfolio")
         assets<-rep(1/nassets,nassets)
       } else {
         nassets = length(assets)
@@ -38,7 +38,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
     if(is.character(assets)){
       nassets=length(assets)
       assetnames=assets
-      cat("assuming equal weighted seed portfolio")
+      message("assuming equal weighted seed portfolio")
       assets<-rep(1/nassets,nassets)
       names(assets)<-assetnames  # set names, so that other code can access it,
       # and doesn't have to know about the character vector
@@ -51,7 +51,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
     if (length(min)>1 & length(max)>1){
       if (length(min)!=length(max)) { stop("length of min and max must be the same") }
     } else {
-      cat("min and max not passed in as vectors, replicating min and max to length of length(assets)")
+      message("min and max not passed in as vectors, replicating min and max to length of length(assets)")
       min <- rep(min,nassets)
       max <- rep(max,nassets)
     }
@@ -61,7 +61,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
     if (length(min_mult)>1 & length(max_mult)>1){
       if (length(min_mult)!=length(max_mult) ) { stop("length of min_mult and max_mult must be the same") }
     } else {
-      cat("min_mult and max_mult not passed in as vectors, replicating min_mult and max_mult to length of assets vector")
+      message("min_mult and max_mult not passed in as vectors, replicating min_mult and max_mult to length of assets vector")
       min_mult = rep(min_mult,nassets)
       max_mult = rep(max_mult,nassets)
     }
@@ -112,7 +112,8 @@ is.constraint <- function( x ) {
 }
 
 # can we use the generic update.default function?
-update.constraint <- function(constraints, ...){
+update.constraint <- function(object, ...){
+  constraints <- object
   if (is.null(constraints) | !is.constraint(constraints)){
     stop("you must pass in an object of class constraints to modify")
   }
