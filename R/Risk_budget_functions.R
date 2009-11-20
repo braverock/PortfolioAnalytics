@@ -11,7 +11,7 @@
 ###############################################################################
 
 MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcriterion = "mES" , R = NULL,
-                     mu = NULL , sigma = NULL, resSigma = NULL ,M3=NULL,M4=NULL,
+                     mu = NULL , sigma = NULL, resSigma = NULL ,M3=NULL,M4=NULL, return_target=NULL,
                      alpha = 0.05, alphariskbudget = 0.05,
                      lower = NULL , upper = NULL, Riskupper = NULL, RBlower = NULL , RBupper = NULL, precision = 1e-3 , weights=NULL,
                      controlDE = list( VTR = 0 , NP=200 ) , includeDEoutput=FALSE, ... ){
@@ -85,6 +85,7 @@ MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcr
         ) #end function that finds out which risk function to minimize
     }
     objective = function( w ){
+        penalty = 1e4;
 
         #        w = matrix( c( w , 1-sum(w) ) , ncol=1) # assume a cash asset
 
@@ -94,8 +95,10 @@ MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcr
         N = length(w);
         percrisk = percriskcontrib( w );
         out = -sum( w*mu ) #needs to be maximized
+        if(!is.null(return_target)) {
+          if(ret<return_target) { out = out + penalty*100*(return_target-ret) } # hack to penalize returns below target, we'll fix in constrained_objective
+        }
         # add full investment constraint:
-        penalty = 1e4;
         #out = out + penalty*( ((1-sum(w))>upper[N]) | ((1-sum(w))<lower[N]) )
         # penalize weights outside my constraints
         out = out + sum(w[which(w>upper[1:N])]-upper[which(w>upper[1:N])])*penalty
@@ -166,7 +169,7 @@ MaxReturnRBconportfolio = function( minriskcriterion = "mES" , percriskcontribcr
     
     if(includeDEoutput){out$DEoutput=minw}
     end_t<-Sys.time()
-    print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,3), ":targets:",out$targets))
+    print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
     return(out)
 }
 
@@ -547,16 +550,18 @@ findportfolio.dynamic = function(R, from, to, names.input = NA,  names.assets,
        print( paste(to[per],"out of total number of obs equal to", max(to) ));
        print("----------------------------------------------------------------")
 
-       # Estimate GARCH model with data from inception
+       ########################  GARCH Volatility Estimator ####################
+
+       ## Estimate GARCH model with data from inception
 
        inception.R = window(R, start = as.Date(from[1]) , end = as.Date(to[per]) );
 
-       # Estimate comoments of innovations with rolling estimation windows
+       ## Estimate comoments of innovations with rolling estimation windows
        in.sample.R = window(R, start = as.Date(from[per]) , end = as.Date(to[per]) );
        in.sample.R = checkData(in.sample.R, method="matrix");
 
 
-       # Estimation of mean return
+       ## Estimation of mean return
        M = c();
        library(TTR)
        Tmean = 47 # monthly returns: 4 year exponentially weighted moving average
@@ -565,7 +570,7 @@ findportfolio.dynamic = function(R, from, to, names.input = NA,  names.assets,
        }
        M = zoo( M , order.by=time(inception.R) )
 
-       # Center returns (shift by one observations since M[t,] is rolling mean t-Tmean+1,...,t; otherwise lookahead bias)
+       ## Center returns (shift by one observations since M[t,] is rolling mean t-Tmean+1,...,t; otherwise lookahead bias)
        inception.R.cent = inception.R;
        ZZ = matrix( rep(as.vector( apply( inception.R[1:Tmean, ] , 2 , 'mean' )),Tmean),byrow=T,nrow=Tmean);
        inception.R.cent[1:Tmean,] = inception.R[1:Tmean, ] - ZZ;
@@ -573,8 +578,9 @@ findportfolio.dynamic = function(R, from, to, names.input = NA,  names.assets,
                  A = M[Tmean:(nrow(inception.R)-1),];
                  A = zoo( A , order.by = time(inception.R[(Tmean+1):nrow(inception.R), ])) ; #shift dates; otherwise zoo poses problem
                  inception.R.cent[(Tmean+1):nrow(inception.R), ] = inception.R[(Tmean+1):nrow(inception.R), ] - A}
+
        
-       # Garch estimation
+       ## Garch estimation
        S = c();
        for( i in 1:cAssets ){
             gout =  garchFit(formula ~ garch(1,1), data = inception.R.cent[,i],include.mean = F, cond.dist="QMLE", trace = FALSE )
@@ -613,6 +619,8 @@ findportfolio.dynamic = function(R, from, to, names.input = NA,  names.assets,
        mu = matrix(tail(M,n=1),ncol=1 ) ;
        D = diag( as.vector(as.vector(tail(S,n=1) ) ),ncol=cAssets )
        sigma = D%*%Rcor%*%D
+
+       ####### End GARCH estimation
 
        mESfun = function(series){ return( operMES(series,alpha=alpha,2) ) }
        
