@@ -80,7 +80,7 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ...)
     return(constraints)
 }
 
-return_objective <- function(name, enabled=FALSE, ... ,multiplier=1, target=NULL)
+return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NULL)
 {
   if(!hasArg(target)) target = NULL
   if(!hasArg(multiplier)) multiplier=1
