@@ -16,8 +16,9 @@ objective<-function(name , enabled=FALSE , ..., multiplier=1){
   
   ## now structure and return
   return(structure( list(name = name,
-                       enabled = enabled,
-                       multiplier = multiplier
+                         enabled = enabled,
+                         multiplier = multiplier,
+                         call = match.call()
                         ),
                     class="objective"
                   ) # end structure
@@ -28,13 +29,14 @@ is.objective <- function( x ) {
   inherits( x, "objective" )
 }
 
-add.objective <- function(constraints, type, name, enabled=FALSE, ...)
+add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=NULL)
 {
     if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
 
     if (!hasArg(name)) stop("you must supply a name for the objective")
     if (!hasArg(type)) stop("you must supply a type of objective to create")
     if (!hasArg(enabled)) enabled=FALSE
+ 
     
 
     assets=constraints$assets
@@ -75,10 +77,23 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ...)
           {return(constraints)} # got nothing, default to simply returning
     ) # end objective type switch
     if(is.objective(tmp_objective)) {
-       constraints$objectives[[(length(constraints$objectives)+1)]]<-tmp_objective
+       if(!hasArg(indexnum) | (hasArg(indexnum) & is.null(indexnum))) indexnum = length(constraints$objectives)+1
+       constraints$objectives[[indexnum]]<-tmp_objective
     }
     return(constraints)
 }
+
+# update.objective <- function(object, ...) {
+#   # here we do a bunch of magic to update the correct index'd objective
+# 
+#   constraints <- object
+# 
+#   if (is.null(constraints) | !is.constraint(constraints)){
+#     stop("you must pass in an object of class constraints to modify")
+#   }
+# 
+#   
+# }
 
 return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NULL)
 {
@@ -93,7 +108,8 @@ return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NUL
                          enabled = Objective$enabled,
                          method = method,
                          multiplier= Objective$multiplier,
-                         target=target
+                         target=target,
+                         call = Objective$call
                       ), # end of list
                     class=c("return_objective","objective")
                   ) # end structure
@@ -122,8 +138,9 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
                          method = method,
                          portfolio_method = portfolio_method,
                          multiplier= Objective$multiplier,
-                         target=target
-                      ), # end of list
+                         target=target,
+                         call = Objective$call
+                        ), # end of list
                     class=c("portfolio_risk_objective","objective")
                   ) # end structure
   )
@@ -168,7 +185,8 @@ risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1
                          target= Objective$target,
                          multiplier= Objective$multiplier,
                          min_prisk = min_prisk,
-                         max_prisk = max_prisk
+                         max_prisk = max_prisk,
+                         call = Objective$call
                       ), # end of list
                     class=c("risk_budget_objective","objective")
                   ) # end structure
