@@ -55,6 +55,11 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
       min <- rep(min,nassets)
       max <- rep(max,nassets)
     }
+  } else {
+    message("no min or max passed in, assuming 0 and 1")
+    min <- rep(0,nassets)
+    max <- rep(1,nassets)
+    
   }
 
   if(hasArg(min_mult) | hasArg(max_mult)) {
@@ -89,6 +94,16 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
       max_mult = NULL
     }
   }
+  ##now adjust min and max to account for min_mult and max_mult from seed
+  if(!is.null(min_mult) & !is.null(min)) {
+    tmp_min <- assets*min_mult
+    min[which(tmp_min>min)]<-tmp_min[which(tmp_min>min)]
+  }
+  if(!is.null(max_mult) & !is.null(max)) {
+    tmp_max <- assets*max_mult
+    max[which(tmp_max<max)]<-tmp_max[which(tmp_max<max)]
+  }
+
   ## now structure and return
   return(structure(
     list(
