@@ -83,7 +83,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     } # end min_sum and max_sum normalization
     names(w) = colnames(R)
 
-    out = list(weights=w , objective_measures=constrained_objective(w=w,R=R,constraints,trace=TRUE)$objective_measures) 
+    out = list(weights=w , objective_measures=constrained_objective(w=w,R=R,constraints,trace=TRUE)$objective_measures,call=call) 
     if(trace){out$DEoutput=minw}
     
   } ## end case for DEoptim
