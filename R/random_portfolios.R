@@ -169,12 +169,19 @@ random_walk_portfolios <-function(...) {
 #' @param permutations integer: number of unique constrained random portfolios to generate
 #' @param \dots any other passthru parameters 
 #' @callGraph
+#' @usage 
+#' random_portfolios(rpconstraints=constraint(assets=10, 
+#' 											  min_mult=-Inf, max_mult=Inf, 
+#' 											  min_sum=.99, max_sum=1.01, 
+#' 											  min=.01, max=.4, 
+#' 											  weight_seq=generatesequence()),
+#' 					 permutations=100,
+#' 					 ... )
 #' @return matrix of random portfolio weights
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link{randomize_portfolio}}
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
 #' @export
-# random_portfolios <- function (rpconstraints=constraint(assets=10, min_mult=-Inf, max_mult=Inf, min_sum=.99, max_sum=1.01, min=.01, max=.4, weight_seq=generatesequence()),permutations=100,...)
-random_portfolios <- function (rpconstraints,permutations=100,...)
+random_portfolios <- function (rpconstraints=constraint(assets=10, min_mult=-Inf, max_mult=Inf, min_sum=.99, max_sum=1.01, min=.01, max=.4, weight_seq=generatesequence()),permutations=100,...)
 { # 
   # this function generates a series of portfolios that are a "random walk" from the current portfolio
   seed=rpconstraints$assets
