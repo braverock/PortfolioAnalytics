@@ -10,6 +10,15 @@
 #
 ###############################################################################
 
+#' 
+#' @param name 
+#' @param enabled 
+#' @param ... 
+#' @param multiplier 
+#' @returnType 
+#' @return 
+#' @author bpeterson
+#' @export
 objective<-function(name , enabled=FALSE , ..., multiplier=1){
   if(!hasArg(name)) stop("you must specify an objective name")
   if (hasArg(name)) if(is.null(name)) stop("you must specify an objective name")

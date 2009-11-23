@@ -10,11 +10,28 @@
 #
 ###############################################################################
 
-constrained_objective <- function(R, w, constraints, ...)
-{ #@author: Brian Peterson, Peter Carl
-
-    # function to calculate a numeric return value for a portfolio based on a set of constraints,
-    # we'll try to make as few assumptions as possible, and only run objectives that are required by the user
+#'  function to calculate a numeric return value for a portfolio based on a set of constraints
+#' 
+#' function to calculate a numeric return value for a portfolio based on a set of constraints,
+#' we'll try to make as few assumptions as possible, and only run objectives that are required by the user
+#' 
+#' If the user has passed in either min_sum or max_sum constraints for the portfolio, or both,
+#' we'll normalize the weights passed in to whichever boundary condition has been violated
+#' NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
+#' might violate your constraints, so you'd need to renormalize them after optimizing
+#' we'll do this in \code{\link{optimize.portfolio}} so that the weights you see have been 
+#' normalized to min_sum if the generated portfolio is smaller than min_sum or max_sum if the 
+#' generated portfolio is larger than max_sum. 
+#' @param R 
+#' @param w 
+#' @param constraints 
+#' @param ... 
+#' @returnType 
+#' @return 
+#' @author Peter Carl, Brian G. Peterson
+#' @export
+constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
+{ 
 
     if(!hasArg(penalty)) penalty = 1e4
     N = length(w)
@@ -38,7 +55,7 @@ constrained_objective <- function(R, w, constraints, ...)
 
     if(!is.null(contraints$min_sum) | !is.null(constraints$max_sum)){
       # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
-      # we'll normalize the weights passed in to whichever boundry condition has been violated
+      # we'll normalize the weights passed in to whichever boundary condition has been violated
       # NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
       # might violate your constraints, so you'd need to renormalize them after optimizing
       # we'll create functions for that so the user is less likely to mess it up.
@@ -70,6 +87,7 @@ constrained_objective <- function(R, w, constraints, ...)
     if(is.null(constraints$objectives)) {
       warning("no objectives specified in constraints")
     } else{
+      if(trace) tmp_return<-list()
       for (objective in constraints$objectives){
         if(objective$enabled){
           tmp_measure = NULL
@@ -121,7 +139,14 @@ constrained_objective <- function(R, w, constraints, ...)
           ) # end objective switch
           
           # now set the new value of the objective output
-          if(inherits(tmp_measure,"try-error")) { next() }
+          if(inherits(tmp_measure,"try-error")) { 
+              message(paste("objective name",objective$name,"appears to not match a known R function"))
+              next()
+              
+          } else{
+              if(trace) tmp_return[[]]<-tmp_measure
+          }
+          
           if(inherits(objective,"return_objective") | inherits(objective,"portfolio_risk_objective")){
             if (is.null(objective$target)){
               # target is null, just minimize
@@ -131,6 +156,7 @@ constrained_objective <- function(R, w, constraints, ...)
               #should we also penalize risk too low for risk targets? or is a range another objective?
             }
           } # end handling for return and univariate risk objuectives
+          
           if(inherits(objective,"risk_budget_objective")){
             # setup
             
@@ -153,41 +179,45 @@ constrained_objective <- function(R, w, constraints, ...)
     } # end objectives processing
 
     #message(paste("output of objective function",out))
-
+ 
     #return
-    return(out)
+    if(!trace){
+        return(out)
+    } else {
+        return(list(out=out,weights=w,objective_measures=tmp_return))
+    }
 }
 
 
-KB_RBpaper_objective = function( w ){
-
-    #        w = matrix( c( w , 1-sum(w) ) , ncol=1) # assume a cash asset
-
-    # add weight constraint penalty, turn this into configuration from constraints
-    # force weights to 1
-    w <- (1/sum(w))*w
-    N = length(w);
-    percrisk = percriskcontrib( w );
-    out = -sum( w*mu ) #needs to be maximized
-    # add full investment constraint:
-    penalty = 1e4;
-    #out = out + penalty*( ((1-sum(w))>upper[N]) | ((1-sum(w))<lower[N]) )
-    # penalize weights outside my constraints
-    out = out + sum(w[which(w>upper[1:N])]-upper[which(w>upper[1:N])])*penalty
-    out = out + sum(lower[which(w<lower[1:N])]-w[which(w<lower[1:N])])*penalty
-
-    ##########
-    # add portfolio risk constraint
-    prw=prisk(w)
-    # full penalty for violating risk upper limit
-    if(  prw > Riskupper ){ out = out + penalty*( prw - Riskupper) }
-    # half penalty for risk lower than target
-    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
-
-    # add risk budget constraint
-    out = out + penalty*sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
-    #print(paste("output of objective function",out))
-
-    #return
-    return(out)
-}
+#KB_RBpaper_objective = function( w ){
+#
+#    #        w = matrix( c( w , 1-sum(w) ) , ncol=1) # assume a cash asset
+#
+#    # add weight constraint penalty, turn this into configuration from constraints
+#    # force weights to 1
+#    w <- (1/sum(w))*w
+#    N = length(w);
+#    percrisk = percriskcontrib( w );
+#    out = -sum( w*mu ) #needs to be maximized
+#    # add full investment constraint:
+#    penalty = 1e4;
+#    #out = out + penalty*( ((1-sum(w))>upper[N]) | ((1-sum(w))<lower[N]) )
+#    # penalize weights outside my constraints
+#    out = out + sum(w[which(w>upper[1:N])]-upper[which(w>upper[1:N])])*penalty
+#    out = out + sum(lower[which(w<lower[1:N])]-w[which(w<lower[1:N])])*penalty
+#
+#    ##########
+#    # add portfolio risk constraint
+#    prw=prisk(w)
+#    # full penalty for violating risk upper limit
+#    if(  prw > Riskupper ){ out = out + penalty*( prw - Riskupper) }
+#    # half penalty for risk lower than target
+#    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
+#
+#    # add risk budget constraint
+#    out = out + penalty*sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
+#    #print(paste("output of objective function",out))
+#
+#    #return
+#    return(out)
+#}
