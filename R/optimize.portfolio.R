@@ -35,6 +35,11 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   call <- match.call()
 
   R <- checkData(R)
+  N = length(constraints$assets)
+  if (ncol(R)>N) {
+      R=R[,names(constraints$assets)]
+  }
+  T = nrow(R)
   
   if (is.null(constraints) | !is.constraint(constraints)){
     stop("you must pass in an object of class constraints to control the optimization")
@@ -43,16 +48,17 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   if(optimize_method=="DEoptim"){
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
     NP = round(search_size/200)
+    if(!hasArg(controlDE)) controlDE = list( VTR = 0 , NP=NP ) else cotrolDE=controlDE
     if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
     if(!hasArg(sigma)) sigma = cov(R);
-    if(!hasArg(M3))    M3 = M3.MM(R,mu)
-    if(!hasArg(M4))    M4 = M4.MM(R,mu)
+    if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R)
+    if(!hasArg(M4))    M4 = PerformanceAnalytics:::M4.MM(R)
 
     # get upper and lower weights parameters from constraints
     upper = constraints$max
     lower = constraints$min
 
-    minw = try(DEoptim( constrained_objective ,  lower = lower[1:N] , upper = upper[1:N] , control = controlDE, ...)) # add ,silent=TRUE here?
+    minw = try(DEoptim( constrained_objective ,  lower = lower[1:N] , upper = upper[1:N] , control = controlDE, R=R, constraints=constraints, ...=...)) # add ,silent=TRUE here?
     if(inherits(minw,"try-error")) { minw=NULL }
     if(is.null(minw)){
         message(paste("Optimizer was unable to find a solution for target"))
