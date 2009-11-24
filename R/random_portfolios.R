@@ -34,10 +34,10 @@
 #' @param max maximum value of the sequence
 #' @param by number to increment the sequence by
 #' @param rounding integrer how many decimals should we round to
-#' @callGraph
 #' @author Peter Carl, Brian G. Peterson
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}
 #' @export
+#' @callGraph
 generatesequence <- function (min=.01, max=1, by=min/max, rounding=3 )
 { 
   # this creates the sequence of possible weights, not constrained by asset
@@ -45,21 +45,18 @@ generatesequence <- function (min=.01, max=1, by=min/max, rounding=3 )
   return(ret)
 }
 
-
-
 #randomize_portfolio <- function (seed, weight_seq, min_mult=-Inf,max_mult=Inf, min_sum=.99, max_sum=1.01, max_permutations=100,rounding=3)
 #' generate random permutations of a portfolio seed meeting your constraints on the weights of each asset
 #' 
-#' @param rpconstraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraints}}
+#' @param rpconstraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
 #' @param rounding integrer how many decimals should we round to
 #' @callGraph
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
 #' @export
-randomize_portfolio <- function (rpconstraints=constraint(assets=10,min_mult=-Inf,max_mult=Inf,weight_seq=generatesequence()),
-                                  max_permutations=200,
-                                  rounding=3)
+#' @callGraph
+randomize_portfolio <- function (rpconstraints, max_permutations=200, rounding=3)
 
 { # @author: Peter Carl, Brian Peterson (based on an idea by Pat Burns)
   # generate random permutations of a portfolio seed meeting your constraints on the weights of each asset
@@ -165,23 +162,19 @@ random_walk_portfolios <-function(...) {
 #' repeatedly calls \code{\link{randomize_portfolio}} to generate an 
 #' arbitrary number of constrained random portfolios.
 #' 
-#' @param rpconstraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraints}}
+#' @param rpconstraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
 #' @param \dots any other passthru parameters 
-#' @callGraph
-#' @usage 
-#' random_portfolios(rpconstraints=constraint(assets=10, 
-#' 											  min_mult=-Inf, max_mult=Inf, 
-#' 											  min_sum=.99, max_sum=1.01, 
-#' 											  min=.01, max=.4, 
-#' 											  weight_seq=generatesequence()),
-#' 					 permutations=100,
-#' 					 ... )
 #' @return matrix of random portfolio weights
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link{randomize_portfolio}}
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
 #' @export
-random_portfolios <- function (rpconstraints=constraint(assets=10, min_mult=-Inf, max_mult=Inf, min_sum=.99, max_sum=1.01, min=.01, max=.4, weight_seq=generatesequence()),permutations=100,...)
+#' @examples
+#' rpconstraint<-constraint(assets=10, min_mult=-Inf, max_mult=Inf, min_sum=.99, max_sum=1.01, min=.01, max=.4, weight_seq=generatesequence())
+#' rp<- random_portfolios(rpconstraints=rpconstraint,permutations=1000)
+#' head(rp)
+#' @callGraph
+random_portfolios <- function (rpconstraints,permutations=100,...)
 { # 
   # this function generates a series of portfolios that are a "random walk" from the current portfolio
   seed=rpconstraints$assets

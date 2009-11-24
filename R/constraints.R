@@ -10,6 +10,21 @@
 #
 ###############################################################################
 
+#' 
+#' @param assets 
+#' @param ... 
+#' @param min 
+#' @param max 
+#' @param min_mult 
+#' @param max_mult 
+#' @param min_sum 
+#' @param max_sum 
+#' @param weight_seq 
+#' @author Peter Carl and Brian G. Peterson
+#' @examples 
+#' exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, weight_seq=generatesequence())
+#' @export
+#' @callGraph
 constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_sum,weight_seq)
 { # based on GPL R-Forge pkg roi by Stefan Thuessel,Kurt Hornik,David Meyer
   if (hasArg(min) & hasArg(max)) {
@@ -122,6 +137,10 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
   ))
 }
 
+#' 
+#' @param x 
+#' @author bpeterson
+#' @export
 is.constraint <- function( x ) {
   inherits( x, "constraint" )
 }

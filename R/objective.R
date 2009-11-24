@@ -15,10 +15,9 @@
 #' @param enabled 
 #' @param ... 
 #' @param multiplier 
-#' @returnType 
-#' @return 
 #' @author bpeterson
 #' @export
+#' @callGraph
 objective<-function(name , enabled=FALSE , ..., multiplier=1){
   if(!hasArg(name)) stop("you must specify an objective name")
   if (hasArg(name)) if(is.null(name)) stop("you must specify an objective name")
@@ -34,10 +33,24 @@ objective<-function(name , enabled=FALSE , ..., multiplier=1){
   )
 }
 
+
+#' @param x 
+#' @author bpeterson
+#' @export
 is.objective <- function( x ) {
   inherits( x, "objective" )
 }
 
+#' 
+#' @param constraints 
+#' @param type 
+#' @param name 
+#' @param enabled 
+#' @param ... 
+#' @param indexnum 
+#' @author bpeterson
+#' @export
+#' @callGraph
 add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=NULL)
 {
     if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
@@ -57,7 +70,7 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
           {tmp_objective = return_objective(name=name,
                                             enabled=enabled,
                                             if (hasArg(target)) target=target else target = NULL,
-                                            if (hasArg(multiplier)) multiplier=multiplier else multiplier = 1,
+                                            if (hasArg(multiplier)) multiplier=multiplier else multiplier = -10,
                                             ... = ...
                                             )
           },
@@ -104,6 +117,7 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
 #   
 # }
 
+
 return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NULL)
 {
   if(!hasArg(target)) target = NULL
@@ -134,8 +148,8 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
   if (p>1) stop("p must be less than 1")
   if (p<0) stop("p must be greater than zero")
   if(!hasArg(clean)) clean = NULL
-  if(!hasArg(method)) method = NULL
-  if(!hasArg(portfolio_method)) portfolio_method = NULL
+  if(!hasArg(method)) method = NULL else method = method
+  if(!hasArg(portfolio_method)) portfolio_method = NULL else portfolio_method = portfolio_method
   if(!hasArg(target)) target = NULL
   if(!hasArg(multiplier)) multiplier=1
   
@@ -159,6 +173,8 @@ risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1
 {
   if(!hasArg(target)) target=NULL
   Objective <- portfolio_risk_objective(name=name,enabled=enabled,p=p,target=target, multiplier=multiplier, ...=...)
+  if(!hasArg(method)) method="modified"
+  if(!hasArg(portfolio_method)) portfolio_method="component"
   
   #if( is.null(RBlower) ){ RBlower = rep(-Inf,N) }  ; if( is.null(RBupper) ){ RBupper = rep(Inf,N) }
   nassets=length(assets)
@@ -189,8 +205,8 @@ risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1
                          enabled = Objective$enabled,
                          p = Objective$p,
                          clean = Objective$clean,
-                         method = Objective$method,
-                         portfolio_method = Objective$portfolio_method,
+                         method = method,
+                         portfolio_method = portfolio_method,
                          target= Objective$target,
                          multiplier= Objective$multiplier,
                          min_prisk = min_prisk,

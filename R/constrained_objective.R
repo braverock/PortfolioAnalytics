@@ -24,6 +24,12 @@
 #' generated portfolio is larger than max_sum.  
 #' This normalization increases the speed of optimization and convergence by several orders of magnitude.
 #'  
+#' When you are optimizing a return objective, you must specify a negative multiplier 
+#' for the return objective so that the function will maximize return.  If you specify a target return,
+#' any return less than your target will be penalized.  If you do not specify a target return, 
+#' you may need to specify a negative VTR, or the function will not converge.  Try the maximum 
+#' expected return times the multiplier (e.g. -1 or -10).
+#'    
 #' @param R 
 #' @param w 
 #' @param constraints 
@@ -100,7 +106,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
           multiplier  = objective$multiplier
           switch(objective$name,
             median =,
-            mean   = { tmp_measure = match.fun(objective$name)(sum(mu*w))
+            mean   = { tmp_measure = match.fun(objective$name)(R%*%w)
                      },
             sd =,
             StdDev = { tmp_measure = StdDev(R,
@@ -141,7 +147,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                                     ...=...
                                   )
                   },
-            nomatch = { tmp_measure = try(match.fun(objective$name),silent=TRUE) }
+            nomatch = { tmp_measure = try(match.fun(objective$name),silent=TRUE)(R,weights=w,...=...) }
           ) # end objective switch
           
           # now set the new value of the objective output
@@ -150,7 +156,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               next()
               
           } else{
-              if(trace) tmp_return[[]]<-tmp_measure
+              if(trace) tmp_return<-c(tmp_return,tmp_measure)
           }
           
           if(inherits(objective,"return_objective") | inherits(objective,"portfolio_risk_objective")){
