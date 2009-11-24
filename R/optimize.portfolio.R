@@ -20,7 +20,7 @@
 #' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
 #'  
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraints}}
+#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param optimize_method one of "DEoptim" or "random"
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
@@ -51,10 +51,10 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     if(hasArg(itermax)) itermax=itermax else itermax=200
     NP = round(search_size/itermax)
     if(NP>2000) NP=2000
-    if(!hasArg(controlDE)) controlDE = list( VTR = 0 , NP=NP, trace=trace ) else controlDE=controlDE
-    if(hasArg(VTR)) controlDE$VTR = VTR #target number for the objective function
-    if(hasArg(F))   controlDE$F   = F   # stepsize, default .8
-    if(hasArg(CR))  controlDE$CR  = CR  # Crossover probability from interval [0,1]. Default to '0.5'
+    if(!hasArg(controlDE)) controlDE = list( VTR = 0 , NP=NP, trace=trace ) else controlDE=match.call(expand.dots=TRUE)$controlDE
+    if(hasArg(VTR)) controlDE$VTR <- match.call(expand.dots=TRUE)$VTR #target number for the objective function
+    if(hasArg(F))   controlDE$F  <- match.call(expand.dots=TRUE)$F   # stepsize, default .8
+    if(hasArg(CR))  controlDE$CR <- match.call(expand.dots=TRUE)$CR 	 # Crossover probability from interval [0,1]. Default to '0.5'
     if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
     if(!hasArg(sigma)) sigma = cov(R);
     if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R)
