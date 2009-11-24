@@ -10,7 +10,7 @@
 #
 ###############################################################################
 
-#'  function to calculate a numeric return value for a portfolio based on a set of constraints
+#' function to calculate a numeric return value for a portfolio based on a set of constraints
 #' 
 #' function to calculate a numeric return value for a portfolio based on a set of constraints,
 #' we'll try to make as few assumptions as possible, and only run objectives that are required by the user
@@ -19,28 +19,31 @@
 #' we'll normalize the weights passed in to whichever boundary condition has been violated
 #' NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
 #' might violate your constraints, so you'd need to renormalize them after optimizing
-#' we'll do this in \code{\link{optimize.portfolio}} so that the weights you see have been 
+#' We aspply the same normalization in \code{\link{optimize.portfolio}} so that the weights you see have been 
 #' normalized to min_sum if the generated portfolio is smaller than min_sum or max_sum if the 
-#' generated portfolio is larger than max_sum. 
+#' generated portfolio is larger than max_sum.  
+#' This normalization increases the speed of optimization and convergence by several orders of magnitude.
+#'  
 #' @param R 
 #' @param w 
 #' @param constraints 
 #' @param ... 
-#' @returnType 
-#' @return 
+#' 
 #' @author Peter Carl, Brian G. Peterson
 #' @export
 constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
 { 
-
+    if (ncol(R)>length(w)) {
+        R=R[,1:length(w)]
+    }
     if(!hasArg(penalty)) penalty = 1e4
     N = length(w)
     T = nrow(R)
 
     if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
     if(!hasArg(sigma)) sigma = cov(R);
-    if(!hasArg(M3))    M3 = M3.MM(R,mu)
-    if(!hasArg(M4))    M4 = M4.MM(R,mu)
+    if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R)
+    if(!hasArg(M4))    M4 = PerformanceAnalytics:::M4.MM(R)
 
 
     # check for valid constraints
@@ -51,9 +54,12 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
       warning("length of constraints asset list and weights vector do not match, results may be bogus")
     }
 
-    out = -sum( w*mu ) #needs to be maximized
+    # should be take care of by a return objective
+    #out = sum( mu*w ) #needs to be maximized
 
-    if(!is.null(contraints$min_sum) | !is.null(constraints$max_sum)){
+    out=0
+    
+    if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
       # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
       # we'll normalize the weights passed in to whichever boundary condition has been violated
       # NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
@@ -81,7 +87,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     }
     if (!is.null(constraints$min)){
       min = constraints$min
-      out = out + sum(lower[which(w<min[1:N])]-w[which(w<min[1:N])])*penalty
+      out = out + sum(w[which(w<min[1:N])]-w[which(w<min[1:N])])*penalty
     }
     
     if(is.null(constraints$objectives)) {
@@ -94,7 +100,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
           multiplier  = objective$multiplier
           switch(objective$name,
             median =,
-            mean   = { tmp_measure = match.fun(objective$name)
+            mean   = { tmp_measure = match.fun(objective$name)(sum(mu*w))
                      },
             sd =,
             StdDev = { tmp_measure = StdDev(R,
@@ -168,7 +174,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               # we'll use the  univariate measure exactly like we would as a separate objective
               out = out + penalty*objective$multiplier*(tmp_measure[[1]]-objective$target)
             }
-            percrisk = tmp_objective[[3]] # third element is percent component contribution
+            percrisk = tmp_measure[[3]] # third element is percent component contribution
             RBupper = objective$max_prisk
             RBlower = objective$min_prisk
             out = out + penalty*multiplier*sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
