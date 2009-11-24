@@ -46,9 +46,15 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   }
 
   if(optimize_method=="DEoptim"){
+    stopifnot("package:DEoptim" %in% search() || require("DEoptim",quietly = TRUE))
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
-    NP = round(search_size/200)
-    if(!hasArg(controlDE)) controlDE = list( VTR = 0 , NP=NP ) else cotrolDE=controlDE
+    if(hasArg(itermax)) itermax=itermax else itermax=200
+    NP = round(search_size/itermax)
+    if(NP>2000) NP=2000
+    if(!hasArg(controlDE)) controlDE = list( VTR = 0 , NP=NP, trace=trace ) else controlDE=controlDE
+    if(hasArg(VTR)) controlDE$VTR = VTR #target number for the objective function
+    if(hasArg(F))   controlDE$F   = F   # stepsize, default .8
+    if(hasArg(CR))  controlDE$CR  = CR  # Crossover probability from interval [0,1]. Default to '0.5'
     if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
     if(!hasArg(sigma)) sigma = cov(R);
     if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R)
@@ -67,7 +73,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
 
     w = as.vector( minw$optim$bestmem)
     # normalize results if necessary
-    if(!is.null(contraints$min_sum) | !is.null(constraints$max_sum)){
+    if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
         # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
         # we'll normalize the weights passed in to whichever boundary condition has been violated
         # NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
