@@ -118,8 +118,8 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
           rp_objective_results<-apply(rp, 1, constrained_objective, R=R, constraints=constraints, trace=trace, ...=...)
       }
       #' if trace=TRUE , store results of foreach in out$random_results
-      if(trace) out$random_portfolio_Objective_results<-rp_objective_results
-      #' loop through results keeping track of the minimum value of objective$out
+      if(trace) out$random_portfolio_objective_results<-rp_objective_results
+      #' loop through results keeping track of the minimum value of rp_objective_results[[objective]]$out
       min_objective_weights<- NULL #'TODO ## DO SOME SEARCH HERE ##
       #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
       out$weights<-min_objective_weights
