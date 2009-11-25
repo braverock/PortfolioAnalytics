@@ -10,6 +10,7 @@
 #
 ###############################################################################
 
+
 #' wrapper for constrained optimization of portfolios
 #' 
 #' This function aims to provide a wrapper for constrained optimization of 
@@ -18,7 +19,10 @@
 #' 
 #' This function currently supports DEoptim and random portfolios as back ends.
 #' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
-#'  
+#'
+#' TODO add multivariate moment calcs wherever possible for greater efficience
+#' TODO write random protfolio method code
+#'   
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param optimize_method one of "DEoptim" or "random"
@@ -101,7 +105,18 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     if(trace){out$DEoutput=minw}
     
   } ## end case for DEoptim
-
+  if(optimize_method=="random"){
+      #' call random_portfolios() with constraints and search_size to create matrix of portfolios
+      #' store matrix in out if trace=TRUE
+      #' write foreach loop to call constrained_objective() with each portfolio 
+      #' (should we call trace=TRUE for these? or just pass through?)
+      #' if trace=TRUE , store results of foreach in out$random_results
+      #' loop through results keeping track of the minimum value of objective$out
+      #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
+      #' construct out list to be as similar as possible to DEoptim list, within reason
+      message("not yet implemented, sorry") 
+      out=list()
+  }
     end_t<-Sys.time()
     # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
     print(c("elapsed time:",round(end_t-start_t,2)))
