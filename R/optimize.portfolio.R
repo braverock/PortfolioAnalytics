@@ -50,7 +50,8 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   if (is.null(constraints) | !is.constraint(constraints)){
     stop("you must pass in an object of class constraints to control the optimization")
   }
-
+  out=list()
+  
   if(optimize_method=="DEoptim"){
     stopifnot("package:DEoptim" %in% search() || require("DEoptim",quietly = TRUE))
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
@@ -107,19 +108,28 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   } ## end case for DEoptim
   if(optimize_method=="random"){
       #' call random_portfolios() with constraints and search_size to create matrix of portfolios
+      rp<-random_portfolios(rpconstraints=constraints,permutations=search_size)
       #' store matrix in out if trace=TRUE
-      #' write foreach loop to call constrained_objective() with each portfolio 
-      #' (should we call trace=TRUE for these? or just pass through?)
+      if(trace) out$random_portfolios<-rp
+      #' write foreach loop to call constrained_objective() with each portfolio
+      if ("package:foreach" %in% search()){
+          rp_objective_results<-foreach(ii=1:nrow(rp)) %dopar% constrained_objective(w=rp[ii,],R,constraints,trace=trace,...=...)
+      } else {
+          rp_objective_results<-apply(rp, 1, constrained_objective, R=R, constraints=constraints, trace=trace, ...=...)
+      }
       #' if trace=TRUE , store results of foreach in out$random_results
+      if(trace) out$random_portfolio_Objective_results<-rp_objective_results
       #' loop through results keeping track of the minimum value of objective$out
+      min_objective_weights<- NULL #'TODO ## DO SOME SEARCH HERE ##
       #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
+      out$weights<-min_objective_weights
+      out$constrained_objective<-constrained_objective(w=min_objective_weights,R=R,constraints,trace=TRUE)$objective_measures
+      out$call<-call
       #' construct out list to be as similar as possible to DEoptim list, within reason
-      message("not yet implemented, sorry") 
-      out=list()
   }
     end_t<-Sys.time()
     # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
-    print(c("elapsed time:",round(end_t-start_t,2)))
+    message(c("elapsed time:",round(end_t-start_t,2)))
     out$constraints<-constraints
     out$data_summary<-list(first=first(R),last=last(R))
     out$elapsed_time<-end_t-start_t
