@@ -31,6 +31,8 @@
 #' @export
 optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ...)
 {
+  start_t<-Sys.time()
+
   #store the call for later
   call <- match.call()
 
