@@ -102,20 +102,11 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     
   } ## end case for DEoptim
 
-    ## FIXME: CODE BELOW THIS  POINT HIGHLY QUESTIONABLE
-    # print(c("combining results for target",Riskupper ))
-    # outw = as.vector(c( minw$optim$bestmem , 1-sum(minw$optim$bestmem) )) ; #full investment constraint
-    # names(outw) = c(colnames(R),"cash")
-    # check
-    # include some standard measures
-#    out$stats=c(sum( outw*mu ) , StdDev(outw,sigma=sigma), VaR(outw,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4), ES(outw,mu=mu,alpha=alpha,sigma=sigma,M3=M3,M4=M4))
-#    names(out$stats)<-c("mean_ret","Std. Dev.","mVaR","mES")
-#    # @TODO: change these to use PerformanceAnalytics functions
-#    out$targets<-c(minriskcriterion,Riskupper,percriskcontribcriterion)
-#    names(out$targets)<-c("Risk Fn","Risk Target","Risk Contribution Fn")
-
     end_t<-Sys.time()
     # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
     print(c("elapsed time:",round(end_t-start_t,2)))
+    out$constraints<-constraints
+    out$data_summary<-list(first=first(R),last=last(R))
+    out$elapsed_time<-end_t-start_t
     return(out)
 }
