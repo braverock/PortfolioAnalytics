@@ -64,13 +64,13 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
     assets=constraints$assets
     
     tmp_objective=NULL
-    
+	
     switch(type,
         return=, return_objective=
           {tmp_objective = return_objective(name=name,
                                             enabled=enabled,
-                                            if (hasArg(target)) target=target else target = NULL,
-                                            if (hasArg(multiplier)) multiplier=multiplier else multiplier = -10,
+                                            if (hasArg(target)) target=match.call(expand.dots=TRUE)$target else target = NULL,
+                                            if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = -10,
                                             ... = ...
                                             )
           },
@@ -78,9 +78,9 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
         risk=, portfiolio_risk=, portfolio_risk_objective =
           {tmp_objective = portfolio_risk_objective(name=name,
                                                     enabled=enabled,
-                                                    if (hasArg(p)) p=p else p=.95,
-                                                    if (hasArg(multiplier)) multiplier=multiplier else multiplier = 1,
-                                                    if (hasArg(target)) target=target else target = NULL,
+                                                    if (hasArg(p)) p=match.call(expand.dots=TRUE)$p else p=.95,
+                                                    if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = 1,
+                                                    if (hasArg(target)) target=match.call(expand.dots=TRUE)$target else target = NULL,
                                                     ...=...
                                                    )
           },
@@ -88,9 +88,9 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
         risk_budget=, risk_budget_objective=
           {tmp_objective = risk_budget_objective(name=name,
                                                  enabled=enabled,
-                                                 if (hasArg(p)) p=p else p=.95,
-                                                 if (hasArg(multiplier)) multiplier=multiplier else multiplier = 1,
-                                                 if (hasArg(target)) target=target else target = NULL,
+                                                 if (hasArg(p)) p=match.call(expand.dots=TRUE)$p else p=.95,
+                                                 if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = 1,
+                                                 if (hasArg(target)) target=match.call(expand.dots=TRUE)$target else target = NULL,
                                                  ...=...
                                                 )
           },
@@ -147,11 +147,11 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
   if (!is.numeric(p)) stop("your p value must be numeric")
   if (p>1) stop("p must be less than 1")
   if (p<0) stop("p must be greater than zero")
-  if(!hasArg(clean)) clean = NULL
-  if(!hasArg(method)) method = NULL else method = method
-  if(!hasArg(portfolio_method)) portfolio_method = NULL else portfolio_method = portfolio_method
-  if(!hasArg(target)) target = NULL
-  if(!hasArg(multiplier)) multiplier=1
+  if(!hasArg(clean)) clean = NULL else clean = match.call(expand.dots=TRUE)$clean
+  if(!hasArg(method)) method = NULL else method = match.call(expand.dots=TRUE)$method
+  if(!hasArg(portfolio_method)) portfolio_method = NULL else portfolio_method = match.call(expand.dots=TRUE)$portfolio_method
+  if(!hasArg(target)) target = NULL else target = match.call(expand.dots=TRUE)$target
+  if(!hasArg(multiplier)) multiplier=1 else multiplier = match.call(expand.dots=TRUE)$multiplier
   
   ## now structure and return
   return(structure( list(name = Objective$name,
@@ -171,10 +171,10 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
 
 risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1, target=NULL, p=.95, min_prisk, max_prisk )
 {
-  if(!hasArg(target)) target=NULL
+  if(!hasArg(target)) target=NULL else target=match.call(expand.dots=TRUE)$target
   Objective <- portfolio_risk_objective(name=name,enabled=enabled,p=p,target=target, multiplier=multiplier, ...=...)
-  if(!hasArg(method)) method="modified"
-  if(!hasArg(portfolio_method)) portfolio_method="component"
+  if(!hasArg(method)) method="modified" else method=match.call(expand.dots=TRUE)$method
+  if(!hasArg(portfolio_method)) portfolio_method="component" else portfolio_method=match.call(expand.dots=TRUE)$portfolio_method
   
   #if( is.null(RBlower) ){ RBlower = rep(-Inf,N) }  ; if( is.null(RBupper) ){ RBupper = rep(Inf,N) }
   nassets=length(assets)
