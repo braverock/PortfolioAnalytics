@@ -13,4 +13,4 @@ constraints$objectives[[1]]$multiplier=-10
 constraints$objectives[[2]]$target=.05
 # and clean the returns
 constraints$objectives[[2]]$clean="boudt"
-optimize.portfolio(R=edhec[,1:10], constraints, optimize_method=c("DEoptim"), search_size=1000, trace=TRUE)
+opt_out<-optimize.portfolio(R=edhec[,1:10], constraints, optimize_method=c("DEoptim"), search_size=1000, trace=TRUE)
