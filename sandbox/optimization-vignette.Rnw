@@ -1,0 +1,56 @@
+% 
+\documentclass[12pt,letterpaper,english]{article}
+\usepackage[OT1]{fontenc}
+\usepackage{Sweave}
+\begin{document}
+
+\title{Portfolio Optimization with \pkg{optimizer}}
+\author{Peter Carl \& Brian G. Peterson}
+
+\makeatletter
+\makeatother
+\maketitle
+
+\begin{abstract}
+  This vignette describes the steps used to optimize a portfolio of financial assets.
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+
+<<LoadLibrary,echo=F,results=hide>>=
+library('optimizer') # also loads PerformanceAnalytics, etc.
+@
+
+\section{Getting Started}
+\subsection{Load and review data}
+Describe the data.  Zero fill the data where necessary.  discuss the tradeoffs with zero filling and speed.
+%
+\begin{figure}
+\caption{First Lines of the managers Object }
+\label{fig:First-Lines-of}
+<<LoadData,echo=T>>=
+data(edhec)
+#managers=read.csv("/home/peter/dev/R/managers.csv",row.names=1)
+head(managers)
+@
+\end{figure}
+
+\subsection{Select an optimizer}
+
+
+\section{Unconstrained mean-variance optimization}
+
+\section{Adding constraints}
+
+\subsection{Adding portfolio constraints}
+
+\subsection{Adding per-asset weight constraints}
+
+\section{Value-at-Risk and Expected Shortfall}
+
+\section{Optimization with higher moments}
+
+
+\end{document}
