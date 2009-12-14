@@ -1,6 +1,6 @@
 Package: optimizer
 Type: Package
-Title: Numeric Methods for Optimization of Portfolios
+Title: Portfolio Analysis, including Numeric Methods for Optimization of Portfolios
 Version: 0.0.2
 Date: 2009-12-14
 Author: Kris Boudt, Peter Carl, Brian G. Peterson
