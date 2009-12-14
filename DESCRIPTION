@@ -1,13 +1,13 @@
 Package: optimizer
 Type: Package
 Title: Numeric Methods for Optimization of Portfolios
-Version: 0.0.1
-Date: 2009-11-15
-Author: Peter Carl, Brian G. Peterson
+Version: 0.0.2
+Date: 2009-12-14
+Author: Kris Boudt, Peter Carl, Brian G. Peterson
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization routines.
 Depends: R (>= 2.9.0), zoo, xts (>= 0.6-8), PerformanceAnalytics (>= 1.0.0)
-Suggests: quantmod
+Suggests: quantmod, DEoptim
 License: GPL
 Copyright: (c) 2004-2009
 Contributors: Kris Boudt
