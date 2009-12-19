@@ -15,27 +15,38 @@
 #' function to calculate a numeric return value for a portfolio based on a set of constraints,
 #' we'll try to make as few assumptions as possible, and only run objectives that are required by the user
 #' 
-#' If the user has passed in either min_sum or max_sum constraints for the portfolio, or both,
-#' we'll normalize the weights passed in to whichever boundary condition has been violated
+#' If the user has passed in either min_sum or max_sum constraints for the portfolio, or both, 
+#' and are using a numerical optimization method like DEoptim,
+#' we'll normalize the weights passed in to whichever boundary condition has been violated.  
+#' If using random portfolios, all the portfolios generated will meet the constraints by construction.
 #' NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
 #' might violate your constraints, so you'd need to renormalize them after optimizing
-#' We aspply the same normalization in \code{\link{optimize.portfolio}} so that the weights you see have been 
+#' We apply the same normalization in \code{\link{optimize.portfolio}} so that the weights you see have been 
 #' normalized to min_sum if the generated portfolio is smaller than min_sum or max_sum if the 
 #' generated portfolio is larger than max_sum.  
 #' This normalization increases the speed of optimization and convergence by several orders of magnitude.
+#' 
+#' Whether or not we normalize the weights using min_sum and max_sum, and are using a numerical optimization 
+#' engine like DEoptim, we will penalize portfolios that violate weight constraints in much the same way
+#' we penalize other constraints.  If a min_sum/max_sum normalization has not occured, convergence
+#' can take a very long time.  We currently do not allow for a non-normalized full investment constraint.  
+#' Future version of this function could include this additional constraint penalty. 
 #'  
 #' When you are optimizing a return objective, you must specify a negative multiplier 
 #' for the return objective so that the function will maximize return.  If you specify a target return,
 #' any return less than your target will be penalized.  If you do not specify a target return, 
 #' you may need to specify a negative VTR, or the function will not converge.  Try the maximum 
 #' expected return times the multiplier (e.g. -1 or -10).
-#'    
-#' @param R 
-#' @param w 
-#' @param constraints 
-#' @param ... 
 #' 
-#' @author Peter Carl, Brian G. Peterson
+#' TODO add examples
+#' TODO add more details about the nuances of the optimization engines
+#'    
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
+#' @param w a vector of weights to test
+#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
+#' @param \dots any other passthru parameters 
+#' 
+#' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
 constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
 { 
@@ -147,7 +158,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                                     ...=...
                                   )
                   },
-            nomatch = { tmp_measure = try(match.fun(objective$name),silent=TRUE)(R,weights=w,...=...) }
+            nomatch = { tmp_measure = try((match.fun(objective$name)(R,weights=w,...=...)),silent=TRUE) }
           ) # end objective switch
           
           # now set the new value of the objective output
@@ -160,12 +171,12 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
           }
           
           if(inherits(objective,"return_objective") | inherits(objective,"portfolio_risk_objective")){
-            if (is.null(objective$target)){
-              # target is null, just minimize
-              out = out + (tmp_measure*multiplier)
-            } else { # we have a target
-              out = out + penalty*objective$multiplier*(tmp_measure-objective$target)
-              #should we also penalize risk too low for risk targets? or is a range another objective?
+            if (!is.null(objective$target) & is.numeric(objective$target)){ # we have a target
+                out = out + penalty*objective$multiplier*(tmp_measure-objective$target)
+                #should we also penalize risk too low for risk targets? or is a range another objective?
+            } else { 
+                # target is null or doesn't exist, just minimize
+                out = out + (tmp_measure*multiplier)
             }
           } # end handling for return and univariate risk objuectives
           
@@ -174,7 +185,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
             
             # out = out + penalty*sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
             # add risk budget constraint
-            if(!is.null(objective$target)){
+            if(!is.null(objective$target) & is.numeric(objective$target)){
               #in addition to a risk budget constraint, we have a univariate target
               # the first element of the returned list is the univariate measure
               # we'll use the  univariate measure exactly like we would as a separate objective
