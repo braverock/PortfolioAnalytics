@@ -11,9 +11,9 @@
 ###############################################################################
 
 #' 
-#' @param name 
-#' @param enabled 
-#' @param ... 
+#' @param name name of the objective which will be used to call a function, like 'ES', 'VaR', 'mean'
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthrough parameters
 #' @param multiplier 
 #' @author bpeterson
 #' @export
@@ -41,6 +41,7 @@ is.objective <- function( x ) {
   inherits( x, "objective" )
 }
 
+#' General interface for adding optimization objectives, including risk, return, and risk budget
 #' 
 #' @param constraints 
 #' @param type 
@@ -118,6 +119,16 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
 # }
 
 
+#' 
+#' @param name 
+#' @param enabled 
+#' @param ... 
+#' @param multiplier 
+#' @param target 
+#' @returnType 
+#' @return 
+#' @author bpeterson
+#' @export
 return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NULL)
 {
   if(!hasArg(target)) target = NULL
@@ -140,6 +151,17 @@ return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NUL
   
 } # end return_objective constructor
 
+#' 
+#' @param name 
+#' @param enabled 
+#' @param ... 
+#' @param multiplier 
+#' @param target 
+#' @param p 
+#' @returnType 
+#' @return 
+#' @author bpeterson
+#' @export
 portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, target=NULL, p=.95)
 {
   Objective <- objective(name=name,enabled=enabled, multiplier=multiplier)
@@ -169,6 +191,20 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
   )
 } # end portfolio_risk_objective constructor
 
+#' 
+#' @param assets 
+#' @param name 
+#' @param enabled 
+#' @param ... 
+#' @param multiplier 
+#' @param target 
+#' @param p 
+#' @param min_prisk 
+#' @param max_prisk 
+#' @returnType 
+#' @return 
+#' @author bpeterson
+#' @export
 risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1, target=NULL, p=.95, min_prisk, max_prisk )
 {
   if(!hasArg(target)) target=NULL else target=match.call(expand.dots=TRUE)$target
@@ -217,4 +253,3 @@ risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1
                   ) # end structure
   )
 } # end risk_budget_objective constructor
-
