@@ -26,7 +26,7 @@ objective<-function(name , enabled=FALSE , ..., multiplier=1){
   return(structure( list(name = name,
                          enabled = enabled,
                          multiplier = multiplier,
-                         call = match.call()
+                         #call = match.call()
                         ),
                     class="objective"
                   ) # end structure
@@ -101,6 +101,7 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
     ) # end objective type switch
     if(is.objective(tmp_objective)) {
        if(!hasArg(indexnum) | (hasArg(indexnum) & is.null(indexnum))) indexnum = length(constraints$objectives)+1
+       tmp_objective$call<-match.call()
        constraints$objectives[[indexnum]]<-tmp_objective
     }
     return(constraints)
@@ -125,8 +126,6 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
 #' @param ... 
 #' @param multiplier 
 #' @param target 
-#' @returnType 
-#' @return 
 #' @author bpeterson
 #' @export
 return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NULL)
@@ -143,7 +142,7 @@ return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NUL
                          method = method,
                          multiplier= Objective$multiplier,
                          target=target,
-                         call = Objective$call
+                         #call = Objective$call
                       ), # end of list
                     class=c("return_objective","objective")
                   ) # end structure
@@ -158,8 +157,6 @@ return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NUL
 #' @param multiplier 
 #' @param target 
 #' @param p 
-#' @returnType 
-#' @return 
 #' @author bpeterson
 #' @export
 portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, target=NULL, p=.95)
@@ -184,7 +181,7 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
                          portfolio_method = portfolio_method,
                          multiplier= Objective$multiplier,
                          target=target,
-                         call = Objective$call
+                         #call = Objective$call
                         ), # end of list
                     class=c("portfolio_risk_objective","objective")
                   ) # end structure
@@ -201,8 +198,6 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
 #' @param p 
 #' @param min_prisk 
 #' @param max_prisk 
-#' @returnType 
-#' @return 
 #' @author bpeterson
 #' @export
 risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1, target=NULL, p=.95, min_prisk, max_prisk )
@@ -247,7 +242,7 @@ risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1
                          multiplier= Objective$multiplier,
                          min_prisk = min_prisk,
                          max_prisk = max_prisk,
-                         call = Objective$call
+                         #call = Objective$call
                       ), # end of list
                     class=c("risk_budget_objective","objective")
                   ) # end structure
