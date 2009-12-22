@@ -10,11 +10,12 @@
 #
 ###############################################################################
 
+#' constructor for class 'objective'
 #' 
 #' @param name name of the objective which will be used to call a function, like 'ES', 'VaR', 'mean'
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthrough parameters
-#' @param multiplier 
+#' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @author bpeterson
 #' @export
 #' @callGraph
@@ -34,7 +35,7 @@ objective<-function(name , enabled=FALSE , ..., multiplier=1){
 }
 
 
-#' @param x 
+#' @param x an object of potentiall of type 'objective' to test
 #' @author bpeterson
 #' @export
 is.objective <- function( x ) {
@@ -43,13 +44,22 @@ is.objective <- function( x ) {
 
 #' General interface for adding optimization objectives, including risk, return, and risk budget
 #' 
-#' @param constraints 
-#' @param type 
-#' @param name 
-#' @param enabled 
-#' @param ... 
-#' @param indexnum 
+#' This function is the main function for adding and updating business objectives in an object of type \code{\link{constraint}}.
+#' 
+#' In general, you will define your objective as one of three types: 'return', 'risk', or 'risk_budget'.  
+#' These have special handling and intelligent defaults for dealing with the function most likely to be 
+#' used as objectives, including mean, median, VaR, ES, etc.
+#' 
+#' @param constraints an object of type "constraints" to add the objective to, specifying the constraints for the optimization, see \code{\link{constraint}}
+#' @param type character type of the objective to add or update, currently 'return','risk', or 'risk_budget'
+#' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters 
+#' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
 #' @author bpeterson
+#' 
+#' @seealso \code{\link{constraint}}
+#' 
 #' @export
 #' @callGraph
 add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=NULL)
@@ -120,12 +130,13 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
 # }
 
 
+#' constructor for class return_objective
 #' 
-#' @param name 
-#' @param enabled 
-#' @param ... 
-#' @param multiplier 
-#' @param target 
+#' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters 
+#' @param multiplier multiplier to apply to the objective, usually 1 or -1
+#' @param target univariate target for the objective
 #' @author bpeterson
 #' @export
 return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NULL)
@@ -150,13 +161,14 @@ return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NUL
   
 } # end return_objective constructor
 
+#' constructor for class portfolio_risk_objective
 #' 
-#' @param name 
-#' @param enabled 
-#' @param ... 
-#' @param multiplier 
-#' @param target 
-#' @param p 
+#' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters 
+#' @param multiplier multiplier to apply to the objective, usually 1 or -1
+#' @param target univariate target for the objective
+#' @param p confidence level for calculation, default p=.95
 #' @author bpeterson
 #' @export
 portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, target=NULL, p=.95)
@@ -188,16 +200,17 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
   )
 } # end portfolio_risk_objective constructor
 
+#' constructor for class risk_budget_objective
 #' 
-#' @param assets 
-#' @param name 
-#' @param enabled 
-#' @param ... 
-#' @param multiplier 
-#' @param target 
-#' @param p 
-#' @param min_prisk 
-#' @param max_prisk 
+#' @param assets vector of assets to use, should come from constraints object
+#' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters 
+#' @param multiplier multiplier to apply to the objective, usually 1 or -1
+#' @param target univariate target for the objective
+#' @param p confidence level for calculation, default p=.95
+#' @param min_prisk minimum percentage contribution to risk
+#' @param max_prisk maximum percentage contribution to risk
 #' @author bpeterson
 #' @export
 risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1, target=NULL, p=.95, min_prisk, max_prisk )

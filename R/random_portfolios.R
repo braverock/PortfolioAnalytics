@@ -149,8 +149,14 @@ randomize_portfolio <- function (rpconstraints, max_permutations=200, rounding=3
   return(portfolio)
 }
 
-# TODO: write a function for random trades that only makes n trades and increases/decreases other elements to compensate.
-# random_walk_portfolios(seed,y,min_sum=.99,max_sum=1.01,permutations=100,max_permutations=5000)
+#' deprecated random portfolios wrapper until we write a random trades function
+#' 
+#' TODO: write a function for random trades that only makes n trades and increases/decreases other elements to compensate.
+#' random_walk_portfolios(seed,y,min_sum=.99,max_sum=1.01,permutations=100,max_permutations=5000)
+#' 
+#' @param ... 
+#' @author bpeterson
+#' @export
 random_walk_portfolios <-function(...) {
   # wrapper function protect older code for now?
   random_portfolios(...=...)

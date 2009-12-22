@@ -10,6 +10,7 @@
 #
 ###############################################################################
 
+#' constructor for class constraint
 #' 
 #' @param assets 
 #' @param ... 
@@ -137,6 +138,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
   ))
 }
 
+#' check function for constraints
 #' 
 #' @param x 
 #' @author bpeterson
@@ -145,7 +147,12 @@ is.constraint <- function( x ) {
   inherits( x, "constraint" )
 }
 
-# can we use the generic update.default function?
+#' function for updating constrints, not well tested, may be broken
+#' 
+#' can we use the generic update.default function?
+#' @param object 
+#' @param ... 
+#' @author bpeterson
 update.constraint <- function(object, ...){
   constraints <- object
   if (is.null(constraints) | !is.constraint(constraints)){

@@ -10,6 +10,9 @@
 #
 ###############################################################################
 
+#' 
+#' @param resultlist 
+#' @author bpeterson
 extractstats <- function(resultlist) {
     l = length(resultlist)
     result=matrix(nrow=l,ncol=49)

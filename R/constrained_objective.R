@@ -47,6 +47,7 @@
 #' @param w a vector of weights to test
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param \dots any other passthru parameters 
+#' @param trace TRUE/FALSE whether to include debugging and additional detail in the output list
 #' 
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
