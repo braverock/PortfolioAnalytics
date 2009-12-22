@@ -20,8 +20,7 @@
 #' This function currently supports DEoptim and random portfolios as back ends.
 #' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
 #'
-#' TODO add multivariate moment calcs wherever possible for greater efficience
-#' TODO write random protfolio method code
+#' TODO add multivariate moment calcs wherever possible for greater efficiency
 #'   
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
@@ -31,7 +30,7 @@
 #' @param \dots any other passthru parameters
 #' @callGraph 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
-#' @author Peter Carl, Brian G. Peterson
+#' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
 optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ...)
 {
@@ -40,6 +39,10 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   #store the call for later
   call <- match.call()
 
+  if (is.null(constraints) | !is.constraint(constraints)){
+      stop("you must pass in an object of class constraints to control the optimization")
+  }
+  
   R <- checkData(R)
   N = length(constraints$assets)
   if (ncol(R)>N) {
@@ -47,9 +50,6 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   }
   T = nrow(R)
   
-  if (is.null(constraints) | !is.constraint(constraints)){
-    stop("you must pass in an object of class constraints to control the optimization")
-  }
   out=list()
   
   if(optimize_method=="DEoptim"){
@@ -58,10 +58,12 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=200
     NP = round(search_size/itermax)
     if(NP>2000) NP=2000
-    if(!hasArg(controlDE)) controlDE = list( VTR = 0 , NP=NP, trace=trace ) else controlDE=match.call(expand.dots=TRUE)$controlDE
+    if(!hasArg(controlDE)) controlDE = list( VTR = 0 , NP=NP, trace=trace, trystart=5 ) else controlDE=match.call(expand.dots=TRUE)$controlDE
     if(hasArg(VTR)) controlDE$VTR <- match.call(expand.dots=TRUE)$VTR #target number for the objective function
     if(hasArg(F))   controlDE$F  <- match.call(expand.dots=TRUE)$F   # stepsize, default .8
     if(hasArg(CR))  controlDE$CR <- match.call(expand.dots=TRUE)$CR 	 # Crossover probability from interval [0,1]. Default to '0.5'
+    #if(hasArg(trace))  controlDE$trace <- match.call(expand.dots=TRUE)$trace      # trace
+    if(hasArg(trace))  controlDE$trystart <- match.call(expand.dots=TRUE)$trystart      # how many times to try to generate an initial population
     if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
     if(!hasArg(sigma)) sigma = cov(R);
     if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R,mu)
@@ -113,7 +115,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
       if(trace) out$random_portfolios<-rp
       #' write foreach loop to call constrained_objective() with each portfolio
       if ("package:foreach" %in% search()){
-          rp_objective_results<-foreach(ii=1:nrow(rp)) %dopar% constrained_objective(w=rp[ii,],R,constraints,trace=trace,...=...)
+          rp_objective_results<-foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,],R,constraints,trace=trace,...=...)
       } else {
           rp_objective_results<-apply(rp, 1, constrained_objective, R=R, constraints=constraints, trace=trace, ...=...)
       }
@@ -136,3 +138,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     out$end_t<-as.character(Sys.time())
     return(out)
 }
+
+###############################################################################
+# $Id$
+###############################################################################
