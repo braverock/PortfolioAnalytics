@@ -38,6 +38,8 @@
 #' you may need to specify a negative VTR, or the function will not converge.  Try the maximum 
 #' expected return times the multiplier (e.g. -1 or -10).
 #' 
+#' Additional parameters for random portfolios or \code{\link[DEoptim]{DEoptim.control}} may be passed in via \dots
+#' 
 #' TODO add examples
 #' TODO add more details about the nuances of the optimization engines
 #'    
@@ -46,6 +48,7 @@
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param \dots any other passthru parameters 
 #' 
+#' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
 constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
@@ -62,7 +65,27 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R)
     if(!hasArg(M4))    M4 = PerformanceAnalytics:::M4.MM(R)
 
-
+    # check for 'clean' in the objectives
+    loc<-grep('clean',constraints)
+    if(!identical(loc,integer(0)) {
+        for (objective in constraints[loc]){
+            if(!is.null(objective$clean)) cleanR<-try(Return.clean(R,method=objective$clean))
+            if(!inherits(cleanR,"try-error")) {
+                mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
+                sigma = cov(cleanR);
+                M3 = PerformanceAnalytics:::M3.MM(cleanR)
+                M4 = PerformanceAnalytics:::M4.MM(cleanR)
+                #' NOTE: this isn't perfect as it overwrites the moments for all objectives, not just this one
+                #' however, this should really be taken care of one level higher, in optimize.portfolio(), 
+                #' and this should be the fallback 
+            }    
+        }    
+    }
+    #if(!hasArg(cleanmu))    cleanmu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
+    #if(!hasArg(cleansigma)) cleansigma = cov(cleanR);
+    #if(!hasArg(cleanM3))    cleanM3 = PerformanceAnalytics:::M3.MM(cleanR)
+    #if(!hasArg(cleanM4))    cleanM4 = PerformanceAnalytics:::M4.MM(cleanR)
+    
     # check for valid constraints
     if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
 
@@ -112,6 +135,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     } else{
       if(trace) tmp_return<-list()
       for (objective in constraints$objectives){
+        #check for clean bits to pass in
         if(objective$enabled){
           tmp_measure = NULL
           multiplier  = objective$multiplier
@@ -135,6 +159,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                                     portfolio_method=objective$portfolio_method,
                                     p=objective$p,
                                     weights=w,
+                                    #clean=objective$clean,
                                     mu=mu,
                                     sigma=sigma,
                                     M3=M3,
@@ -151,6 +176,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                                     portfolio_method=objective$portfolio_method,
                                     p=objective$p,
                                     weights=w,
+                                    #clean=objective$clean,
                                     mu=mu,
                                     sigma=sigma,
                                     M3=M3,
@@ -174,11 +200,13 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
             if (!is.null(objective$target) & is.numeric(objective$target)){ # we have a target
                 out = out + penalty*objective$multiplier*(tmp_measure-objective$target)
                 #should we also penalize risk too low for risk targets? or is a range another objective?
-            } else { 
+                #    # half penalty for risk lower than target
+                #    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
+    } else { 
                 # target is null or doesn't exist, just minimize
                 out = out + (tmp_measure*multiplier)
             }
-          } # end handling for return and univariate risk objuectives
+          } # end handling for return and univariate risk objectives
           
           if(inherits(objective,"risk_budget_objective")){
             # setup
@@ -201,46 +229,16 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
       } # end loop over objectives
     } # end objectives processing
 
-    #message(paste("output of objective function",out))
- 
+    if(verbose) message(paste("output of objective function",out))
     #return
     if(!trace){
         return(out)
     } else {
-        return(list(out=out,weights=w,objective_measures=tmp_return))
+        if(optimize_method=="random"){
+            return(list(out=out,weights=w,objective_measures=tmp_return))
+        } else {
+            if(verbose) message(tmp_return)            
+        }
+        
     }
 }
-
-
-#KB_RBpaper_objective = function( w ){
-#
-#    #        w = matrix( c( w , 1-sum(w) ) , ncol=1) # assume a cash asset
-#
-#    # add weight constraint penalty, turn this into configuration from constraints
-#    # force weights to 1
-#    w <- (1/sum(w))*w
-#    N = length(w);
-#    percrisk = percriskcontrib( w );
-#    out = -sum( w*mu ) #needs to be maximized
-#    # add full investment constraint:
-#    penalty = 1e4;
-#    #out = out + penalty*( ((1-sum(w))>upper[N]) | ((1-sum(w))<lower[N]) )
-#    # penalize weights outside my constraints
-#    out = out + sum(w[which(w>upper[1:N])]-upper[which(w>upper[1:N])])*penalty
-#    out = out + sum(lower[which(w<lower[1:N])]-w[which(w<lower[1:N])])*penalty
-#
-#    ##########
-#    # add portfolio risk constraint
-#    prw=prisk(w)
-#    # full penalty for violating risk upper limit
-#    if(  prw > Riskupper ){ out = out + penalty*( prw - Riskupper) }
-#    # half penalty for risk lower than target
-#    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
-#
-#    # add risk budget constraint
-#    out = out + penalty*sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
-#    #print(paste("output of objective function",out))
-#
-#    #return
-#    return(out)
-#}
