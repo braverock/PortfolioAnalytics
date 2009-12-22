@@ -71,7 +71,7 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
           {tmp_objective = return_objective(name=name,
                                             enabled=enabled,
                                             if (hasArg(target)) target=match.call(expand.dots=TRUE)$target else target = NULL,
-                                            if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = -10,
+                                            if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = -1,
                                             ... = ...
                                             )
           },
