@@ -1,4 +1,4 @@
-require("optimizer")
+require("PortfolioAnalytics")
 require("DEoptim")
 data(edhec)
 constraints=constraint(assets = colnames(edhec[, 1:10]), min = 0.01, max = 0.4, min_sum=1, max_sum=1, weight_seq = generatesequence())
@@ -13,4 +13,9 @@ constraints$objectives[[1]]$multiplier=-10
 constraints$objectives[[2]]$target=.05
 # and clean the returns
 constraints$objectives[[2]]$clean="boudt"
-opt_out<-optimize.portfolio(R=edhec[,1:10], constraints, optimize_method=c("DEoptim"), search_size=1000, trace=TRUE)
+# look for a solution using both DEoptim and random portfolios
+opt_out<-optimize.portfolio(R=edhec[,1:10], constraints, optimize_method="DEoptim", search_size=1000, trace=TRUE)
+#we need a little more wiggle in min/max sum for random portfolios or it takes too long to converge
+constraints$min_sum<-.99
+constraints$max_sum<-1.01
+opt_out_random<-optimize.portfolio(R=edhec[,1:10], constraints, optimize_method="random", search_size=1000, trace=TRUE)
