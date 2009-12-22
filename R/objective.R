@@ -25,7 +25,7 @@ objective<-function(name , enabled=FALSE , ..., multiplier=1){
   ## now structure and return
   return(structure( list(name = name,
                          enabled = enabled,
-                         multiplier = multiplier,
+                         multiplier = multiplier
                          #call = match.call()
                         ),
                     class="objective"
@@ -141,7 +141,7 @@ return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NUL
                          enabled = Objective$enabled,
                          method = method,
                          multiplier= Objective$multiplier,
-                         target=target,
+                         target=target
                          #call = Objective$call
                       ), # end of list
                     class=c("return_objective","objective")
@@ -180,7 +180,7 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
                          method = method,
                          portfolio_method = portfolio_method,
                          multiplier= Objective$multiplier,
-                         target=target,
+                         target=target
                          #call = Objective$call
                         ), # end of list
                     class=c("portfolio_risk_objective","objective")
@@ -241,7 +241,7 @@ risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1
                          target= Objective$target,
                          multiplier= Objective$multiplier,
                          min_prisk = min_prisk,
-                         max_prisk = max_prisk,
+                         max_prisk = max_prisk
                          #call = Objective$call
                       ), # end of list
                     class=c("risk_budget_objective","objective")
