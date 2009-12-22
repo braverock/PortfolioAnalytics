@@ -253,7 +253,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     if(!trace){
         return(out)
     } else {
-            print(tmp_return)
-            return(list(out=out,weights=w,objective_measures=tmp_return))
+        # if(verbose) print(tmp_return)
+        return(list(out=out,weights=w,objective_measures=tmp_return))
     }
 }
