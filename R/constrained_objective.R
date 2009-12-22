@@ -59,7 +59,8 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     if(!hasArg(penalty)) penalty = 1e4
     N = length(w)
     T = nrow(R)
-
+    if(hasArg(optimize_method)) optimize_method=match.call(expand.dots=TRUE)$optimize_method else optimize_method=NULL 
+    if(hasArg(verbose)) verbose=match.call(expand.dots=TRUE)$verbose else verbose=FALSE 
     if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
     if(!hasArg(sigma)) sigma = cov(R);
     if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R)
@@ -67,18 +68,20 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
 
     # check for 'clean' in the objectives
     loc<-grep('clean',constraints)
-    if(!identical(loc,integer(0)) {
+    if(!identical(loc,integer(0))) {
         for (objective in constraints[loc]){
-            if(!is.null(objective$clean)) cleanR<-try(Return.clean(R,method=objective$clean))
-            if(!inherits(cleanR,"try-error")) {
-                mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
-                sigma = cov(cleanR);
-                M3 = PerformanceAnalytics:::M3.MM(cleanR)
-                M4 = PerformanceAnalytics:::M4.MM(cleanR)
-                #' NOTE: this isn't perfect as it overwrites the moments for all objectives, not just this one
-                #' however, this should really be taken care of one level higher, in optimize.portfolio(), 
-                #' and this should be the fallback 
-            }    
+            if(!is.null(objective$clean)) {
+                cleanR<-try(Return.clean(R,method=objective$clean))
+                if(!inherits(cleanR,"try-error")) {
+                    mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
+                    sigma = cov(cleanR);
+                    M3 = PerformanceAnalytics:::M3.MM(cleanR)
+                    M4 = PerformanceAnalytics:::M4.MM(cleanR)
+                    #' NOTE: this isn't perfect as it overwrites the moments for all objectives, not just this one
+                    #' however, this should really be taken care of one level higher, in optimize.portfolio(), 
+                    #' and this should be the fallback 
+                }
+            }
         }    
     }
     #if(!hasArg(cleanmu))    cleanmu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
@@ -196,17 +199,28 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               if(trace) tmp_return<-c(tmp_return,tmp_measure)
           }
           
-          if(inherits(objective,"return_objective") | inherits(objective,"portfolio_risk_objective")){
+          if(inherits(objective,"return_objective")){ 
+              if (!is.null(objective$target) & is.numeric(objective$target)){ # we have a target
+                  if(tmp_measure<objective$target){
+                      out = out + penalty*objective$multiplier*(tmp_measure-objective$target)
+                  } 
+              }  
+              # target is null or doesn't exist, just maximize, or minimize violation of constraint
+              out = out + (tmp_measure*multiplier)
+          } # end handling for return objectives
+
+          if(inherits(objective,"portfolio_risk_objective")){
             if (!is.null(objective$target) & is.numeric(objective$target)){ # we have a target
-                out = out + penalty*objective$multiplier*(tmp_measure-objective$target)
+                if(tmp_measure>objective$target){
+                    out = out + penalty*objective$multiplier*(tmp_measure-objective$target)
+                } 
                 #should we also penalize risk too low for risk targets? or is a range another objective?
                 #    # half penalty for risk lower than target
                 #    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
-    } else { 
-                # target is null or doesn't exist, just minimize
-                out = out + (tmp_measure*multiplier)
-            }
-          } # end handling for return and univariate risk objectives
+            }  
+            # target is null or doesn't exist, just maximize, or minimize violation of constraint
+            out = out + (tmp_measure*multiplier)
+          } #  univariate risk objectives
           
           if(inherits(objective,"risk_budget_objective")){
             # setup
@@ -217,8 +231,13 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               #in addition to a risk budget constraint, we have a univariate target
               # the first element of the returned list is the univariate measure
               # we'll use the  univariate measure exactly like we would as a separate objective
-              out = out + penalty*objective$multiplier*(tmp_measure[[1]]-objective$target)
-            }
+              if(tmp_measure[[1]]>objective$target){
+                out = out + penalty*objective$multiplier*(tmp_measure[[1]]-objective$target)
+              }
+              #should we also penalize risk too low for risk targets? or is a range another objective?
+              #    # half penalty for risk lower than target
+              #    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
+          }
             percrisk = tmp_measure[[3]] # third element is percent component contribution
             RBupper = objective$max_prisk
             RBlower = objective$min_prisk
@@ -237,7 +256,8 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
         if(optimize_method=="random"){
             return(list(out=out,weights=w,objective_measures=tmp_return))
         } else {
-            if(verbose) message(tmp_return)            
+            print(tmp_return)
+            return(out)
         }
         
     }
