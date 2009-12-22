@@ -59,7 +59,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     if(!hasArg(penalty)) penalty = 1e4
     N = length(w)
     T = nrow(R)
-    if(hasArg(optimize_method)) optimize_method=match.call(expand.dots=TRUE)$optimize_method else optimize_method=NULL 
+    if(hasArg(optimize_method)) optimize_method=match.call(expand.dots=TRUE)$optimize_method else optimize_method='' 
     if(hasArg(verbose)) verbose=match.call(expand.dots=TRUE)$verbose else verbose=FALSE 
     if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
     if(!hasArg(sigma)) sigma = cov(R);
@@ -253,12 +253,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     if(!trace){
         return(out)
     } else {
-        if(optimize_method=="random"){
-            return(list(out=out,weights=w,objective_measures=tmp_return))
-        } else {
             print(tmp_return)
-            return(out)
-        }
-        
+            return(list(out=out,weights=w,objective_measures=tmp_return))
     }
 }
