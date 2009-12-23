@@ -10,9 +10,7 @@
 #
 ###############################################################################
 
-#' 
-#' @param resultlist 
-#' @author bpeterson
+### @TODO: Rewrite this function to test the input object and direct to the correct parse function
 extractstats <- function(resultlist) {
     l = length(resultlist)
     result=matrix(nrow=l,ncol=49)
@@ -31,4 +29,23 @@ extractstats <- function(resultlist) {
         }
     }
     return(result)
+}
+
+extractStats.rp <-
+function(OptimResults, ...){
+# This just flattens the $random_portfolio_objective_results part of the
+# object
+# @TODO: add a class check for the input object
+  numColumns = length(unlist(OptimResults$random_portfolio_objective_results[[1]]))
+  numRows = length(OptimResults$random_portfolio_objective_results)
+
+  result <- matrix(nrow=numRows, ncol=numColumns)
+
+  for(i in 1:numRows)
+    result[i,] = unlist(OptimResults$random_portfolio_objective_results[[i]])
+
+  colnames(result) = names(unlist(OptimResults$random_portfolio_objective_results[[1]]))
+  rownames(result) = paste("rnd.portf.", index(cls_out_random2$random_portfolio_objective_results), sep="")
+
+  return(result)
 }
