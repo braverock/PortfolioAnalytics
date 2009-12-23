@@ -146,6 +146,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
           switch(objective$name,
             median =,
             mean   = { tmp_measure = match.fun(objective$name)(R%*%w)
+                       names(tmp_measure)<-objective$name
                      },
             sd =,
             StdDev = { tmp_measure = StdDev(R,
