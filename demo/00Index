@@ -1,0 +1,1 @@
+constrained_optim	Demonstrate creating and using constrained portfolio optimization using the dataset 'edhec'.  Includes examples of both DEoptim and random portfolio optimization.
