@@ -1,0 +1,8 @@
+This is code under heavy development!  
+
+Please contribute with bug fixes, comments, and testing scripts 
+(take your data and disguise it, or use data sets like 'edhec' like we do in the demo with your constraints and other objectives modified to demonstrate your problem on public data)
+
+All documentation is being done in roxygen as an experiment.  
+We will not be checking in compiled .Rd help file source all the time, mostly just before CRAN releases, so do
+R CMD roxygen -d PortfolioAnalytics from one directory up.
