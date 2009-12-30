@@ -8,7 +8,7 @@ constraints<-add.objective(constraints, type="risk_budget", name="ES", enabled=T
 #constraints
 #now set some additional bits
 # I should have set the multiplier for returns to negative
-constraints$objectives[[1]]$multiplier=-10
+constraints$objectives[[1]]$multiplier=-1
 # and let's set a portfolio risk target in the risk budget objective too
 constraints$objectives[[2]]$target=.05
 # and clean the returns
@@ -21,4 +21,6 @@ constraints$max_sum<-1.01
 opt_out_random<-optimize.portfolio(R=edhec[,1:10], constraints, optimize_method="random", search_size=1000, trace=TRUE)
 
 # now lets try a portfolio that rebalances quarterly
-opt_out_rebalancing<-optimize.portfolio.rebalancing(R=edhec[,1:10], constraints, optimize_method="DEoptim", search_size=1000, trace=TRUE,rebalance_on='quarters')
+opt_out_rebalancing<-optimize.portfolio.rebalancing(R=edhec[,1:10], constraints, optimize_method="DEoptim", search_size=1000, trace=FALSE,rebalance_on='quarters')
+# and now lets rebalance quarterly with 48 mo trailing
+opt_out_trailing<-optimize.portfolio.rebalancing(R=edhec[,1:10], constraints, optimize_method="DEoptim", search_size=1000, trace=FALSE,rebalance_on='quarters',trailing_periods=48,training_period=48)

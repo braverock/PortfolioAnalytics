@@ -176,7 +176,13 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
 optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ..., rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
 {
     stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
-    #this will need a whole bunch of hasArg and other error testing...
+    start_t<-Sys.time()
+    
+    #store the call for later
+    call <- match.call()
+    
+    #' NOTE this will need a whole bunch of hasArg and other error testing...
+    
     if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
     if (is.null(trailing_periods)){
         out_list<-foreach(ep=iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)])) %dopar% optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)
@@ -185,7 +191,13 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
         out_list<-foreach(ep=iter((endpoints(R, on=rebalance_on)>=training_period))) %dopar% optimize.portfolio(R[(ifelse(training_period-trailing_periods>=1,training_period-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)
         # rework lines above for trailing periods
     }
-    # set names(out_list)
+    end_t<-Sys.time()
+    # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
+    message(c("elapsed time:",end_t-start_t))
+    out$elapsed_time<-end_t-start_t
+    out$end_t<-as.character(Sys.time())
+    
+    # set names(out_list) names should be the text representations of the index(endpoints)
     return(out_list)
 }
 
