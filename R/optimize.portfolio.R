@@ -127,8 +127,15 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
       if(trace) out$random_portfolio_objective_results<-rp_objective_results
       #' loop through results keeping track of the minimum value of rp_objective_results[[objective]]$out
       search<-vector(length=length(rp_objective_results))
-      for (i in 1:length(search)) search[i]<-ifelse(rp_objective_results[[i]]$out,rp_objective_results[[i]]$out,1e6) # ifelse(x >= 0, x, NA
-      min_objective_weights<- normalize_weights(rp_objective_results[[which.min(search)]]$weights)
+      for (i in 1:length(search)) {
+          if (trace) {
+              search[i]<-ifelse(try(rp_objective_results[[i]]$out),rp_objective_results[[i]]$out,1e6)
+              min_objective_weights<- normalize_weights(rp_objective_results[[which.min(search)]]$weights)
+          } else {
+              search[i]<-as.numeric(rp_objective_results[[i]])
+              min_objective_weights<- normalize_weights(rp[which.min(search),])
+          }
+      }
       #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
       out$weights<-min_objective_weights
       out$constrained_objective<-constrained_objective(w=min_objective_weights,R=R,constraints,trace=TRUE)$objective_measures
