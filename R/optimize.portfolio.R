@@ -152,6 +152,43 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     return(out)
 }
 
+#' portfolio optimization with support for rebalancing or rolling periods
+#' 
+#' This function may eventually be wrapped into optimize.portfolio
+#' 
+#' For now, we'll set the rebalancing periods here, though I think they should eventually be part of the constraints object
+#' 
+#' This function is massively parallel, and will require 'foreach' and we suggest that you register a parallel backend.
+#' 
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
+#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
+#' @param optimize_method one of "DEoptim" or "random"
+#' @param search_size integer, how many portfolios to test, default 20,000
+#' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
+#' @param \dots any other passthru parameters
+#' @param rebalance_on a periodicity as returned by xts function periodicity and usable by endpoints
+#' @param training_period period to use as training in the front of the data
+#' @param trailing_periods if set, an integer with the number of periods to roll over, default NULL
+#' @callGraph 
+#' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
+#' @author Kris Boudt, Peter Carl, Brian G. Peterson
+#' @export
+optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ..., rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
+{
+    stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
+    #this will need a whole bunch of hasArg and other error testing...
+    if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
+    if (is.null(trailing_periods)){
+        out_list<-foreach(ep=iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)])) %dopar% optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)
+    } else {
+        #stopifnot(training_period>=trailing_periods)
+        out_list<-foreach(ep=iter((endpoints(R, on=rebalance_on)>=training_period))) %dopar% optimize.portfolio(R[(ifelse(training_period-trailing_periods>=1,training_period-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)
+        # rework lines above for trailing periods
+    }
+    # set names(out_list)
+    return(out_list)
+}
+
 ###############################################################################
 # $Id$
 ###############################################################################
