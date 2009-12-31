@@ -45,7 +45,7 @@ function(OptimResults, ...){
     result[i,] = unlist(OptimResults$random_portfolio_objective_results[[i]])
 
   colnames(result) = names(unlist(OptimResults$random_portfolio_objective_results[[1]]))
-  rownames(result) = paste("rnd.portf.", index(cls_out_random2$random_portfolio_objective_results), sep="")
+  rownames(result) = paste("rnd.portf.", index(OptimResults$random_portfolio_objective_results), sep="")
 
   return(result)
 }
