@@ -185,19 +185,18 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     
     if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
     if (is.null(trailing_periods)){
-        out_list<-foreach(ep=iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)])) %dopar% optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)
+        out_list<-foreach(ep=iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)])) %dopar% {optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)}
+        names(out_list)<-index(R[endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]])
     } else {
         #stopifnot(training_period>=trailing_periods)
-        out_list<-foreach(ep=iter((endpoints(R, on=rebalance_on)>=training_period))) %dopar% optimize.portfolio(R[(ifelse(training_period-trailing_periods>=1,training_period-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)
+        out_list<-foreach(ep=iter((endpoints(R, on=rebalance_on)>=training_period))) %dopar% {optimize.portfolio(R[(ifelse(training_period-trailing_periods>=1,training_period-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)}
         # rework lines above for trailing periods
+        names(out_list)<-index(R[endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]])
     }
+
     end_t<-Sys.time()
-    # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
-    message(c("elapsed time:",end_t-start_t))
-    out$elapsed_time<-end_t-start_t
-    out$end_t<-as.character(Sys.time())
+    message(c("overall elapsed time:",end_t-start_t))
     
-    # set names(out_list) names should be the text representations of the index(endpoints)
     return(out_list)
 }
 
