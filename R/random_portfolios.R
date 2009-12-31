@@ -50,7 +50,7 @@ generatesequence <- function (min=.01, max=1, by=min/max, rounding=3 )
 #' 
 #' @param rpconstraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
-#' @param rounding integrer how many decimals should we round to
+#' @param rounding integer how many decimals should we round to
 #' @callGraph
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
@@ -151,8 +151,6 @@ randomize_portfolio <- function (rpconstraints, max_permutations=200, rounding=3
 
 #' deprecated random portfolios wrapper until we write a random trades function
 #' 
-#' TODO: write a function for random trades that only makes n trades and increases/decreases other elements to compensate.
-#' random_walk_portfolios(seed,y,min_sum=.99,max_sum=1.01,permutations=100,max_permutations=5000)
 #' 
 #' @param ... 
 #' @author bpeterson
@@ -161,7 +159,6 @@ random_walk_portfolios <-function(...) {
   # wrapper function protect older code for now?
   random_portfolios(...=...)
 }
-
 
 #' generate an arbitraty number of constrained random portfolios
 #' 
@@ -210,3 +207,5 @@ random_portfolios <- function (rpconstraints,permutations=100,...)
 # integer(0)
 
 # start_t <- Sys.time(); s<-foreach(seed=iter(weights, by='row'),.combine=rbind) %dopar% random_walk_portfolios(seed,xseq,permutations=10000); end_t <- Sys.time(); save.image(); start_t-end_t;
+
+# TODO: write a function for random trades that only makes n trades and increases/decreases other elements to compensate.

@@ -1,3 +1,15 @@
+###############################################################################
+# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+#
+# Copyright (c) 2004-2009 Kris Boudt, Peter Carl and Brian G. Peterson
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id$
+#
+###############################################################################
+
 chart.Weights.RP <- function(RP, neighbors = NA, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class

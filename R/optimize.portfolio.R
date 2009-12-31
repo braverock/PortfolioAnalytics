@@ -10,6 +10,8 @@
 #
 ###############################################################################
 
+# TODO add multivariate moment calcs wherever possible for greater efficiency
+
 
 #' wrapper for constrained optimization of portfolios
 #' 
@@ -20,8 +22,6 @@
 #' This function currently supports DEoptim and random portfolios as back ends.
 #' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
 #'
-#' TODO add multivariate moment calcs wherever possible for greater efficiency
-#'   
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param optimize_method one of "DEoptim" or "random"

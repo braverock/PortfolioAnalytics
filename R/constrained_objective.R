@@ -10,6 +10,11 @@
 #
 ###############################################################################
 
+# TODO add examples
+ 
+# TODO add more details about the nuances of the optimization engines
+
+
 #' function to calculate a numeric return value for a portfolio based on a set of constraints
 #' 
 #' function to calculate a numeric return value for a portfolio based on a set of constraints,
@@ -40,8 +45,6 @@
 #' 
 #' Additional parameters for random portfolios or \code{\link[DEoptim]{DEoptim.control}} may be passed in via \dots
 #' 
-#' TODO add examples
-#' TODO add more details about the nuances of the optimization engines
 #'    
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param w a vector of weights to test
