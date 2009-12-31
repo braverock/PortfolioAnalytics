@@ -149,6 +149,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     out$data_summary<-list(first=first(R),last=last(R))
     out$elapsed_time<-end_t-start_t
     out$end_t<-as.character(Sys.time())
+    class(out)<-c(paste("optimize.portfolio",optimize_method,sep='.'),"optimize.portfolio")
     return(out)
 }
 
@@ -196,7 +197,7 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
 
     end_t<-Sys.time()
     message(c("overall elapsed time:",end_t-start_t))
-    
+    class(out_list)<-c("optimize.portfolio.rebalancing")
     return(out_list)
 }
 
