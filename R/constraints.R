@@ -26,7 +26,7 @@
 #' exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, weight_seq=generatesequence())
 #' @export
 #' @callGraph
-constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_sum,weight_seq)
+constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,max_sum=1.01,weight_seq=NULL)
 { # based on GPL R-Forge pkg roi by Stefan Thuessel,Kurt Hornik,David Meyer
   if (hasArg(min) & hasArg(max)) {
     if (is.null(assets) & (!length(min)>1) & (!length(max)>1)) {
@@ -66,18 +66,29 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum,max_s
   if(hasArg(min) | hasArg(max)) {
     if (length(min)>1 & length(max)>1){
       if (length(min)!=length(max)) { stop("length of min and max must be the same") }
-    } else {
-      message("min and max not passed in as vectors, replicating min and max to length of length(assets)")
-      min <- rep(min,nassets)
-      max <- rep(max,nassets)
+    } 
+
+    if (length(min)==1) {
+        message("min not passed in as vector, replicating min to length of length(assets)")
+        min <- rep(min,nassets)
     }
+    if (length(min)!=nassets) stop(paste("length of min must be equal to 1 or the number of assets",nassets))
+    
+    if (length(max)==1) {
+        message("max not passed in as vector, replicating max to length of length(assets)")
+        max <- rep(max,nassets)
+    }
+    if (length(max)!=nassets) stop(paste("length of max must be equal to 1 or the number of assets",nassets))
+    
   } else {
     message("no min or max passed in, assuming 0 and 1")
     min <- rep(0,nassets)
     max <- rep(1,nassets)
-    
   }
 
+  names(min)<-names(assets)
+  names(max)<-names(assets)
+  
   if(hasArg(min_mult) | hasArg(max_mult)) {
     if (length(min_mult)>1 & length(max_mult)>1){
       if (length(min_mult)!=length(max_mult) ) { stop("length of min_mult and max_mult must be the same") }
