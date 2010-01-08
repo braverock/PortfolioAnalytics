@@ -201,6 +201,11 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     return(out_list)
 }
 
+#TODO write function to compute an efficient frontier of optimal portfolios
+
+#TODO write function to check sensitivity of optimal results by running n portfolios in a foreach loop
+
+
 ###############################################################################
 # $Id$
 ###############################################################################
