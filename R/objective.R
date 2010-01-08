@@ -86,7 +86,7 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
                                             )
           },
 
-        risk=, portfiolio_risk=, portfolio_risk_objective =
+        risk=, portfolio_risk=, portfolio_risk_objective =
           {tmp_objective = portfolio_risk_objective(name=name,
                                                     enabled=enabled,
                                                     if (hasArg(p)) p=match.call(expand.dots=TRUE)$p else p=.95,
