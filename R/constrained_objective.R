@@ -172,6 +172,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                                     sigma=sigma,
                                     M3=M3,
                                     M4=M4,
+                                    invert=FALSE,
                                     ...=...
                                   )
                   },
@@ -189,6 +190,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                                     sigma=sigma,
                                     M3=M3,
                                     M4=M4,
+                                    invert=FALSE,
                                     ...=...
                                   )
                   },
