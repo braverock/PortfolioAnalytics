@@ -82,7 +82,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=200
     NP = round(search_size/itermax)
     if(NP>2000) NP=2000
-    if(!hasArg(controlDE)) controlDE = list( NP=NP, itermax=itermax, trace=trace, trystart=5 ) else controlDE=match.call(expand.dots=TRUE)$controlDE
+    if(!hasArg(controlDE)) controlDE = list( NP=NP, itermax=itermax, trace=trace) else controlDE=match.call(expand.dots=TRUE)$controlDE
     if(hasArg(VTR)) controlDE$VTR <- match.call(expand.dots=TRUE)$VTR #target number for the objective function
     if(hasArg(F))   controlDE$F  <- match.call(expand.dots=TRUE)$F   # stepsize, default .8
     if(hasArg(CR))  controlDE$CR <- match.call(expand.dots=TRUE)$CR 	 # Crossover probability from interval [0,1]. Default to '0.5'
