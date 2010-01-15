@@ -194,7 +194,9 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                                     ...=...
                                   )
                   },
-            { tmp_measure = try((match.fun(objective$name)(R,weights=w,...=...)),silent=TRUE) }
+            { tmp_measure = try((match.fun(objective$name)(R,weights=w, ...=...)),silent=TRUE)
+            names(tmp_measure)<-objective$name  
+            }
           ) # end objective switch
           
           # now set the new value of the objective output
