@@ -10,6 +10,9 @@
 #
 ###############################################################################
 
+#' print method for optimize.portfolio.rebalancing
+#' @param x object of type optimize.portfolio.rebalancing
+#' @export
 print.optimize.portfolio.rebalancing <- function(x) {
     if(!inherits(x,"optimize.portfolio.rebalancing")) 
         stop ("passed object is not of class optimize.portfolio.rebalancing")

@@ -1,6 +1,7 @@
 export(constrained_objective)
 export(constraint)
 export(is.constraint)
+export(print.optimize.portfolio.rebalancing)
 export(objective)
 export(is.objective)
 export(add.objective)
