@@ -153,6 +153,11 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               nargs=NULL
           }
           switch(objective$name,
+              mean =,
+              median = {
+                  fun = match.fun(objective$name)  
+                  objective$arguments$x <- ( R %*% w ) #do the multivariate mean/median with Kroneker product
+              },
               sd =,
               StdDev = { 
                   fun= match.fun(StdDev)
