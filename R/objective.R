@@ -75,8 +75,8 @@ add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE
     if (!hasArg(name)) stop("you must supply a name for the objective")
     if (!hasArg(type)) stop("you must supply a type of objective to create")
     if (!hasArg(enabled)) enabled=FALSE
- 
-    if(!is.list(arguments)) stop("arguments must be passed as a named list")
+    if (!hasArg(arguments) | is.null(arguments)) arguments<-list()
+    if (!is.list(arguments)) stop("arguments must be passed as a named list")
 
     assets=constraints$assets
     

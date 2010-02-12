@@ -198,8 +198,9 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               .formals  <- formals(fun)
               onames <- names(.formals)
               if(is.list(objective$arguments)){
-                  if(is.null(objective$arguments$R)) objective$arguments$R=R
-                  if(is.null(objective$arguments$weights)) objective$arguments$weights=w
+                  if(is.null(objective$arguments$R) | !length(objective$arguments$R)==length(R)) objective$arguments$R = R
+                  
+                  if(is.null(objective$arguments$weights)) objective$arguments$weights = w
                   
                   pm <- pmatch(names(objective$arguments), onames, nomatch = 0L)
                   if (any(pm == 0L))
