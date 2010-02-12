@@ -74,8 +74,8 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     loc<-grep('clean',constraints)
     if(!identical(loc,integer(0))) {
         for (objective in constraints[loc]){
-            if(!is.null(objective$clean)) {
-                cleanR<-try(Return.clean(R,method=objective$clean))
+            if(!is.null(objective$arguments$clean)) {
+                cleanR<-try(Return.clean(R,method=objective$arguments$clean))
                 if(!inherits(cleanR,"try-error")) {
                     mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
                     sigma = cov(cleanR);
@@ -169,8 +169,8 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                   if(is.null(objective$arguments$weights)) objective$arguments$weights=w
                   if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
                   if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
-                  if(is.null(objective$arguments$M3)) objective$arguments$M3=M3
-                  if(is.null(objective$arguments$M4)) objective$arguments$M4=M4
+                  if(is.null(objective$arguments$m3)) objective$arguments$m3=M3
+                  if(is.null(objective$arguments$m4)) objective$arguments$m4=M4
                   if(is.null(objective$arguments$invert)) objective$arguments$invert=FALSE
                   if(is.null(objective$arguments$clean)) objective$arguments$clean='boudt'
                   if(is.null(objective$arguments$portfolio_method)) objective$arguments$portfolio_method='single'
@@ -185,8 +185,8 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                   if(is.null(objective$arguments$weights)) objective$arguments$weights=w
                   if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
                   if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
-                  if(is.null(objective$arguments$M3)) objective$arguments$M3=M3
-                  if(is.null(objective$arguments$M4)) objective$arguments$M4=M4
+                  if(is.null(objective$arguments$m3)) objective$arguments$m3=M3
+                  if(is.null(objective$arguments$m4)) objective$arguments$m4=M4
                   if(is.null(objective$arguments$invert)) objective$arguments$invert=FALSE
                   if(is.null(objective$arguments$clean)) objective$arguments$clean='boudt'
                   if(is.null(objective$arguments$portfolio_method)) objective$arguments$portfolio_method='single'
@@ -199,8 +199,6 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               .formals  <- formals(fun)
               onames <- names(.formals)
               if(is.list(objective$arguments)){
-                  objective$arguments$R<-R
-                  objective$arguments$weights=w
                   
                   pm <- pmatch(names(objective$arguments), onames, nomatch = 0L)
                   if (any(pm == 0L))
