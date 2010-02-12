@@ -17,10 +17,11 @@
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthrough parameters
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
+#' @param objclass string class to apply, default 'objective'
 #' @author Brian G. Peterson
 #' @export
 #' @callGraph
-objective<-function(name , arguments, enabled=FALSE , ..., multiplier=1){
+objective<-function(name , arguments, enabled=FALSE , ..., multiplier=1, objclass='objective'){
   if(!hasArg(name)) stop("you must specify an objective name")
   if (hasArg(name)) if(is.null(name)) stop("you must specify an objective name")
   if (!is.list(arguments)) stop("arguments must be passed as a named list")
@@ -32,7 +33,7 @@ objective<-function(name , arguments, enabled=FALSE , ..., multiplier=1){
                          multiplier = multiplier
                          #call = match.call()
                         ),
-                    class="objective"
+                    class=objclass
                   ) # end structure
   )
 }
@@ -75,30 +76,25 @@ add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE
     if (!hasArg(type)) stop("you must supply a type of objective to create")
     if (!hasArg(enabled)) enabled=FALSE
  
-    
+    if(!is.list(arguments)) stop("arguments must be passed as a named list")
 
     assets=constraints$assets
     
     tmp_objective=NULL
-	
+    
     switch(type,
         return=, return_objective=
           {tmp_objective = return_objective(name=name,
-                                            arguments=arguments,
                                             enabled=enabled,
-                                            if (hasArg(target)) target=match.call(expand.dots=TRUE)$target else target = NULL,
-                                            if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = -1,
+                                            arguments=arguments,
                                             ... = ...
                                             )
           },
 
         risk=, portfolio_risk=, portfolio_risk_objective =
           {tmp_objective = portfolio_risk_objective(name=name,
-                                                    arguments=arguments,
                                                     enabled=enabled,
-                                                    if (hasArg(p)) p=match.call(expand.dots=TRUE)$p else p=.95,
-                                                    if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = 1,
-                                                    if (hasArg(target)) target=match.call(expand.dots=TRUE)$target else target = NULL,
+                                                    arguments=arguments,
                                                     ...=...
                                                    )
           },
@@ -107,9 +103,6 @@ add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE
           {tmp_objective = risk_budget_objective(name=name,
                                                  enabled=enabled,
                                                  arguments=arguments,
-                                                 if (hasArg(p)) p=match.call(expand.dots=TRUE)$p else p=.95,
-                                                 if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = 1,
-                                                 if (hasArg(target)) target=match.call(expand.dots=TRUE)$target else target = NULL,
                                                  ...=...
                                                 )
           },
@@ -139,99 +132,60 @@ add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE
 
 
 #' constructor for class return_objective
+#'
+#' if target is null, we'll try to maximize the return metric
 #' 
+#' if target is set, we'll try to meet or exceed the metric, penalizing a shortfall
+#'  
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param target univariate target for the objective
 #' @param arguments default arguments to be passed to an objective function when executed
+#' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters 
-#' @param multiplier multiplier to apply to the objective, usually 1 or -1
-#' @param target univariate target for the objective
 #' @author Brian G. Peterson
 #' @export
-return_objective <- function(name, arguments=NULL, enabled=FALSE, ... ,multiplier=-1, target=NULL)
+return_objective <- function(name, target=NULL, arguments=NULL, multiplier=-1, enabled=FALSE, ... )
 {
   if(!hasArg(target)) target = NULL
-  if(!hasArg(multiplier)) multiplier=1
-  if(!hasArg(method)) method = NULL
-  Objective <- objective(name=name,arguments=arguments, enabled=enabled, multiplier=multiplier)
   ##' if target is null, we'll try to maximize the return metric
-  ##' if target is set, we'll try to meet or exceed the metric, penalizing a shortfall
-  ## now structure and return
-  return(structure( list(name = Objective$name,
-                         arguments = Objective$arguments, 
-                         enabled = Objective$enabled,
-                         method = method,
-                         multiplier= Objective$multiplier,
-                         target=target
-                         #call = Objective$call
-                      ), # end of list
-                    class=c("return_objective","objective")
-                  ) # end structure
-  )
-  
+  if(!hasArg(multiplier)) multiplier=-1
+  return(objective(name=name,arguments=arguments, enabled=enabled, multiplier=multiplier,objclass=c("return_objective","objective")))
 } # end return_objective constructor
 
 #' constructor for class portfolio_risk_objective
 #' 
+#' if target is null, we'll try to minimize the risk metric
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param target univariate target for the objective
 #' @param arguments default arguments to be passed to an objective function when executed
+#' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters 
-#' @param multiplier multiplier to apply to the objective, usually 1 or -1
-#' @param target univariate target for the objective
-#' @param p confidence level for calculation, default p=.95
 #' @author Brian G. Peterson
 #' @export
-portfolio_risk_objective <- function(name, arguments=NULL, enabled=FALSE, ... ,  multiplier=1, target=NULL, p=.95)
+portfolio_risk_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ... )
 {
-  Objective <- objective(name=name,enabled=enabled, multiplier=multiplier)
-  ##' if target is null, we'll try to minimize the risk metric
-  if (!is.numeric(p)) stop("your p value must be numeric")
-  if (p>1) stop("p must be less than 1")
-  if (p<0) stop("p must be greater than zero")
-  if(!hasArg(clean)) clean = NULL else clean = match.call(expand.dots=TRUE)$clean
-  if(!hasArg(method)) method = NULL else method = match.call(expand.dots=TRUE)$method
-  if(!hasArg(portfolio_method)) portfolio_method = NULL else portfolio_method = match.call(expand.dots=TRUE)$portfolio_method
-  if(!hasArg(target)) target = NULL else target = match.call(expand.dots=TRUE)$target
-  if(!hasArg(multiplier)) multiplier=1 else multiplier = match.call(expand.dots=TRUE)$multiplier
-  
-  ## now structure and return
-  return(structure( list(name = Objective$name,
-                         arguments = Objective$arguments, 
-                         enabled = Objective$enabled,
-                         p = p,
-                         clean = clean,
-                         method = method,
-                         portfolio_method = portfolio_method,
-                         multiplier= Objective$multiplier,
-                         target=target
-                         #call = Objective$call
-                        ), # end of list
-                    class=c("portfolio_risk_objective","objective")
-                  ) # end structure
-  )
+    if(is.null(arguments$portfolio_method)) arguments$portfolio_method="single" #use multivariate risk calcs
+    return(objective(name=name,target=target, arguments=arguments, multiplier=multiplier,enabled=enabled, objclass=c("portfolio_risk_objective","objective")))
 } # end portfolio_risk_objective constructor
 
 #' constructor for class risk_budget_objective
 #' 
 #' @param assets vector of assets to use, should come from constraints object
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param target univariate target for the objective
 #' @param arguments default arguments to be passed to an objective function when executed
+#' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters 
-#' @param multiplier multiplier to apply to the objective, usually 1 or -1
-#' @param target univariate target for the objective
-#' @param p confidence level for calculation, default p=.95
 #' @param min_prisk minimum percentage contribution to risk
 #' @param max_prisk maximum percentage contribution to risk
 #' @author Brian G. Peterson
 #' @export
-risk_budget_objective <- function(assets, name, arguments=NULL, enabled=FALSE, ..., multiplier=1, target=NULL, p=.95, min_prisk, max_prisk )
+risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ..., min_prisk, max_prisk )
 {
-  if(!hasArg(target)) target=NULL else target=match.call(expand.dots=TRUE)$target
-  Objective <- portfolio_risk_objective(name=name,enabled=enabled,p=p,target=target, multiplier=multiplier, ...=...)
-  if(!hasArg(method)) method="modified" else method=match.call(expand.dots=TRUE)$method
-  if(!hasArg(portfolio_method)) portfolio_method="component" else portfolio_method=match.call(expand.dots=TRUE)$portfolio_method
+  if(is.null(arguments$portfolio_method)) arguments$portfolio_method="component"
   
   #if( is.null(RBlower) ){ RBlower = rep(-Inf,N) }  ; if( is.null(RBupper) ){ RBupper = rep(Inf,N) }
   nassets=length(assets)
@@ -257,21 +211,9 @@ risk_budget_objective <- function(assets, name, arguments=NULL, enabled=FALSE, .
   
   if(!hasArg(max_prisk)) max_prisk = NULL
   if(!hasArg(min_prisk)) min_prisk = NULL
+  Objective<-objective(name=name,target=target, arguments=arguments, multiplier=multiplier,enabled=enabled, objclass=c("risk_budget_objective","objective"))
+  Objective$min_prisk = min_prisk
+  Objective$max_prisk = max_prisk
   
-  return(structure( list(name = Objective$name,
-                         arguments = Objective$arguments, 
-                         enabled = Objective$enabled,
-                         p = Objective$p,
-                         clean = Objective$clean,
-                         method = method,
-                         portfolio_method = portfolio_method,
-                         target= Objective$target,
-                         multiplier= Objective$multiplier,
-                         min_prisk = min_prisk,
-                         max_prisk = max_prisk
-                         #call = Objective$call
-                      ), # end of list
-                    class=c("risk_budget_objective","objective")
-                  ) # end structure
-  )
+  return(Objective)
 } # end risk_budget_objective constructor

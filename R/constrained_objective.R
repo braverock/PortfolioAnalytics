@@ -152,8 +152,49 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               rm('...')
               nargs=NULL
           }
-          # see 'S Programming p. 67 for this matching
-          fun<-try(match.fun(objective$name))
+          switch(objective$name,
+              sd =,
+              StdDev = { 
+                  fun= match.fun(StdDev)
+                  if(is.null(objective$arguments$R)) objective$arguments$R=R
+                  if(is.null(objective$arguments$weights)) objective$arguments$weights=w
+                  if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
+                  if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
+              },
+              var =,
+              mVaR =,
+              VaR = {
+                  fun= match.fun(VaR) 
+                  if(is.null(objective$arguments$R)) objective$arguments$R=R
+                  if(is.null(objective$arguments$weights)) objective$arguments$weights=w
+                  if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
+                  if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
+                  if(is.null(objective$arguments$M3)) objective$arguments$M3=M3
+                  if(is.null(objective$arguments$M4)) objective$arguments$M4=M4
+                  if(is.null(objective$arguments$invert)) objective$arguments$invert=FALSE
+                  if(is.null(objective$arguments$clean)) objective$arguments$clean='boudt'
+                  if(is.null(objective$arguments$portfolio_method)) objective$arguments$portfolio_method='single'
+              },
+              es =,
+              mES =,
+              CVaR =,
+              cVaR =,
+              ES = {
+                  fun = match.fun(ES)
+                  if(is.null(objective$arguments$R)) objective$arguments$R=R
+                  if(is.null(objective$arguments$weights)) objective$arguments$weights=w
+                  if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
+                  if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
+                  if(is.null(objective$arguments$M3)) objective$arguments$M3=M3
+                  if(is.null(objective$arguments$M4)) objective$arguments$M4=M4
+                  if(is.null(objective$arguments$invert)) objective$arguments$invert=FALSE
+                  if(is.null(objective$arguments$clean)) objective$arguments$clean='boudt'
+                  if(is.null(objective$arguments$portfolio_method)) objective$arguments$portfolio_method='single'
+              },
+              {   # see 'S Programming p. 67 for this matching
+                  fun<-try(match.fun(objective$name))
+              }
+          )
           if(is.function(fun)){
               .formals  <- formals(fun)
               onames <- names(.formals)
@@ -176,59 +217,9 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               }
           } # TODO do some funky return magic here on try-error
           
-          switch(objective$name,
-            median =,
-            mean   = { tmp_measure = match.fun(objective$name)(R%*%w)
-                       names(tmp_measure)<-objective$name
-                     },
-            sd =,
-            StdDev = { tmp_measure = StdDev(R,
-                                            weights=w,
-                                            mu=mu,
-                                            sigma=sigma,
-                                            portfolio_method=objective$portfolio_method,
-                                            ...=...
-                                           )
-            },
-            var =,
-            mVaR =,
-            VaR = {tmp_measure = VaR(R,
-                                    method=objective$method,
-                                    portfolio_method=objective$portfolio_method,
-                                    p=objective$p,
-                                    weights=w,
-                                    #clean=objective$clean,
-                                    mu=mu,
-                                    sigma=sigma,
-                                    M3=M3,
-                                    M4=M4,
-                                    invert=FALSE,
-                                    ...=...
-                                  )
-                  },
-            es =,
-            mES =,
-            CVaR =,
-            cVaR =,
-            ES = {tmp_measure = ES(R,
-                                    method=objective$method,
-                                    portfolio_method=objective$portfolio_method,
-                                    p=objective$p,
-                                    weights=w,
-                                    #clean=objective$clean,
-                                    mu=mu,
-                                    sigma=sigma,
-                                    M3=M3,
-                                    M4=M4,
-                                    invert=FALSE,
-                                    ...=...
-                                  )
-                  },
-            { tmp_measure = try((do.call(fun,.formals)),silent=TRUE)
-            names(tmp_measure)<-objective$name  
-            }
-          ) # end objective switch
-          
+          tmp_measure = try((do.call(fun,.formals)),silent=TRUE)
+          names(tmp_measure)<-objective$name  
+                  
           # now set the new value of the objective output
           if(inherits(tmp_measure,"try-error")) { 
               message(paste("objective name",objective$name,"appears to not match a known R function"))
