@@ -161,8 +161,6 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               sd =,
               StdDev = { 
                   fun= match.fun(StdDev)
-                  if(is.null(objective$arguments$R)) objective$arguments$R=R
-                  if(is.null(objective$arguments$weights)) objective$arguments$weights=w
                   if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
                   if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
               },
@@ -170,8 +168,6 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               mVaR =,
               VaR = {
                   fun= match.fun(VaR) 
-                  if(is.null(objective$arguments$R)) objective$arguments$R=R
-                  if(is.null(objective$arguments$weights)) objective$arguments$weights=w
                   if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
                   if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
                   if(is.null(objective$arguments$m3)) objective$arguments$m3=M3
@@ -186,8 +182,6 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               cVaR =,
               ES = {
                   fun = match.fun(ES)
-                  if(is.null(objective$arguments$R)) objective$arguments$R=R
-                  if(is.null(objective$arguments$weights)) objective$arguments$weights=w
                   if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
                   if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
                   if(is.null(objective$arguments$m3)) objective$arguments$m3=M3
@@ -204,6 +198,8 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               .formals  <- formals(fun)
               onames <- names(.formals)
               if(is.list(objective$arguments)){
+                  if(is.null(objective$arguments$R)) objective$arguments$R=R
+                  if(is.null(objective$arguments$weights)) objective$arguments$weights=w
                   
                   pm <- pmatch(names(objective$arguments), onames, nomatch = 0L)
                   if (any(pm == 0L))
