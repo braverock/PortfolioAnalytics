@@ -10,7 +10,14 @@
 #
 ###############################################################################
 
-### @TODO: Rewrite this function to test the input object and direct to the correct parse function
+
+#' extract some stats from a DEoptim portfolio list fun via foreach
+#' 
+#' TODO: Rewrite this function to test the input object and direct to the correct parse function
+#' 
+#' @param resultlist list returned by optimize.portfolio
+#' @seealso \code{\link{optimize.portfolio}}
+#' @export
 extractstats <- function(resultlist) {
     l = length(resultlist)
     result=matrix(nrow=l,ncol=49)
@@ -31,6 +38,14 @@ extractstats <- function(resultlist) {
     return(result)
 }
 
+#' unlist random portfolio resultsoops
+#' 
+#' This just flattens the $random_portfolio_objective_results part of the object
+#' 
+#' @param OptimResults list returned by optimize.portfolio
+#' @param ... any other passthru parameters
+#' @seealso \code{\link{random_portfolios}}
+#' @export
 extractStats.rp <-
 function(OptimResults, ...){
 # This just flattens the $random_portfolio_objective_results part of the

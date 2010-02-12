@@ -19,4 +19,4 @@ This function is massively parallel, and will require 'foreach' and we suggest t
 \item{\dots}{any other passthru parameters}
 \item{rebalance_on}{a periodicity as returned by xts function periodicity and usable by endpoints}
 \item{training_period}{period to use as training in the front of the data}
-\item{trailing_periods}{if set, an integer with the number of periods to roll over, default NULL}}
+\item{trailing_periods}{if set, an integer with the number of periods to roll over, default NULL will run from inception}}

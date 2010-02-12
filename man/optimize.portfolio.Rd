@@ -8,9 +8,7 @@ portfolios that allows the user to specify box constraints and business
 objectives.
 
 This function currently supports DEoptim and random portfolios as back ends.
-Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
-
-TODO add multivariate moment calcs wherever possible for greater efficiency}
+Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.}
 \value{a list containing the optimal weights, some summary statistics, the function call, and optionally trace information}
 \author{Kris Boudt, Peter Carl, Brian G. Peterson}
 \arguments{\item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}

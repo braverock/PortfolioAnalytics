@@ -7,4 +7,4 @@
 \author{Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)}
 \arguments{\item{rpconstraints}{an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}}
 \item{max_permutations}{integer: maximum number of iterations to try for a valid portfolio, default 200}
-\item{rounding}{integrer how many decimals should we round to}}
+\item{rounding}{integer how many decimals should we round to}}

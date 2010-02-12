@@ -1,6 +1,7 @@
 \name{is.objective}
 \alias{is.objective}
-\title{is.objective}
+\title{check class of an objective object...}
 \usage{is.objective(x)}
-\author{bpeterson}
-\arguments{\item{x}{an object of potentiall of type 'objective' to test}}
+\description{check class of an objective object}
+\author{Brian G. Peterson}
+\arguments{\item{x}{an object potentially of type 'objective' to test}}

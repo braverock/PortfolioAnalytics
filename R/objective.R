@@ -13,18 +13,21 @@
 #' constructor for class 'objective'
 #' 
 #' @param name name of the objective which will be used to call a function, like 'ES', 'VaR', 'mean'
+#' @param arguments default arguments to be passed to an objective function when executed
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthrough parameters
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
-#' @author bpeterson
+#' @author Brian G. Peterson
 #' @export
 #' @callGraph
-objective<-function(name , enabled=FALSE , ..., multiplier=1){
+objective<-function(name , arguments, enabled=FALSE , ..., multiplier=1){
   if(!hasArg(name)) stop("you must specify an objective name")
   if (hasArg(name)) if(is.null(name)) stop("you must specify an objective name")
+  if (!is.list(arguments)) stop("arguments must be passed as a named list")
   
   ## now structure and return
   return(structure( list(name = name,
+                         arguments=arguments, 
                          enabled = enabled,
                          multiplier = multiplier
                          #call = match.call()
@@ -35,8 +38,9 @@ objective<-function(name , enabled=FALSE , ..., multiplier=1){
 }
 
 
-#' @param x an object of potentiall of type 'objective' to test
-#' @author bpeterson
+#' check class of an objective object
+#' @param x an object potentially of type 'objective' to test
+#' @author Brian G. Peterson
 #' @export
 is.objective <- function( x ) {
   inherits( x, "objective" )
@@ -53,16 +57,17 @@ is.objective <- function( x ) {
 #' @param constraints an object of type "constraints" to add the objective to, specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param type character type of the objective to add or update, currently 'return','risk', or 'risk_budget'
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param arguments default arguments to be passed to an objective function when executed
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters 
 #' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
-#' @author bpeterson
+#' @author Brian G. Peterson
 #' 
 #' @seealso \code{\link{constraint}}
 #' 
 #' @export
 #' @callGraph
-add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=NULL)
+add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE, ..., indexnum=NULL)
 {
     if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
 
@@ -79,6 +84,7 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
     switch(type,
         return=, return_objective=
           {tmp_objective = return_objective(name=name,
+                                            arguments=arguments,
                                             enabled=enabled,
                                             if (hasArg(target)) target=match.call(expand.dots=TRUE)$target else target = NULL,
                                             if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = -1,
@@ -88,6 +94,7 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
 
         risk=, portfolio_risk=, portfolio_risk_objective =
           {tmp_objective = portfolio_risk_objective(name=name,
+                                                    arguments=arguments,
                                                     enabled=enabled,
                                                     if (hasArg(p)) p=match.call(expand.dots=TRUE)$p else p=.95,
                                                     if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = 1,
@@ -99,6 +106,7 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
         risk_budget=, risk_budget_objective=
           {tmp_objective = risk_budget_objective(name=name,
                                                  enabled=enabled,
+                                                 arguments=arguments,
                                                  if (hasArg(p)) p=match.call(expand.dots=TRUE)$p else p=.95,
                                                  if (hasArg(multiplier)) multiplier=match.call(expand.dots=TRUE)$multiplier else multiplier = 1,
                                                  if (hasArg(target)) target=match.call(expand.dots=TRUE)$target else target = NULL,
@@ -133,22 +141,24 @@ add.objective <- function(constraints, type, name, enabled=FALSE, ..., indexnum=
 #' constructor for class return_objective
 #' 
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param arguments default arguments to be passed to an objective function when executed
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters 
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param target univariate target for the objective
-#' @author bpeterson
+#' @author Brian G. Peterson
 #' @export
-return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NULL)
+return_objective <- function(name, arguments=NULL, enabled=FALSE, ... ,multiplier=-1, target=NULL)
 {
   if(!hasArg(target)) target = NULL
   if(!hasArg(multiplier)) multiplier=1
   if(!hasArg(method)) method = NULL
-  Objective <- objective(name=name,enabled=enabled, multiplier=multiplier)
+  Objective <- objective(name=name,arguments=arguments, enabled=enabled, multiplier=multiplier)
   ##' if target is null, we'll try to maximize the return metric
   ##' if target is set, we'll try to meet or exceed the metric, penalizing a shortfall
   ## now structure and return
   return(structure( list(name = Objective$name,
+                         arguments = Objective$arguments, 
                          enabled = Objective$enabled,
                          method = method,
                          multiplier= Objective$multiplier,
@@ -164,14 +174,15 @@ return_objective <- function(name, enabled=FALSE, ... ,multiplier=-1, target=NUL
 #' constructor for class portfolio_risk_objective
 #' 
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param arguments default arguments to be passed to an objective function when executed
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters 
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param target univariate target for the objective
 #' @param p confidence level for calculation, default p=.95
-#' @author bpeterson
+#' @author Brian G. Peterson
 #' @export
-portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, target=NULL, p=.95)
+portfolio_risk_objective <- function(name, arguments=NULL, enabled=FALSE, ... ,  multiplier=1, target=NULL, p=.95)
 {
   Objective <- objective(name=name,enabled=enabled, multiplier=multiplier)
   ##' if target is null, we'll try to minimize the risk metric
@@ -186,6 +197,7 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
   
   ## now structure and return
   return(structure( list(name = Objective$name,
+                         arguments = Objective$arguments, 
                          enabled = Objective$enabled,
                          p = p,
                          clean = clean,
@@ -204,6 +216,7 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
 #' 
 #' @param assets vector of assets to use, should come from constraints object
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param arguments default arguments to be passed to an objective function when executed
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters 
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
@@ -211,9 +224,9 @@ portfolio_risk_objective <- function(name, enabled=FALSE, ... ,  multiplier=1, t
 #' @param p confidence level for calculation, default p=.95
 #' @param min_prisk minimum percentage contribution to risk
 #' @param max_prisk maximum percentage contribution to risk
-#' @author bpeterson
+#' @author Brian G. Peterson
 #' @export
-risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1, target=NULL, p=.95, min_prisk, max_prisk )
+risk_budget_objective <- function(assets, name, arguments=NULL, enabled=FALSE, ..., multiplier=1, target=NULL, p=.95, min_prisk, max_prisk )
 {
   if(!hasArg(target)) target=NULL else target=match.call(expand.dots=TRUE)$target
   Objective <- portfolio_risk_objective(name=name,enabled=enabled,p=p,target=target, multiplier=multiplier, ...=...)
@@ -246,6 +259,7 @@ risk_budget_objective <- function(assets, name, enabled=FALSE, ..., multiplier=1
   if(!hasArg(min_prisk)) min_prisk = NULL
   
   return(structure( list(name = Objective$name,
+                         arguments = Objective$arguments, 
                          enabled = Objective$enabled,
                          p = Objective$p,
                          clean = Objective$clean,

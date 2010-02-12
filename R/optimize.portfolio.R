@@ -169,7 +169,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
 #' @param \dots any other passthru parameters
 #' @param rebalance_on a periodicity as returned by xts function periodicity and usable by endpoints
 #' @param training_period period to use as training in the front of the data
-#' @param trailing_periods if set, an integer with the number of periods to roll over, default NULL
+#' @param trailing_periods if set, an integer with the number of periods to roll over, default NULL will run from inception
 #' @callGraph 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
@@ -186,11 +186,11 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     
     if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
     if (is.null(trailing_periods)){
-        out_list<-foreach(ep=iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)])) %dopar% {optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)}
+        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)])) %dopar% {optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)}
         names(out_list)<-index(R[endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]])
     } else {
         #stopifnot(training_period>=trailing_periods)
-        out_list<-foreach(ep=iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)])) %dopar% {optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)}
+        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)])) %dopar% {optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)}
         # rework lines above for trailing periods
         names(out_list)<-index(R[endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]])
     }

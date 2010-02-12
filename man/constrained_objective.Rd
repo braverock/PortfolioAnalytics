@@ -29,10 +29,7 @@ any return less than your target will be penalized.  If you do not specify a tar
 you may need to specify a negative VTR, or the function will not converge.  Try the maximum 
 expected return times the multiplier (e.g. -1 or -10).
 
-Additional parameters for random portfolios or \code{\link[DEoptim]{DEoptim.control}} may be passed in via \dots
-
-TODO add examples
-TODO add more details about the nuances of the optimization engines}
+Additional parameters for random portfolios or \code{\link[DEoptim]{DEoptim.control}} may be passed in via \dots}
 \seealso{\code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}}}
 \author{Kris Boudt, Peter Carl, Brian G. Peterson}
 \arguments{\item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}

@@ -6,10 +6,16 @@
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id$
+# $Id:$
 #
 ###############################################################################
 
+#' boxplot of the weight distributions in the random portfolios 
+#' @param RP set of random portfolios created by \code{\link{random_portfolios}}
+#' @param neighbors set of 'neighbor portfolios to overplot
+#' @param ... any other passthru parameters 
+#' @seealso \code{\link{random_portfolios}}
+#' @export
 chart.Weights.RP <- function(RP, neighbors = NA, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
@@ -36,6 +42,12 @@ chart.Weights.RP <- function(RP, neighbors = NA, ...){
     axis(1, labels=names(RP$weights), at=1:numassets, las=3)
 }
 
+#' classic risk return scatter of random portfolios
+#' @param RP set of random portfolios created by \code{\link{random_portfolios}}
+#' @param neighbors set of 'neighbor portfolios to overplot
+#' @param ... any other passthru parameters 
+#' @seealso \code{\link{random_portfolios}}
+#' @export
 chart.Scatter.RP <- function(RP, neighbors = NA, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
@@ -58,6 +70,12 @@ chart.Scatter.RP <- function(RP, neighbors = NA, ...){
     points(RP$constrained_objective$MES, RP$constrained_objective$mean, col="red", pch=16) # optimal
 }
 
+#' scatter and weights chart  for random portfolios
+#' @param RP set of random portfolios created by \code{\link{random_portfolios}}
+#' @param neighbors set of 'neighbor portfolios to overplot
+#' @param ... any other passthru parameters 
+#' @seealso \code{\link{random_portfolios}}
+#' @export
 charts.RP <- function(RP, neighbors = NA, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class

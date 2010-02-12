@@ -1,7 +1,7 @@
 \name{constraint}
 \alias{constraint}
 \title{constructor for class constraint...}
-\usage{constraint(assets, ..., min, max, min_mult, max_mult, min_sum, max_sum, weight_seq)}
+\usage{constraint(assets, ..., min, max, min_mult, max_mult, min_sum=0.99, max_sum=1.01, weight_seq)}
 \description{constructor for class constraint}
 \author{Peter Carl and Brian G. Peterson}
 \arguments{\item{assets}{}

@@ -146,6 +146,36 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
         if(objective$enabled){
           tmp_measure = NULL
           multiplier  = objective$multiplier
+          nargs <-list(...)
+          if(length(nargs)==0) nargs=NULL
+          if (length('...')==0 | is.null('...')) {
+              rm('...')
+              nargs=NULL
+          }
+          # see 'S Programming p. 67 for this matching
+          fun<-try(match.fun(objective$name))
+          if(is.function(fun)){
+              .formals  <- formals(fun)
+              onames <- names(.formals)
+              if(is.list(objective$arguments)){
+                  objective$arguments$R<-R
+                  objective$arguments$weights=w
+                  
+                  pm <- pmatch(names(objective$arguments), onames, nomatch = 0L)
+                  if (any(pm == 0L))
+                      warning(paste("some arguments stored for",objective$name,"do not match"))
+                  names(objective$arguments[pm > 0L]) <- onames[pm]
+                  .formals[pm] <- objective$arguments[pm > 0L]
+                  #now add dots
+                  if (length(nargs)) {
+                      pm <- pmatch(names(nargs), onames, nomatch = 0L)
+                      names(nargs[pm > 0L]) <- onames[pm]
+                      .formals[pm] <- nargs[pm > 0L]
+                  }
+                  .formals$... <- NULL
+              }
+          } # TODO do some funky return magic here on try-error
+          
           switch(objective$name,
             median =,
             mean   = { tmp_measure = match.fun(objective$name)(R%*%w)
@@ -194,7 +224,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                                     ...=...
                                   )
                   },
-            { tmp_measure = try((match.fun(objective$name)(R,weights=w, ...=...)),silent=TRUE)
+            { tmp_measure = try((do.call(fun,.formals)),silent=TRUE)
             names(tmp_measure)<-objective$name  
             }
           ) # end objective switch
