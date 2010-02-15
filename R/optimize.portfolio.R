@@ -42,7 +42,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   if (is.null(constraints) | !is.constraint(constraints)){
       stop("you must pass in an object of class constraints to control the optimization")
   }
-  
+  ?rsprng
   R <- checkData(R)
   N = length(constraints$assets)
   if (ncol(R)>N) {
@@ -83,15 +83,18 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     NP = round(search_size/itermax)
     if(NP>2000) NP=2000
     if(!hasArg(controlDE)) controlDE = list( NP=NP, itermax=itermax, trace=trace) else controlDE=match.call(expand.dots=TRUE)$controlDE
+    if(isTRUE(trace)) trace=FALSE #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
     if(hasArg(VTR)) controlDE$VTR <- match.call(expand.dots=TRUE)$VTR #target number for the objective function
     if(hasArg(F))   controlDE$F  <- match.call(expand.dots=TRUE)$F   # stepsize, default .8
     if(hasArg(CR))  controlDE$CR <- match.call(expand.dots=TRUE)$CR 	 # Crossover probability from interval [0,1]. Default to '0.5'
-    #if(hasArg(trace))  controlDE$trace <- match.call(expand.dots=TRUE)$trace      # trace
-    if(hasArg(trace))  controlDE$trystart <- match.call(expand.dots=TRUE)$trystart      # how many times to try to generate an initial population
-    if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
-    if(!hasArg(sigma)) sigma = cov(R);
-    if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R,mu)
-    if(!hasArg(M4))    M4 = PerformanceAnalytics:::M4.MM(R,mu)
+    if(hasArg(trystart))  controlDE$trystart <- match.call(expand.dots=TRUE)$trystart      # how many times to try to generate an initial population
+    
+    # we need to calculate these here is we only want to do it once, and not again in constrained_objective
+    #however, I think we'd need to assign them to slots in ... dots argument
+    #if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+    #if(!hasArg(sigma)) sigma = cov(R);
+    #if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R,mu)
+    #if(!hasArg(M4))    M4 = PerformanceAnalytics:::M4.MM(R,mu)
 
     # get upper and lower weights parameters from constraints
     upper = constraints$max
@@ -109,7 +112,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     names(w) = colnames(R)
 
     out = list(weights=w , objective_measures=constrained_objective(w=w,R=R,constraints,trace=TRUE)$objective_measures,call=call) 
-    if (isTRUE(trace)){out$DEoutput=minw}
+    if (isTRUE(controlDE$trace)){out$DEoutput=minw}
     
   } ## end case for DEoptim
   if(optimize_method=="random"){
