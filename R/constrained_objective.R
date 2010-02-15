@@ -146,6 +146,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
         if(objective$enabled){
           tmp_measure = NULL
           multiplier  = objective$multiplier
+          if(is.null(objective$arguments) | !is.list(objective$arguments)) objective$arguments<-list()
           nargs <-list(...)
           if(length(nargs)==0) nargs=NULL
           if (length('...')==0 | is.null('...')) {
@@ -278,7 +279,10 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
       } # end loop over objectives
     } # end objectives processing
 
-    if(verbose) message(paste("output of objective function",out))
+    if(isTRUE(verbose)) {
+        message(paste('weights:',w))
+        message(paste("output of objective function",out))
+    }
     #return
     if(!isTRUE(trace)){
         return(out)
