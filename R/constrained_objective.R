@@ -140,7 +140,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     if(is.null(constraints$objectives)) {
       warning("no objectives specified in constraints")
     } else{
-      if(trace) tmp_return<-list()
+      if(isTRUE(trace)) tmp_return<-list()
       for (objective in constraints$objectives){
         #check for clean bits to pass in
         if(objective$enabled){
@@ -217,8 +217,8 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               }
           } # TODO do some funky return magic here on try-error
           
-          tmp_measure = try((do.call(fun,.formals)),silent=TRUE)
-          names(tmp_measure)<-objective$name  
+          tmp_measure = try((do.call(fun,.formals)) ,silent=TRUE)
+          if(is.null(names(tmp_measure))) names(tmp_measure)<-objective$name  
                   
           # now set the new value of the objective output
           if(inherits(tmp_measure,"try-error")) { 
@@ -226,7 +226,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               next()
               
           } else{
-              if(trace) tmp_return<-c(tmp_return,tmp_measure)
+              if(isTRUE(trace)) tmp_return<-c(tmp_return,tmp_measure)
           }
           
           if(inherits(objective,"return_objective")){ 
@@ -280,7 +280,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
 
     if(verbose) message(paste("output of objective function",out))
     #return
-    if(!trace){
+    if(!isTRUE(trace)){
         return(out)
     } else {
         # if(verbose) print(tmp_return)
