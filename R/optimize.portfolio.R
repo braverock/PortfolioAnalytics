@@ -42,7 +42,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   if (is.null(constraints) | !is.constraint(constraints)){
       stop("you must pass in an object of class constraints to control the optimization")
   }
-  ?rsprng
+  
   R <- checkData(R)
   N = length(constraints$assets)
   if (ncol(R)>N) {
@@ -52,7 +52,9 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   
   out=list()
   
-  normalize_weights <- function(w){
+  weights=NULL
+  
+  normalize_weights <- function(weights){
       # normalize results if necessary
       if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
           # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
@@ -65,17 +67,18 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
           ##' In Kris' original function, this was manifested as a full investment constraint
           if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
               max_sum=constraints$max_sum
-              if(sum(w)>max_sum) { w<-(max_sum/sum(w))*w } # normalize to max_sum
+              if(sum(weights)>max_sum) { weights<-(max_sum/sum(weights))*w } # normalize to max_sum
           }
           
           if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
               min_sum=constraints$min_sum
-              if(sum(w)<min_sum) { w<-(min_sum/sum(w))*w } # normalize to min_sum
+              if(sum(weights)<min_sum) { weights<-(min_sum/sum(weights))*weights } # normalize to min_sum
           }
           
       } # end min_sum and max_sum normalization
-      return(w)
+      return(weights)
   }
+  
   if(optimize_method=="DEoptim"){
     stopifnot("package:DEoptim" %in% search() || require("DEoptim",quietly = TRUE))
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
@@ -87,9 +90,8 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     if(hasArg(VTR)) controlDE$VTR <- match.call(expand.dots=TRUE)$VTR #target number for the objective function
     if(hasArg(F))   controlDE$F  <- match.call(expand.dots=TRUE)$F   # stepsize, default .8
     if(hasArg(CR))  controlDE$CR <- match.call(expand.dots=TRUE)$CR 	 # Crossover probability from interval [0,1]. Default to '0.5'
-    if(hasArg(trystart))  controlDE$trystart <- match.call(expand.dots=TRUE)$trystart      # how many times to try to generate an initial population
     
-    # we need to calculate these here is we only want to do it once, and not again in constrained_objective
+    # we need to calculate these here as we only want to do it once, and not again in constrained_objective
     #however, I think we'd need to assign them to slots in ... dots argument
     #if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
     #if(!hasArg(sigma)) sigma = cov(R);
@@ -107,11 +109,12 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
         return (paste("Optimizer was unable to find a solution for target"))
     }
 
-    w = as.vector( minw$optim$bestmem)
-    w <- normalize_weights(w)
-    names(w) = colnames(R)
+    weights = as.vector( minw$optim$bestmem)
+    weights <- normalize_weights(weights)
+    names(weights) = colnames(R)
 
-    out = list(weights=w , objective_measures=constrained_objective(w=w,R=R,constraints,trace=TRUE)$objective_measures,call=call) 
+    out = list(weights=weights , objective_measures=constrained_objective(w=weights,R=R,constraints,trace=TRUE)$objective_measures,call=call) 
+    weights=NULL
     if (isTRUE(controlDE$trace)){out$DEoutput=minw}
     
   } ## end case for DEoptim
