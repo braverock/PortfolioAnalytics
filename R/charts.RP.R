@@ -55,7 +55,7 @@ chart.Scatter.RP <- function(RP, neighbors = NA, ...){
     columnnames = colnames(xtract)
     return.column = grep("objective_measures.mean",columnnames)
     ## @TODO: Generalize this to find column containing the "risk" metric
-    risk.column = grep("objective_measures.MES",columnnames)
+    risk.column = grep("objective_measures.ES",columnnames)
 
     plot(xtract[,risk.column],xtract[,return.column], xlab=colnames(xtract)[risk.column], ylab=columnnames[return.column], col="lightgray", ...)
 
@@ -64,10 +64,16 @@ chart.Scatter.RP <- function(RP, neighbors = NA, ...){
         subsetx = head(xtract[orderx,], n=neighbors)
         points(subsetx[,risk.column], subsetx[,return.column], col="lightblue", pch=1)
     }
-
     points(xtract[1,risk.column],xtract[1,return.column], col="orange", pch=16) # overplot the equal weighted (or seed)
+    #check to see if portfolio 1 is EW  RP$random_portoflios[1,] all weights should be the same
+    if(!isTRUE(all.equal(RP$random_portfolios[1,][1],1/length(RP$random_portfolios[1,] ) ))){
+        #show both the seed and EW if they are different 
+        #NOTE the all.equal comparison could fail above if the first element of the first portfolio is the same as the EW weight, 
+        #but the rest is not, shouldn't happen often with real portfolios, only toy examples
+        points(xtract[2,risk.column],xtract[2,return.column], col="green", pch=16) # overplot the equal weighted (or seed)
+    }
     ## @TODO: Generalize this to find column containing the "risk" metric
-    points(RP$constrained_objective$MES, RP$constrained_objective$mean, col="red", pch=16) # optimal
+    points(RP$constrained_objective$ES, RP$constrained_objective$mean, col="blue", pch=16) # optimal
 }
 
 #' scatter and weights chart  for random portfolios
