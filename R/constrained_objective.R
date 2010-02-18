@@ -137,6 +137,13 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
       out = out + sum(w[which(w<min[1:N])]-w[which(w<min[1:N])])*penalty
     }
     
+    nargs <-list(...)
+    if(length(nargs)==0) nargs=NULL
+    if (length('...')==0 | is.null('...')) {
+        rm('...')
+        nargs=NULL
+    }
+    
     if(is.null(constraints$objectives)) {
       warning("no objectives specified in constraints")
     } else{
@@ -147,12 +154,6 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
           tmp_measure = NULL
           multiplier  = objective$multiplier
           if(is.null(objective$arguments) | !is.list(objective$arguments)) objective$arguments<-list()
-          nargs <-list(...)
-          if(length(nargs)==0) nargs=NULL
-          if (length('...')==0 | is.null('...')) {
-              rm('...')
-              nargs=NULL
-          }
           switch(objective$name,
               mean =,
               median = {
