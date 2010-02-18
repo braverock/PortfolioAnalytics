@@ -28,11 +28,12 @@
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
+#' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
 #' @callGraph 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
-optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ...)
+optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ..., rp=NULL)
 {
   start_t<-Sys.time()
 
@@ -120,7 +121,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   } ## end case for DEoptim
   if(optimize_method=="random"){
       #' call random_portfolios() with constraints and search_size to create matrix of portfolios
-      if(!hasArg(rp) | is.null(rp)){
+      if(missing(rp) | is.null(rp)){
           rp<-random_portfolios(rpconstraints=constraints,permutations=search_size)
       }
       #' store matrix in out if trace=TRUE
