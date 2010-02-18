@@ -48,19 +48,19 @@ chart.Weights.RP <- function(RP, neighbors = NA, ...){
 #' @param ... any other passthru parameters 
 #' @seealso \code{\link{random_portfolios}}
 #' @export
-chart.Scatter.RP <- function(RP, neighbors = NA, ...){
+chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES', ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     xtract = extractStats.rp(RP)
     columnnames = colnames(xtract)
-    return.column = grep("objective_measures.mean",columnnames)
+    return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
     ## @TODO: Generalize this to find column containing the "risk" metric
-    risk.column = grep("objective_measures.ES",columnnames)
+    risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
 
-    plot(xtract[,risk.column],xtract[,return.column], xlab=colnames(xtract)[risk.column], ylab=columnnames[return.column], col="lightgray", ...)
+    plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="lightgray", ...)
 
     if(!is.na(neighbors)){ # overplot nearby portfolios
-        orderx = order(xtract[,"out.mean"])
+        orderx = order(xtract[,"out.mean"]) #TODO this won't work if the objective is anything othchart.Scatter.er than mean
         subsetx = head(xtract[orderx,], n=neighbors)
         points(subsetx[,risk.column], subsetx[,return.column], col="lightblue", pch=1)
     }
@@ -73,7 +73,7 @@ chart.Scatter.RP <- function(RP, neighbors = NA, ...){
         points(xtract[2,risk.column],xtract[2,return.column], col="green", pch=16) # overplot the equal weighted (or seed)
     }
     ## @TODO: Generalize this to find column containing the "risk" metric
-    points(RP$constrained_objective$ES, RP$constrained_objective$mean, col="blue", pch=16) # optimal
+    points(RP$constrained_objective[risk.col], RP$constrained_objective[return.col], col="blue", pch=16) # optimal
 }
 
 #' scatter and weights chart  for random portfolios
