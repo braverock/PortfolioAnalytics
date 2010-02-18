@@ -120,11 +120,13 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   } ## end case for DEoptim
   if(optimize_method=="random"){
       #' call random_portfolios() with constraints and search_size to create matrix of portfolios
-      rp<-random_portfolios(rpconstraints=constraints,permutations=search_size)
+      if(!hasArg(rp) | is.null(rp)){
+          rp<-random_portfolios(rpconstraints=constraints,permutations=search_size)
+      }
       #' store matrix in out if trace=TRUE
       if (isTRUE(trace)) out$random_portfolios<-rp
       #' write foreach loop to call constrained_objective() with each portfolio
-      if ("package:foreach" %in% search()){
+      if ("package:foreach" %in% search() & !hasArg(rp)){
           rp_objective_results<-foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,],R,constraints,trace=trace,...=...)
       } else {
           rp_objective_results<-apply(rp, 1, constrained_objective, R=R, constraints=constraints, trace=trace, ...=...)
@@ -193,16 +195,21 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     
     #store the call for later
     call <- match.call()
-    
+    if(optimize_method=="random"){
+        #' call random_portfolios() with constraints and search_size to create matrix of portfolios
+        rp<-random_portfolios(rpconstraints=constraints,permutations=search_size)
+    } else {
+        rp=NULL
+    }    
     #' NOTE this will need a whole bunch of hasArg and other error testing...
     
     if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
     if (is.null(trailing_periods)){
-        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)])) %dopar% {optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)}
+        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]), .errorhandling='pass') %dopar% {optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)}
         names(out_list)<-index(R[endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]])
     } else {
         #stopifnot(training_period>=trailing_periods)
-        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)])) %dopar% {optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...=...)}
+        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]), .errorhandling='pass') %dopar% {optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)}
         # rework lines above for trailing periods
         names(out_list)<-index(R[endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]])
     }
