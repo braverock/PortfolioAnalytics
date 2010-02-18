@@ -144,13 +144,13 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
       # now find the weights that correspond to the minimum score from the constrained objective
       # and normalize_weights so that we meet our min_sum/max_sum constraints
       if (isTRUE(trace)) {
-          min_objective_weights<- normalize_weights(rp_objective_results[[which.min(search)]]$weights)
+          min_objective_weights<- try(normalize_weights(rp_objective_results[[which.min(search)]]$weights))
       } else {
-          min_objective_weights<- normalize_weights(rp[which.min(search),])
+          min_objective_weights<- try(normalize_weights(rp[which.min(search),]))
       }
       #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
       out$weights<-min_objective_weights
-      out$constrained_objective<-constrained_objective(w=min_objective_weights,R=R,constraints,trace=TRUE)$objective_measures
+      out$constrained_objective<-try(constrained_objective(w=min_objective_weights,R=R,constraints,trace=TRUE)$objective_measures)
       out$call<-call
       #' construct out list to be as similar as possible to DEoptim list, within reason
   }
