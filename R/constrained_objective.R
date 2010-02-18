@@ -211,9 +211,10 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                   .formals[pm] <- objective$arguments[pm > 0L]
                   #now add dots
                   if (length(nargs)) {
-                      pm <- pmatch(names(nargs), onames, nomatch = 0L)
-                      names(nargs[pm > 0L]) <- onames[pm]
-                      .formals[pm] <- nargs[pm > 0L]
+                      dargs<-nargs
+                      pm <- pmatch(names(dargs), onames, nomatch = 0L)
+                      names(dargs[pm > 0L]) <- onames[pm]
+                      .formals[pm] <- dargs[pm > 0L]
                   }
                   .formals$... <- NULL
               }
