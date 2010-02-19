@@ -229,7 +229,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               next()
               
           } else{
-              if(isTRUE(trace)) tmp_return<-c(tmp_return,tmp_measure)
+              if(isTRUE(trace)) tmp_return[objective$name]<-tmp_measure
           }
           
           if(inherits(objective,"return_objective")){ 
