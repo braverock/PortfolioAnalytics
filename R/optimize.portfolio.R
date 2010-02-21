@@ -134,9 +134,8 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     weights <- normalize_weights(weights)
     names(weights) = colnames(R)
 
-    out = list(weights=weights , objective_measures=constrained_objective(w=weights,R=R,constraints,trace=TRUE)$objective_measures,call=call) 
-    weights=NULL
-    if (isTRUE(controlDE$trace)){out$DEoutput=minw}
+    out = list(weights=weights, objective_measures=constrained_objective(w=weights,R=R,constraints,trace=TRUE)$objective_measures,call=call)
+    if (isTRUE(trace)){out$DEoutput=minw}
     
   } ## end case for DEoptim
   if(optimize_method=="random"){
