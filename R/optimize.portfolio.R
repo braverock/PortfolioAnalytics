@@ -75,7 +75,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
           ##' In Kris' original function, this was manifested as a full investment constraint
           if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
               max_sum=constraints$max_sum
-              if(sum(weights)>max_sum) { weights<-(max_sum/sum(weights))*w } # normalize to max_sum
+              if(sum(weights)>max_sum) { weights<-(max_sum/sum(weights))*weights } # normalize to max_sum
           }
           
           if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
