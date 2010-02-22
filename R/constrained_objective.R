@@ -188,8 +188,8 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
           if(is.null(names(tmp_measure))) names(tmp_measure)<-objective$name  
                   
           # now set the new value of the objective output
-          if(inherits(tmp_measure,"try-error")) { 
-              message(paste("objective name",objective$name,"appears to not match a known R function"))
+          if(inherits(tmp_measure,"try-error") | is.na(out)) { 
+              message(paste("objective name",objective$name,"generated an error:",out))
               next()
               
           } else{
@@ -250,6 +250,13 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
         message(paste(w,' '))
         message(paste("output of objective function",out))
     }
+    
+    if(is.na(out) | is.nan(out) | is.null(out)){
+        #this should never happen
+        warning(paste('NA or NaN produced in objective function',out))
+        out<-penalty
+    }
+    
     #return
     if(!isTRUE(trace)){
         return(out)
