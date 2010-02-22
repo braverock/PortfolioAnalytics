@@ -191,7 +191,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               tmp_return[objective$name]<-tmp_measure
           }
           
-          if(inherits(tmp_measure,"try-error") | is.na(out)) { 
+          if(inherits(tmp_measure,"try-error") | is.na(tmp_measure)) { 
               message(paste("objective name",objective$name,"generated an error:",out))
               next()  
           } 
