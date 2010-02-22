@@ -247,7 +247,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
 
     if(isTRUE(verbose)) {
         message('weights: ')
-        message(weights)
+        message(paste(w,' '))
         message(paste("output of objective function",out))
     }
     #return
