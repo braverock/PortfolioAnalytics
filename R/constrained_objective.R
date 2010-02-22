@@ -194,7 +194,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
           }
           
           if(inherits(tmp_measure,"try-error") | is.na(tmp_measure)) { 
-              message(paste("objective name",objective$name,"generated an error:",out))
+              message(paste("objective name",objective$name,"generated an error or warning:",tmp_measure))
               next()  
           } 
           
