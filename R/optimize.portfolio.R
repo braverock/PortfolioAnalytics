@@ -57,7 +57,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     
   dotargs <-list(...)    
   
-  #TODO FIXME we need to calculate these here as we only want to do it once, and not again in constrained_objective
+  # set portfolio moments only once
   dotargs <- set.portfolio.moments(R, constraints, momentargs=dotargs)
   
   normalize_weights <- function(weights){
@@ -201,7 +201,10 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
     start_t<-Sys.time()
     
-    #TODO FIXME call set.portfolio.moments in here
+    dotargs <-list(...)    
+    
+    # set portfolio moments only once
+    dotargs <- set.portfolio.moments(R, constraints, momentargs=dotargs)
     
     #store the call for later
     call <- match.call()
@@ -215,11 +218,11 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     
     if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
     if (is.null(trailing_periods)){
-        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]), .errorhandling='pass') %dopar% {optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)}
+        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]), .errorhandling='pass') %dopar% {optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=dotargs)}
         names(out_list)<-index(R[endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]])
     } else {
         #stopifnot(training_period>=trailing_periods)
-        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]), .errorhandling='pass') %dopar% {optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)}
+        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]), .errorhandling='pass') %dopar% {optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=dotargs)}
         # rework lines above for trailing periods
         names(out_list)<-index(R[endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]])
     }
@@ -230,6 +233,10 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     return(out_list)
 }
 
+#' set portfolio moments for use by lower level optimization functions
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
+#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
+#' @param momentargs list containing arguments to be passed down to lower level functions, default NULL
 set.portfolio.moments <- function(R, constraints, momentargs=NULL){
 
     if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
