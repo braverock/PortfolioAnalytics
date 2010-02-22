@@ -65,33 +65,6 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     T = nrow(R)
     if(hasArg(optimize_method)) optimize_method=match.call(expand.dots=TRUE)$optimize_method else optimize_method='' 
     if(hasArg(verbose)) verbose=match.call(expand.dots=TRUE)$verbose else verbose=FALSE 
-    if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
-    if(!hasArg(sigma)) sigma = cov(R);
-    if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R)
-    if(!hasArg(M4))    M4 = PerformanceAnalytics:::M4.MM(R)
-
-    # check for 'clean' in the objectives
-    loc<-grep('clean',constraints)
-    if(!identical(loc,integer(0))) {
-        for (objective in constraints[loc]){
-            if(!is.null(objective$arguments$clean)) {
-                cleanR<-try(Return.clean(R,method=objective$arguments$clean))
-                if(!inherits(cleanR,"try-error")) {
-                    mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
-                    sigma = cov(cleanR);
-                    M3 = PerformanceAnalytics:::M3.MM(cleanR)
-                    M4 = PerformanceAnalytics:::M4.MM(cleanR)
-                    #' NOTE: this isn't perfect as it overwrites the moments for all objectives, not just this one
-                    #' however, this should really be taken care of one level higher, in optimize.portfolio(), 
-                    #' and this should be the fallback 
-                }
-            }
-        }    
-    }
-    #if(!hasArg(cleanmu))    cleanmu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
-    #if(!hasArg(cleansigma)) cleansigma = cov(cleanR);
-    #if(!hasArg(cleanM3))    cleanM3 = PerformanceAnalytics:::M3.MM(cleanR)
-    #if(!hasArg(cleanM4))    cleanM4 = PerformanceAnalytics:::M4.MM(cleanR)
     
     # check for valid constraints
     if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
@@ -140,9 +113,11 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     nargs <-list(...)
     if(length(nargs)==0) nargs=NULL
     if (length('...')==0 | is.null('...')) {
-        rm('...')
+        # rm('...')
         nargs=NULL
     }
+
+    nargs<-set.portfolio.moments(R, constraints, momentargs=nargs)
     
     if(is.null(constraints$objectives)) {
       warning("no objectives specified in constraints")
@@ -153,30 +128,22 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
         if(objective$enabled){
           tmp_measure = NULL
           multiplier  = objective$multiplier
-          if(is.null(objective$arguments) | !is.list(objective$arguments)) objective$arguments<-list()
+          #if(is.null(objective$arguments) | !is.list(objective$arguments)) objective$arguments<-list()
           switch(objective$name,
               mean =,
               median = {
                   fun = match.fun(objective$name)  
-                  objective$arguments$x <- ( R %*% w ) #do the multivariate mean/median with Kroneker product
+                  nargs$x <- ( R %*% w ) #do the multivariate mean/median with Kroneker product
               },
               sd =,
               StdDev = { 
                   fun= match.fun(StdDev)
-                  if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
-                  if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
               },
               var =,
               mVaR =,
               VaR = {
                   fun= match.fun(VaR) 
-                  if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
-                  if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
-                  if(is.null(objective$arguments$m3)) objective$arguments$m3=M3
-                  if(is.null(objective$arguments$m4)) objective$arguments$m4=M4
-                  if(is.null(objective$arguments$invert)) objective$arguments$invert=FALSE
-                  if(is.null(objective$arguments$clean)) objective$arguments$clean='boudt'
-                  if(is.null(objective$arguments$portfolio_method)) objective$arguments$portfolio_method='single'
+                  if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method) & is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
               },
               es =,
               mES =,
@@ -184,13 +151,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               cVaR =,
               ES = {
                   fun = match.fun(ES)
-                  if(is.null(objective$arguments$mu)) objective$arguments$mu=mu
-                  if(is.null(objective$arguments$sigma)) objective$arguments$sigma=sigma
-                  if(is.null(objective$arguments$m3)) objective$arguments$m3=M3
-                  if(is.null(objective$arguments$m4)) objective$arguments$m4=M4
-                  if(is.null(objective$arguments$invert)) objective$arguments$invert=FALSE
-                  if(is.null(objective$arguments$clean)) objective$arguments$clean='boudt'
-                  if(is.null(objective$arguments$portfolio_method)) objective$arguments$portfolio_method='single'
+                  if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method)& is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
               },
               {   # see 'S Programming p. 67 for this matching
                   fun<-try(match.fun(objective$name))
@@ -200,14 +161,17 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               .formals  <- formals(fun)
               onames <- names(.formals)
               if(is.list(objective$arguments)){
-                  if(is.null(objective$arguments$R) | !length(objective$arguments$R)==length(R)) objective$arguments$R = R
+                  #TODO FIXME only do this if R and weights are in the argument list of the fn
+                  if(is.null(nargs$R) | !length(nargs$R)==length(R)) nargs$R <- R
                   
-                  if(is.null(objective$arguments$weights)) objective$arguments$weights = w
+                  if(is.null(nargs$weights)) nargs$weights <- w
                   
                   pm <- pmatch(names(objective$arguments), onames, nomatch = 0L)
                   if (any(pm == 0L))
                       warning(paste("some arguments stored for",objective$name,"do not match"))
-                  names(objective$arguments[pm > 0L]) <- onames[pm]
+                  # this line overwrites the names of things stored in $arguments with names from formals.
+                  # I'm not sure it's a good idea, so commenting for now, until we prove we need it
+                  #names(objective$arguments[pm > 0L]) <- onames[pm]
                   .formals[pm] <- objective$arguments[pm > 0L]
                   #now add dots
                   if (length(nargs)) {

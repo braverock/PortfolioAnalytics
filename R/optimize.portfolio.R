@@ -50,17 +50,15 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
       R=R[,names(constraints$assets)]
   }
   T = nrow(R)
-  
+    
   out=list()
   
   weights=NULL
-
+    
+  dotargs <-list(...)    
+  
   #TODO FIXME we need to calculate these here as we only want to do it once, and not again in constrained_objective
-  #however, I think we'd need to assign them to slots in ... dots argument
-  #if(!hasArg(mu))    mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
-  #if(!hasArg(sigma)) sigma = cov(R);
-  #if(!hasArg(M3))    M3 = PerformanceAnalytics:::M3.MM(R,mu)
-  #if(!hasArg(M4))    M4 = PerformanceAnalytics:::M4.MM(R,mu)
+  dotargs <- set.portfolio.moments(R, constraints, momentargs=dotargs)
   
   normalize_weights <- function(weights){
       # normalize results if necessary
@@ -94,24 +92,14 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     NP = round(search_size/itermax)
     if(NP>2000) NP=2000
     
-    # this is where we previously created the controlDE list by hand
-    #    if(!hasArg(controlDE)) controlDE = list( NP=NP, itermax=itermax, trace=trace) else controlDE=match.call(expand.dots=TRUE)$controlDE
-    #    if(isTRUE(trace)) trace=FALSE #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
-    #    if(hasArg(VTR)) controlDE$VTR <- match.call(expand.dots=TRUE)$VTR #target number for the objective function
-    #    if(hasArg(F))   controlDE$F  <- match.call(expand.dots=TRUE)$F   # stepsize, default .8
-    #    if(hasArg(CR))  controlDE$CR <- match.call(expand.dots=TRUE)$CR 	 # Crossover probability from interval [0,1]. Default to '0.5'
-    
-    dotargs <-list(...)
-    dotargs$NP <- NP
-    dotargs$itermax <- itermax
-    
     DEcformals  <- formals(DEoptim.control)
     DEcargs <- names(DEcformals)
     if( is.list(dotargs) ){
         pm <- pmatch(names(dotargs), DEcargs, nomatch = 0L)
         names(dotargs[pm > 0L]) <- DEcargs[pm]
+        DEcformals$NP <- NP
+        DEcformals$itermax <- itermax
         DEcformals[pm] <- dotargs[pm > 0L]
-        #DEcformals$... <- NULL
         
         #TODO FIXME also check for a passed in controlDE list, including checking its class, and match formals
     }
@@ -147,9 +135,9 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
       if (isTRUE(trace)) out$random_portfolios<-rp
       #' write foreach loop to call constrained_objective() with each portfolio
       if ("package:foreach" %in% search() & !hasArg(rp)){
-          rp_objective_results<-foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,],R,constraints,trace=trace,...=...)
+          rp_objective_results<-foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,],R,constraints,trace=trace,...=dotargs)
       } else {
-          rp_objective_results<-apply(rp, 1, constrained_objective, R=R, constraints=constraints, trace=trace, ...=...)
+          rp_objective_results<-apply(rp, 1, constrained_objective, R=R, constraints=constraints, trace=trace, ...=dotargs)
       }
       #' if trace=TRUE , store results of foreach in out$random_results
       if(isTRUE(trace)) out$random_portfolio_objective_results<-rp_objective_results
@@ -213,6 +201,8 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
     start_t<-Sys.time()
     
+    #TODO FIXME call set.portfolio.moments in here
+    
     #store the call for later
     call <- match.call()
     if(optimize_method=="random"){
@@ -240,6 +230,61 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     return(out_list)
 }
 
+set.portfolio.moments <- function(R, constraints, momentargs=NULL){
+
+    if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
+    if(is.null(constraints$objectives)) {
+        warning("no objectives specified in constraints")
+        next()
+    } else {
+        lcl<-grep('clean',constraints)
+        if(!identical(lcl,integer(0))) {
+            for (objective in constraints[lcl]){
+                if(!is.null(objective$arguments$clean)) {
+                    cleanR<-try(Return.clean(R,method=objective$arguments$clean))
+                    if(!inherits(cleanR,"try-error")) {
+                        momentargs$mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
+                        momentargs$sigma = cov(cleanR);
+                        momentargs$m3 = PerformanceAnalytics:::M3.MM(cleanR)
+                        momentargs$m4 = PerformanceAnalytics:::M4.MM(cleanR)
+                        #' FIXME NOTE: this isn't perfect as it overwrites the moments for all objectives, not just one with clean='boudt'
+                    }
+                }
+            }    
+        }
+        for (objective in constraints$objectives){
+            switch(objective$name,
+                    sd =,
+                    StdDev = { 
+                        #FIXME only calculate moments once, and only if needed
+                        if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+                        if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
+                    },
+                    var =,
+                    mVaR =,
+                    VaR = {
+                        if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+                        if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
+                        if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
+                        if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+                        if(is.null(momentargs$invert)) momentargs$invert = FALSE
+                    },
+                    es =,
+                    mES =,
+                    CVaR =,
+                    cVaR =,
+                    ES = {
+                        if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+                        if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
+                        if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
+                        if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+                        if(is.null(momentargs$invert)) momentargs$invert = FALSE
+                    }
+            ) # end switch on objectives    
+        }    
+    }    
+    return(momentargs)
+}
 #TODO write function to compute an efficient frontier of optimal portfolios
 
 #TODO write function to check sensitivity of optimal results by running n portfolios in a foreach loop

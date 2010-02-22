@@ -45,6 +45,8 @@ chart.Weights.RP <- function(RP, neighbors = NA, ...){
 #' classic risk return scatter of random portfolios
 #' @param RP set of random portfolios created by \code{\link{random_portfolios}}
 #' @param neighbors set of 'neighbor portfolios to overplot
+#' @param return.col string matching the objective of a 'return' objective, on vertical axis
+#' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
 #' @param ... any other passthru parameters 
 #' @seealso \code{\link{random_portfolios}}
 #' @export
@@ -57,7 +59,7 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
     ## @TODO: Generalize this to find column containing the "risk" metric
     risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
 
-    plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="lightgray", ...)
+    plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="gray", ...)
 
     if(!is.na(neighbors)){ # overplot nearby portfolios
         orderx = order(xtract[,"out.mean"]) #TODO this won't work if the objective is anything othchart.Scatter.er than mean
