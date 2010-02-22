@@ -88,6 +88,8 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
 
       ##' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
       ##' In Kris' original function, this was manifested as a full investment constraint
+      ##' the normalization process produces much faster convergence, 
+      ##' and then we penalize parameters outside the constraints in the next block
       if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
         max_sum=constraints$max_sum
         if(sum(w)>max_sum) { w<-(max_sum/sum(w))*w } # normalize to max_sum
@@ -100,14 +102,14 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
 
     } # end min_sum and max_sum normalization
 
-    ##' penalize weights outside my constraints
+    ##' penalize weights outside my constraints (can be caused by normalization)
     if (!is.null(constraints$max)){
       max = constraints$max
-      out = out + sum(w[which(w>max[1:N])]-max[which(w>max[1:N])])*penalty
+      out = out + sum(w[which(w>max[1:N])]- constraints$max[which(w>max[1:N])])*penalty
     }
     if (!is.null(constraints$min)){
       min = constraints$min
-      out = out + sum(w[which(w<min[1:N])]-w[which(w<min[1:N])])*penalty
+      out = out + sum(constraints$min[which(w<min[1:N])] - w[which(w<min[1:N])])*penalty
     }
     
     nargs <-list(...)
