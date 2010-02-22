@@ -185,17 +185,18 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
           } # TODO do some funky return magic here on try-error
           
           tmp_measure = try((do.call(fun,.formals)) ,silent=TRUE)
-          if(is.null(names(tmp_measure))) names(tmp_measure)<-objective$name  
-                  
-          # now set the new value of the objective output
-          if(inherits(tmp_measure,"try-error") | is.na(out)) { 
-              message(paste("objective name",objective$name,"generated an error:",out))
-              next()
-              
-          } else{
-              if(isTRUE(trace)) tmp_return[objective$name]<-tmp_measure
+          
+          if(isTRUE(trace)) {
+              if(is.null(names(tmp_measure))) names(tmp_measure)<-objective$name
+              tmp_return[objective$name]<-tmp_measure
           }
           
+          if(inherits(tmp_measure,"try-error") | is.na(out)) { 
+              message(paste("objective name",objective$name,"generated an error:",out))
+              next()  
+          } 
+          
+          # now set the new value of the objective output
           if(inherits(objective,"return_objective")){ 
               if (!is.null(objective$target) & is.numeric(objective$target)){ # we have a target
                   if(tmp_measure<objective$target){
