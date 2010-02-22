@@ -100,7 +100,8 @@ add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE
           },
 
         risk_budget=, risk_budget_objective=
-          {tmp_objective = risk_budget_objective(name=name,
+          {tmp_objective = risk_budget_objective(assets=constraints$assets,
+                                                 name=name,
                                                  enabled=enabled,
                                                  arguments=arguments,
                                                  ...=...
