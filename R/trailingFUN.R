@@ -10,7 +10,20 @@
 #
 ###############################################################################
 
-trailingFUN <- function(R, weights, n=0, FUN, FUNargs, ...) {
+#' apply a function over a configurable trailing period
+#' 
+#' this function is primarily designed for use with portfolio functions passing 
+#' 'x' or 'R' and weights, but may be usable for other things as well, see Exmample for a vector example.
+#' 
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
+#' @param weights a vector of weights to test
+#' @param \dots any other passthru parameters 
+#' @param n numeric number of trailing periods
+#' @param FUN string describing the function to be called
+#' @param FUNargs list describing any additional arguments
+#' @example trailingFUN(seq(1:100), weights=NULL, n=12, FUN='mean',FUNargs=list())
+#' @export
+trailingFUN <- function(R, weights, n=0, FUN, FUNargs=NULL, ...) {
     
     if (is.null(FUN)) {stop("you must supply a function to apply to")}
     
@@ -24,8 +37,8 @@ trailingFUN <- function(R, weights, n=0, FUN, FUNargs, ...) {
         nargs=NULL
     }
     
-    if(!is.null(nrow(R))) R<-R[nrow(R-n):nrow(R),]
-    else R<-R[length(R-n):length(R)]
+    if(!is.null(nrow(R))) R<-R[((nrow(R)-n)):nrow(R),]
+    else R<-R[(length(R)-n):length(R)]
     
     
     if(is.function(FUN)){
