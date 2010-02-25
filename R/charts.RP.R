@@ -98,15 +98,15 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
 #' @param ... any other passthru parameters 
 #' @seealso \code{\link{random_portfolios}}
 #' @export
-charts.RP <- function(RP, ...){
+charts.RP <- function(RP, risk.col, return.col, neighbors=NA, las=3, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     op <- par(no.readonly=TRUE)
     layout(matrix(c(1,2)),height=c(2,1.5),width=1)
-    par(cex=.7, mar=c(4,4,4,2))
-    chart.Scatter.RP(RP, ...)
-    par(mar=c(2,4,4,2))
-    chart.Weights.RP(RP, ...)
+    par(mar=c(4,4,4,2))
+    chart.Scatter.RP(RP, risk.col=risk.col, return.col=return.col, neighbors=neighbors, ...)
+    par(mar=c(2,4,0,2))
+    chart.Weights.RP(RP, main="", las=las, neighbors=neighbors, ...)
     par(op)
 
 }
