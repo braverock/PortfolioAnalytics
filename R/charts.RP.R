@@ -6,7 +6,7 @@
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id:$
+# $Id$
 #
 ###############################################################################
 
@@ -46,7 +46,7 @@ chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1
         for(i in 1:neighbors) points(subsetx[i,], type="b", col="lightblue")
         points(RP$random_portfolios[1,], type="b", col="orange", pch=16) # to overprint neighbors
     }
-    points(RP$weights, type="b", col="red", pch=16)
+    points(RP$weights, type="b", col="blue", pch=16)
     axis(2, cex.axis = cex.axis, col = element.color)
     axis(1, labels=names(RP$weights), at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
     box(col = element.color)
@@ -86,7 +86,7 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
         points(xtract[2,risk.column],xtract[2,return.column], col="green", pch=16) # overplot the equal weighted (or seed)
     }
     ## @TODO: Generalize this to find column containing the "risk" metric
-    points(RP$constrained_objective[risk.col], RP$constrained_objective[return.col], col="red", pch=16) # optimal
+    points(RP$constrained_objective[risk.col], RP$constrained_objective[return.col], col="blue", pch=16) # optimal
     axis(1, cex.axis = cex.axis, col = element.color)
     axis(2, cex.axis = cex.axis, col = element.color)
     box(col = element.color)
