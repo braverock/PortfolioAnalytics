@@ -16,7 +16,7 @@
 #' @param ... any other passthru parameters 
 #' @seealso \code{\link{random_portfolios}}
 #' @export
-chart.Weights.RP <- function(RP, neighbors = NA, ...){
+chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, main="Weights", ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     columnnames = names(RP$weights)
@@ -24,22 +24,33 @@ chart.Weights.RP <- function(RP, neighbors = NA, ...){
 
     if(!is.na(neighbors)){
         xtract=extractStats.rp(RP)
-        orderx = order(xtract[,"out.mean"])
+        orderx = order(xtract[,"out"])
         subsetx = head(xtract[orderx,2:(numassets+1)], n=neighbors)
     }
-    par( mar=c(5,4,4,2)) # set margin to accomodate vertical names
-    plot(RP$random_portfolios[1,], type="b", col="orange", axes=FALSE, xlab="", ylim=c(0,max(RP$constraints$max)), ...)
+    if(is.null(xlab))
+        minmargin = 3
+    else
+        minmargin = 5
+    if(main=="") topmargin=1 else topmargin=4
+    if(las > 1) {# set the bottom border to accomodate labels
+        bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
+    }
+    else {
+        bottommargin = 5
+    }
+    par(mar = c(bottommargin, 4, topmargin, 2) +.1)
+    plot(RP$random_portfolios[1,], type="b", col="orange", axes=FALSE, xlab="", ylim=c(0,max(RP$constraints$max)), ylab="Weights", main=main, ...)
+    points(RP$constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
+    points(RP$constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
     if(!is.na(neighbors)){
         for(i in 1:neighbors) points(subsetx[i,], type="b", col="lightblue")
         points(RP$random_portfolios[1,], type="b", col="orange", pch=16) # to overprint neighbors
     }
-
     points(RP$weights, type="b", col="red", pch=16)
-    points(RP$constraints$min, type="b", col="darkgray", lty="dashed", pch=24)
-    points(RP$constraints$max, type="b", col="darkgray", lty="dashed", pch=25)
-    box()
-    axis(2)
-    axis(1, labels=names(RP$weights), at=1:numassets, las=3)
+    axis(2, cex.axis = cex.axis, col = element.color)
+    axis(1, labels=names(RP$weights), at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
+    box(col = element.color)
+
 }
 
 #' classic risk return scatter of random portfolios
@@ -50,7 +61,7 @@ chart.Weights.RP <- function(RP, neighbors = NA, ...){
 #' @param ... any other passthru parameters 
 #' @seealso \code{\link{random_portfolios}}
 #' @export
-chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES', ...){
+chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES', element.color = "darkgray", cex.axis=0.8, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     xtract = extractStats.rp(RP)
@@ -59,10 +70,10 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
     ## @TODO: Generalize this to find column containing the "risk" metric
     risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
 
-    plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="gray", ...)
+    plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
 
     if(!is.na(neighbors)){ # overplot nearby portfolios
-        orderx = order(xtract[,"out.mean"]) #TODO this won't work if the objective is anything othchart.Scatter.er than mean
+        orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything othchart.Scatter.er than mean
         subsetx = head(xtract[orderx,], n=neighbors)
         points(subsetx[,risk.column], subsetx[,return.column], col="lightblue", pch=1)
     }
@@ -75,7 +86,10 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
         points(xtract[2,risk.column],xtract[2,return.column], col="green", pch=16) # overplot the equal weighted (or seed)
     }
     ## @TODO: Generalize this to find column containing the "risk" metric
-    points(RP$constrained_objective[risk.col], RP$constrained_objective[return.col], col="blue", pch=16) # optimal
+    points(RP$constrained_objective[risk.col], RP$constrained_objective[return.col], col="red", pch=16) # optimal
+    axis(1, cex.axis = cex.axis, col = element.color)
+    axis(2, cex.axis = cex.axis, col = element.color)
+    box(col = element.color)
 }
 
 #' scatter and weights chart  for random portfolios
@@ -84,10 +98,15 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
 #' @param ... any other passthru parameters 
 #' @seealso \code{\link{random_portfolios}}
 #' @export
-charts.RP <- function(RP, neighbors = NA, ...){
+charts.RP <- function(RP, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
-    layout(matrix(c(1,2)),height=c(2,1),width=1)
-    chart.Scatter.RP(RP, neighbors, ...)
-    chart.Weights.RP(RP, neighbors, ...)
+    op <- par(no.readonly=TRUE)
+    layout(matrix(c(1,2)),height=c(2,1.5),width=1)
+    par(cex=.7, mar=c(4,4,4,2))
+    chart.Scatter.RP(RP, ...)
+    par(mar=c(2,4,4,2))
+    chart.Weights.RP(RP, ...)
+    par(op)
+
 }
