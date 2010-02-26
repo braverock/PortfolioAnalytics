@@ -1,7 +1,7 @@
 \name{risk_budget_objective}
 \alias{risk_budget_objective}
 \title{constructor for class risk_budget_objective...}
-\usage{risk_budget_objective(assets, name, target, arguments, multiplier=1, enabled=FALSE, ..., min_prisk, max_prisk)}
+\usage{risk_budget_objective(assets, name, target, arguments, multiplier=1, enabled=FALSE, ..., min_prisk, max_prisk, min_concentration=FALSE)}
 \description{constructor for class risk_budget_objective}
 \author{Brian G. Peterson}
 \arguments{\item{assets}{vector of assets to use, should come from constraints object}
@@ -12,4 +12,5 @@
 \item{enabled}{TRUE/FALSE}
 \item{\dots}{any other passthru parameters}
 \item{min_prisk}{minimum percentage contribution to risk}
-\item{max_prisk}{maximum percentage contribution to risk}}
+\item{max_prisk}{maximum percentage contribution to risk}
+\item{min_concentration}{TRUE/FALSE whether to minimize concentration, default FALSE, always TRUE if min_prisk and max_prisk are NULL}}

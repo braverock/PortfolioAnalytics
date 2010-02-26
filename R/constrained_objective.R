@@ -241,7 +241,16 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
             percrisk = tmp_measure[[3]] # third element is percent component contribution
             RBupper = objective$max_prisk
             RBlower = objective$min_prisk
-            out = out + penalty*multiplier*sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
+            if(!is.null(RBupper) | !is.null(RBlower)){
+                out = out + penalty*multiplier*sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
+            }
+            if(!is.null(objective$min_concentration)){
+                if(isTRUE(objective$min_concentration)){
+                    max_conc<-max(tmp_measure[[2]]) #second element is the contribution in absolute terms
+                    out=out+penalty*max_conc
+                }
+            }
+            
           } # end handling of risk_budget objective
 
         } # end enabled check

@@ -1,7 +1,7 @@
 \name{charts.RP}
 \alias{charts.RP}
 \title{scatter and weights chart  for random portfolios...}
-\usage{charts.RP(RP, neighbors=NA, ...)}
+\usage{charts.RP(RP, risk.col, return.col, neighbors=NA, las=3, main="Random Portfolios", ...)}
 \description{scatter and weights chart  for random portfolios}
 \seealso{\code{\link{random_portfolios}}}
 \arguments{\item{RP}{set of random portfolios created by \code{\link{random_portfolios}}}
