@@ -10,9 +10,6 @@
 #
 ###############################################################################
 
-# TODO add multivariate moment calcs wherever possible for greater efficiency
-
-
 #' wrapper for constrained optimization of portfolios
 #' 
 #' This function aims to provide a wrapper for constrained optimization of 
@@ -209,19 +206,21 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     } else {
         rp=NULL
     }    
-    #' NOTE this will need a whole bunch of hasArg and other error testing...
     
     if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
     if (is.null(trailing_periods)){
-        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]), .errorhandling='pass') %dopar% {optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)}
-        names(out_list)<-index(R[endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]])
+        ep<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
+        out_list<-foreach(iter(ep), .errorhandling='pass') %dopar% {
+                    optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)
+                  }
     } else {
-        #stopifnot(training_period>=trailing_periods)
-        out_list<-foreach(ep<-iter(endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]), .errorhandling='pass') %dopar% {optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)}
-        # rework lines above for trailing periods
-        names(out_list)<-index(R[endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]])
+        ep<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
+        out_list<-foreach(iter(ep), .errorhandling='pass') %dopar% {
+                    optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)
+                  }
     }
-
+    names(out_list)<-index(R[ep])
+    
     end_t<-Sys.time()
     message(c("overall elapsed time:",end_t-start_t))
     class(out_list)<-c("optimize.portfolio.rebalancing")
@@ -258,7 +257,6 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL){
             switch(objective$name,
                     sd =,
                     StdDev = { 
-                        #FIXME only calculate moments once, and only if needed
                         if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
                         if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
                     },
