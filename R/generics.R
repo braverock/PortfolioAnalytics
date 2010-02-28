@@ -10,27 +10,32 @@
 #
 ###############################################################################
 
-#' print method for optimize.portfolio.rebalancing
-#' @param x object of type optimize.portfolio.rebalancing
+#' summary method for optimize.portfolio.rebalancing
+#' @param object object of type optimize.portfolio.rebalancing
 #' @param \dots any other passthru parameters
 #' @export
-print.optimize.portfolio.rebalancing <- function(x, ...) {
-    if(!inherits(x,"optimize.portfolio.rebalancing")) 
+summary.optimize.portfolio.rebalancing <- function(object, ...) {
+    if(!inherits(object,"optimize.portfolio.rebalancing")) 
         stop ("passed object is not of class optimize.portfolio.rebalancing")
     
     
     # loop through and show the results and weights
     cat('Weights:\n')
-    for(i in 1:length(x)){
-        cat(names(x[i]))
+    for(i in 1:length(object)){
+        cat(names(object[i]))
         cat('\n')
-        print(round(x[[i]]$weights,4))
+        if(!inherits(object[i],'try-error')){
+            print(round(object[[i]]$weights,4))
+        } else {
+            print(object[i])
+        }
     }
     cat('Objective Measures\n')
-    for(i in 1:length(x)){
-        cat(names(x[i]))
-        cat('\n')
-        print(x[[i]]$objective_measures)
-    }
-    
+    for(i in 1:length(object)){
+        if(!inherits(object[i],'try-error')){
+            cat(names(object[i]))
+            cat('\n')
+            print(object[[i]]$constrained_objective)
+        }
+    }    
 }
