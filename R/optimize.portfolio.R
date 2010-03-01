@@ -209,17 +209,21 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     
     if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
     if (is.null(trailing_periods)){
-        ep<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
-        out_list<-foreach(iter(ep), .errorhandling='pass') %dopar% {
+        # define the index endpoints of our periods
+        ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
+        # now apply optimize.portfolio to the periods, in parallel if available
+        out_list<-foreach(ep=iter(ep.i), .errorhandling='pass') %dopar% {
                     optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)
                   }
     } else {
-        ep<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
-        out_list<-foreach(iter(ep), .errorhandling='pass') %dopar% {
+        # define the index endpoints of our periods
+        ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
+        # now apply optimize.portfolio to the periods, in parallel if available
+        out_list<-foreach(ep=iter(ep.i), .errorhandling='pass') %dopar% {
                     optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)
                   }
     }
-    names(out_list)<-index(R[ep])
+    names(out_list)<-index(R[ep.i])
     
     end_t<-Sys.time()
     message(c("overall elapsed time:",end_t-start_t))
