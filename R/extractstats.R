@@ -64,3 +64,20 @@ function(OptimResults, ...){
 
   return(result)
 }
+
+extractWeights.rebal <-
+function(RebalResults, ...){
+# @TODO: add a class check for the input object
+  numColumns = length(RebalResults[[1]]$weights)
+  numRows = length(RebalResults)
+
+  result <- matrix(nrow=numRows, ncol=numColumns)
+
+  for(i in 1:numRows)
+    result[i,] = unlist(RebalResults[[i]]$weights)
+
+  colnames(result) = names(unlist(RebalResults[[1]]$weights))
+  rownames(result) = names(RebalResults)
+  result = as.xts(result)
+  return(result)
+}
