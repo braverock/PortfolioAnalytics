@@ -32,6 +32,7 @@
 #' @export
 optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ..., rp=NULL)
 {
+  optimize_method=optimize_method[1]  
   start_t<-Sys.time()
 
   #store the call for later
@@ -289,10 +290,44 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL){
     }    
     return(momentargs)
 }
+
+#'execute multiple optimize.portfolio calls, presumably in parallel
+#' 
+#' TODO write function to check sensitivity of optimal results by using optimize.portfolio.parallel results
+#' 
+#' 
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
+#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
+#' @param optimize_method one of "DEoptim" or "random"
+#' @param search_size integer, how many portfolios to test, default 20,000
+#' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
+#' @param \dots any other passthru parameters
+#' @param nodes how many processes to run in the foreach loop, default 4
+#' @callGraph 
+#' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
+#' @author Kris Boudt, Peter Carl, Brian G. Peterson
+#' @export
+optimize.portfolio.parallel <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ..., nodes=4)
+{
+    stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
+    optimize_method=optimize_method[1]  
+    
+    start_t<-Sys.time()
+    
+    #store the call for later
+    call <- match.call()
+    
+    opt_out_list<-foreach(1:nodes) %dopar% optimize.portfolio(R=R,constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...)    
+
+    end_t<-Sys.time()
+    message(c("overall elapsed time:",end_t-start_t))
+    class(opt_out_list)<-c("optimize.portfolio.parallel")
+    return(opt_out_list)
+    
+}
+
+
 #TODO write function to compute an efficient frontier of optimal portfolios
-
-#TODO write function to check sensitivity of optimal results by running n portfolios in a foreach loop
-
 
 ###############################################################################
 # $Id$
