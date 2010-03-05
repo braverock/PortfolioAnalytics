@@ -132,7 +132,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
       #' store matrix in out if trace=TRUE
       if (isTRUE(trace)) out$random_portfolios<-rp
       #' write foreach loop to call constrained_objective() with each portfolio
-      if ("package:foreach" %in% search() & !hasArg(rp)){
+      if ("package:foreach" %in% search() & !hasArg(parallel)){
           rp_objective_results<-foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,],R,constraints,trace=trace,...=dotargs)
       } else {
           rp_objective_results<-apply(rp, 1, constrained_objective, R=R, constraints=constraints, trace=trace, ...=dotargs)
@@ -214,14 +214,14 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
         ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
         # now apply optimize.portfolio to the periods, in parallel if available
         out_list<-foreach(ep=iter(ep.i), .errorhandling='pass') %dopar% {
-                    optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)
+                    optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
                   }
     } else {
         # define the index endpoints of our periods
         ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
         # now apply optimize.portfolio to the periods, in parallel if available
         out_list<-foreach(ep=iter(ep.i), .errorhandling='pass') %dopar% {
-                    optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, ...=...)
+                    optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
                   }
     }
     names(out_list)<-index(R[ep.i])
@@ -272,7 +272,6 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL){
                         if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
                         if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
                         if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
-                        if(is.null(momentargs$invert)) momentargs$invert = FALSE
                     },
                     es =,
                     mES =,
@@ -283,7 +282,6 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL){
                         if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
                         if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
                         if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
-                        if(is.null(momentargs$invert)) momentargs$invert = FALSE
                     }
             ) # end switch on objectives    
         }    

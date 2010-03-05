@@ -33,7 +33,7 @@
 #' 
 #' Whether or not we normalize the weights using min_sum and max_sum, and are using a numerical optimization 
 #' engine like DEoptim, we will penalize portfolios that violate weight constraints in much the same way
-#' we penalize other constraints.  If a min_sum/max_sum normalization has not occured, convergence
+#' we penalize other constraints.  If a min_sum/max_sum normalization has not occurred, convergence
 #' can take a very long time.  We currently do not allow for a non-normalized full investment constraint.  
 #' Future version of this function could include this additional constraint penalty. 
 #'  
@@ -146,6 +146,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               VaR = {
                   fun= match.fun(VaR) 
                   if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method) & is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+                  if(is.null(objective$arguments$invert)) objective$arguments$invert = FALSE
               },
               es =,
               mES =,
@@ -154,6 +155,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               ES = {
                   fun = match.fun(ES)
                   if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method)& is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+                  if(is.null(objective$arguments$invert)) objective$arguments$invert = FALSE
               },
               {   # see 'S Programming p. 67 for this matching
                   fun<-try(match.fun(objective$name))

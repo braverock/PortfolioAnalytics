@@ -35,6 +35,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
   }
 
   if(!is.null(assets)){
+    # TODO FIXME this doesn't work quite right on matrix of assets
     if(is.numeric(assets)){
       if (length(assets) == 1) {
         nassets=assets
@@ -124,10 +125,12 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
   ##now adjust min and max to account for min_mult and max_mult from seed
   if(!is.null(min_mult) & !is.null(min)) {
     tmp_min <- assets*min_mult
+    #TODO FIXME this creates a list, and it should create a named vector or matrix
     min[which(tmp_min>min)]<-tmp_min[which(tmp_min>min)]
   }
   if(!is.null(max_mult) & !is.null(max)) {
     tmp_max <- assets*max_mult
+    #TODO FIXME this creates a list, and it should create a named vector or matrix
     max[which(tmp_max<max)]<-tmp_max[which(tmp_max<max)]
   }
 
