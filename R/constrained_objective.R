@@ -192,7 +192,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
           
           if(isTRUE(trace)) {
               if(is.null(names(tmp_measure))) names(tmp_measure)<-objective$name
-              tmp_return[objective$name]<-tmp_measure
+              tmp_return[[objective$name]]<-tmp_measure
           }
           
           if(inherits(tmp_measure,"try-error") | is.na(tmp_measure)) { 
