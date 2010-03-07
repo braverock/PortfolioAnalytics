@@ -32,14 +32,19 @@ chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1
     else
         minmargin = 5
     if(main=="") topmargin=1 else topmargin=4
-    if(las > 1) {# set the bottom border to accomodate labels
+    if(las > 1) {# set the bottom border to accommodate labels
         bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
+        if(bottommargin > 10 ) {
+            bottommargin<-10
+            columnnames<-substr(columnnames,1,19)
+            # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
+        }
     }
     else {
-        bottommargin = 5
+        bottommargin = minmargin
     }
     par(mar = c(bottommargin, 4, topmargin, 2) +.1)
-    plot(RP$random_portfolios[1,], type="b", col="orange", axes=FALSE, xlab="", ylim=c(0,max(RP$constraints$max)), ylab="Weights", main=main, ...)
+    plot(RP$random_portfolios[1,], type="b", col="orange", axes=FALSE, xlab='', ylim=c(0,max(RP$constraints$max)), ylab="Weights", main=main, ...)
     points(RP$constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
     points(RP$constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
     if(!is.na(neighbors)){
@@ -48,7 +53,7 @@ chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1
     }
     points(RP$weights, type="b", col="blue", pch=16)
     axis(2, cex.axis = cex.axis, col = element.color)
-    axis(1, labels=names(RP$weights), at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
+    axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
     box(col = element.color)
 
 }
@@ -86,7 +91,12 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
         points(xtract[2,risk.column],xtract[2,return.column], col="green", pch=16) # overplot the equal weighted (or seed)
     }
     ## @TODO: Generalize this to find column containing the "risk" metric
-    points(RP$objective_measures[risk.col], RP$objective_measures[return.col], col="blue", pch=16) # optimal
+    if(length(names(RP)[which(names(RP)=='constrained_objective')])) {
+        result.slot<-'constrained_objective'
+    } else {
+        result.slot<-'objective_measures'
+    }
+    points(RP[[result.slot]][risk.col], RP[[result.slot]][return.col], col="blue", pch=16) # optimal
     axis(1, cex.axis = cex.axis, col = element.color)
     axis(2, cex.axis = cex.axis, col = element.color)
     box(col = element.color)
