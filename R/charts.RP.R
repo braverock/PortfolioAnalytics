@@ -86,7 +86,7 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
         points(xtract[2,risk.column],xtract[2,return.column], col="green", pch=16) # overplot the equal weighted (or seed)
     }
     ## @TODO: Generalize this to find column containing the "risk" metric
-    points(RP$constrained_objective[risk.col], RP$constrained_objective[return.col], col="blue", pch=16) # optimal
+    points(RP$objective_measures[risk.col], RP$objective_measures[return.col], col="blue", pch=16) # optimal
     axis(1, cex.axis = cex.axis, col = element.color)
     axis(2, cex.axis = cex.axis, col = element.color)
     box(col = element.color)

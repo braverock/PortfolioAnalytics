@@ -158,7 +158,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
       }
       #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
       out$weights<-min_objective_weights
-      out$constrained_objective<-try(constrained_objective(w=min_objective_weights,R=R,constraints,trace=TRUE)$objective_measures)
+      out$objective_measures<-try(constrained_objective(w=min_objective_weights,R=R,constraints,trace=TRUE)$objective_measures)
       out$call<-call
       #' construct out list to be as similar as possible to DEoptim list, within reason
   }
