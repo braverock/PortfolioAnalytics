@@ -11,7 +11,10 @@
 ###############################################################################
 
 
-#' extract some stats from a DEoptim portfolio list fun via foreach
+#' extract some stats from a DEoptim portfolio list run via foreach
+#' 
+#' This function will take everything in the objective_measures slot and \code{unlist} it.  
+#' This may produce a very large number of columns or strange column names.
 #' 
 #' TODO: Rewrite this function to test the input object and direct to the correct parse function
 #' 
@@ -20,19 +23,14 @@
 #' @export
 extractstats <- function(resultlist) {
     l = length(resultlist)
-    result=matrix(nrow=l,ncol=49)
-    colnames(result)<-c("mean_ret","sd","mVaR","mES",names(resultlist[[1]]$weights))
+    nobj<-length(resultlist[[1]]$objective_measures)
+    result=matrix(nrow=l,ncol=(nobj+length(resultlist[[1]]$weights)))
+    colnames(result)<-c(names(resultlist[[1]]$objective_measures),names(resultlist[[1]]$weights))
+    ncols<-ncol(result)
     for (i in 1:l) {
-        if(!is.atomic(resultlist[[i]])){
-            if(!is.null(resultlist[[i]]$stats)){
-                result[i,1:4]<-t(resultlist[[i]]$stats)
-            } else if(!is.null(resultlist[[i]]$mean_ret)){
-                result[i,1]<-resultlist[[i]]$mean_ret
-                result[i,2]<-resultlist[[i]]$sd
-                result[i,3]<-resultlist[[i]]$VaR
-                result[i,4]<-resultlist[[i]]$ES
-            }
-            result[i,]<-t(c(result[i,1:4],resultlist[[i]]$weights))
+        if(!is.atomic(resultlist[[i]])) {
+            result[i,1:nobj]<-unlist(resultlist[[i]]$objective_measures)
+            result[i,(nobj+1):ncols]<-resultlist[[i]]$weights
         }
     }
     return(result)
