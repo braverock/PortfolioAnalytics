@@ -11,7 +11,8 @@
 ###############################################################################
 
 
-#' extract some stats from a DEoptim portfolio list run via foreach
+#' extract some stats from a portfolio list run via \code{foreach} via
+#' \code{\link{optimize.portfolio.parallel}}
 #' 
 #' This function will take everything in the objective_measures slot and \code{unlist} it.  
 #' This may produce a very large number of columns or strange column names.
@@ -63,6 +64,11 @@ function(OptimResults, ...){
   return(result)
 }
 
+#' extract time series of weights from output of \code{\link{optimize.portfolio.rebalancing}}
+#' @param RebalResults object of type optimize.portfolio.rebalancing to extract weights from
+#' @param ... any other passthru parameters
+#' @seealso \code{\link{optimize.portfolio.rebalancing}}
+#' @export
 extractWeights.rebal <-
 function(RebalResults, ...){
 # @TODO: add a class check for the input object
