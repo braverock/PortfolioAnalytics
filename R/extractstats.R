@@ -34,6 +34,8 @@ extractstats <- function(resultlist) {
             result[i,(nobj+1):ncols]<-resultlist[[i]]$weights
         }
     }
+    
+    rownames(result) = paste("opt.portf.", index(resultlist), sep="")
     return(result)
 }
 
