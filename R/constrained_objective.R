@@ -260,9 +260,10 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     } # end objectives processing
 
     if(isTRUE(verbose)) {
-        message('weights: ')
-        message(paste(w,' '))
-        message(paste("output of objective function",out))
+        print('weights: ')
+        print(paste(w,' '))
+        print(paste("output of objective function",out))
+        print(unlist(tmp_return))
     }
     
     if(is.na(out) | is.nan(out) | is.null(out)){
@@ -275,7 +276,6 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     if(!isTRUE(trace)){
         return(out)
     } else {
-        # if(verbose) print(tmp_return)
-        return(list(out=out,weights=w,objective_measures=tmp_return))
+        return(list(out=as.numeric(out),weights=w,objective_measures=tmp_return))
     }
 }
