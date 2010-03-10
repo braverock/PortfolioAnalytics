@@ -11,10 +11,10 @@
 ###############################################################################
 
 #' boxplot of the weight distributions in the random portfolios 
-#' @param RP set of random portfolios created by \code{\link{random_portfolios}}
+#' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param ... any other passthru parameters 
-#' @seealso \code{\link{random_portfolios}}
+#' @seealso \code{\link{optimize.portfolio}}
 #' @export
 chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, main="Weights", ...){
 # Specific to the output of the random portfolio code with constraints
@@ -59,22 +59,23 @@ chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1
 }
 
 #' classic risk return scatter of random portfolios
-#' @param RP set of random portfolios created by \code{\link{random_portfolios}}
+#' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
 #' @param ... any other passthru parameters 
-#' @seealso \code{\link{random_portfolios}}
+#' @seealso \code{\link{optimize.portfolio}}
 #' @export
 chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES', element.color = "darkgray", cex.axis=0.8, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
-    xtract = extractStats.rp(RP)
+    xtract = extractStats(RP)
     columnnames = colnames(xtract)
-    return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
-    ## @TODO: Generalize this to find column containing the "risk" metric
-    risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
-
+    #return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
+    return.column = pmatch(return.col,columnnames)
+    #risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
+    risk.column = pmatch(risk.col,columnnames)
+    
     plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
 
     if(!is.na(neighbors)){ # overplot nearby portfolios
@@ -103,10 +104,10 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
 }
 
 #' scatter and weights chart  for random portfolios
-#' @param RP set of random portfolios created by \code{\link{random_portfolios}}
+#' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param ... any other passthru parameters 
-#' @seealso \code{\link{random_portfolios}}
+#' @seealso \code{\link{optimize.portfolio}}
 #' @export
 charts.RP <- function(RP, risk.col, return.col, neighbors=NA, las=3, main="Random Portfolios", ...){
 # Specific to the output of the random portfolio code with constraints
@@ -118,5 +119,12 @@ charts.RP <- function(RP, risk.col, return.col, neighbors=NA, las=3, main="Rando
     par(mar=c(2,4,0,2))
     chart.Weights.RP(RP, main="", las=las, neighbors=neighbors, ...)
     par(op)
+}
 
+#TODO make chart.RP into a plot() method or methods
+
+#' plot method
+#' @export
+plot.optimize.portfolio <- function(x,y,...,  return.col='mean', risk.col='ES',  neighbors=NA, main='portfolio plot') {
+    charts.RP(RP=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
 }
