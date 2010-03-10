@@ -27,7 +27,7 @@ extractstats <- function(resultlist) {
     nobj<-length(unlist(resultlist[[1]]$objective_measures))
     result=matrix(nrow=l,ncol=(nobj+length(resultlist[[1]]$weights)))
     cnames<-c(names(unlist(resultlist[[1]]$objective_measures)),names(resultlist[[1]]$weights))
-    matchvec<-c('mean.mean','median.median','ES.MES','VaR.MVaR')
+    matchvec<-c('mean.mean','median.median','ES.MES','VaR.MVaR','maxDrawdown.maxDrawdown','sd.sd','StdDev.StdDev')
     for(str in matchvec){
         pos<-pmatch(str,cnames)
         if(!is.na(pos)){
@@ -35,7 +35,9 @@ extractstats <- function(resultlist) {
                     mean.mean = {cnames[pos]<-'mean'},
                     median.median = {cnames[pos]<-'median'},
                     ES.MES = {cnames[pos]<-'ES'},
-                    VaR.MVaR = {cnames[pos]<-'VaR'}
+                    VaR.MVaR = {cnames[pos]<-'VaR'},
+                    maxDrawdown.maxDrawdown = {cnames[pos]<-'maxDrawdown'},
+                    sd.sd=, StdDev.StdDev = {cnames[pos]<-'StdDev'}
             )
         }
     }
