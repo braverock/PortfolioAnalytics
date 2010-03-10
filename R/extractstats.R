@@ -24,9 +24,22 @@
 #' @export
 extractstats <- function(resultlist) {
     l = length(resultlist)
-    nobj<-length(resultlist[[1]]$objective_measures)
+    nobj<-length(unlist(resultlist[[1]]$objective_measures))
     result=matrix(nrow=l,ncol=(nobj+length(resultlist[[1]]$weights)))
-    colnames(result)<-c(names(resultlist[[1]]$objective_measures),names(resultlist[[1]]$weights))
+    cnames<-c(names(unlist(resultlist[[1]]$objective_measures)),names(resultlist[[1]]$weights))
+    matchvec<-c('mean.mean','median.median','ES.MES','VaR.MVaR')
+    for(str in matchvec){
+        pos<-pmatch(str,cnames)
+        if(!is.na(pos)){
+            switch(str,
+                    mean.mean = {cnames[pos]<-'mean'},
+                    median.median = {cnames[pos]<-'median'},
+                    ES.MES = {cnames[pos]<-'ES'},
+                    VaR.MVaR = {cnames[pos]<-'VaR'}
+            )
+        }
+    }
+    colnames(result)<-cnames
     ncols<-ncol(result)
     for (i in 1:l) {
         if(!is.atomic(resultlist[[i]])) {
