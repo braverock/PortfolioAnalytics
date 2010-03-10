@@ -19,7 +19,7 @@ This normalization increases the speed of optimization and convergence by severa
 
 Whether or not we normalize the weights using min_sum and max_sum, and are using a numerical optimization 
 engine like DEoptim, we will penalize portfolios that violate weight constraints in much the same way
-we penalize other constraints.  If a min_sum/max_sum normalization has not occured, convergence
+we penalize other constraints.  If a min_sum/max_sum normalization has not occurred, convergence
 can take a very long time.  We currently do not allow for a non-normalized full investment constraint.  
 Future version of this function could include this additional constraint penalty. 
 
