@@ -16,7 +16,7 @@
 #' @param ... any other passthru parameters 
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
-chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, main="Weights", ...){
+chart.Weights.RP <- function(RP, neighbors = NULL, las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, main="Weights", ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     columnnames = names(RP$weights)
@@ -42,7 +42,7 @@ chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1
     plot(RP$random_portfolios[1,], type="b", col="orange", axes=FALSE, xlab='', ylim=c(0,max(RP$constraints$max)), ylab="Weights", main=main, ...)
     points(RP$constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
     points(RP$constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
-    if(!is.na(neighbors)){ 
+    if(!is.null(neighbors)){ 
         if(is.vector(neighbors)){
             xtract=extractStats(RP)
             weightcols<-grep('w\\.',colnames(xtract)) #need \\. to get the dot 
@@ -54,13 +54,15 @@ chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1
             } else{
                 # assume we have a vector of portfolio numbers
                 subsetx = xtract[neighbors,weightcols]
-            }
-            for(i in 1:neighbors) points(subsetx[i,weightcols], type="b", col="lightblue")
-            
+                for(i in 1:length(neighbors)) points(subsetx[i,weightcols], type="b", col="lightblue")
+            }      
         }
         if(is.matrix(neighbors) | is.data.frame(neighbors)){
             # the user has likely passed in a matrix containing calculated values for risk.col and return.col
-            # points(neighbors[,risk.column], neighbors[,return.column], col="lightblue", pch=1)
+            nbweights<-grep('w\\.',colnames(neighbors)) #need \\. to get the dot
+            for(i in 1:nrow(neighbors)) points(as.numeric(neighbors[i,nbweights]), type="b", col="lightblue")
+            # note that here we need to get weight cols separately from the matrix, not from xtract
+            # also note the need for as.numeric.  points() doesn't like matrix inputs
         }
     }
     
@@ -73,14 +75,15 @@ chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1
 }
 
 #' classic risk return scatter of random portfolios
+#' 
 #' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
-#' @param neighbors set of 'neighbor portfolios to overplot
+#' @param neighbors set of 'neighbor' portfolios to overplot, see Details
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
 #' @param ... any other passthru parameters 
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
-chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES', element.color = "darkgray", cex.axis=0.8, ...){
+chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='ES', element.color = "darkgray", cex.axis=0.8, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     xtract = extractStats(RP)
@@ -92,7 +95,7 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
     
     plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
 
-    if(!is.na(neighbors)){ 
+    if(!is.null(neighbors)){ 
         if(is.vector(neighbors)){
             if(length(neighbors)==1){
                 # overplot nearby portfolios defined by 'out'
@@ -106,7 +109,7 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
         }
         if(is.matrix(neighbors) | is.data.frame(neighbors)){
             # the user has likely passed in a matrix containing calculated values for risk.col and return.col
-            points(neighbors[,risk.column], neighbors[,return.column], col="lightblue", pch=1)
+            for(i in 1:nrow(neighbors)) points(neighbors[i,risk.col], neighbors[i,return.col], col="lightblue", pch=1)
         }
     }
     
@@ -131,10 +134,22 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
 }
 
 #' scatter and weights chart  for random portfolios
+#' 
+#' \code{neighbors} may be specified in three ways.  
+#' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
+#' portfolios in terms of the \code{out} numerical statistic.
+#' The second method consists of a numeric vector for \code{neighbors}.
+#' This will extract the \code{neighbors} with portfolio index numbers that correspond to the vector contents.
+#' The third method for specifying \code{neighbors} is to pass in a matrix.  
+#' This matrix should look like the output of \code{\link{extractStats}}, and should contain
+#' \code{risk.col},\code{return.col}, and weights columns all properly named.  
+#' 
 #' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param ... any other passthru parameters 
-#' @seealso \code{\link{optimize.portfolio}}
+#' @seealso 
+#' \code{\link{optimize.portfolio}}
+#' \code{\link{extractStats}}
 #' @export
 charts.RP <- function(RP, risk.col, return.col, neighbors=NA, las=3, main="Random Portfolios", ...){
 # Specific to the output of the random portfolio code with constraints
