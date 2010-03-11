@@ -22,11 +22,6 @@ chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1
     columnnames = names(RP$weights)
     numassets = length(columnnames)
 
-    if(!is.na(neighbors)){
-        xtract=extractStats.rp(RP)
-        orderx = order(xtract[,"out"])
-        subsetx = head(xtract[orderx,2:(numassets+1)], n=neighbors)
-    }
     if(is.null(xlab))
         minmargin = 3
     else
@@ -47,10 +42,29 @@ chart.Weights.RP <- function(RP, neighbors = NA, las = 3, xlab=NULL, cex.lab = 1
     plot(RP$random_portfolios[1,], type="b", col="orange", axes=FALSE, xlab='', ylim=c(0,max(RP$constraints$max)), ylab="Weights", main=main, ...)
     points(RP$constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
     points(RP$constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
-    if(!is.na(neighbors)){
-        for(i in 1:neighbors) points(subsetx[i,], type="b", col="lightblue")
-        points(RP$random_portfolios[1,], type="b", col="orange", pch=16) # to overprint neighbors
+    if(!is.na(neighbors)){ 
+        if(is.vector(neighbors)){
+            xtract=extractStats(RP)
+            weightcols<-grep('w\\.',colnames(xtract)) #need \\. to get the dot 
+            if(length(neighbors)==1){
+                # overplot nearby portfolios defined by 'out'
+                orderx = order(xtract[,"out"])
+                subsetx = head(xtract[orderx,], n=neighbors)
+                for(i in 1:neighbors) points(subsetx[i,weightcols], type="b", col="lightblue")
+            } else{
+                # assume we have a vector of portfolio numbers
+                subsetx = xtract[neighbors,weightcols]
+            }
+            for(i in 1:neighbors) points(subsetx[i,weightcols], type="b", col="lightblue")
+            
+        }
+        if(is.matrix(neighbors) | is.data.frame(neighbors)){
+            # the user has likely passed in a matrix containing calculated values for risk.col and return.col
+            # points(neighbors[,risk.column], neighbors[,return.column], col="lightblue", pch=1)
+        }
     }
+    
+    points(RP$random_portfolios[1,], type="b", col="orange", pch=16) # to overprint neighbors
     points(RP$weights, type="b", col="blue", pch=16)
     axis(2, cex.axis = cex.axis, col = element.color)
     axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
@@ -78,11 +92,24 @@ chart.Scatter.RP <- function(RP, neighbors = NA, return.col='mean', risk.col='ES
     
     plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
 
-    if(!is.na(neighbors)){ # overplot nearby portfolios
-        orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything othchart.Scatter.er than mean
-        subsetx = head(xtract[orderx,], n=neighbors)
-        points(subsetx[,risk.column], subsetx[,return.column], col="lightblue", pch=1)
+    if(!is.na(neighbors)){ 
+        if(is.vector(neighbors)){
+            if(length(neighbors)==1){
+                # overplot nearby portfolios defined by 'out'
+                orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything othchart.Scatter.er than mean
+                subsetx = head(xtract[orderx,], n=neighbors)
+            } else{
+                # assume we have a vector of portfolio numbers
+                subsetx = xtract[neighbors,]
+            }
+            points(subsetx[,risk.column], subsetx[,return.column], col="lightblue", pch=1)
+        }
+        if(is.matrix(neighbors) | is.data.frame(neighbors)){
+            # the user has likely passed in a matrix containing calculated values for risk.col and return.col
+            points(neighbors[,risk.column], neighbors[,return.column], col="lightblue", pch=1)
+        }
     }
+    
     points(xtract[1,risk.column],xtract[1,return.column], col="orange", pch=16) # overplot the equal weighted (or seed)
     #check to see if portfolio 1 is EW  RP$random_portoflios[1,] all weights should be the same
     if(!isTRUE(all.equal(RP$random_portfolios[1,][1],1/length(RP$random_portfolios[1,] ) ))){

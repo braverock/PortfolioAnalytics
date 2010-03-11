@@ -62,7 +62,7 @@ function(object,prefix=NULL,...) {
     l = length(resultlist)
     nobj<-length(unlist(resultlist[[1]]$objective_measures))
     result=matrix(nrow=l,ncol=(nobj+length(resultlist[[1]]$weights)))
-    rnames<-c(names(unlist(resultlist[[1]]$objective_measures)),names(resultlist[[1]]$weights))
+    rnames<-c(names(unlist(resultlist[[1]]$objective_measures)),paste('w',names(resultlist[[1]]$weights),sep='.'))
     rnames<-name.replace(rnames)
     colnames(result)<-rnames
     ncols<-ncol(result)
@@ -98,23 +98,36 @@ function(object, prefix=NULL, ...){
 
   l = length(OptimResults$random_portfolio_objective_results)
   nobj<-length(unlist(OptimResults$random_portfolio_objective_results[[1]]$objective_measures))
-  result=matrix(nrow=l,ncol=(nobj+length(OptimResults$weights)))
+  result=matrix(nrow=l,ncol=(nobj+length(OptimResults$weights))+1)
   ncols<-ncol(result)
   
   for (i in 1:l) {
       if(!is.atomic(OptimResults$random_portfolio_objective_results[[i]])) {
           result[i,1:nobj]<-unlist(OptimResults$random_portfolio_objective_results[[i]]$objective_measures)
-          result[i,(nobj+1):ncols]<-OptimResults$random_portfolio_objective_results[[i]]$weights
+          result[i,(nobj+1)]<-OptimResults$random_portfolio_objective_results[[i]]$out
+          result[i,(nobj+2):ncols]<-OptimResults$random_portfolio_objective_results[[i]]$weights
       }
   }
   
-  rnames<-c(names(unlist(OptimResults$random_portfolio_objective_results[[1]]$objective_measures)),names(OptimResults$weights))
+  rnames<-c(names(unlist(OptimResults$random_portfolio_objective_results[[1]]$objective_measures)),'out',paste('w',names(OptimResults$weights),sep='.'))
   rnames<-name.replace(rnames)
   colnames(result)<-rnames
   rownames(result) = paste(prefix,"rnd.portf", index(OptimResults$random_portfolio_objective_results), sep=".")
 
   return(result)
 }
+
+#FIXME this needs to become an extractStats function for optimize.portfolio.DEoptim
+extractDEresults <- function(delist){
+    cnames<-names(delist[[1]]$weights)
+    optimstats<- matrix(nrow=length(delist), ncol=(2+(2*length(cnames))))
+    for (i in 1:length(delist)) optimstats[i,] <- c(delist[[i]]$objective_measures$mean,delist[[i]]$objective_measures$MES,delist[[i]]$weights,delist[[i]]$objective_measures$pct_contrib_MES)
+    colnames(optimstats)<-c("Mean Ret.","mES",paste("weights",cnames,sep='.'),paste("pct_contrib_MES",cnames,sep='.'))
+    return(optimstats)
+}
+
+#TODO write extractStats method for optimize.portfolio.parallel
+# should check the class of the elements, and call the appropriate extractStats function
 
 #' extract time series of weights from output of \code{\link{optimize.portfolio.rebalancing}}
 #' 
