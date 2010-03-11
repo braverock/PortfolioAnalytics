@@ -77,7 +77,7 @@ function(object,prefix=NULL,...) {
     return(result)
 }
 
-#' unlist random portfolio resultsoops
+#' unlist random portfolio results
 #' 
 #' This just flattens the $random_portfolio_objective_results part of the object
 #' 
@@ -117,9 +117,6 @@ function(object, prefix=NULL, ...){
 }
 
 #' extract time series of weights from output of \code{\link{optimize.portfolio.rebalancing}}
-#' 
-#' TODO make this compatible with extractStats functions
-#' 
 #' 
 #' @param RebalResults object of type optimize.portfolio.rebalancing to extract weights from
 #' @param ... any other passthru parameters

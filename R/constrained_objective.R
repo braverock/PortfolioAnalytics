@@ -40,8 +40,8 @@
 #' When you are optimizing a return objective, you must specify a negative multiplier 
 #' for the return objective so that the function will maximize return.  If you specify a target return,
 #' any return less than your target will be penalized.  If you do not specify a target return, 
-#' you may need to specify a negative VTR, or the function will not converge.  Try the maximum 
-#' expected return times the multiplier (e.g. -1 or -10).
+#' you may need to specify a negative VTR (value to reach) , or the function will not converge.  
+#' Try the maximum expected return times the multiplier (e.g. -1 or -10).
 #' 
 #' Additional parameters for random portfolios or \code{\link[DEoptim]{DEoptim.control}} may be passed in via \dots
 #' 
@@ -73,9 +73,6 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     if (N != length(constraints$assets)){
       warning("length of constraints asset list and weights vector do not match, results may be bogus")
     }
-
-    # should be take care of by a return objective
-    #out = sum( mu*w ) #needs to be maximized
 
     out=0
     
@@ -195,7 +192,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               tmp_return[[objective$name]]<-tmp_measure
           }
           
-          if(inherits(tmp_measure,"try-error") | is.na(tmp_measure)) { 
+          if(inherits(tmp_measure,"try-error")) { 
               message(paste("objective name",objective$name,"generated an error or warning:",tmp_measure))
               next()  
           } 
@@ -268,7 +265,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
     
     if(is.na(out) | is.nan(out) | is.null(out)){
         #this should never happen
-        warning(paste('NA or NaN produced in objective function',out))
+        warning('NA or NaN produced in objective function for weights ',w)
         out<-penalty
     }
     
