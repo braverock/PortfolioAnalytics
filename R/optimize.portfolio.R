@@ -103,7 +103,11 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     }
     controlDE <- do.call(DEoptim.control,DEcformals)
     
-    if(isTRUE(trace)) trace=FALSE #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
+    if(isTRUE(trace)) { 
+        #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
+        tmptrace=trace 
+        trace=FALSE
+    } 
     
     # get upper and lower weights parameters from constraints
     upper = constraints$max
@@ -115,12 +119,14 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
         message(paste("Optimizer was unable to find a solution for target"))
         return (paste("Optimizer was unable to find a solution for target"))
     }
-
+    
+    trace <- tmptrace
+    
     weights = as.vector( minw$optim$bestmem)
     weights <- normalize_weights(weights)
     names(weights) = colnames(R)
 
-    out = list(weights=weights, objective_measures=constrained_objective(w=weights,R=R,constraints,trace=TRUE)$objective_measures,call=call)
+    out = list(weights=weights, objective_measures=constrained_objective(w=weights,R=R,constraints,trace=TRUE)$objective_measures,out=minw$optim$bestval, call=call)
     if (isTRUE(trace)){out$DEoutput=minw}
     
   } ## end case for DEoptim
