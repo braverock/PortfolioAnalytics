@@ -43,8 +43,60 @@ name.replace <- function(rnames){
     } 
     return(rnames)
 }
-#' extract some stats from a portfolio list run via \code{foreach} via
+
+#' extract some stats from a portfolio list run via 
+#' \code{foreach} via
 #' \code{\link{optimize.portfolio.parallel}}
+#' 
+#' This function will take everything in the objective_measures slot and \code{unlist} it.  
+#' This may produce a very large number of columns or strange column names.
+#' 
+#' TODO: Rewrite this function to test the input object and direct to the correct parse function
+#' 
+#' @param object list returned by optimize.portfolio
+#' @param prefix prefix to add to output row names
+#' @param ... any other passthru parameters
+#' @seealso \code{\link{optimize.portfolio}}
+#' @export 
+extractStats.optimize.portfolio.DEoptim <- function(object, prefix=NULL, ...) {
+
+    # first pull out the optimal portfolio
+    trow<-c(unlist(object$objective_measures),object$out,object$weights)
+    colnames(trow)<-c(colnames(unlist(object$objective_measures)),'out',names(object$weights))
+    result<-trow
+    # add the equal weight portfolio
+    #nassets<-length(object$weights)
+    #EWgt<-rep(1/nassets,nassets)
+    # we don't have the return series, so we can't make this work.  maybe we should put it in the optimize.portfolio function
+    
+    # then pull bestmemit/bestvalit and pop(ulation) from DEoutput if it exists
+    # normalize all these weights
+    # calculate constrained_objective on all of them
+    
+    
+#    ncols<-ncol(trow)
+#    for (i in 1:l) {
+#        if(!is.atomic(resultlist[[i]])) {
+#            result[i,1:nobj]<-unlist(resultlist[[i]]$objective_measures)
+#            result[i,(nobj+1):ncols]<-resultlist[[i]]$weights
+#        }
+#    }
+    
+    rownames(result) = paste("DE.portf.", index(result), sep="")
+    return(result)
+}
+
+##FIXME this needs to become an extractStats function for optimize.portfolio.DEoptim
+#extractDEresults <- function(delist){
+#    cnames<-names(delist[[1]]$weights)
+#    optimstats<- matrix(nrow=length(delist), ncol=(2+(2*length(cnames))))
+#    for (i in 1:length(delist)) optimstats[i,] <- c(delist[[i]]$objective_measures$mean,delist[[i]]$objective_measures$MES,delist[[i]]$weights,delist[[i]]$objective_measures$pct_contrib_MES)
+#    colnames(optimstats)<-c("Mean Ret.","mES",paste("weights",cnames,sep='.'),paste("pct_contrib_MES",cnames,sep='.'))
+#    return(optimstats)
+#}
+
+
+#' extract some stats from a portfolio list run via foreach in optimize.portfolio.parallel
 #' 
 #' This function will take everything in the objective_measures slot and \code{unlist} it.  
 #' This may produce a very large number of columns or strange column names.
@@ -54,30 +106,23 @@ name.replace <- function(rnames){
 #' @param ... any other passthru parameters
 #' @seealso 
 #' \code{\link{optimize.portfolio}}
+#' \code{\link{optimize.portfolio.parallel}}
 #' \code{\link{extractStats}}
 #' @export
-extractStats.optimize.portfolio.parallel <- 
-function(object,prefix=NULL,...) {
+extractStats.optimize.portfolio.parallel <- function(object,prefix=NULL,...) {
     resultlist<-object
     l = length(resultlist)
-    nobj<-length(unlist(resultlist[[1]]$objective_measures))
-    result=matrix(nrow=l,ncol=(nobj+length(resultlist[[1]]$weights)))
-    rnames<-c(names(unlist(resultlist[[1]]$objective_measures)),paste('w',names(resultlist[[1]]$weights),sep='.'))
-    rnames<-name.replace(rnames)
-    colnames(result)<-rnames
-    ncols<-ncol(result)
+    result=NULL
     for (i in 1:l) {
-        if(!is.atomic(resultlist[[i]])) {
-            result[i,1:nobj]<-unlist(resultlist[[i]]$objective_measures)
-            result[i,(nobj+1):ncols]<-resultlist[[i]]$weights
-        }
+        if(is.null(result)) result<-extractStats(resultlist[[i]])
+        else result <- rbind(result,extractStats(resultlist[[i]]))
     }
     
-    rownames(result) = paste(prefix,"opt.portf", index(resultlist), sep=".")
+    rownames(result) = paste("par", index(result), rownames(result), sep=".")
     return(result)
 }
 
-#' unlist random portfolio results
+#' extract stats from random portfolio results
 #' 
 #' This just flattens the $random_portfolio_objective_results part of the object
 #' 
@@ -89,8 +134,7 @@ function(object,prefix=NULL,...) {
 #' \code{\link{random_portfolios}}
 #' \code{\link{extractStats}}
 #' @export
-extractStats.optimize.portfolio.random <-
-function(object, prefix=NULL, ...){
+extractStats.optimize.portfolio.random <- function(object, prefix=NULL, ...){
 # This just flattens the $random_portfolio_objective_results part of the
 # object
 # @TODO: add a class check for the input object
@@ -117,27 +161,19 @@ function(object, prefix=NULL, ...){
   return(result)
 }
 
-#FIXME this needs to become an extractStats function for optimize.portfolio.DEoptim
-extractDEresults <- function(delist){
-    cnames<-names(delist[[1]]$weights)
-    optimstats<- matrix(nrow=length(delist), ncol=(2+(2*length(cnames))))
-    for (i in 1:length(delist)) optimstats[i,] <- c(delist[[i]]$objective_measures$mean,delist[[i]]$objective_measures$MES,delist[[i]]$weights,delist[[i]]$objective_measures$pct_contrib_MES)
-    colnames(optimstats)<-c("Mean Ret.","mES",paste("weights",cnames,sep='.'),paste("pct_contrib_MES",cnames,sep='.'))
-    return(optimstats)
-}
-
-#TODO write extractStats method for optimize.portfolio.parallel
-# should check the class of the elements, and call the appropriate extractStats function
-
-#' extract time series of weights from output of \code{\link{optimize.portfolio.rebalancing}}
+#' extract time series of weights from output of optimize.portfolio
+#' 
+#' \code{\link{optimize.portfolio.rebalancing}} outputs a list of
+#' \code{\link{optimize.portfolio}} objects, one for each rebalancing period
+#' 
+#' The output list is indexed by the dates of the rebalancing periods, as determined by \code{endpoints}
 #' 
 #' @param RebalResults object of type optimize.portfolio.rebalancing to extract weights from
 #' @param ... any other passthru parameters
 #' @seealso 
 #' \code{\link{optimize.portfolio.rebalancing}}
 #' @export
-extractWeights.rebal <-
-function(RebalResults, ...){
+extractWeights.rebal <- function(RebalResults, ...){
 # @TODO: add a class check for the input object
   numColumns = length(RebalResults[[1]]$weights)
   numRows = length(RebalResults)
