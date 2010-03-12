@@ -12,11 +12,23 @@
 
 #' boxplot of the weight distributions in the random portfolios 
 #' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
-#' @param neighbors set of 'neighbor portfolios to overplot
+#' @param neighbors set of 'neighbor' portfolios to overplot
+#' @param las numeric in \{0,1,2,3\}; the style of axis labels
+#'       \describe{
+#'         \item{0:}{always parallel to the axis [\emph{default}],}
+#'         \item{1:}{always horizontal,}
+#'         \item{2:}{always perpendicular to the axis,}
+#'         \item{3:}{always vertical.}
+#'       }
+#' @param xlab a title for the x axis: see \code{\link{title}}
+#' @param cex.lab The magnification to be used for x and y labels relative to the current setting of \code{cex}
+#' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
+#' @param element.color color for the default plot lines
 #' @param ... any other passthru parameters 
+#' @param main an overall title for the plot: see \code{\link{title}}
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
-chart.Weights.RP <- function(RP, neighbors = NULL, las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, main="Weights", ...){
+chart.Weights.RP <- function(RP, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     columnnames = names(RP$weights)
@@ -76,16 +88,19 @@ chart.Weights.RP <- function(RP, neighbors = NULL, las = 3, xlab=NULL, cex.lab =
 
 #' classic risk return scatter of random portfolios
 #' 
-#' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
+#' @param RP set of portfolios created by \code{\link{optimize.portfolio}}
 #' @param neighbors set of 'neighbor' portfolios to overplot, see Details
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
 #' @param ... any other passthru parameters 
+#' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
+#' @param element.color color for the default plot scatter points
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
-chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='ES', element.color = "darkgray", cex.axis=0.8, ...){
-# Specific to the output of the random portfolio code with constraints
-    # @TODO: check that RP is of the correct class
+chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
+    # more or less specific to the output of the random portfolio code with constraints
+    # will work to a point with other functions, such as optimize.porfolio.parallel
+    # there's still a lot to do to improve this.
     xtract = extractStats(RP)
     columnnames = colnames(xtract)
     #return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
@@ -128,7 +143,7 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
         result.slot<-'objective_measures'
     }
     objcols<-unlist(RP[[result.slot]])
-    colnames(objcols)<-name.replace(colnames(objcols))
+    names(objcols)<-name.replace(names(objcols))
     points(objcols[risk.col], objcols[return.col], col="blue", pch=16) # optimal
     axis(1, cex.axis = cex.axis, col = element.color)
     axis(2, cex.axis = cex.axis, col = element.color)
@@ -147,13 +162,16 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' 
 #' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
-#' @param neighbors set of 'neighbor portfolios to overplot
 #' @param ... any other passthru parameters 
+#' @param risk.col string name of column to use for risk (horizontal axis)
+#' @param return.col string name of column to use for returns (vertical axis)
+#' @param neighbors set of 'neighbor portfolios to overplot
+#' @param main an overall title for the plot: see \code{\link{title}}
 #' @seealso 
 #' \code{\link{optimize.portfolio}}
 #' \code{\link{extractStats}}
 #' @export
-charts.RP <- function(RP, risk.col, return.col, neighbors=NULL, las=3, main="Random Portfolios", ...){
+charts.RP <- function(RP, risk.col, return.col, neighbors=NULL, main="Random Portfolios", ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     op <- par(no.readonly=TRUE)
@@ -161,14 +179,31 @@ charts.RP <- function(RP, risk.col, return.col, neighbors=NULL, las=3, main="Ran
     par(mar=c(4,4,4,2))
     chart.Scatter.RP(RP, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
     par(mar=c(2,4,0,2))
-    chart.Weights.RP(RP, main="", las=las, neighbors=neighbors, ...)
+    chart.Weights.RP(RP, main="", neighbors=neighbors, ...)
     par(op)
 }
 
 #TODO make chart.RP into a plot() method or methods
 
-#' plot method
+#' plot method for optimize.portfolio output
+#' 
+#' scatter and weights chart  for random portfolios
+#' 
+#' \code{neighbors} may be specified in three ways.  
+#' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
+#' portfolios in terms of the \code{out} numerical statistic.
+#' The second method consists of a numeric vector for \code{neighbors}.
+#' This will extract the \code{neighbors} with portfolio index numbers that correspond to the vector contents.
+#' The third method for specifying \code{neighbors} is to pass in a matrix.  
+#' This matrix should look like the output of \code{\link{extractStats}}, and should contain
+#' \code{risk.col},\code{return.col}, and weights columns all properly named.  
+#' @param x set of portfolios created by \code{\link{optimize.portfolio}}
+#' @param ... any other passthru parameters 
+#' @param risk.col string name of column to use for risk (horizontal axis)
+#' @param return.col string name of column to use for returns (vertical axis)
+#' @param neighbors set of 'neighbor portfolios to overplot
+#' @param main an overall title for the plot: see \code{\link{title}}
 #' @export
-plot.optimize.portfolio <- function(x,y,...,  return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
+plot.optimize.portfolio <- function(x, ...,  return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
     charts.RP(RP=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
 }

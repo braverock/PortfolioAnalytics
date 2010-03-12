@@ -26,8 +26,8 @@ Future version of this function could include this additional constraint penalty
 When you are optimizing a return objective, you must specify a negative multiplier 
 for the return objective so that the function will maximize return.  If you specify a target return,
 any return less than your target will be penalized.  If you do not specify a target return, 
-you may need to specify a negative VTR, or the function will not converge.  Try the maximum 
-expected return times the multiplier (e.g. -1 or -10).
+you may need to specify a negative VTR (value to reach) , or the function will not converge.  
+Try the maximum expected return times the multiplier (e.g. -1 or -10).
 
 Additional parameters for random portfolios or \code{\link[DEoptim]{DEoptim.control}} may be passed in via \dots}
 \seealso{\code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}}}

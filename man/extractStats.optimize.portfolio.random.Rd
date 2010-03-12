@@ -1,8 +1,8 @@
 \name{extractStats.optimize.portfolio.random}
 \alias{extractStats.optimize.portfolio.random}
-\title{unlist random portfolio resultsoops...}
+\title{extract stats from random portfolio results...}
 \usage{extractStats.optimize.portfolio.random(object, prefix, ...)}
-\description{unlist random portfolio resultsoops}
+\description{extract stats from random portfolio results}
 \details{This just flattens the $random_portfolio_objective_results part of the object}
 \seealso{\code{\link{optimize.portfolio}}
 \code{\link{random_portfolios}}

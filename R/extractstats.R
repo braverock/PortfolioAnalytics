@@ -27,7 +27,7 @@ extractStats <- function (object, prefix=NULL, ...){
 #' utility function to replace awkward named from unlist
 #' @param rnames character vector of names to check for cleanup
 name.replace <- function(rnames){
-    matchvec<-c('mean.mean','median.median','ES.MES','VaR.MVaR','maxDrawdown.maxDrawdown','sd.sd','StdDev.StdDev')
+    matchvec<-c('mean.mean','median.median','ES.MES','CVaR.MES','VaR.MVaR','maxDrawdown.maxDrawdown','sd.sd','StdDev.StdDev')
     for(str in matchvec){
         pos<-pmatch(str,rnames)
         if(!is.na(pos)){
