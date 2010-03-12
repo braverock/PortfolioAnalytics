@@ -54,7 +54,7 @@ chart.Weights.RP <- function(RP, neighbors = NULL, las = 3, xlab=NULL, cex.lab =
             } else{
                 # assume we have a vector of portfolio numbers
                 subsetx = xtract[neighbors,weightcols]
-                for(i in 1:length(neighbors)) points(subsetx[i,weightcols], type="b", col="lightblue")
+                for(i in 1:length(neighbors)) points(subsetx[i,], type="b", col="lightblue")
             }      
         }
         if(is.matrix(neighbors) | is.data.frame(neighbors)){
