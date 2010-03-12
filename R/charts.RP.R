@@ -169,6 +169,6 @@ charts.RP <- function(RP, risk.col, return.col, neighbors=NULL, las=3, main="Ran
 
 #' plot method
 #' @export
-plot.optimize.portfolio <- function(x,y,...,  return.col='mean', risk.col='ES',  neighbors=NA, main='portfolio plot') {
+plot.optimize.portfolio <- function(x,y,...,  return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
     charts.RP(RP=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
 }
