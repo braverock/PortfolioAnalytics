@@ -115,7 +115,7 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
     
     points(xtract[1,risk.column],xtract[1,return.column], col="orange", pch=16) # overplot the equal weighted (or seed)
     #check to see if portfolio 1 is EW  RP$random_portoflios[1,] all weights should be the same
-    if(!isTRUE(all.equal(RP$random_portfolios[1,][1],1/length(RP$random_portfolios[1,] ) ))){
+    if(!isTRUE(all.equal(RP$random_portfolios[1,][1],1/length(RP$random_portfolios[1,]),check.attributes=FALSE))){
         #show both the seed and EW if they are different 
         #NOTE the all.equal comparison could fail above if the first element of the first portfolio is the same as the EW weight, 
         #but the rest is not, shouldn't happen often with real portfolios, only toy examples
@@ -127,7 +127,9 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
     } else {
         result.slot<-'objective_measures'
     }
-    points(RP[[result.slot]][risk.col], RP[[result.slot]][return.col], col="blue", pch=16) # optimal
+    objcols<-unlist(RP[[result.slot]])
+    colnames(objcols)<-name.replace(colnames(objcols))
+    points(objcols[risk.col], objcols[return.col], col="blue", pch=16) # optimal
     axis(1, cex.axis = cex.axis, col = element.color)
     axis(2, cex.axis = cex.axis, col = element.color)
     box(col = element.color)
@@ -151,7 +153,7 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
 #' \code{\link{optimize.portfolio}}
 #' \code{\link{extractStats}}
 #' @export
-charts.RP <- function(RP, risk.col, return.col, neighbors=NA, las=3, main="Random Portfolios", ...){
+charts.RP <- function(RP, risk.col, return.col, neighbors=NULL, las=3, main="Random Portfolios", ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     op <- par(no.readonly=TRUE)

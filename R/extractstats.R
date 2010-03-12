@@ -34,6 +34,7 @@ name.replace <- function(rnames){
             switch(str,
                     mean.mean = {rnames[pos]<-'mean'},
                     median.median = {rnames[pos]<-'median'},
+                    CVaR.MES = {rnames[pos]<-'CVaR'}, 
                     ES.MES = {rnames[pos]<-'ES'},
                     VaR.MVaR = {rnames[pos]<-'VaR'},
                     maxDrawdown.maxDrawdown = {rnames[pos]<-'maxDrawdown'},
