@@ -105,8 +105,18 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
     columnnames = colnames(xtract)
     #return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
     return.column = pmatch(return.col,columnnames)
+    if(is.na(return.column)) {
+        return.col = paste(return.col,return.col,sep='.')
+        return.column = pmatch(return.col,columnnames)
+    }
     #risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
     risk.column = pmatch(risk.col,columnnames)
+    if(is.na(risk.column)) {
+        risk.col = paste(risk.col,risk.col,sep='.')
+        risk.column = pmatch(risk.col,columnnames)
+    }
+    
+    if(is.na(return.column) | is.na(risk.column)) stop(return.col,' or ',risk.col, ' do  not match extractStats output')
     
     plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
 
@@ -143,8 +153,19 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
         result.slot<-'objective_measures'
     }
     objcols<-unlist(RP[[result.slot]])
-    names(objcols)<-name.replace(names(objcols))
-    points(objcols[risk.col], objcols[return.col], col="blue", pch=16) # optimal
+    names(objcols)<-PortfolioAnalytics:::name.replace(names(objcols))
+    return.column = pmatch(return.column,names(objcols))
+    if(is.na(return.column)) {
+        return.col = paste(return.col,return.col,sep='.')
+        return.column = pmatch(return.col,names(objcols))
+    }
+    risk.column = pmatch(risk.col,names(objcols))
+    if(is.na(risk.column)) {
+        risk.col = paste(risk.col,risk.col,sep='.')
+        risk.column = pmatch(risk.col,names(objcols))
+    }
+    if(is.na(return.column) | is.na(risk.column)) warning(return.col,' or ',risk.col, ' do  not match extractStats output of $objective_measures slot')
+    points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
     axis(1, cex.axis = cex.axis, col = element.color)
     axis(2, cex.axis = cex.axis, col = element.color)
     box(col = element.color)
