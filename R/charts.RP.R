@@ -133,8 +133,16 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
             points(subsetx[,risk.column], subsetx[,return.column], col="lightblue", pch=1)
         }
         if(is.matrix(neighbors) | is.data.frame(neighbors)){
-            # the user has likely passed in a matrix containing calculated values for risk.col and return.col
-            for(i in 1:nrow(neighbors)) points(neighbors[i,risk.col], neighbors[i,return.col], col="lightblue", pch=1)
+            # the user has likely passed in a matrix containing calculated values for risk.col and return.col      
+            rtc = pmatch(return.col,columnnames)
+            if(is.na(rtc)) {
+                rtc = pmatch(paste(return.col,return.col,sep='.'),columnnames)
+            }
+            rsc = pmatch(risk.col,columnnames)
+            if(is.na(rsc)) {
+                risk.column = pmatch(paste(risk.col,risk.col,sep='.'),columnnames)
+            }
+            for(i in 1:nrow(neighbors)) points(neighbors[i,rsc], neighbors[i,rtc], col="lightblue", pch=1)
         }
     }
     
