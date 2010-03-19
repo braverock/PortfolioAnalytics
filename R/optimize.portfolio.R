@@ -298,6 +298,7 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL){
 #'execute multiple optimize.portfolio calls, presumably in parallel
 #' 
 #' TODO write function to check sensitivity of optimal results by using optimize.portfolio.parallel results
+
 #' 
 #' 
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns

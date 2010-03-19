@@ -183,9 +183,10 @@ portfolio_risk_objective <- function(name, target=NULL, arguments=NULL, multipli
 #' @param min_prisk minimum percentage contribution to risk
 #' @param max_prisk maximum percentage contribution to risk
 #' @param min_concentration TRUE/FALSE whether to minimize concentration, default FALSE, always TRUE if min_prisk and max_prisk are NULL
+#' @param min_difference TRUE/FALSE whether to minimize difference between concentration, default FALSE
 #' @author Brian G. Peterson
 #' @export
-risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ..., min_prisk, max_prisk, min_concentration=FALSE )
+risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ..., min_prisk, max_prisk, min_concentration=FALSE, min_difference=FALSE )
 {
   if(is.null(arguments$portfolio_method)) arguments$portfolio_method="component"
   
@@ -221,6 +222,7 @@ risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, mul
   Objective$min_prisk = min_prisk
   Objective$max_prisk = max_prisk
   Objective$min_concentration<-min_concentration
+  Objective$min_difference<-min_difference
   
   return(Objective)
 } # end risk_budget_objective constructor
