@@ -64,10 +64,10 @@ function (portfolios=NULL,
         mtc = pmatch(paste(match.col,match.col,sep='.'),columnnames)
     }
     
-    result <- foreach(i=1:nrow(set),.combine=rbind) %do% {
-        xtract[which.min(xtract[which(xtract[,mtc]>=set[i,1] & xtract[,mtc]<set[i,2]),'out']),]
-        # xtract[which.min(xtract[which(xtract[,match.col]>=set[i,1] & xtract[,match.col]<set[i,2]),'out'])][which(xtract[,'out']<=threshold)]       
-
+    result <- foreach(i=1:nrow(set),.inorder=TRUE, .combine=rbind, .errorhandling='remove') %do% {
+        tmp<-xtract[which(xtract[,mtc]>=set[i,1] & xtract[,mtc]<set[i,2]),]
+        tmp<-tmp[which.min(tmp[,'out']),]
+        tmp
     }
     return(result)
 }
