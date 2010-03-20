@@ -22,7 +22,7 @@
 #' @param from minimum value of the sequence
 #' @param to maximum value of the sequence
 #' @param by number to increment the sequence by
-#' @param risk.col string name of column to use for risk (horizontal axis)
+#' @param match.col string name of column to use for risk (horizontal axis)
 #' @param \dots any other passthru parameters
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
@@ -30,12 +30,15 @@
 #' @export
 extract.efficient.frontier <- 
 function (portfolios=NULL, 
-          risk.col='ES', from=0, to=1, by=.005, 
+          match.col='ES', from=0, to=1, by=.005, 
           ..., 
           R = NULL, 
           constraints = NULL, 
           optimize_method='random')
 {
+    #TODO add a threshold argument for how close it has to be to count
+    # do we need to recalc the constrained_objective too?  I don't think so.
+    
     set<-seq(from=from,to=to,by=by)
     set<-cbind(quantmod::Lag(set,1),as.matrix(set))[-1,]
     if(is.null(portfolios)){
@@ -47,13 +50,24 @@ function (portfolios=NULL,
     }
     
     xtract<-extractStats(portfolios)
+    columnnames=colnames(xtract)
     #if("package:multicore" %in% search() || require("multicore",quietly = TRUE)){
     #    mclapply
     #}
     stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+#    rtc = pmatch(return.col,columnnames)
+#    if(is.na(rtc)) {
+#        rtc = pmatch(paste(return.col,return.col,sep='.'),columnnames)
+#    }
+    mtc = pmatch(match.col,columnnames)
+    if(is.na(mtc)) {
+        mtc = pmatch(paste(match.col,match.col,sep='.'),columnnames)
+    }
     
     result <- foreach(i=1:nrow(set),.combine=rbind) %do% {
-        xtract[which.min(xtract[which(xtract[,risk.col]>=set[i,1] & xtract[,risk.col]<set[i,2]),'out']),]
+        xtract[which.min(xtract[which(xtract[,mtc]>=set[i,1] & xtract[,mtc]<set[i,2]),'out']),]
+        # xtract[which.min(xtract[which(xtract[,match.col]>=set[i,1] & xtract[,match.col]<set[i,2]),'out'])][which(xtract[,'out']<=threshold)]       
+
     }
     return(result)
 }
