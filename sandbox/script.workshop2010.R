@@ -18,6 +18,13 @@ data(indexes)
 ### Review the data
 # Generate charts to show 12m sma returns and CVaR by asset
 charts.BarVaR(indexes[,1:4], p=(1-1/12), clean='boudt', show.cleaned=TRUE, methods=c("ModifiedVaR","ModifiedES"), colorset=rainbow6equal, cex.axis=1)
+# Weights v %Contrib to CVaR
+table = as.matrix(ES(indexes[,1:4], weights=rep(1/4,4), portfolio_method="component", p=(1-1/12))$pct_contrib_MES)
+table = cbind(rep(1/4,4),table)
+colnames(table) = c("Weights", "%Contrib to CVaR")
+plot(table, ylim=c(-0.1,1), xlim=c(0,1), col=1:4, main="Weight and Contribution to Risk")
+text(table[,1],table[,2],rownames(table), pos=4, cex = 0.8, col=1:4)
+abline(a=0,b=1, col="darkgray", lty="dotted")
 
 ### Create a benchmark using equal-weighted portfolio returns
 # Rebalance an equal-weight portfolio quarterly
@@ -73,8 +80,15 @@ postscript(file="rpPlot1.eps", height=6, width=5, paper="special", horizontal=FA
 charts.RP(rndResult, risk.col="CVaR", return.col="pamean", main="Constrained Mean-CVaR", neighbors=25)
 dev.off()
 
-# @TODO Chart the weights and contribution to risk
-
+# Chart the weights versus contribution to risk
+postscript(file="WeightsVsRisk1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+table = ES(indexes[,1:4],weights=rndResult$weights, portfolio_method="component", p=(1-1/12))$pct_contrib_MES
+table = cbind(rndResult$weights,table)
+colnames(table) = c("Weights", "%Contrib to CVaR")
+plot(table, ylim=c(0,1), xlim=c(0,1), col=1:4, main="Weight and Contribution to Risk")
+text(table[,1],table[,2],rownames(table), pos=4, cex = 0.8, col=1:4)
+abline(a=0,b=1, col="darkgray", lty="dotted")
+dev.off()
 
 ## Evaluate Constrained Mean-CVaR through time
 #on one line for easy cut/paste/editing in interactive mode
@@ -104,7 +118,14 @@ postscript(file="rpPlot2.eps", height=6, width=5, paper="special", horizontal=FA
 charts.RP(rndResult2, risk.col="CVaR", return.col="pamean", main="Mean-CVaR With Risk Limits", neighbors=25)
 dev.off()
 
-# @TODO Chart the weights and contribution to risk_budget
+# Chart the weights versus contribution to risk
+postscript(file="WeightsVsRisk2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+table = cbind(rndResult2$weights, rndResult2$objective_measures$CVaR$pct_contrib_MES)
+colnames(table) = c("Weights", "%Contrib to CVaR")
+plot(table, ylim=c(0,1), xlim=c(0,1), col=1:4, main="Weight and Contribution to Risk")
+text(table[,1],table[,2],rownames(table), pos=4, cex = 0.8, col=1:4)
+abline(a=0,b=1, col="darkgray", lty="dotted")
+dev.off()
 
 ### Evaluate Mean-CVaR Risk Limit through time
 #on one line for easy cut/paste/editing in interactive mode
@@ -115,6 +136,9 @@ rndResults2<-optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=aConstr
 # @TODO Chart the cumulative returns
 
 # @TODO Chart the weights and contribution to risk_budget through time
+x=extractWeights.rebal(rndResults2)
+chart.StackedBar(x, main="Weights")
+
 
 ## EXAMPLE 3: Equal Risk Portfolio
 ### Constraints for an Equal risk contribution portfolio
