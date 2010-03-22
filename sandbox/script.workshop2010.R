@@ -136,9 +136,18 @@ rndResults2<-optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=aConstr
 # @TODO Chart the cumulative returns
 
 # @TODO Chart the weights and contribution to risk_budget through time
+# op <- par(no.readonly = TRUE)
+layout(rbind(1, 2, 3), height = c(3, 3, 1.2), width = 1)
+par(mar = c(2, 4, 4, 2) + 0.1)
 x=extractWeights.rebal(rndResults2)
-chart.StackedBar(x, main="Weights")
-
+PerformanceAnalytics:::chart.StackedBar.xts(x, main="Weights", legend.loc=NULL, cex.axis=1)
+par(mar = c(2, 4, 4, 2) + 0.1)
+x=extractRiskContrib.rebal(rndResults2)
+PerformanceAnalytics:::chart.StackedBar.xts(x, main="Risk Contribution", legend.loc=NULL, cex.axis=1)
+plot.new()
+par(mar = c(1, 4, 4, 2))
+legend("top", legend = colnames(x), fill = 1:4, ncol = 4, box.col="darkgray", border.col="darkgray", cex=1.2)
+# par(op)
 
 ## EXAMPLE 3: Equal Risk Portfolio
 ### Constraints for an Equal risk contribution portfolio
