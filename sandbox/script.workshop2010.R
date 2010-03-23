@@ -85,8 +85,8 @@ postscript(file="WeightsVsRisk1.eps", height=6, width=5, paper="special", horizo
 table = ES(indexes[,1:4],weights=rndResult$weights, portfolio_method="component", p=(1-1/12))$pct_contrib_MES
 table = cbind(rndResult$weights,table)
 colnames(table) = c("Weights", "%Contrib to CVaR")
-plot(table, ylim=c(0,1), xlim=c(0,1), col=1:4, main="Weight and Contribution to Risk")
-text(table[,1],table[,2],rownames(table), pos=4, cex = 0.8, col=1:4)
+plot(table, ylim=c(0,1), xlim=c(0,1), col=rainbow6equal, main="Weight and Contribution to Risk")
+text(table[,1],table[,2],rownames(table), pos=4, cex = 1, col=rainbow6equal)
 abline(a=0,b=1, col="darkgray", lty="dotted")
 dev.off()
 
@@ -95,9 +95,25 @@ dev.off()
 registerDoMC()
 rndResults<-optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=aConstraintObj, optimize_method="random", trace=TRUE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, search_size=1000)
 
-# @TODO Chart the cumulative returns
-
+# Chart the cumulative returns
+weights1=extractWeights.rebal(rndResults)
+Ex1=Return.rebalancing(indexes[,1:4], weights1)
+colnames(Ex1)="Mean CVaR"
+results = cbind(EqWgt,Ex1)
+postscript(file="ReturnsEx1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+charts.PerformanceSummary(results[,2:1], main="Constrained Mean-CVaR", colorset=bluefocus[-3], lwd=c(3,2), method=c("ModifiedVaR","ModifiedES"), p=(1-1/12), gap=36)
+dev.off()
 # @TODO Chart the weights and contribution to risk through time
+postscript(file="WeightsContribEx1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+layout(rbind(1, 2, 3), height = c(3, 3, 1.2), width = 1)
+par(mar = c(2, 4, 4, 2) + 0.1)
+PerformanceAnalytics:::chart.StackedBar.xts(x, main="Mean-CVaR Weights", legend.loc=NULL, cex.axis=1, colorset=rainbow6equal, space=0, border="darkgray")
+par(mar = c(2, 4, 4, 2) + 0.1)
+PerformanceAnalytics:::chart.StackedBar.xts(weights1, main="Mean-CVaR Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=rainbow6equal, space=0, border="darkgray")
+plot.new()
+par(mar = c(1, 4, 4, 2))
+legend("top", legend = colnames(x), fill = rainbow6equal, ncol = 4, box.col="darkgray", border.col="darkgray", cex=1)
+dev.off()
 
 ## EXAMPLE 2: Mean-CVaR Risk Limit Portfolio
 ### Add a risk contribution constraint
@@ -122,8 +138,8 @@ dev.off()
 postscript(file="WeightsVsRisk2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 table = cbind(rndResult2$weights, rndResult2$objective_measures$CVaR$pct_contrib_MES)
 colnames(table) = c("Weights", "%Contrib to CVaR")
-plot(table, ylim=c(0,1), xlim=c(0,1), col=1:4, main="Weight and Contribution to Risk")
-text(table[,1],table[,2],rownames(table), pos=4, cex = 0.8, col=1:4)
+plot(table, ylim=c(0,1), xlim=c(0,1), col=rainbow6equal, main="Weight and Contribution to Risk")
+text(table[,1],table[,2],rownames(table), pos=4, cex = 1, col=rainbow6equal)
 abline(a=0,b=1, col="darkgray", lty="dotted")
 dev.off()
 
@@ -132,21 +148,28 @@ dev.off()
 registerDoMC()
 rndResults2<-optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=aConstraintObj, optimize_method="random", trace=TRUE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, search_size=1000)
 
-### Chart results
-# @TODO Chart the cumulative returns
+### Chart the results
+# Chart the cumulative returns
+weights2=extractWeights.rebal(rndResults2)
+Ex2=Return.rebalancing(indexes[,1:4], weights2)
+colnames(Ex2) = "Risk Limit"
+results = cbind(results, Ex2) 
+postscript(file="ReturnsEx2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+charts.PerformanceSummary(results[,3:1], main="Mean-CVaR Risk Limit", colorset=bluefocus[-3], lwd=c(3,2,2), method=c("ModifiedVaR","ModifiedES"), p=(1-1/12), gap=36)
+dev.off()
 
-# @TODO Chart the weights and contribution to risk_budget through time
+# Chart the weights and contribution to risk_budget through time
 # op <- par(no.readonly = TRUE)
+postscript(file="WeightsContribEx2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 layout(rbind(1, 2, 3), height = c(3, 3, 1.2), width = 1)
 par(mar = c(2, 4, 4, 2) + 0.1)
-x=extractWeights.rebal(rndResults2)
-PerformanceAnalytics:::chart.StackedBar.xts(x, main="Weights", legend.loc=NULL, cex.axis=1)
+PerformanceAnalytics:::chart.StackedBar.xts(x, main="Risk Limit Weights", legend.loc=NULL, cex.axis=1, colorset=rainbow6equal, space=0, border="darkgray")
 par(mar = c(2, 4, 4, 2) + 0.1)
-x=extractRiskContrib.rebal(rndResults2)
-PerformanceAnalytics:::chart.StackedBar.xts(x, main="Risk Contribution", legend.loc=NULL, cex.axis=1)
+PerformanceAnalytics:::chart.StackedBar.xts(weights2, main="Risk Limit Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=rainbow6equal, space=0, border="darkgray")
 plot.new()
 par(mar = c(1, 4, 4, 2))
-legend("top", legend = colnames(x), fill = 1:4, ncol = 4, box.col="darkgray", border.col="darkgray", cex=1.2)
+legend("top", legend = colnames(x), fill = rainbow6equal, ncol = 4, box.col="darkgray", border.col="darkgray", cex=1)
+dev.off()
 # par(op)
 
 ## EXAMPLE 3: Equal Risk Portfolio
