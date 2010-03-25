@@ -35,7 +35,7 @@ EqWgt = Return.rebalancing(indexes[,1:4],weights)
 
 # Chart EqWgt Results
 postscript(file="EqWgtPlot1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
-charts.PerformanceSummary(EqWgt, main="Eq Wgt Portfolio", methods=c("ModifiedVaR", "ModifiedES"), p=(1-1/12), clean='boudt', show.cleaned=TRUE, gap=36, colorset=redfocus)
+charts.PerformanceSummary(EqWgt, main="Eq Wgt Portfolio", methods=c("ModifiedVaR", "ModifiedES"), p=(1-1/12), clean='boudt', show.cleaned=TRUE, gap=36, colorset=bluefocus, lwd=3)
 dev.off()
 
 ## EXAMPLE 1: Constrained Mean-CVaR Portfolio
@@ -103,16 +103,38 @@ results = cbind(EqWgt,Ex1)
 postscript(file="ReturnsEx1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 charts.PerformanceSummary(results[,2:1], main="Constrained Mean-CVaR", colorset=bluefocus[-3], lwd=c(3,2), method=c("ModifiedVaR","ModifiedES"), p=(1-1/12), gap=36)
 dev.off()
-# @TODO Chart the weights and contribution to risk through time
+
+# Chart the weights and contribution to risk through time
+# First, extract weights and calculate ES
+numColumns = length(rndResults[[1]]$weights)
+numRows = length(rndResults)
+contrib1 <- matrix(nrow=numRows, ncol=numColumns)
+for(i in 1:numRows){
+    todate=paste("::",as.Date(names(rndResults)[i]), sep="")
+    contrib1[i,]=ES(indexes[todate,1:4], portfolio_method="component", weights=rndResults[[i]]$weights, clean="boudt", p=(1-1/12))$pct_contrib_MES
+}
+colnames(contrib1) = names(unlist(rndResults[[1]]$weights))
+rownames(contrib1) = names(rndResults)
+contrib1 = as.xts(contrib1)
+
+# test
+  retrisk1 <- matrix(nrow=numRows, ncol=2)
+  for(i in 1:numRows)
+    retrisk1[i,] = unlist(rndResults[[i]]$objective_measures)
+  rownames(retrisk1) = names(rndResults)
+  colnames(retrisk1) = c("pamean", "CVaR")
+ chart.TimeSeries(retrisk1, legend="topright", main="In Sample Estimates")
+# end test
+
 postscript(file="WeightsContribEx1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 layout(rbind(1, 2, 3), height = c(3, 3, 1.2), width = 1)
 par(mar = c(2, 4, 4, 2) + 0.1)
-PerformanceAnalytics:::chart.StackedBar.xts(x, main="Mean-CVaR Weights", legend.loc=NULL, cex.axis=1, colorset=rainbow6equal, space=0, border="darkgray")
+PerformanceAnalytics:::chart.StackedBar.xts(weights1, main="Mean-CVaR Weights", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
 par(mar = c(2, 4, 4, 2) + 0.1)
-PerformanceAnalytics:::chart.StackedBar.xts(weights1, main="Mean-CVaR Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=rainbow6equal, space=0, border="darkgray")
+PerformanceAnalytics:::chart.StackedBar.xts(contrib1, main="Mean-CVaR Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
 plot.new()
-par(mar = c(1, 4, 4, 2))
-legend("top", legend = colnames(x), fill = rainbow6equal, ncol = 4, box.col="darkgray", border.col="darkgray", cex=1)
+par(oma = c(0, 0, 0, 0), mar=c(2,4,4,2)) #c(bottom, left, top, right)
+legend("top", legend = colnames(weights1), fill = bluemono[c(-2,-4,-6)], ncol = 4, box.col="darkgray", border.col="white", cex=1)
 dev.off()
 
 ## EXAMPLE 2: Mean-CVaR Risk Limit Portfolio
@@ -158,17 +180,25 @@ postscript(file="ReturnsEx2.eps", height=6, width=5, paper="special", horizontal
 charts.PerformanceSummary(results[,3:1], main="Mean-CVaR Risk Limit", colorset=bluefocus[-3], lwd=c(3,2,2), method=c("ModifiedVaR","ModifiedES"), p=(1-1/12), gap=36)
 dev.off()
 
-# Chart the weights and contribution to risk_budget through time
+# Chart the weights and contribution to risk through time
+numColumns = length(rndResults2[[1]]$weights)
+numRows = length(rndResults2)
+contrib2 <- matrix(nrow=numRows, ncol=numColumns)
+for(i in 1:numRows)
+  contrib2[i,] = unlist(rndResults2[[i]]$objective_measures$CVaR$pct_contrib_MES)
+colnames(contrib2) = names(unlist(rndResults2[[1]]$objective_measures$CVaR$pct_contrib_MES))
+rownames(contrib2) = names(rndResults2)
+
 # op <- par(no.readonly = TRUE)
 postscript(file="WeightsContribEx2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 layout(rbind(1, 2, 3), height = c(3, 3, 1.2), width = 1)
 par(mar = c(2, 4, 4, 2) + 0.1)
-PerformanceAnalytics:::chart.StackedBar.xts(x, main="Risk Limit Weights", legend.loc=NULL, cex.axis=1, colorset=rainbow6equal, space=0, border="darkgray")
+PerformanceAnalytics:::chart.StackedBar.xts(weights2, main="Risk Limit Weights", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
 par(mar = c(2, 4, 4, 2) + 0.1)
-PerformanceAnalytics:::chart.StackedBar.xts(weights2, main="Risk Limit Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=rainbow6equal, space=0, border="darkgray")
+PerformanceAnalytics:::chart.StackedBar.xts(contrib2, main="Risk Limit Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
 plot.new()
-par(mar = c(1, 4, 4, 2))
-legend("top", legend = colnames(x), fill = rainbow6equal, ncol = 4, box.col="darkgray", border.col="darkgray", cex=1)
+par(oma = c(0, 0, 0, 0), mar=c(2,4,4,2))
+legend("top", legend = colnames(x), fill = bluemono[c(-2,-4,-6)], ncol = 4, box.col="darkgray", border.col="white", cex=1)
 dev.off()
 # par(op)
 
