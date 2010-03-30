@@ -51,11 +51,12 @@
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param \dots any other passthru parameters 
 #' @param trace TRUE/FALSE whether to include debugging and additional detail in the output list
+#' @param normalize TRUE/FALSE whether to normalize results to min/max sum (TRUE), or let the optimizer penalize portfolios that do not conform (FALSE)
 #' 
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
-constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
+constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize=TRUE)
 { 
     if (ncol(R)>length(w)) {
         R=R[,1:length(w)]
@@ -76,28 +77,40 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
 
     out=0
     
-    if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
-      # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
-      # we'll normalize the weights passed in to whichever boundary condition has been violated
-      # NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
-      # might violate your constraints, so you'd need to renormalize them after optimizing
-      # we'll create functions for that so the user is less likely to mess it up.
-
-      ##' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
-      ##' In Kris' original function, this was manifested as a full investment constraint
-      ##' the normalization process produces much faster convergence, 
-      ##' and then we penalize parameters outside the constraints in the next block
-      if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
-        max_sum=constraints$max_sum
-        if(sum(w)>max_sum) { w<-(max_sum/sum(w))*w } # normalize to max_sum
-      }
-
-      if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
-        min_sum=constraints$min_sum
-        if(sum(w)<min_sum) { w<-(min_sum/sum(w))*w } # normalize to min_sum
-      }
-
-    } # end min_sum and max_sum normalization
+    if(isTRUE(normalize)){
+        if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
+            # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
+            # we'll normalize the weights passed in to whichever boundary condition has been violated
+            # NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
+            # might violate your constraints, so you'd need to renormalize them after optimizing
+            # we'll create functions for that so the user is less likely to mess it up.
+            
+            ##' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
+            ##' In Kris' original function, this was manifested as a full investment constraint
+            ##' the normalization process produces much faster convergence, 
+            ##' and then we penalize parameters outside the constraints in the next block
+            if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
+                max_sum=constraints$max_sum
+                if(sum(w)>max_sum) { w<-(max_sum/sum(w))*w } # normalize to max_sum
+            }
+            
+            if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
+                min_sum=constraints$min_sum
+                if(sum(w)<min_sum) { w<-(min_sum/sum(w))*w } # normalize to min_sum
+            }
+            
+        } # end min_sum and max_sum normalization
+    } else {
+        # the user wants the optimization algorithm to figure it out
+        if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
+            max_sum=constraints$max_sum
+            if(sum(w)>max_sum) { out = out + .5*penalty*(sum(w) - max_sum)  } # penalize difference to max_sum
+        }
+        if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
+            min_sum=constraints$min_sum
+            if(sum(w)<min_sum) { out = out + .5*penalty*(min_sum - sum(w)) } # penalize difference to min_sum
+        }
+    }
 
     ##' penalize weights outside my constraints (can be caused by normalization)
     if (!is.null(constraints$max)){
@@ -236,7 +249,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
               #should we also penalize risk too low for risk targets? or is a range another objective?
               #    # half penalty for risk lower than target
               #    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
-          }
+            }
             percrisk = tmp_measure[[3]] # third element is percent component contribution
             RBupper = objective$max_prisk
             RBlower = objective$min_prisk
@@ -249,7 +262,12 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE)
                     out=out+penalty*max_conc
                 }
             }
-            
+            if(!is.null(objective$min_difference)){
+                if(isTRUE(objective$min_difference)){
+                    max_diff<-max(tmp_measure[[2]]-(sum(tmp_measure[[2]])/length(tmp_measure[[2]]))) #second element is the contribution in absolute terms
+                    out=out+penalty*max_diff
+                }
+            }
           } # end handling of risk_budget objective
 
         } # end enabled check
