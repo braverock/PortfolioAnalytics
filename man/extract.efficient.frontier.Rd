@@ -1,7 +1,7 @@
 \name{extract.efficient.frontier}
 \alias{extract.efficient.frontier}
 \title{extract the efficient frontier of portfolios that meet your objectives over a range of risks...}
-\usage{extract.efficient.frontier(portfolios, risk.col="ES", from=0, to=1, by=0.005, ..., R, constraints, optimize_method="random")}
+\usage{extract.efficient.frontier(portfolios, match.col="ES", from=0, to=1, by=0.005, ..., R, constraints, optimize_method="random")}
 \description{extract the efficient frontier of portfolios that meet your objectives over a range of risks}
 \details{note that this function will be extremely sensitive to the objectives in your
 \code{\link{constraint}} object.  It will be especially obvious if you 
@@ -12,7 +12,7 @@ If you do not have a set of portfolios to extract from, portfolios may be genera
 \item{from}{minimum value of the sequence}
 \item{to}{maximum value of the sequence}
 \item{by}{number to increment the sequence by}
-\item{risk.col}{string name of column to use for risk (horizontal axis)}
+\item{match.col}{string name of column to use for risk (horizontal axis)}
 \item{\dots}{any other passthru parameters}
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}
 \item{constraints}{an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}}

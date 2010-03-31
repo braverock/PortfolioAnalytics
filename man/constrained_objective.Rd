@@ -1,13 +1,13 @@
 \name{constrained_objective}
 \alias{constrained_objective}
 \title{function to calculate a numeric return value for a portfolio based on a set of constraints...}
-\usage{constrained_objective(w, R, constraints, ..., trace=FALSE)}
+\usage{constrained_objective(w, R, constraints, ..., trace=FALSE, normalize=TRUE)}
 \description{function to calculate a numeric return value for a portfolio based on a set of constraints}
 \details{function to calculate a numeric return value for a portfolio based on a set of constraints,
 we'll try to make as few assumptions as possible, and only run objectives that are required by the user
 
 If the user has passed in either min_sum or max_sum constraints for the portfolio, or both, 
-and are using a numerical optimization method like DEoptim,
+and are using a numerical optimization method like DEoptim, and normalize=TRUE, the default,
 we'll normalize the weights passed in to whichever boundary condition has been violated.  
 If using random portfolios, all the portfolios generated will meet the constraints by construction.
 NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
@@ -15,7 +15,12 @@ might violate your constraints, so you'd need to renormalize them after optimizi
 We apply the same normalization in \code{\link{optimize.portfolio}} so that the weights you see have been 
 normalized to min_sum if the generated portfolio is smaller than min_sum or max_sum if the 
 generated portfolio is larger than max_sum.  
-This normalization increases the speed of optimization and convergence by several orders of magnitude.
+This normalization increases the speed of optimization and convergence by several orders of magnitude in many cases.
+
+You may find that for some portfolios, normalization is not desirable, if the algorithm 
+cannot find a direction in which to move to head towards an optimal portfolio.  In these cases, 
+it may be best to set normalize=FALSE, and penalize the portfolios if the sum of the weighting 
+vector lies outside the min_sum and/or max_sum.
 
 Whether or not we normalize the weights using min_sum and max_sum, and are using a numerical optimization 
 engine like DEoptim, we will penalize portfolios that violate weight constraints in much the same way
@@ -36,4 +41,5 @@ Additional parameters for random portfolios or \code{\link[DEoptim]{DEoptim.cont
 \item{w}{a vector of weights to test}
 \item{constraints}{an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}}
 \item{\dots}{any other passthru parameters}
-\item{trace}{TRUE/FALSE whether to include debugging and additional detail in the output list}}
+\item{trace}{TRUE/FALSE whether to include debugging and additional detail in the output list}
+\item{normalize}{TRUE/FALSE whether to normalize results to min/max sum (TRUE), or let the optimizer penalize portfolios that do not conform (FALSE)}}
