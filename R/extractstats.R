@@ -52,8 +52,6 @@ name.replace <- function(rnames){
 #' This function will take everything in the objective_measures slot and \code{unlist} it.  
 #' This may produce a very large number of columns or strange column names.
 #' 
-#' TODO: Rewrite this function to test the input object and direct to the correct parse function
-#' 
 #' @param object list returned by optimize.portfolio
 #' @param prefix prefix to add to output row names
 #' @param ... any other passthru parameters
@@ -62,39 +60,29 @@ name.replace <- function(rnames){
 extractStats.optimize.portfolio.DEoptim <- function(object, prefix=NULL, ...) {
 
     # first pull out the optimal portfolio
-    trow<-c(unlist(object$objective_measures),object$out,object$weights)
-    colnames(trow)<-c(colnames(unlist(object$objective_measures)),'out',names(object$weights))
+    trow<-c(unlist(object$objective_measures),out=object$out,object$weights)
+    #colnames(trow)<-c(colnames(unlist(object$objective_measures)),'out',names(object$weights))
     result<-trow
-    # add the equal weight portfolio
-    #nassets<-length(object$weights)
-    #EWgt<-rep(1/nassets,nassets)
-    # we don't have the return series, so we can't make this work.  maybe we should put it in the optimize.portfolio function
+    l = length(object$DEoptim_objective_results)
+    nobj<-length(unlist(object$DEoptim_objective_results[[1]]$objective_measures))
+    result=matrix(nrow=l,ncol=(nobj+length(object$weights))+1)
+    ncols<-ncol(result)
     
-    # then pull bestmemit/bestvalit and pop(ulation) from DEoutput if it exists
-    # normalize all these weights
-    # calculate constrained_objective on all of them
+    for (i in 1:l) {
+        if(!is.atomic(object$DEoptim_objective_results[[i]])) {
+            result[i,1:nobj]<-unlist(object$DEoptim_objective_results[[i]]$objective_measures)
+            result[i,(nobj+1)]<-object$DEoptim_objective_results[[i]]$out
+            result[i,(nobj+2):ncols]<-object$DEoptim_objective_results[[i]]$weights
+        }
+    }
     
-    
-#    ncols<-ncol(trow)
-#    for (i in 1:l) {
-#        if(!is.atomic(resultlist[[i]])) {
-#            result[i,1:nobj]<-unlist(resultlist[[i]]$objective_measures)
-#            result[i,(nobj+1):ncols]<-resultlist[[i]]$weights
-#        }
-#    }
-    
-    rownames(result) = paste("DE.portf.", index(result), sep="")
+    rnames<-c(names(unlist(object$DEoptim_objective_results[[1]]$objective_measures)),'out',paste('w',names(object$weights),sep='.'))
+    rnames<-name.replace(rnames)
+    colnames(result)<-rnames
+    rownames(result) = paste(prefix,"DE.portf", index(object$DEoptim_objective_results), sep=".")
+    #rownames(result) = paste("DE.portf.", index(result), sep="")
     return(result)
 }
-
-##FIXME this needs to become an extractStats function for optimize.portfolio.DEoptim
-#extractDEresults <- function(delist){
-#    cnames<-names(delist[[1]]$weights)
-#    optimstats<- matrix(nrow=length(delist), ncol=(2+(2*length(cnames))))
-#    for (i in 1:length(delist)) optimstats[i,] <- c(delist[[i]]$objective_measures$mean,delist[[i]]$objective_measures$MES,delist[[i]]$weights,delist[[i]]$objective_measures$pct_contrib_MES)
-#    colnames(optimstats)<-c("Mean Ret.","mES",paste("weights",cnames,sep='.'),paste("pct_contrib_MES",cnames,sep='.'))
-#    return(optimstats)
-#}
 
 
 #' extract some stats from a portfolio list run via foreach in optimize.portfolio.parallel

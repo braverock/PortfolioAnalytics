@@ -106,6 +106,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     if(isTRUE(trace)) { 
         #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
         tmptrace=trace 
+        assign('.objectivestorage', list(), pos='.GlobalEnv')
         trace=FALSE
     } 
     
@@ -127,7 +128,11 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     names(weights) = colnames(R)
 
     out = list(weights=weights, objective_measures=constrained_objective(w=weights,R=R,constraints,trace=TRUE)$objective_measures,out=minw$optim$bestval, call=call)
-    if (isTRUE(trace)){out$DEoutput=minw}
+    if (isTRUE(trace)){
+        out$DEoutput=minw
+        out$DEoptim_objective_results<-try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
+        rm('.objectivestorage',pos='.GlobalEnv')
+    }
     
   } ## end case for DEoptim
   if(optimize_method=="random"){

@@ -46,7 +46,8 @@
 #' for the return objective so that the function will maximize return.  If you specify a target return,
 #' any return less than your target will be penalized.  If you do not specify a target return, 
 #' you may need to specify a negative VTR (value to reach) , or the function will not converge.  
-#' Try the maximum expected return times the multiplier (e.g. -1 or -10).
+#' Try the maximum expected return times the multiplier (e.g. -1 or -10).  
+#' Adding a return objective defaults the multiplier to -1.
 #' 
 #' Additional parameters for random portfolios or \code{\link[DEoptim]{DEoptim.control}} may be passed in via \dots
 #' 
@@ -57,7 +58,7 @@
 #' @param \dots any other passthru parameters 
 #' @param trace TRUE/FALSE whether to include debugging and additional detail in the output list
 #' @param normalize TRUE/FALSE whether to normalize results to min/max sum (TRUE), or let the optimizer penalize portfolios that do not conform (FALSE)
-#' 
+# @param storage TRUE/FALSE default TRUE for DEoptim with trase, otherwise FALSE. not typically user-called
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
@@ -69,6 +70,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
     if(!hasArg(penalty)) penalty = 1e4
     N = length(w)
     T = nrow(R)
+
     if(hasArg(optimize_method)) optimize_method=match.call(expand.dots=TRUE)$optimize_method else optimize_method='' 
     if(hasArg(verbose)) verbose=match.call(expand.dots=TRUE)$verbose else verbose=FALSE 
     
@@ -81,6 +83,10 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
     }
 
     out=0
+
+    # do the get here
+    store_output <- try(get('.objectivestorage',pos='.GlobalEnv'))#,silent=TRUE)
+    if(inherits(store_output,"try-error")) storage=FALSE else storage=TRUE        
     
     if(isTRUE(normalize)){
         if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
@@ -139,7 +145,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
     if(is.null(constraints$objectives)) {
       warning("no objectives specified in constraints")
     } else{
-      if(isTRUE(trace)) tmp_return<-list()
+      if(isTRUE(trace) | isTRUE(storage)) tmp_return<-list()
       for (objective in constraints$objectives){
         #check for clean bits to pass in
         if(objective$enabled){
@@ -205,7 +211,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
           
           tmp_measure = try((do.call(fun,.formals)) ,silent=TRUE)
           
-          if(isTRUE(trace)) {
+          if(isTRUE(trace) | isTRUE(storage)) {
               if(is.null(names(tmp_measure))) names(tmp_measure)<-objective$name
               tmp_return[[objective$name]]<-tmp_measure
           }
@@ -293,6 +299,12 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
     }
     
     #return
+    if (isTRUE(storage)){
+        #add the new objective results
+        store_output[[length(store_output)+1]]<-list(out=as.numeric(out),weights=w,objective_measures=tmp_return)
+        # do the assign here
+        assign('.objectivestorage', store_output, pos='.GlobalEnv')
+    }
     if(!isTRUE(trace)){
         return(out)
     } else {
