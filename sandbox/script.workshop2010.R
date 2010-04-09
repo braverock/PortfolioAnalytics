@@ -211,6 +211,10 @@ EqRiskConstr <- add.objective(constraints=EqRiskConstr, type="return", name="pam
 ### Use DEoptim engine
 EqRiskResultDE<-optimize.portfolio(R=indexes[,1:4], constraints=EqRiskConstr, optimize_method='DEoptim', search_size=2000, trace=TRUE, verbose=FALSE) #itermax=55, CR=0.99, F=0.5,
 
+postscript(file="EqRiskDE.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+charts.DE(EqRiskResultDE, return.col="pamean", risk.col="CVaR")
+dev.off()
+
 ### Evaluate through time
 EqRiskResultDERebal<-optimize.portfolio.rebalancing(R=indexes[,1:4],
 constraints=EqRiskConstr, optimize_method="DEoptim", trace=FALSE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, itermax=45, CR=0.99, F=0.5, search_size=1000)
@@ -221,10 +225,16 @@ EqRiskWeights=extractWeights.rebal(EqRiskResultDERebal)
 EqRisk=Return.rebalancing(indexes, EqRiskWeights)
 R=cbind(EqRisk,EqWgt)
 colnames(R)=c("Equal Risk","Equal Weight")
-charts.PerformanceSummary(R, methods=c("ModifiedVaR", "HistoricalVaR"), p=(1-1/12), colorset=redfocus)
+postscript(file="EqRiskPerf.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+charts.PerformanceSummary(R, methods=c("ModifiedVaR", "HistoricalVaR"), p=(1-1/12), colorset=bluefocus)
+dev.off()
 
 # Panel 2: Equal Risk Allocations
-chart.StackedBar(EqRiskWeights)
+postscript(file="EqRiskBars.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+layout(rbind(1, 2, 3), height = c(3, 3, 1.2), width = 1)
+par(mar = c(2, 4, 4, 2) + 0.1)
+PerformanceAnalytics:::chart.StackedBar.xts(EqRiskWeights, main="Equal Risk Weights", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
+par(mar = c(2, 4, 4, 2) + 0.1)
 ### @TODO: Make this an extract function or calculate in the optim results
 EqRiskPercContrCVaR=matrix(nrow=nrow(EqRiskWeights), ncol=ncol(EqRiskWeights))
 for(i in 1:nrow(EqRiskWeights)){
@@ -233,7 +243,12 @@ for(i in 1:nrow(EqRiskWeights)){
 }
 colnames(EqRiskPercContrCVaR) = names(unlist(EqRiskResultDERebal[[1]]$weights))
 rownames(EqRiskPercContrCVaR) = names(EqRiskResultDERebal)
-chart.StackedBar(EqRiskPercContrCVaR)
+par(mar = c(2, 4, 4, 2) + 0.1)
+PerformanceAnalytics:::chart.StackedBar.xts(EqRiskPercContrCVaR, main="Equal Risk Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
+plot.new()
+par(oma = c(0, 0, 0, 0), mar=c(2,4,4,2))
+legend("top", legend = colnames(x), fill = bluemono[c(-2,-4,-6)], ncol = 4, box.col="darkgray", border.col="white", cex=1)
+dev.off()
 
 
 ### APPENDIX EXAMPLES? ###
