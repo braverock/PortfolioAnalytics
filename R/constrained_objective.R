@@ -85,7 +85,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
     out=0
 
     # do the get here
-    store_output <- try(get('.objectivestorage',pos='.GlobalEnv'))#,silent=TRUE)
+    store_output <- try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
     if(inherits(store_output,"try-error")) storage=FALSE else storage=TRUE        
     
     if(isTRUE(normalize)){
