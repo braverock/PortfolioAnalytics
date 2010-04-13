@@ -1,0 +1,12 @@
+\name{extractStats.optimize.portfolio.DEoptim}
+\alias{extractStats.optimize.portfolio.DEoptim}
+\title{extract some stats from a portfolio list run with DEoptim via...}
+\usage{extractStats.optimize.portfolio.DEoptim(object, prefix, ...)}
+\description{extract some stats from a portfolio list run with DEoptim via
+\code{\link{optimize.portfolio}}}
+\details{This function will take everything in the objective_measures slot and \code{unlist} it.  
+This may produce a very large number of columns or strange column names.}
+\seealso{\code{\link{optimize.portfolio}}}
+\arguments{\item{object}{list returned by optimize.portfolio}
+\item{prefix}{prefix to add to output row names}
+\item{...}{any other passthru parameters}}
