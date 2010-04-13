@@ -32,7 +32,8 @@
 #' @export
 optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ..., rp=NULL)
 {
-  optimize_method=optimize_method[1]  
+  optimize_method=optimize_method[1]
+  tmptrace=NULL
   start_t<-Sys.time()
 
   #store the call for later
@@ -121,7 +122,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
         return (paste("Optimizer was unable to find a solution for target"))
     }
     
-    trace <- tmptrace
+    if(isTRUE(tmptrace)) trace <- tmptrace
     
     weights = as.vector( minw$optim$bestmem)
     weights <- normalize_weights(weights)

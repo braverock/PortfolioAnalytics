@@ -270,13 +270,13 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
             if(!is.null(objective$min_concentration)){
                 if(isTRUE(objective$min_concentration)){
                     max_conc<-max(tmp_measure[[2]]) #second element is the contribution in absolute terms
-                    out=out+penalty*max_conc
+                    out=out+penalty*max_conc*multiplier
                 }
             }
             if(!is.null(objective$min_difference)){
                 if(isTRUE(objective$min_difference)){
                     max_diff<-max(tmp_measure[[2]]-(sum(tmp_measure[[2]])/length(tmp_measure[[2]]))) #second element is the contribution in absolute terms
-                    out=out+penalty*max_diff
+                    out=out+penalty*max_diff*multiplier
                 }
             }
           } # end handling of risk_budget objective

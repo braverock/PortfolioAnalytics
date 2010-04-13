@@ -45,9 +45,8 @@ name.replace <- function(rnames){
     return(rnames)
 }
 
-#' extract some stats from a portfolio list run via 
-#' \code{foreach} via
-#' \code{\link{optimize.portfolio.parallel}}
+#' extract some stats from a portfolio list run with DEoptim via
+#' \code{\link{optimize.portfolio}}
 #' 
 #' This function will take everything in the objective_measures slot and \code{unlist} it.  
 #' This may produce a very large number of columns or strange column names.

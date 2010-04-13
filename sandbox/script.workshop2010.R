@@ -14,8 +14,11 @@ require(TTR)
 ### Load the data
 # Monthly total returns of four asset-class indexes
 data(indexes)
+#only look at 2000 onward
+indexes<-indexes["2000::"]
 
-### Review the data
+#'## Review the data
+postscript(file="WeightsVsRiskReview.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 # Generate charts to show 12m sma returns and CVaR by asset
 charts.BarVaR(indexes[,1:4], p=(1-1/12), clean='boudt', show.cleaned=TRUE, methods=c("ModifiedVaR","ModifiedES"), colorset=rainbow6equal, cex.axis=1)
 # Weights v %Contrib to CVaR
@@ -25,6 +28,7 @@ colnames(table) = c("Weights", "%Contrib to CVaR")
 plot(table, ylim=c(-0.1,1), xlim=c(0,1), col=1:4, main="Weight and Contribution to Risk")
 text(table[,1],table[,2],rownames(table), pos=4, cex = 0.8, col=1:4)
 abline(a=0,b=1, col="darkgray", lty="dotted")
+dev.off()
 
 ### Create a benchmark using equal-weighted portfolio returns
 # Rebalance an equal-weight portfolio quarterly
@@ -38,7 +42,12 @@ postscript(file="EqWgtPlot1.eps", height=6, width=5, paper="special", horizontal
 charts.PerformanceSummary(EqWgt, main="Eq Wgt Portfolio", methods=c("ModifiedVaR", "ModifiedES"), p=(1-1/12), clean='boudt', show.cleaned=TRUE, gap=36, colorset=bluefocus, lwd=3)
 dev.off()
 
-## EXAMPLE 1: Constrained Mean-CVaR Portfolio
+# chart the assets
+postscript(file="assetReturns.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+charts.BarVaR(indexes[,1:4], methods=c("ModifiedVaR", "ModifiedES"), colorset=rep("black",4), clean="boudt", show.clean=TRUE)
+dev.off()
+
+#'# EXAMPLE 1: Constrained Mean-CVaR Portfolio
 ### Show an example of a constraint set
 aConstraintObj <- constraint(assets = colnames(indexes[,1:4]),
 min = .05, # minimum position weight
@@ -76,7 +85,7 @@ optimize_method='random',
 search_size=1000, trace=TRUE, verbose=TRUE)
 
 # Chart the results
-postscript(file="rpPlot1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+postscript(file="rpPerformancePlot1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 charts.RP(rndResult, risk.col="CVaR", return.col="pamean", main="Constrained Mean-CVaR", neighbors=25)
 dev.off()
 
@@ -98,6 +107,7 @@ rndResults<-optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=aConstra
 # Chart the cumulative returns
 weights1=extractWeights.rebal(rndResults)
 Ex1=Return.rebalancing(indexes[,1:4], weights1)
+index(weights1)<-as.Date(index(weights1))+1
 colnames(Ex1)="Mean CVaR"
 results = cbind(EqWgt,Ex1)
 postscript(file="ReturnsEx1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
@@ -118,12 +128,15 @@ rownames(contrib1) = names(rndResults)
 contrib1 = as.xts(contrib1)
 
 # test
+postscript(file="InSampleStats.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+
   retrisk1 <- matrix(nrow=numRows, ncol=2)
   for(i in 1:numRows)
     retrisk1[i,] = unlist(rndResults[[i]]$objective_measures)
   rownames(retrisk1) = names(rndResults)
   colnames(retrisk1) = c("pamean", "CVaR")
  chart.TimeSeries(retrisk1, legend="topright", main="In Sample Estimates")
+dev.off()
 # end test
 
 postscript(file="WeightsContribEx1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
@@ -137,7 +150,7 @@ par(oma = c(0, 0, 0, 0), mar=c(2,4,4,2)) #c(bottom, left, top, right)
 legend("top", legend = colnames(weights1), fill = bluemono[c(-2,-4,-6)], ncol = 4, box.col="darkgray", border.col="white", cex=1)
 dev.off()
 
-## EXAMPLE 2: Mean-CVaR Risk Limit Portfolio
+#'# EXAMPLE 2: Mean-CVaR Risk Limit Portfolio
 ### Add a risk contribution constraint
 # No more than 40% of the risk may be contributed by any one asset
 # Reset the position constraints
@@ -152,7 +165,7 @@ optimize_method='random',
 search_size=1000, trace=TRUE, verbose=TRUE)
 
 ### Chart the results
-postscript(file="rpPlot2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+postscript(file="rpPerformancePlot2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 charts.RP(rndResult2, risk.col="CVaR", return.col="pamean", main="Mean-CVaR With Risk Limits", neighbors=25)
 dev.off()
 
@@ -168,12 +181,13 @@ dev.off()
 ### Evaluate Mean-CVaR Risk Limit through time
 #on one line for easy cut/paste/editing in interactive mode
 registerDoMC()
-rndResults2<-optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=aConstraintObj, optimize_method="random", trace=TRUE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, search_size=1000)
+rndResults2<-optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=aConstraintObj, optimize_method="random", trace=TRUE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, search_size=3000)
 
 ### Chart the results
 # Chart the cumulative returns
 weights2=extractWeights.rebal(rndResults2)
 Ex2=Return.rebalancing(indexes[,1:4], weights2)
+index(weights2)<-as.Date(index(weights2)) + 1
 colnames(Ex2) = "Risk Limit"
 results = cbind(results, Ex2) 
 postscript(file="ReturnsEx2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
@@ -198,13 +212,13 @@ par(mar = c(2, 4, 4, 2) + 0.1)
 PerformanceAnalytics:::chart.StackedBar.xts(contrib2, main="Risk Limit Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
 plot.new()
 par(oma = c(0, 0, 0, 0), mar=c(2,4,4,2))
-legend("top", legend = colnames(x), fill = bluemono[c(-2,-4,-6)], ncol = 4, box.col="darkgray", border.col="white", cex=1)
+legend("top", legend = colnames(weights2), fill = bluemono[c(-2,-4,-6)], ncol = 4, box.col="darkgray", border.col="white", cex=1)
 dev.off()
 # par(op)
 
-## EXAMPLE 3: Equal Risk Portfolio
+#'# EXAMPLE 3: Equal Risk Portfolio
 ### Constraints for an Equal risk contribution portfolio
-EqRiskConstr <- constraint(assets = colnames(indexes[,1:4]), min = 0.05, max = c(0.85,0.5,0.5,0.3), min_sum=0.99, max_sum=1.01, weight_seq = generatesequence())
+EqRiskConstr <- constraint(assets = colnames(indexes[,1:4]), min = 0.05, max = c(0.85,0.5,0.5,0.3), min_sum=1, max_sum=1, weight_seq = generatesequence())
 EqRiskConstr <- add.objective(EqRiskConstr, type="risk_budget", name="CVaR",  enabled=TRUE, min_concentration=TRUE, arguments = list(clean='boudt', p=(1-1/12)))
 EqRiskConstr <- add.objective(constraints=EqRiskConstr, type="return", name="pamean", enabled=TRUE, multiplier=0, arguments = list(n=12))
 
@@ -217,12 +231,13 @@ dev.off()
 
 ### Evaluate through time
 EqRiskResultDERebal<-optimize.portfolio.rebalancing(R=indexes[,1:4],
-constraints=EqRiskConstr, optimize_method="DEoptim", trace=FALSE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, itermax=45, CR=0.99, F=0.5, search_size=1000)
+constraints=EqRiskConstr, optimize_method="DEoptim", trace=FALSE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, itermax=75, CR=0.99, F=0.5, search_size=3000)
 
 ### Chart results
 # Panel 1: Equal Risk Performance Summary
 EqRiskWeights=extractWeights.rebal(EqRiskResultDERebal)
 EqRisk=Return.rebalancing(indexes, EqRiskWeights)
+index(EqRiskWeights)<-as.Date(index(EqRiskWeights)) + 1
 R=cbind(EqRisk,EqWgt)
 colnames(R)=c("Equal Risk","Equal Weight")
 postscript(file="EqRiskPerf.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
@@ -247,11 +262,63 @@ par(mar = c(2, 4, 4, 2) + 0.1)
 PerformanceAnalytics:::chart.StackedBar.xts(EqRiskPercContrCVaR, main="Equal Risk Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
 plot.new()
 par(oma = c(0, 0, 0, 0), mar=c(2,4,4,2))
-legend("top", legend = colnames(x), fill = bluemono[c(-2,-4,-6)], ncol = 4, box.col="darkgray", border.col="white", cex=1)
+legend("top", legend = colnames(weights1), fill = bluemono[c(-2,-4,-6)], ncol = 4, box.col="darkgray", border.col="white", cex=1)
+dev.off()
+
+#'## extended Equal Risk example
+#' turn back on the return objective
+EqRiskConstr$objectives[[2]]$multiplier = -1
+#' turn off risk_budget objective
+EqRiskConstr$objectives[[1]]$multiplier = 0
+#' add CDD objective
+EqRiskConstr <- add.objective(EqRiskConstr, type="risk", name="CDD",  enabled=TRUE, arguments = list(clean='boudt', p=(1-1/12)))
+
+### Use DEoptim engine
+EqRiskResultDE2<-optimize.portfolio(R=indexes[,1:4], constraints=EqRiskConstr, optimize_method='DEoptim', search_size=3000, trace=TRUE, verbose=FALSE, itermax=75, CR=0.99, F=0.5)
+postscript(file="EqRiskDE2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+charts.DE(EqRiskResultDE2, return.col="pamean", risk.col="CDD")
+dev.off()
+
+### Evaluate through time
+EqRiskResultDERebal2<-optimize.portfolio.rebalancing(R=indexes[,1:4],
+        constraints=EqRiskConstr, optimize_method="DEoptim", trace=FALSE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, itermax=75, CR=0.99, F=0.5, search_size=3000)
+
+### Chart results
+# Panel 1: Equal Risk Performance Summary
+EqRiskWeights2=extractWeights.rebal(EqRiskResultDERebal2)
+EqRiskRet=Return.rebalancing(indexes, EqRiskWeights2)
+index(EqRiskWeights2)<-as.Date(index(EqRiskWeights2)) + 1
+R=cbind(EqRiskRet,EqWgt)
+colnames(R)=c("Equal Risk","Equal Weight")
+postscript(file="EqRiskPerf2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+charts.PerformanceSummary(R, methods=c("ModifiedVaR", "HistoricalVaR"), p=(1-1/12), colorset=bluefocus)
+dev.off()
+
+# Panel 2: Equal Risk Allocations
+postscript(file="EqRiskBars2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+layout(rbind(1, 2, 3), height = c(3, 3, 1.2), width = 1)
+par(mar = c(2, 4, 4, 2) + 0.1)
+PerformanceAnalytics:::chart.StackedBar.xts(EqRiskWeights2, main="Equal Risk w/ Return Obj. Weights", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
+par(mar = c(2, 4, 4, 2) + 0.1)
+### @TODO: Make this an extract function or calculate in the optim results
+EqRiskPercContrCVaR2=matrix(nrow=nrow(EqRiskWeights), ncol=ncol(EqRiskWeights))
+for(i in 1:nrow(EqRiskWeights)){
+    dates = paste(index(indexes)[1], index(EqRiskWeights2)[i], sep="::")
+    EqRiskPercContrCVaR2[i,] = ES(indexes[dates,1:4], weights=EqRiskWeights2[i,], p=(1-1/12), portfolio_method="component")$pct_contrib_MES
+}
+colnames(EqRiskPercContrCVaR2) = names(unlist(EqRiskResultDERebal2[[1]]$weights))
+rownames(EqRiskPercContrCVaR2) = names(EqRiskResultDERebal2)
+par(mar = c(2, 4, 4, 2) + 0.1)
+PerformanceAnalytics:::chart.StackedBar.xts(EqRiskPercContrCVaR2, main="Eq. Risk w/ Ret. Obj. Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
+plot.new()
+par(oma = c(0, 0, 0, 0), mar=c(2,4,4,2))
+legend("top", legend = colnames(weights1), fill = bluemono[c(-2,-4,-6)], ncol = 4, box.col="darkgray", border.col="white", cex=1)
 dev.off()
 
 
-### APPENDIX EXAMPLES? ###
+
+#'## APPENDIX EXAMPLES? ###
+stopifnot(isTRUE(extended_ex),"halting")
 
 ## Markowitz-like constrained mean-variance
 MeanVarConstr <- constraint(assets = colnames(indexes[,1:4]),
@@ -281,7 +348,7 @@ constraints=MeanVarConstr,
 optimize_method="random",
 trace=FALSE, 
 rebalance_on='quarters', 
-trailing_periods=36, 
+trailing_periods=NULL, 
 training_period=36, 
 search_size=1000)
 
@@ -317,6 +384,7 @@ constraints=EqRiskConstr, optimize_method="DEoptim", trace=FALSE, rebalance_on='
 # Panel 1: Equal Risk Performance Summary
 EqRiskWeights=extractWeights.rebal(EqRiskResultDERebal)
 EqRisk=Return.rebalancing(indexes, EqRiskWeights)
+index(EqRiskWeights)<-as.Date(index(EqRiskWeights)) + 1
 R=cbind(EqRisk,EqWgt)
 colnames(R)=c("Equal Risk","Equal Weight")
 charts.PerformanceSummary(R, methods=c("ModifiedVaR", "HistoricalVaR"), p=(1-1/12), colorset=redfocus)
