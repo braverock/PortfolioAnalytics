@@ -42,6 +42,13 @@ postscript(file="EqWgtPlot1.eps", height=6, width=5, paper="special", horizontal
 charts.PerformanceSummary(EqWgt, main="Eq Wgt Portfolio", methods=c("ModifiedVaR", "ModifiedES"), p=(1-1/12), clean='boudt', show.cleaned=TRUE, gap=36, colorset=bluefocus, lwd=3)
 dev.off()
 
+### Chart the VaR Sensitivity
+postscript(file="VaRSense.eps", height=6, width=6, paper="special", horizontal=FALSE, onefile=FALSE)
+layout(matrix(c(1,2,3,4), nrow=2))
+for(i in 1:4)
+  chart.VaRSensitivity(indexes[,i], methods=c("ModifiedES", "HistoricalES", "GaussianES"), colorset=bluemono, lwd=c(3,2,2), clean="boudt", main=paste("VaR Sensitivity for", colnames(indexes)[i], sep=" "), cex=.8)
+dev.off()
+
 # chart the assets
 postscript(file="assetReturns.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 charts.BarVaR(indexes[,1:4], methods=c("ModifiedVaR", "ModifiedES"), colorset=rep("black",4), clean="boudt", show.clean=TRUE)
@@ -272,7 +279,7 @@ CDDConstr$objectives[[2]]$multiplier = -1
 #' turn off risk_budget objective
 CDDConstr$objectives[[1]]$multiplier = 0
 #' add CDD objective
-CDDConstr <- add.objective(CDDConstr, type="risk", name="CDD",  enabled=TRUE, arguments = list(clean='boudt', p=(1-1/12)))
+CDDConstr <- add.objective(CDDConstr, type="risk", name="CDD",  enabled=TRUE, arguments = list(p=(1-1/12)))
 
 ### Use DEoptim engine
 CDDResultDE2<-optimize.portfolio(R=indexes[,1:4], constraints=CDDConstr, optimize_method='DEoptim', search_size=3000, trace=TRUE, verbose=FALSE, itermax=75, CR=0.99, F=0.5)
