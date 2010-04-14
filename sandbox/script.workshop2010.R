@@ -256,8 +256,8 @@ for(i in 1:nrow(EqRiskWeights)){
     dates = paste(index(indexes)[1], index(EqRiskWeights)[i], sep="::")
     EqRiskPercContrCVaR[i,] = ES(indexes[dates,1:4], weights=EqRiskWeights[i,], p=(1-1/12), portfolio_method="component")$pct_contrib_MES
 }
-colnames(EqRiskPercContrCVaR) = names(unlist(EqRiskResultDERebal[[1]]$weights))
-rownames(EqRiskPercContrCVaR) = names(EqRiskResultDERebal)
+colnames(EqRiskPercContrCVaR) = names(EqRiskResultDERebal[[1]]$weights)
+EqRiskPercContrCVaR<-xts(EqRiskPercContrCVaR,order.by=index(weights1))
 par(mar = c(2, 4, 4, 2) + 0.1)
 PerformanceAnalytics:::chart.StackedBar.xts(EqRiskPercContrCVaR, main="Equal Risk Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
 plot.new()
@@ -266,50 +266,52 @@ legend("top", legend = colnames(weights1), fill = bluemono[c(-2,-4,-6)], ncol = 
 dev.off()
 
 #'## extended Equal Risk example
+#' shart with the prior example
+CDDConstr<-EqRiskConstr
 #' turn back on the return objective
-EqRiskConstr$objectives[[2]]$multiplier = -1
+CDDConstr$objectives[[2]]$multiplier = -1
 #' turn off risk_budget objective
-EqRiskConstr$objectives[[1]]$multiplier = 0
+CDDConstr$objectives[[1]]$multiplier = 0
 #' add CDD objective
-EqRiskConstr <- add.objective(EqRiskConstr, type="risk", name="CDD",  enabled=TRUE, arguments = list(clean='boudt', p=(1-1/12)))
+CDDConstr <- add.objective(CDDConstr, type="risk", name="CDD",  enabled=TRUE, arguments = list(clean='boudt', p=(1-1/12)))
 
 ### Use DEoptim engine
-EqRiskResultDE2<-optimize.portfolio(R=indexes[,1:4], constraints=EqRiskConstr, optimize_method='DEoptim', search_size=3000, trace=TRUE, verbose=FALSE, itermax=75, CR=0.99, F=0.5)
-postscript(file="EqRiskDE2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
-charts.DE(EqRiskResultDE2, return.col="pamean", risk.col="CDD")
+CDDResultDE2<-optimize.portfolio(R=indexes[,1:4], constraints=CDDConstr, optimize_method='DEoptim', search_size=3000, trace=TRUE, verbose=FALSE, itermax=75, CR=0.99, F=0.5)
+postscript(file="CDDDE2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+charts.DE(CDDResultDE2, return.col="pamean", risk.col="CDD")
 dev.off()
 
 ### Evaluate through time
-EqRiskResultDERebal2<-optimize.portfolio.rebalancing(R=indexes[,1:4],
-        constraints=EqRiskConstr, optimize_method="DEoptim", trace=FALSE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, itermax=75, CR=0.99, F=0.5, search_size=3000)
+CDDResultDERebal2<-optimize.portfolio.rebalancing(R=indexes[,1:4],
+        constraints=CDDConstr, optimize_method="DEoptim", trace=FALSE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, itermax=75, CR=0.99, F=0.5, search_size=3000)
 
 ### Chart results
-# Panel 1: Equal Risk Performance Summary
-EqRiskWeights2=extractWeights.rebal(EqRiskResultDERebal2)
-EqRiskRet=Return.rebalancing(indexes, EqRiskWeights2)
-index(EqRiskWeights2)<-as.Date(index(EqRiskWeights2)) + 1
-R=cbind(EqRiskRet,EqWgt)
-colnames(R)=c("Equal Risk","Equal Weight")
-postscript(file="EqRiskPerf2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+# Panel 1: CDD Performance Summary
+CDDweights=extractWeights.rebal(CDDResultDERebal2)
+CDDRet=Return.rebalancing(indexes, CDDweights)
+index(CDDweights)<-as.Date(index(CDDweights)) + 1
+R=cbind(CDDRet,EqWgt)
+colnames(R)=c("CDD","Equal Weight")
+postscript(file="CDDPerf.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 charts.PerformanceSummary(R, methods=c("ModifiedVaR", "HistoricalVaR"), p=(1-1/12), colorset=bluefocus)
 dev.off()
 
-# Panel 2: Equal Risk Allocations
-postscript(file="EqRiskBars2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+# Panel 2: CDD Allocations
+postscript(file="CDDBars2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 layout(rbind(1, 2, 3), height = c(3, 3, 1.2), width = 1)
 par(mar = c(2, 4, 4, 2) + 0.1)
-PerformanceAnalytics:::chart.StackedBar.xts(EqRiskWeights2, main="Equal Risk w/ Return Obj. Weights", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
+PerformanceAnalytics:::chart.StackedBar.xts(CDDweights, main="CDD w/ Return Obj. Weights", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
 par(mar = c(2, 4, 4, 2) + 0.1)
 ### @TODO: Make this an extract function or calculate in the optim results
-EqRiskPercContrCVaR2=matrix(nrow=nrow(EqRiskWeights), ncol=ncol(EqRiskWeights))
-for(i in 1:nrow(EqRiskWeights)){
-    dates = paste(index(indexes)[1], index(EqRiskWeights2)[i], sep="::")
-    EqRiskPercContrCVaR2[i,] = ES(indexes[dates,1:4], weights=EqRiskWeights2[i,], p=(1-1/12), portfolio_method="component")$pct_contrib_MES
+CDDPercContrCVaR2=matrix(nrow=nrow(CDDweights), ncol=ncol(CDDweights))
+for(i in 1:nrow(CDDweights)){
+    dates = paste(index(indexes)[1], index(CDDweights)[i], sep="::")
+    CDDPercContrCVaR2[i,] = ES(indexes[dates,1:4], weights=CDDweights[i,], p=(1-1/12), portfolio_method="component")$pct_contrib_MES
 }
-colnames(EqRiskPercContrCVaR2) = names(unlist(EqRiskResultDERebal2[[1]]$weights))
-rownames(EqRiskPercContrCVaR2) = names(EqRiskResultDERebal2)
+colnames(CDDPercContrCVaR2) = names(unlist(CDDResultDERebal2[[1]]$weights))
+CDDPercContrCVaR2<-xts(CDDPercContrCVaR2,order.by=index(weights1))
 par(mar = c(2, 4, 4, 2) + 0.1)
-PerformanceAnalytics:::chart.StackedBar.xts(EqRiskPercContrCVaR2, main="Eq. Risk w/ Ret. Obj. Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
+PerformanceAnalytics:::chart.StackedBar.xts(CDDPercContrCVaR2, main="CDD w/ Ret. Obj. Risk Contribution", legend.loc=NULL, cex.axis=1, colorset=bluemono[c(-2,-4,-6)], space=0, border="darkgray")
 plot.new()
 par(oma = c(0, 0, 0, 0), mar=c(2,4,4,2))
 legend("top", legend = colnames(weights1), fill = bluemono[c(-2,-4,-6)], ncol = 4, box.col="darkgray", border.col="white", cex=1)
@@ -398,7 +400,7 @@ for(i in 1:nrow(EqRiskWeights)){
     EqRiskPercContrCVaR[i,] = ES(indexes[dates,1:4], weights=EqRiskWeights[i,], p=(1-1/12), portfolio_method="component")$pct_contrib_MES
 }
 colnames(EqRiskPercContrCVaR) = names(unlist(EqRiskResultDERebal[[1]]$weights))
-rownames(EqRiskPercContrCVaR) = names(EqRiskResultDERebal)
+rownames(EqRiskPercContrCVaR) = colnames(weights1)
 chart.StackedBar(EqRiskPercContrCVaR)
 
 ## Return target with risk budget
