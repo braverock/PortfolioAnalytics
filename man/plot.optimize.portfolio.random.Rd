@@ -1,11 +1,9 @@
-\name{plot.optimize.portfolio}
-\alias{plot.optimize.portfolio}
+\name{plot.optimize.portfolio.random}
+\alias{plot.optimize.portfolio.random}
 \title{plot method for optimize...}
-\usage{plot.optimize.portfolio(x, ..., return.col="mean", risk.col="ES", neighbors, main="optimized portfolio plot")}
-\description{plot method for optimize.portfolio output}
-\details{scatter and weights chart for portfolio optimization
-
-this is a fallback that will be called for classes of portfolio that do not have specific pre-existing plot methods.
+\usage{plot.optimize.portfolio.random(x, ..., return.col="mean", risk.col="ES", neighbors, main="optimized portfolio plot")}
+\description{plot method for optimize.portfolio.random output}
+\details{scatter and weights chart  for random portfolios
 
 \code{neighbors} may be specified in three ways.  
 The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 

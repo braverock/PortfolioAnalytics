@@ -1,7 +1,7 @@
 \name{chart.Scatter.DE}
 \alias{chart.Scatter.DE}
 \title{classic risk return scatter of DEoptim results...}
-\usage{chart.Scatter.DE(DE, neighbors, return.col="mean", risk.col="ES", ..., element.color="darkgray", cex.axis=0.8)}
+\usage{chart.Scatter.DE(DE, R, constraints, neighbors, return.col="mean", risk.col="ES", ..., element.color="darkgray", cex.axis=0.8)}
 \description{classic risk return scatter of DEoptim results}
 \seealso{\code{\link{optimize.portfolio}}}
 \arguments{\item{DE}{set of portfolios created by \code{\link{optimize.portfolio}}}
