@@ -88,6 +88,7 @@ chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3,
 #' classic risk return scatter of DEoptim results
 #' 
 #' @param DE set of portfolios created by \code{\link{optimize.portfolio}}
+
 #' @param neighbors set of 'neighbor' portfolios to overplot, see Details
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
@@ -96,7 +97,7 @@ chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3,
 #' @param element.color color for the default plot scatter points
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
-chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
+chart.Scatter.DE <- function(DE, R=NULL, constraints=NULL, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
     # more or less specific to the output of the random portfolio code with constraints
     # will work to a point with other functions, such as optimize.porfolio.parallel
     # there's still a lot to do to improve this.
@@ -123,7 +124,7 @@ chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='
         if(is.vector(neighbors)){
             if(length(neighbors)==1){
                 # overplot nearby portfolios defined by 'out'
-                orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything othchart.Scatter.er than mean
+                orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything other than mean
                 subsetx = head(xtract[orderx,], n=neighbors)
             } else{
                 # assume we have a vector of portfolio numbers
@@ -155,25 +156,46 @@ chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='
 #     }
 
     ## Draw solution trajectory
-    w.traj = unique(DE$DEoutput$member$bestmemit)
-    rows = nrow(w.traj)
-    rr = matrix(nrow=rows, ncol=2)
-    for(i in 1:rows){
-        w = w.traj[i,]
-        x = constrained_objective(w=w, R=indexes[,1:4], constraints=EqRiskConstr, trace=TRUE)
-        rr[i,1] = x$objective_measures$CVaR$MES
-        rr[i,2] = x$objective_measures$pamean
+    if(!is.null(R) & !is.null(constraints)){
+        w.traj = unique(DE$DEoutput$member$bestmemit)
+        rows = nrow(w.traj)
+        rr = matrix(nrow=rows, ncol=2)
+        ## maybe rewrite as an apply statement by row on w.traj
+        rtc = NULL
+        rsc = NULL
+        trajnames = NULL
+        for(i in 1:rows){
+            
+            w = w.traj[i,]
+            x = unlist(constrained_objective(w=w, R=R, constraints=constraints, trace=TRUE))
+            names(x)<-name.replace(names(x))
+            if(is.null(trajnames)) trajnames<-names(x)
+            if(is.null(rsc)){
+                rtc = pmatch(return.col,trajnames)
+                if(is.na(rtc)) {
+                    rtc = pmatch(paste(return.col,return.col,sep='.'),trajnames)
+                }
+                rsc = pmatch(risk.col,trajnames)
+                if(is.na(rsc)) {
+                    rsc = pmatch(paste(risk.col,risk.col,sep='.'),trajnames)
+                }
+            }
+            rr[i,1] = x[rsc] #'FIXME
+            rr[i,2] = x[rtc]  #'FIXME      
+        }
+        colors2 = colorRamp(c("blue","lightblue"))
+        colortrail = rgb(colors2((0:rows)/rows),max=255)
+        for(i in 1:rows){
+            points(rr[i,1], rr[i,2], pch=1, col = colortrail[rows-i+1])
+        }
+        
+        for(i in 2:rows){
+            segments(rr[i,1], rr[i,2], rr[i-1,1], rr[i-1,2],col = colortrail[rows-i+1], lty = 1, lwd = 2)
+        }
+    } else{
+        message("Trajectory cannot be drawn because return object or constraints were not passed.")
     }
 
-    colors2 = colorRamp(c("blue","lightblue"))
-    colortrail = rgb(colors2((0:rows)/rows),max=255)
-    for(i in 1:rows){
-    points(rr[i,1], rr[i,2], pch=1, col = colortrail[rows-i+1])
-    }
-
-    for(i in 2:rows){
-        segments(rr[i,1], rr[i,2], rr[i-1,1], rr[i-1,2],col = colortrail[rows-i+1], lty = 1, lwd = 2)
-    }
 
     ## @TODO: Generalize this to find column containing the "risk" metric
     if(length(names(DE)[which(names(DE)=='constrained_objective')])) {
@@ -182,7 +204,7 @@ chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='
         result.slot<-'objective_measures'
     }
     objcols<-unlist(DE[[result.slot]])
-    names(objcols)<-PortfolioAnalytics:::name.replace(names(objcols))
+    names(objcols)<-name.replace(names(objcols))
     return.column = pmatch(return.column,names(objcols))
     if(is.na(return.column)) {
         return.col = paste(return.col,return.col,sep='.')
@@ -235,9 +257,9 @@ charts.DE <- function(DE, risk.col, return.col, neighbors=NULL, main="DEoptim Po
 
 #TODO make chart.DE into a plot() method or methods
 
-#' plot method for optimize.portfolio output
+#' plot method for optimize.portfolio.DEoptim output
 #' 
-#' scatter and weights chart  for random portfolios
+#' scatter and weights chart  for DEoptim portfolio optimizations run with trace=TRUE
 #' 
 #' \code{neighbors} may be specified in three ways.  
 #' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
@@ -254,6 +276,6 @@ charts.DE <- function(DE, risk.col, return.col, neighbors=NULL, main="DEoptim Po
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param main an overall title for the plot: see \code{\link{title}}
 #' @export
-plot.optimize.portfolio <- function(x, ...,  return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
+plot.optimize.portfolio.DEoptim <- function(x, ...,  return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
     charts.DE(DE=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
 }

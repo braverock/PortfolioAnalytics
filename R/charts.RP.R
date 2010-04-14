@@ -140,7 +140,7 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
             }
             rsc = pmatch(risk.col,columnnames)
             if(is.na(rsc)) {
-                risk.column = pmatch(paste(risk.col,risk.col,sep='.'),columnnames)
+                rsc = pmatch(paste(risk.col,risk.col,sep='.'),columnnames)
             }
             for(i in 1:nrow(neighbors)) points(neighbors[i,rsc], neighbors[i,rtc], col="lightblue", pch=1)
         }
@@ -214,9 +214,34 @@ charts.RP <- function(RP, risk.col, return.col, neighbors=NULL, main="Random Por
 
 #TODO make chart.RP into a plot() method or methods
 
-#' plot method for optimize.portfolio output
+#' plot method for optimize.portfolio.random output
 #' 
 #' scatter and weights chart  for random portfolios
+#' 
+#' \code{neighbors} may be specified in three ways.  
+#' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
+#' portfolios in terms of the \code{out} numerical statistic.
+#' The second method consists of a numeric vector for \code{neighbors}.
+#' This will extract the \code{neighbors} with portfolio index numbers that correspond to the vector contents.
+#' The third method for specifying \code{neighbors} is to pass in a matrix.  
+#' This matrix should look like the output of \code{\link{extractStats}}, and should contain
+#' \code{risk.col},\code{return.col}, and weights columns all properly named.  
+#' @param x set of portfolios created by \code{\link{optimize.portfolio}}
+#' @param ... any other passthru parameters 
+#' @param risk.col string name of column to use for risk (horizontal axis)
+#' @param return.col string name of column to use for returns (vertical axis)
+#' @param neighbors set of 'neighbor portfolios to overplot
+#' @param main an overall title for the plot: see \code{\link{title}}
+#' @export
+plot.optimize.portfolio.random <- function(x, ...,  return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
+    charts.RP(RP=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+}
+
+#' plot method for optimize.portfolio output
+#' 
+#' scatter and weights chart for portfolio optimization
+#' 
+#' this is a fallback that will be called for classes of portfolio that do not have specific pre-existing plot methods.
 #' 
 #' \code{neighbors} may be specified in three ways.  
 #' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 

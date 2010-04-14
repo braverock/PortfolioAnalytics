@@ -27,6 +27,7 @@ extractStats <- function (object, prefix=NULL, ...){
 #' utility function to replace awkward named from unlist
 #' @param rnames character vector of names to check for cleanup
 name.replace <- function(rnames){
+    rnames<-gsub("objective_measures.",'',rnames)
     matchvec<-c('mean.mean','median.median','ES.MES','CVaR.MES','VaR.MVaR','maxDrawdown.maxDrawdown','sd.sd','StdDev.StdDev')
     for(str in matchvec){
         pos<-pmatch(str,rnames)
