@@ -124,8 +124,7 @@ for(i in 1:numRows){
     contrib1[i,]=ES(indexes[todate,1:4], portfolio_method="component", weights=rndResults[[i]]$weights, clean="boudt", p=(1-1/12))$pct_contrib_MES
 }
 colnames(contrib1) = names(unlist(rndResults[[1]]$weights))
-rownames(contrib1) = names(rndResults)
-contrib1 = as.xts(contrib1)
+contrib1<-xts(contrib1,order.by=index(weights1))
 
 # test
 postscript(file="InSampleStats.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
@@ -201,7 +200,7 @@ contrib2 <- matrix(nrow=numRows, ncol=numColumns)
 for(i in 1:numRows)
   contrib2[i,] = unlist(rndResults2[[i]]$objective_measures$CVaR$pct_contrib_MES)
 colnames(contrib2) = names(unlist(rndResults2[[1]]$objective_measures$CVaR$pct_contrib_MES))
-rownames(contrib2) = names(rndResults2)
+contrib2<-xts(contrib2,order.by=index(weights1))
 
 # op <- par(no.readonly = TRUE)
 postscript(file="WeightsContribEx2.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
