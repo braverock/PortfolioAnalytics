@@ -62,6 +62,7 @@
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
+
 constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize=TRUE)
 { 
     if (ncol(R)>length(w)) {
@@ -70,12 +71,16 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
     if(!hasArg(penalty)) penalty = 1e4
     N = length(w)
     T = nrow(R)
-
-    if(hasArg(optimize_method)) optimize_method=match.call(expand.dots=TRUE)$optimize_method else optimize_method='' 
-    if(hasArg(verbose)) verbose=match.call(expand.dots=TRUE)$verbose else verbose=FALSE 
+    if(hasArg(optimize_method)) 
+    	optimize_method=match.call(expand.dots=TRUE)$optimize_method else optimize_method='' 
+    if(hasArg(verbose)) 
+    	verbose=match.call(expand.dots=TRUE)$verbose 
+    else verbose=FALSE 
     
     # check for valid constraints
-    if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
+    if (!is.constraint(constraints)) {
+    	stop("constraints passed in are not of class constraint")
+    }
 
     # check that the constraints and the weighting vector have the same length
     if (N != length(constraints$assets)){
@@ -115,11 +120,13 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
         # the user wants the optimization algorithm to figure it out
         if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
             max_sum=constraints$max_sum
-            if(sum(w)>max_sum) { out = out + .5*penalty*(sum(w) - max_sum)  } # penalize difference to max_sum
+            # if(sum(w)>max_sum) { out = out + .5*penalty*(sum(w) - max_sum)  } # penalize difference to max_sum
+            if(sum(w)>max_sum) { out = out + penalty*(sum(w) - max_sum)  } # penalize difference to max_sum
         }
         if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
             min_sum=constraints$min_sum
-            if(sum(w)<min_sum) { out = out + .5*penalty*(min_sum - sum(w)) } # penalize difference to min_sum
+            # if(sum(w)<min_sum) { out = out + .5*penalty*(min_sum - sum(w)) } # penalize difference to min_sum
+            if(sum(w)<min_sum) { out = out + penalty*(min_sum - sum(w)) } # penalize difference to min_sum
         }
     }
 
@@ -229,7 +236,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
                   } 
               }  
               # target is null or doesn't exist, just maximize, or minimize violation of constraint
-              out = out + (tmp_measure*multiplier)
+              out = out + objective$multiplier*tmp_measure
           } # end handling for return objectives
 
           if(inherits(objective,"portfolio_risk_objective")){
@@ -242,7 +249,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
                 #    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
             }  
             # target is null or doesn't exist, just maximize, or minimize violation of constraint
-            out = out + (tmp_measure*multiplier)
+            out = out + objective$multiplier*tmp_measure
           } #  univariate risk objectives
           
           if(inherits(objective,"risk_budget_objective")){
@@ -265,18 +272,20 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
             RBupper = objective$max_prisk
             RBlower = objective$min_prisk
             if(!is.null(RBupper) | !is.null(RBlower)){
-                out = out + penalty*multiplier*sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
+                out = out + penalty * objective$multiplier * sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
             }
             if(!is.null(objective$min_concentration)){
                 if(isTRUE(objective$min_concentration)){
                     max_conc<-max(tmp_measure[[2]]) #second element is the contribution in absolute terms
-                    out=out+penalty*max_conc*multiplier
+                    # out=out + penalty * objective$multiplier * max_conc
+                    out = out + objective$multiplier * max_conc
                 }
             }
             if(!is.null(objective$min_difference)){
                 if(isTRUE(objective$min_difference)){
                     max_diff<-max(tmp_measure[[2]]-(sum(tmp_measure[[2]])/length(tmp_measure[[2]]))) #second element is the contribution in absolute terms
-                    out=out+penalty*max_diff*multiplier
+                    # out = out + penalty * objective$multiplier * max_diff
+                    out = out + objective$multiplier * max_diff
                 }
             }
           } # end handling of risk_budget objective

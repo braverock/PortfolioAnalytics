@@ -102,7 +102,6 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
         
         #TODO FIXME also check for a passed in controlDE list, including checking its class, and match formals
     }
-    controlDE <- do.call(DEoptim.control,DEcformals)
     
     if(isTRUE(trace)) { 
         #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
@@ -115,7 +114,20 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     upper = constraints$max
     lower = constraints$min
 
-    minw = try(DEoptim( constrained_objective ,  lower = lower[1:N] , upper = upper[1:N] , control = controlDE, R=R, constraints=constraints, ...=...)) # add ,silent=TRUE here?
+	if(hasArg(rpseed)) seed=match.call(expand.dots=TRUE)$rpseed else rpseed=TRUE
+	if(isTRUE(rpseed)) {
+	    # initial seed population is generated with random_portfolios function
+	    if(hasArg(eps)) eps=match.call(expand.dots=TRUE)$eps else eps = 0.01
+    	rpconstraint<-constraint(assets=length(lower), min_sum=constraints$min_sum-eps, max_sum=constraints$max_sum+eps, 
+             					min=lower, max=upper, weight_seq=generatesequence())
+    	rp<- random_portfolios(rpconstraints=rpconstraint,permutations=NP)
+    	DEcformals$initialpop=rp
+    }
+    controlDE <- do.call(DEoptim.control,DEcformals)
+
+    # minw = try(DEoptim( constrained_objective ,  lower = lower[1:N] , upper = upper[1:N] , control = controlDE, R=R, constraints=constraints, ...=...)) # add ,silent=TRUE here?
+    minw = try(DEoptim( constrained_objective ,  lower = lower[1:N] , upper = upper[1:N] , control = controlDE, R=R, constraints=constraints, nargs = dotargs , ...=...)) # add ,silent=TRUE here?
+ 
     if(inherits(minw,"try-error")) { minw=NULL }
     if(is.null(minw)){
         message(paste("Optimizer was unable to find a solution for target"))
@@ -244,6 +256,50 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     return(out_list)
 }
 
+#' compute comoments for use by lower level optimization functions when the conditional covariance matrix is a CCC GARCH model
+#' it first estimates the conditional GARCH variances, then filters out the time-varying volatility and estimates the higher order comoments on the innovations rescaled such that their unconditional covariance matrix is the conditional covariance matrix forecast
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
+#' @param momentargs list containing arguments to be passed down to lower level functions, default NULL
+CCCgarch.MM = function(R, momentargs = NULL , ... )
+{
+    stopifnot("package:fGarch" %in% search() || require("fGarch",quietly=TRUE))
+    if (!hasArg(momentargs) | is.null(momentargs)) 
+        momentargs <- list()
+    cAssets = ncol(R)
+    T = nrow(R)
+    if (!hasArg(mu)){ 
+        mu = apply(R, 2, "mean")
+    }else{ mu = match.call(expand.dots = TRUE)$mu }
+    R = R - matrix( rep(mu,T) , nrow = T , byrow = TRUE )
+    momentargs$mu = mu
+    S = c();
+    for( i in 1:cAssets ){
+       gout =  garchFit(formula ~ garch(1,1), data = R[,i],include.mean = F, cond.dist="QMLE", trace = FALSE )
+       if( as.vector(gout@fit$coef["alpha1"]) < 0.01 ){
+               sigmat = rep( sd( as.vector(R[,i])), length(R[,i]) ); 
+        }else{
+               sigmat = gout@sigma.t
+        }
+        S = cbind( S , sigmat)
+    }
+    U = R/S; #filtered out time-varying volatility
+    if (!hasArg(clean)){ 
+        clean = match.call(expand.dots = TRUE)$clean
+    }else{ clean = NULL }
+    if(!is.null(clean)){ 
+        cleanU <- try(Return.clean(U, method = clean))
+        if (!inherits(cleanU, "try-error")) { U = cleanU }
+    }
+    Rcor = cor(U)
+    D = diag( as.vector(tail(S,n=1)  ),ncol=cAssets )
+    momentargs$sigma = D%*%Rcor%*%D
+    # set volatility of all U to last observation, such that cov(rescaled U)=sigma 
+    U = U*matrix( rep(as.vector(tail(S,n=1)),T  ) , ncol = cAssets , byrow = T )
+    momentargs$m3 = PerformanceAnalytics:::M3.MM(U)
+    momentargs$m4 = PerformanceAnalytics:::M4.MM(U)
+    return(momentargs)
+} 
+
 #' set portfolio moments for use by lower level optimization functions
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
@@ -255,20 +311,42 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL){
         warning("no objectives specified in constraints")
         next()
     } else {
+
+        lcl <- grep('garch', constraints)
+        if (!identical(lcl, integer(0))) {
+            for (objective in constraints[lcl]) {
+                objective = unlist(objective)
+                if( is.null( objective$arguments.garch ) ) next
+                if (objective$arguments.garch){
+                   if (is.null(momentargs$mu)|is.null(momentargs$sigma)|is.null(momentargs$m3)|is.null(momentargs$m4))
+                   {
+                        momentargs =  CCCgarch.MM(R,clean=objective$arguments.clean)
+                   }
+               }
+           }
+        }
+
+
         lcl<-grep('clean',constraints)
         if(!identical(lcl,integer(0))) {
             for (objective in constraints[lcl]){
-                if(!is.null(objective$arguments$clean)) {
-                    cleanR<-try(Return.clean(R,method=objective$arguments$clean))
-                    if(!inherits(cleanR,"try-error")) {
-                        momentargs$mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
-                        momentargs$sigma = cov(cleanR);
-                        momentargs$m3 = PerformanceAnalytics:::M3.MM(cleanR)
-                        momentargs$m4 = PerformanceAnalytics:::M4.MM(cleanR)
-                        #' FIXME NOTE: this isn't perfect as it overwrites the moments for all objectives, not just one with clean='boudt'
-                    }
-                }
-            }    
+                objective = unlist(objective)
+                #if(!is.null(objective$arguments$clean)) {
+                if (!is.null(objective$arguments.clean)){
+                   	if (is.null(momentargs$mu)|is.null(momentargs$sigma)|is.null(momentargs$m3)|is.null(momentargs$m4))
+                   	{
+                       	# cleanR<-try(Return.clean(R,method=objective$arguments$clean))
+                       	cleanR <- try(Return.clean(R, method = objective$arguments.clean))
+                    	if(!inherits(cleanR,"try-error")) {
+                        	momentargs$mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
+                        	momentargs$sigma = cov(cleanR);
+                        	momentargs$m3 = PerformanceAnalytics:::M3.MM(cleanR)
+                        	momentargs$m4 = PerformanceAnalytics:::M4.MM(cleanR)
+                        	#' FIXME NOTE: this isn't perfect as it overwrites the moments for all objectives, not just one with clean='boudt'
+                    	}
+                	}
+            	}    
+        	}
         }
         for (objective in constraints$objectives){
             switch(objective$name,
