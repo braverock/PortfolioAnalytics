@@ -58,12 +58,12 @@
 #' @param \dots any other passthru parameters 
 #' @param trace TRUE/FALSE whether to include debugging and additional detail in the output list
 #' @param normalize TRUE/FALSE whether to normalize results to min/max sum (TRUE), or let the optimizer penalize portfolios that do not conform (FALSE)
-# @param storage TRUE/FALSE default TRUE for DEoptim with trase, otherwise FALSE. not typically user-called
+#' @param storage TRUE/FALSE default TRUE for DEoptim with trace, otherwise FALSE. not typically user-called
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
 
-constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize=TRUE)
+constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize=TRUE, storage=FALSE)
 { 
     if (ncol(R)>length(w)) {
         R=R[,1:length(w)]
@@ -101,10 +101,10 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
             # might violate your constraints, so you'd need to renormalize them after optimizing
             # we'll create functions for that so the user is less likely to mess it up.
             
-            ##' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
-            ##' In Kris' original function, this was manifested as a full investment constraint
-            ##' the normalization process produces much faster convergence, 
-            ##' and then we penalize parameters outside the constraints in the next block
+            #' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
+            #' In Kris' original function, this was manifested as a full investment constraint
+            #' the normalization process produces much faster convergence, 
+            #' and then we penalize parameters outside the constraints in the next block
             if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
                 max_sum=constraints$max_sum
                 if(sum(w)>max_sum) { w<-(max_sum/sum(w))*w } # normalize to max_sum
@@ -120,17 +120,15 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
         # the user wants the optimization algorithm to figure it out
         if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
             max_sum=constraints$max_sum
-            # if(sum(w)>max_sum) { out = out + .5*penalty*(sum(w) - max_sum)  } # penalize difference to max_sum
             if(sum(w)>max_sum) { out = out + penalty*(sum(w) - max_sum)  } # penalize difference to max_sum
         }
         if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
             min_sum=constraints$min_sum
-            # if(sum(w)<min_sum) { out = out + .5*penalty*(min_sum - sum(w)) } # penalize difference to min_sum
             if(sum(w)<min_sum) { out = out + penalty*(min_sum - sum(w)) } # penalize difference to min_sum
         }
     }
 
-    ##' penalize weights outside my constraints (can be caused by normalization)
+    #' penalize weights outside my constraints (can be caused by normalization)
     if (!is.null(constraints$max)){
       max = constraints$max
       out = out + sum(w[which(w>max[1:N])]- constraints$max[which(w>max[1:N])])*penalty
