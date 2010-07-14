@@ -316,8 +316,8 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL){
         if (!identical(lcl, integer(0))) {
             for (objective in constraints[lcl]) {
                 objective = unlist(objective)
-                if( is.null( objective$arguments.garch ) ) next
-                if (objective$arguments.garch){
+                if( is.null( objective$garch ) ) next
+                if (objective$garch){
                    if (is.null(momentargs$mu)|is.null(momentargs$sigma)|is.null(momentargs$m3)|is.null(momentargs$m4))
                    {
                         momentargs =  CCCgarch.MM(R,clean=objective$arguments.clean)
