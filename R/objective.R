@@ -28,13 +28,14 @@ objective<-function(name , target, arguments, enabled=FALSE , ..., multiplier=1,
   if (!is.list(arguments)) stop("arguments must be passed as a named list")
   
   ## now structure and return
-  return(structure( list(name = name,
+  return(structure( c(list(name = name,
                          target = target, 
                          arguments=arguments, 
                          enabled = enabled,
                          multiplier = multiplier
                          #call = match.call()
                         ),
+						list(...)),
                     class=objclass
                   ) # end structure
   )
@@ -153,7 +154,7 @@ return_objective <- function(name, target=NULL, arguments=NULL, multiplier=-1, e
   if(!hasArg(target)) target = NULL
   ##' if target is null, we'll try to maximize the return metric
   if(!hasArg(multiplier)) multiplier=-1
-  return(objective(name=name,arguments=arguments, enabled=enabled, multiplier=multiplier,objclass=c("return_objective","objective")))
+  return(objective(name=name, target=target, arguments=arguments, enabled=enabled, multiplier=multiplier,objclass=c("return_objective","objective"), ... ))
 } # end return_objective constructor
 
 #' constructor for class portfolio_risk_objective
@@ -170,7 +171,7 @@ return_objective <- function(name, target=NULL, arguments=NULL, multiplier=-1, e
 portfolio_risk_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ... )
 {
     if(is.null(arguments$portfolio_method)) arguments$portfolio_method="single" #use multivariate risk calcs
-    return(objective(name=name,target=target, arguments=arguments, multiplier=multiplier,enabled=enabled, objclass=c("portfolio_risk_objective","objective")))
+    return(objective(name=name,target=target, arguments=arguments, multiplier=multiplier,enabled=enabled, objclass=c("portfolio_risk_objective","objective"), ... ))
 } # end portfolio_risk_objective constructor
 
 #' constructor for class risk_budget_objective
@@ -220,7 +221,7 @@ risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, mul
   if (is.null(min_prisk) & is.null(max_prisk)) 
       min_concentration<-TRUE
   
-  Objective<-objective(name=name,target=target, arguments=arguments, multiplier=multiplier,enabled=enabled, objclass=c("risk_budget_objective","objective"))
+  Objective<-objective(name=name,target=target, arguments=arguments, multiplier=multiplier,enabled=enabled, objclass=c("risk_budget_objective","objective"), ... )
   Objective$min_prisk = min_prisk
   Objective$max_prisk = max_prisk
   Objective$min_concentration<-min_concentration
