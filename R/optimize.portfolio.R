@@ -260,6 +260,7 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
 #' it first estimates the conditional GARCH variances, then filters out the time-varying volatility and estimates the higher order comoments on the innovations rescaled such that their unconditional covariance matrix is the conditional covariance matrix forecast
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param momentargs list containing arguments to be passed down to lower level functions, default NULL
+#' @param \dots any other passthru parameters
 CCCgarch.MM = function(R, momentargs = NULL , ... )
 {
     stopifnot("package:fGarch" %in% search() || require("fGarch",quietly=TRUE))
@@ -304,7 +305,8 @@ CCCgarch.MM = function(R, momentargs = NULL , ... )
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param momentargs list containing arguments to be passed down to lower level functions, default NULL
-set.portfolio.moments <- function(R, constraints, momentargs=NULL){
+#' @param \dots any other passthru parameters
+set.portfolio.moments <- function(R, constraints, momentargs=NULL,...){
 
     if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
     if(is.null(constraints$objectives)) {
@@ -320,7 +322,7 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL){
                 if (objective$garch){
                    if (is.null(momentargs$mu)|is.null(momentargs$sigma)|is.null(momentargs$m3)|is.null(momentargs$m4))
                    {
-                        momentargs =  CCCgarch.MM(R,clean=objective$arguments.clean)
+                        momentargs =  CCCgarch.MM(R,clean=objective$arguments.clean,...)
                    }
                }
            }
@@ -336,7 +338,7 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL){
                    	if (is.null(momentargs$mu)|is.null(momentargs$sigma)|is.null(momentargs$m3)|is.null(momentargs$m4))
                    	{
                        	# cleanR<-try(Return.clean(R,method=objective$arguments$clean))
-                       	cleanR <- try(Return.clean(R, method = objective$arguments.clean))
+                       	cleanR <- try(Return.clean(R, method = objective$arguments.clean,...))
                     	if(!inherits(cleanR,"try-error")) {
                         	momentargs$mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
                         	momentargs$sigma = cov(cleanR);
