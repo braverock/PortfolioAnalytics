@@ -19,7 +19,7 @@ mincriterion = "mES" ; percriskcontribcriterion = "mES";
 # names = c( "EqualRisk" , "EqualWeight" , "MinRisk" , "MinRiskConc" , 
 #             "MinRisk_PositionLimit" , "MinRisk_RiskLimit" , "MinRisk_ReturnTarget",
 #             "MinRiskConc_PositionLimit" , "MinRiskConc_RiskLimit" , "MinRiskConc_ReturnTarget")
-strategy = "MinRiskConc_RiskLimit"  # "MinRiskConc_PositionLimit" , "MinRiskConc_RiskLimit"
+strategy = "MinRisk_ReturnTarget"  # "MinRiskConc_PositionLimit" , "MinRiskConc_RiskLimit"
 
 # Load programs
 
@@ -53,6 +53,7 @@ ep = endpoints(monthlyR,on='quarters')
 # select those for estimation period
 ep.start = ep[1:(length(ep)-estyears*4)]+1
 from = time(monthlyR)[ep.start]
+from = seq( as.Date(paste(firstyear,"-01-01",sep="")), as.Date(paste(lastyear-estyears,"-07-01",sep="")), by="3 month") 
 ep.end = ep[(1+estyears*4):length(ep)]
 to = time(monthlyR)[ep.end]
 nsamples = length(from);
