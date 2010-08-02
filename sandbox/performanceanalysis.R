@@ -190,7 +190,8 @@ for( strat in 1:6 ){
     criterion = criteria[strat];
     wstart = read.csv( file = paste( criterion,".csv",sep=""),header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
     wend   = (wstart[1:cRebalancing,]*cumR)/rowSums( wstart[1:cRebalancing,]*cumR )  
-    turnover  = c( turnover , mean( abs(wend[1:(cRebalancing-1),] -    wstart[2:cRebalancing,]         ) ))
+    out  = mean(  abs(wend[1:(cRebalancing-1),] -    wstart[2:cRebalancing,]         ))
+    turnover  = c( turnover , mean(out) )
 }
 
-print( rbind( namelabels[1:6] , turnover) );
+print( rbind( namelabels[1:6] , turnover*100) );
