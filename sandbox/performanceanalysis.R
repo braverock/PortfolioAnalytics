@@ -73,9 +73,35 @@ load(paste(getwd(),"/","/oosreturns/", "simplereturns.Rdata" ,sep="") )
 colnames(simplereturns) = names
 date = time(simplereturns)
 
+
 # Bear periods
 sp500 = window (monthlyR , start = from[1] , end = to[ length(to) ] )[,2]
 bear = c(1:length(sp500))[sp500<mean(sp500)]
+bear = c(1:length(sp500))[sp500<(-0.12)]
+m.bear.dates = list();
+i=1;
+for( b in bear){
+ m.bear.dates[[i]] = c( b-0.5, b+0.5)
+ i = i + 1;  
+}
+
+# http://www.aheadofthecurve-thebook.com/charts.html
+# Vertical yellow bars in most charts denote bear markets (declines in the S&P 500 Index of 12% or more). 
+# IMPORTANT: The leading edge (left side) of the vertical yellow bars are thus stock market peaks, 
+# and the trailing edge (right side) are stock market troughs.
+
+out = table.Drawdowns(sp500,top=10) 
+start.bear = out$From[out$Depth<(-0.12)]
+end.bear = out$Trough[out$Depth<(-0.12)]
+start.bear.index = c(1:length(sp500))[ time(sp500) ]
+m.bear.dates = list()
+v.bear.dates = c()
+for( i in 1:length(start.bear) ){
+   m.bear.dates[[i]] = c( as.yearmon(start.bear[i]) , as.yearmon(end.bear[i]) )
+   v.bear.dates = c( v.bear.dates , seq(start.bear[i],end.bear[i],"days") )
+}
+v.bear.dates = as.Date( v.bear.dates )
+
 
 # Chart of relative performance strategies vs Equal-Weight 
 
@@ -86,21 +112,19 @@ par( mfrow = c(2,1) , mar =c(2,2,2,2), cex.axis = 0.7 , cex.main=0.7 )
 chart.RelativePerformance( simplereturns[,c(2,3,4)] , simplereturns[,c(1)] , 
    main = "" , lty=c("solid","solid","solid") , ylab="", xlab="",
    col=c("black","darkgray","darkgray") , las=1, lwd=c(2,2,5) , 
-   auto.grid = TRUE, minor.ticks = FALSE ,ylim=c(0.7,1.65)) 
+   auto.grid = TRUE, minor.ticks = FALSE ,ylim=c(0.7,1.65),
+   period.areas = m.bear.dates , period.color="lightgray",
+  date.format.in = "%Y-%m-%d",date.format = "%b %Y") 
 legend("topleft", legend = c("Min CVaR","Min CVaR + Position Limit", "Min CVaR + Risk Allocation Limit"), 
    col=c("black","darkgray","darkgray"), lty=c("solid","solid","solid"), lwd=c(2,2,5)  ,cex=0.7) 
-
-for( b in bear){
- rect( xleft=b-0.5, xright=b+0.5,  ybottom=0, ytop=0.7, col="lightgray", border=NA)
-}
 
 chart.RelativePerformance( simplereturns[,c(5,6)] , simplereturns[,c(1)] , 
    main = "" , lty=c("solid","solid","solid") , ylab="",
    col=c("black","darkgray") , lwd=c(2,2), las=1 , 
-   auto.grid = TRUE, minor.ticks = FALSE , ylim=c(0.7,1.65)) 
-for( b in bear){
- rect( xleft=b-0.5, xright=b+0.5,  ybottom=0, ytop=0.7, col="lightgray", border=NA)
-}
+   auto.grid = TRUE, minor.ticks = FALSE , ylim=c(0.7,1.65), 
+   period.areas = m.bear.dates , period.color="lightgray",
+  date.format.in = "%Y-%m-%d",date.format = "%b %Y")  
+
 legend("topleft", legend = c("Min CVaR Concentration","Min CVaR Concentration + Position Limit"), lty=c("solid","solid") ,
    col=c("black","darkgray"), lwd=c(2,2) ,cex=0.7 ) 
 dev.off()
@@ -112,6 +136,8 @@ library(PerformanceAnalytics)
 library(zoo)
 oosreturns = zoo(simplereturns[,1:6],order.by = seq.Date(as.Date(from[1])+31, as.Date(tail(to,1)) + 1, by ="month") - 1)
 
+v.nobear.dates = as.Date(setdiff( time(oosreturns) , v.bear.dates ))
+
 # Mean, Standard Deviation, CVaR 
 histVaR = function( series ){ return(-quantile(series,probs=0.05) ) }
 histCVaR = function( series ){ series = as.numeric(series) ; q = as.numeric(histVaR(series)) ; return( -mean( series[series<(-q)] )) }
@@ -121,8 +147,8 @@ apply( oosreturns , 2 , 'mean' )*100*12  ;
 apply( oosreturns , 2 , 'sd' )*100
 100*apply( oosreturns , 2 , 'histCVaR')
 
-oosreturns_bear = oosreturns[ monthlyR[time(oosreturns),2]<mean(monthlyR[time(oosreturns),2]) ]
-oosreturns_bull = oosreturns[ monthlyR[time(oosreturns),2]>=mean(monthlyR[time(oosreturns),2]) ]
+oosreturns_bear = oosreturns[ v.bear.dates ]
+oosreturns_bull = oosreturns[ v.nobear.dates ]
 
 print("Bear market")
 apply( oosreturns_bear , 2 , 'mean' )*100*12; 
