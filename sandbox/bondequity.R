@@ -22,7 +22,7 @@ monthlyR = indexes = zoo( data[,2:3] , order.by = date )
 # Summary stats individual assets
 
 head(indexes[,1:2],2); tail(indexes[,1:2],2)
-apply(indexes[,1:2],2,'mean')
+apply(indexes[,1:2],2,'mean')*12
 apply(indexes[,1:2],2,'sd')
 ES(indexes[,1],method="modified")
 ES(indexes[,2],method="modified")
@@ -234,6 +234,69 @@ plot.new()
 legend("center",legend=c("US bond", "S&P 500"),fill=colorset[1:2],cex=0.8,ncol=2)
 
 dev.off()
+
+# Other layout
+
+
+postscript('frontier_bondequity.eps') 
+layout( matrix(  c(1,2,3,4),  ncol = 2 ) , height= c(4,0.4,4,0.4), width=1 )
+####################################
+# Min CVaR Concentration
+####################################
+labelnames = c( "US bond" , "S&P 500" )
+W = read.csv(file = "EffFrontierMinCVaRConc _weights_biv.csv")[,2:3]
+EffFrontier_stats = read.csv(file = "EffFrontierMinCVaRConc_stats_biv.csv")[,2:5]
+vmu             = EffFrontier_stats[,1] ;
+vrisk           = EffFrontier_stats[,2] ;
+vmaxpercrisk    = EffFrontier_stats[,3] ;
+vriskconc       = EffFrontier_stats[,4] ;
+
+Wsel = vmusel = vrisksel = vriskconcsel = c();
+lm = minmu = min(vmu) ; maxmu = max(vmu);
+ylim = c( min(assetmu) - 0.0003 , max(assetmu) + 0.0003 )
+xlim = c( 0 , max(assetCVaR) + 0.01 )
+
+# seq( minmu + 0.00005 , maxmu , 0.00005 )
+for( rm in seq( minmu + 0.00005 , maxmu , 0.00005 )  ){
+   selection    =  c(vmu >= lm & vmu < rm) ;
+   if( any(selection) ){
+      vmusel       = c( vmusel       ,  mean(vmu[ selection ] ));
+      Wsel         = rbind( Wsel     ,  apply( W[selection,] ,2,'mean' ))
+      vrisksel     = c( vrisksel     ,  mean(vrisk[ selection ]) );
+      vriskconcsel = c( vriskconcsel ,  mean(vriskconc[ selection ])  )
+   }
+   lm = rm; 
+}
+ 
+cAssets = ncol(monthlyR)
+ colorset = gray( seq(0,(cAssets-1),1)/cAssets ) ; 
+colnames( Wsel ) = c("US bond", "S&P 500")
+rownames( Wsel ) = vmusel;
+
+par( mar = c(4,5,5,1), las=1 ,cex=0.9 , cex.axis=0.9, cex.main=0.95)
+plot( vriskconcsel, vmusel*12 , type="l", lty = 2 , 
+          main = "Ann. Return vs total CVaR and Largest Component CVaR \n for minimum CVaR concentration efficient portfolios" , 
+          ylab="Annualized mean return" , xlab="" , 
+          lwd=2, xlim = xlim , ylim = ylim*12  )
+lines( vrisksel , vmusel*12,  lty = 1, lwd=2 ) # , col="darkgray" )
+for( c in 1:2 ){ text(y=assetmu[c]*12,x= assetCVaR[c]  , label=labelnames[c]  , cex = 0.8) };
+
+par( mar = c(0,5,0,1) )
+plot.new()
+legend("center",legend=c("Total Portfolio CVaR" , "Largest Component CVaR" ),lty=c(1,2), cex=0.8,ncol=1,lwd=2)
+
+
+par( mar = c(5,5,5,1) , las=1 )
+
+barplot( t(Wsel) , axisnames=T ,col=colorset,space=0 , names.arg = round(vmusel*12,3), xlab="Annualized mean return" , 
+      ylab="Weight allocation" , main = "Weight allocation of\n  minimum CVaR concentration  efficient portfolios" )
+
+par( mar = c(0,5,0,1) )
+plot.new()
+legend("center",legend=c("US bond", "S&P 500"),fill=colorset[1:2],cex=0.8,ncol=1)
+
+dev.off()
+
 
 
 
