@@ -1,7 +1,8 @@
 \name{constrained_objective}
 \alias{constrained_objective}
 \title{function to calculate a numeric return value for a portfolio based on a set of constraints...}
-\usage{constrained_objective(w, R, constraints, ..., trace=FALSE, normalize=TRUE)}
+\usage{constrained_objective(w, R, constraints, ..., trace=FALSE,
+    normalize=TRUE, storage=FALSE)}
 \description{function to calculate a numeric return value for a portfolio based on a set of constraints}
 \details{function to calculate a numeric return value for a portfolio based on a set of constraints,
 we'll try to make as few assumptions as possible, and only run objectives that are required by the user
@@ -43,4 +44,5 @@ Additional parameters for random portfolios or \code{\link[DEoptim]{DEoptim.cont
 \item{constraints}{an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}}
 \item{\dots}{any other passthru parameters}
 \item{trace}{TRUE/FALSE whether to include debugging and additional detail in the output list}
-\item{normalize}{TRUE/FALSE whether to normalize results to min/max sum (TRUE), or let the optimizer penalize portfolios that do not conform (FALSE)}}
+\item{normalize}{TRUE/FALSE whether to normalize results to min/max sum (TRUE), or let the optimizer penalize portfolios that do not conform (FALSE)}
+\item{storage}{TRUE/FALSE default TRUE for DEoptim with trace, otherwise FALSE. not typically user-called}}

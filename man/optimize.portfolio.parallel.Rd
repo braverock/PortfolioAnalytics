@@ -1,7 +1,9 @@
 \name{optimize.portfolio.parallel}
 \alias{optimize.portfolio.parallel}
 \title{multiple optimize...}
-\usage{optimize.portfolio.parallel(R, constraints, optimize_method=c("DEoptim", "random"), search_size=20000, trace=FALSE, ..., nodes=4)}
+\usage{optimize.portfolio.parallel(R, constraints,
+    optimize_method=c("DEoptim", "random"), search_size=20000,
+    trace=FALSE, ..., nodes=4)}
 \description{multiple optimize.portfolio calls, presumably in parallel}
 \details{TODO write function to check sensitivity of optimal results by using optimize.portfolio.parallel results}
 \value{a list containing the optimal weights, some summary statistics, the function call, and optionally trace information}

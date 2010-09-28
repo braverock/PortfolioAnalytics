@@ -1,7 +1,8 @@
 \name{add.objective}
 \alias{add.objective}
 \title{General interface for adding optimization objectives, including risk, return, and risk budget...}
-\usage{add.objective(constraints, type, name, arguments, enabled=FALSE, ..., indexnum)}
+\usage{add.objective(constraints, type, name, arguments, enabled=FALSE, ...,
+    indexnum)}
 \description{General interface for adding optimization objectives, including risk, return, and risk budget}
 \details{This function is the main function for adding and updating business objectives in an object of type \code{\link{constraint}}.
 

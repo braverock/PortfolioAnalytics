@@ -1,7 +1,8 @@
 \name{portfolio_risk_objective}
 \alias{portfolio_risk_objective}
 \title{constructor for class portfolio_risk_objective...}
-\usage{portfolio_risk_objective(name, target, arguments, multiplier=1, enabled=FALSE, ...)}
+\usage{portfolio_risk_objective(name, target, arguments, multiplier=1,
+    enabled=FALSE, ...)}
 \description{constructor for class portfolio_risk_objective}
 \details{if target is null, we'll try to minimize the risk metric}
 \author{Brian G. Peterson}

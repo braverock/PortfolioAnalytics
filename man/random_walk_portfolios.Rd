@@ -4,4 +4,4 @@
 \usage{random_walk_portfolios(...)}
 \description{deprecated random portfolios wrapper until we write a random trades function}
 \author{bpeterson}
-\arguments{\item{...}{}}
+\arguments{\item{...}{any other passthru parameters}}

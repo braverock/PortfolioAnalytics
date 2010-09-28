@@ -1,7 +1,8 @@
 \name{charts.RP}
 \alias{charts.RP}
 \title{scatter and weights chart  for random portfolios...}
-\usage{charts.RP(RP, risk.col, return.col, neighbors, main="Random Portfolios", ...)}
+\usage{charts.RP(RP, risk.col, return.col, neighbors,
+    main="Random.Portfolios", ...)}
 \description{scatter and weights chart  for random portfolios}
 \details{\code{neighbors} may be specified in three ways.  
 The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 

@@ -1,7 +1,8 @@
 \name{optimize.portfolio}
 \alias{optimize.portfolio}
 \title{wrapper for constrained optimization of portfolios...}
-\usage{optimize.portfolio(R, constraints, optimize_method=c("DEoptim", "random"), search_size=20000, trace=FALSE, ..., rp)}
+\usage{optimize.portfolio(R, constraints, optimize_method=c("DEoptim",
+    "random"), search_size=20000, trace=FALSE, ..., rp)}
 \description{wrapper for constrained optimization of portfolios}
 \details{This function aims to provide a wrapper for constrained optimization of 
 portfolios that allows the user to specify box constraints and business 

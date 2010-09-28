@@ -2,7 +2,7 @@
 \usepackage[round]{natbib}
 \usepackage{bm}
 \usepackage{verbatim}
-
+% \VignetteIndexEntry{Portfolio Optimization with CVaR budgets in PortfolioAnalytics}
 \bibliographystyle{abbrvnat}
 
 \usepackage{url}
@@ -146,7 +146,7 @@ the constant conditional correlation model of \citet{Bollerslev90}.
 For the formulation of the objective function, this implies setting: 
 <<echo=TRUE>>=| 
 ObjSpec = add.objective( constraints = Wcons , type="risk",name="CVaR",
-arguments=list(p=0.95,clean="boudt",garch=TRUE), enabled=TRUE)   
+arguments=list(p=0.95,clean="boudt"), enabled=TRUE, garch=TRUE)   
 constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , constraints = ObjSpec)
 @
 

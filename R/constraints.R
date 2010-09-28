@@ -12,15 +12,15 @@
 
 #' constructor for class constraint
 #' 
-#' @param assets 
-#' @param ... 
-#' @param min 
-#' @param max 
-#' @param min_mult 
-#' @param max_mult 
-#' @param min_sum 
-#' @param max_sum 
-#' @param weight_seq 
+#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
+#' @param ... any other passthru parameters
+#' @param min numeric or named vector specifying minimum weight box constraints
+#' @param max numeric or named vector specifying minimum weight box constraints
+#' @param min_mult numeric or named vector specifying minimum multiplier box constraint from seed weight in \code{assets}
+#' @param max_mult numeric or named vector specifying maximum multiplier box constraint from seed weight in \code{assets}
+#' @param min_sum minimum sum of all asset weights, default .99
+#' @param max_sum maximum sum of all asset weights, default 1.01
+#' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
 #' @author Peter Carl and Brian G. Peterson
 #' @examples 
 #' exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, weight_seq=generatesequence())
@@ -154,7 +154,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
 
 #' check function for constraints
 #' 
-#' @param x 
+#' @param x object to test for type \code{constraint}
 #' @author bpeterson
 #' @export
 is.constraint <- function( x ) {
@@ -164,8 +164,8 @@ is.constraint <- function( x ) {
 #' function for updating constrints, not well tested, may be broken
 #' 
 #' can we use the generic update.default function?
-#' @param object 
-#' @param ... 
+#' @param object object of type \code{\link{constraint}} to update
+#' @param ... any other passthru parameters, used to call \code{\link{constraint}}
 #' @author bpeterson
 update.constraint <- function(object, ...){
   constraints <- object
@@ -209,15 +209,3 @@ update.constraint <- function(object, ...){
   return(constraints)
 }
 
-# assume a structure that includes column names for each asset
-# constraints should be a list by constraint type
-# we have min/max constraints on each asset
-# constraint <- function (x){
-#
-# structure( list(L   = L,
-#                   dir = dir,
-#                   rhs = rhs,
-#                   n_L_constraints = n_L_constraints),
-#             class = c("L_constraint", "constraint"))
-# }
-# ultimately, I'd like to have a real portfolio class, and real constraints classes, but for now we can build Burns-style random portfolios by specifying our box constriants

@@ -1,7 +1,8 @@
 \name{plot.optimize.portfolio}
 \alias{plot.optimize.portfolio}
 \title{plot method for optimize...}
-\usage{plot.optimize.portfolio(x, ..., return.col="mean", risk.col="ES", neighbors, main="optimized portfolio plot")}
+\usage{plot.optimize.portfolio(x, ..., return.col="mean", risk.col="ES",
+    neighbors, main="optimized portfolio plot")}
 \description{plot method for optimize.portfolio output}
 \details{scatter and weights chart for portfolio optimization
 

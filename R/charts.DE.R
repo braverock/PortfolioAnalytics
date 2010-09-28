@@ -88,8 +88,9 @@ chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3,
 #' classic risk return scatter of DEoptim results
 #' 
 #' @param DE set of portfolios created by \code{\link{optimize.portfolio}}
-
-#' @param neighbors set of 'neighbor' portfolios to overplot, see Details
+#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns, used to recalulate the objective function where required
+#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
+#' @param neighbors set of 'neighbor' portfolios to overplot, see Details in \code{\link{charts.DE}}
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
 #' @param ... any other passthru parameters 
@@ -243,7 +244,7 @@ chart.Scatter.DE <- function(DE, R=NULL, constraints=NULL, neighbors = NULL, ret
 #' \code{\link{optimize.portfolio}}
 #' \code{\link{extractStats}}
 #' @export
-charts.DE <- function(DE, risk.col, return.col, neighbors=NULL, main="DEoptim Portfolios", ...){
+charts.DE <- function(DE, risk.col, return.col, neighbors=NULL, main="DEoptim.Portfolios", ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that DE is of the correct class
     op <- par(no.readonly=TRUE)

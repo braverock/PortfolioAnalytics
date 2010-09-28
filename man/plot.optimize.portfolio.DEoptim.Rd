@@ -1,7 +1,8 @@
 \name{plot.optimize.portfolio.DEoptim}
 \alias{plot.optimize.portfolio.DEoptim}
 \title{plot method for optimize...}
-\usage{plot.optimize.portfolio.DEoptim(x, ..., return.col="mean", risk.col="ES", neighbors, main="optimized portfolio plot")}
+\usage{plot.optimize.portfolio.DEoptim(x, ..., return.col="mean",
+    risk.col="ES", neighbors, main="optimized portfolio plot")}
 \description{plot method for optimize.portfolio.DEoptim output}
 \details{scatter and weights chart  for DEoptim portfolio optimizations run with trace=TRUE
 

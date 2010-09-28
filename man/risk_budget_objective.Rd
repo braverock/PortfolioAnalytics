@@ -1,7 +1,8 @@
 \name{risk_budget_objective}
 \alias{risk_budget_objective}
 \title{constructor for class risk_budget_objective...}
-\usage{risk_budget_objective(assets, name, target, arguments, multiplier=1, enabled=FALSE, ..., min_prisk, max_prisk, min_concentration=FALSE,
+\usage{risk_budget_objective(assets, name, target, arguments, multiplier=1,
+    enabled=FALSE, ..., min_prisk, max_prisk, min_concentration=FALSE,
     min_difference=FALSE)}
 \description{constructor for class risk_budget_objective}
 \author{Brian G. Peterson}

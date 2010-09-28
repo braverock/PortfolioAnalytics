@@ -1,7 +1,8 @@
 \name{plot.optimize.portfolio.random}
 \alias{plot.optimize.portfolio.random}
 \title{plot method for optimize...}
-\usage{plot.optimize.portfolio.random(x, ..., return.col="mean", risk.col="ES", neighbors, main="optimized portfolio plot")}
+\usage{plot.optimize.portfolio.random(x, ..., return.col="mean",
+    risk.col="ES", neighbors, main="optimized portfolio plot")}
 \description{plot method for optimize.portfolio.random output}
 \details{scatter and weights chart  for random portfolios
 

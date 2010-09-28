@@ -1,7 +1,8 @@
 \name{extract.efficient.frontier}
 \alias{extract.efficient.frontier}
 \title{extract the efficient frontier of portfolios that meet your objectives over a range of risks...}
-\usage{extract.efficient.frontier(portfolios, match.col="ES", from=0, to=1, by=0.005, ..., R, constraints, optimize_method="random")}
+\usage{extract.efficient.frontier(portfolios, match.col="ES", from=0, to=1,
+    by=0.005, ..., R, constraints, optimize_method="random")}
 \description{extract the efficient frontier of portfolios that meet your objectives over a range of risks}
 \details{note that this function will be extremely sensitive to the objectives in your
 \code{\link{constraint}} object.  It will be especially obvious if you 

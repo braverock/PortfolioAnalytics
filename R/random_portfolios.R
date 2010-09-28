@@ -152,7 +152,7 @@ randomize_portfolio <- function (rpconstraints, max_permutations=200, rounding=3
 #' deprecated random portfolios wrapper until we write a random trades function
 #' 
 #' 
-#' @param ... 
+#' @param ... any other passthru parameters
 #' @author bpeterson
 #' @export
 random_walk_portfolios <-function(...) {
@@ -160,7 +160,7 @@ random_walk_portfolios <-function(...) {
   random_portfolios(...=...)
 }
 
-#' generate an arbitraty number of constrained random portfolios
+#' generate an arbitary number of constrained random portfolios
 #' 
 #' repeatedly calls \code{\link{randomize_portfolio}} to generate an 
 #' arbitrary number of constrained random portfolios.

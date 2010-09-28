@@ -1,7 +1,8 @@
 \name{return_objective}
 \alias{return_objective}
 \title{constructor for class return_objective...}
-\usage{return_objective(name, target, arguments, multiplier=-1, enabled=FALSE, ...)}
+\usage{return_objective(name, target, arguments, multiplier=-1, enabled=FALSE,
+    ...)}
 \description{constructor for class return_objective}
 \details{if target is null, we'll try to maximize the return metric
 

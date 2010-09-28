@@ -1,8 +1,8 @@
 \name{random_portfolios}
 \alias{random_portfolios}
-\title{generate an arbitraty number of constrained random portfolios...}
+\title{generate an arbitary number of constrained random portfolios...}
 \usage{random_portfolios(rpconstraints, permutations=100, ...)}
-\description{generate an arbitraty number of constrained random portfolios}
+\description{generate an arbitary number of constrained random portfolios}
 \details{repeatedly calls \code{\link{randomize_portfolio}} to generate an 
 arbitrary number of constrained random portfolios.}
 \value{matrix of random portfolio weights}

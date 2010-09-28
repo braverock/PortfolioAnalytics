@@ -4,4 +4,4 @@
 \usage{is.constraint(x)}
 \description{check function for constraints}
 \author{bpeterson}
-\arguments{\item{x}{}}
+\arguments{\item{x}{object to test for type \code{constraint}}}

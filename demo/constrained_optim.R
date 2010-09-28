@@ -1,3 +1,4 @@
+require("PerformanceAnalytics")
 require("PortfolioAnalytics")
 require("DEoptim")
 data(edhec)

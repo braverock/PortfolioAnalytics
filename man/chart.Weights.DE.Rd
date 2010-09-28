@@ -1,7 +1,8 @@
 \name{chart.Weights.DE}
 \alias{chart.Weights.DE}
 \title{boxplot of the weight distributions in the random portfolios...}
-\usage{chart.Weights.DE(DE, neighbors, ..., main="Weights", las=3, xlab, cex.lab=1, element.color="darkgray", cex.axis=0.8)}
+\usage{chart.Weights.DE(DE, neighbors, ..., main="Weights", las=3, xlab,
+    cex.lab=1, element.color="darkgray", cex.axis=0.8)}
 \description{boxplot of the weight distributions in the random portfolios}
 \seealso{\code{\link{optimize.portfolio}}}
 \arguments{\item{DE}{set of random portfolios created by \code{\link{optimize.portfolio}}}

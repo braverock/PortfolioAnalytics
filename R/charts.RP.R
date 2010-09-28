@@ -200,7 +200,8 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
 #' \code{\link{optimize.portfolio}}
 #' \code{\link{extractStats}}
 #' @export
-charts.RP <- function(RP, risk.col, return.col, neighbors=NULL, main="Random Portfolios", ...){
+charts.RP <- function(RP, risk.col, return.col, 
+						neighbors=NULL, main="Random.Portfolios", ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     op <- par(no.readonly=TRUE)

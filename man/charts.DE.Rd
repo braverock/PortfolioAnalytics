@@ -1,7 +1,8 @@
 \name{charts.DE}
 \alias{charts.DE}
 \title{scatter and weights chart  for random portfolios...}
-\usage{charts.DE(DE, risk.col, return.col, neighbors, main="DEoptim Portfolios", ...)}
+\usage{charts.DE(DE, risk.col, return.col, neighbors,
+    main="DEoptim.Portfolios", ...)}
 \description{scatter and weights chart  for random portfolios}
 \details{\code{neighbors} may be specified in three ways.  
 The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 

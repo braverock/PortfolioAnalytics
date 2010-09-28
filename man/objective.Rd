@@ -1,7 +1,8 @@
 \name{objective}
 \alias{objective}
 \title{constructor for class 'objective'...}
-\usage{objective(name, target, arguments, enabled=FALSE, ..., multiplier=1, objclass="objective")}
+\usage{objective(name, target, arguments, enabled=FALSE, ..., multiplier=1,
+    objclass="objective")}
 \description{constructor for class 'objective'}
 \author{Brian G. Peterson}
 \arguments{\item{name}{name of the objective which will be used to call a function, like 'ES', 'VaR', 'mean'}

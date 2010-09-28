@@ -1,8 +1,9 @@
 \name{optimize.portfolio.rebalancing}
 \alias{optimize.portfolio.rebalancing}
 \title{portfolio optimization with support for rebalancing or rolling periods...}
-\usage{optimize.portfolio.rebalancing(R, constraints, optimize_method=c("DEoptim", "random"), search_size=20000, trace=FALSE, ..., rebalance_on,
-    training_period, trailing_periods)}
+\usage{optimize.portfolio.rebalancing(R, constraints,
+    optimize_method=c("DEoptim", "random"), search_size=20000,
+    trace=FALSE, ..., rebalance_on, training_period, trailing_periods)}
 \description{portfolio optimization with support for rebalancing or rolling periods}
 \details{This function may eventually be wrapped into optimize.portfolio
 
