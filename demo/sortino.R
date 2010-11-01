@@ -21,7 +21,7 @@ registerDoMC()
 # Monthly total returns of four asset-class indexes
 data(indexes)
 #only look at 2000 onward
-indexes<-indexes["2000::"]
+#indexes<-indexes["2000::"]
 
 
 # parameter MAR
@@ -32,16 +32,15 @@ SortinoConstr <- constraint(assets = colnames(indexes[,1:4]), min = 0.05, max = 
 SortinoConstr <- add.objective(SortinoConstr, type="return", name="SortinoRatio",  enabled=TRUE, arguments = list(MAR=MAR))
 SortinoConstr <- add.objective(SortinoConstr, type="return", name="mean",  enabled=TRUE, multiplier=0) # multiplier 0 makes it availble for plotting, but not affect optimization
 
-
-#SortinoConstr <- add.objective(constraints=SortinoConstr, type="return", name="pamean", enabled=TRUE, multiplier=0, arguments = list(n=12))
-
 ### Use random portfolio engine
 SortinoResult<-optimize.portfolio(R=indexes[,1:4], constraints=SortinoConstr, optimize_method='random', search_size=2000, trace=TRUE, verbose=TRUE)
 plot(SortinoResult, risk.col='SortinoRatio')
 
-
 ### alternately, Use DEoptim engine
 #SortinoResultDE<-optimize.portfolio(R=indexes[,1:4], constraints=SortinoConstr, optimize_method='DEoptim', search_size=2000, trace=TRUE, verbose=FALSE,strategy=6) #itermax=55, CR=0.99, F=0.5,
+
+### now rebalance quarterly
+SortinoRebalance <- optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=SortinoConstr, optimize_method="random", trace=TRUE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, search_size=2000)
 
 ###############################################################################
 # R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
