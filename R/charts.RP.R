@@ -162,7 +162,7 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
     }
     objcols<-unlist(RP[[result.slot]])
     names(objcols)<-PortfolioAnalytics:::name.replace(names(objcols))
-    return.column = pmatch(return.column,names(objcols))
+    return.column = pmatch(return.col,names(objcols))
     if(is.na(return.column)) {
         return.col = paste(return.col,return.col,sep='.')
         return.column = pmatch(return.col,names(objcols))
