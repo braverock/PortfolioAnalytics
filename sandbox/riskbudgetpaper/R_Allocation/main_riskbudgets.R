@@ -19,7 +19,7 @@ mincriterion = "mES" ; percriskcontribcriterion = "mES";
 # names = c( "EqualRisk" , "EqualWeight" , "MinRisk" , "MinRiskConc" , 
 #             "MinRisk_PositionLimit" , "MinRisk_RiskLimit" , "MinRisk_ReturnTarget",
 #             "MinRiskConc_PositionLimit" , "MinRiskConc_RiskLimit" , "MinRiskConc_ReturnTarget")
-strategy = "MinRiskConc_RiskLimit"  # "MinRiskConc_PositionLimit" , "MinRiskConc_RiskLimit"
+strategy = "MinRiskConc_PositionLimit"  # "MinRiskConc_PositionLimit" , "MinRiskConc_RiskLimit"
 
 # Load programs
 
@@ -67,7 +67,7 @@ names.input = c( names.input , paste( c("Q1y_","Q2y_","Q3y_") , rep(lastyear,eac
 out = findportfolio.dynamic( R=monthlyR,  from=from, to=to, names.input=names.input, names.assets = colnames(monthlyR) , 
              p = p , priskbudget = priskbudget , mincriterion = mincriterion , 
              percriskcontribcriterion = percriskcontribcriterion , 
-             strategy ,  controlDE = list( VTR = 0 , NP=200 , itermax = 200,trace=F ) )
+             strategy , optimize_method = "DEoptim+L-BFGS-B" )
 
 write.table( out[[1]] , file = paste("weights/",strategy,".csv",sep=""),
             append = FALSE, quote = TRUE, sep = ",", eol = "\n", na = "NA", dec = ".", row.names = TRUE,col.names = TRUE, qmethod = "escape")

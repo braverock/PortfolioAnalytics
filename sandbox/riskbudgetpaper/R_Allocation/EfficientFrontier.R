@@ -1,42 +1,213 @@
-# Paper: Portfolio Optimization with Conditional Value-at-Risk Budgets
-# Boudt, Carl, Peterson (2010)
-# This R script serves to make the exhibits regarding the four asset efficient frontier
-
 setwd("c:/Documents and Settings/Administrator/Desktop/risk budget programs")
 
-cAssets = 4; p = priskbudget = 0.95;
+# Equal risk portfolio
+cAssets = 4;
+p = priskbudget = 0.95;
+
 mincriterion = "mES" ; percriskcontribcriterion = "mES";
 
 # Load programs
 
 source("R_Allocation/Risk_budget_functions.R"); 
 library(zoo); library(fGarch); library("PerformanceAnalytics"); library("PortfolioAnalytics")
-clean = TRUE
 
+clean = TRUE
 #   Load the data
+
 firstyear = 1976 ; firstquarter = 1; lastyear = 2010; lastquarter = 2; 
+
 data = read.table( file= paste("data/","/data.txt",sep="") ,header=T)
 date = as.Date(data[,1],format="%Y-%m-%d")
 
-monthlyR = zoo( data[,2:(1+cAssets)] , order.by = date )
-if(clean){ monthlyR = clean.boudt2(monthlyR,alpha=0.05)[[1]] }
 
-mu = apply(monthlyR,2,'mean')
-sigma = cov(monthlyR)
-M3 = PerformanceAnalytics:::M3.MM(monthlyR) 
-M4 = PerformanceAnalytics:::M4.MM(monthlyR) 
+monthlyR = indexes = zoo( data[,2:(1+cAssets)] , order.by = date )
+
+if(clean){
+indexes = monthlyR = clean.boudt2(monthlyR,alpha=0.05)[[1]]
+}
+
+mu = apply(indexes,2,'mean')
+sigma = cov(indexes)
+M3 = PerformanceAnalytics:::M3.MM(indexes) 
+M4 = PerformanceAnalytics:::M4.MM(indexes) 
 
 # Summary stats individual assets
-apply(monthlyR,2,'mean')*12
-apply(monthlyR,2,'sd')
-apply(monthlyR,2,'skewness')
-apply(monthlyR,2,'kurtosis')
-ES(monthlyR[,1],method="modified"); ES(monthlyR[,2],method="modified")
-ES(monthlyR[,3],method="modified"); ES(monthlyR[,4],method="modified")
+
+head(indexes[,1:2],2); tail(indexes[,1:2],2)
+apply(indexes[,1:2],2,'mean')*12
+apply(indexes[,1:2],2,'sd')
+ES(indexes[,1],method="modified")
+ES(indexes[,2],method="modified")
 
 #################################################################################
 # Make Exhibit 3 Risk budget paper: Efficient frontier plot
 #################################################################################
+
+mESfun = function( series ){ return( operMES(  series , alpha = 0.05 , r = 2 ) ) }
+assetmu = apply( monthlyR , 2 , 'mean' )
+assetCVaR = apply( monthlyR , 2 , 'mESfun' )
+minmu = min(assetmu); maxmu = max(assetmu); print(minmu*12); print(maxmu*12);
+
+# Do the optimization: given a return target minimize the largest percentage CVaR in the portfolio
+#---------------------------------------------------------------------------------------------------
+
+# unconstrained solution is Minimum CVaR Concentration portfolio (having the equal risk contribution property):
+# sol = MinMaxCompCVaRconportfolio(R=monthlyR, Riskupper = Inf ,Returnlower= -Inf )
+minmu = min( apply(monthlyR,2,'mean' )); 
+sol = PortfolioOptim(  minriskcriterion = "mES" , MinMaxComp = T, percriskcontribcriterion = "mES" , 
+                Riskupper = Inf ,  mu = mu, sigma = sigma, M3=M3, M4=M4)
+
+W               = as.vector( sol[[1]] ) ;   vmu             = as.vector( sol[[2]] )
+vrisk           = as.vector( sol[[3]] ) ;   mPercrisk       = as.vector( sol[[4]] )  
+vmaxpercrisk    = max( sol[[4]] )       ;   vmaxriskcontrib = max( sol[[5]] ) 
+
+for( mutarget in seq(minmu+0.00001,maxmu,0.00001) ){
+   sol = PortfolioOptim(  minriskcriterion = "mES" , MinMaxComp = T, percriskcontribcriterion = "mES" , 
+                      Riskupper = Inf ,Returnlower= mutarget,
+                      mu = mu, sigma = sigma, M3=M3, M4=M4) 
+   W = rbind( W, as.vector( sol[[1]] ) )
+   mPercrisk = rbind( mPercrisk , as.vector( sol[[4]] ) )
+   vmu = c( vmu , as.vector( sol[[2]] ))
+   vrisk = c( vrisk , as.vector( sol[[3]] ) )
+   vmaxpercrisk = c( vmaxpercrisk , max( sol[[4]] ) )
+   vmaxriskcontrib = c( vmaxriskcontrib , max( sol[[5]] ) )
+}
+
+# For the highest return targets, a very high penalty parameter is (sometimes) needed
+
+for( mutarget in c(seq( max(vmu) , maxmu, 0.000001),maxmu) ){
+   print( c("mutarget equal to",mutarget) )
+   sol = PortfolioOptim(  minriskcriterion = "mES" , MinMaxComp = T, percriskcontribcriterion = "mES" , 
+            Riskupper = Inf ,Returnlower= mutarget, penalty = 1e9,
+            mu = mu, sigma = sigma, M3=M3, M4=M4) 
+   W = rbind( W, as.vector( sol[[1]] ) )
+   mPercrisk = rbind( mPercrisk , as.vector( sol[[4]] ) )
+   vmu = c( vmu , as.vector( sol[[2]] ))
+   vrisk = c( vrisk , as.vector( sol[[3]] ) )
+   vmaxpercrisk = c( vmaxpercrisk , max( sol[[4]] ) )
+   vmaxriskcontrib = c( vmaxriskcontrib , max( sol[[5]] ) )
+}
+
+
+if(clean){
+write.csv( W , file = "EffFrontierMinCVaRConc_weights_clean.csv" )
+write.csv( mPercrisk , file = "EffFrontierMinCVaRConc_percrisk_clean.csv" )
+EffFrontier_stats = cbind( vmu , vrisk , vmaxpercrisk , vmaxriskcontrib)
+write.csv( EffFrontier_stats , file = "EffFrontierMinCVaRConc_stats_clean.csv" )
+}else{
+write.csv( W , file = "EffFrontierMinCVaRConc_weights.csv" )
+write.csv( mPercrisk , file = "EffFrontierMinCVaRConc_percrisk.csv" )
+EffFrontier_stats = cbind( vmu , vrisk , vmaxpercrisk , vmaxriskcontrib)
+write.csv( EffFrontier_stats , file = "EffFrontierMinCVaRConc_stats.csv" )
+}
+
+
+
+# Do the optimization: given a return target minimize the portfolio CVaR
+#--------------------------------------------------------------------------
+
+# unconstrained solution is Minimum CVaR portfolio (having the property that percentage CVaR corresponds to porfolio weights):
+minmu = min( apply(monthlyR,2,'mean' )); 
+sol = PortfolioOptim(  minriskcriterion = "mES" , MinMaxComp = F, percriskcontribcriterion = "mES" , 
+                Riskupper = Inf , mu = mu, sigma = sigma, M3=M3, M4=M4) 
+
+W               = as.vector( sol[[1]] ) ;   vmu             = as.vector( sol[[2]] )
+vrisk           = as.vector( sol[[3]] ) ;   mPercrisk       = as.vector( sol[[4]] )  
+vmaxpercrisk    = max( sol[[4]] )       ;   vmaxriskcontrib = max( sol[[5]] ) 
+
+for( mutarget in seq(minmu+0.00001,maxmu,0.00001) ){
+   sol = PortfolioOptim(  minriskcriterion = "mES" , MinMaxComp = F, percriskcontribcriterion = "mES" , 
+                      Riskupper = Inf ,Returnlower= mutarget,
+                      mu = mu, sigma = sigma, M3=M3, M4=M4) 
+   W = rbind( W, as.vector( sol[[1]] ) )
+   mPercrisk = rbind( mPercrisk , as.vector( sol[[4]] ) )
+   vmu = c( vmu , as.vector( sol[[2]] ))
+   vrisk = c( vrisk , as.vector( sol[[3]] ) )
+   vmaxpercrisk = c( vmaxpercrisk , max( sol[[4]] ) )
+   vmaxriskcontrib = c( vmaxriskcontrib , max( sol[[5]] ) )
+}
+
+# For the highest return targets, a very high penalty parameter is (sometimes) needed
+
+for( mutarget in c(seq( max(vmu) , maxmu, 0.000001),maxmu) ){
+   print( c("mutarget equal to",mutarget) )
+   sol = PortfolioOptim(  minriskcriterion = "mES" , MinMaxComp = F, percriskcontribcriterion = "mES" , 
+            Riskupper = Inf ,Returnlower= mutarget, penalty = 1e9,
+            mu = mu, sigma = sigma, M3=M3, M4=M4) 
+   W = rbind( W, as.vector( sol[[1]] ) )
+   mPercrisk = rbind( mPercrisk , as.vector( sol[[4]] ) )
+   vmu = c( vmu , as.vector( sol[[2]] ))
+   vrisk = c( vrisk , as.vector( sol[[3]] ) )
+   vmaxpercrisk = c( vmaxpercrisk , max( sol[[4]] ) )
+   vmaxriskcontrib = c( vmaxriskcontrib , max( sol[[5]] ) )
+}
+
+if(clean){
+   write.csv( W , file = "EffFrontierMinCVaR_weights_clean.csv" )
+   write.csv( mPercrisk , file = "EffFrontierMinCVaR_percrisk_clean.csv" )
+   EffFrontier_stats = cbind( vmu , vrisk , vmaxpercrisk , vmaxriskcontrib)
+   write.csv( EffFrontier_stats , file = "EffFrontierMinCVaR_stats_clean.csv" )
+}else{
+   write.csv( W , file = "EffFrontierMinCVaR_weights.csv" )
+   write.csv( mPercrisk , file = "EffFrontierMinCVaR_percrisk.csv" )
+   EffFrontier_stats = cbind( vmu , vrisk , vmaxpercrisk , vmaxriskcontrib)
+   write.csv( EffFrontier_stats , file = "EffFrontierMinCVaR_stats.csv" )
+}
+
+
+
+
+# Do the optimization: given a return target minimize the portfolio standard deviation (use quadprog)
+#------------------------------------------------------------------------------------------------------
+
+library(quadprog)
+N = 4 ;  maxweight = 1; minweight = 0; sumweights = 1; 
+Amat = rbind( rep(1,N) ,  diag(x =1,nrow=N,ncol=N) ,  diag(x =-1,nrow=N,ncol=N) , as.numeric(mu) );
+bvec =  c( sumweights , rep(minweight,N), rep(-maxweight,N)  ) 
+dvec = matrix( rep(0,N) , ncol=1 )
+
+mutarget = -10000; 
+# min(-d^T b + 1/2 b^T D b) with the constraints A^T b >= b_0.
+optw = solve.QP( Dmat = sigma   , dvec = dvec , Amat = t(Amat) , 
+   bvec = matrix( c(bvec,mutarget) , ncol = 1) , meq =1  )$solution
+sol = ES(weights=optw, portfolio_method="component", mu = mu, sigma = sigma, m3=M3, m4=M4,invert=FALSE)
+W               = optw                             ;   vmu             = sum(optw*mu)
+vrisk           = sol$MES                          ;   mPercrisk       = as.vector( sol$pct_contrib_MES )  
+vmaxpercrisk    = max( sol$pct_contrib_MES )       ;   vmaxriskcontrib = max( sol$contribution ) 
+
+# unconstrained solution is Minimum CVaR portfolio (having the property that percentage CVaR corresponds to porfolio weights):
+minmu = min( apply(monthlyR,2,'mean' )); 
+
+
+for( mutarget in seq(minmu+0.00001,maxmu,0.00001) ){
+   optw = solve.QP( Dmat = sigma   , dvec = dvec , Amat = t(Amat) , 
+          bvec = matrix( c(bvec,mutarget) , ncol = 1) , meq =1  )$solution
+   sol = ES(weights=optw, portfolio_method="component", mu = mu, sigma = sigma, m3=M3, m4=M4,invert=FALSE)
+   W = rbind( W, optw )
+   mPercrisk = rbind( mPercrisk , as.vector( sol$pct_contrib_MES ) )
+   vmu = c( vmu , sum(optw*mu) )
+   vrisk = c( vrisk , sol$MES )
+   vmaxpercrisk = c( vmaxpercrisk , max( sol$pct_contrib_MES ) )
+   vmaxriskcontrib = c( vmaxriskcontrib , max( sol$contribution ) )
+}
+
+if(clean){
+   write.csv( W , file = "EffFrontierMinVar_weights_clean.csv" )
+   write.csv( mPercrisk , file = "EffFrontierMinVar_percrisk_clean.csv" )
+   EffFrontier_stats = cbind( vmu , vrisk , vmaxpercrisk , vmaxriskcontrib)
+   write.csv( EffFrontier_stats , file = "EffFrontierMinVar_stats_clean.csv" )
+}else{
+   write.csv( W , file = "EffFrontierMinVar_weights.csv" )
+   write.csv( mPercrisk , file = "EffFrontierMinVar_percrisk.csv" )
+   EffFrontier_stats = cbind( vmu , vrisk , vmaxpercrisk , vmaxriskcontrib)
+   write.csv( EffFrontier_stats , file = "EffFrontierMinVar_stats.csv" )
+}
+
+
+
+
+# Plotting 
+#----------------------------------------------------------------------
 
 # Layout 3 
 source("R_interpretation/chart.StackedBar.R"); 
@@ -46,8 +217,11 @@ assetmu = apply( monthlyR , 2 , 'mean' )
 assetCVaR = apply( monthlyR , 2 , 'mESfun' )
 minmu = min(assetmu); maxmu = max(assetmu); print(minmu*12); print(maxmu*12);
 
-# Load the data
 
+
+####################################
+# Min CVaR Concentration
+####################################
 labelnames = c( "US bond" , "S&P 500" , "EAFE" , "GSCI" )
 
 clean = TRUE
@@ -79,10 +253,14 @@ if(clean){
  EffFrontier_stats_minCVaR   = read.csv(file = "EffFrontierMinCVar_stats.csv")[,2:5]
 }
 
-vmu_MCC             = EffFrontier_stats_MCC[,1] ;  vmu_minCVaR             = EffFrontier_stats_minCVaR[,1] ; vmu_minVar     = EffFrontier_stats_minVar[,1] ;
-vrisk_MCC           = EffFrontier_stats_MCC[,2] ;  vrisk_minCVaR           = EffFrontier_stats_minCVaR[,2] ; vrisk_minVar   = EffFrontier_stats_minVar[,2] ;
+vmu_MCC             = EffFrontier_stats_MCC[,1] ;  vmu_minCVaR             = EffFrontier_stats_minCVaR[,1] ;
+vrisk_MCC           = EffFrontier_stats_MCC[,2] ;  vrisk_minCVaR           = EffFrontier_stats_minCVaR[,2] ;
 vmaxpercrisk_MCC    = EffFrontier_stats_MCC[,3] ;  vmaxpercrisk_minCVaR    = EffFrontier_stats_minCVaR[,3] ;
-vriskconc_MCC       = EffFrontier_stats_MCC[,4] ;  vriskconc_minCVaR       = EffFrontier_stats_minCVaR[,4] ; vriskconc_minVar  = EffFrontier_stats_minVar[,4] ;
+vriskconc_MCC       = EffFrontier_stats_MCC[,4] ;  vriskconc_minCVaR       = EffFrontier_stats_minCVaR[,4] ;
+
+vmu_minVar        = EffFrontier_stats_minVar[,1] ;
+vrisk_minVar      = EffFrontier_stats_minVar[,2] ;
+vriskconc_minVar  = EffFrontier_stats_minVar[,4] ;
 
 # The MCC and Min CVaR were obtained with DEoptim. The solutions are not always optimal. Correct for this: 
 
@@ -123,62 +301,56 @@ PercCVaR_MCC = PercCVaR_MCC[sel_MCC,]             ; PercCVaR_minCVaR = PercCVaR_
 
 wEW <- rep(1/4,4)
 muEW       = mean(assetmu*12)
-outES      = ES(weights=wEW, portfolio_method="component", mu = mu, sigma = sigma, m3=M3, m4=M4,invert=FALSE) 
-riskEW     = outES$MES; riskconcEW = max(outES$contribution)
+outES       = ES(weights=wEW, portfolio_method="component", mu = mu, sigma = sigma, m3=M3, m4=M4,invert=FALSE) 
+riskEW     = outES$MES
+riskconcEW = max(outES$contribution)
 
 postscript('frontier_fourassets.eps') 
 
- layout( matrix(  c(1,2,3,1,2,3),  ncol = 2 ) , height= c(5,5,1), width=c(1,1) )
- ylim = c( min(assetmu) , max(assetmu) )
- par( mar = c(4.5,5,2,2), las=1 ,cex=0.9 , cex.axis=0.9, cex.main=0.95)
- plot( vrisk_MCC , vmu_MCC*12 , type="l", lty = 1, main = "" , 
+layout( matrix(  c(1,2,3,1,2,3),  ncol = 2 ) , height= c(5,5,1), width=c(1,1) )
+ylim = c( min(assetmu) , max(assetmu) )
+par( mar = c(4.5,5,2,2), las=1 ,cex=0.9 , cex.axis=0.9, cex.main=0.95)
+plot( vrisk_MCC , vmu_MCC*12 , type="l", lty = 1, 
+          main = "" , 
           ylab="Annualized mean return" , xlab="Monthly 95% Portfolio CVaR" , 
-          lwd=2, xlim = c(0.01,0.13) , ylim = (ylim*12+c(0,0.01)) , col="black" )
- lines( vrisk_minCVaR , vmu_minCVaR*12,  lty = 1, lwd=2, col="darkgray" ) 
- lines( vrisk_minVar , vmu_minVar*12,  lty = 3, lwd=2, col="black" )
+          lwd=2, xlim = c(0.02,0.13) , ylim = (ylim*12+c(0,0.01)) , col="black" )
+lines( vrisk_minCVaR , vmu_minCVaR*12,  lty = 1, lwd=2, col="darkgray" ) 
+lines( vrisk_minVar , vmu_minVar*12,  lty = 3, lwd=2, col="black" )
 
- c = 1; text(y=assetmu[c]*12,x= assetCVaR[c]-0.005  , label=labelnames[c]  , cex = 0.7, offset = 0.2, pos = 3); points(y=assetmu[c]*12,x= assetCVaR[c] )  
- for( c in 2:cAssets ){ 
+c = 1; text(y=assetmu[c]*12,x= assetCVaR[c]  , label=labelnames[c]  , cex = 0.7, offset = 0.2, pos = 1); points(y=assetmu[c]*12,x= assetCVaR[c] )  
+for( c in 2:cAssets ){ 
    text(y=assetmu[c]*12,x= assetCVaR[c]  , label=labelnames[c]  , cex = 0.7, offset = 0.2, pos = 3) 
    points(y=assetmu[c]*12,x= assetCVaR[c] ) 
- };
- # Plot also EW portfolio
- text(y=muEW,x=riskEW, label="EW"  , cex = 0.7, offset = 0.2, pos = 3)
- points(y=muEW,x= riskEW , pch=22 ) 
- text(y=vmu_MCC[1]*12,x=vrisk_MCC[1], label="MCC=ERC"  , cex = 0.7, offset = 0.2, pos = 1)
- points(y=vmu_MCC[1]*12,x=vrisk_MCC[1],  pch=22 ) 
- text(y=vmu_minCVaR[1]*12,x=vrisk_minCVaR[1]-0.0035, label="Min CVaR"  , cex = 0.7, offset = 0.2, pos = 1)
- points(y=vmu_minCVaR[1]*12,x=vrisk_minCVaR[1],  pch=22 ) 
- text(y=vmu_minVar[1]*12-0.001,x=vrisk_minVar[1]+0.0035, label="Min StdDev"  , cex = 0.7, offset = 0.2, pos = 1)
- points(y=vmu_minVar[1]*12,x=vrisk_minVar[1],  pch=22 ) 
+};
+# Plot also EW portfolio
 
- par( mar = c(4.5,5,2,2), las=1 ,cex=0.9 , cex.axis=0.9, cex.main=0.95)
- plot( vriskconc_MCC/vrisk_MCC , vmu_MCC*12 , type="l", lty = 1, main = "" , 
+text(y=muEW,x=riskEW, label="EW"  , cex = 0.7, offset = 0.2, pos = 3)
+points(y=muEW,x= riskEW ) 
+
+par( mar = c(4.5,5,2,2), las=1 ,cex=0.9 , cex.axis=0.9, cex.main=0.95)
+plot( vriskconc_MCC/vrisk_MCC , vmu_MCC*12 , type="l", lty = 1, 
+          main = "" , 
           ylab="Annualized  mean return" , xlab="Largest Perc. CVaR contribution" , 
           lwd=2, xlim = c(0.2,1.1), ylim = c(ylim*12+c(0,0.01)) , col="black" )
- lines( vriskconc_minCVaR/vrisk_minCVaR , vmu_minCVaR*12,  lty = 1, lwd=2, col="darkgray" ) 
- lines( vriskconc_minVar/vrisk_minVar   , vmu_minVar*12 ,  lty = 3, lwd=2, col="black" )
+lines( vriskconc_minCVaR/vrisk_minCVaR , vmu_minCVaR*12,  lty = 1, lwd=2, col="darkgray" ) 
+lines( vriskconc_minVar/vrisk_minVar , vmu_minVar*12,  lty = 3, lwd=2, col="black" )
 
- text(y=muEW,x=riskconcEW/riskEW, label="EW"  , cex = 0.7, offset = 0.2, pos = 1)
- points(y=muEW,x= riskconcEW/riskEW , pch=22 ) 
- text(y=vmu_MCC[1]*12,x=vriskconc_MCC[1]/vrisk_MCC[1], label="MCC=ERC"  , cex = 0.7, offset = 0.2, pos = 1)
- points(y=vmu_MCC[1]*12,x=vriskconc_MCC[1]/vrisk_MCC[1],  pch=22 ) 
- text(y=vmu_minCVaR[1]*12,x=vriskconc_minCVaR[1]/vrisk_minCVaR[1], label="Min CVaR"  , cex = 0.7, offset = 0.2, pos = 1)
- points(y=vmu_minCVaR[1]*12,x=vriskconc_minCVaR[1]/vrisk_minCVaR[1],  pch=22 ) 
- text(y=vmu_minVar[1]*12,x=vriskconc_minVar[1]/vrisk_minVar[1], label="Min StdDev"  , cex = 0.7, offset = 0.2, pos = 1)
- points(y=vmu_minVar[1]*12,x=vriskconc_minVar[1]/vrisk_minVar[1],  pch=22 ) 
-
- for( c in 1:cAssets ){ 
+text(y=muEW,x=riskconcEW/riskEW, label="EW"  , cex = 0.7, offset = 0.2, pos = 1)
+points(y=muEW,x= riskconcEW/riskEW ) 
+for( c in 1:cAssets ){ 
    text(y=assetmu[c]*12,x= 1  , label=labelnames[c]  , cex = 0.7, offset = 0.2, pos = 4) 
    points(y=assetmu[c]*12,x= 1 ) 
- };
- 
- par( mar = c(0,1,1,0) )
- plot.new()
-  legend("center",legend=c("Mean-CVaR concentration", "Mean-CVaR","Mean-StdDev"  ),
-   lty=c("solid","solid","dashed"), cex=0.8,ncol=3,lwd=c(4,4,2),col=c("black","darkgray","black"))
+};
 
+par( mar = c(0,1,1,0) )
+plot.new()
+legend("center",legend=c("Mean/StdDev" , "Mean/CVaR","Mean/CVaR concentration"  ),
+   lty=c("dashed","solid","solid"), cex=0.8,ncol=3,lwd=2,col=c("black","darkgray","black"))
 dev.off()
+
+
+# cbind( vmu_minVar*12 , vriskconc_minVar/vrisk_minVar ) : 0.0816 is turning point
+# cbind( vmu_minCVaR*12 , vriskconc_minCVaR/vrisk_minCVaR ) : 0.0816 is turning point
 
 
 # Make the weight/CVaR allocation plots
@@ -213,7 +385,8 @@ if( binning ){
       }
       selection    =  c(vmu_minCVaR >= lm & vmu_minCVaR < rm) ;
       if( any(selection) ){
-         selection    = c(1:length(selection))[selection]; selone       = sort(vrisk_minCVaR[ selection ],index.return=T)$ix[1]
+         selection    = c(1:length(selection))[selection]
+         selone       = sort(vrisk_minCVaR[ selection ],index.return=T)$ix[1]
          selone       = selection[selone]
          vmusel_minCVaR       = c( vmusel_minCVaR       ,  mean(vmu_minCVaR[selone  ] ));
          Wsel_minCVaR         = rbind( Wsel_minCVaR     ,  apply( W_minCVaR[selone,] ,2,'mean' ))
@@ -229,7 +402,8 @@ if( binning ){
       }
       selection    =  c(vmu_minVar >= lm & vmu_minVar < rm) ;
       if( any(selection) ){
-         selection    = c(1:length(selection))[selection]; selone       = sort(vrisk_minVar[ selection ],index.return=T)$ix[1]
+         selection    = c(1:length(selection))[selection]
+         selone       = sort(vrisk_minVar[ selection ],index.return=T)$ix[1]
          selone       = selection[selone]
          vmusel_minVar       = c( vmusel_minVar       ,  mean(vmu_minVar[selone  ] ));
          Wsel_minVar         = rbind( Wsel_minVar     ,  apply( W_minVar[selone,] ,2,'mean' ))
@@ -243,6 +417,7 @@ if( binning ){
          vrisksel_minVar     = c( vrisksel_minVar     ,  NA );
          vriskconcsel_minVar = c( vriskconcsel_minVar ,  NA  )
       }
+
       lm = rm; 
    }
 }else{
@@ -264,9 +439,14 @@ rownames( Wsel_minVar ) = rownames( PercCVaRsel_minVar ) = round( interpNA(vmuse
 colnames( Wsel_minVar ) = labelnames
 
 
+
 w.names = c( "US bond" , "S&P 500", "EAFE"  , "GSCI" )
-namelabels = c("Mean-StdDev" , "Mean-CVaR","Mean-CVaR concentration"  )
-l = 2 ; mar1 =c(2,l,2,1.1) ; mar3 = c(3,l+1,3,0.1)
+namelabels = c("Mean/StdDev" , "Mean/CVaR","Mean/CVaR concentration"  )
+ l = 2
+mar1 =c(2,l,2,1.1)
+mar2 =c(0,l,2,1)
+mar3 = c(3,l+1,3,0.1)
+mar4 = c(2,l+1,2,0.1)
 
 source("R_interpretation/chart.StackedBar.R"); 
 
@@ -301,7 +481,7 @@ postscript('stackedweightsriskcont_efficientfrontier.eps')
 
    par(mar=mar1 , cex.main=1)
    plot.new()
-   legend("center",legend=w.names,col=colorset,ncol=4,lwd=6)
+   legend("center",legend=w.names,fill=colorset,ncol=4)
 
    par(mar=mar3 , cex.main=1)
    chart.StackedBar2(interpNA(PercCVaRsel_minVar),col=colorset,space=0,  main = namelabels[1], ylab="CVaR allocation", las=1, l=3.9, r=0,  cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
@@ -312,20 +492,20 @@ dev.off()
 
 
 
+
 #----------------------------------------------------------------------------------------------------
 # DISCUSSION RESULTS
-
-
-# unconstrained:
-12*vmu_minVar[1] ; vrisk_minVar[1] ; W_minVar[1,] ; PercCVaR_minVar[1,]; 
-12*vmu_minCVaR[1]; vrisk_minCVaR[1]; W_minCVaR[1,]; PercCVaR_minCVaR[1,]; 
-12*vmu_MCC[1]    ; vrisk_MCC[1]    ; W_MCC[1,]    ; PercCVaR_MCC[1,]; 
-
-
-cbind( vmu_minVar*12 , vriskconc_minVar/vrisk_minVar ) : 0.0816 is turning point
-cbind( vmu_minCVaR*12 , vriskconc_minCVaR/vrisk_minCVaR ) : 0.0816 is turning point
-
-# Mean/CVaR concentration efficient portfolios
+# On Raw Data: Discontinuity in the Mean-CVaR frontier of Mean CVaR concentration efficient portfolios: 
+# Two types of portfolios:
+# Lower return targets: portfolio where the component risk of the bond dominates
+# Higher return targets: portfolio where the component risk of the US equity dominates
+# Shift when: 
+# > vmu[13:14]
+# [1] 0.006796657 0.006806883
+# > vriskconc[13:14]
+# [1] 0.0082 0.0254
+#  > vrisk[13:14]
+# [1] 0.01544720 0.06036618
 
 # On Cleaned Data: Three segments
 
@@ -338,45 +518,45 @@ cbind( vmu_minCVaR*12 , vriskconc_minCVaR/vrisk_minCVaR ) : 0.0816 is turning po
 
 
 # Unconstrained: Equal Risk Contribution Portfolio:
-# > W_MCC[1,]
+# > W[1,]
 # 0.6431897 0.1337981 0.1044994 0.1185127
-#> PercCVaR_MCC[1,]
+#> mPercrisk[1,]
 # 0.2516 0.2517 0.2504 0.2463
-# > vmu_MCC[1]*12
+# > vmu[1]*12
 # [1] 0.07773165
-#> vrisk_MCC[1]
+#> vrisk[1]
 #[1] 0.03467514
-#> vriskconc_MCC[1]
+#> vriskconc[1]
 #[1] 0.0087
 # Segment 1: increasing allocation to bonds and decreasing allocation to commodities
 # Portfolio risk concentration increases, portfolio risk decreases
-# > W_MCC[25:27,]
+# > W[25:27,]
 # 0.7052788 0.1584357 0.1321813 0.0041042550
 # 0.7085301 0.1597522 0.1313759 0.0003417814
 # 0.7025028 0.1628656 0.1344935 0.0001380022
-#> vmu_MCC[26]*12
+#> vmu[26]*12
 #[1] 0.0812571
-#> vrisk_MCC[26]
+#> vrisk[26]
 #[1] 0.03352778
-#> vriskconc_MCC[26]
+#> vriskconc[26]
 #[1] 0.0112
 # Segment 2: increasing allocation to both US equity and EAFE
 # Portfolio risk concentration and risk increase together
-# > W_MCC[138:140,]
+# > W[138:140,]
 # 0.0078323664 0.5106416 0.4814090 1.169711e-04
 # 0.0005986683 0.5136429 0.4856355 1.228907e-04
 # 0.0002258733 0.5201106 0.4796231 4.051641e-05
-# > PercCVaR_MCC[138:140,]
+# > mPercrisk[138:140,]
 #  0e+00 0.4999 0.5000  0
-#> vmu_MCC[139]*12
+#> vmu[139]*12
 #[1] 0.09483605
-# > vrisk_MCC[139]
+# > vrisk[139]
 # [1] 0.09808784
-# > vriskconc_MCC[139]
+# > vriskconc[139]
 # [1] 0.049
 # Segment 3: increasing alllocation to US equity and decreasing to EAFE
 # Portfolio risk concentration and risk increase together
-# > tail(W_MCC,1)
+# > tail(W,1)
 # 5.45402e-05 0.9998762 4.340072e-05 2.585630e-05
 
 

@@ -9,7 +9,7 @@ mincriterion = "mES" ; percriskcontribcriterion = "mES";
 # Load programs
 
 source("R_Allocation/Risk_budget_functions.R"); 
-library(zoo); library(fGarch); library("PerformanceAnalytics"); 
+library(zoo); library(fGarch); library("PerformanceAnalytics"); library("DEoptim")
 
 #   Load the data
 
@@ -54,7 +54,7 @@ sum( w5050*mu*12 ) ;
 ES(R=indexes[,1:2], weights=w5050, portfolio_method="component", mu = mu, sigma = sigma, m3=M3, m4=M4,invert=FALSE)
 
 # 60/40 bond equity allocation
-w6040 <- c(0.4,0.6); 
+w6040 <- c(0.6,0.4); 
 sum( w6040*mu*12 ) ; 
 #VaR(R=indexes[,1:2], weights=w6040, portfolio_method="component")
 ES(R=indexes[,1:2], weights=w6040, portfolio_method="component", mu = mu, sigma = sigma, m3=M3, m4=M4,invert=FALSE)
@@ -108,8 +108,8 @@ obj <- function(w) {
  w <- w / sum(w)
  CVaR <- ES(R=indexes[,1:2], weights=matrix(w,ncol=1),portfolio_method="component", mu = mu, sigma = sigma, m3=M3, m4=M4)
  tmp1 <- CVaR$MES
- tmp2 <- max(CVaR$pct_contrib_MES - c(0.401, 0.601) , 0)
- tmp3 <- max(c(0.395, 0.595) - CVaR$pct_contrib_MES , 0)
+ tmp2 <- max(CVaR$pct_contrib_MES - c(0.601,0.401 ) , 0)
+ tmp3 <- max(c(0.599,0.399 ) - CVaR$pct_contrib_MES , 0)
  out  <- tmp1 + 1e3 * tmp2 + 1e3 * tmp3
 }
 out <- DEoptim(fn = obj, lower = rep(0, 2), upper = rep(1, 2), 
@@ -118,7 +118,7 @@ wstar <- out$optim$bestmem
 w6040riskalloc <- wstar / sum(wstar) 
 print(w6040riskalloc)
 #      par1      par2 
-#0.7290461 0.2709539 
+#0.8123427 0.1876573  
 print(sum(w6040riskalloc*mu*12))
 # w6040riskalloc = c( 0.7290461 , 0.2709539 ) 
 ES(R=indexes[,1:2], weights=w6040riskalloc, portfolio_method="component", mu = mu, sigma = sigma, m3=M3, m4=M4)

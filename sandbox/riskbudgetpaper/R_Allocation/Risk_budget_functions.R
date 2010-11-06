@@ -2,7 +2,7 @@
 PortfolioOptim = function( minriskcriterion = "mES" , MinMaxComp = F, percriskcontribcriterion = "mES" , 
                      R = NULL, mu = NULL , sigma = NULL, M3=NULL,M4=NULL, alpha = 0.05, alphariskbudget = 0.05,
                      lower = NULL , upper = NULL, Riskupper = NULL, Returnlower = NULL, RBlower = NULL , RBupper = NULL, precision = 1e-3 , 
-                     controlDE = list( VTR = 0 , NP=200, trace = FALSE ) , heuristic=TRUE , penalty = NULL ){
+                     controlDE = NULL , optimize_method = "DEoptim+L-BFGS-B", penalty = NULL ){
 
      # Description: 
      # This function produces the portfolio that minimimizes 
@@ -31,11 +31,11 @@ PortfolioOptim = function( minriskcriterion = "mES" , MinMaxComp = F, percriskco
      if( is.null(Riskupper) ){ Riskupper = Inf       }  ; if( is.null(Returnlower) ){ Returnlower = -Inf   }  
 
      switch( percriskcontribcriterion ,
-                StdDev = { percriskcontrib = function(w){ return( Portsd(w,mu=mu,sigma=sigma)                                           ) }},
-                GVaR   = { percriskcontrib = function(w){ return( PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma)                ) }},
-                GES    = { percriskcontrib = function(w){ return( PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma)                 ) }},
-                mVaR   = { percriskcontrib = function(w){ return( PortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)       ) }},
-                mES    = { percriskcontrib = function(w){ return( operPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4)    ) }}
+                StdDev = { percriskcontrib = function(w){ return( Portsd(w,mu=mu,sigma=sigma, precision=9)                                           ) }},
+                GVaR   = { percriskcontrib = function(w){ return( PortgausVaR(w,alpha=alphariskbudget,mu=mu,sigma=sigma, precision=9)                ) }},
+                GES    = { percriskcontrib = function(w){ return( PortgausES(w,mu=mu,alpha=alphariskbudget,sigma=sigma, precision=9)                 ) }},
+                mVaR   = { percriskcontrib = function(w){ return( PortMVaR(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4, precision=9)       ) }},
+                mES    = { percriskcontrib = function(w){ return( operPortMES(w,mu=mu,alpha=alphariskbudget,sigma=sigma,M3=M3,M4=M4, precision=9)    ) }}
      ) #end function that finds out which percentage risk contribution criterion to use
      switch( minriskcriterion ,
                 StdDev = { prisk = function(w){ return( stddevfun(w,mu=mu,sigma=sigma) ) }},
@@ -50,7 +50,7 @@ PortfolioOptim = function( minriskcriterion = "mES" , MinMaxComp = F, percriskco
     }else{
        abspenalty = relpenalty = penalty; 
     }; 
-    if( heuristic ){
+    if( optimize_method == "DEoptim" | optimize_method == "DEoptim+L-BFGS-B" ){
         objective = function( w ){
            w = w/sum(w)  
            cont = percriskcontrib( w );  percrisk = cont[[3]]; crisk = cont[[2]] ; 
@@ -73,13 +73,15 @@ PortfolioOptim = function( minriskcriterion = "mES" , MinMaxComp = F, percriskco
            return(out_con)
          }
 
-         # initial population is generated with random_portfolios function
-         require('PortfolioAnalytics')
-         eps = 0.01
-         rpconstraint<-constraint(assets=length(lower), min_sum=(1-eps), max_sum=(1+eps), 
-             min=lower, max=upper, weight_seq=generatesequence())
-         rp<- random_portfolios(rpconstraints=rpconstraint,permutations=controlDE$NP)
-         controlDE = list(  NP=as.numeric(nrow(rp)) , initialpop=rp,trace=F ) 
+         if( is.null(controlDE) ){
+            # initial population is generated with random_portfolios function
+            require('PortfolioAnalytics')
+            eps = 0.01
+            rpconstraint<-constraint(assets=length(lower), min_sum=(1-eps), max_sum=(1+eps), 
+              min=lower, max=upper, weight_seq=generatesequence())
+            rp<- random_portfolios(rpconstraints=rpconstraint,permutations=200)
+            controlDE = list(  NP=as.numeric(nrow(rp)) , initialpop=rp,trace=F ) 
+         }
          # print(controlDE)
          minw = DEoptim( fn = objective ,  lower = lower , upper = upper , control = controlDE)
          fvalues = minw$member$bestval
@@ -98,7 +100,18 @@ PortfolioOptim = function( minriskcriterion = "mES" , MinMaxComp = F, percriskco
             if( diff > 0 ){ best = min( fvalues ) ; bestsol = minw ; print(best) }
           }
           minw = bestsol$optim$bestmem/sum(bestsol$optim$bestmem)  ; #full investment constraint
-    }else{
+    }
+
+
+    if( optimize_method == "DEoptim+L-BFGS-B" ){
+         print(minw) ; print( objective(minw) )
+         print("local improvement")
+         out = optim( par=minw, f = objective, lower = lower, upper = upper, method="L-BFGS-B" ) 
+         minw = out$par/sum(out$par)
+         print(minw) ; print( objective(minw) )
+    }
+
+    if( optimize_method == "L-BFGS-B" ){
         objective = function( w ){
            if(sum(w)==0){w=w+0.001}
            w = w/sum(w)  
@@ -137,7 +150,7 @@ PortfolioOptim = function( minriskcriterion = "mES" , MinMaxComp = F, percriskco
 
 findportfolio.dynamic = function(R, from, to, names.input = NA,  names.assets, 
               	p = 0.95 , priskbudget = 0.95,  mincriterion = "mES" , percriskcontribcriterion = "mES"  ,
-                  strategy , controlDE = list( VTR = 0 , NP=200 ) )
+                  strategy , controlDE =  list( VTR = 0 , NP=200 , itermax = 200,trace=F ), optimize_method = "DEoptim+L-BFGS-B" )
 { # @author Kris Boudt and Brian G. Peterson
 
     # Description:
@@ -212,6 +225,14 @@ findportfolio.dynamic = function(R, from, to, names.input = NA,  names.assets,
       lower = rep(0,cAssets); upper=rep(1,cAssets) 
       RBlower = rep(-Inf,cAssets) ; RBupper = rep(0.40,cAssets)  ;
    }
+
+   # initial population is generated with random_portfolios function
+   require('PortfolioAnalytics')
+   eps = 0.01
+   rpconstraint<-constraint(assets=length(lower), min_sum=(1-eps), max_sum=(1+eps), 
+             min=lower, max=upper, weight_seq=generatesequence())
+   rp<- random_portfolios(rpconstraints=rpconstraint,permutations=controlDE$NP)
+   controlDE = list(  NP=as.numeric(nrow(rp)) , initialpop=rp,trace=F ) 
 
     for( per in c(1:cPeriods) ){
 
@@ -301,7 +322,7 @@ findportfolio.dynamic = function(R, from, to, names.input = NA,  names.assets,
            solution = PortfolioOptim(  minriskcriterion = "mES" , MinMaxComp = MinMaxComp, percriskcontribcriterion = "mES" , 
                                        mu = mu , sigma = sigma, M3=M3 , M4=M4 , alpha = alpha , alphariskbudget = alphariskbudget , 
                                        lower = lower , upper = upper , Riskupper = Inf , Returnlower= mutarget , RBlower = RBlower, RBupper = RBupper , 
-                                       controlDE = controlDE ) 
+                                       controlDE = controlDE , optimize_method = optimize_method ) 
            # [[1]] : weights ; [[2]] : expected portfolio return ; [[3]] : portfolio CVaR
            # [[4]] : percentage CVaR ; [[5]] : component CVaR
            solution = list( solution[[1]] , solution[[4]] , solution[[3]] , solution[[2]] ); 
@@ -479,7 +500,6 @@ operMESfun = function(w,alpha,mu,sigma,M3,M4){
     E = E/alpha
     return (- (t(w)%*%mu) - sqrt(pm2)*min(-E,h) ) }
 
-precision = 4;
 
 Portmean = function(w,mu,precision=4)
 {
