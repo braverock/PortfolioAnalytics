@@ -91,6 +91,7 @@ for( b in bear){
 # IMPORTANT: The leading edge (left side) of the vertical yellow bars are thus stock market peaks, 
 # and the trailing edge (right side) are stock market troughs.
 
+#source( paste(getwd(),"/R_interpretation/findDrawdowns.R",sep="") )
 out = table.Drawdowns(sp500,top=10) 
 start.bear = out$From[out$Depth<(-0.12)]
 end.bear = out$Trough[out$Depth<(-0.12)]
@@ -145,7 +146,7 @@ histCVaR = function( series ){ series = as.numeric(series) ; q = as.numeric(hist
 
 print("Full period") #median, skew; exkur; histVaR
 apply( oosreturns , 2 , 'mean' )*100*12  ; 
-apply( oosreturns , 2 , 'sd' )*100
+apply( oosreturns , 2 , 'sd' )*100*sqrt(12)
 100*apply( oosreturns , 2 , 'histCVaR')
 
 oosreturns_bear = oosreturns[ v.bear.dates ]
@@ -153,12 +154,12 @@ oosreturns_bull = oosreturns[ v.nobear.dates ]
 
 print("Bear market")
 apply( oosreturns_bear , 2 , 'mean' )*100*12; 
-apply( oosreturns_bear , 2 , 'sd' )*100
+apply( oosreturns_bear , 2 , 'sd' )*100*sqrt(12)
 100*apply( oosreturns_bear , 2 , 'histCVaR')
 
 print("Bull market")
 apply( oosreturns_bull , 2 , 'mean' )*100*12    ;
-apply( oosreturns_bull , 2 , 'sd' )*100
+apply( oosreturns_bull , 2 , 'sd' )*100*sqrt(12)
 100*apply( oosreturns_bull , 2 , 'histCVaR')
 
 for( i in 1:7 ){ # Print the drawdowns
@@ -166,12 +167,11 @@ for( i in 1:7 ){ # Print the drawdowns
    print( table.Drawdowns(oosreturns[,i],top=10) )
 }
 
-# Herfindahl Index of Concentration
-
-HI = c()
+# Risk concentration
 
 for( strat in 1:7 ){
     criterion = criteria[strat];
+    print( criterion );
     weightedR = c(); portfolioVaR = c();
     weights = read.csv( file = paste( criterion,".csv",sep=""),header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
 
@@ -190,11 +190,18 @@ for( strat in 1:7 ){
     # Step 2: compute the mean squared weighted return over months with beyond VaR losses
 
     series = rowSums(weightedR) ; 
-    out = mean(weightedR[series<(-portfolioVaR),]^2); 
-    #out = mean(apply(weightedR[series<(-portfolioVaR),],1,'max')); 
-    HI = c( HI , out )
+    #out = mean(weightedR[series<(-portfolioVaR),]^2); 
+    downsidelosses = weightedR[series<(-portfolioVaR),]
+    downsidelosses = weightedR[series<=-0.10,]
+    vES = rowSums(downsidelosses)
+
+    print("Total portfolio loss")
+    print( summary( apply(   -downsidelosses , 1 , 'sum') ))
+    print("Max percentage loss")
+    print( summary( apply(   downsidelosses/ apply(   downsidelosses , 1 , 'sum') , 1 , 'max') ))
+
 }
-rbind( namelabels[1:7] , HI*100 )
+
 
 # Portfolio turnover per strategy:
 
@@ -217,7 +224,7 @@ for( strat in 1:7 ){
     criterion = criteria[strat];
     wstart = read.csv( file = paste( criterion,".csv",sep=""),header = TRUE,  sep = ",", na.strings = "NA", dec = ".")
     wend   = (wstart[1:cRebalancing,]*cumR)/rowSums( wstart[1:cRebalancing,]*cumR )  
-    out  = mean(  abs(wend[1:(cRebalancing-1),] -    wstart[2:cRebalancing,]         ))
+    out  = mean(  abs( wstart[2:cRebalancing,]-wend[1:(cRebalancing-1),]     ))
     turnover  = c( turnover , mean(out) )
 }
 

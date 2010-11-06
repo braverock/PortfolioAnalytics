@@ -30,7 +30,7 @@ names = c(  "EqualWeight" , "MinRisk" , "MinRisk_PositionLimit" , "MinRisk_RiskL
             "MinRisk_ReturnTarget", "MinRiskConc_ReturnTarget" )
 
 namelabels = c( "Equal-Weight" , "Min CVaR" , "Min CVaR + 40% Position Limit" , "Min CVaR + 40% CVaR Alloc Limit" ,  
-       "Min CVaR Conc" , "Min CVaR Conc + 40% Position Limit", "Min CVaR + ERC constraint" , "Min CVaR + Return Target" , "Min CVaR Conc + Return Target" )
+       "Min CVaR Concentration" , "Min CVaR Concentration + 40% Position Limit", "Min CVaR + ERC constraint" , "Min CVaR + Return Target" , "Min CVaR Conc + Return Target" )
 
 # frequency of rebalancing: yearly of quarterly
 frequency = "quarterly"
@@ -111,7 +111,7 @@ postscript('stackedweightsriskcont_benchmark.eps')
 
    par(mar=mar1 , cex.main=1)
    plot.new()
-   legend("center",legend=w.names,fill=colorset,ncol=4)
+   legend("center",legend=w.names,col=colorset,lwd=6,ncol=4)
 
 
 
@@ -132,7 +132,7 @@ postscript('MinCVaR_alternatives.eps')
 
    par(mar=mar1 , cex.main=1)
    plot.new()
-   legend("center",legend=w.names,fill=colorset,ncol=4)
+   legend("center",legend=w.names,col=colorset,lwd=6,ncol=4)
    par(mar=mar3 , cex.main=1)
 
    chart.StackedBar2(riskcontS3,col=colorset,space=0,  main = namelabels[3], ylab="CVaR allocation", las=1, l=3.9, r=0,  cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
@@ -282,14 +282,6 @@ save(mMU, file="mMU.Rdata")
 
 load(file="mCVaR.Rdata")
 load(file="mMU.Rdata")
-
-# riskreturn6 = c(); riskreturn6$risk = mCVaR[,6]
-# names = c(  "EqualWeight" , "MinRisk" , "MinRisk_PositionLimit" , "MinRisk_RiskLimit" , "MinRiskConc" , "MinRiskConc_PositionLimit", "EqualRisk" )
-#mCVaR = cbind(  riskreturn1$risk ,  riskreturn2$risk ,  riskreturn3$risk , riskreturn4$risk )
-#mCVaR = cbind( mCVaR ,  riskreturn5$risk ,  riskreturn6$risk ,  riskreturn7$risk )
-
-#mMU = cbind(  riskreturn1$expreturn ,  riskreturn2$expreturn ,  riskreturn3$expreturn , riskreturn4$expreturn )
-#mMU = cbind( mMU ,  riskreturn5$expreturn ,  riskreturn6$expreturn ,  riskreturn7$expreturn )
 
 postscript(file="portfolioMeanCVaR.eps")
 par(mfrow=c(2,1),mar=c(3,2,3,2))
