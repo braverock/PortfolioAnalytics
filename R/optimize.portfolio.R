@@ -85,7 +85,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   }
   
   if(optimize_method=="DEoptim"){
-    stopifnot("package:DEoptim" %in% search() || require("DEoptim",quietly = TRUE))
+    stopifnot("package:DEoptim" %in% search() || "package:RcppDE" %in% search() ||  require("DEoptim",quietly = TRUE || require('RcppDE', quietly=TRUE)))
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
     if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=200
     NP = round(search_size/itermax)

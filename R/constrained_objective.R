@@ -62,7 +62,6 @@
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
-
 constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize=TRUE, storage=FALSE)
 { 
     if (ncol(R)>length(w)) {
