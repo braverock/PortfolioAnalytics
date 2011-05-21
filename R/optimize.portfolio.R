@@ -87,7 +87,8 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   if(optimize_method=="DEoptim"){
     stopifnot("package:DEoptim" %in% search() || "package:RcppDE" %in% search() ||  require("DEoptim",quietly = TRUE || require('RcppDE', quietly=TRUE)))
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
-    if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=200
+    if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=N*50
+	
     NP = round(search_size/itermax)
     if(NP>2000) NP=2000
     
@@ -99,7 +100,11 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
         DEcformals$NP <- NP
         DEcformals$itermax <- itermax
         DEcformals[pm] <- dotargs[pm > 0L]
-        
+		if(!hasArg(strategy)) DEcformals$strategy=6 # use DE/current-to-p-best/1
+		if(!hasArg(reltol)) DEcformals$reltol=.000001 # 1/1000 of 1% change in objective is significant
+		if(!hasArg(steptol)) DEcformals$steptol=round(N*1.5) # number of assets times 1.5 tries to improve
+		if(!hasArg(c)) DEcformals$c=.4 # JADE mutation parameter, this could maybe use some adjustment
+		 
         #TODO FIXME also check for a passed in controlDE list, including checking its class, and match formals
     }
     
@@ -237,14 +242,14 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
         # define the index endpoints of our periods
         ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
         # now apply optimize.portfolio to the periods, in parallel if available
-        out_list<-foreach(ep=iter(ep.i), .errorhandling='pass') %dopar% {
+        out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
                     optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
                   }
     } else {
         # define the index endpoints of our periods
         ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
         # now apply optimize.portfolio to the periods, in parallel if available
-        out_list<-foreach(ep=iter(ep.i), .errorhandling='pass') %dopar% {
+        out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
                     optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
                   }
     }
@@ -411,7 +416,7 @@ optimize.portfolio.parallel <- function(R,constraints,optimize_method=c("DEoptim
     #store the call for later
     call <- match.call()
     
-    opt_out_list<-foreach(1:nodes) %dopar% optimize.portfolio(R=R,constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...)    
+    opt_out_list<-foreach(1:nodes., packages='PortfolioAnalytics') %dopar% optimize.portfolio(R=R,constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...)    
 
     end_t<-Sys.time()
     message(c("overall elapsed time:",end_t-start_t))
