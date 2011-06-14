@@ -281,15 +281,15 @@ CCCgarch.MM = function(R, momentargs = NULL , ... )
     }else{ mu = match.call(expand.dots = TRUE)$mu }
     R = R - matrix( rep(mu,T) , nrow = T , byrow = TRUE )
     momentargs$mu = mu
-    S = c();
+    S = nextS = c();
     for( i in 1:cAssets ){
        gout =  garchFit(formula ~ garch(1,1), data = R[,i],include.mean = F, cond.dist="QMLE", trace = FALSE )
        if( as.vector(gout@fit$coef["alpha1"]) < 0.01 ){
-               sigmat = rep( sd( as.vector(R[,i])), length(R[,i]) ); 
+               sigmat = rep( sd( as.vector(R[,i])), length(R[,i]) ); nextSt = sd( as.vector(R[,i]))
         }else{
-               sigmat = gout@sigma.t
+               sigmat = gout@sigma.t; nextSt = predict(gout)[1,3]
         }
-        S = cbind( S , sigmat)
+        S = cbind( S , sigmat); nextS = c(nextS,nextSt)
     }
     U = R/S; #filtered out time-varying volatility
     if (!hasArg(clean)){ 
@@ -300,10 +300,11 @@ CCCgarch.MM = function(R, momentargs = NULL , ... )
         if (!inherits(cleanU, "try-error")) { U = cleanU }
     }
     Rcor = cor(U)
-    D = diag( as.vector(tail(S,n=1)  ),ncol=cAssets )
+    D = diag( nextS ,ncol=cAssets )
     momentargs$sigma = D%*%Rcor%*%D
     # set volatility of all U to last observation, such that cov(rescaled U)=sigma 
-    U = U*matrix( rep(as.vector(tail(S,n=1)),T  ) , ncol = cAssets , byrow = T )
+    uncS = sqrt(diag( cov(U) ))
+    U = U*matrix( rep(nextS/uncS,T  ) , ncol = cAssets , byrow = T )
     momentargs$m3 = PerformanceAnalytics:::M3.MM(U)
     momentargs$m4 = PerformanceAnalytics:::M4.MM(U)
     return(momentargs)
