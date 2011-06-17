@@ -1,0 +1,294 @@
+This is pdfTeX, Version 3.1415926-1.40.10 (MiKTeX 2.8) (preloaded format=latex 2011.5.3)  16 JUN 2011 21:28
+entering extended mode
+**C:/Documents*and*Settings/Administrator/Desktop/risk*budget*programs/text_lat
+ex/CVaRbudgets_June2011bis.tex
+
+("C:/Documents and Settings/Administrator/Desktop/risk budget programs/text_lat
+ex/CVaRbudgets_June2011bis.tex"
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, dumylang, nohyphenation, ge
+rman, ngerman, german-x-2009-06-19, ngerman-x-2009-06-19, french, loaded.
+("C:\Program Files\MiKTeX 2.8\tex\latex\base\article.cls"
+Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+("C:\Program Files\MiKTeX 2.8\tex\latex\base\size12.clo"
+File: size12.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+("C:\Program Files\MiKTeX 2.8\tex\latex\tools\theorem.sty"
+Package: theorem 1995/11/23 v2.2c Theorem extension package (FMi)
+\theorem@style=\toks14
+\theorem@bodyfont=\toks15
+\theorempreskipamount=\skip43
+\theorempostskipamount=\skip44
+
+("C:\Program Files\MiKTeX 2.8\tex\latex\tools\thp.sty"
+File: thp.sty 1995/11/23 v2.2c Theorem extension package (FMi)
+))
+("C:\Program Files\MiKTeX 2.8\tex\latex\ams\math\amsmath.sty"
+Package: amsmath 2000/07/18 v2.13 AMS math features
+\@mathmargin=\skip45
+
+For additional information on amsmath, use the `?' option.
+("C:\Program Files\MiKTeX 2.8\tex\latex\ams\math\amstext.sty"
+Package: amstext 2000/06/29 v2.01
+
+("C:\Program Files\MiKTeX 2.8\tex\latex\ams\math\amsgen.sty"
+File: amsgen.sty 1999/11/30 v2.0
+\@emptytoks=\toks16
+\ex@=\dimen103
+))
+("C:\Program Files\MiKTeX 2.8\tex\latex\ams\math\amsbsy.sty"
+Package: amsbsy 1999/11/29 v1.2d
+\pmbraise@=\dimen104
+)
+("C:\Program Files\MiKTeX 2.8\tex\latex\ams\math\amsopn.sty"
+Package: amsopn 1999/12/14 v2.01 operator names
+)
+\inf@bad=\count87
+LaTeX Info: Redefining \frac on input line 211.
+\uproot@=\count88
+\leftroot@=\count89
+LaTeX Info: Redefining \overline on input line 307.
+\classnum@=\count90
+\DOTSCASE@=\count91
+LaTeX Info: Redefining \ldots on input line 379.
+LaTeX Info: Redefining \dots on input line 382.
+LaTeX Info: Redefining \cdots on input line 467.
+\Mathstrutbox@=\box26
+\strutbox@=\box27
+\big@size=\dimen105
+LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
+\macc@depth=\count92
+\c@MaxMatrixCols=\count93
+\dotsspace@=\muskip10
+\c@parentequation=\count94
+\dspbrk@lvl=\count95
+\tag@help=\toks17
+\row@=\count96
+\column@=\count97
+\maxfields@=\count98
+\andhelp@=\toks18
+\eqnshift@=\dimen106
+\alignsep@=\dimen107
+\tagshift@=\dimen108
+\tagwidth@=\dimen109
+\totwidth@=\dimen110
+\lineht@=\dimen111
+\@envbody=\toks19
+\multlinegap=\skip46
+\multlinetaggap=\skip47
+\mathdisplay@stack=\toks20
+LaTeX Info: Redefining \[ on input line 2666.
+LaTeX Info: Redefining \] on input line 2667.
+)
+("C:\Program Files\MiKTeX 2.8\tex\latex\amsfonts\amssymb.sty"
+Package: amssymb 2009/06/22 v3.00
+
+("C:\Program Files\MiKTeX 2.8\tex\latex\amsfonts\amsfonts.sty"
+Package: amsfonts 2009/06/22 v3.00 Basic AMSFonts support
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 96.
+))
+("C:\Program Files\MiKTeX 2.8\tex\latex\graphics\graphicx.sty"
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+("C:\Program Files\MiKTeX 2.8\tex\latex\graphics\keyval.sty"
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks21
+)
+("C:\Program Files\MiKTeX 2.8\tex\latex\graphics\graphics.sty"
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+("C:\Program Files\MiKTeX 2.8\tex\latex\graphics\trig.sty"
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+("C:\Program Files\MiKTeX 2.8\tex\latex\00miktex\graphics.cfg"
+File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+)
+Package graphics Info: Driver file: dvips.def on input line 91.
+
+("C:\Program Files\MiKTeX 2.8\tex\latex\graphics\dvips.def"
+File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+))
+\Gin@req@height=\dimen112
+\Gin@req@width=\dimen113
+)
+("C:\Documents and Settings\Administrator\Application Data\MiKTeX\2.8\tex\latex
+\lineno\lineno.sty"
+Package: lineno 2005/11/02 line numbers on paragraphs v4.41
+\linenopenalty=\count99
+\output=\toks22
+\linenoprevgraf=\count100
+\linenumbersep=\dimen114
+\linenumberwidth=\dimen115
+\c@linenumber=\count101
+\c@pagewiselinenumber=\count102
+\c@LN@truepage=\count103
+\c@internallinenumber=\count104
+\c@internallinenumbers=\count105
+\quotelinenumbersep=\dimen116
+\bframerule=\dimen117
+\bframesep=\dimen118
+\bframebox=\box28
+LaTeX Info: Redefining \\ on input line 3056.
+) ("C:\Program Files\MiKTeX 2.8\tex\latex\tools\verbatim.sty"
+Package: verbatim 2003/08/22 v1.5q LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks23
+\verbatim@line=\toks24
+\verbatim@in@stream=\read1
+) ("C:\Program Files\MiKTeX 2.8\tex\latex\graphics\lscape.sty"
+Package: lscape 2000/10/22 v3.01 Landscape Pages (DPC)
+)
+("C:\Documents and Settings\Administrator\Application Data\MiKTeX\2.8\tex\latex
+\natbib\natbib.sty"
+Package: natbib 2009/11/07 8.31a (PWD, AO)
+\bibhang=\skip48
+\bibsep=\skip49
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count106
+)
+("C:\Documents and Settings\Administrator\Application Data\MiKTeX\2.8\tex\latex
+\setspace\setspace.sty"
+Package: setspace 2000/12/01 6.7 Contributed and Supported LaTeX2e package
+
+Package: `setspace' 6.7 <2000/12/01>
+)
+("C:\Documents and Settings\Administrator\Application Data\MiKTeX\2.8\tex\latex
+\rotating\rotating.sty"
+Package: rotating 2009/03/28 v2.16a rotated objects in LaTeX
+ ("C:\Program Files\MiKTeX 2.8\tex\latex\base\ifthen.sty"
+Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
+)
+\c@r@tfl@t=\count107
+\rotFPtop=\skip50
+\rotFPbot=\skip51
+\rot@float@box=\box29
+\rot@mess@toks=\toks25
+)
+("C:\Documents and Settings\Administrator\Application Data\MiKTeX\2.8\tex\latex
+\psfrag\psfrag.sty"
+Package: psfrag 1998/04/11 v3.04 PSfrag (MCG)
+\pfg@pcount=\count108
+\pfg@scount=\count109
+\pfg@temp=\write3
+) ("C:\Program Files\MiKTeX 2.8\tex\latex\tools\enumerate.sty"
+Package: enumerate 1999/03/05 v3.00 enumerate extensions (DPC)
+\@enLab=\toks26
+) ("C:\Program Files\MiKTeX 2.8\tex\latex\ltxmisc\url.sty"
+\Urlmuskip=\muskip11
+Package: url 2006/04/12  ver 3.3  Verb mode for urls, etc.
+)
+\c@Lemma=\count110
+\c@Theorem=\count111
+\c@Definition=\count112
+\c@Proposition=\count113
+\c@Assumption=\count114
+\c@Constraint=\count115
+\c@Def=\count116
+
+("C:\Documents and Settings\Administrator\Desktop\risk budget programs\text_lat
+ex\CVaRbudgets_June2011bis.aux"
+
+LaTeX Warning: Label `eq:CVaR' multiply defined.
+
+
+LaTeX Warning: Label `eq:ERCconstraint' multiply defined.
+
+)
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Try loading font information for U+msa on input line 94.
+ ("C:\Program Files\MiKTeX 2.8\tex\latex\amsfonts\umsa.fd"
+File: umsa.fd 2009/06/22 v3.00 AMS symbols A
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 94.
+
+("C:\Program Files\MiKTeX 2.8\tex\latex\amsfonts\umsb.fd"
+File: umsb.fd 2009/06/22 v3.00 AMS symbols B
+) [1
+
+] [2] [3] [4]
+[5] [6] [7] [8] [9]
+File: sensitivity_rho50.eps Graphic file (type eps)
+ <sensitivity_rho50.eps> [10] [11] [12] [13] [14]
+File: stackedweightsriskcont_efficientfrontier_clean.eps Graphic file (type eps
+)
+
+<stackedweightsriskcont_efficientfrontier_clean.eps>
+File: frontier_fourassets_tris_clean.eps Graphic file (type eps)
+
+<frontier_fourassets_tris_clean.eps> [15] [16] [17]
+File: stackedweightsriskcont_benchmark_CC.eps Graphic file (type eps)
+
+<stackedweightsriskcont_benchmark_CC.eps> [18
+
+]
+File: portfolioCVaR_CC.eps Graphic file (type eps)
+ <portfolioCVaR_CC.eps>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+File: RelPerf_EW_CC.eps Graphic file (type eps)
+<RelPerf_EW_CC.eps> [19] [20] [21]
+Overfull \hbox (9.56793pt too wide) in paragraph at lines 393--394
+ [] 
+ []
+
+[22]
+File: MinCVaR_alternatives_CC.eps Graphic file (type eps)
+ <MinCVaR_alternatives_CC.eps> [23] [24] [25] [26] [27] [28
+
+] [29] [30
+
+]
+Overfull \hbox (5.16055pt too wide) in paragraph at lines 557--558
+\OT1/cmr/m/n/12 when $[]\OMS/cmsy/m/n/12 f\OT1/cmr/m/n/12 %\OML/cmm/m/it/12 C[]
+[][]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 \OT1/cmr/m/n/12 )\OML/cmm/m/it/12 ; [] ;
+ \OT1/cmr/m/n/12 %\OML/cmm/m/it/12 C[][][]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 \O
+T1/cmr/m/n/12 )\OMS/cmsy/m/n/12 g ! \OT1/cmr/m/n/12 0\OML/cmm/m/it/12 :$ \OT1/c
+mr/m/n/12 Hence the weight and CVaR
+ []
+
+
+("C:\Documents and Settings\Administrator\Desktop\risk budget programs\text_lat
+ex\CVaRbudgets_June2011bis.bbl" [31] [32]) [33]
+("C:\Documents and Settings\Administrator\Desktop\risk budget programs\text_lat
+ex\CVaRbudgets_June2011bis.aux")
+
+LaTeX Warning: There were multiply-defined labels.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 2547 strings out of 495286
+ 33340 string characters out of 3180340
+ 115691 words of memory out of 3000000
+ 5712 multiletter control sequences out of 15000+200000
+ 13864 words of font info for 54 fonts, out of 3000000 for 9000
+ 14 hyphenation exceptions out of 8191
+ 30i,13n,24p,1730b,322s stack positions out of 5000i,500n,10000p,200000b,50000s
+
+Output written on CVaRbudgets_June2011bis.dvi (33 pages, 90732 bytes).

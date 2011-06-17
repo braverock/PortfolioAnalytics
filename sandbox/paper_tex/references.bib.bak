@@ -1,0 +1,2958 @@
+% This file was created with JabRef 2.5.
+% Encoding: ISO8859_1
+
+@ARTICLE{Acerbi2002,
+  author = {Acerbi, Carlo and Tasche, Dirk},
+  title = {Expected Shortfall: A Natural Coherent Alternative to Value at Risk},
+  journal = {Economic Notes},
+  year = {2002},
+  volume = {31},
+  pages = {379-388},
+  number = {2},
+  abstract = {We discuss the coherence properties of expected shortfall (ES) as
+	a financial risk measure. This statistic arises in a natural way
+	from the estimation of the ‘average of the 100% worst losses’
+	in a sample of returns to a portfolio. Here p is some fixed confidence
+	level. We also compare several alternative representations of ES
+	which turn out to be more appropriate for certain purposes.},
+  owner = {brian},
+  timestamp = {2007.09.08}
+}
+
+@ARTICLE{Acerbi2002a,
+  author = {Acerbi, Carlo and Tasche, Dirk},
+  title = {On the Coherence of Expected Shortfall},
+  journal = {Journal of Banking and Finance},
+  year = {2002},
+  volume = {26},
+  pages = {1487-1503},
+  number = {7},
+  abstract = {Expected Shortfall (ES) in several variants has been proposed as remedy
+	for the defi-ciencies of Value-at-Risk (VaR) which in general is
+	not a coherent risk measure. In fact, most definitions of ES lead
+	to the same results when applied to continuous loss distributions.
+	Differences may appear when the underlying loss distributions have
+	discontinuities. In this case even the coherence property of ES can
+	get lost unless one took care of the details in its definition. We
+	compare some of the definitions of Expected Shortfall, pointing out
+	that there is one which is robust in the sense of yielding a coherent
+	risk measure regardless of the underlying distributions. Moreover,
+	this Expected Shortfall can be estimated effectively even in cases
+	where the usual estimators for VaR fail.
+	
+	Key words: Expected Shortfall; Risk measure; worst conditional expectation;
+	tail con-ditional expectation; value-at-risk (VaR); conditional value-at-risk
+	(CVaR); tail mean; co-herence; quantile; sub-additivity.},
+  owner = {brian},
+  timestamp = {2007.09.08}
+}
+
+@ARTICLE{Agarwal2004,
+  author = {Agarwal, Vikas and Naik, Narayan},
+  title = {Risks and portfolio decisions involving hedge funds},
+  journal = {Review of Financial Studies},
+  year = {2004},
+  volume = {17},
+  pages = {63-98},
+  number = {1},
+  owner = {peter},
+  timestamp = {2008.02.11}
+}
+
+@ARTICLE{Agarwal2002,
+  author = {Agarwal, Vikas and Naik, Narayan},
+  title = {Characterizing Systematic Risk of Hedge Funds with Buy-and-Hold and
+	Option-based Strategies},
+  journal = {Working Paper. London Business School},
+  year = {2002},
+  owner = {brian},
+  timestamp = {2008.05.07}
+}
+
+@ARTICLE{Agarwal2000,
+  author = {Agarwal, Vikas and Naik, Narayan},
+  title = {Generalized Style Analysis of Hedge Funds},
+  journal = {Journal of Asset Management},
+  year = {2000},
+  volume = {1},
+  pages = {93-109},
+  number = {1},
+  owner = {brian},
+  timestamp = {2008.05.07}
+}
+
+@ARTICLE{Agarwal1999,
+  author = {Agarwal, Vikas and Naik, Narayan},
+  title = {Multi-period Performance Persistence Analysis of Hedge Funds},
+  journal = {Journal of Financial and Quantitative Analysis},
+  year = {1999},
+  volume = {35},
+  pages = {337-342},
+  number = {3},
+  owner = {brian},
+  timestamp = {2008.05.07}
+}
+
+@BOOK{AmencLeSourd2003,
+  title = {Portfolio Theory and Performance Analysis},
+  publisher = {Wiley Finance},
+  year = {2003},
+  author = {Amenc, No\"{e}l and Le Sourd, V\'{e}ronique},
+  owner = {peter},
+  timestamp = {2007.11.16}
+}
+
+@TECHREPORT{Amenc2005,
+  author = {Amenc, No\"{e}l and Malaise, Philippe and Vaissi\'{e}, Mathieu},
+  title = {Edhec Funds of Hedge Funds Reporting Survey : A Return-Based Approach
+	to Funds of Hedge Funds Reporting},
+  institution = {Edhec Risk and Asset Management Research Centre},
+  year = {2005},
+  month = {January},
+  file = {Edhec Funds of Hedge Funds Reporting Survey.pdf:/home/brian/docs/Research/Edhec Funds of Hedge Funds Reporting Survey.pdf:PDF},
+  owner = {brian},
+  timestamp = {2007.09.01}
+}
+
+@ARTICLE{Amenc2002,
+  author = {Amenc, No\"{e}l and Martellini, Lionel},
+  title = {Portfolio optimization and Hedge Fund Style Allocation Decisions},
+  journal = {Journal of Alternative Investment},
+  year = {2002},
+  volume = {5},
+  pages = {7-20},
+  number = {2},
+  abstract = {This article attempts to evaluate the out-of-sample performance of
+	an improved estimator of the covariance structure of hedge fund index
+	returns, focusing on its use for optimal portfolio selection. Using
+	data from CSFB/Tremont hedge fund indices, we find that ex-post volatility
+	of minimum variance portfolios generated using implicit factor-based
+	estimation techniques is between 1.5 and 6 times lower than that
+	of a value-weighted benchmark, such differences being both economically
+	and statistically significant. This strongly indicates that optimal
+	inclusion of hedge funds in an investor portfolio can potentially
+	generate a dramatic decrease in the portfolio volatility on an out-of-sample
+	basis. Differences in mean returns, on the other hand, are not statistically
+	significant, suggesting that the improvement in terms of risk control
+	does not necessarily come at the cost of lower expected returns.},
+  file = {:/home/brian/Portfolio_Optimization_and_Hedge_Fund_Style_Allocation_Decisions_2002_Amenc_Martellini_SSRN-id305006.pdf:PDF},
+  owner = {brian},
+  timestamp = {2007.08.19},
+  url = {http://papers.ssrn.com/sol3/papers.cfm?abstract_id=305006}
+}
+
+@ARTICLE{Amenc2003,
+  author = {Amenc, No\"{e}l and Martellini, Lionel and Vaiss\'{e}, Mathieu},
+  title = {Benefits and Risks of Alternative Investment Strategies},
+  journal = {Journal of Asset Management},
+  year = {2003},
+  volume = {4},
+  pages = {96-118},
+  number = {2},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@ARTICLE{Ardia2010,
+  author = {Ardia, David and Boudt, Kris and Carl, Peter and Mullen, Katharine
+	and Peterson, Brian},
+  title = {Differential evolution (DEoptim) for non-convex portfolio optimization},
+  journal = {R Journal, forthcoming},
+  year = {2011},
+  owner = {Administrator},
+  timestamp = {2010.05.30}
+}
+
+@BOOK{Aronson2007,
+  title = {Evidence-Based Technical Analysis},
+  publisher = {Wiley},
+  year = {2007},
+  author = {David Aronson},
+  owner = {peter},
+  timestamp = {2007.11.04}
+}
+
+@ARTICLE{Artzner1999,
+  author = {Artzner, Philippe and Delbaen, Freddy and Eber, Jean-Marc and Heath,
+	David},
+  title = {Coherent Measures of Risk},
+  journal = {Mathematical Finance},
+  year = {1999},
+  volume = {9},
+  pages = {203-228},
+  number = {3},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Artzner1997,
+  author = {Artzner, Philippe and Delbaen, Freddy and Eber, Jean-Marc and Heath,
+	David},
+  title = {Thinking Coherently},
+  journal = {RISK},
+  year = {1997},
+  volume = {10},
+  pages = {68-71},
+  number = {10},
+  owner = {brian},
+  timestamp = {2007.11.06}
+}
+
+@MISC{Artzner2002,
+  author = {Philippe Artzner and Freddy Delbaen and Jean-Marc Eber and David
+	Heath and Heyjin Ku},
+  title = {Coherent Multiperiod Risk Measurement},
+  howpublished = {working paper, Department of Mathematics, ETH-Z\"{u}rich.},
+  month = {February},
+  year = {2002},
+  abstract = {We explain why and how to deal with the definition, acceptability,
+	computation and management of risk in a genuinely multitemporal way.
+	Coherence axioms provide a representation of a risk-adjusted valuation.
+	Some special cases of practical interest allowing for easy recursive
+	computations are presented. The multiperiod extension of Tail VaR
+	is discussed.},
+  citeseerurl = {http://citeseer.ist.psu.edu/artzner02coherent.html},
+  file = {Coherent_Multiperiod_Risk_Measurement_2002_Artzner.pdf:/home/brian/docs/Research/Coherent_Multiperiod_Risk_Measurement_2002_Artzner.pdf:PDF},
+  owner = {brian},
+  text = {Artzner, P, Delbaen, F., Eber, J.-M., Heath, D. & Ku, H. (2002) Coherent
+	multiperiod risk measurement, working paper, Department of Mathematics,
+	ETH-Z\"{u}rich.},
+  timestamp = {2007.08.22},
+  url = {http://citeseer.ist.psu.edu/artzner02coherent.html}
+}
+
+@ARTICLE{Asness2001,
+  author = {Asness, Cliff S. and Krail, Robert and Liew, John M.},
+  title = {Do Hedge Funds Hedge?},
+  journal = {SSRN eLibrary},
+  year = {2001},
+  doi = {10.2139/ssrn.252810},
+  language = {English},
+  location = {http://ssrn.com/paper=252810},
+  owner = {peter},
+  publisher = {SSRN},
+  timestamp = {2007.11.17},
+  type = {Working Paper Series}
+}
+
+@MISC{AthaydeFlores2004,
+  author = {Athayde, Gustavo M. and Flores Jr, Renat\^{o} G.},
+  title = {Do Higher Moments Really Matter in Portfolio Choice?},
+  howpublished = {Graduate School of Economics, Getulio Vargas Foundation (Brazil)
+	in its series Economics Working Papers (Ensaios Economicos da EPGE)
+	with number 574},
+  month = {December},
+  year = {2004},
+  number = {574},
+  owner = {peter},
+  timestamp = {2007.11.03}
+}
+
+@BOOK{Bacon2004,
+  title = {Practical Portfolio Performance Measurement and Attribution},
+  publisher = {Wiley},
+  year = {2004},
+  author = {Bacon, Carl},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Baillie1992,
+  author = {Baillie, Richard T. and Bollerslev, Tim},
+  title = {Prediction in Dynamic Models with Time-Dependent Conditional Variances},
+  journal = {Journal of Econometrics},
+  year = {1992},
+  volume = {52},
+  pages = {91-113},
+  number = {1-2},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@INBOOK{Bali2004,
+  chapter = {Alternative Approaches to Estimating VaR for Hedge Fund Portfolios},
+  pages = {253-277},
+  title = {Intelligent Hedge Fund Investing},
+  publisher = {RiskBooks},
+  year = {2004},
+  editor = {Barry Schachter},
+  author = {Bali, Turan G. and Gokcan, Suleyman},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Bali2007,
+  author = {Bali, Turan G. and Gokcan, Suleyman and Liang, Bing},
+  title = {Value at Risk and the Cross-Section of Hedge Fund Returns},
+  journal = {Journal of Banking and Finance},
+  year = {2007},
+  volume = {31},
+  pages = {1135-1166},
+  number = {4},
+  abstract = {Using two large hedge fund databases, this paper empirically tests
+	the presence and significance of a cross-sectional relation between
+	hedge fund returns and value at risk (VaR). The univariate and bivariate
+	portfolio-level analyses as well as the fund-level regression results
+	indicate a significantly positive relation between VaR and the cross-section
+	of expected returns on live funds. During the period of January 1995
+	to December 2003, the live funds with high VaR outperform those with
+	low VaR by an annual return difference of 9%. This risk-return tradeoff
+	holds even after controlling for age, size, and liquidity factors.
+	Furthermore, the risk profile of defunct funds is found to be different
+	from that of live funds. The relation between downside risk and expected
+	return is found to be negative for defunct funds because taking high
+	risk by these funds can wipe out fund capital, and hence they become
+	defunct. Meanwhile, voluntary closure makes some well performed funds
+	with large assets and low risk fall into the defunct category. Hence,
+	the risk-return relation for defunct funds is more complicated than
+	what implies by survival. We demonstrate how to distinguish live
+	funds from defunct funds on an ex ante basis. A trading rule based
+	on buying the expected to live funds and selling the expected to
+	disappear funds provides an annual profit of 8–10% depending on
+	the investment horizons.},
+  keywords = {Hedge fund; Value at risk; Cross-section of expected returns; Liquidity;
+	Voluntary closure},
+  owner = {brian},
+  timestamp = {2007.08.19},
+  url = {http://www.sciencedirect.com/science?_ob=ArticleURL&_udi=B6VCY-4MG6P7X-3&_user=10&_coverDate=04%2F30%2F2007&_rdoc=1&_fmt=summary&_orig=browse&_sort=d&view=c&_acct=C000050221&_version=1&_urlVersion=0&_userid=10&md5=aa98941c82f67e4f1d0dabad4a769c62}
+}
+
+@BOOK{Becker1988,
+  title = {The New {S} Language},
+  publisher = {Chapman \& Hall},
+  year = {1988},
+  author = {Richard A. Becker and John M. Chambers and Allan R. Wilks},
+  address = {London},
+  abstract = {This book is often called the ``\emph{Blue Book}'', and introduced
+	what is now known as S version 2.},
+  owner = {brian},
+  timestamp = {2008.04.27}
+}
+
+@BOOK{Bernstein1996,
+  title = {Against the Gods: The Remarkable Story of Risk},
+  publisher = {John Wiley {\&} Sons},
+  year = {1996},
+  author = {Peter L. Bernstein},
+  isbn = {471121045},
+  owner = {peter}
+}
+
+@ARTICLE{Bertsimas2004,
+  author = {Dimitris Bertsimas and Geoffrey J. Lauprete and Alexander Samarov},
+  title = {Shortfall as a Risk Measure: Properties, Optimization and Applications},
+  journal = {Journal of Economic Dynamics and Control},
+  year = {2004},
+  volume = {28},
+  pages = {1353-1381},
+  number = {7},
+  abstract = {Motivated from second-order stochastic dominance, we introduce a risk
+	measure that we call shortfall. We examine shortfall’s properties
+	and discuss its relation to such commonly used risk measures as standard
+	deviation, VaR, lower partial moments, and coherent risk measures.
+	We show that the mean-shortfall optimization problem, unlike mean-VaR,
+	can be solved efficiently as a convex optimization problem, while
+	the sample mean-shortfall portfolio optimization problem can be solved
+	very efficiently as a linear optimization problem. We provide empirical
+	evidence (a) in asset allocation, and (b) in a problem of tracking
+	an index using only a limited number of assets that the mean-shortfall
+	approach might have advantages over mean-variance.},
+  file = {:/home/brian/docs/Research/Shortfall_as_a_risk_measure_Bertsimas2004.pdf:PDF},
+  owner = {brian},
+  timestamp = {2008.01.02}
+}
+
+@BOOK{Bodie1995,
+  title = {Investments},
+  publisher = {Irwin},
+  year = {1995},
+  author = {Bodie, Z., and Kane, A., and Marcus, A.},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@MISC{PortfolioAnalytics,
+  author = {Kris Boudt and Peter Carl and Brian G. Peterson},
+  title = {{PortfolioAnalytics}: Portfolio Analysis, including numeric methods
+	for optimization of portfolios},
+  year = {2010},
+  note = {R package version 0.0.6},
+  owner = {brian},
+  timestamp = {2008.02.01},
+  url = {http://braverock.com/R/}
+}
+
+@INCOLLECTION{BoudtPetersonCarl2008,
+  author = {Boudt, Kris and Peterson, Brian G. and Carl, Peter},
+  title = {Hedge fund portfolio selection with modified expected shortfall},
+  booktitle = {Computational Finance and its Applications III},
+  publisher = {WIT, Southampton},
+  year = {2008},
+  editor = {Brebbia, C.A. and Constantino, M. and Larran, M.},
+  series = {WIT Transactions on Modelling and Simulation},
+  owner = {n06054},
+  timestamp = {2008.05.14}
+}
+
+@ARTICLE{Boudt2007,
+  author = {Boudt, Kris and Peterson, Brian G. and Croux, Christophe},
+  title = {Estimation and Decomposition of Downside Risk for Portfolios with
+	Non-Normal Returns},
+  journal = {Journal of Risk},
+  year = {2008},
+  pages = {Winter 2008, 79-103},
+  owner = {brian},
+  timestamp = {2007.09.12}
+}
+
+@TECHREPORT{Burns2005,
+  author = {Burns, Patrick},
+  title = {A Guide for the Unwilling S User},
+  institution = {Burns Statistics},
+  year = {2005},
+  owner = {brian},
+  timestamp = {2008.05.07},
+  url = {http://www.burns-stat.com/pages/Tutor/unwilling_S.pdf}
+}
+
+@BOOK{CampbellLoMackinlay1997,
+  title = {The Econometrics of Financial Markets},
+  publisher = {Princeton University Press},
+  year = {1997},
+  author = {John Y. Campbell and Andrew Lo and Craig MacKinlay},
+  address = {Princeton},
+  owner = {peter},
+  timestamp = {2007.09.20}
+}
+
+@ARTICLE{Campbell2001,
+  author = {Rachel Campbell and Ronald Huisman and Kees Koedijk},
+  title = {Optimal Portfolio Selection in a Value at Risk Framework},
+  journal = {Journal of Banking and Finance},
+  year = {2001},
+  volume = {25},
+  pages = {1789-1804},
+  number = {9},
+  abstract = {In this paper, we develop a portfolio selection model which allocates
+	financial assets by maximising expected return subject to the constraint
+	that the expected maximum loss should meet the Value-at-Risk limits
+	set by the risk manager. Similar to the mean±variance approach a
+	performance index like the Sharpe index is constructed.Furthermore
+	when expected returns are assumed to be normally distributedwe show
+	that the model provides almost identical results to the mean±variance
+	approach.We provide an empirical analysis using two risky assets:
+	US stocks and bonds. The results highlight the influence of both
+	non-normal characteristics of the expected return distribution and
+	the length of investment time horizon on the optimal portfolio selection.},
+  file = {Optimal portfolio selection in a Value-at-Risk framework 2001 Campbell Huisman Koedijk JBF01.pdf":"/home/brian/docs/Research/Optimal portfolio selection in a Value-at-Risk framework 2001 Campbell Huisman Koedijk JBF01.pdf":PDF},
+  owner = {brian},
+  timestamp = {2007.11.19}
+}
+
+@ARTICLE{Capocci2004,
+  author = {Capocci, Daniel P.J. and H\"{u}bner, Georges},
+  title = {An Analysis of Hedge Fund Performance},
+  journal = {Journal of Empirical Finance},
+  year = {2004},
+  volume = {11},
+  pages = {55-89},
+  number = {1},
+  month = {January},
+  owner = {peter},
+  timestamp = {2008.02.11}
+}
+
+@MISC{PerformanceAnalytics,
+  author = {Peter Carl and Brian G. Peterson},
+  title = {{PerformanceAnalytics}: Econometric Tools for Performance and Risk
+	Analysis},
+  year = {2010},
+  note = {R package version 1.0.2.1},
+  owner = {brian},
+  timestamp = {2008.02.01},
+  url = {http://braverock.com/R/}
+}
+
+@BOOK{Carmona2004,
+  title = {Statistical Analysis of Financial Data in S-Plus},
+  publisher = {Springer},
+  year = {2004},
+  author = {Ren\'{e} A. Carmona},
+  series = {Springer Texts in Statistics},
+  owner = {peter},
+  timestamp = {2007.11.04}
+}
+
+@INBOOK{Chambers1992,
+  chapter = {4},
+  pages = {95-144},
+  title = {Statistical Models in S},
+  publisher = {Chapman \& Hall/CRC},
+  year = {1992},
+  editor = {John M. Chambers and Trevor J. Hastie},
+  author = {John M. Chambers},
+  owner = {peter},
+  timestamp = {2008.02.13}
+}
+
+@BOOK{Chambers1998,
+  title = {Programming with Data},
+  publisher = {Springer},
+  year = {1998},
+  author = {John M. Chambers},
+  address = {New York},
+  note = {ISBN 0-387-98503-4},
+  abstract = {This ``\emph{Green Book}'' describes version 4 of S, a major revision
+	of S designed by John Chambers to improve its usefulness at every
+	stage of the programming process.},
+  owner = {brian},
+  publisherurl = {http://www.springeronline.com/sgw/cda/frontpage/0,11855,4-40109-22-2008951-0,00.html},
+  timestamp = {2008.04.27},
+  url = {http://cm.bell-labs.com/cm/ms/departments/sia/Sbook/}
+}
+
+@BOOK{Chambers1992a,
+  title = {Statistical Models in {S}},
+  publisher = {Chapman \& Hall},
+  year = {1992},
+  author = {John M. Chambers and Trevor J. Hastie},
+  address = {London},
+  abstract = {This is also called the ``\emph{White Book}'', and introduced S version
+	3, which added structures to facilitate statistical modeling in S.},
+  owner = {brian},
+  publisherurl = {http://www.crcpress.com/shopping_cart/products/product_detail.asp?sku=C3040&parent_id=&pc=},
+  timestamp = {2008.04.27}
+}
+
+@ARTICLE{ChanGetmanskyetal2005,
+  author = {Nicholas Chan and Mila Getmansky and Shane M. Haas and Andrew W.
+	Lo},
+  title = {Systemic Risk and Hedge Funds},
+  journal = {NBER Working Paper Series},
+  year = {2005},
+  number = {11200},
+  month = {March},
+  institution = {National Bureau of Economic Research},
+  owner = {peter},
+  series = {Working Paper Series},
+  timestamp = {2007.11.03},
+  type = {Working Paper},
+  url = {http://www.nber.org/papers/w11200}
+}
+
+@ARTICLE{Chow2001,
+  author = {Chow, George and Kritzman, Mark},
+  title = {Risk budgets},
+  journal = {Journal of Portfolio Management},
+  year = {2001},
+  pages = {Winter 2001, 56-60},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@ARTICLE{Christoffersen2005,
+  author = {Christoffersen, Peter and Gon\c{c}alves, S\'{i}lvia},
+  title = {Estimation Risk in Financial Risk Management},
+  journal = {Journal of Risk},
+  year = {2005},
+  volume = {7},
+  pages = {1-28},
+  number = {3},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@TECHREPORT{Basel2006,
+  author = {Basel~II~Committee},
+  title = {Basel II: International Convergence of Capital Measurement and Capital
+	Standards: A Revised Framework - Comprehensive Version},
+  institution = {Bank of International Settlements},
+  year = {2006},
+  month = {June},
+  note = {available at: \url{http://www.bis.org/publ/bcbs128.htm}},
+  file = {bcbs128.pdf:http\://www.bis.org/publ/bcbs128.pdf:PDF},
+  owner = {brian},
+  timestamp = {2007.09.15},
+  url = {http://www.bis.org/publ/bcbs128.htm}
+}
+
+@TECHREPORT{Compliance2007,
+  author = {LLC Compliance},
+  title = {Basel II Training},
+  institution = {Complaince, LLC},
+  year = {2007},
+  note = {available at: \url{http://www.basel-ii-accord.com/BaselText/Basel525to537.htm}},
+  owner = {brian},
+  timestamp = {2007.09.15},
+  url = {http://www.basel-ii-accord.com/BaselText/Basel525to537.htm}
+}
+
+@ARTICLE{Cont2001,
+  author = {Cont, Rama},
+  title = {Empirical Properties of Asset Returns: Stylized Facts and Statistical
+	Issues},
+  journal = {Quantitative Finance},
+  year = {2001},
+  volume = {1},
+  pages = {223-236},
+  owner = {brian},
+  timestamp = {2008.01.02}
+}
+
+@ARTICLE{Cornish1937,
+  author = {Cornish, Edmund A. and Fisher, Ronald A.},
+  title = {Moments and Cumulants in the Specification of Distributions},
+  journal = {Revue de l'Institut International de Statistique},
+  year = {1937},
+  volume = {5},
+  pages = {307-320},
+  number = {4},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Creal2007,
+  author = {Drew Creal and Ying Gu and Eric Zivot},
+  title = {Evaluating Structural Models for the U.S. Short Rate Using EMM and
+	Particle Filters},
+  year = {2007},
+  month = aug,
+  abstract = {We combine the efficient method of moments with appropriate algorithms
+	from the optimal filtering literature to study a collection of models
+	for the U.S. short rate. Our models include two continuous-time stochastic
+	volatility models and two regime switching models, which provided
+	the best fit in previous work that examined a large collection of
+	models. The continuous-time stochastic volatility models fall into
+	the class of nonlinear, non-Gaussian state space models for which
+	we apply particle filtering and smoothing algorithms. Our results
+	demonstrate the effectiveness of the particle filter for continuous-time
+	processes. Our analysis also provides an alternative and complementary
+	approach to the reprojection technique of Gallant and Tauchen (1998)
+	for studying the dynamics of volatility.},
+  publisher = {University of Washington, Department of Economics},
+  url = {http://ideas.repec.org/p/udb/wpaper/uwec-2006-18.html}
+}
+
+@ARTICLE{Cribari-Neto1999,
+  author = {Francisco Cribari-Neto and Spyros G. Zarkos},
+  title = {{R}: Yet another econometric programming environment},
+  journal = {Journal of Applied Econometrics},
+  year = {1999},
+  volume = {14},
+  pages = {319-329},
+  file = {Cribari-Neto+Zarkos\:1999.pdf:http\://www.R-project.org/nosvn/papers/Cribari-Neto+Zarkos\:1999.pdf:PDF},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://www.interscience.wiley.com/jpages/0883-7252/}
+}
+
+@BOOK{Dalgaard2002,
+  title = {Introductory Statistics with R},
+  publisher = {Springer-Verlag},
+  year = {2002},
+  author = {Dalgaard, Peter},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@BOOK{Dalgaard2002a,
+  title = {Introductory Statistics with {R}},
+  publisher = {Springer},
+  year = {2002},
+  author = {Peter Dalgaard},
+  pages = {288},
+  note = {ISBN 0-387-95475-9},
+  owner = {brian},
+  publisherurl = {http://www.springeronline.com/sgw/cda/frontpage/0,11855,4-10130-22-2287329-0,00.html?changeHeader=true},
+  timestamp = {2008.04.27},
+  url = {http://www.biostat.ku.dk/~pd/ISwR.html}
+}
+
+@ARTICLE{DaviesKatLu2006,
+  author = {Davies, Ryan J. and Kat, Harry M. and Lu, Sa},
+  title = {Fund of Hedge Funds Portfolio Selection: A Multiple-Objective Approach},
+  year = {2006},
+  keywords = {Hedge funds, asset allocation, diversification, skewness, kurtosis,
+	optimisation},
+  language = {English},
+  location = {http://faculty.babson.edu/rdavies/pgp_final17.pdf},
+  owner = {peter},
+  timestamp = {2007.11.03},
+  type = {Working Paper Series}
+}
+
+@ARTICLE{DeMiguel2009,
+  author = {DeMiguel, Victor and Garlappi, Lorenzo and Uppal, Raman},
+  title = {Optimal versus na\"{\i}ve diversification: how inefficient is the
+	{1/N} portfolio strategy?},
+  journal = {Review of Financial Studies},
+  year = {2009},
+  volume = {22},
+  pages = {1915-1953},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@ARTICLE{Denault2001,
+  author = {Denault, Michel},
+  title = {Coherent allocation of risk capital},
+  journal = {Journal of Risk},
+  year = {2001},
+  pages = {Fall 2001, 1-33},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@ARTICLE{Denton2004,
+  author = {Denton, M., and Jayaraman, J.D.},
+  title = {Incremental, Marginal, and Component {VaR}},
+  journal = {Sunguard},
+  year = {2004},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{DiClemente2003,
+  author = {Di Clemente, Annalisa and Romano, Claudio},
+  title = {Beyond Markowitz: Building Optimal Portfolio Using Non-Elliptical
+	Asset Return Distributions},
+  journal = {Working paper},
+  year = {2003},
+  abstract = {The Modern Portfolio Theory (MPT) assumes that the asset return distribution
+	is
+	
+	multivariate normal. However, statistical data show fat-tailed and
+	asymmetric asset return
+	
+	distributions. Consequently, the minimum-variance portfolios are not
+	efficient with respect
+	
+	to their effective risk profile (in particular, with refer to their
+	tail risk). We know that only
+	
+	whether the asset return distribution is elliptical (for example,
+	in the case of multi-normal
+	
+	distribution) the mean-variance criterion is correct. Hence, for non-elliptical
+	distributions,
+	
+	the minimum-variance portfolios may be far from the efficient ones
+	with respect to relevant
+	
+	and tractable risk measures as, in particular, the Conditional VaR
+	(CVaR).
+	
+	The aim of this paper is therefore to underline how the optimal portfolio
+	composition
+	
+	with respect to CVaR may change, assuming different hypotheses for
+	generating the asset
+	
+	return scenarios. In order to achieve this purpose, primarily we generate
+	scenarios for
+	
+	portfolio asset returns assuming the traditional hypothesis of multivariate
+	conditional normal
+	
+	distribution. Successively, we generate the scenarios from the empirical
+	distribution using
+	
+	Filtered Historical Simulation (FHS). Finally, we generate Monte Carlo
+	(MC) asset return
+	
+	scenarios by using Extreme Value Theory (EVT) and copula function.
+	These latter scenarios
+	
+	are generated from a non-elliptical multivariate distribution constructed
+	by a Student’s tcopula
+	
+	with ten degrees of freedom and assuming marginal distributions Gaussian
+	in the
+	
+	center and EVT distributed in the tail. Finally, we apply the whole
+	methodology described to
+	
+	a portfolio of Italian equities.},
+  file = {Beyond_Markowitz\:_Building_Optimal_Portfolio_Using_Non-Elliptical_Asset_Return_Distributions_2003_Di-Clemente_Romano.pdf:/home/brian/My Documents/Research/Beyond_Markowitz\:_Building_Optimal_Portfolio_Using_Non-Elliptical_Asset_Return_Distributions_2003_Di-Clemente_Romano.pdf:PDF},
+  keywords = {Extreme Value Theory, Copula Function, Filtered Historical Simulation,
+	Exponentially Weighted Moving Average, Conditional Value-at-Risk,
+	Portfolio Optimization},
+  owner = {brian},
+  timestamp = {2007.09.11},
+  url = {http://www.gloriamundi.org/detailpopup.asp?ID=453056362}
+}
+
+@ARTICLE{Draper1973,
+  author = {Draper, Norman R. and Tierney, David E.},
+  title = {Exact Formulas for Additional Terms in Some Important Expansions},
+  journal = {Communications in Statistics-Theory and Methods},
+  year = {1973},
+  volume = {1},
+  pages = {495-524},
+  number = {6},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@BOOK{Ellis2005,
+  title = {Ahead of the curve: a commonsense guide to forecasting business and
+	market cycles},
+  publisher = {Harvard Business Press},
+  year = {2005},
+  author = {Ellis, J.H.},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@ARTICLE{Ellner2001,
+  author = {Stephen P. Ellner},
+  title = {Review of {R}, Version 1.1.1},
+  journal = {Bulletin of the Ecological Society of America},
+  year = {2001},
+  volume = {82},
+  pages = {127--128},
+  number = {2},
+  month = {April},
+  owner = {brian},
+  timestamp = {2008.04.27}
+}
+
+@ARTICLE{Embrechts2000,
+  author = {Embrechts, Paul},
+  title = {Extreme Value Theory: Potential and Limitations as an Integrated
+	Risk Management Tool},
+  journal = {Derivatives Use, Trading \& Regulation},
+  year = {2000},
+  volume = {6},
+  pages = {449-456},
+  file = {Extreme Value Theory\: Potential and Limitations as an Integrated Risk Management Tool_2000_Embrechts.pdf:/home/brian/My Documents/Research/Extreme Value Theory\: Potential and Limitations as an Integrated Risk Management Tool_2000_Embrechts.pdf:PDF},
+  owner = {brian},
+  timestamp = {2007.09.08},
+  url = {http://www.math.ethz.ch/~baltes/ftp/evtpot.pdf}
+}
+
+@BOOK{Embrechts1999,
+  title = {Modelling Extremal Events for Insurance and Finance. Application
+	of Mathematics.},
+  publisher = {Springer-Verlag},
+  year = {1999},
+  author = {Embrechts, Paul and Kl\"{u}pelberg, Claudia, and Mikosch, Thomas},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@INCOLLECTION{Embrechts2001,
+  author = {Embrechts, Paul and McNeil, Alexander and Straumann, Daniel},
+  title = {Correlation and Dependence in Risk Management: Properties and Pitfalls},
+  booktitle = {Risk Management: Value at Risk and Beyond},
+  publisher = {Cambridge University Press},
+  year = {2001},
+  editor = {Dempster, M.A.H.},
+  chapter = {7},
+  pages = {176-273},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@ARTICLE{EngleDCC02,
+  author = {Engle, R.F.},
+  title = {Dynamic Conditional Correlation - a Simple Class of Multivariate
+	{GARCH} Models},
+  journal = {Journal of Business and Economic Statistics},
+  year = {2002},
+  volume = {20},
+  pages = {339-350},
+  owner = {Administrator},
+  timestamp = {2011.05.27}
+}
+
+@ARTICLE{Faber2007,
+  author = {Faber, Mebane T},
+  title = {A Quantitative Approach to Tactical Asset Allocation},
+  journal = {Journal of Wealth Management},
+  year = {2007},
+  volume = {16},
+  pages = {69-79},
+  owner = {Administrator},
+  timestamp = {2011.06.09}
+}
+
+@BOOK{Faraway2004,
+  title = {Linear Models with R},
+  publisher = {Chapman \& Hall/CRC},
+  year = {2004},
+  author = {Julian J. Faraway},
+  address = {Boca Raton, FL},
+  note = {ISBN 1-584-88425-8},
+  abstract = {The first book that directly uses R to teach data analysis, Linear
+	Models with R focuses on the practice of regression and analysis
+	of variance. It clearly demonstrates the different methods available
+	and in which situations each one applies. It covers all of the standard
+	topics, from the basics of estimation to missing data, factorial
+	designs, and block designs, but it also includes discussion of topics,
+	such as model uncertainty, rarely addressed in books of this type.
+	The presentation incorporates an abundance of examples that clarify
+	both the use of each technique and the conclusions one can draw from
+	the results.},
+  owner = {brian},
+  publisherurl = {http://www.crcpress.com/shopping_cart/products/product_detail.asp?sku=C4258&parent_id=&pc=},
+  timestamp = {2008.04.27},
+  url = {http://www.stat.lsa.umich.edu/~faraway/LMR/}
+}
+
+@TECHREPORT{Farnsworth2006,
+  author = {Farnsworth, Grant V.},
+  title = {Econometrics in R},
+  institution = {Northwestern University},
+  year = {2006},
+  owner = {brian},
+  timestamp = {2008.05.07},
+  url = {http://cran.r-project.org/doc/contrib/Farnsworth-EconometricsInR.pdf}
+}
+
+@ARTICLE{Favre2002,
+  author = {Favre, Laurent and Galeano, Jose-Antonio},
+  title = {Mean-Modified Value-at-Risk Optimization with Hedge Funds},
+  journal = {Journal of Alternative Investment},
+  year = {2002},
+  volume = {5},
+  pages = {2-21},
+  number = {2},
+  abstract = {Based on the normal value-at-risk, we develop a new value-at-risk
+	method called modified value-at-risk. This modified value-at-risk
+	has the property to adjust the risk, measured by volatility alone,
+	with the skewness and the kurtosis of the distribution of returns.
+	The modified value-at-risk allows us to measure the risk of a portfolio
+	with non-normally distributed assets like hedge funds or technology
+	stocks and to solve for optimal portfolio by minimizing the modified
+	value-at-risk at a given confidence level.},
+  file = {Mean-modified_VaR_optimization_with_Hedge_Funds_EDHEC_Favre_2002.pdf:/home/brian/docs/Research/Mean-modified_VaR_optimization_with_Hedge_Funds_EDHEC_Favre_2002.pdf:PDF},
+  owner = {brian},
+  timestamp = {2007.07.25},
+  url = {http://www.gloriamundi.org/picsresources/lfjg1.pdf}
+}
+
+@ARTICLE{Favre2003,
+  author = {Favre, Laurent, and Renaldo, A.},
+  title = {How to Price Hedge Funds: From Two- to Four-Moment CAPM},
+  journal = {UBS and EDHEC Business School},
+  year = {2003},
+  volume = {October},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Fernandez1998,
+  author = {Fern\'{a}ndez, Carmen and Steel, Mark F.J.},
+  title = {On Bayesian Modelling of Fat Tails and Skewness},
+  journal = {Journal of the American Statistical Association},
+  year = {1998},
+  volume = {93},
+  pages = {359-371},
+  number = {441},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@BOOK{Fox2002,
+  title = {An {R} and {S-Plus} Companion to Applied Regression},
+  publisher = {Sage Publications},
+  year = {2002},
+  author = {John Fox},
+  address = {Thousand Oaks, CA, USA},
+  note = {ISBN 0761922792},
+  abstract = {A companion book to a text or course on applied regression (such as
+	``Applied Regression, Linear Models, and Related Methods'' by the
+	same author). It introduces S, and concentrates on how to use linear
+	and generalized-linear models in S while assuming familiarity with
+	the statistical methodology.},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://www.socsci.mcmaster.ca/jfox/Books/Companion/}
+}
+
+@ARTICLE{Fung2002,
+  author = {Fung, W.K. and Hsieh, D. A.},
+  title = {Asset-based Style Factors for Hedge Funds},
+  journal = {Financial Analysts Journal},
+  year = {2002},
+  volume = {58},
+  pages = {16-27},
+  number = {5},
+  owner = {brian},
+  timestamp = {2008.05.07}
+}
+
+@ARTICLE{FungHsieh1999,
+  author = {Fung, William K.H. and Hsieh, David A.},
+  title = {Is Mean-Variance Analysis Applicable to Hedge Funds?},
+  journal = {Economics Letters},
+  year = {1999},
+  volume = {62},
+  pages = {53-58},
+  abstract = {This paper shows that the mean-variance analysis of hedge funds approximately
+	preserves the ranking of preferences in
+	
+	standard utility functions. This extends the results of Levy and Markowitz
+	(1979) [Levy, H., Markowitz, H.M., 1979.
+	
+	Approximating expected utility by a function of mean and variance.
+	American Economic Review 69, 308–317] and
+	
+	Hlawitschka (1994) [Hlawitschka, W., 1994. The empirical nature of
+	Taylor-series approximations to expected utility.
+	
+	American Economic Review 84, 713–719] for individual stocks and
+	portfolios of stocks.},
+  keywords = {Hedge funds; Mean-variance analysis; Taylor-series approximation;
+	risk version},
+  owner = {peter},
+  timestamp = {2007.11.03},
+  url = {http://faculty.fuqua.duke.edu/~dah7/PDFofPublishedPapers/EconLett1999.pdf}
+}
+
+@ARTICLE{Furrer2001,
+  author = {Reinhard Furrer and Diego Kuonen},
+  title = {{GRASS GIS et R}: main dans la main dans un monde libre},
+  journal = {Flash Informatique Sp{\'e}cial {\'E}t{\'e}},
+  year = {2001},
+  pages = {51-56},
+  month = {sep},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://sawww.epfl.ch/SIC/SA/publications/FI01/fi-sp-1/sp-1-page51.html}
+}
+
+@ARTICLE{Gehin2006,
+  author = {G\'{e}hin, Walter},
+  title = {The Challenge of Hedge Fund Performance Measurement: a Toolbox Rather
+	Than a Pandora's Box},
+  journal = {Working paper},
+  year = {2006},
+  owner = {peter},
+  timestamp = {2007.11.03}
+}
+
+@ARTICLE{Garman1997,
+  author = {Garman, Mark B.},
+  title = {Taking VaR to pieces},
+  journal = {RISK},
+  year = {1997},
+  volume = {10},
+  pages = {70-71},
+  number = {10},
+  owner = {brian},
+  timestamp = {2007.09.09},
+  url = {http://www.fea.com/resources/pdf/a_taking_var_to_pieces.pdf}
+}
+
+@ARTICLE{Garman1997a,
+  author = {Garman, Mark B.},
+  title = {Ending the Search for Component {VaR}},
+  journal = {Working paper},
+  year = {1997},
+  owner = {brian},
+  timestamp = {2007.09.09},
+  url = {http://www.fea.com/resources/pdf/a_endsearchvar.pdf}
+}
+
+@ARTICLE{Gaussel2001,
+  author = {Gaussel, N. and Legras, J. and Longin, F. and Rabemananjara, R.},
+  title = {Beyond the {VaR} Horizon},
+  journal = {Quants Review},
+  year = {2001},
+  volume = {No. 37.},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Geltner1993,
+  author = {Geltner, David},
+  title = {Estimating Market Values from Appraised Values without Assuming an
+	Efficient Market},
+  journal = {Journal of Real Estate Research},
+  year = {1993},
+  volume = {8},
+  pages = {325-345},
+  owner = {brian},
+  timestamp = {2007.09.01}
+}
+
+@ARTICLE{Geltner1991,
+  author = {Geltner, David},
+  title = {Smoothing in Appraisal-Based Returns},
+  journal = {Journal of Real Estate Finance and Economics},
+  year = {1991},
+  volume = {4},
+  pages = {327-345},
+  owner = {brian},
+  timestamp = {2007.09.01}
+}
+
+@ARTICLE{Gentleman2000,
+  author = {Robert Gentleman and Ross Ihaka},
+  title = {Lexical Scope and Statistical Computing},
+  journal = {Journal of Computational and Graphical Statistics},
+  year = {2000},
+  volume = {9},
+  pages = {491--508},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://www.amstat.org/publications/jcgs/}
+}
+
+@ARTICLE{GetmanskyLoEtAl2004,
+  author = {Mila Getmansky and Andrew W. Lo and Igor Makarov},
+  title = {An Econometric Model of Serial Correlation and Illiquidity in Hedge
+	Fund Returns},
+  journal = {Journal of Financial Economics},
+  year = {2004},
+  pages = {529-609},
+  number = {74},
+  month = {March},
+  abstract = {The returns to hedge funds and other alternative investments are often
+	highly serially cor-
+	
+	related, in sharp contrast to the returns of more traditional investment
+	vehicles such as
+	
+	long-only equity portfolios and mutual funds. In this paper, we explore
+	several sources of
+	
+	such serial correlation and show that the most likely explanation
+	is illiquidity exposure,
+	
+	i.e., investments in securities that are not actively traded and for
+	which market prices are
+	
+	not always readily available. For portfolios of illiquid securities,
+	reported returns will tend
+	
+	to be smoother than true economic returns, which will understate volatility
+	and increase
+	
+	risk-adjusted performance measures such as the Sharpe ratio. We propose
+	an economet-
+	
+	ric model of illiquidity exposure and develop estimators for the smoothing
+	proﬁle as well
+	
+	as a smoothing-adjusted Sharpe ratio. For a sample of 908 hedge funds
+	drawn from the
+	
+	TASS database, we show that our estimated smoothing coeﬃcients vary
+	considerably across
+	
+	hedge-fund style categories and may be a useful proxy for quantifying
+	illiquidity exposure.},
+  keywords = {Hedge Funds; Serial Correlation; Performance Smoothing; Liquidity;
+	Market Eﬃciency.},
+  owner = {peter},
+  timestamp = {2007.11.03}
+}
+
+@ARTICLE{Giot2003,
+  author = {Giot, Pierre and Laurent, S\'{e}bastien},
+  title = {Value-at-Risk for Long and Short Trading Positions},
+  journal = {Journal of Applied Econometrics},
+  year = {2003},
+  volume = {18},
+  pages = {641-664},
+  number = {6},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@ARTICLE{Gourieroux2000,
+  author = {Gouri\'{e}roux, Christian and Laurent, Jean-Paul and Scaillet, Olivier},
+  title = {Sensitivity Analysis of Value at Risk},
+  journal = {Journal of Empirical Finance},
+  year = {2000},
+  volume = {7},
+  pages = {225-245},
+  number = {3-4},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@MANUAL{FinTS,
+  title = {FinTS: Companion to Tsay (2005) Analysis of Financial Time Series},
+  author = {Spencer Graves},
+  year = {2008},
+  note = {R package version 0.2-6},
+  owner = {brian},
+  timestamp = {2008.02.11},
+  url = {http://cran.r-project.org/src/contrib/Descriptions/FinTS.html}
+}
+
+@ARTICLE{Guegan2004,
+  author = {Guegan, Dominique and Cyril, Caillault},
+  title = {Forecasting {VaR} and Expected Shortfall using Dynamical Systems:
+	A Risk Management Strategy},
+  journal = {Working paper},
+  year = {2004},
+  month = {June 27},
+  abstract = {Using copulas' approach and parametric models, we show that the bivariate
+	distribution of an Asian portfolio is not stable all along the period
+	under study. Thus, we develop several dynamical models to compute
+	two market risk's measures: the Value at Risk and the Expected Shortfall.
+	The methods considered are the RiskMetric methodology, the Multivariate
+	GARCH models, the Multivariate Markov-Switching models, the empirical
+	histogram and the dynamical copulas. We discuss the choice of the
+	best method with respect to the policy management of banks supervisors.
+	The copula approach seems to be a good compromise between all these
+	models. It permits to take into account financial crises and to obtain
+	a low capital requirement during the most important crises.},
+  file = {Forecasting_VaR_and_Expected_Shortfall_using_Dynamical_Systems\:_A_Risk_Management_Strategy_2004_Guegan_Cyril_SSRN-id898828.pdf:/home/brian/My Documents/Research/Forecasting_VaR_and_Expected_Shortfall_using_Dynamical_Systems\:_A_Risk_Management_Strategy_2004_Guegan_Cyril_SSRN-id898828.pdf:PDF},
+  keywords = {Value at Risk, Expected Shortfall, Copula, RiskMetrics, Risk management},
+  owner = {brian},
+  timestamp = {2007.09.11},
+  url = {http://papers.ssrn.com/sol3/papers.cfm?abstract_id=898828}
+}
+
+@ARTICLE{Gueyie2006,
+  author = {Gueyi\'{e}, Jean-Pierre and Amvella, Serge Patrick},
+  title = {Optimal Portfolio Allocation Using Funds of Hedge Funds},
+  journal = {Journal of Wealth Management},
+  year = {2006},
+  volume = {9},
+  pages = {85-95},
+  number = {2},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@ARTICLE{Hallerbach2002,
+  author = {Hallerbach, Winfried G.},
+  title = {Decomposing Portfolio Value-at-Risk: A General Analysis},
+  journal = {Journal of Risk},
+  year = {2002},
+  volume = {5},
+  pages = {1-18},
+  number = {2},
+  abstract = {An intensive and still growing body of research focuses on estimating
+	a portfolio’s Valueat-
+	
+	Risk. Depending on both the degree of non-linearity of the instruments
+	comprised in
+	
+	the portfolio and the willingness to make restrictive assumptions
+	on the underlying
+	
+	statistical distributions, a variety of analytical methods and simulation-based
+	methods are
+	
+	available. Aside from the total portfolio’s VaR, there is a growing
+	need for information
+	
+	about (i) the marginal contribution of the individual portfolio components
+	to the
+	
+	diversified portfolio VaR, (ii) the proportion of the diversified
+	portfolio VaR that can be
+	
+	attributed to each of the individual components consituting the portfolio,
+	and (iii) the
+	
+	incremental effect on VaR of adding a new instrument to the existing
+	portfolio.
+	
+	Expressions for these marginal, component and incremental VaR metrics
+	have
+	
+	been derived by Garman [1996a, 1997a] under the assumption that returns
+	are drawn
+	
+	from a multivariate normal distribution. For many portfolios, however,
+	the assumption
+	
+	of normally distributed returns is too stringent. Whenever these deviations
+	from
+	
+	normality are expected to cause serious distortions in VaR calculations,
+	one has to resort
+	
+	to either alternative distribution specifications or historical and
+	Monte Carlo simulation
+	
+	methods. Although these approaches to overall VaR estimation have
+	received substantial
+	
+	interest in the literature, there exist to the best of our knowledge
+	no procedures for
+	
+	estimating marginal VaR, component VaR and incremental VaR in either
+	a non-normal
+	
+	analytical setting or a Monte Carlo / historical simulation context.
+	
+	This paper tries to fill this gap by investigating these VaR concepts
+	in a general
+	
+	distribution-free setting. We derive a general expression for the
+	marginal contribution of
+	
+	an instrument to the diversified portfolio VaR - whether this instrument
+	is already
+	
+	included in the portfolio or not. We show how in a most general way,
+	the total portfolio
+	
+	VaR can be decomposed in partial VaRs that can be attributed to the
+	individual
+	
+	instruments comprised in the portfolio. These component VaRs have
+	the appealing
+	
+	property that they aggregate linearly into the diversified portfolio
+	VaR. We not only
+	
+	show how the standard results under normality can be generalized to
+	non-normal
+	
+	analytical VaR approaches but also present an explicit procedure for
+	estimating marginal
+	
+	VaRs in a simulation framework. Given the marginal VaR estimate, component
+	VaR and
+	
+	incremental VaR readily follow. The proposed estimation approach pairs
+	intuitive appeal
+	
+	with computational efficiency. We evaluate various alternative estimation
+	methods in an
+	
+	application example and conclude that the proposed approach displays
+	an astounding
+	
+	accuracy and a promising outperformance.},
+  keywords = {Value-at-Risk, marginal VaR, component VaR, incremental VaR, nonnormality,
+	
+	non-linearity, estimation, simulation},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@ARTICLE{HarveyLiechtyetal2004,
+  author = {Harvey, Campbell R. and Liechty, John C. and Liechty, Merrill W.
+	and M\"{u}ller, Peter},
+  title = {Portfolio Selection with Higher Moments},
+  journal = {Working paper},
+  year = {2004},
+  month = {May},
+  abstract = {We build on the Markowitz portfolio selection process by incorporating
+	higher order
+	
+	moments of the assets, as well as utility functions based on predictive
+	asset returns.
+	
+	We propose the use of the skew normal distribution as a characterization
+	of the asset
+	
+	returns. We show that this distribution has many attractive features
+	when it comes
+	
+	to modeling multivariate returns. Preference over portfolios is framed
+	in terms of ex-
+	
+	pected utility maximization. We discuss estimation and optimal portfolio
+	selection
+	
+	using Bayesian methods. These methods allow for a comparison to other
+	optimiza-
+	
+	tion approaches where parameter uncertainty is either ignored or accommodated
+	in an
+	
+	ad hoc manner. Our results suggest that it is important to incorporate
+	higher order
+	
+	moments in portfolio selection. Further, we show that our approach
+	leads to higher
+	
+	expected utility than the resampling methods common in the practice
+	of ﬁnance.},
+  keywords = {Bayesian statistics, multivariate skewness, parameter uncertainty,
+	
+	portfolio selection, utility function maximization.},
+  owner = {peter},
+  timestamp = {2007.11.03},
+  url = {http://faculty.fuqua.duke.eduzSz%7EcharveyzSzResearchzSzWorking_PaperszSzW70_Portfolio_selection_with.pdf/harvey04portfolio.pdf}
+}
+
+@BOOK{Heiberger2004,
+  title = {Statistical Analysis and Data Display: An Intermediate Course with
+	Examples in {S-Plus}, {R}, and {SAS}},
+  publisher = {Springer},
+  year = {2004},
+  author = {Richard M. Heiberger and Burt Holland},
+  series = {Springer Texts in Statistics},
+  note = {ISBN 0-387-40270-5},
+  abstract = {A contemporary presentation of statistical methods featuring 200 graphical
+	displays for exploring data and displaying analyses. Many of the
+	displays appear here for the first time. Discusses construction and
+	interpretation of graphs, principles of graphical design, and relation
+	between graphs and traditional tabular results. Can serve as a graduate-level
+	standalone statistics text and as a reference book for researchers.
+	In-depth discussions of regression analysis, analysis of variance,
+	and design of experiments are followed by introductions to analysis
+	of discrete bivariate data, nonparametrics, logistic regression,
+	and ARIMA time series modeling. Concepts and techniques are illustrated
+	with a variety of case studies. S-Plus, R, and SAS executable functions
+	are provided and discussed. S functions are provided for each new
+	graphical display format. All code, transcript and figure files are
+	provided for readers to use as templates for their own analyses.},
+  owner = {brian},
+  publisherurl = {http://www.springeronline.com/sgw/cda/frontpage/0,11855,4-10129-22-28904982-0,00.html?changeHeader=true},
+  timestamp = {2008.04.27},
+  url = {http://astro.temple.edu/~rmh/HH}
+}
+
+@BOOK{Huet2003,
+  title = {Statistical Tools for Nonlinear Regression},
+  publisher = {Springer},
+  year = {2003},
+  author = {Sylvie Huet and Annie Bouvier and Marie-Anne Gruet and Emmanuel Jolivet},
+  address = {New York},
+  note = {ISBN 0-387-40081-8},
+  owner = {brian},
+  publisherurl = {http://www.springeronline.com/sgw/cda/frontpage/0,11855,4-40109-22-7107970-0,00.html},
+  timestamp = {2008.04.27}
+}
+
+@BOOK{Iacus2003,
+  title = {Laboratorio di statistica con {R}},
+  publisher = {McGraw-Hill},
+  year = {2003},
+  author = {Stefano Iacus and Guido Masarotto},
+  pages = {384},
+  address = {Milano},
+  note = {ISBN 88-386-6084-0},
+  owner = {brian},
+  publisherurl = {http://www.ateneonline.it/LibroAteneo.asp?item_id=1436},
+  timestamp = {2008.04.27}
+}
+
+@ARTICLE{Ihaka1996,
+  author = {Ross Ihaka and Robert Gentleman},
+  title = {R: A Language for Data Analysis and Graphics},
+  journal = {Journal of Computational and Graphical Statistics},
+  year = {1996},
+  volume = {5},
+  pages = {299--314},
+  number = {3},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://www.amstat.org/publications/jcgs/}
+}
+
+@TECHREPORT{RiskMetrics1996,
+  author = {J.P.Morgan/Reuters},
+  title = {RiskMetrics Technical Document},
+  institution = {J.P. Morgan/Reuters},
+  year = {1996},
+  number = {Fourth Edition},
+  address = {New York},
+  owner = {brian},
+  timestamp = {2007.09.09}
+}
+
+@ARTICLE{Jaschke2002,
+  author = {Jaschke, Stefan R.},
+  title = {The Cornish-Fisher-Expansion in the Context of Delta-Gamma-Normal
+	Approximations},
+  journal = {Journal of Risk},
+  year = {2002},
+  volume = {4},
+  pages = {33-52},
+  number = {4},
+  month = {December},
+  citeseerurl = {http://citeseer.ist.psu.edu/608652.html},
+  file = {Cornish_fisher_Expansion_in _the_Context_of_Delta_Gamma_Normal_Approximations-Jaschke-2001.pdf:/home/brian/docs/Research/Cornish_fisher_Expansion_in _the_Context_of_Delta_Gamma_Normal_Approximations-Jaschke-2001.pdf:PDF},
+  institution = {Journal of Risk},
+  owner = {brian},
+  timestamp = {2007.08.25},
+  type = {Sonderforschungsbereich 373},
+  url = {http://ideas.repec.org/p/wop/humbsf/2001-54.html}
+}
+
+@ARTICLE{Jin2006,
+  author = {Jin, Hanqing and Markowitz, Harry and Zhou, Xunyu},
+  title = {A Note on Semivariance},
+  journal = {Mathematical Finance},
+  year = {2006},
+  volume = {Vol. 16, No. 1, January},
+  pages = {53-61},
+  abstract = {In a recent paper (Jin, Yan, and Zhou 2005), it is proved that efficient
+	strategies of the continuous-time mean-semivariance portfolio selection
+	model are in general never achieved save for a trivial case. In this
+	note, we show that the mean-semivariance efficient strategies in
+	a single period are always attained irrespective of the market condition
+	or the security return distribution. Further, for the below-target
+	semivariance model the attainability is established under the arbitrage-free
+	condition. Finally, we extend the results to problems with general
+	downside risk measures.},
+  owner = {brian},
+  timestamp = {2007.08.19},
+  url = {http://papers.ssrn.com/sol3/papers.cfm?abstract_id=910640}
+}
+
+@ARTICLE{JobsonKorkie1981,
+  author = {Jobson, J.D. and Korkie, B.M.},
+  title = {Performance Hypothesis Testing with the Sharpe and Treynor Measures},
+  journal = {Journal of Finance},
+  year = {1981},
+  volume = {36},
+  pages = {889-908},
+  owner = {Administrator},
+  timestamp = {2011.06.12}
+}
+
+@ARTICLE{Jondeau2006,
+  author = {Jondeau, Eric and Rockinger, Michael},
+  title = {Optimal Portfolio Allocation Under Higher Moments},
+  journal = {European Financial Management},
+  year = {2006},
+  volume = {12},
+  pages = {29-55},
+  number = {1},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@BOOK{Jorion2007,
+  title = {Value at Risk: the New Benchmark for Managing Financial Risk, 3rd
+	edition},
+  publisher = {McGraw Hill},
+  year = {2007},
+  author = {Jorion, Phillippe},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Kalkbrener2005,
+  author = {Kalkbrener, Michael},
+  title = {An Axiomatic Approach to Capital Allocation},
+  journal = {Mathematical Finance},
+  year = {2005},
+  volume = {15},
+  pages = {425-437},
+  number = {3},
+  month = {July},
+  abstract = {Capital allocation techniques are of central importance in portfolio
+	management and risk-based performance measurement. In this paper
+	we propose an axiom system for capital allocation and analyze its
+	satisfiability and completeness: it is shown that for a given risk
+	measure rho there exists a capital allocation lambda that satisfies
+	the main axioms if and only if rho is subadditive and positively
+	homogeneous. Furthermore, it is proved that the axiom system uniquely
+	specifies lambda. We apply the axiomatization to the most popular
+	risk measures in the finance industry in order to derive explicit
+	capital allocation formulae for these measures.},
+  doi = {doi:10.1111/j.1467-9965.2005.00227.x},
+  file = {:/home/brian/docs/Research/axiomatic_approach_to_capital_allocation_2005_Kalkbrener.pdf:PDF},
+  keywords = {capital allocation, risk measure, expected shortfall, value-at-risk,
+	Hahn-Banach theorem},
+  owner = {brian},
+  timestamp = {2008.04.27}
+}
+
+@ARTICLE{Kalman1960,
+  author = {Kalman, Rudolf Emil},
+  title = {A New Approach to Linear Filtering and Prediction Problems},
+  journal = {Transactions of the ASME -- Journal of Basic Engineering},
+  year = {1960},
+  volume = {82},
+  pages = {35-45},
+  number = {Series D},
+  month = {March},
+  comment = {this is a transcription of the original paper for readability and
+	referenceability. transcription notes are at the url},
+  file = {:/home/brian/docs/Research/Kalman1960.pdf:PDF},
+  keywords = {linear filter, Kalman filter},
+  owner = {brian},
+  timestamp = {2008.02.09},
+  url = {http://www.cs.unc.edu/~welch/kalman/kalmanPaper.html}
+}
+
+@TECHREPORT{Kaufmann2005,
+  author = {Roger Kaufmann},
+  title = {Long Term Risk Management},
+  institution = {Swiss Life},
+  year = {2005},
+  abstract = {In this paper financial risks for long time horizons are investigated.
+	
+	As measures for these risks, value-at-risk and expected shortfall
+	are considered.
+	
+	In a first part, questions concerning a two-week horizon are addressed.
+	For
+	
+	GARCH-type processes and stochastic volatility models with jumps,
+	methods
+	
+	to estimate quantiles of financial risks for two-week periods are
+	introduced, and
+	
+	compared with the widely used square-root-of-time rule, which scales
+	one-day
+	
+	risk measures by $\sqrt{10}$ to get ten-day risk measures.
+	
+	In the second part of the paper, a framework for the measurement of
+	one-year
+	
+	risks is developed. Several models for financial time series are introduced,
+	and
+	
+	compared with each other. The various models are tested for their
+	appropriateness
+	
+	for estimating one-year expected shortfall and value-at-risk on 95\%
+	and
+	
+	99\% confidence levels.},
+  file = {Long_Term_Risk_Management_2004_Kaufmann.pdf:/home/brian/docs/Research/Long_Term_Risk_Management_2004_Kaufmann.pdf:PDF},
+  owner = {brian},
+  school = {Department of Mathematics, ETH-Z\"{u}rich},
+  timestamp = {2007.11.19}
+}
+
+@PHDTHESIS{Kaufmann2004,
+  author = {Roger Kaufmann},
+  title = {Long Term Risk Management},
+  school = {Department of Mathematics, ETH-Z\"{u}rich},
+  year = {2004},
+  file = {Long_Term_Risk_Management_2004_thesis_Kaufmann.pdf:/home/brian/docs/Research/Long_Term_Risk_Management_2004_thesis_Kaufmann.pdf:PDF},
+  owner = {brian},
+  timestamp = {2007.11.19}
+}
+
+@ARTICLE{Kazemi2003,
+  author = {Kazemi and Schneeweis and Gupta},
+  title = {Omega as a Performance Measure},
+  journal = {Working paper},
+  year = {2003},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Keating2002,
+  author = {Keating, J. and Shadwick, W.F.},
+  title = {The Omega Function},
+  journal = {Finance Development Center, London},
+  year = {2002},
+  volume = {working paper},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Keel2010,
+  author = {Keel, Simon and Ardia, Simon},
+  title = {Generalized Marginal Risk},
+  journal = {Journal of Asset Management},
+  year = {2011},
+  volume = {12},
+  pages = {123-131},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@ARTICLE{Khan2007,
+  author = {Khan, Jafar A. and Van Aelst, Stefan and Zamar, Ruben H.},
+  title = {Robust Linear Model Selection Based on Least Angle Regression},
+  journal = {Journal of the American Statistical Association},
+  year = {2007},
+  volume = {102},
+  pages = {1289-1299},
+  number = {1289-1299},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@ARTICLE{Kooli2005,
+  author = {Maher Kooli and Serge Patrick Amvella and Jean-Pierre Gueyi\'{e}},
+  title = {Hedge Funds in a Portfolio Context: a Mean-Modified Value at Risk
+	Framework},
+  journal = {Derivative Use, Trading and Regulation},
+  year = {2005},
+  volume = {10},
+  pages = {373-383},
+  number = {4},
+  abstract = {Practical Implications: This paper finds that the modified Sharpe
+	ratio, which uses the value at risk (VaR) as a risk measure, is more
+	accurate than the traditional Sharpe ratio. Also, the VaR adjusted
+	to the Cornish–Fisher expansion is a good compromise between the
+	normal VaR (based on the standard deviation of returns) and the historical
+	VaR (which uses past returns to proxy future returns). With the VaR
+	adjusted to the Cornish–Fisher expansion, the paper examines the
+	behaviour of a Canadian institutional investor’s portfolio which
+	includes hedge funds (HFs). It is confirmed that including HFs in
+	a portfolio improves its risk-adjusted performance. The findings
+	are relevant for investors who invest in different traditional and
+	alternative assets as well as in HFs. It should be noted, however,
+	that if an investment offers a superior risk-return profile, it does
+	not automatically mean that investors should buy it, as it may not
+	fit their preferences and/or fit in with other available alternatives.
+	
+	
+	Abstract: Hedge funds (HFs) are attracting growing interest from investors.
+	Their persistent high returns, combined with their low correlation
+	with traditional assets such as equities and bonds, have certainly
+	acted in their favour. This attraction is, however, accompanied by
+	a price to pay. Hedge funds’ returns generally have negative skewness
+	and excess kurtosis, which force their distribution to deviate from
+	normality. The purpose of this paper is to determine an acceptable
+	risk measure, which allows one to analyse correctly the behaviour
+	of these funds in a Canadian institutional investor portfolio. It
+	is shown that the modified Sharpe ratio, which uses the value at
+	risk (VaR) as a risk measure, is more accurate. Furthermore, among
+	various measures of VaR, the VaR adjusted to the Cornish–Fisher
+	expansion is more conservative. Overall, the paper confirms that
+	including HFs in a portfolio improves its risk-adjusted performance.},
+  owner = {brian},
+  timestamp = {2008.01.02}
+}
+
+@ARTICLE{Kosowski2007,
+  author = {Kosowski, Robert and Naik, Narayan Y. and Teo, Melvyn },
+  title = {Do Hedge Funds Deliver Alpha? A Bayesian and Bootstrap Analysis},
+  journal = {Journal of Financial Economics},
+  year = {2007},
+  volume = {84},
+  pages = {229-264},
+  month = {April},
+  abstract = {Using a robust bootstrap procedure, we find that top hedge fund performance
+	cannot be explained by luck, and hedge fund performance persists
+	at annual horizons. Moreover, we show that Bayesian measures, which
+	help overcome the short-sample problem inherent in hedge fund returns,
+	lead to superior performance predictability. Sorting on Bayesian
+	alphas, relative to OLS alphas, yields a 5.5% per year increase in
+	the alpha of the spread between the top and bottom hedge fund deciles.
+	Our results are robust and relevant to investors as they are neither
+	confined to small funds, nor driven by incubation bias, backfill
+	bias, or serial correlation.},
+  file = {Do_Hedge_unds_Deliver_Alpha_A_Bayesian_and_Bootstap_Analoysis_2005-2007_Kosowski.pdf:/home/brian/docs/Research/Do_Hedge_unds_Deliver_Alpha_A_Bayesian_and_Bootstap_Analoysis_2005-2007_Kosowski.pdf:PDF},
+  keywords = {hedge fund, persistence, Bayesian, alpha, backfill, incubation, bootstrap},
+  language = {English},
+  location = {http://ssrn.com/paper=829025},
+  owner = {brian},
+  publisher = {SSRN},
+  timestamp = {2007.09.01},
+  type = {Working Paper Series}
+}
+
+@ARTICLE{Kuester2006,
+  author = {Kuester, Keith and Mittnik, Stefan and Paolella, Marc S.},
+  title = {Value-at-Risk Prediction: A Comparison of Alternative Strategies},
+  journal = {Journal of Financial Econometrics},
+  year = {2006},
+  volume = {4},
+  pages = {53-89},
+  number = {1},
+  abstract = {Given the growing need for managing financial risk, risk prediction
+	plays an increasing role in banking and finance. In this study we
+	compare the out-of-sample performance of existing methods and some
+	new models for predicting value-at-risk (VaR) in a univariate context.
+	Using more than 30 years of the daily return data on the NASDAQ Composite
+	Index, we find that most approaches perform inadequately, although
+	several models are acceptable under current regulatory assessment
+	rules for model adequacy. A hybrid method, combining a heavy-tailed
+	generalized autoregressive conditionally heteroskedastic (GARCH)
+	filter with an extreme value theory-based approach, performs best
+	overall, closely followed by a variant on a filtered historical simulation,
+	and a new model based on heteroskedastic mixture distributions. Conditional
+	autoregressive VaR (CAVaR) models perform inadequately, though an
+	extension to a particular CAVaR model is shown to outperform the
+	others.},
+  keywords = {empirical finance, extreme value theory, fat tails, GARCH, quantile
+	regression},
+  location = {http://ssrn.com/paper=922912},
+  owner = {brian},
+  publisher = {SSRN},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Kuonen2001b,
+  author = {Diego Kuonen},
+  title = {Introduction au data mining avec {R} : vers la reconqu{\^e}te du
+	`knowledge discovery in databases' par les statisticiens},
+  journal = {Bulletin of the Swiss Statistical Society},
+  year = {2001},
+  volume = {40},
+  pages = {3-7},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://www.statoo.com/en/publications/2001.R.SSS.40/}
+}
+
+@ARTICLE{Kuonen2001,
+  author = {Diego Kuonen and Valerie Chavez},
+  title = {{R} - un exemple du succ{\`e}s des mod{\`e}les libres},
+  journal = {Flash Informatique},
+  year = {2001},
+  volume = {2},
+  pages = {3-7},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://sawww.epfl.ch/SIC/SA/publications/FI01/fi-2-1/2-1-page3.html}
+}
+
+@ARTICLE{Kuonen2001a,
+  author = {Diego Kuonen and Reinhard Furrer},
+  title = {Data mining avec {R} dans un monde libre},
+  journal = {Flash Informatique Sp{\'e}cial {\'E}t{\'e}},
+  year = {2001},
+  pages = {45-50},
+  month = {sep},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://sawww.epfl.ch/SIC/SA/publications/FI01/fi-sp-1/sp-1-page45.html}
+}
+
+@MISC{Lambert2001,
+  author = {Lambert, Philippe and Laurent, S\'{e}bastien},
+  title = {Modelling Financial Time Series Using {GARCH}-type Models and a Skewed
+	{Student} Density},
+  howpublished = {Working paper},
+  year = {2001},
+  note = {Universit\'{e} de Li\`{e}ge},
+  owner = {brian},
+  timestamp = {2007.10.30},
+  volume = {working paper}
+}
+
+@BOOK{Lhabitant2004,
+  title = {Hedge Funds: Quantitative Insights},
+  publisher = {Wiley},
+  year = {2004},
+  author = {Lhabitant, Francois-Sergei},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Liang1999,
+  author = {Liang, Bing},
+  title = {On the Performance of Hedge Funds},
+  journal = {Financial Analysts Journal},
+  year = {1999},
+  volume = {55},
+  pages = {72-85},
+  number = {4},
+  month = {July/August},
+  owner = {brian},
+  timestamp = {2008.05.07}
+}
+
+@BOOK{Limas2001,
+  title = {Control de Calidad. Metodologia para el analisis previo a la modelizaci{\'o}n
+	de datos en procesos industriales. Fundamentos te{\'o}ricos y aplicaciones
+	con R.},
+  publisher = {Servicio de Publicaciones de la Universidad de La Rioja},
+  year = {2001},
+  author = {Manuel Castej{\'o}n Limas and Joaqu{\'\i}n Ordieres Mer{\'e} and
+	Fco. Javier de Cos Juez and Fco. Javier Mart{\'\i}nez de Pis{\'o}n
+	Ascacibar},
+  note = {ISBN 84-95301-48-2},
+  abstract = {This book, written in Spanish, is oriented to researchers interested
+	in applying multivariate analysis techniques to real processes. It
+	combines the theoretical basis with applied examples coded in R.},
+  owner = {brian},
+  timestamp = {2008.04.27}
+}
+
+@BOOK{Litterman1998,
+  title = {The Practice of Risk Management: Implementing Processes for Managing
+	Firm-Wide Market Risk},
+  publisher = {Euromoney},
+  year = {1998},
+  author = {Litterman, R. and Gumerlock, R. and et. al.},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Litterman1996,
+  author = {Litterman, Robert B},
+  title = {Hot Spots$^{TM}$ and hedges},
+  journal = {Journal of Portfolio Management},
+  year = {1996},
+  pages = {Special issue 1996, 52-75},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@ARTICLE{Lo2001,
+  author = {Lo, Andrew W. },
+  title = {Risk Management for Hedge Funds: Introduction and Overview},
+  journal = {SSRN eLibrary},
+  year = {2001},
+  doi = {10.2139/ssrn.283308},
+  keywords = {Risk management, hedge funds, risk transparency, risk budgeting, fund
+	of funds},
+  language = {English},
+  location = {http://ssrn.com/paper=283308},
+  owner = {peter},
+  publisher = {SSRN},
+  timestamp = {2007.11.03},
+  type = {Working Paper Series}
+}
+
+@ARTICLE{Maillard2010,
+  author = {Maillard, Sebastien and Roncalli, Thierry and Teiletche, Jerome},
+  title = {On the properties of equally-weighted risk contributions portfolios},
+  journal = {Journal of Portfolio Management},
+  year = {2010},
+  pages = {Summer 2010, 60-70},
+  owner = {Administrator},
+  timestamp = {2010.09.02}
+}
+
+@BOOK{Maindonald2003,
+  title = {Data Analysis and Graphics Using R: An Example-Based Approach},
+  publisher = {Cambridge University Press},
+  year = {2003},
+  author = {Maindonald, J. and Braun, J.},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@BOOK{Maindonald2003a,
+  title = {Data Analysis and Graphics Using R},
+  publisher = {Cambridge University Press},
+  year = {2003},
+  author = {John Maindonald and John Braun},
+  pages = {362},
+  address = {Cambridge},
+  note = {ISBN 0-521-81336-0},
+  owner = {brian},
+  publisherurl = {http://www.cup.org/},
+  timestamp = {2008.04.27},
+  url = {http://wwwmaths.anu.edu.au/~johnm/r-book.html}
+}
+
+@BOOK{Marin2007,
+  title = {Bayesian Core: A Practical Approach to Computational Bayesian Statistics},
+  publisher = {Springer},
+  year = {2007},
+  author = {Jean-Michel Marin and Christian P. Robert},
+  pages = {258},
+  edition = {First},
+  month = feb,
+  abstract = {This Bayesian modeling book is intended for practitioners and applied
+	statisticians looking for a self-contained entry to computational
+	Bayesian statistics. Focusing on standard statistical models and
+	backed up by discussed real datasets available from the book website,
+	it provides an operational methodology for conducting Bayesian inference,
+	rather than focusing on its theoretical justifications. Special attention
+	is paid to the derivation of prior distributions in each case and
+	specific reference solutions are given for each of the models. Similarly,
+	computational details are worked out to lead the reader towards an
+	effective programming of the methods given in the book. While R programs
+	are provided on the book website and R hints are given in the computational
+	sections of the book, The Bayesian Core requires no knowledge of
+	the R language and it can be read and used with any other programming
+	language.
+	
+	The Bayesian Core can be used as a textbook at both undergraduate
+	and graduate levels, as exemplified by courses given at Universit{\'e}
+	Paris Dauphine (France), University of Canterbury (New Zealand),
+	and University of British Columbia (Canada). It serves as a unique
+	textbook for a service course for scientists aiming at analyzing
+	data the Bayesian way as well as an introductory course on Bayesian
+	statistics. The prerequisites for the book are a basic knowledge
+	of probability theory and of statistics. Methodological and data-based
+	exercises are included within the main text and students are expected
+	to solve them as they read the book. Those exercises can obviously
+	serve as assignments, as was done in the above courses. Datasets,
+	R codes and course slides all are available on the book website.},
+  isbn = {0387389792},
+  owner = {brian},
+  timestamp = {2008.02.02}
+}
+
+@ARTICLE{Markowitz1952,
+  author = {Harry Markowitz},
+  title = {Portfolio Selection},
+  journal = {Journal of Finance},
+  year = {1952},
+  volume = {7},
+  pages = {77-91},
+  number = {1},
+  owner = {brian},
+  timestamp = {2008.01.02}
+}
+
+@BOOK{Maronna2006,
+  title = {Robust Statistics: Theory and Methods},
+  publisher = {Wiley},
+  year = {2006},
+  author = {Maronna, Ricardo A. and Martin, Douglas R. and Yohai, Victor J.},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@ARTICLE{Martellini2005,
+  author = {Martellini, Lionel and Vaissi\'{e}, Mathieu and Ziemann, Volker},
+  title = {Investing in Hedge Funds: Adding Value through Active Style Allocation
+	Decisions},
+  journal = {EDHEC Risk and Asset Management Research Centre},
+  year = {2005},
+  volume = {October},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{MartelliniZiemann2010,
+  author = {Martellini, Lionel and Ziemann, Volker},
+  title = {Improved Forecasts of Higher-Order Comoments and Implications for
+	Portfolio Selection},
+  journal = {Review of Financial Studies},
+  year = {2010},
+  volume = {23},
+  pages = {1467-1502},
+  owner = {peter},
+  timestamp = {2007.11.03}
+}
+
+@ARTICLE{MartelliniZiemann2005,
+  author = {Martellini, Lionel and Ziemann, Volker},
+  title = {Marginal Impacts on Portfolio Distributions},
+  journal = {EDHEC Risk and Asset Management Research Centre},
+  year = {2005},
+  volume = {working paper},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Martin2001,
+  author = {Martin, Richard and Thompson, Kevin and Browne, Christopher},
+  title = {{VaR}: Who Contributes and How Much?},
+  journal = {RISK},
+  year = {2001},
+  volume = {14},
+  pages = {99-102},
+  number = {8},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@BOOK{Mase2004,
+  title = {Introduction to Data Science for engineers--- Data analysis using
+	free statistical software R (in Japanese)},
+  publisher = {Suuri-Kogaku-sha, Tokyo},
+  year = {2004},
+  author = {S. Mase and T. Kamakura and M. Jimbo and K. Kanefuji},
+  pages = {254},
+  month = {April},
+  note = {ISBN 4901683128},
+  owner = {brian},
+  timestamp = {2008.04.27}
+}
+
+@BOOK{McNeil2005,
+  title = {Quantitative Risk Management: Concepts, Techniques, Tools},
+  publisher = {Princton University Press},
+  year = {2005},
+  author = {McNeil, Alexander J. and Frey, R\"{u}dinger and Embrechts, Paul},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Memmel2003,
+  author = {Memmel, C},
+  title = {Performance hypothesis testing with the {Sharpe} Ratio},
+  journal = {Finance Letters},
+  year = {2003},
+  volume = {1},
+  pages = {21-23},
+  owner = {Administrator},
+  timestamp = {2011.06.12}
+}
+
+@BOOK{Michaud1998,
+  title = {Efficient Asset Management: A Practical Guide to Stock Portfolio
+	Optimization and Asset Allocation},
+  publisher = {Harvard Business School Press},
+  year = {1998},
+  author = {Michaud, Richard O.},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@BOOK{Murrell2006,
+  title = {R Graphics},
+  publisher = {Chapman \& Hall/CRC},
+  year = {2006},
+  author = {Paul Murrell},
+  series = {Computer Science and Data Analysis Series},
+  owner = {peter},
+  timestamp = {2007.11.04}
+}
+
+@ARTICLE{Murrell2000,
+  author = {Paul Murrell and Ross Ihaka},
+  title = {An Approach to Providing Mathematical Annotation in Plots},
+  journal = {Journal of Computational and Graphical Statistics},
+  year = {2000},
+  volume = {9},
+  pages = {582--599},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://www.amstat.org/publications/jcgs/}
+}
+
+@BOOK{Nolan2000,
+  title = {Stat Labs: Mathematical Statistics Through Applications},
+  publisher = {Springer},
+  year = {2000},
+  author = {Deborah Nolan and Terry Speed},
+  series = {Springer Texts in Statistics},
+  note = {ISBN 0-387-98974-9},
+  abstract = {Integrates theory of statistics with the practice of statistics through
+	a collection of case studies (``labs''), and uses R to analyze the
+	data.},
+  owner = {brian},
+  publisherurl = {http://www.springeronline.com/sgw/cda/frontpage/0,11855,4-40106-22-2104508-0,00.html?changeHeader=true},
+  timestamp = {2008.04.27},
+  url = {http://www.stat.Berkeley.EDU/users/statlabs/}
+}
+
+@ARTICLE{Okunev2003,
+  author = {Okunev, John and White, Derek},
+  title = {Hedge Fund Risk Factors and Value at Risk of Credit Trading Strategies},
+  journal = {SSRN eLibrary},
+  year = {2003},
+  abstract = {This paper analyzes the risk characteristics for various hedge fund
+	strategies specializing in fixed income instruments. Because fixed
+	income hedge fund strategies have exceptionally high autocorrelations
+	in reported returns and this is taken as evidence of return smoothing,
+	we first develop a method to completely eliminate any order of autocorrelation
+	process across a wide array of time series processes. Once this is
+	complete, we determine the underlying risk factors to the "true"
+	hedge fund returns and examine the incremental benefit attained from
+	using nonlinear payoffs relative to the more traditional linear factors.
+	For a great many of the hedge fund indices we find the strongest
+	risk factor to be equivalent to a short put position on high-yield
+	debt. In general, we find a moderate benefit to using the nonlinear
+	risk factors in terms of the ability to explain reported returns.
+	However, in some cases this fit is not stable even over the in-sample
+	period. Finally, we examine the benefit to using various factor structures
+	for estimating the value-at-risk of the hedge funds. We find, in
+	general, that using nonlinear factors slightly increases the estimated
+	downside risk levels of the hedge funds due to their option-like
+	payoff structures.},
+  doi = {10.2139/ssrn.460641},
+  keywords = {Hedge Funds, Value at Risk},
+  language = {English},
+  location = {http://ssrn.com/paper=460641},
+  owner = {brian},
+  publisher = {SSRN},
+  timestamp = {2007.09.01},
+  type = {Working Paper Series}
+}
+
+@ARTICLE{Okunev2005,
+  author = {Okunev, John and White, Derek, and Lewis, Nigel},
+  title = {Using a Value at Risk Approach to Enhance Tactical Asset Allocation},
+  journal = {SSRN eLibrary},
+  year = {2005},
+  keywords = {Tactical Asset Allocation, Value at Risk},
+  language = {English},
+  location = {http://ssrn.com/paper=879522},
+  owner = {brian},
+  publisher = {SSRN},
+  timestamp = {2007.09.02},
+  type = {Working Paper Series},
+  url = {http://ssrn.com/paper=879522}
+}
+
+@ARTICLE{Parello2007,
+  author = {Parello, Joseph},
+  title = {Downside Risk Analysis Applied to Hedge Funds Universe},
+  year = {2007},
+  abstract = {Hedge Funds are considered as one of the portfolio management sectors
+	which shows a fastest growing for the past decade. An optimal Hedge
+	Fund management requires an appropriate risk metrics. The classic
+	CAPM theory and its Ratio Sharpe fail to capture some crucial aspects
+	due to the strong non-Gaussian character of Hedge Funds statistics.
+	A possible way out to this problem while keeping the CAPM simplicity
+	is the so-called Downside Risk analysis. One important benefit lies
+	in distinguishing between good and bad returns, that is: returns
+	greater or lower than investor's goal. We revisit most popular Downside
+	Risk indicators and provide new analytical results on them. We compute
+	these measures by taking the Credit Suisse/Tremont Investable Hedge
+	Fund Index Data and with the Gaussian case as a benchmark. In this
+	way an unusual transversal lecture of the existing Downside Risk
+	measures is provided.},
+  doi = {10.1016/j.physa.2007.04.079},
+  owner = {brian},
+  timestamp = {2007.08.19},
+  url = {http://arxiv.org/abs/physics/0610162}
+}
+
+@BOOK{Parmigiani2003,
+  title = {The Analysis of Gene Expression Data},
+  publisher = {Springer},
+  year = {2003},
+  author = {Giovanni Parmigiani and Elizabeth S. Garrett and Rafael A. Irizarry
+	and Scott L. Zeger},
+  address = {New York},
+  note = {ISBN 0-387-95577-1},
+  owner = {brian},
+  publisherurl = {http://www.springeronline.com/sgw/cda/frontpage/0,11855,4-40109-22-2292983-0,00.html},
+  timestamp = {2008.04.27}
+}
+
+@BOOK{Pearson2002,
+  title = {Risk Budgeting: Portfolio Problem Solving with Value-at-Risk},
+  publisher = {Wiley},
+  year = {2002},
+  author = {Neil D. Pearson},
+  pages = {256},
+  edition = {1},
+  isbn = {0471405566},
+  owner = {brian},
+  timestamp = {2007.12.08}
+}
+
+@ARTICLE{Peterson2008,
+  author = {Peterson, Brian G. and Kris Boudt},
+  title = {Component {VaR} for a non-normal world},
+  journal = {{RISK}},
+  year = {2008},
+  pages = {November 2008, 78-81},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@INPROCEEDINGS{Pflug2000,
+  author = {Pflug, G. Ch.},
+  title = {Some remarks on the value-at-risk and the conditional value-at-risk},
+  booktitle = {Probabilistic constrained optimization: methodology and applications},
+  year = {2000},
+  editor = {Uryasev, S.},
+  pages = {272-281},
+  publisher = {Dordrecht: Kluwer},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@BOOK{Pinheiro2000,
+  title = {Mixed-Effects Models in S and {S-Plus}},
+  publisher = {Springer},
+  year = {2000},
+  author = {Jose C. Pinheiro and Douglas M. Bates},
+  note = {ISBN 0-387-98957-0},
+  abstract = {A comprehensive guide to the use of the `nlme' package for linear
+	and nonlinear mixed-effects models.},
+  owner = {brian},
+  publisherurl = {http://www.springeronline.com/sgw/cda/frontpage/0,11855,4-10129-22-2102822-0,00.html?changeHeader=true},
+  timestamp = {2008.04.27}
+}
+
+@ARTICLE{Plantinga2001,
+  author = {Plantinga, Auke and van der Meer, Robert and Sortino, Frank},
+  title = {The Impact of Downside Risk on Risk-Adjusted Performance of Mutual
+	Funds in the Euronext Markets.},
+  journal = {Working paper},
+  year = {2001},
+  abstract = {Many performance measures, such as the classic Sharpe ratio have difficulty
+	in evaluating the performance of mutual funds with skewed return
+	distributions. Common causes for skewness are the use of options
+	in the portfolio or superior market timing skills of the portfolio
+	manager. In this article we examine to what extent downside risk
+	and the upside potential ratio can be used to evaluate skewed return
+	distributions. In order to accomplish this goal, we first show the
+	relation between the risk preferences of the investor and the risk-adjusted
+	performance measure. We conclude that it is difficult to interpret
+	differences in the outcomes of risk-adjusted performance measures
+	exclusively as differences in forecasting skills of portfolio managers.
+	We illustrate this with an example of a simulation study of a protective
+	put strategy. We show that the Sharpe ratio leads to incorrect conclusions
+	in the case of protective put strategies. On the other hand, the
+	upside potential ratio leads to correct conclusions. Finally, we
+	apply downside risk and the upside potential ratio in the process
+	of selecting a mutual fund from a sample of mutual funds in the Euronext
+	stock markets. The rankings appear similar, which can be attributed
+	to the absence of significant skewness in the sample. However, find
+	that the remaining differences can be quite significant for individual
+	fund managers, and that these differences can be attributed to skewness.
+	Therefore, we prefer to use the UPR as an alternative to the Sharpe
+	ratio, as it accounts better for the use of options and forecasting
+	skills.},
+  keywords = {Performance measurement, mutual funds, skewness, Sharpe ratio, market
+	efficiency},
+  owner = {brian},
+  timestamp = {2007.08.19},
+  url = {http://ssrn.com/abstract=277352}
+}
+
+@ARTICLE{Pownall99,
+  author = {R. Pownall and R. Huisman and K. Koedijk},
+  title = {Asset Allocation in a Value-at-Risk Framework},
+  year = {1999},
+  owner = {brian},
+  text = {R. A.J. Pownall, R. Huisman, and Kees G. Koedijk. Asset allocation
+	in a value-at-risk framework. In Proceedings of the European Finance
+	Association Conference, Helsinki, Finland, 1999.},
+  timestamp = {2007.11.19},
+  url = {citeseer.ist.psu.edu/huisman99asset.html}
+}
+
+@BOOK{Price2005,
+  title = {Differential Evolution - A practical approach to global optimization},
+  publisher = {Springer-Verlag},
+  year = {2005},
+  author = {Price, K.V. and Storn, R.M. and Lampinen, J.A.},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@ARTICLE{Qian2006,
+  author = {Qian, Edward},
+  title = {On the Financial Interpretation of Risk Contribution: Risk Budgets
+	Do
+	
+	Add Up},
+  journal = {Journal of Investment Management},
+  year = {2006},
+  volume = {4},
+  pages = {1-11},
+  number = {4},
+  owner = {brian},
+  timestamp = {2007.10.16}
+}
+
+@ARTICLE{Qian2005,
+  author = {Qian, Edward},
+  title = {Risk parity portfolios: efficient portfolios through true diversification
+	of risk},
+  journal = {Panagora Asset Management},
+  year = {2005},
+  volume = {September},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@ARTICLE{RanaldoFavre2005,
+  author = {Ranaldo, Angelo and Favre Sr., Laurent},
+  title = {{How to Price Hedge Funds: From Two- to Four-Moment CAPM}},
+  journal = {SSRN eLibrary},
+  year = {2005},
+  keywords = {Hedge funds, CAPM, higher moments, skewness, kurtosis, required rate
+	of return},
+  language = {English},
+  location = {http://ssrn.com/paper=474561},
+  owner = {peter},
+  publisher = {SSRN},
+  timestamp = {2007.11.03},
+  type = {Working Paper Series}
+}
+
+@ARTICLE{Ribeiro2001,
+  author = {Ribeiro, Jr., Paulo J. and Patrick E. Brown},
+  title = {Some words on the R project},
+  journal = {The ISBA Bulletin},
+  year = {2001},
+  volume = {8},
+  pages = {12--16},
+  number = {1},
+  month = {March},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://www.iami.mi.cnr.it/isba/index.html}
+}
+
+@MISC{Ricci2005,
+  author = {Vito Ricci},
+  title = {Fitting Distributions with R},
+  howpublished = {Working paper},
+  month = {February},
+  year = {2005},
+  file = {Ricci-distributions-en.pdf:http\://cran.r-project.org/doc/contrib/Ricci-distributions-en.pdf:PDF},
+  owner = {peter},
+  timestamp = {2007.11.03}
+}
+
+@ARTICLE{Ricci2004,
+  author = {Vito Ricci},
+  title = {{R} : un ambiente opensource per l'analisi statistica dei dati},
+  journal = {Economia e Commercio},
+  year = {2004},
+  volume = {1},
+  pages = {69--82},
+  abstract = {This paper would be a short introduction and overview about the language
+	and environment for statistical analysis R, without entering in specific
+	details too much computational. I give a look about this opensource
+	software pointing out its main features, its functionalities, its
+	pros and cons describing some libraries and the kind of analysis
+	they support. I supply a summary, with a short description, about
+	many resources concerning R that can be found in the Web: the most
+	are in English language, but there are also some in the Italian language.
+	The aim of this work is to contribute in increasing of the use of
+	the R environment in Italy among statistical researchers trying to
+	``advertise'' this software and its opensource philosophy.},
+  owner = {brian},
+  timestamp = {2008.04.27}
+}
+
+@ARTICLE{Ripley2001,
+  author = {Brian D. Ripley},
+  title = {The {R} Project in Statistical Computing},
+  journal = {MSOR Connections. The newsletter of the LTSN Maths, Stats \& OR Network.},
+  year = {2001},
+  volume = {1},
+  pages = {23--25},
+  number = {1},
+  month = {February},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://ltsn.mathstore.ac.uk/newsletter/feb2001/pdf/rproject.pdf}
+}
+
+@BOOK{Robert2005,
+  title = {Monte Carlo Statistical Methods (Springer Texts in Statistics)},
+  publisher = {Springer},
+  year = {2005},
+  author = {Robert, Christian P. and Casella, George },
+  month = {July},
+  abstract = {{<P>Monte Carlo statistical methods, particularly those based on Markov
+	chains, are now an essential component of the standard set of techniques
+	used by statisticians. This new edition has been revised towards
+	a coherent and flowing coverage of these simulation techniques, with
+	incorporation of the most recent developments in the field. In particular,
+	the introductory coverage of random variable generation has been
+	totally revised, with many concepts being unified through a fundamental
+	theorem of simulation</P> <P></P> <P>There are five completely new
+	chapters that cover Monte Carlo control, reversible jump, slice sampling,
+	sequential Monte Carlo, and perfect sampling. There is a more in-depth
+	coverage of Gibbs sampling, which is now contained in three consecutive
+	chapters. The development of Gibbs sampling starts with slice sampling
+	and its connection with the fundamental theorem of simulation, and
+	builds up to two-stage Gibbs sampling and its theoretical properties.
+	A third chapter covers the multi-stage Gibbs sampler and its variety
+	of applications. Lastly, chapters from the previous edition have
+	been revised towards easier access, with the examples getting more
+	detailed coverage.</P> <P></P> <P>This textbook is intended for a
+	second year graduate course, but will also be useful to someone who
+	either wants to apply simulation techniques for the resolution of
+	practical problems or wishes to grasp the fundamental principles
+	behind those methods. The authors do not assume familiarity with
+	Monte Carlo techniques (such as random variable generation), with
+	computer programming, or with any Markov chain theory (the necessary
+	concepts are developed in Chapter 6). A solutions manual, which covers
+	approximately 40\% of the problems, is available for instructors
+	who require the book for a course.</P> <P></P> <P>Christian P. Robert
+	is Professor of Statistics in the Applied Mathematics Department
+	at Universit\'{e} Paris Dauphine, France. He is also Head of the
+	Statistics Laboratory at the Center for Research in Economics and
+	Statistics (CREST) of the National Institute for Statistics and Economic
+	Studies (INSEE) in Paris, and Adjunct Professor at Ecole Polytechnique.
+	He has written three other books, including The Bayesian Choice,
+	Second Edition, Springer 2001. He also edited Discretization and
+	MCMC Convergence Assessment, Springer 1998. He has served as associate
+	editor for the Annals of Statistics and the Journal of the American
+	Statistical Association. He is a fellow of the Institute of Mathematical
+	Statistics, and a winner of the Young Statistician Award of the Societi\'{e}
+	de Statistique de Paris in 1995.</P> <P></P> <P>George Casella is
+	Distinguished Professor and Chair, Department of Statistics, University
+	of Florida. He has served as the Theory and Methods Editor of the
+	Journal of the American Statistical Association and Executive Editor
+	of Statistical Science. He has authored three other textbooks: Statistical
+	Inference, Second Edition, 2001, with Roger L. Berger; Theory of
+	Point Estimation, 1998, with Erich Lehmann; and Variance Components,
+	1992, with Shayle R. Searle and Charles E. McCulloch. He is a fellow
+	of the Institute of Mathematical Statistics and the American Statistical
+	Association, and an elected fellow of the International Statistical
+	Institute.</P> <P></P> <P> </P> <P> </P> <P> </P> <P> </P>}},
+  citeulike-article-id = {1839984},
+  comment = {p373, Chapter 10 "The Multi-Stage Gibbs Sampler"
+	
+	""" Although the Gibbs sampler is, formally, a special case of the
+	Metropolic-Hastings algorithm (or rather a combination of Metropolis-Hastings
+	algorithms applied to different components; see Theorem 10.13), the
+	Gibbs sampling algorithm has a number of distinct features:
+	
+	+ The acceptance rate of the Gibbs sampler is uniformly equal to 1.
+	Therefore, every simulated value is accepted and the suggestions
+	of Section 7.6.1 on the optimal acceptance rates do not apply in
+	this setting. This also means that convergence assessment for this
+	algorithm should be treated differently than for Metropolis-Hastings
+	techniques.
+	
+	+ The use of the Gibbs sampler implies limitations on the choice of
+	instrumental distributions an requires a prior knowledge of some
+	analytical or probabilistic properties of f.
+	
+	+ The Gibbs sampler is, by construction, multidimensional. Even though
+	some components of the simulated vector may be artificial for the
+	problem of interest, or unnecessary for the required inference, the
+	construction is still at least two-dimensional.
+	
+	+ The Gibbs sampler does not apply to problems where the number of
+	parameters varies, as in Chapter 11, because of the obvious lack
+	of irreducibility of the resultung chain.
+	
+	"""},
+  howpublished = {Hardcover},
+  isbn = {0387212396},
+  keywords = {gibbs, mcmctheory},
+  priority = {0},
+  url = {http://www.amazon.ca/exec/obidos/redirect?tag=citeulike09-20\&amp;path=ASIN/0387212396}
+}
+
+@ARTICLE{Rockafellar2000,
+  author = {Rockafellar, Ralph T and Uryasev, Stanislav},
+  title = {Optimization of Conditional Value-at-Risk},
+  journal = {Journal of Risk},
+  year = {2000},
+  pages = {Spring 2000, 21-41},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@INCOLLECTION{Rousseeuw1985,
+  author = {Rousseeuw, Peter J.},
+  title = {Multivariate Estimation with High Breakdown Point},
+  booktitle = {Mathematical Statistics and Its Applications},
+  publisher = {Dordrecht-Reidel},
+  year = {1985},
+  editor = {Grossmann, W. and Pflug, G. and Vincze, I. and Wertz, W.},
+  volume = {B},
+  pages = {283-297},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@BOOK{Ruppert2004,
+  title = {Statistics and Finance, an Introduction},
+  publisher = {Springer-Verlag},
+  year = {2004},
+  author = {Ruppert, David},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Scaillet2002,
+  author = {Scaillet, Olivier},
+  title = {Nonparametric Estimation and Sensitivity Analysis of Expected Shortfall},
+  journal = {Mathematical Finance},
+  year = {2002},
+  volume = {14},
+  pages = {74-86},
+  number = {1},
+  owner = {brian},
+  timestamp = {2007.10.30}
+}
+
+@BOOK{Scherer2007,
+  title = {Portfolio Construction and Risk Budgeting},
+  publisher = {London: Risk Books},
+  year = {2007},
+  author = {Scherer, Bernd},
+  edition = {3rd},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@BOOK{Scherer2005,
+  title = {Modern Portfolio Optimization},
+  publisher = {Springer},
+  year = {2005},
+  author = {Scherer, Bernd. and Martin, Douglas},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{ScottHorvath1980,
+  author = {Scott, Robert C. and Horvath, Philip A.},
+  title = {On the Direction of Preference for Moments of Higher Order than the
+	Variance},
+  journal = {Journal of Finance},
+  year = {1980},
+  volume = {35},
+  pages = {915-919},
+  number = {4},
+  month = {September},
+  owner = {peter},
+  timestamp = {2007.11.03}
+}
+
+@ARTICLE{Sharpe1992,
+  author = {Sharpe, William},
+  title = {Asset Allocation: Management Style and Performance Measurement},
+  journal = {Journal of Portfolio Management},
+  year = {1992},
+  pages = {7-19},
+  number = {Winter},
+  owner = {brian},
+  timestamp = {2008.05.07}
+}
+
+@ARTICLE{Sharpe1991,
+  author = {Sharpe, William},
+  title = {Capital Asset Prices with and without Negative Holdings},
+  journal = {Journal of Finance},
+  year = {1991},
+  volume = {46},
+  pages = {489-509},
+  number = {2},
+  month = {June},
+  abstract = {My Nobel lecture in 1990. Includes a concise version of the original
+	CAPM with extensions to cover cases in which negative holdings are
+	not allowed.},
+  doi = {10.2307/2328833},
+  owner = {brian},
+  timestamp = {2007.11.19},
+  url = {http://nobelprize.org/economics/laureates/1990/sharpe-lecture.pdf}
+}
+
+@ARTICLE{Sharpe1988,
+  author = {William Sharpe},
+  title = {Determining a Fund's Effective Asset Mix},
+  journal = {Investment Management Review},
+  year = {1988},
+  month = {December},
+  owner = {peter},
+  timestamp = {2008.02.11}
+}
+
+@ARTICLE{Sharpe2002,
+  author = {Sharpe, William F.},
+  title = {Budgeting and Monitoring Pension Fund Risk},
+  journal = {Financial Analysts Journal},
+  year = {2002},
+  volume = {58},
+  pages = {74-86},
+  number = {5},
+  owner = {brian},
+  timestamp = {2007.10.16}
+}
+
+@ARTICLE{Sharpe1994,
+  author = {Sharpe, William F.},
+  title = {The Sharpe Ratio},
+  journal = {Journal of Portfolio Management},
+  year = {1994},
+  volume = {Fall},
+  pages = {49-58},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Sharpe1964,
+  author = {Sharpe, William F.},
+  title = {Capital Asset Prices - A Theory of Market Equilibrium Under Conditions
+	of Risk},
+  journal = {Journal of Finance},
+  year = {1964},
+  volume = {September},
+  pages = {425-442},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Sharpe1963,
+  author = {Sharpe, William F.},
+  title = {A Simplified Model for Portfolio Analysis},
+  journal = {Management Science},
+  year = {1963},
+  volume = {January},
+  pages = {277-293},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@BOOK{Shumway2006,
+  title = {Time Series Analysis and its Applications with R examples: second
+	edition},
+  publisher = {Springer},
+  year = {2006},
+  author = {Shumway, Robert H. and Stoffer, David S.},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@MISC{Sortino1999,
+  author = {Sortino, Frank},
+  title = {The Sortino Ratio},
+  howpublished = {http://www.sortino.com/htm/Sortino%20Ratio.htm},
+  owner = {brian},
+  timestamp = {2007.08.19},
+  url = {http://www.sortino.com/htm/Sortino%20Ratio.htm}
+}
+
+@ARTICLE{Sortino1994,
+  author = {Sortino, Frank A. and Price, Lee N.},
+  title = {Performance Measurement in a Downside Risk Framework},
+  journal = {Journal of Investing},
+  year = {1994},
+  volume = {Fall},
+  pages = {59-65},
+  owner = {brian},
+  timestamp = {2007.08.19},
+  url = {http://www.sortino.com/htm/performance.htm}
+}
+
+@TECHREPORT{NIST2006,
+  author = {National Institute of Standards and Technology},
+  title = {Engineering Statistics Handbook},
+  institution = {NIST/Sematech},
+  year = {2006},
+  owner = {brian},
+  timestamp = {2007.08.28},
+  url = {http://www.itl.nist.gov/div898/handbook/toolaids/pff/ehb-chapters-1-8.pdf}
+}
+
+@ARTICLE{Stoyanov2009,
+  author = {Stoyanov, Stoyan and Rachev, Svetlozar T and Fabozzi, Frank J},
+  title = {Sensitivity of portfolio {VaR} and {CVaR} to portfolio return characteristics},
+  journal = {Universit\"{a}t Karlsruhe working paper},
+  year = {2009},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@INBOOK{Tasche2004,
+  chapter = {Allocating Portfolio Economic Capital to Sub-Portfolios},
+  pages = {275-302},
+  title = {Economic Capital: A Practitioners Guide},
+  publisher = {Risk Books},
+  year = {2004},
+  editor = {Ashish Dev},
+  author = {Tasche, Dirk},
+  owner = {brian},
+  review = {Tasche's Theorem 1 references a proof in Kalkbrener 2002 which Tasche
+	characterizes as stating that "in the case of sub-additive and one
+	homogeneous risk measures only derivatives yield risk contributions
+	that do not exceed the corresponding stand-alone risks"(p.286).
+	
+	
+	Tasche also says "if a risk measure is smooth, we should use its partial
+	derivatives as risk contributions of the assets in the portfolio.
+	Otherwise we run the risk of receiving misleading information about
+	the profitability of the assets."(p.286)
+	
+	
+	Another point he makes in the conclusion to the chapter is:
+	
+	
+	"the allocation procedure has to be based on the derivatives of the
+	applied risk measure with respect to the weights of the sub-portfolios
+	or assets."(p. 299)
+	
+	
+	If you search the book for "Theorem I", you can read the Theorem itself
+	on pages 284 and 285 and read most of the proof as well.},
+  timestamp = {2008.04.29}
+}
+
+@ARTICLE{Thorp1997,
+  author = {Thorp, Edward O.},
+  title = {The Kelly Criterion in Blackjack, Sports Betting, and the Stock Market},
+  year = {1997, revised 1998},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Treynor1973,
+  author = {Treynor, Jack L. and Black, Fischer},
+  title = {How to Use Security Analysis to Improve Portfolio Selection},
+  journal = {Journal of Business},
+  year = {1973},
+  volume = {46},
+  pages = {66-86},
+  number = {1},
+  month = {January},
+  note = {available at http://ideas.repec.org/a/ucp/jnlbus/v46y1973i1p66-86.html},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@BOOK{Tsay2005,
+  title = {Analysis of Financial Time Series},
+  publisher = {Wiley},
+  year = {2005},
+  author = {Tsay, Ruey},
+  edition = {2},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Uryasev1999,
+  author = {Uryasev, S. and Rockafellar, R.},
+  title = {Optimization of Conditional Value-at-Risk},
+  journal = {Journal of Risk},
+  year = {2000},
+  volume = {2},
+  pages = {21-41},
+  number = {3},
+  owner = {brian},
+  timestamp = {2007.07.25}
+}
+
+@ARTICLE{Vaissie2003,
+  author = {Vaissie, Mathieu},
+  title = {A Detailed Analysis of the Construction Methods and Management Principles
+	of Hedge Fund Indices},
+  journal = {EDHEC Risk and Asset Management Research Centre},
+  year = {2003},
+  volume = {October},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@BOOK{Venables2002,
+  title = {Modern Applied Statistics with {S}. Fourth Edition},
+  publisher = {Springer},
+  year = {2002},
+  author = {William N. Venables and Brian D. Ripley},
+  note = {ISBN 0-387-95457-0},
+  abstract = {A highly recommended book on how to do statistical data analysis using
+	R or S-Plus. In the first chapters it gives an introduction to the
+	S language. Then it covers a wide range of statistical methodology,
+	including linear and generalized linear models, non-linear and smooth
+	regression, tree-based methods, random and mixed effects, exploratory
+	multivariate analysis, classification, survival analysis, time series
+	analysis, spatial statistics, and optimization. The `on-line complements'
+	available at the books homepage provide updates of the book, as well
+	as further details of technical material. },
+  owner = {brian},
+  publisherurl = {http://www.springeronline.com/sgw/cda/frontpage/0,11855,4-40109-22-1542120-0,00.html},
+  timestamp = {2008.04.27},
+  url = {http://www.stats.ox.ac.uk/pub/MASS4/}
+}
+
+@BOOK{VenablesRipley2002,
+  title = {Moderen Applied Statistics with S},
+  publisher = {Springer},
+  year = {2002},
+  author = {Venables, William N. and Ripley, Brian D.},
+  edition = {4},
+  owner = {peter},
+  timestamp = {2007.11.04}
+}
+
+@BOOK{Venables2000,
+  title = {S Programming},
+  publisher = {Springer},
+  year = {2000},
+  author = {William N. Venables and Brian D. Ripley},
+  note = {ISBN 0-387-98966-8},
+  abstract = {This provides an in-depth guide to writing software in the S language
+	which forms the basis of both the commercial S-Plus and the Open
+	Source R data analysis software systems.},
+  owner = {brian},
+  publisherurl = {http://www.springeronline.com/sgw/cda/frontpage/0,11855,4-40109-22-2104231-0,00.html},
+  timestamp = {2008.04.27},
+  url = {http://www.stats.ox.ac.uk/pub/MASS3/Sprog/}
+}
+
+@BOOK{Verzani2005,
+  title = {Using R for Introductory Statistics},
+  publisher = {Chapman \& Hall/CRC},
+  year = {2005},
+  author = {John Verzani},
+  address = {Boca Raton, FL},
+  note = {ISBN 1-584-88450-9},
+  abstract = {There are few books covering introductory statistics using R, and
+	this book fills a gap as a true ``beginner'' book. With emphasis
+	on data analysis and practical examples, `Using R for Introductory
+	Statistics' encourages understanding rather than focusing on learning
+	the underlying theory. It includes a large collection of exercises
+	and numerous practical examples from a broad range of scientific
+	disciplines. It comes complete with an online resource containing
+	datasets, R functions, selected solutions to exercises, and updates
+	to the latest features. A full solutions manual is available from
+	Chapman \& Hall/CRC.},
+  owner = {brian},
+  publisherurl = {http://www.crcpress.com/shopping_cart/products/product_detail.asp?sku=C4509&parent_id=&pc=},
+  timestamp = {2008.04.27},
+  url = {http://wiener.math.csi.cuny.edu/UsingR/}
+}
+
+@ARTICLE{White2006,
+  author = {White, Derek and Okunev, John },
+  title = {Moment Matching for the Masses},
+  journal = {SSRN eLibrary},
+  year = {2006},
+  abstract = {It is well known that Cholesky decomposition will compress the tails
+	in a multivariate probability mass. With significantly skewed or
+	highly kurtotic distributions, this tail compression can be quite
+	severe. In this paper, a simple methodology is presented to generate
+	multivariate systems matching the first four moments, a desired correlation
+	structure, and any number of tail points.},
+  keywords = {Value at Risk, Simulation, Cholesky decomposition, Risk Management,
+	multivariate moments},
+  language = {English},
+  location = {http://ssrn.com/paper=921451},
+  owner = {brian},
+  publisher = {SSRN},
+  timestamp = {2007.09.03},
+  type = {Working Paper Series},
+  url = {http://papers.ssrn.com/sol3/Papers.cfm?abstract_id=921451}
+}
+
+@ARTICLE{Zangari1996,
+  author = {Zangari, Peter},
+  title = {A {VaR} Methodology for Portfolios that include Options},
+  journal = {RiskMetrics Monitor},
+  year = {1996},
+  volume = {First Quarter},
+  pages = {4-12},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@ARTICLE{Zhu2010,
+  author = {Zhu, Shushang and Li, Duan and Sun, Xiaoling},
+  title = {Portfolio selection with marginal risk control},
+  journal = {Journal of Computational Finance},
+  year = {2010},
+  pages = {Fall 2010, 1-26},
+  owner = {Administrator},
+  timestamp = {2010.12.19}
+}
+
+@BOOK{Zivot2006,
+  title = {Modeling Financial Time Series with S-Plus: second edition},
+  publisher = {Springer},
+  year = {2006},
+  author = {Zivot, Eric and Wang, Jiahui},
+  owner = {brian},
+  timestamp = {2007.08.19}
+}
+
+@PROCEEDINGS{Hornik2001,
+  title = {Proceedings of the 2nd International Workshop on Distributed Statistical
+	Computing (DSC 2001)},
+  year = {2001},
+  editor = {Kurt Hornik and Friedrich Leisch},
+  address = {Technische Universit{\"a}t Wien, Vienna, Austria},
+  note = {ISSN 1609-395X},
+  owner = {brian},
+  timestamp = {2008.04.27},
+  url = {http://www.ci.tuwien.ac.at/Conferences/DSC.html}
+}
+
+@BOOK{Matz2006,
+  title = {Liquidity Risk Measurement and Management: A Practitioner's Guide
+	to Global Best Practices},
+  publisher = {Wiley Finance},
+  year = {2006},
+  editor = {Matz, Leonard and Nue, Peter},
+  owner = {brian},
+  timestamp = {2007.09.02}
+}
+
+@MISC{EDHEC2003,
+  title = {About EDHEC Alternative Indexes},
+  howpublished = {\url{http://www.edhec-risk.com/indexes/pure_style/about}},
+  month = {December},
+  year = {2003},
+  journal = {EDHEC Risk and Asset Management Research Centre},
+  owner = {brian},
+  url = {http://www.edhec-risk.com/indexes/pure_style/about},
+  volume = {December 16}
+}
+
