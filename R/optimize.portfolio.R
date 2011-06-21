@@ -363,8 +363,8 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL,...){
             switch(objective$name,
                     sd =,
                     StdDev = { 
-                        if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
-                        if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
+                        if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean', na.rm=TRUE)),ncol=1);
+                        if(is.null(momentargs$sigma)) momentargs$sigma = cov(R, use='pairwise.complete.obs')
                     },
                     var =,
                     mVaR =,
