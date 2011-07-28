@@ -124,7 +124,7 @@ postscript('stackedweightsriskcont_benchmark_CC.eps')
    layout( matrix(  c(1,2,3,4,5,6,7,4),  ncol = 2 ) , height= c(1.5,1.5,1.5,0.7), width=1)
 
    par(mar=mar3 , cex.main=1)
-   chart.StackedBar2(weightsS1,col=colorset,space=0,  main = namelabels[1], ylab="Weight allocation", las=1, l=3.9, r=0, cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T, legend.loc = NULL,ylim=c(0,1),border = F )
+   chart.StackedBar2(weightsS1[Tstart:Tend,],col=colorset,space=0,  main = namelabels[1], ylab="Weight allocation", las=1, l=3.9, r=0, cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T, legend.loc = NULL,ylim=c(0,1),border = F )
 
    chart.StackedBar2(weightsS2[Tstart:Tend,],col=colorset,space=0,  main = namelabels[2], ylab="Weight allocation", las=1, l=3.9, r=0,  cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
    chart.StackedBar2(weightsS5[Tstart:Tend,],col=colorset,space=0,  main = namelabels[5], ylab="Weight allocation", las=1, l=3.9, r=0,   cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
@@ -152,18 +152,18 @@ postscript('MinCVaR_alternatives_CC.eps')
    layout( matrix(  c(1,2,3,4,5,6,7,4),  ncol = 2 ) , height= c(1.5,1.5,1.5,0.7), width=1)
 
    par(mar=mar3 , cex.main=1)
-   chart.StackedBar2(weightsS3,col=colorset,space=0,  main = namelabels[3], ylab="Weight allocation", las=1, l=3.9, r=0, cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T, legend.loc = NULL,ylim=c(0,1),border = F )
-   chart.StackedBar2(weightsS4,col=colorset,space=0,  main = namelabels[4], ylab="Weight allocation", las=1, l=3.9, r=0,  cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
-   chart.StackedBar2(weightsS6,col=colorset,space=0,  main = namelabels[6], ylab="Weight allocation", las=1, l=3.9, r=0,   cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
+   chart.StackedBar2(weightsS3[Tstart:Tend,],col=colorset,space=0,  main = namelabels[3], ylab="Weight allocation", las=1, l=3.9, r=0, cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T, legend.loc = NULL,ylim=c(0,1),border = F )
+   chart.StackedBar2(weightsS4[Tstart:Tend,],col=colorset,space=0,  main = namelabels[4], ylab="Weight allocation", las=1, l=3.9, r=0,  cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
+   chart.StackedBar2(weightsS6[Tstart:Tend,],col=colorset,space=0,  main = namelabels[6], ylab="Weight allocation", las=1, l=3.9, r=0,   cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
 
    par(mar=mar1 , cex.main=1)
    plot.new()
    legend("center",legend=w.names,col=colorset,lwd=6,ncol=4)
    par(mar=mar3 , cex.main=1)
 
-   chart.StackedBar2(riskcontS3,col=colorset,space=0,  main = namelabels[3], ylab="CVaR allocation", las=1, l=3.9, r=0,  cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
-   chart.StackedBar2(riskcontS4,col=colorset,space=0,  main = namelabels[4], ylab="CVaR allocation", las=1, l=3.9, r=0,  cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
-   chart.StackedBar2(riskcontS6,col=colorset,space=0,  main = namelabels[6], ylab="CVaR allocation", las=1, l=3.9, r=0,   cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
+   chart.StackedBar2(riskcontS3[Tstart:Tend,],col=colorset,space=0,  main = namelabels[3], ylab="CVaR allocation", las=1, l=3.9, r=0,  cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
+   chart.StackedBar2(riskcontS4[Tstart:Tend,],col=colorset,space=0,  main = namelabels[4], ylab="CVaR allocation", las=1, l=3.9, r=0,  cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
+   chart.StackedBar2(riskcontS6[Tstart:Tend,],col=colorset,space=0,  main = namelabels[6], ylab="CVaR allocation", las=1, l=3.9, r=0,   cex.axis=1, cex.lab=1,  cex.main=1, axisnames=T,legend.loc = NULL,ylim=c(0,1),border = F )
 
 dev.off()
 
