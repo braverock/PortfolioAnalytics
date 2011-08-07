@@ -19,6 +19,21 @@
 #' This function currently supports DEoptim and random portfolios as back ends.
 #' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
 #'
+#' When using random portfolios, search_size is precisely that, how many 
+#' portfolios to test.  You need to make sure to set your feasible weights 
+#' in generatesequence to make sure you have search_size unique 
+#' portfolios to test, typically by manipulating the 'by' parameter 
+#' to select something smaller than .01 
+#' (I often use .002, as .001 seems like overkill)
+#' 
+#' When using DE, search_size is decomposed into two other parameters 
+#' which it interacts with, NP and itermax.
+#' 
+#' NP, the number of members in each population, is set to cap at 2000 in 
+#' DEoptim, and by default is the number of parameters (assets/weights) *10.
+#' 
+#' itermax, if not passed in dots, defaults to the number of parameters (assets/weights) *50.
+#'  
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param optimize_method one of "DEoptim" or "random"
