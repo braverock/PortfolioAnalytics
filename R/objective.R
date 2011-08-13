@@ -13,7 +13,7 @@
 #' constructor for class 'objective'
 #' 
 #' @param name name of the objective which will be used to call a function, like 'ES', 'VaR', 'mean'
-#' @param target univariate target for the objective
+#' @param target univariate target for the objective, default NULL
 #' @param arguments default arguments to be passed to an objective function when executed
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthrough parameters
@@ -22,7 +22,7 @@
 #' @author Brian G. Peterson
 #' @export
 #' @callGraph
-objective<-function(name , target, arguments, enabled=FALSE , ..., multiplier=1, objclass='objective'){
+objective<-function(name , target=NULL , arguments, enabled=FALSE , ..., multiplier=1, objclass='objective'){
   if(!hasArg(name)) stop("you must specify an objective name")
   if (hasArg(name)) if(is.null(name)) stop("you must specify an objective name")
   if (!is.list(arguments)) stop("arguments must be passed as a named list")
