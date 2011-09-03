@@ -73,32 +73,32 @@
 \vspace{-2cm}
 %\baselineskip=20pt
 \renewcommand{\baselinestretch}{1}
-\title{Asset Allocation with \\ Conditional Value-at-Risk Budgets}
+\title{Asset Allocation with \\ Conditional Value-at-Risk Budgets }
 
-\smallskip
+
 
 \author{
-Kris Boudt\thanks{Correspondence to: Kris Boudt,
-Faculty of Business and Economics, K.U.Leuven, Naamsestraat 69, 3000 Leuven. Tel.: +32 032011810. The authors thank David Ardia, Bernhard Pfaff, and Dale Rosenthal for helpful comments and the National Bank of Belgium for financial support. The code to replicate the analysis is available in the R packages PerformanceAnalytics of \citet{PerformanceAnalytics} and PortfolioAnalytics of \citet{PortfolioAnalytics}. More information on the utilization of these packages for the estimation and optimization of portfolio CVaR budgets can be found at \web.}\\
-Lessius and K.U.Leuven.\\
-kris.boudt@econ.kuleuven.be
+ \\ \\ Kris Boudt\thanks{Correspondence to: Kris Boudt,
+Faculty of Business and Economics, K.U.Leuven, Naamsestraat 69, 3000 Leuven. Tel.: +32 032011810. The authors thank David Ardia, Bernhard Pfaff, and Dale Rosenthal for helpful comments and the National Bank of Belgium for financial support. The code to replicate the analysis is available in the R packages PerformanceAnalytics of \citet{PerformanceAnalytics} and PortfolioAnalytics of \citet{PortfolioAnalytics}. More information on the utilization of these packages for the estimation and optimization of portfolio risk budgets can be found at \web.}\\
+K.U.Leuven/Lessius \\ and VU University Amsterdam\\
+kris.boudt@econ.kuleuven.be  \\  \hspace{14cm}
  \and Peter Carl\\
 William Blair \& Company  \\
-pcarl@gsb.uchicago.edu\\
+pcarl@gsb.uchicago.edu\\  \hspace{14cm}
 \and Brian G. Peterson\\
 DV Trading\\
-brian@braverock.com}
+brian@braverock.com \\ \\ \\ }
 
 \date{\today}
 
 \maketitle
 \thispagestyle{empty} % produces no numbering on the first page
 
-\vspace{-0.5cm}
+\newpage
 
 \renewcommand{\baselinestretch}{1}
 \begin{abstract}
-Risk budgets are frequently used to estimate and allocate the risk of a portfolio by decomposing the total portfolio risk into the risk contribution of each component position. Many approaches to portfolio allocation use ex post methods for constructing risk budgets and take the variance as a risk measure. In this paper, however, we use ex ante methods to evaluate the component contribution to Conditional Value at Risk (CVaR) and to allocate risk. The proposed minimum CVaR concentration portfolio draws a balance between the investor's return objectives and the diversification of risk across the portfolio. For a portfolio invested in bonds, commodities, equities, and real estate, we show that the minimum CVaR concentration (MCC) portfolio offers an attractive compromise between the good risk-adjusted return properties of the minimum CVaR portfolio and the positive return potential and low portfolio turnover of an equally weighted portfolio.
+Risk budgets are frequently used to allocate the risk of a portfolio by decomposing the total portfolio risk into the risk contribution of each component position. Many approaches to portfolio allocation use ex post methods for constructing risk budgets and take the variance as a risk measure. In this paper, however, we use ex ante methods to evaluate the component contribution to Conditional Value at Risk (CVaR) and to allocate risk. The proposed minimum CVaR concentration portfolio draws a balance between the investor's return objectives and the diversification of risk across the portfolio. For a portfolio invested in bonds, commodities, equities, and real estate, we find that over the period January 1984 - June 2010, the minimum CVaR concentration portfolio offers an attractive compromise between the good risk-adjusted return properties of the minimum CVaR portfolio and the positive return potential and low portfolio turnover of an equally weighted portfolio.
 \end{abstract}
 
 %\end{titlepage}
@@ -109,9 +109,9 @@ Risk budgets are frequently used to estimate and allocate the risk of a portfoli
 
 \section{Introduction}
 
-Risk budgets are frequently used to estimate and allocate the risk of a portfolio by decomposing the total portfolio risk into the risk contribution of each component position.  While various volatility-weighted portfolio allocation methods have existed for many years, the ex ante use of risk budgets in portfolio allocation is more recent.
+Risk budgets are frequently used to allocate the risk of a portfolio by decomposing the total portfolio risk into the risk contribution of each component position.  While various volatility-weighted portfolio allocation methods have existed for many years, the ex ante use of risk budgets in portfolio allocation is more recent.
 
-\nocite{Qian2005} Qian's (2005) ``Risk Parity Portfolio'' allocates the portfolio variance equally across the portfolio components. \citet{Maillard2010} show that the volatility of this portfolio is located between those of the minimum variance and the equally weighted portfolio. \citet{Zhu2010} study optimal mean-variance portfolio selection under a direct constraint on the contributions to portfolio variance. Compared to the equally weighted portfolio, the ``most diversified portfolio'' of \citet{MDP2008} and the global minimum variance portfolio, \citet{Lee2011} finds that the risk-contribution approach is ``potentially more applicable because of its heuristic nature, economic intuition, and the financial interpretation that ties its concept to economic losses.''
+\nocite{Qian2005} Qian's (2005) risk parity portfolio allocates the portfolio variance equally across the portfolio components. \citet{Maillard2010} show that the volatility of this portfolio is located between those of the minimum variance and the equally weighted portfolio. \citet{Zhu2010} study optimal mean-variance portfolio selection under a direct constraint on the contributions to portfolio variance. Compared to the equally weighted portfolio, the most diversified portfolio of \citet{MDP2008} and the global minimum variance portfolio, \citet{Lee2011} finds that the risk-contribution approach is ``potentially more applicable because of its heuristic nature, economic intuition, and the financial interpretation that ties its concept to economic losses.''
 
 However, to our knowledge, the literature on risk contribution portfolios lacks a detailed study on using downside risk budgets rather than portfolio variance budgets as an ex ante portfolio allocation tool. Given the non-normality of many financial return series, the practice of assigning equal weights to positive and negative returns when computing risk contributions is likely to be suboptimal with respect to the allocation of risk through ex ante downside risk budgets. We fill this gap by explaining in detail the implementation of portfolio strategies that use downside risk contributions rather than variance contributions as an objective or constraint.
 
@@ -133,7 +133,7 @@ For many practical applications, the risk parity constraint that requires all as
 The first step in the construction of a risk budget is to define how portfolio risk and its risk contributions should be measured. A na\"{\i}ve approach is to set the risk contribution equal to the stand-alone risk of each portfolio component. This approach is overly simplistic and neglects important diversification or multiplication effects of the component units being exposed differently to the underlying risk factors. Using game theory, \citet{Denault2001} has shown that the only satisfactory risk allocation principle is to measure the risk contribution as the weight of the position in the portfolio times the partial derivative of the portfolio risk  $R_w$ with respect to that weight:
 
 \begin{equation}  C_{(i)}R_w = w_{(i)}\frac{\partial R_w}{\partial w_{(i)}}. \label{eq:ComponentRisk}\end{equation}
-The standard deviation, VaR and CVaR of a portfolio are all linear in position size. By Euler's theorem we have that for such risk measures the total portfolio risk equals the sum of the risk contributions in (\ref{eq:ComponentRisk}).
+The standard deviation, value-at-risk and CVaR of a portfolio are all linear in position size. By Euler's theorem we have that for such risk measures the total portfolio risk equals the sum of the risk contributions in (\ref{eq:ComponentRisk}).
 
 
 Previous work by \citet{Chow2001}, \citet{Litterman1996}, \citet{Maillard2010}, \citet{Peterson2008}, and \citet{Scherer2007} study the use of portfolio standard deviation and value-at-risk (VaR) budgets. In his book ``Risk budgeting'', \nocite{Pearson2002} Pearson (2002, p.7) notes that ``value-at-risk has some well known limitations, and it may be that some other risk measure eventually supplants value-at-risk in the risk budgeting process''. Unlike value-at-risk, conditional value-at-risk (CVaR) has all the properties a risk measure should have to be coherent and is a convex function of the portfolio weights \citep{Artzner1999, Pflug2000}. Moreover, CVaR provides less incentive to load on to tail risk above the VaR level.
@@ -294,7 +294,7 @@ The risk-return trade-off is visualized in Figure \ref{fig:EfficientFrontier}. W
 
 
 
-\begin{figure}[tb]
+\begin{figure}[t]
 \caption{Weight and CVaR allocation of mean-StdDev, mean-CVaR and mean-CVaR concentration efficient
 portfolios for various levels of annualized portfolio returns. \label{fig:EfficientFrontier_weights}   }
 \includegraphics[width=16cm,height=14cm,angle=270]{stackedweightsriskcont_efficientfrontier_clean.eps}
@@ -302,7 +302,7 @@ portfolios for various levels of annualized portfolio returns. \label{fig:Effici
 \end{figure}
 
 
-\begin{figure}[tb]
+\begin{figure}[t]
 %\begin{center}
 \caption{Annualized mean return versus the annualized portfolio standard deviation, the monthly portfolio 95\% CVaR and the largest percentage CVaR contribution for the mean-StdDev, mean-CVaR and mean-CVaR concentration efficient
 portfolios.  \label{fig:EfficientFrontier}}
@@ -334,21 +334,19 @@ We discuss first the results for the equal-weight, minimum CVaR and MCC portfoli
 
 \subsubsection{Results unconstrained portfolios}
 
-\begin{figure}[tb]
+
+
+The left and right panels of Figure \ref{fig:weightcvar_allocation_dynamic} plot the weight and CVaR allocations of the equal-weight, minimum CVaR, and MCC portfolios. We find that for almost all periods the minimum CVaR portfolio is highly invested in the bond index, while the MCC portfolio is more balanced across all asset classes. As predicted by theory, the risk allocation of the minimum CVaR portfolio coincides with its weight allocation. The risk allocation of the MCC portfolio is almost identical to the equal risk contribution state. The CVaR of the equal-weight portfolio is dominated by the S\&P 500, GSCI and NAREIT indices, while the risk contribution of the bond is almost zero for many  quarters.  The reason for the bad performance of weight constraints in ensuring ex ante risk diversification is the non-linear dependence of portfolio CVaR contributions on the weights. Reaching the portfolio manager's goal of ensuring risk diversification is therefore more efficiently achieved via direct constraints on the risk budget contributions rather than on the weights.
+
+\begin{figure}[t]
 \begin{center}
+\vspace{-1cm}
 \caption{Stacked bar weight and CVaR contribution plots for the quarterly rebalanced equal-weight, minimum CVaR and minimum CVaR concentration portfolios. \label{fig:weightcvar_allocation_dynamic}} \vspace{-1cm}
 \includegraphics[width=12cm,height=14cm,angle=270]{stackedweightsriskcont_benchmark_CC.eps}
 \end{center}
 \end{figure}
 
-The left and right panels of Figure \ref{fig:weightcvar_allocation_dynamic} plot the weight and CVaR allocations of the equal-weight, minimum CVaR, and MCC portfolios. We find that for almost all periods the minimum CVaR portfolio is highly invested in the bond index, while the MCC portfolio is more balanced across all asset classes. As predicted by theory, the risk allocation of the minimum CVaR portfolio coincides with its weight allocation and the risk allocation of the MCC portfolio is close to the equal risk contribution state. The CVaR of the equal-weight portfolio is dominated by the S\&P 500 and NAREIT indices. The diversification potential of the bond is not fully exploited by the equal-weight portfolio, since for many quarters it has a negative risk contribution. This indicates that increasing the weight of the bond would marginally decrease portfolio risk.  The reason for the bad performance of weight constraints in ensuring ex ante risk diversification is the non-linear dependence of portfolio CVaR contributions on the weights. Reaching the portfolio manager's goal of ensuring risk diversification is therefore more efficiently achieved via direct constraints on the risk budget contributions rather than on the weights.
 
-\begin{figure}[h]
-\begin{center}
-\caption{Monthly CVaR of the quarterly rebalanced equal-weight and risk budget optimized portfolios (upper panel) and relative performance of the quarterly rebalanced CVaR risk budget optimized portfolios versus the equal-weight portfolio (lower panel). The shaded regions indicate a bear market regime. \label{fig:relperformance}  }
-\includegraphics[width=12cm,height=14cm,angle=270]{portfolioCVaRRelPerf_CC.eps}
-\end{center}
-\end{figure}
 
 %\begin{figure}[tb]
 %\begin{center}
@@ -359,18 +357,25 @@ The left and right panels of Figure \ref{fig:weightcvar_allocation_dynamic} plot
 
 The upper panel in Figure \ref{fig:relperformance} plots the ex ante portfolio risk estimates. As expected, the CVaR of the MCC portfolio is for all quarters in between the CVaR of the minimum CVaR portfolio and the CVaR of the equal-weight portfolio.
 
-
+\begin{figure}[t]
+\begin{center}
+\vspace{-1cm}
+\caption{Monthly CVaR of the quarterly rebalanced equal-weight, minimum CVaR and minimum CVaR concentration portfolios (upper panel) and relative performance of the quarterly rebalanced minimum CVaR and minimum CVaR concentration portfolios versus the equal-weight portfolio (lower panel). The shaded regions indicate a bear market regime. \label{fig:relperformance}  }
+\includegraphics[width=12cm,height=14cm,angle=270]{portfolioCVaRRelPerf_CC.eps}
+\end{center}
+\end{figure}
 
 The solid grey and black lines in the lower panel of Figure \ref{fig:relperformance} plot the ratio of the monthly cumulative out-of-sample returns of the minimum CVaR and MCC portfolios versus the cumulative returns of the equal-weight portfolio over the period January 1984-June 2010. The value of the chart is less important than the slope of the line. If the slope is positive, the strategy in the numerator is outperforming the equal-weight strategy, and vice versa. The vertical grey bars denote bear markets defined by \citet{Ellis2005} as periods with a decline in the S\&P 500 index of 12 per cent or more. The left side of the bar corresponds to the market peaks and the right side to the stock market trough.  We see in Figure \ref{fig:relperformance} that the minimum CVaR portfolio, having a large allocation to the bond, outperforms the equal-weight and MCC portfolios at times of serious stock market downturn. The performance of the MCC portfolio seems to be a middle ground between the performance of the equal-weight and minimum CVaR portfolios. It offers an attractive compromise between the good performance of the minimum CVaR portfolio in adverse markets and the upward potential of the equal-weight portfolio. A final observation is that periods where one strategy is outperforming the other are relatively long and indicate the possibility of applying market timing strategies on top of these allocations.
 
 Table \ref{Table:oosresults} reports the annualized out-of-sample average return on the portfolios. When computed over the whole period, the minimum CVaR and MCC portfolios performed within 15 bps of one another. This is a small margin, given the long period of time presented. The risk statistics computed from the out-of-sample returns confirm the ex ante risk estimates from Figure \ref{fig:relperformance}.  The value of the annualized standard deviation and monthly historical CVaR of the MCC portfolio is in between those of the minimum CVaR portfolio and the equal-weight portfolio.    In the credit crisis the equal-weight portfolio suffered a drawdown of 52\%, which is significantly higher than the 34\%  drawdown of the MCC portfolio.
 
 
-\begin{table}[tb]
+\begin{table}[t]
 \begin{center}
+\vspace{-1cm}
 \caption{Summary statistics of monthly out-of-sample returns on equal weight, minimum portfolio CVaR (concentration)  investment strategies over the period January 1984 - June 2010. \label{Table:oosresults}    } \vspace{-0.5cm}
 \vspace{1cm}\scalebox{0.75}{
-\begin{tabular}{|lc c c cccc c cc | } \hline
+\begin{tabular}{|lc rrrrrrrrr | } \hline
 \emph{Objective} &          &  	Equal & Min  & Min & & Min & &   & & Min  \\
 
 &     &   Weight      & CVaR          &  CVaR Conc      & &    CVaR   &	     & 	      &      	   &     CVaR Conc   \\    \cline{7-9} \cline{11-11}
@@ -424,14 +429,16 @@ Finally, we consider the portfolio turnover of the strategies, defined by \citet
 \label{eq:turnover} \end{equation}
 where $w_{(i)t+1}$ is the weight of asset $i$ at the start of rebalancing period $t+1$, $w_{(i)t+}$ is the weight of that asset before rebalancing at $t+1$ and $T_*$ is the total number of rebalancing periods. This turnover quantity can be interpreted as the average percentage of wealth traded in each period. The portfolio turnover is the lowest for the equal-weight portfolio (5.01\%).  The MCC portfolio has a significantly lower turnover (9.04\%) than the minimum CVaR portfolio (10.31\%).
 
-	In conclusion, the minimum CVaR portfolio has the lowest out-of-sample risk but a high risk concentration and turnover. The equal-weight strategy has the lowest turnover and risk concentration, but highest total risk. The proposed MCC portfolio is on all these dimensions the second best. It achieves an attractive compromise between low overall risk, good upside return, high diversification, and low turnover.
-
-\clearpage
-
-\subsubsection{Sensitivity to weight and CVaR allocation constraints and to the choice of risk measure}
+	In conclusion, over the period January 1984 - June 2010, the minimum CVaR portfolio has the lowest out-of-sample risk but a high risk concentration and turnover. The equal-weight strategy has the lowest turnover and risk concentration, but highest total risk. The proposed MCC portfolio is on all these dimensions the second best. It achieves an attractive compromise between low overall risk, good upside return, high diversification, and low turnover. When we condition on the market regime, we find that in bear markets, as expected, the minimum CVaR portfolio outperforms all strategies, but has a lower return in normal/bull markets than the equal-weight and MCC portfolios. Compared to the equal-weight diversification strategy, the MCC portfolio has a comparable return but lower risk in a normal/bull stock market, and its performance is less affected when the market regime switches to a more negative outlook. For this reason, we recommend a minimum CVaR allocation strategy in a bear market regime and the MCC strategy in a normal/bull market regime.
 
 
-The MCC portfolio optimizes directly the risk diversification of the portfolio. Previous research of \citet{Maillard2010}, \citet{Qian2005} and \citet{Zhu2010} has focussed however on using risk budgets as a constraint in the portfolio allocation, or impose diversification through weight constraints.  We investigate in Table \ref{Table:oosresults} and Figures \ref{fig:MinCVaR_alternatives}-\ref{fig:relperformance_alternatives} the sensitivity of the portfolios to an equal risk contribution constraint, upper 40\% position limit or an upper 40\% CVaR allocation limit. The choice of 40\% is arbitrary, but it is consistent with the 40\% allocation to equity in the stylized 60/40 bond-equity portfolio.
+
+%\clearpage
+
+\subsubsection{Sensitivity to weight and CVaR allocation constraints}
+
+
+The MCC portfolio optimizes directly the risk diversification of the portfolio. Previous research of \citet{Maillard2010}, \citet{Qian2005} and \citet{Zhu2010} has focussed however on using risk budgets as a constraint in the portfolio allocation, or impose diversification through weight constraints.  We investigate in Table \ref{Table:oosresults_StdDev} and Figures \ref{fig:MinCVaR_alternatives}-\ref{fig:relperformance_alternatives} the sensitivity of the portfolios to an equal risk contribution constraint, upper 40\% position limit or an upper 40\% CVaR allocation limit. The choice of 40\% is arbitrary, but it is consistent with the 40\% allocation to equity in the stylized 60/40 bond-equity portfolio.
 
 
 %Portfolio managers might wish to impose their diversification objective through a position limit or risk allocation constraint on the minimum %CVaR or MCC portfolios.
@@ -441,21 +448,23 @@ The MCC portfolio optimizes directly the risk diversification of the portfolio. 
 The upper two plots in Figure \ref{fig:MinCVaR_alternatives} present the weight allocations of the constrained minimum CVaR portfolios. We see that the 40\% upper bound on the portfolio weights and risk allocations is stringent for almost all periods. Under these constraints, the component CVaR contribution of the minimum CVaR portfolio no longer coincides with the weight allocation. The investment in the bond typically contributes less to CVaR risk than its portfolio weight. Its contribution is for some months even negative under the position limit. The bottom plots in Figure \ref{fig:MinCVaR_alternatives} show the weight and risk allocation of the MCC portfolio under a 40\% upper bound on the portfolio weights.  We see that in spite of the weight constraint, the risk of the MCC portfolio is still more equally spread out than for the minimum CVaR portfolio where for some periods the S\&P 500 investment causes more than half of portfolio risk.
 
 
-\begin{figure}[tb]
+\begin{figure}[t]
 %\begin{center}
-\caption{Stacked bar weight and CVaR contribution plots for the constrained minimum CVaR portfolios invested in the Merrill Lynch US bond, S\&P500, NAREIT and S\&P GSCI indices. The portfolios are rebalanced quarterly.\label{fig:MinCVaR_alternatives}}
+\vspace{-1cm}
+\caption{Stacked bar weight and CVaR contribution plots for the constrained minimum CVaR and minimum CVaR concentration portfolios invested in the Merrill Lynch US bond, S\&P500, NAREIT and S\&P GSCI indices. The portfolios are rebalanced quarterly.\label{fig:MinCVaR_alternatives}}
 \includegraphics[width=12cm,height=14cm,angle=270]{MinCVaR_alternatives_CC.eps}
 %\end{center}
 \end{figure}
 
-\begin{figure}[tb]
+\begin{figure}[t]
 \begin{center}
-\caption{Monthly CVaR of the quarterly rebalanced constrained risk budget optimized portfolios (upper panel) and relative performance of the quarterly rebalanced constrained risk budget optimized portfolios versus the equal-weight portfolio (lower panel). The shaded regions indicate a bear market regime. \label{fig:relperformance_alternatives}  }
+\vspace{-1cm}
+\caption{Monthly CVaR of the quarterly rebalanced constrained minimum CVaR and minimum CVaR concentration portfolios (upper panel) and relative performance of the quarterly rebalanced constrained minimum CVaR and minimum CVaR concentration portfolios versus the equal-weight portfolio (lower panel). The shaded regions indicate a bear market regime. \label{fig:relperformance_alternatives}  }
 \includegraphics[width=12cm,height=14cm,angle=270]{portfolioCVaRRelPerf_CC_alternatives.eps}
 \end{center}
 \end{figure}
 
-From the weight and CVaR allocation plots, it is clear that adding position or risk allocation limits pushes the minimum CVaR and MCC portfolio towards an allocation that is closer to the equal-weight portfolio. Consequently, the return, risk, and turnover properties of these constrained portfolios are closer to the equal-weight portfolio, as can be seen in Table \ref{Table:oosresults} and Figure \ref{fig:relperformance_alternatives}. Compared to the 40\% CVaR allocation limit, the maximum 40\% weight constraint leads to portfolios with a substantially higher predicted risk (see the upper plot in Figure \ref{fig:MinCVaR_alternatives}) and realized risk (see the StdDev and historical CVaR numbers in Table \ref{Table:oosresults}). In all aspects, the unconstrained MCC portfolio and ERC constrained minimum CVaR portfolios are very similar.
+From the weight and CVaR allocation plots, it is clear that adding position or risk allocation limits pushes the minimum CVaR and MCC portfolio towards an allocation that is closer to the equal-weight portfolio. Consequently, the return, risk, and turnover properties of these constrained portfolios are closer to the equal-weight portfolio, as can be seen in Table \ref{Table:oosresults_StdDev} and Figure \ref{fig:relperformance_alternatives}. Compared to the 40\% CVaR allocation limit, the maximum 40\% weight constraint leads to portfolios with a substantially higher predicted risk (see the upper plot in Figure \ref{fig:MinCVaR_alternatives}) and realized risk (see the StdDev and historical CVaR numbers in Table \ref{Table:oosresults_StdDev}). In all aspects, the unconstrained MCC portfolio and ERC constrained minimum CVaR portfolios are very similar.
 
 %The performance of the constrained minimum CVaR and MCC portfolios is also more similar than the unconstrained ones.
 %This is especially the case for the  40\% bound constraint dominates the performance of the
@@ -467,18 +476,13 @@ From the weight and CVaR allocation plots, it is clear that adding position or r
 
 %In all aspects, the unconstrained MCC portfolio and ERC constrained minimum CVaR portfolios are very similar. The MCC portfolio has the
 %advantage that it can be easily combined with many other investor objectives and constraints (such as return targets or drawdown and cardinality constraints).
-
-
-In \citet{Maillard2010}, \citet{Qian2005} and \citet{Zhu2010}, the portfolio standard deviation is used as the risk measure in the risk allocation portfolio. We analyze the sensitivity of our results to the use of downside risk measures in Table \ref{Table:oosresults_StdDev}, where we report the performance statistics for the same investment styles, but using the portfolio standard deviation as the risk measure. Overall, it seems that for this investment universe,  changing the risk measure only has a marginal impact on the out of sample performance, compared to the choice of investment style. In fact, when testing for the equality of the Sharpe ratios between the minimum CVaR (concentration) and minimum StdDev (concentration) portfolios using the test of \citet{JobsonKorkie1981} and \citet{Memmel2003}, we do not find a significant difference in performance at a 90\% confidence level.  Similarly as for the CVaR risk measure, we find that minimum StdDev concentration portfolio constitutes an attractive middle-ground between the upward potential of the equal-weight portfolio in bull markets and the low risk of the minimum StdDev portfolio in bear markets.
-
-
-\begin{table}[tb]
+\begin{table}[t]
 \begin{center}
-
+\vspace{-1cm}
 
 \caption{Summary statistics of monthly out-of-sample returns on minimum portfolio standard deviation (concentration) investment strategies over the period January 1984 - June 2010. \label{Table:oosresults_StdDev}    } \vspace{-0.5cm}
 \vspace{1cm}\scalebox{0.75}{
-\begin{tabular}{|lc c  cccc c cc| } \hline
+\begin{tabular}{|lc rrrrrrrr| } \hline
 \emph{Objective} &      &  	 &    Min   &Min & Min &   & & & Min   \\
 &      &  	 &    StdDev &StdDev Conc &  StdDev &  & & & StdDev Conc  \\
                              \cline{6-8} \cline{10-10}
@@ -515,13 +519,20 @@ In \citet{Maillard2010}, \citet{Qian2005} and \citet{Zhu2010}, the portfolio sta
 {\scriptsize $^{1}$  June 2008-Feb 2009.  $^{2}$  Nov 1997-Aug 1998 for the minimum StdDev concentration and ERC constrained portfolios. Otherwise Nov 1997-Feb 1998.  }
 \end{table}
 
-\clearpage
+\subsubsection{Sensitivity to the choice of risk measure}
+
+In \citet{Maillard2010}, \citet{Qian2005} and \citet{Zhu2010}, the portfolio standard deviation is used as the risk measure in the risk allocation portfolio. We analyze the sensitivity of our results to the use of downside risk measures in Table \ref{Table:oosresults_StdDev}, where we report the performance statistics for the same investment styles, but using the portfolio standard deviation as the risk measure. Overall, it seems that for this investment universe,  changing the risk measure only has a marginal impact on the out of sample performance, compared to the choice of investment style. In fact, when testing for the equality of the Sharpe ratios between the minimum CVaR (concentration) and minimum StdDev (concentration) portfolios using the test of \citet{JobsonKorkie1981} and \citet{Memmel2003}, we do not find a significant difference in performance at a 90\% confidence level.  Similarly as for the CVaR risk measure, we find that minimum StdDev concentration portfolio constitutes an attractive middle-ground between the upward potential of the equal-weight portfolio in normal/bull markets and the low risk of the minimum StdDev portfolio.
+
+
+
+
+%\clearpage
 
 \section{Conclusion \label{sec:Conclusion}}
 
-An extensive empirical application of ex ante downside risk budget methods to dynamic allocation across bonds, commodities, domestic and international equity illustrated the out of sample effectiveness of downside risk budgets in generating portfolios that have low portfolio risk and risk concentration, high diversification, and low portfolio turnover. A first strategy is to impose bound constraints on the percentage CVaR contributions. This provides a direct substitute and improvement to the commonly practiced risk diversification approach based on position limits. A second strategy consists of minimizing the largest component CVaR contribution, which directly addresses risk diversification, even in portfolios with non-normally distributed assets. The properties of these approaches as described in this paper compare favorably relative to the equal-weight and minimum risk portfolios. Unconstrained, the minimum CVaR concentration  portfolio is typically similar to the equal-risk-contribution portfolio of \citet{Qian2005}. Furthermore, it may be easily combined with many other investor objectives and constraints (such as return targets or drawdown and cardinality constraints). Investors can thus optimally balance their maximum return, minimum downside risk, and maximum downside risk diversification objectives through an ex ante use of CVaR  budgets in portfolio optimization.
+An extensive empirical application of ex ante downside risk budget methods to dynamic allocation across bonds, commodities, domestic and international equity illustrated the out of sample effectiveness of downside risk budgets in generating portfolios that have low portfolio risk and risk concentration, high diversification, and low portfolio turnover. A first strategy is to impose bound constraints on the percentage CVaR contributions. This provides a direct substitute and improvement to the commonly practiced risk diversification approach based on position limits. A second strategy consists of minimizing the largest component CVaR contribution, which directly addresses risk diversification, even in portfolios with non-normally distributed assets. The properties of these approaches as described in this paper compare favorably relative to the equal-weight portfolio. Unconstrained, the minimum CVaR concentration  portfolio is typically similar to the equal-risk-contribution portfolio of \citet{Qian2005}. Furthermore, it may be easily combined with many other investor objectives and constraints (such as return targets or drawdown and cardinality constraints). Investors can thus optimally balance their maximum return, minimum downside risk, and maximum downside risk diversification objectives through an ex ante use of CVaR  budgets in portfolio optimization. Based on our empirical study, we recommend to optimize the asset allocation according to a minimum CVaR objective in a bear market regime and to minimize the portfolio's CVaR concentration in a normal/bull market regime.
 
-%\newpage
+\newpage
 
 \section{Appendix \label{sec:Appendix}}
 
