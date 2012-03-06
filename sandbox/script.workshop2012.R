@@ -33,11 +33,19 @@ x=read.csv(file="history.csv", sep=";", header=TRUE, check.names=FALSE)
 x.dates = as.Date(x[,1], format="%d/%m/%Y")
 x.data = apply(x[,-1], MARGIN=2, FUN=function(x){as.numeric(sub("%","", x, fixed=TRUE))/100}) # get rid of percentage signs
 edhec = xts(x.data, order.by=x.dates)
+colnames(edhec)
+# Drop some indexes and reorder
+edhec.R = edhec[,c("Convertible Arbitrage", "Equity Market Neutral","Fixed Income Arbitrage", "Event Driven", "CTA Global", "Global Macro", "Long/Short Equity")]
 
 # Statistical analysis of hedge fund indexes
 ## Returns through time
+
 ## Distributions
 ## Risk
+postscript(file="EDHEC-returns.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+# Generate charts of EDHEC index returns with ETL and VaR through time
+charts.BarVaR(edhec.R, p=(1-1/12), gap=36, main="EDHEC Index Returns", clean='boudt', show.cleaned=TRUE, show.greenredbars=TRUE, methods=c("ModifiedES", "ModifiedVaR"), show.endvalue=TRUE, colorset=rep("black", NCOL(edhec.R)))
+
 ## Returns and Risk
 ## Autocorrelation
 
