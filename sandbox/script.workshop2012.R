@@ -118,7 +118,7 @@ init.constr <- constraint(assets = colnames(edhec.R),
   max_sum=1.01, # maximum sum must also be about 1
   weight_seq = generatesequence() 
   )
-
+# Add measure 1, annualized return
 init.constr <- add.objective(constraints=init.constr,
   type="return", # the kind of objective this is
   name="pamean",
@@ -126,7 +126,7 @@ init.constr <- add.objective(constraints=init.constr,
   multiplier=0, # calculate it but don't use it in the objective
   arguments = list(n=60)
   )
-
+# Add measure 2, annualized standard deviation
 init.constr <- add.objective(init.constr,
   type="risk", # the kind of objective this is
   name="pasd", # the function to minimize
@@ -134,7 +134,14 @@ init.constr <- add.objective(init.constr,
   multiplier=0, # calculate it but don't use it in the objective
   arguments=list(n=60)
   )
-# @TODO: add CVaR here to look at these in CVaR space
+# Add measure 3, CVaR with p=(1-1/23)
+init.constr <- add.objective(init.constr,
+  type="risk", # the kind of objective this is
+  name="CVaR", # the function to minimize
+  enabled=TRUE, # enable or disable the objective
+  multiplier=0, # calculate it but don't use it in the objective
+  arguments=list(p=(1-1/12)) #, clean="boudt"
+  )
 
 # Generate a single set of random portfolios to evaluate against all constraint sets
 rp = random_portfolios(rpconstraints=init.constr, permutations=1000)
@@ -151,25 +158,45 @@ MeanSD.RND<-optimize.portfolio(R=edhec.R,
   search_size=1000, trace=TRUE, verbose=TRUE,
   rp=rp) # use the same random portfolios generated above
 plot(MeanSD.RND, risk.col="pasd.pasd", return.col="mean")
+# Evaluate the objectives through time 
+### requires PortfolioAnalytics build >= 1864
+MeanSD.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+  constraints=MeanSD.constr, 
+  optimize_method='random', 
+  search_size=1000, trace=TRUE, verbose=TRUE, 
+  #rp=rp, # all the same as prior
+  rebalance_on='years', # uses xts 'endpoints'
+  trailing_periods=NULL, # calculates from inception
+  training_period=36) # starts 3 years in to the data history
+MeanSD.w = extractWeights.rebal(MeanSD.RND.t)
+MeanSD=Return.rebalancing(edhec.R, MeanSD.w)
+colnames(MeanSD) = "MeanSD"
 
 ### BUOY 2: Constrained Mean-mETL Portfolio
 MeanmETL.constr <- init.constr
 # Turn on the return objective
 MeanmETL.constr$objectives[[1]]$multiplier = -1 # pamean
-# Add a mETL risk objective to the constraints
-MeanmETL.constr <- add.objective(MeanmETL.constr,
-  type="risk", # the kind of objective this is
-  name="CVaR", # the function to minimize
-  enabled=TRUE, # enable or disable the objective
-  arguments=list(p=(1-1/12), clean="boudt")
-  )
-# Evaluate the constraint object with Random Portfolios
+# Turn back on the mETL objective
+MeamETL.constr$objectives[[3]]$multiplier = 1 # mETL
+# Evaluate the objectives with Random Portfolios
 MeanmETL.RND<-optimize.portfolio(R=edhec.R,
   constraints=MeanmETL.constr,
   optimize_method='random',
   search_size=1000, trace=TRUE, verbose=TRUE,
   rp=rp) # use the same random portfolios generated above
 plot(MeanmETL.RND, risk.col="pasd.pasd", return.col="mean")
+# Evaluate the objectives with RP through time 
+MeanmETL.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+  constraints=MeanmETL.constr, 
+  optimize_method='random', 
+  search_size=1000, trace=TRUE, verbose=TRUE, 
+  rp=rp, # all the same as prior
+  rebalance_on='years', # uses xts 'endpoints'
+  trailing_periods=NULL, # calculates from inception
+  training_period=36) # starts 3 years in to the data history
+MeanmETL.w = extractWeights.rebal(MeanmETL.RND.t)
+MeanmETL=Return.rebalancing(edhec.R, MeanmETL.w)
+colnames(MeanmETL) = "MeanmETL"
 
 ### BUOY 3: Constrained Minimum Variance Portfolio
 MinSD.constr <- init.constr
@@ -182,14 +209,23 @@ MinSD.RND<-optimize.portfolio(R=edhec.R,
   search_size=1000, trace=TRUE, verbose=TRUE,
   rp=rp) # use the same random portfolios generated above
 plot(MinSD.RND, risk.col="pasd.pasd", return.col="mean")
+# Evaluate the objectives with RP through time 
+MinSD.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+  constraints=MinSD.constr, 
+  optimize_method='random', 
+  search_size=1000, trace=TRUE, verbose=TRUE, 
+  rp=rp, # all the same as prior
+  rebalance_on='years', # uses xts 'endpoints'
+  trailing_periods=NULL, # calculates from inception
+  training_period=36) # starts 3 years in to the data history
+MinSD.w = extractWeights.rebal(MinSD.RND.t)
+MinSD=Return.rebalancing(edhec.R, MinSD.w)
+colnames(MinSD) = "MinSD"
 
 ### BUOY 4: Constrained Minimum mETL Portfolio
-MinmETL.constr <- add.objective(init.constr,
-  type="risk", # the kind of objective this is
-  name="CVaR", # the function to minimize
-  enabled=TRUE, # enable or disable the objective
-  arguments=list(p=(1-1/12))
-  )
+MinmETL.constr <- init.constr
+# Turn back on the mETL objective
+MinmETL.constr$objectives[[3]]$multiplier = 1 # mETL
 # Evaluate the constraint object with Random Portfolios
 MinmETL.RND<-optimize.portfolio(R=edhec.R,
   constraints=MinmETL.constr,
@@ -197,6 +233,18 @@ MinmETL.RND<-optimize.portfolio(R=edhec.R,
   search_size=1000, trace=TRUE, verbose=TRUE,
   rp=rp) # use the same random portfolios generated above
 plot(MinmETL.RND, risk.col="pasd.pasd", return.col="mean")
+# Evaluate the objectives with RP through time 
+MinmETL.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+  constraints=MinmETL.constr, 
+  optimize_method='random', 
+  search_size=1000, trace=TRUE, verbose=TRUE, 
+  rp=rp, # all the same as prior
+  rebalance_on='years', # uses xts 'endpoints'
+  trailing_periods=NULL, # calculates from inception
+  training_period=36) # starts 3 years in to the data history
+MinmETL.w = extractWeights.rebal(MinmETL.RND.t)
+MinmETL=Return.rebalancing(edhec.R, MinmETL.w)
+colnames(MinmETL) = "MinmETL"
 
 ### BUOY 5: Constrained Equal Variance Contribution Portfolio
 EqSD.constr <- add.objective(init.constr, type="risk_budget", name="StdDev",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12)))
@@ -207,7 +255,17 @@ EqSD.RND<-optimize.portfolio(R=edhec.R,
   search_size=1000, trace=TRUE, verbose=TRUE,
   rp=rp) # use the same random portfolios generated above
 plot(EqSD.RND, risk.col="pasd.pasd", return.col="mean")
-
+EqSD.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+  constraints=EqSD.constr, 
+  optimize_method='random', 
+  search_size=1000, trace=TRUE, verbose=TRUE, 
+  rp=rp, # all the same as prior
+  rebalance_on='years', # uses xts 'endpoints'
+  trailing_periods=NULL, # calculates from inception
+  training_period=36) # starts 3 years in to the data history
+EqSD.w = extractWeights.rebal(EqSD.RND.t)
+EqSD=Return.rebalancing(edhec.R, EqSD.w)
+colnames(EqSD) = "EqSD"
 
 ### BUOY 6: Constrained Equal mETL Contribution Portfolio
 EqmETL.constr <- add.objective(init.constr, type="risk_budget", name="CVaR",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12)))
@@ -217,21 +275,42 @@ EqmETL.RND<-optimize.portfolio(R=edhec.R,
   optimize_method='random',
   search_size=1000, trace=TRUE, verbose=TRUE,
   rp=rp) # use the same random portfolios generated above
+EqmETL.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+  constraints=EqmETL.constr, 
+  optimize_method='random', 
+  search_size=1000, trace=TRUE, verbose=TRUE, 
+  rp=rp, # all the same as prior
+  rebalance_on='years', # uses xts 'endpoints'
+  trailing_periods=NULL, # calculates from inception
+  training_period=36) # starts 3 years in to the data history
+EqmETL.w = extractWeights.rebal(EqmETL.RND.t)
+EqmETL=Return.rebalancing(edhec.R, EqmETL.w)
+colnames(EqmETL) = "EqmETL"
 
 ### BUOY 7: Equal Weight Portfolio
-# There's only one:
-# Rebalance an equal-weight portfolio annually
+# There's only one, so construct it.  Rebalance the equal-weight portfolio annually
 dates=c(as.Date("1999-12-31"),time(edhec.R[endpoints(edhec.R, on="years")]))
+dates=index(edhec.R[endpoints(edhec.R, on="years")])
 weights = xts(matrix(rep(1/NCOL(edhec.R),length(dates)*NCOL(edhec.R)), ncol=NCOL(edhec.R)), order.by=dates)
 colnames(weights)= colnames(edhec.R)
-EqWgt = Return.rebalancing(edhec.R,weights)
+EqWgt = Return.rebalancing(edhec.R,weights) # requires development build of PerfA >= 1863 or CRAN version 1.0.4 or higher
+colnames(EqWgt)="EqWgt"
 
-# Chart EqWgt Results
-postscript(file="EqWgtPlot1.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
-charts.PerformanceSummary(EqWgt, main="Eq Wgt Portfolio", methods=c("ModifiedVaR", "ModifiedES"), p=(1-1/12), clean='boudt', show.cleaned=TRUE, gap=36, colorset=black, lwd=3)
+### Performance of Buy & Hold Random Portfolios
+BHportfs = EqWgt
+for(i in 2:NROW(rp)){ #@TODO: Use foreach in this loop instead
+  weights_i = xts(matrix(rep(rp[i,],length(dates)), ncol=NCOL(rp)), order.by=dates)
+  tmp = Return.rebalancing(edhec.R,weights_i)
+  BHportfs = cbind(BHportfs,tmp)
+}
+
+# Chart EqWgt Results against BH RP portfolios
+postscript(file="EqWgtBHPerfSumm.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+charts.PerformanceSummary(BHportfs, main="Equal Weight and Buy & Hold Random Portfolios", methods=c("ModifiedVaR", "ModifiedES"), p=(1-1/12), gap=36, colorset=c("orange",rep("darkgray",NCOL(BHportfs))), lwd=3, legend.loc=NA)
+# use clean='boudt', show.cleaned=TRUE, in final version?
 dev.off()
 
-### Comparison of portfolio weights plot
+### Plot comparison of objectives and weights 
 # > names(EqmETL.RND)
 # [1] "random_portfolios"                  "random_portfolio_objective_results"
 # [3] "weights"                            "objective_measures"                
@@ -240,7 +319,7 @@ dev.off()
 # [9] "end_t"      
 # Assemble the result data
 results = c("MeanSD.RND", "MeanmETL.RND", "MinSD.RND", "MinmETL.RND", "EqSD.RND", "EqmETL.RND")
-## Weights
+## Extract Weights
 RND.weights=MeanSD.RND$random_portfolio_objective_results[[1]]$weights #EqWgt
 for(result in results){
   x=get(result)
@@ -248,7 +327,7 @@ for(result in results){
 }
 rownames(RND.weights)=c("EqWgt",results) # @TODO: add prettier labels
 
-## Objective measures
+## Extract Objective measures
 RND.objectives=rbind(MeanSD.RND$random_portfolio_objective_results[[1]]$objective_measures[1:2]) #EqWgt
 for(result in results){
   x=get(result)
