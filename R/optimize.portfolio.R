@@ -231,6 +231,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
+#' @param rp a set of random portfolios passed into the function, to prevent recalculation
 #' @param rebalance_on a periodicity as returned by xts function periodicity and usable by endpoints
 #' @param training_period period to use as training in the front of the data
 #' @param trailing_periods if set, an integer with the number of periods to roll over, default NULL will run from inception
@@ -238,7 +239,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
-optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ..., rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
+optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
 {
     stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
     start_t<-Sys.time()
@@ -247,7 +248,8 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     call <- match.call()
     if(optimize_method=="random"){
         #' call random_portfolios() with constraints and search_size to create matrix of portfolios
-        rp<-random_portfolios(rpconstraints=constraints,permutations=search_size)
+        if(is.null(rp))
+            rp<-random_portfolios(rpconstraints=constraints,permutations=search_size)
     } else {
         rp=NULL
     }    
