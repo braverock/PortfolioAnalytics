@@ -93,9 +93,9 @@ paEMA <- function(n=10, R, weights, ...)
   sum((12*last(apply(R,2,FUN=TTR::EMA,n=n)))*weights)
 }
 
-pasd <- function(R, weights, n){
-  as.numeric(StdDev(R=last(R,n), weights=weights)*sqrt(12)) # hardcoded for monthly data
-}
+# pasd <- function(R, weights, n){
+#   as.numeric(StdDev(R=last(R,n), weights=weights)*sqrt(12)) # hardcoded for monthly data
+# }
 pasd <- function(R, weights){
   as.numeric(StdDev(R=R, weights=weights)*sqrt(12)) # hardcoded for monthly data
 }
@@ -138,13 +138,13 @@ init.constr <- add.objective(init.constr,
   name="pasd", # the function to minimize
   enabled=TRUE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
-  arguments=list(n=60)
+  arguments=list() # from inception 
   )
 # Add measure 3, CVaR with p=(1-1/12)
 init.constr <- add.objective(init.constr,
   type="risk", # the kind of objective this is
   name="CVaR", # the function to minimize
-  enabled=TRUE, # enable or disable the objective
+  enabled=FALSE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
   arguments=list(p=(1-1/12)) #, clean="boudt"
   )
@@ -160,6 +160,7 @@ MeanmETL.constr <- init.constr
 # Turn on the return and mETL objectives
 MeanmETL.constr$objectives[[1]]$multiplier = -1 # pamean
 MeamETL.constr$objectives[[3]]$multiplier = 1 # mETL
+MeamETL.constr$objectives[[3]]$enabled = TRUE # mETL
 
 ### Construct BUOY 3: Constrained Minimum Variance Portfolio
 MinSD.constr <- init.constr
@@ -170,6 +171,7 @@ MinSD.constr$objectives[[2]]$multiplier = 1 # StdDev
 MinmETL.constr <- init.constr
 # Turn back on the mETL objective
 MinmETL.constr$objectives[[3]]$multiplier = 1 # mETL
+MinmETL.constr$objectives[[3]]$enabled = TRUE # mETL
 
 ### Construct BUOY 5: Constrained Equal Variance Contribution Portfolio
 EqSD.constr <- add.objective(init.constr, type="risk_budget", name="StdDev",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12)))
@@ -180,6 +182,7 @@ EqSD.constr$objectives[[1]]$multiplier = -1 # max pamean
 ### Construct BUOY 6: Constrained Equal mETL Contribution Portfolio
 EqmETL.constr <- add.objective(init.constr, type="risk_budget", name="CVaR",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12)))
 EqmETL.constr$objectives[[3]]$multiplier = 1 # min mETL
+EqmETL.constr$objectives[[3]]$enabled = TRUE # min mETL
 EqmETL.constr$objectives[[1]]$multiplier = -1 # max pamean
 
 ### Construct BUOY 7: Equal Weight Portfolio
@@ -347,10 +350,10 @@ for(result in results){
 rownames(RND.weights)=c("EqWgt",results) # @TODO: add prettier labels
 
 ## Extract Objective measures
-RND.objectives=rbind(MeanSD.RND[["2010-12-31"]]$random_portfolio_objective_results[[1]]$objective_measures[1:2]) #EqWgt
+RND.objectives=rbind(MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$objective_measures[1:3]) #EqWgt
 for(result in results){
   x=get(result)
-  x.obj=rbind(x[["2010-12-31"]]$objective_measures[1:2])
+  x.obj=rbind(x[["2010-12-31"]]$objective_measures[1:3])
   RND.objectives = rbind(RND.objectives,x.obj)
 }
 rownames(RND.objectives)=c("EqWgt",results) # @TODO: add prettier labels
@@ -363,8 +366,10 @@ par(mar=c(4,4,4,2)+.1, cex=1)
 ### Get the random portfolios from one of the result sets
 xtract = extractStats(MeanSD.RND)
 plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space")
-# @TODO: this could easily be done in mean CVaR space as well
 points(RND.objectives[,2],RND.objectives[,1], col=rainbow8equal, pch=16)
+# This could easily be done in mean CVaR space as well
+# plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="CVaR", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-mETL Space")
+# points(RND.objectives[,3],RND.objectives[,1], col=rainbow8equal, pch=16)
 box(col = "darkgray")
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
@@ -398,6 +403,11 @@ box(col = "darkgray")
 par(op)
 # Use colors to group measures weight=orange, ETL=blue, sd=green
 # Use pch to group types min=triangle, equal=circle, returnrisk=square
+
+# Results through time
+# @TODO: remove center panel
+charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL))
+
 
 # Ex-ante and Ex-post views of buoy portfolios at a date
 
