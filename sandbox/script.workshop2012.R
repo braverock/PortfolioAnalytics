@@ -12,6 +12,28 @@ registerDoMC()
 require(TTR)
 # Available on r-forge
 require(FactorAnalytics) # development version > build 
+require(vcd) # for color palates
+
+### Set up color palates
+pal <- function(col, border = "light gray", ...){
+  n <- length(col)
+  plot(0, 0, type="n", xlim = c(0, 1), ylim = c(0, 1),
+    axes = FALSE, xlab = "", ylab = "", ...)
+    rect(0:(n-1)/n, 0, 1:n/n, 1, col = col, border = border)
+}
+# Use dark8equal for now?
+
+# Qualitative color scheme by Paul Tol
+tol1qualitative=c("#4477AA")
+tol2qualitative=c("#4477AA", "#CC6677")
+tol3qualitative=c("#4477AA", "#DDCC77", "#CC6677")
+tol4qualitative=c("#4477AA", "#117733", "#DDCC77", "#CC6677")
+tol5qualitative=c("#332288", "#88CCEE", "#117733", "#DDCC77", "#CC6677")
+tol6qualitative=c("#332288", "#88CCEE", "#117733", "#DDCC77", "#CC6677","#AA4499")
+tol7qualitative=c("#332288", "#88CCEE", "#44AA99", "#117733", "#DDCC77", "#CC6677","#AA4499")
+tol8qualitative=c("#332288", "#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677","#AA4499")
+tol9qualitative=c("#332288", "#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499")
+tol10qualitative=c("#332288", "#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#661100", "#CC6677", "#882255", "#AA4499")
 
 ####### Script WBS
 # Parse data from EDHEC or HFRI
@@ -209,7 +231,7 @@ MeanSD.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
   constraints=MeanSD.constr, 
   optimize_method='random', 
   search_size=1000, trace=TRUE, verbose=TRUE, 
-  #rp=rp, # all the same as prior
+  rp=rp, # all the same as prior
   rebalance_on=rebalance_period, # uses xts 'endpoints'
   trailing_periods=NULL, # calculates from inception
   training_period=36) # starts 3 years in to the data history
@@ -364,13 +386,12 @@ layout(matrix(c(1,2,3)),height=c(2,0.25,1.5),width=1)
 par(mar=c(4,4,4,2)+.1, cex=1)
 ## Draw the Scatter chart of combined results
 ### Get the random portfolios from one of the result sets
-xtract = extractStats(MeanSD.RND)
-plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space")
-points(RND.objectives[,2],RND.objectives[,1], col=rainbow8equal, pch=16)
+xtract = extractStats(MeanSD.RND.t[["2010-12-31"]])
+plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
+points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16)
 # This could easily be done in mean CVaR space as well
 # plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="CVaR", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-mETL Space")
 # points(RND.objectives[,3],RND.objectives[,1], col=rainbow8equal, pch=16)
-box(col = "darkgray")
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
@@ -378,7 +399,7 @@ box(col = "darkgray")
 # Add legend to middle panel
 par(mar=c(0,4,0,2)+.1, cex=0.7)
 plot.new()
-legend("bottom",legend=rownames(RND.weights), col=rainbow8equal, pch=16, lwd=2, ncol=4,  border.col="darkgray", y.intersp=1.2)
+legend("bottom",legend=rownames(RND.weights), col=tol7qualitative, pch=16, lwd=2, ncol=4,  border.col="darkgray", y.intersp=1.2)
 
 # Draw the Weights chart of the combined results
 columnnames = colnames(RND.weights)
@@ -396,7 +417,7 @@ par(mar = c(bottommargin, 4, topmargin, 2) +.1, cex=1)
 plot(RND.weights[1,], type="b", col=rainbow8equal[1],  ylim=c(0,max(EqSD.RND$constraints$max)), ylab="Weights", xlab="",axes=FALSE)
 points(EqSD.RND$constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
 points(EqSD.RND$constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
-for(i in 1:NROW(RND.weights)) points(RND.weights[i,], type="b", col=rainbow8equal[i], lwd=2)
+for(i in 1:NROW(RND.weights)) points(RND.weights[i,], type="b", col=tol7qualitative[i], lwd=2)
 axis(2, cex.axis = .8, col = "darkgray")
 axis(1, labels=columnnames, at=1:numassets, las=3, cex.axis = .8, col = "darkgray")
 box(col = "darkgray")
@@ -404,11 +425,75 @@ par(op)
 # Use colors to group measures weight=orange, ETL=blue, sd=green
 # Use pch to group types min=triangle, equal=circle, returnrisk=square
 
+# Realized return versus predicted volatility?
+dim(BHportfs["2011-01::2011-12"])
+x.ret2011=Return.cumulative(BHportfs["2011-01::2011-12"])
+x.sd2011=StdDev.annualized(BHportfs["2011-01::2011-12"])
+plot(x.sd2011,x.ret2011, xlab="StdDev", ylab="Mean", col="darkgray", axes=TRUE, main="Realized 2011 for Objectives in Mean-Variance Space", cex=.7)
+
+obj.real2011=NA
+for(i in 1:NROW(RND.weights)){
+  x = Return.portfolio(R=edhec.R["2011-01::2011-12"], weights=RND.weights[i,])
+  y=c(Return.cumulative(x), StdDev.annualized(x))
+  if(is.na(obj.real2011))
+    obj.real2011=y
+  else
+    obj.real2011=rbind(obj.real2011,y)
+}
+rownames(obj.real2011)=rownames(RND.weights)
+colnames(obj.real2011)=c("Realized Returns","Realized SD")
+points(obj.real2011[,2],obj.real2011[,1], col=tol7qualitative, pch=16)
+
+
 # Results through time
 # @TODO: remove center panel
-charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL))
+charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)["2009::2011"], colorset=tol7qualitative)
 
 
+turnover = function(w1,w2) {sum(abs(w1-w2))/length(w1)}
+colorstrip <- function(colors, description, ShowAxis=FALSE)
+{
+  count <- length(colors)
+  m <- matrix(1:count, count, 1)
+  image(m, xlim = 0.5 + c(0, 10), ylim = 0.5 + c(0, 1), col=colors, ylab="", xaxs="r", xlab=description, axes=FALSE)
+  if (ShowAxis)
+  {
+    axis(1)
+  }
+#   mtext(description, 1, adj=0.5, line=0.5)
+}
+
+
+op <- par(no.readonly=TRUE)
+layout(matrix(c(1,2)),height=c(4,1),width=1)
+par(mar=c(4,4,4,2)+.1, cex=1)
+## Draw the Scatter chart of combined results
+### Get the random portfolios from one of the result sets
+x=apply(rp, MARGIN=1,FUN=turnover,w2=rp[1,])
+plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col=heat.colors(10)[x*100], axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7, pch=16)
+points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1)
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
+
+# Add legend to middle panel
+par(mar=c(4,4,4,2)+.1, cex=0.7)
+colorstrip(heat.colors(10),"Turnover", ShowAxis=TRUE)
+extreme <- max(abs(x), na.rm = TRUE)
+breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE),               length = 11)
+h <- hist(x, plot = FALSE, breaks=breaks)
+scale01 <- function(x, low = min(x), high = max(x)) {
+  x <- (x - low)/(high - low)
+  x
+}
+hx <- scale01(breaks, min(x), max(x))
+hy <- c(h$counts, h$counts[length(h$counts)])
+lines(hx, hy/max(hy) * 0.95, lwd = 1, type = "s", col = "blue")
+axis(2, at = pretty(hy)/max(hy) * 0.95, pretty(hy))
+title("Color Key\nand Histogram")
+par(cex = 0.5)
+mtext(side = 2, "Count", line = 2)
+par(op)
 # Ex-ante and Ex-post views of buoy portfolios at a date
 
 # Historical performance of each buoy portfolio
