@@ -168,7 +168,7 @@ init.constr <- add.objective(init.constr,
   name="CVaR", # the function to minimize
   enabled=FALSE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
-  arguments=list(p=(1-1/12)) #, clean="boudt"
+  arguments=list(p=(1-1/12), clean="boudt"))
   )
 
 ### Construct BUOY 1: Constrained Mean-StdDev Portfolio
@@ -202,7 +202,7 @@ EqSD.constr$objectives[[2]]$multiplier = 1 # min paSD
 EqSD.constr$objectives[[1]]$multiplier = -1 # max pamean
 
 ### Construct BUOY 6: Constrained Equal mETL Contribution Portfolio
-EqmETL.constr <- add.objective(init.constr, type="risk_budget", name="CVaR",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12)))
+EqmETL.constr <- add.objective(init.constr, type="risk_budget", name="CVaR",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12), clean="boudt"))
 EqmETL.constr$objectives[[3]]$multiplier = 1 # min mETL
 EqmETL.constr$objectives[[3]]$enabled = TRUE # min mETL
 EqmETL.constr$objectives[[1]]$multiplier = -1 # max pamean
