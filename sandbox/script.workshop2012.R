@@ -215,9 +215,10 @@ colnames(weights)= colnames(edhec.R)
 
 
 ### Evaluate constraint objects
-# Generate a single set of random portfolios to evaluate against all constraint sets
+# Generate a single set of random portfolios to evaluate against all constraint set
 rp = random_portfolios(rpconstraints=init.constr, permutations=1000)
 
+start_time<-Sys.time()
 ### Evaluate BUOY 1: Constrained Mean-StdDev Portfolio
 # MeanSD.RND<-optimize.portfolio(R=edhec.R,
 #   constraints=MeanSD.constr,
@@ -342,17 +343,25 @@ EqWgt = Return.rebalancing(edhec.R,weights) # requires development build of Perf
 colnames(EqWgt)="EqWgt"
 ### Performance of Buy & Hold Random Portfolios
 BHportfs = EqWgt
-for(i in 2:NROW(rp)){ #@TODO: Use foreach in this loop instead
-  weights_i = xts(matrix(rep(rp[i,],length(dates)), ncol=NCOL(rp)), order.by=dates)
-  tmp = Return.rebalancing(edhec.R,weights_i)
-  BHportfs = cbind(BHportfs,tmp)
+#for(i in 2:NROW(rp)){ #@TODO: Use foreach in this loop instead
+#  weights_i = xts(matrix(rep(rp[i,],length(dates)), ncol=NCOL(rp)), order.by=dates)
+#  tmp = Return.rebalancing(edhec.R,weights_i)
+#  BHportfs = cbind(BHportfs,tmp)
+#}
+
+BHportfs <- foreach(i=2:NROW(rp),.combine=cbind) %dopar% {
+	weights_i = xts(matrix(rep(rp[i,],length(dates)), ncol=NCOL(rp)), order.by=dates)
+	tmp = Return.rebalancing(edhec.R,weights_i)
 }
+
+end_time<-Sys.time()
+end_time-start_time
+
 # Chart EqWgt Results against BH RP portfolios
 postscript(file="EqWgtBHPerfSumm.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 charts.PerformanceSummary(BHportfs, main="Equal Weight and Buy & Hold Random Portfolios", methods=c("ModifiedVaR", "ModifiedES"), p=(1-1/12), gap=36, colorset=c("orange",rep("darkgray",NCOL(BHportfs))), lwd=3, legend.loc=NA)
 # use clean='boudt', show.cleaned=TRUE, in final version?
 dev.off()
-
 
 ### Plot comparison of objectives and weights 
 # > names(EqmETL.RND)
