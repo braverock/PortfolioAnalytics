@@ -469,42 +469,46 @@ for(x in 1:NROW(rp)){
 }
 
 # Show turnover of the RP portfolios relative to the EqWgt portfolio
+postscript(file="TurnoverOf20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
 layout(matrix(c(1,2)),height=c(4,1),width=1)
 par(mar=c(4,4,4,2)+.1, cex=1)
-## Draw the Scatter chart of combined results
-### Get the random portfolios from one of the result sets
-x=apply(rp, MARGIN=1,FUN=turnover,w2=rp[1,])
-plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col=heat.colors(10)[x*100], axes=FALSE, main="Turnover of Random Portfolios from Equal-Weighted", cex=.7, pch=16)
-points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1)
-axis(1, cex.axis = 0.8, col = "darkgray")
-axis(2, cex.axis = 0.8, col = "darkgray")
-box(col = "darkgray")
+  seq.col = heat.colors(10)
+  ## Draw the Scatter chart of combined results
+  ### Get the random portfolios from one of the result sets
+  x=apply(rp, MARGIN=1,FUN=turnover,w2=rp[1,])
+  plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col=seq.col[floor(x*100)], axes=FALSE, main="Turnover of Random Portfolios from Equal-Weighted", cex=.7, pch=16)
+  points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1)
+  axis(1, cex.axis = 0.8, col = "darkgray")
+  axis(2, cex.axis = 0.8, col = "darkgray")
+  box(col = "darkgray")
 
 # Add legend to bottom panel
-par(mar=c(4,5.5,2,3)+.1, cex=0.7)
+par(mar=c(5,5.5,2,3)+.1, cex=0.7)
 ## Create a histogramed legend for sequential colorsets
 ## this next bit of code is based on heatmap.2 in gplots package
-scale01 <- function(x, low = min(x), high = max(x)) {
-  x <- (x - low)/(high - low)
-  x
-}
-breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length = length(heat.colors(10))+1)
-min.raw <- min(x, na.rm = TRUE)
-max.raw <- max(x, na.rm = TRUE)
-z <- seq(min.raw, max.raw, length = length(heat.colors(10)))
-image(z = matrix(z, ncol = 1), col = heat.colors(10), breaks = breaks, xaxt = "n", yaxt = "n")
-par(usr = c(0, 1, 0, 1)) # needed to draw the histogram correctly
-lv <- pretty(breaks)
-xv <- scale01(as.numeric(lv), min.raw, max.raw)
-axis(1, at = xv, labels = lv)
-h <- hist(x, plot = FALSE, breaks=breaks)
-hx <- scale01(breaks, min(x), max(x))
-hy <- c(h$counts, h$counts[length(h$counts)])
-lines(hx, hy/max(hy)*.95, lwd = 2, type = "s", col = "blue")
-axis(2, at = pretty(hy)/max(hy)*.95, pretty(hy))
-title(ylab="Count")
+x=floor(x*100)
+  scale01 <- function(x, low = min(x), high = max(x)) {
+    return((x - low)/(high - low))
+  }
+  breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length = length(seq.col)+1)
+  min.raw <- min(x, na.rm = TRUE)
+  max.raw <- max(x, na.rm = TRUE)
+  z <- seq(min.raw, max.raw, length = length(seq.col))
+  image(z = matrix(z, ncol = 1), col = seq.col, breaks = breaks, xaxt = "n", yaxt = "n")
+  par(usr = c(0, 1, 0, 1)) # needed to draw the histogram correctly
+  lv <- pretty(breaks)
+  xv <- scale01(as.numeric(lv), min.raw, max.raw)
+  axis(1, at = xv, labels=sprintf("%s%%", pretty(lv)))
+  h <- hist(x, plot = FALSE, breaks=breaks)
+  hx <- scale01(breaks, min(x), max(x))
+  hy <- c(h$counts, h$counts[length(h$counts)])
+  lines(hx, hy/max(hy)*.95, lwd = 2, type = "s", col = "blue")
+  axis(2, at = pretty(hy)/max(hy)*.95, pretty(hy))
+  title(ylab="Count")
+  title(xlab="Degree of Turnover from Equal Weight Portfolio")
 par(op)
+dev.off()
 # Ex-ante and Ex-post views of buoy portfolios at a date
 
 # Historical performance of each buoy portfolio
