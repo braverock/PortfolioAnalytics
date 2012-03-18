@@ -137,6 +137,7 @@ pasd <- function(R, weights){
 
 # Select a rebalance period
 rebalance_period = 'quarters' # uses endpoints identifiers from xts
+clean = "boudt" #"none"
 
 # A set of box constraints used to initialize ALL the bouy portfolios
 init.constr <- constraint(assets = colnames(edhec.R),
@@ -168,7 +169,7 @@ init.constr <- add.objective(init.constr,
   name="CVaR", # the function to minimize
   enabled=FALSE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
-  arguments=list(p=(1-1/12), clean="boudt"))
+  arguments=list(p=(1-1/12), clean=clean))
   )
 
 ### Construct BUOY 1: Constrained Mean-StdDev Portfolio
@@ -202,7 +203,7 @@ EqSD.constr$objectives[[2]]$multiplier = 1 # min paSD
 EqSD.constr$objectives[[1]]$multiplier = -1 # max pamean
 
 ### Construct BUOY 6: Constrained Equal mETL Contribution Portfolio
-EqmETL.constr <- add.objective(init.constr, type="risk_budget", name="CVaR",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12), clean="boudt"))
+EqmETL.constr <- add.objective(init.constr, type="risk_budget", name="CVaR",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12), clean=clean))
 EqmETL.constr$objectives[[3]]$multiplier = 1 # min mETL
 EqmETL.constr$objectives[[3]]$enabled = TRUE # min mETL
 EqmETL.constr$objectives[[1]]$multiplier = -1 # max pamean
@@ -348,11 +349,11 @@ colnames(EqWgt)="EqWgt"
 #  tmp = Return.rebalancing(edhec.R,weights_i)
 #  BHportfs = cbind(BHportfs,tmp)
 #}
-BHportfs <- foreach(i=2:NROW(rp),.combine=cbind, .inorder=TRUE) %dopar% {
+BHportfs <- foreach(i=1:NROW(rp),.combine=cbind, .inorder=TRUE) %dopar% {
 	weights_i = xts(matrix(rep(rp[i,],length(dates)), ncol=NCOL(rp)), order.by=dates)
 	tmp = Return.rebalancing(edhec.R,weights_i)
 }
-BHportfs <- cbind(EqWgt,BHportfs)
+# BHportfs <- cbind(EqWgt,BHportfs)
 
 end_time<-Sys.time()
 end_time-start_time
@@ -435,7 +436,6 @@ par(op)
 # Use pch to group types min=triangle, equal=circle, returnrisk=square
 
 # Realized return versus predicted volatility?
-dim(BHportfs["2011-01::2011-12"])
 x.ret2011=Return.cumulative(BHportfs["2011-01::2011-12"])
 x.sd2011=StdDev.annualized(BHportfs["2011-01::2011-12"])
 plot(x.sd2011,x.ret2011, xlab="StdDev", ylab="Mean", col="darkgray", axes=TRUE, main="Realized 2011 for Objectives in Mean-Variance Space", cex=.7)
@@ -457,51 +457,53 @@ points(obj.real2011[,2],obj.real2011[,1], col=tol7qualitative, pch=16)
 # Results through time
 # @TODO: remove center panel
 charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)["2009::2011"], colorset=tol7qualitative)
-
+charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)["2000::2011"], colorset=tol7qualitative)
 
 turnover = function(w1,w2) {sum(abs(w1-w2))/length(w1)}
-colorstrip <- function(colors, description, ShowAxis=FALSE)
-{
-  count <- length(colors)
-  m <- matrix(1:count, count, 1)
-  image(m, xlim = 0.5 + c(0, 10), ylim = 0.5 + c(0, 1), col=colors, ylab="", xaxs="r", xlab=description, axes=FALSE)
-  if (ShowAxis)
-  {
-    axis(1)
+# Calculate the turnover matrix for the random portfolio set:
+to.matrix<-matrix(nrow=NROW(rp),ncol=NROW(rp))
+for(x in 1:NROW(rp)){
+  for(y in 1:NROW(rp)) {
+    to.matrix[x,y]<-turnover(rp[x,],rp[y,])
   }
-#   mtext(description, 1, adj=0.5, line=0.5)
 }
 
-
+# Show turnover of the RP portfolios relative to the EqWgt portfolio
 op <- par(no.readonly=TRUE)
 layout(matrix(c(1,2)),height=c(4,1),width=1)
 par(mar=c(4,4,4,2)+.1, cex=1)
 ## Draw the Scatter chart of combined results
 ### Get the random portfolios from one of the result sets
 x=apply(rp, MARGIN=1,FUN=turnover,w2=rp[1,])
-plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col=heat.colors(10)[x*100], axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7, pch=16)
+plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col=heat.colors(10)[x*100], axes=FALSE, main="Turnover of Random Portfolios from Equal-Weighted", cex=.7, pch=16)
 points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1)
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
 
-# Add legend to middle panel
-par(mar=c(4,4,4,2)+.1, cex=0.7)
-colorstrip(heat.colors(10),"Turnover", ShowAxis=TRUE)
-extreme <- max(abs(x), na.rm = TRUE)
-breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE),               length = 11)
-h <- hist(x, plot = FALSE, breaks=breaks)
+# Add legend to bottom panel
+par(mar=c(4,5.5,2,3)+.1, cex=0.7)
+## Create a histogramed legend for sequential colorsets
+## this next bit of code is based on heatmap.2 in gplots package
 scale01 <- function(x, low = min(x), high = max(x)) {
   x <- (x - low)/(high - low)
   x
 }
+breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length = length(heat.colors(10))+1)
+min.raw <- min(x, na.rm = TRUE)
+max.raw <- max(x, na.rm = TRUE)
+z <- seq(min.raw, max.raw, length = length(heat.colors(10)))
+image(z = matrix(z, ncol = 1), col = heat.colors(10), breaks = breaks, xaxt = "n", yaxt = "n")
+par(usr = c(0, 1, 0, 1)) # needed to draw the histogram correctly
+lv <- pretty(breaks)
+xv <- scale01(as.numeric(lv), min.raw, max.raw)
+axis(1, at = xv, labels = lv)
+h <- hist(x, plot = FALSE, breaks=breaks)
 hx <- scale01(breaks, min(x), max(x))
 hy <- c(h$counts, h$counts[length(h$counts)])
-lines(hx, hy/max(hy) * 0.95, lwd = 1, type = "s", col = "blue")
-axis(2, at = pretty(hy)/max(hy) * 0.95, pretty(hy))
-title("Color Key\nand Histogram")
-par(cex = 0.5)
-mtext(side = 2, "Count", line = 2)
+lines(hx, hy/max(hy)*.95, lwd = 2, type = "s", col = "blue")
+axis(2, at = pretty(hy)/max(hy)*.95, pretty(hy))
+title(ylab="Count")
 par(op)
 # Ex-ante and Ex-post views of buoy portfolios at a date
 
