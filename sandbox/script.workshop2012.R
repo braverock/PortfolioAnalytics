@@ -473,11 +473,11 @@ postscript(file="TurnoverOf20101231.eps", height=6, width=5, paper="special", ho
 op <- par(no.readonly=TRUE)
 layout(matrix(c(1,2)),height=c(4,1),width=1)
 par(mar=c(4,4,4,2)+.1, cex=1)
-  seq.col = heat.colors(10)
+  seq.col = heat.colors(11)
   ## Draw the Scatter chart of combined results
   ### Get the random portfolios from one of the result sets
   x=apply(rp, MARGIN=1,FUN=turnover,w2=rp[1,])
-  plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col=seq.col[floor(x*100)], axes=FALSE, main="Turnover of Random Portfolios from Equal-Weighted", cex=.7, pch=16)
+  plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col=seq.col[ceiling(x*100)], axes=FALSE, main="Turnover of Random Portfolios from Equal-Weighted", cex=.7, pch=16)
   points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1)
   axis(1, cex.axis = 0.8, col = "darkgray")
   axis(2, cex.axis = 0.8, col = "darkgray")
@@ -487,7 +487,7 @@ par(mar=c(4,4,4,2)+.1, cex=1)
 par(mar=c(5,5.5,2,3)+.1, cex=0.7)
 ## Create a histogramed legend for sequential colorsets
 ## this next bit of code is based on heatmap.2 in gplots package
-x=floor(x*100)
+x=ceiling(x*100)
   scale01 <- function(x, low = min(x), high = max(x)) {
     return((x - low)/(high - low))
   }
