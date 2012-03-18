@@ -342,13 +342,13 @@ colnames(EqmETL) = "EqmETL"
 EqWgt = Return.rebalancing(edhec.R,weights) # requires development build of PerfA >= 1863 or CRAN version 1.0.4 or higher
 colnames(EqWgt)="EqWgt"
 ### Performance of Buy & Hold Random Portfolios
-BHportfs = EqWgt
+#BHportfs = EqWgt
 #for(i in 2:NROW(rp)){ #@TODO: Use foreach in this loop instead
 #  weights_i = xts(matrix(rep(rp[i,],length(dates)), ncol=NCOL(rp)), order.by=dates)
 #  tmp = Return.rebalancing(edhec.R,weights_i)
 #  BHportfs = cbind(BHportfs,tmp)
 #}
-BHportfs <- foreach(i=2:NROW(rp),.combine=cbind) %dopar% {
+BHportfs <- foreach(i=2:NROW(rp),.combine=cbind, .inorder=TRUE) %dopar% {
 	weights_i = xts(matrix(rep(rp[i,],length(dates)), ncol=NCOL(rp)), order.by=dates)
 	tmp = Return.rebalancing(edhec.R,weights_i)
 }
