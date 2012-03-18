@@ -348,11 +348,11 @@ BHportfs = EqWgt
 #  tmp = Return.rebalancing(edhec.R,weights_i)
 #  BHportfs = cbind(BHportfs,tmp)
 #}
-
 BHportfs <- foreach(i=2:NROW(rp),.combine=cbind) %dopar% {
 	weights_i = xts(matrix(rep(rp[i,],length(dates)), ncol=NCOL(rp)), order.by=dates)
 	tmp = Return.rebalancing(edhec.R,weights_i)
 }
+BHportfs <- cbind(EqWgt,BHportfs)
 
 end_time<-Sys.time()
 end_time-start_time
