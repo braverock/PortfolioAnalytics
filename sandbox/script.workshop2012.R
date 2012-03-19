@@ -371,10 +371,10 @@ dev.off()
 # [5] "call"                               "constraints"                       
 # [7] "data_summary"                       "elapsed_time"                      
 # [9] "end_t"      
-# Assemble the result data
+# Assemble the ex ante result data
 results = c("MeanSD.RND.t", "MeanmETL.RND.t", "MinSD.RND.t", "MinmETL.RND.t", "EqSD.RND.t", "EqmETL.RND.t")
 ## Extract Weights
-RND.weights=MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$weights #EqWgt
+RND.weights = MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$weights #EqWgt
 for(result in results){
   x=get(result)
   RND.weights = rbind(RND.weights,x[["2010-12-31"]]$weights)
@@ -435,10 +435,9 @@ par(op)
 # Use colors to group measures weight=orange, ETL=blue, sd=green
 # Use pch to group types min=triangle, equal=circle, returnrisk=square
 
-# Realized return versus predicted volatility?
+# Calculate ex post results
 x.ret2011=Return.cumulative(BHportfs["2011-01::2011-12"])
 x.sd2011=StdDev.annualized(BHportfs["2011-01::2011-12"])
-plot(x.sd2011,x.ret2011, xlab="StdDev", ylab="Mean", col="darkgray", axes=TRUE, main="Realized 2011 for Objectives in Mean-Variance Space", cex=.7)
 
 obj.real2011=NA
 for(i in 1:NROW(RND.weights)){
@@ -451,8 +450,44 @@ for(i in 1:NROW(RND.weights)){
 }
 rownames(obj.real2011)=rownames(RND.weights)
 colnames(obj.real2011)=c("Realized Returns","Realized SD")
-points(obj.real2011[,2],obj.real2011[,1], col=tol7qualitative, pch=16)
+xmin=min(c(x.sd2011,xtract[,"pasd.pasd"]))
+xmax=max(c(x.sd2011,xtract[,"pasd.pasd"]))
+ymin=min(c(x.ret2011,xtract[,"mean"]))
+ymax=max(c(x.ret2011,xtract[,"mean"]))
+# One more time, chart the ex ante results in mean-sd space
+op <- par(no.readonly=TRUE)
+layout(matrix(c(1,2,3)),height=c(2,0.25,2),width=1)
+par(mar=c(4,4,4,2)+.1, cex=1)
+## Draw the Scatter chart of combined results
+### Get the random portfolios from one of the result sets
+xtract = extractStats(MeanSD.RND.t[["2010-12-31"]])
+plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Ex Ante Results for 2010-12-31", cex=.5,  xlim=c(xmin,xmax), ylim=c(ymin,ymax))
+grid(col = "darkgray")
+points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16)
+abline(h = 0, col = "darkgray")
+# This could easily be done in mean CVaR space as well
+# plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="CVaR", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-mETL Space")
+# points(RND.objectives[,3],RND.objectives[,1], col=rainbow8equal, pch=16)
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
 
+# Add legend to middle panel
+par(mar=c(0,4,0,2)+.1, cex=0.7)
+plot.new()
+legend("bottom",legend=rownames(RND.weights), col=tol7qualitative, pch=16, ncol=4,  border.col="darkgray", y.intersp=1.2)
+
+# Plot the ex post results in mean-sd space
+# Realized return versus predicted volatility?
+par(mar=c(4,4,4,2)+.1, cex=1)
+plot(x.sd2011,x.ret2011, xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Ex Post Results for 2010-12-31", cex=.5,  xlim=c(xmin,xmax), ylim=c(ymin,ymax))
+grid(col = "darkgray")
+points(obj.real2011[,2],obj.real2011[,1], col=tol7qualitative, pch=16)
+abline(h = 0, col = "darkgray")
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
+par(op)
 
 # Results through time
 # @TODO: remove center panel
@@ -477,7 +512,7 @@ par(mar=c(4,4,4,2)+.1, cex=1)
   ## Draw the Scatter chart of combined results
   ### Get the random portfolios from one of the result sets
   x=apply(rp, MARGIN=1,FUN=turnover,w2=rp[1,])
-  plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col=seq.col[ceiling(x*100)], axes=FALSE, main="Turnover of Random Portfolios from Equal-Weighted", cex=.7, pch=16)
+  plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col=seq.col[ceiling(x*100)], axes=FALSE, main="Turnover of Random Portfolios from Equal-Weight Portfolio", cex=.7, pch=16)
   points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1)
   axis(1, cex.axis = 0.8, col = "darkgray")
   axis(2, cex.axis = 0.8, col = "darkgray")
