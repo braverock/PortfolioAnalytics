@@ -107,9 +107,19 @@ require(RQuantLib)
 
 ### Volatility
 # as per Lo, the first difference of the end-of-month value of the CBOE Volatility Index (VIX)
+
+# Older VIX data is available at:
+# http://www.cboe.com/publish/ScheduledTask/MktData/datahouse/vixarchive.xls
+# Daily from 1990-2003
+  x= read.xls( "http://www.cboe.com/publish/ScheduledTask/MktData/datahouse/vixarchive.xls" )
+  ISOdates = as.Date(x[,1], "%m/%d/%y") # Get dates
+  x.xts = as.xts(as.numeric(as.vector(x[,5])), order.by=ISOdates)
+  x.m.xts = to.monthly(x.xts)
   getSymbols("VIXCLS", src="FRED")
   # Calculate monthly returns
   VIX=to.monthly(VIXCLS)
+  VIX=rbind(x.m.xts,VIX)
+  index(VIX)=as.Date(index(VIX), frac=1)
   dVIX=diff(Cl(VIX))
   colnames(dVIX)="dVIX"
 
@@ -128,5 +138,5 @@ require(RQuantLib)
   OIL.R = ROC(OILPRICE)
 
 
-factors=cbind(SP500.R, GS10.R, USDI.R, TERM, CREDIT, DJUBS.R, dVIX, TED, OIL.R)
-factors=factors["1998::",]
+factors=cbind(SP500.R, GS10.R, USDI.R, TERM, CREDIT, DJUBS.R, dVIX, TED, OIL.R, TB3MS/100)
+factors=factors["1997::",]
