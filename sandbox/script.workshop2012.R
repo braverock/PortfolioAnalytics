@@ -390,7 +390,8 @@ for(result in results){
 }
 rownames(RND.objectives)=c("EqWgt",results) # @TODO: add prettier labels
 
-# Chart the results together
+# Plot Ex Ante scatter of buoy portfolios and weights
+postscript(file="ExAnteScatterWeights20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
 layout(matrix(c(1,2,3)),height=c(2,0.25,1.5),width=1)
 par(mar=c(4,4,4,2)+.1, cex=1)
@@ -432,6 +433,7 @@ axis(2, cex.axis = .8, col = "darkgray")
 axis(1, labels=columnnames, at=1:numassets, las=3, cex.axis = .8, col = "darkgray")
 box(col = "darkgray")
 par(op)
+dev.off()
 # Use colors to group measures weight=orange, ETL=blue, sd=green
 # Use pch to group types min=triangle, equal=circle, returnrisk=square
 
@@ -454,7 +456,10 @@ xmin=min(c(x.sd2011,xtract[,"pasd.pasd"]))
 xmax=max(c(x.sd2011,xtract[,"pasd.pasd"]))
 ymin=min(c(x.ret2011,xtract[,"mean"]))
 ymax=max(c(x.ret2011,xtract[,"mean"]))
+
+# Show Ex Ante and Ex Post results for 2010-12-31
 # One more time, chart the ex ante results in mean-sd space
+postscript(file="ExAnteExPost20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
 layout(matrix(c(1,2,3)),height=c(2,0.25,2),width=1)
 par(mar=c(4,4,4,2)+.1, cex=1)
@@ -488,6 +493,7 @@ axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
 par(op)
+dev.off()
 
 # Results through time
 # @TODO: remove center panel
