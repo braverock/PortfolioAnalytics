@@ -425,9 +425,9 @@ topmargin=1
     # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
   }
 par(mar = c(bottommargin, 4, topmargin, 2) +.1, cex=1)
-plot(RND.weights[1,], type="b", col=rainbow8equal[1],  ylim=c(0,max(EqSD.RND$constraints$max)), ylab="Weights", xlab="",axes=FALSE)
-points(EqSD.RND$constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
-points(EqSD.RND$constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
+plot(RND.weights[1,], type="b", col=rainbow8equal[1],  ylim=c(0,max(EqSD.RND.t$constraints$max)), ylab="Weights", xlab="",axes=FALSE)
+points(EqSD.RND.t$constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
+points(EqSD.RND.t$constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
 for(i in 1:NROW(RND.weights)) points(RND.weights[i,], type="b", col=tol7qualitative[i], lwd=2)
 axis(2, cex.axis = .8, col = "darkgray")
 axis(1, labels=columnnames, at=1:numassets, las=3, cex.axis = .8, col = "darkgray")
