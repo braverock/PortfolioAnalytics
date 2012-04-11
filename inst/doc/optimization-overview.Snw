@@ -21,6 +21,14 @@
 \renewcommand{\baselinestretch}{1.5}
 \setlength{\textwidth}{15cm} \setlength{\textheight}{22cm} \topmargin-1cm \evensidemargin0.5cm \oddsidemargin0.5cm
 
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+
 \begin{document}
 
 \title{Vignette: Portfolio Optimization with CVaR budgets\\
