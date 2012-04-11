@@ -100,12 +100,17 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   }
   
   if(optimize_method=="DEoptim"){
-    stopifnot("package:DEoptim" %in% search() || "package:RcppDE" %in% search() ||  require("DEoptim",quietly = TRUE || require('RcppDE', quietly=TRUE)))
+    stopifnot("package:DEoptim" %in% search() || "package:RcppDE" %in% search() ||  require("DEoptim",quietly = TRUE) || require('RcppDE', quietly=TRUE))
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
     if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=N*50
-	
     NP = round(search_size/itermax)
     if(NP>2000) NP=2000
+    
+    #check to see whether we need to disable foreach for parallel optimization, esp if called from inside foreach
+    if(hasArg(parallel)) parallel=match.call(expand.dots=TRUE)$parallel else parallel=TRUE
+    if(!isTRUE(parallel) && 'package:foreach' %in% search()){
+        registerDoSEQ()
+    }
     
     DEcformals  <- formals(DEoptim.control)
     DEcargs <- names(DEcformals)
@@ -434,7 +439,7 @@ optimize.portfolio.parallel <- function(R,constraints,optimize_method=c("DEoptim
     #store the call for later
     call <- match.call()
     
-    opt_out_list<-foreach(1:nodes., packages='PortfolioAnalytics') %dopar% optimize.portfolio(R=R,constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...)    
+    opt_out_list<-foreach(1:nodes, packages='PortfolioAnalytics') %dopar% optimize.portfolio(R=R,constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...)    
 
     end_t<-Sys.time()
     message(c("overall elapsed time:",end_t-start_t))
