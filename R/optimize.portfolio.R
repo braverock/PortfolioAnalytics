@@ -124,7 +124,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
 		if(!hasArg(reltol)) DEcformals$reltol=.000001 # 1/1000 of 1% change in objective is significant
 		if(!hasArg(steptol)) DEcformals$steptol=round(N*1.5) # number of assets times 1.5 tries to improve
 		if(!hasArg(c)) DEcformals$c=.4 # JADE mutation parameter, this could maybe use some adjustment
-        if(!hasArg(storepopfrom)) storepopfrom=1
+        if(!hasArg(storepopfrom)) DEcformals$storepopfrom=1
         if(isTRUE(parallel) && 'package:foreach' %in% search()){
             if(!hasArg(parallelType) ) DEcformals$parallelType=1 #use all cores
             if(!hasArg(packages) ) DEcformals$packages <- names(sessionInfo()$otherPkgs) #use all packages
