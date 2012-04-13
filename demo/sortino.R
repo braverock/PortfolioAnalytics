@@ -15,6 +15,9 @@ require(TTR)
 #note: these may not be appropriate on Windows
 require(doMC)
 registerDoMC()
+# for Windows
+#require(doParallel)
+#registerDoParallel()
 
 
 ### Load the data
@@ -37,7 +40,8 @@ SortinoResult<-optimize.portfolio(R=indexes[,1:4], constraints=SortinoConstr, op
 plot(SortinoResult, risk.col='SortinoRatio')
 
 ### alternately, Use DEoptim engine
-#SortinoResultDE<-optimize.portfolio(R=indexes[,1:4], constraints=SortinoConstr, optimize_method='DEoptim', search_size=2000, trace=TRUE, verbose=FALSE,strategy=6) #itermax=55, CR=0.99, F=0.5,
+#SortinoResultDE<-optimize.portfolio(R=indexes[,1:4], constraints=SortinoConstr, optimize_method='DEoptim', search_size=2000, trace=TRUE, verbose=FALSE,strategy=6, parallel=TRUE) #itermax=55, CR=0.99, F=0.5,
+#plot(SortinoResultDE, risk.col='SortinoRatio')
 
 ### now rebalance quarterly
 SortinoRebalance <- optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=SortinoConstr, optimize_method="random", trace=TRUE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, search_size=2000)

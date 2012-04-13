@@ -100,7 +100,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   }
   
   if(optimize_method=="DEoptim"){
-    stopifnot("package:DEoptim" %in% search() || "package:RcppDE" %in% search() ||  require("DEoptim",quietly = TRUE) || require('RcppDE', quietly=TRUE))
+    stopifnot("package:DEoptim" %in% search()  ||  require("DEoptim",quietly = TRUE) )
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
     if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=N*50
     NP = round(search_size/itermax)
@@ -124,6 +124,11 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
 		if(!hasArg(reltol)) DEcformals$reltol=.000001 # 1/1000 of 1% change in objective is significant
 		if(!hasArg(steptol)) DEcformals$steptol=round(N*1.5) # number of assets times 1.5 tries to improve
 		if(!hasArg(c)) DEcformals$c=.4 # JADE mutation parameter, this could maybe use some adjustment
+        if(!hasArg(storepopfrom)) storepopfrom=1
+        if(isTRUE(parallel) && 'package:foreach' %in% search()){
+            if(!hasArg(parallelType) ) DEcformals$parallelType=1 #use all cores
+            if(!hasArg(packages) ) DEcformals$packages <- names(sessionInfo()$otherPkgs) #use all packages
+        }
 		 
         #TODO FIXME also check for a passed in controlDE list, including checking its class, and match formals
     }
@@ -415,8 +420,19 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL,...){
 #'execute multiple optimize.portfolio calls, presumably in parallel
 #' 
 #' TODO write function to check sensitivity of optimal results by using optimize.portfolio.parallel results
-
 #' 
+#' This function will not speed up optimization!
+#' 
+#' This function exists to run multiple copies of optimize.portfolio, presumabley in parallel using foreach.
+#' 
+#' This is typically done to test your parameter settings, specifically 
+#' total population size, but also possibly to help tune your 
+#' convergence settings, number of generations, stopping criteria,
+#' etc.
+#' 
+#' If you want to use all the cores on your multi-core computer, use 
+#' the parallel version of the apppropriate optimization engine, not 
+#' this function.
 #' 
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
