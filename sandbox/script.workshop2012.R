@@ -60,25 +60,40 @@ edhec.R = edhec[,c("Convertible Arbitrage", "Equity Market Neutral","Fixed Incom
 
 # Statistical analysis of hedge fund indexes
 ## Returns through time
-postscript(file="EDHEC-Cumulative-Returns.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+#postscript(file="EDHEC-Cumulative-Returns.pdf", height=6, width=10,  paper="special", horizontal=FALSE, onefile=FALSE)
+png(filename="EDHEC-Cumulative-Returns.png", units="in", height=5.5, width=9, res=96) 
 par(cex.lab=.8) # should set these parameters once at the top
 op <- par(no.readonly = TRUE)
 layout(matrix(c(1, 2)), height = c(2, 1.3), width = 1)
 par(mar = c(1, 4, 4, 2))
 chart.CumReturns(edhec.R, main = "EDHEC Index Returns", xaxis = FALSE, legend.loc = "topleft", ylab = "Cumulative Return", colorset= rainbow8equal, ylog=TRUE, wealth.index=TRUE, cex.legend=.7, cex.axis=.6, cex.lab=.7)
-par(mar = c(5, 4, 0, 2))
+par(mar = c(4, 4, 0, 2))
 chart.Drawdown(edhec.R, main = "", ylab = "Drawdown", colorset = rainbow8equal, cex.axis=.6, cex.lab=.7)
 par(op)
-
+dev.off()
 ## Distributions
 
 ## Risk
-postscript(file="EDHEC-BarVaR.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+# postscript(file="EDHEC-BarVaR.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+png(filename="EDHEC-BarVaR.png", units="in", height=5.5, width=9, res=96) 
 # Generate charts of EDHEC index returns with ETL and VaR through time
 charts.BarVaR(edhec.R, p=(1-1/12), gap=36, main="EDHEC Index Returns", clean='boudt', show.cleaned=TRUE, show.greenredbars=TRUE, methods=c("ModifiedES", "ModifiedVaR"), show.endvalue=TRUE, colorset=rainbow8equal)
 dev.off()
 
+## Rolling Performance
+png(filename="EDHEC-RollPerf.png", units="in", height=5.5, width=9, res=96) 
+# Generate charts of EDHEC index returns with ETL and VaR through time
+charts.RollingPerformance(edhec.R, width=36, main="EDHEC Index Rolling 36-Month Performance", colorset=rainbow8equal)
+dev.off()
+
 ## Returns and Risk Scatter
+png(filename="EDHEC-Scatter36m.png", units="in", height=5.5, width=4.5, res=96) 
+chart.RiskReturnScatter(last(edhec.R,36), main="EDHEC Index Trailing 36-Month Performance", colorset=rainbow8equal, ylim=c(0,.2), xlim=c(0,.12))
+dev.off()
+png(filename="EDHEC-ScatterSinceIncept.png", units="in", height=5.5, width=4.5, res=96) 
+chart.RiskReturnScatter(edhec.R, main="EDHEC Index Since Inception Performance", colorset=rainbow8equal, ylim=c(0,.2), xlim=c(0,.12))
+dev.off()
+## Distributions
 
 ## Autocorrelation
 
@@ -138,6 +153,7 @@ pasd <- function(R, weights){
 # Select a rebalance period
 rebalance_period = 'quarters' # uses endpoints identifiers from xts
 clean = "boudt" #"none"
+permutations = 1000
 
 # A set of box constraints used to initialize ALL the bouy portfolios
 init.constr <- constraint(assets = colnames(edhec.R),
@@ -169,7 +185,7 @@ init.constr <- add.objective(init.constr,
   name="CVaR", # the function to minimize
   enabled=FALSE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
-  arguments=list(p=(1-1/12), clean=clean))
+  arguments=list(p=(1-1/12), clean=clean)
   )
 
 ### Construct BUOY 1: Constrained Mean-StdDev Portfolio
@@ -182,8 +198,8 @@ MeanSD.constr$objectives[[2]]$multiplier = 1 # pasd
 MeanmETL.constr <- init.constr
 # Turn on the return and mETL objectives
 MeanmETL.constr$objectives[[1]]$multiplier = -1 # pamean
-MeamETL.constr$objectives[[3]]$multiplier = 1 # mETL
-MeamETL.constr$objectives[[3]]$enabled = TRUE # mETL
+MeanmETL.constr$objectives[[3]]$multiplier = 1 # mETL
+MeanmETL.constr$objectives[[3]]$enabled = TRUE # mETL
 
 ### Construct BUOY 3: Constrained Minimum Variance Portfolio
 MinSD.constr <- init.constr
@@ -217,7 +233,7 @@ colnames(weights)= colnames(edhec.R)
 
 ### Evaluate constraint objects
 # Generate a single set of random portfolios to evaluate against all constraint set
-rp = random_portfolios(rpconstraints=init.constr, permutations=1000)
+rp = random_portfolios(rpconstraints=init.constr, permutations=permutations)
 
 start_time<-Sys.time()
 ### Evaluate BUOY 1: Constrained Mean-StdDev Portfolio
@@ -232,7 +248,7 @@ start_time<-Sys.time()
 MeanSD.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
   constraints=MeanSD.constr, 
   optimize_method='random', 
-  search_size=1000, trace=TRUE, verbose=TRUE, 
+  search_size=permutations, trace=TRUE, verbose=TRUE, 
   rp=rp, # all the same as prior
   rebalance_on=rebalance_period, # uses xts 'endpoints'
   trailing_periods=NULL, # calculates from inception
@@ -252,7 +268,7 @@ colnames(MeanSD) = "MeanSD"
 MeanmETL.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
   constraints=MeanmETL.constr, 
   optimize_method='random', 
-  search_size=1000, trace=TRUE, verbose=TRUE, 
+  search_size=permutations, trace=TRUE, verbose=TRUE, 
   rp=rp, # all the same as prior
   rebalance_on=rebalance_period, # uses xts 'endpoints'
   trailing_periods=NULL, # calculates from inception
@@ -272,7 +288,7 @@ colnames(MeanmETL) = "MeanmETL"
 MinSD.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
   constraints=MinSD.constr, 
   optimize_method='random', 
-  search_size=1000, trace=TRUE, verbose=TRUE, 
+  search_size=permutations, trace=TRUE, verbose=TRUE, 
   rp=rp, # all the same as prior
   rebalance_on=rebalance_period, # uses xts 'endpoints'
   trailing_periods=NULL, # calculates from inception
@@ -292,7 +308,7 @@ colnames(MinSD) = "MinSD"
 MinmETL.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
   constraints=MinmETL.constr, 
   optimize_method='random', 
-  search_size=1000, trace=TRUE, verbose=TRUE, 
+  search_size=permutations, trace=TRUE, verbose=TRUE, 
   rp=rp, # all the same as prior
   rebalance_on=rebalance_period, # uses xts 'endpoints'
   trailing_periods=NULL, # calculates from inception
@@ -311,7 +327,7 @@ colnames(MinmETL) = "MinmETL"
 EqSD.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
   constraints=EqSD.constr, 
   optimize_method='random', 
-  search_size=1000, trace=TRUE, verbose=TRUE, 
+  search_size=permutations, trace=TRUE, verbose=TRUE, 
   rp=rp, # all the same as prior
   rebalance_on=rebalance_period, # uses xts 'endpoints'
   trailing_periods=NULL, # calculates from inception
@@ -329,7 +345,7 @@ colnames(EqSD) = "EqSD"
 EqmETL.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
   constraints=EqmETL.constr, 
   optimize_method='random', 
-  search_size=1000, trace=TRUE, verbose=TRUE, 
+  search_size=permutations, trace=TRUE, verbose=TRUE, 
   rp=rp, # all the same as prior
   rebalance_on=rebalance_period, # uses xts 'endpoints'
   trailing_periods=NULL, # calculates from inception
