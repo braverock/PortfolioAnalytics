@@ -125,6 +125,9 @@ dev.off()
 pamean <- function(n=12, R, weights, geometric=TRUE)
 { as.vector(sum(Return.annualized(last(R,n), geometric=geometric)*weights)) }
 
+pameanLCL <- function(n=36, R, weights, scale=12)
+{ as.vector(sum( scale*mean.LCL(last(R,n))*weights)) }
+
 paEMA <- function(n=10, R, weights, ...)
 {# call Exponential Moving Average from TTR, return the last observation
   sum((12*last(apply(R,2,FUN=TTR::EMA,n=n)))*weights)
