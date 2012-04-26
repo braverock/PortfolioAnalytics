@@ -97,7 +97,9 @@ dev.off()
 
 ## Autocorrelation
 
-
+#########################################################################
+# Optimization starts here
+########################################################################
 
 # Set up objectives as buoys
 ## Equal contribution to
@@ -155,9 +157,8 @@ pasd <- function(R, weights){
 
 # Select a rebalance period
 rebalance_period = 'quarters' # uses endpoints identifiers from xts
-clean = "none" #"boudt" #"none"
-# permutations = 1000
-permutations = 200
+clean = "boudt" #"none"
+permutations = 4000
 
 # A set of box constraints used to initialize ALL the bouy portfolios
 init.constr <- constraint(assets = colnames(edhec.R),
@@ -170,6 +171,7 @@ init.constr <- constraint(assets = colnames(edhec.R),
 # Add measure 1, annualized return
 init.constr <- add.objective(constraints=init.constr,
   type="return", # the kind of objective this is
+  #name="pamean",
   name="pameanLCL",
   enabled=TRUE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
@@ -241,11 +243,11 @@ rp = random_portfolios(rpconstraints=init.constr, permutations=permutations)
 
 start_time<-Sys.time()
 ### Evaluate BUOY 1: Constrained Mean-StdDev Portfolio
-MeanSD.RND<-optimize.portfolio(R=edhec.R,
-  constraints=MeanSD.constr,
-  optimize_method='random',
-  search_size=1000, trace=TRUE, verbose=TRUE,
-  rp=rp) # use the same random portfolios generated above
+# MeanSD.RND<-optimize.portfolio(R=edhec.R,
+#   constraints=MeanSD.constr,
+#   optimize_method='random',
+#   search_size=1000, trace=TRUE, verbose=TRUE,
+#   rp=rp) # use the same random portfolios generated above
 # plot(MeanSD.RND, risk.col="pasd.pasd", return.col="mean")
 # Evaluate the objectives through time 
 ### requires PortfolioAnalytics build >= 1864
