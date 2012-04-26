@@ -588,10 +588,13 @@ for(x in 1:NROW(rp)){
 }
 
 # Show turnover of the RP portfolios relative to the EqWgt portfolio
-postscript(file="TurnoverOf20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+# --------------------------------------------------------------------
+png(filename="Turnover-2010-12-31.png", units="in", height=5.5, width=9, res=96)
+# postscript(file="TurnoverOf20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
-layout(matrix(c(1,2)),height=c(4,1),width=1)
-par(mar=c(4,4,4,2)+.1, cex=1)
+# c(bottom, left, top, right)
+layout(matrix(c(1,2)),height=c(7,2),width=1)
+par(mar=c(4,4,3,2)+.1, cex=1)
   seq.col = heat.colors(11)
   ## Draw the Scatter chart of combined results
   ### Get the random portfolios from one of the result sets
@@ -603,7 +606,7 @@ par(mar=c(4,4,4,2)+.1, cex=1)
   box(col = "darkgray")
 
 # Add legend to bottom panel
-par(mar=c(5,5.5,2,3)+.1, cex=0.7)
+par(mar=c(4,5.5,1,3)+.1, cex=0.7)
 ## Create a histogramed legend for sequential colorsets
 ## this next bit of code is based on heatmap.2 in gplots package
 x=ceiling(x*100)
