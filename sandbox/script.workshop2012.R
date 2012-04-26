@@ -139,7 +139,8 @@ paEMA <- function(n=10, R, weights, ...)
 #   as.numeric(StdDev(R=last(R,n), weights=weights)*sqrt(12)) # hardcoded for monthly data
 # }
 pasd <- function(R, weights){
-  as.numeric(StdDev(R=R, weights=weights)*sqrt(12)) # hardcoded for monthly data
+#    as.numeric(StdDev(R=R, weights=weights)*sqrt(12)) # hardcoded for monthly data
+    as.numeric(StdDev(R=R, weights=weights)*sqrt(4)) # hardcoded for quarterly data
 }
 ## Apply multi-factor model
 ## Show fit
@@ -166,7 +167,7 @@ init.constr <- constraint(assets = colnames(edhec.R),
   max = .3, #1, # maximum position weight
   min_sum=0.99, # minimum sum of weights must be equal to 1-ish
   max_sum=1.01, # maximum sum must also be about 1
-  weight_seq = generatesequence() 
+  weight_seq = generatesequence(by=.005) 
   )
 # Add measure 1, annualized return
 init.constr <- add.objective(constraints=init.constr,
@@ -175,8 +176,9 @@ init.constr <- add.objective(constraints=init.constr,
   name="pameanLCL",
   enabled=TRUE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
-  arguments = list(n=60)
-  )
+  # arguments = list(n=60) # for monthly
+  arguments = list(n=12) # for quarterly
+)
 # Add measure 2, annualized standard deviation
 init.constr <- add.objective(init.constr,
   type="risk", # the kind of objective this is
@@ -186,13 +188,15 @@ init.constr <- add.objective(init.constr,
   arguments=list() # from inception 
   )
 # Add measure 3, CVaR with p=(1-1/12)
+p=1-1/12 # for monthly
+p=.25 # for quarterly
 init.constr <- add.objective(init.constr,
   type="risk", # the kind of objective this is
   name="CVaR", # the function to minimize
   enabled=FALSE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
-  arguments=list(p=(1-1/12), clean=clean)
-  )
+  arguments=list(p=p), clean=clean)
+)
 
 ### Construct BUOY 1: Constrained Mean-StdDev Portfolio
 MeanSD.constr <- init.constr
@@ -588,13 +592,10 @@ for(x in 1:NROW(rp)){
 }
 
 # Show turnover of the RP portfolios relative to the EqWgt portfolio
-# --------------------------------------------------------------------
-png(filename="Turnover-2010-12-31.png", units="in", height=5.5, width=9, res=96)
-# postscript(file="TurnoverOf20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+postscript(file="TurnoverOf20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
-# c(bottom, left, top, right)
-layout(matrix(c(1,2)),height=c(7,2),width=1)
-par(mar=c(4,4,3,2)+.1, cex=1)
+layout(matrix(c(1,2)),height=c(4,1),width=1)
+par(mar=c(4,4,4,2)+.1, cex=1)
   seq.col = heat.colors(11)
   ## Draw the Scatter chart of combined results
   ### Get the random portfolios from one of the result sets
@@ -606,7 +607,7 @@ par(mar=c(4,4,3,2)+.1, cex=1)
   box(col = "darkgray")
 
 # Add legend to bottom panel
-par(mar=c(4,5.5,1,3)+.1, cex=0.7)
+par(mar=c(5,5.5,2,3)+.1, cex=0.7)
 ## Create a histogramed legend for sequential colorsets
 ## this next bit of code is based on heatmap.2 in gplots package
 x=ceiling(x*100)
