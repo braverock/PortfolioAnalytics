@@ -155,8 +155,9 @@ pasd <- function(R, weights){
 
 # Select a rebalance period
 rebalance_period = 'quarters' # uses endpoints identifiers from xts
-clean = "boudt" #"none"
-permutations = 1000
+clean = "none" #"boudt" #"none"
+# permutations = 1000
+permutations = 200
 
 # A set of box constraints used to initialize ALL the bouy portfolios
 init.constr <- constraint(assets = colnames(edhec.R),
@@ -169,7 +170,7 @@ init.constr <- constraint(assets = colnames(edhec.R),
 # Add measure 1, annualized return
 init.constr <- add.objective(constraints=init.constr,
   type="return", # the kind of objective this is
-  name="pamean",
+  name="pameanLCL",
   enabled=TRUE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
   arguments = list(n=60)
@@ -240,11 +241,11 @@ rp = random_portfolios(rpconstraints=init.constr, permutations=permutations)
 
 start_time<-Sys.time()
 ### Evaluate BUOY 1: Constrained Mean-StdDev Portfolio
-# MeanSD.RND<-optimize.portfolio(R=edhec.R,
-#   constraints=MeanSD.constr,
-#   optimize_method='random',
-#   search_size=1000, trace=TRUE, verbose=TRUE,
-#   rp=rp) # use the same random portfolios generated above
+MeanSD.RND<-optimize.portfolio(R=edhec.R,
+  constraints=MeanSD.constr,
+  optimize_method='random',
+  search_size=1000, trace=TRUE, verbose=TRUE,
+  rp=rp) # use the same random portfolios generated above
 # plot(MeanSD.RND, risk.col="pasd.pasd", return.col="mean")
 # Evaluate the objectives through time 
 ### requires PortfolioAnalytics build >= 1864
@@ -392,6 +393,7 @@ dev.off()
 # [9] "end_t"      
 # Assemble the ex ante result data
 results = c("MeanSD.RND.t", "MeanmETL.RND.t", "MinSD.RND.t", "MinmETL.RND.t", "EqSD.RND.t", "EqmETL.RND.t")
+results.names= c("Eq Wgt", "Mean SD", "Mean mETL", "Min SD", "Min mETL", "Eq SD", "Eq mETL")
 ## Extract Weights
 RND.weights = MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$weights #EqWgt
 for(result in results){
@@ -409,6 +411,27 @@ for(result in results){
 }
 rownames(RND.objectives)=c("EqWgt",results) # @TODO: add prettier labels
 
+# Plot Ex Ante scatter of RP and Equal Weight portfolio
+xtract = extractStats(MeanSD.RND.t[["2010-12-31"]])
+png(filename="RP-EqW-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96) 
+# op <- par(no.readonly=TRUE)
+# layout(matrix(c(1,2)),heights=c(1,1),widths=c(3,1))
+# par(mar=c(4,4,4,2)+.1, cex=1)
+plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
+points(RND.objectives[1,2],RND.objectives[1,1], col=tol7qualitative, pch=16)
+# This could easily be done in mean CVaR space as well
+# plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="CVaR", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-mETL Space")
+# points(RND.objectives[,3],RND.objectives[,1], col=rainbow8equal, pch=16)
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
+# add legend to next panel
+# par(mar=c(0,4,0,2)+.1, cex=0.8)
+# plot.new()
+legend("bottomright",legend=results.names[1], col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=0.8, inset=.02)
+# par(op)
+dev.off()
+
 # Plot Ex Ante scatter of buoy portfolios and weights
 postscript(file="ExAnteScatterWeights20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
@@ -416,7 +439,7 @@ layout(matrix(c(1,2,3)),height=c(2,0.25,1.5),width=1)
 par(mar=c(4,4,4,2)+.1, cex=1)
 ## Draw the Scatter chart of combined results
 ### Get the random portfolios from one of the result sets
-xtract = extractStats(MeanSD.RND.t[["2010-12-31"]])
+# xtract = extractStats(MeanSD.RND.t[["2010-12-31"]]) # did this above
 plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
 points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16)
 # This could easily be done in mean CVaR space as well
