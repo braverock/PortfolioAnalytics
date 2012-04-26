@@ -40,7 +40,7 @@ tol10qualitative=c("#332288", "#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC
 ## Just load the data from packages
 ### See script.buildEDHEC.R and script.buildFactors.R
 data(edhec)
-data(factors)
+# data(factors)
 
 
 ## Which styles?
@@ -402,7 +402,7 @@ for(result in results){
   x=get(result)
   RND.weights = rbind(RND.weights,x[["2010-12-31"]]$weights)
 }
-rownames(RND.weights)=c("EqWgt",results) # @TODO: add prettier labels
+rownames(RND.weights)=c(results.names) # @TODO: add prettier labels
 
 ## Extract Objective measures
 RND.objectives=rbind(MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$objective_measures[1:3]) #EqWgt
@@ -413,26 +413,60 @@ for(result in results){
 }
 rownames(RND.objectives)=c("EqWgt",results) # @TODO: add prettier labels
 
-# Plot Ex Ante scatter of RP and Equal Weight portfolio
+# --------------------------------------------------------------------
+# Plot Ex Ante scatter of RP and ONLY Equal Weight portfolio
+# --------------------------------------------------------------------
 xtract = extractStats(MeanSD.RND.t[["2010-12-31"]])
 png(filename="RP-EqW-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96) 
-# op <- par(no.readonly=TRUE)
-# layout(matrix(c(1,2)),heights=c(1,1),widths=c(3,1))
-# par(mar=c(4,4,4,2)+.1, cex=1)
 plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
 points(RND.objectives[1,2],RND.objectives[1,1], col=tol7qualitative, pch=16)
-# This could easily be done in mean CVaR space as well
-# plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="CVaR", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-mETL Space")
-# points(RND.objectives[,3],RND.objectives[,1], col=rainbow8equal, pch=16)
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
-# add legend to next panel
-# par(mar=c(0,4,0,2)+.1, cex=0.8)
-# plot.new()
 legend("bottomright",legend=results.names[1], col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=0.8, inset=.02)
-# par(op)
 dev.off()
+
+# --------------------------------------------------------------------
+# Plot Ex Ante scatter of RP and ALL BUOY portfolios
+# --------------------------------------------------------------------
+png(filename="Buoy-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96) 
+plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
+points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16)
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
+legend("bottomright", legend=results.names, col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=0.8, inset=.02)
+dev.off()
+
+# --------------------------------------------------------------------
+# Plot weights of Buoy portfolios
+# --------------------------------------------------------------------
+# @TODO: add \n to labels
+png(filename="Weights-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96)
+op <- par(no.readonly=TRUE)
+# c(bottom, left, top, right)
+par(oma = c(5,12,6,2), mar=c(0,0,0,1))
+
+layout(matrix(c(1:7), nr = 1, byrow = TRUE))
+for(i in 1:7){
+  if(i==1){
+    barplot(RND.weights[i,], col=rainbow8equal, horiz=TRUE, xlim=c(0,max(RND.weights)), axes=FALSE, names.arg=colnames(RND.weights), las=2)
+    abline(v=0, col="darkgray")
+    abline(v=1/7, col="darkgray", lty=2)
+    axis(1, cex.axis = 1, col = "darkgray", las=1)
+    mtext(rownames(RND.weights)[i], side= 3, cex=0.7, adj=0)
+  } 
+  else{
+    barplot(RND.weights[i,], col=rainbow8equal, horiz=TRUE, xlim=c(0,max(RND.weights)), axes=FALSE, names.arg="", ylab=rownames(RND.weights)[i])
+    abline(v=0, col="darkgray")
+    abline(v=1/7, col="darkgray", lty=2)
+    mtext(rownames(RND.weights)[i], side= 3, cex=0.7, adj=0)
+  }
+}
+par(op)
+title("Portfolio Weights by Objective", outer=TRUE)
+dev.off()
+
 
 # Plot Ex Ante scatter of buoy portfolios and weights
 postscript(file="ExAnteScatterWeights20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
