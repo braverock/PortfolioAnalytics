@@ -40,7 +40,7 @@ name.replace <- function(rnames){
                     VaR.MVaR = {rnames[pos]<-'VaR'},
                     maxDrawdown.maxDrawdown = {rnames[pos]<-'maxDrawdown'},
                     sd.sd=, StdDev.StdDev = {rnames[pos]<-'StdDev'},
-                    pamean={rnames[pos]<-'mean'}
+                    #pamean={rnames[pos]<-'mean'}
             )
         }
     } 
