@@ -58,8 +58,12 @@ data(edhec)
 # Drop some indexes and reorder
 edhec.R = edhec[,c("Convertible Arbitrage", "Equity Market Neutral","Fixed Income Arbitrage", "Event Driven", "CTA Global", "Global Macro", "Long/Short Equity")]
 
-# Statistical analysis of hedge fund indexes
-## Returns through time
+########################################################################
+# Performance analysis of EDHEC hedge fund indexes
+########################################################################
+# --------------------------------------------------------------------
+# EDHEC Indexes Returns through time
+# --------------------------------------------------------------------
 #postscript(file="EDHEC-Cumulative-Returns.pdf", height=6, width=10,  paper="special", horizontal=FALSE, onefile=FALSE)
 png(filename="EDHEC-Cumulative-Returns.png", units="in", height=5.5, width=9, res=96) 
 par(cex.lab=.8) # should set these parameters once at the top
@@ -71,31 +75,53 @@ par(mar = c(4, 4, 0, 2))
 chart.Drawdown(edhec.R, main = "", ylab = "Drawdown", colorset = rainbow8equal, cex.axis=.6, cex.lab=.7)
 par(op)
 dev.off()
-## Distributions
 
-## Risk
+# --------------------------------------------------------------------
+# EDHEC Indexes Distributions
+# --------------------------------------------------------------------
+# @TODO: This is frosting, do it last
+
+# --------------------------------------------------------------------
+# EDHEC Indexes Risk
+# --------------------------------------------------------------------
 # postscript(file="EDHEC-BarVaR.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 png(filename="EDHEC-BarVaR.png", units="in", height=5.5, width=9, res=96) 
 # Generate charts of EDHEC index returns with ETL and VaR through time
 charts.BarVaR(edhec.R, p=(1-1/12), gap=36, main="EDHEC Index Returns", clean='boudt', show.cleaned=TRUE, show.greenredbars=TRUE, methods=c("ModifiedES", "ModifiedVaR"), show.endvalue=TRUE, colorset=rainbow8equal)
 dev.off()
 
-## Rolling Performance
+# --------------------------------------------------------------------
+# EDHEC Indexes Rolling Performance
+# --------------------------------------------------------------------
 png(filename="EDHEC-RollPerf.png", units="in", height=5.5, width=9, res=96) 
 # Generate charts of EDHEC index returns with ETL and VaR through time
 charts.RollingPerformance(edhec.R, width=36, main="EDHEC Index Rolling 36-Month Performance", colorset=rainbow8equal)
 dev.off()
 
-## Returns and Risk Scatter
+# --------------------------------------------------------------------
+# EDHEC Indexes Returns and Risk Scatter
+# --------------------------------------------------------------------
 png(filename="EDHEC-Scatter36m.png", units="in", height=5.5, width=4.5, res=96) 
 chart.RiskReturnScatter(last(edhec.R,36), main="EDHEC Index Trailing 36-Month Performance", colorset=rainbow8equal, ylim=c(0,.2), xlim=c(0,.12))
 dev.off()
 png(filename="EDHEC-ScatterSinceIncept.png", units="in", height=5.5, width=4.5, res=96) 
 chart.RiskReturnScatter(edhec.R, main="EDHEC Index Since Inception Performance", colorset=rainbow8equal, ylim=c(0,.2), xlim=c(0,.12))
 dev.off()
-## Distributions
 
+# --------------------------------------------------------------------
+## EDHEC Indexes Table of Return and Risk Statistics
+# --------------------------------------------------------------------
+# @TODO: This is frosting, do it last
+
+# --------------------------------------------------------------------
+# Correlation
+# --------------------------------------------------------------------
+# @TODO: This is frosting, do it last
+
+# --------------------------------------------------------------------
 ## Autocorrelation
+# --------------------------------------------------------------------
+# @TODO: This is frosting, do it last
 
 #########################################################################
 # Optimization starts here
@@ -384,11 +410,15 @@ BHportfs <- foreach(i=1:NROW(rp),.combine=cbind, .inorder=TRUE) %dopar% {
 end_time<-Sys.time()
 end_time-start_time
 
+# --------------------------------------------------------------------
 # Chart EqWgt Results against BH RP portfolios
+# --------------------------------------------------------------------
 postscript(file="EqWgtBHPerfSumm.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 charts.PerformanceSummary(BHportfs, main="Equal Weight and Buy & Hold Random Portfolios", methods=c("ModifiedVaR", "ModifiedES"), p=(1-1/12), gap=36, colorset=c("orange",rep("darkgray",NCOL(BHportfs))), lwd=3, legend.loc=NA)
 # use clean='boudt', show.cleaned=TRUE, in final version?
 dev.off()
+# --------------------------------------------------------------------
+
 
 ### Plot comparison of objectives and weights 
 # > names(EqmETL.RND)
@@ -435,6 +465,8 @@ dev.off()
 # --------------------------------------------------------------------
 png(filename="Buoy-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96) 
 plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
+grid(col = "darkgray")
+abline(h = 0, col = "darkgray")
 points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16)
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
@@ -443,7 +475,7 @@ legend("bottomright", legend=results.names, col=tol7qualitative, pch=16, ncol=1,
 dev.off()
 
 # --------------------------------------------------------------------
-# Plot weights of Buoy portfolios
+# Plot weights of Buoy portfolios as of 2010-12-31
 # --------------------------------------------------------------------
 # @TODO: add \n to labels
 png(filename="Weights-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96)
@@ -471,8 +503,9 @@ par(op)
 title("Portfolio Weights by Objective", outer=TRUE)
 dev.off()
 
-
-# Plot Ex Ante scatter of buoy portfolios and weights
+# --------------------------------------------------------------------
+# NOT USED: Plot Ex Ante scatter of buoy portfolios and weights
+# --------------------------------------------------------------------
 postscript(file="ExAnteScatterWeights20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
 layout(matrix(c(1,2,3)),height=c(2,0.25,1.5),width=1)
@@ -519,27 +552,43 @@ dev.off()
 # Use colors to group measures weight=orange, ETL=blue, sd=green
 # Use pch to group types min=triangle, equal=circle, returnrisk=square
 
+# --------------------------------------------------------------------
+# Plot Ex Post scatter of buoy portfolios
+# --------------------------------------------------------------------
 # Calculate ex post results
-x.ret2011=Return.cumulative(BHportfs["2011-01::2011-12"])
-x.sd2011=StdDev.annualized(BHportfs["2011-01::2011-12"])
+xpost.ret=Return.cumulative(BHportfs["2011-01::2011-03"])
+xpost.sd=StdDev.annualized(BHportfs["2011-01::2011-03"])
 
-obj.real2011=NA
+xpost.obj=NA
 for(i in 1:NROW(RND.weights)){
-  x = Return.portfolio(R=edhec.R["2011-01::2011-12"], weights=RND.weights[i,])
+  x = Return.portfolio(R=edhec.R["2011-01::2011-03"], weights=RND.weights[i,])
   y=c(Return.cumulative(x), StdDev.annualized(x))
-  if(is.na(obj.real2011))
-    obj.real2011=y
+  if(is.na(xpost.obj))
+    xpost.obj=y
   else
-    obj.real2011=rbind(obj.real2011,y)
+    xpost.obj=rbind(xpost.obj,y)
 }
-rownames(obj.real2011)=rownames(RND.weights)
-colnames(obj.real2011)=c("Realized Returns","Realized SD")
-xmin=min(c(x.sd2011,xtract[,"pasd.pasd"]))
-xmax=max(c(x.sd2011,xtract[,"pasd.pasd"]))
-ymin=min(c(x.ret2011,xtract[,"mean"]))
-ymax=max(c(x.ret2011,xtract[,"mean"]))
+rownames(xpost.obj)=rownames(RND.weights)
+colnames(xpost.obj)=c("Realized Returns","Realized SD")
+xmin=min(c(xpost.sd,xtract[,"pasd.pasd"]))
+xmax=max(c(xpost.sd,xtract[,"pasd.pasd"]))
+ymin=min(c(xpost.ret,xtract[,"mean"]))
+ymax=max(c(xpost.ret,xtract[,"mean"]))
 
-# Show Ex Ante and Ex Post results for 2010-12-31
+png(filename="Scatter-ExPost-2010-12-31.png", units="in", height=5.5, width=9, res=96)
+plot(xpost.sd,xpost.ret, xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Ex Post Results for 2010-12-31", cex=.5,  xlim=c(xmin,xmax), ylim=c(ymin,ymax))
+grid(col = "darkgray")
+points(xpost.obj[,2],xpost.obj[,1], col=tol7qualitative, pch=16)
+abline(h = 0, col = "darkgray")
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
+legend("bottomright",legend=rownames(RND.weights), col=tol7qualitative, pch=16, ncol=4,  border.col="darkgray", y.intersp=1.2, inset=.02)
+dev.off()
+
+# --------------------------------------------------------------------
+# NOT USED: Show Ex Ante AND Ex Post results for 2010-12-31
+# --------------------------------------------------------------------
 # One more time, chart the ex ante results in mean-sd space
 postscript(file="ExAnteExPost20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
@@ -574,14 +623,31 @@ abline(h = 0, col = "darkgray")
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
+legend("bottomright",legend=rownames(RND.weights), col=tol7qualitative, pch=16, ncol=4,  border.col="darkgray", y.intersp=1.2)
 par(op)
 dev.off()
 
-# Results through time
+# --------------------------------------------------------------------
+# Ex Post Results Through Time
+# --------------------------------------------------------------------
 # @TODO: remove center panel
-charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)["2009::2011"], colorset=tol7qualitative)
-charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)["2000::2011"], colorset=tol7qualitative)
+# charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)["2009::2011"], colorset=tol7qualitative)
+# charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)["2000::2011"], colorset=tol7qualitative)
+buoys.R=cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)
+png(filename="Buoy-Cumulative-Returns.png", units="in", height=5.5, width=9, res=96) 
+op <- par(no.readonly = TRUE)
+layout(matrix(c(1, 2)), height = c(2, 1.3), width = 1)
+par(mar = c(1, 4, 4, 2))
+chart.CumReturns(buoys.R["2000::",], main = "Objective Set Returns", xaxis = FALSE, legend.loc = "topleft", ylab = "Cumulative Return", colorset= tol7qualitative, ylog=TRUE, wealth.index=TRUE, cex.legend=.7, cex.axis=.6, cex.lab=.7)
+par(mar = c(4, 4, 0, 2))
+chart.Drawdown(buoys.R["2000::",], main = "", ylab = "Drawdown", colorset = tol7qualitative, cex.axis=.6, cex.lab=.7)
+par(op)
+dev.off()
 
+
+# --------------------------------------------------------------------
+# Show turnover of the RP portfolios relative to the EqWgt portfolio
+# --------------------------------------------------------------------
 turnover = function(w1,w2) {sum(abs(w1-w2))/length(w1)}
 # Calculate the turnover matrix for the random portfolio set:
 to.matrix<-matrix(nrow=NROW(rp),ncol=NROW(rp))
@@ -591,8 +657,8 @@ for(x in 1:NROW(rp)){
   }
 }
 
-# Show turnover of the RP portfolios relative to the EqWgt portfolio
-postscript(file="TurnoverOf20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+png(filename="Turnover-2010-12-31.png", units="in", height=5.5, width=9, res=96)
+# postscript(file="TurnoverOf20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
 layout(matrix(c(1,2)),height=c(4,1),width=1)
 par(mar=c(4,4,4,2)+.1, cex=1)
@@ -632,7 +698,9 @@ x=ceiling(x*100)
   title(xlab="Degree of Turnover from Equal Weight Portfolio")
 par(op)
 dev.off()
-# Ex-ante and Ex-post views of buoy portfolios at a date
+
+# --------------------------------------------------------------------
+# Other things we might do:
 
 # Historical performance of each buoy portfolio
 ## Same statistics as above
