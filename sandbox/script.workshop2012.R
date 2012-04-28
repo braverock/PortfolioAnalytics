@@ -120,19 +120,19 @@ layout(matrix(1:21, ncol=3, byrow=TRUE))
 # layout.show(n=21)
 chart.mins=min(edhec.R)
 chart.maxs=max(edhec.R)
-# @TODO: Fix chart.ECDF - delete xlim, ylim; add xaxis, yaxis=TRUE
-# @TODO: Fix chart.QQPlot - add xaxis, yaxis=TRUE; ylim; add 45 degree line abline(0,1) and dashed best fit line
+# @TODO: Fix chart.ECDF - delete xlim, ylim;
+# @TODO: Fix chart.QQPlot - ylim; add 45 degree line abline(0,1) and dashed best fit line
 # @TODO: Unify blue default color between fits
 for(i in 1:7){
   if(i==7){
-    chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01))
-    chart.QQPlot(edhec.R[,i], main="")
-    chart.ECDF(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs))
+    chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01), show.outliers=TRUE, methods=c("add.normal"))
+    chart.QQPlot(edhec.R[,i], main="", pch="*", envelope=0.95, col=c(1,"#005AFF"), ylim=c(chart.mins, chart.maxs))
+    chart.ECDF(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), lwd=2)
   }
   else{
-    chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01), xaxis=FALSE, yaxis=FALSE)
-    chart.QQPlot(edhec.R[,i], main="")
-    chart.ECDF(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), xaxis=FALSE, yaxis=FALSE)
+    chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01), xaxis=FALSE, yaxis=FALSE, show.outliers=TRUE, methods=c("add.normal"))
+    chart.QQPlot(edhec.R[,i], main="", xaxis=FALSE, yaxis=FALSE, pch="*", envelope=0.95, col=c(1,"#005AFF"), ylim=c(chart.mins, chart.maxs))
+    chart.ECDF(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), xaxis=FALSE, yaxis=FALSE, lwd=2)
   }
 }
 par(op)
