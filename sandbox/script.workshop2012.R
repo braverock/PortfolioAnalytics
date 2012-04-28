@@ -307,9 +307,14 @@ colnames(weights)= colnames(edhec.R)
 # Generate a single set of random portfolios to evaluate against all constraint set
 rp = random_portfolios(rpconstraints=init.constr, permutations=permutations)
 
+### Choose our 'R' variable
+R=edhec.R # for monthlies
+#R=edhec.R.quarterly #to use the quarterlies
+#R=garch.mu # to use the monthly quarter-ahead predictions from the garch
+
 start_time<-Sys.time()
 ### Evaluate BUOY 1: Constrained Mean-StdDev Portfolio
-# MeanSD.RND<-optimize.portfolio(R=edhec.R,
+# MeanSD.RND<-optimize.portfolio(R=R,
 #   constraints=MeanSD.constr,
 #   optimize_method='random',
 #   search_size=1000, trace=TRUE, verbose=TRUE,
@@ -317,7 +322,7 @@ start_time<-Sys.time()
 # plot(MeanSD.RND, risk.col="pasd.pasd", return.col="mean")
 # Evaluate the objectives through time 
 ### requires PortfolioAnalytics build >= 1864
-MeanSD.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+MeanSD.RND.t = optimize.portfolio.rebalancing(R=R,
   constraints=MeanSD.constr, 
   optimize_method='random', 
   search_size=permutations, trace=TRUE, verbose=TRUE, 
@@ -330,14 +335,14 @@ MeanSD=Return.rebalancing(edhec.R, MeanSD.w)
 colnames(MeanSD) = "MeanSD"
 
 ### Evaluate BUOY 2: Constrained Mean-mETL Portfolio
-# MeanmETL.RND<-optimize.portfolio(R=edhec.R,
+# MeanmETL.RND<-optimize.portfolio(R=R,
 #   constraints=MeanmETL.constr,
 #   optimize_method='random',
 #   search_size=1000, trace=TRUE, verbose=TRUE,
 #   rp=rp) # use the same random portfolios generated above
 # plot(MeanmETL.RND, risk.col="pasd.pasd", return.col="mean")
 # Evaluate the objectives with RP through time 
-MeanmETL.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+MeanmETL.RND.t = optimize.portfolio.rebalancing(R=R,
   constraints=MeanmETL.constr, 
   optimize_method='random', 
   search_size=permutations, trace=TRUE, verbose=TRUE, 
@@ -350,14 +355,14 @@ MeanmETL=Return.rebalancing(edhec.R, MeanmETL.w)
 colnames(MeanmETL) = "MeanmETL"
 
 ### Evaluate BUOY 3: Constrained Minimum Variance Portfolio
-# MinSD.RND<-optimize.portfolio(R=edhec.R,
+# MinSD.RND<-optimize.portfolio(R=R,
 #   constraints=MinSD.constr,
 #   optimize_method='random',
 #   search_size=1000, trace=TRUE, verbose=TRUE,
 #   rp=rp) # use the same random portfolios generated above
 # plot(MinSD.RND, risk.col="pasd.pasd", return.col="mean")
 # Evaluate the objectives with RP through time 
-MinSD.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+MinSD.RND.t = optimize.portfolio.rebalancing(R=R,
   constraints=MinSD.constr, 
   optimize_method='random', 
   search_size=permutations, trace=TRUE, verbose=TRUE, 
@@ -370,14 +375,14 @@ MinSD=Return.rebalancing(edhec.R, MinSD.w)
 colnames(MinSD) = "MinSD"
 
 ### Evaluate BUOY 4: Constrained Minimum mETL Portfolio
-# MinmETL.RND<-optimize.portfolio(R=edhec.R,
+# MinmETL.RND<-optimize.portfolio(R=R,
 #   constraints=MinmETL.constr,
 #   optimize_method='random',
 #   search_size=1000, trace=TRUE, verbose=TRUE,
 #   rp=rp) # use the same random portfolios generated above
 # plot(MinmETL.RND, risk.col="pasd.pasd", return.col="mean")
 # Evaluate the objectives with RP through time 
-MinmETL.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+MinmETL.RND.t = optimize.portfolio.rebalancing(R=R,
   constraints=MinmETL.constr, 
   optimize_method='random', 
   search_size=permutations, trace=TRUE, verbose=TRUE, 
@@ -390,13 +395,13 @@ MinmETL=Return.rebalancing(edhec.R, MinmETL.w)
 colnames(MinmETL) = "MinmETL"
 
 ### Evaluate BUOY 5: Constrained Equal Variance Contribution Portfolio
-# EqSD.RND<-optimize.portfolio(R=edhec.R,
+# EqSD.RND<-optimize.portfolio(R=R,
 #   constraints=EqSD.constr,
 #   optimize_method='random',
 #   search_size=1000, trace=TRUE, verbose=TRUE,
 #   rp=rp) # use the same random portfolios generated above
 # plot(EqSD.RND, risk.col="pasd.pasd", return.col="mean")
-EqSD.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+EqSD.RND.t = optimize.portfolio.rebalancing(R=R,
   constraints=EqSD.constr, 
   optimize_method='random', 
   search_size=permutations, trace=TRUE, verbose=TRUE, 
@@ -409,12 +414,12 @@ EqSD=Return.rebalancing(edhec.R, EqSD.w)
 colnames(EqSD) = "EqSD"
 
 ### Evaluate BUOY 6: Constrained Equal mETL Contribution Portfolio
-# EqmETL.RND<-optimize.portfolio(R=edhec.R,
+# EqmETL.RND<-optimize.portfolio(R=R,
 #   constraints=EqmETL.constr,
 #   optimize_method='random',
 #   search_size=1000, trace=TRUE, verbose=TRUE,
 #   rp=rp) # use the same random portfolios generated above
-EqmETL.RND.t = optimize.portfolio.rebalancing(R=edhec.R,
+EqmETL.RND.t = optimize.portfolio.rebalancing(R=R,
   constraints=EqmETL.constr, 
   optimize_method='random', 
   search_size=permutations, trace=TRUE, verbose=TRUE, 
