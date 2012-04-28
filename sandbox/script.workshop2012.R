@@ -112,6 +112,31 @@ dev.off()
 ## EDHEC Indexes Table of Return and Risk Statistics
 # --------------------------------------------------------------------
 # @TODO: This is frosting, do it last
+png(filename="EDHEC-Distributions.png", units="in", height=5.5, width=9, res=96) 
+op <- par(no.readonly = TRUE)
+# c(bottom, left, top, right)
+par(oma = c(5,12,6,2), mar=c(0,0,0,3))
+layout(matrix(1:21, ncol=3, byrow=TRUE))
+# layout.show(n=21)
+chart.mins=min(edhec.R)
+chart.maxs=max(edhec.R)
+# @TODO: Fix chart.ECDF - delete xlim, ylim; add xaxis, yaxis=TRUE
+# @TODO: Fix chart.QQPlot - add xaxis, yaxis=TRUE; ylim; add 45 degree line abline(0,1) and dashed best fit line
+# @TODO: Unify blue default color between fits
+for(i in 1:7){
+  if(i==7){
+    chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01))
+    chart.QQPlot(edhec.R[,i], main="")
+    chart.ECDF(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs))
+  }
+  else{
+    chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01), xaxis=FALSE, yaxis=FALSE)
+    chart.QQPlot(edhec.R[,i], main="")
+    chart.ECDF(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), xaxis=FALSE, yaxis=FALSE)
+  }
+}
+par(op)
+dev.off()
 
 # --------------------------------------------------------------------
 # Correlation
