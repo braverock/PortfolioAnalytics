@@ -188,13 +188,17 @@ paEMA <- function(n=10, R, weights, ...)
   sum((12*last(apply(R,2,FUN=TTR::EMA,n=n)))*weights)
 }
 
-# pasd <- function(R, weights, n){
-#   as.numeric(StdDev(R=last(R,n), weights=weights)*sqrt(12)) # hardcoded for monthly data
-# }
 pasd <- function(R, weights){
-#    as.numeric(StdDev(R=R, weights=weights)*sqrt(12)) # hardcoded for monthly data
-    as.numeric(StdDev(R=R, weights=weights)*sqrt(4)) # hardcoded for quarterly data
+    as.numeric(StdDev(R=R, weights=weights)*sqrt(12)) # hardcoded for monthly data
+#    as.numeric(StdDev(R=R, weights=weights)*sqrt(4)) # hardcoded for quarterly data
 }
+
+pasd.garch<- function(R,weights.sigmas) {
+    #sigmas is an input of predicted sigmas on a date, 
+    # presumably from a GARCH model
+    as.numeric((sigmas[last(index(R)),]*weights)*sqrt(12))
+}
+
 ## Apply multi-factor model
 ## Show fit
 ## ADD MORE DETAIL HERE
@@ -225,24 +229,28 @@ init.constr <- constraint(assets = colnames(edhec.R),
 # Add measure 1, annualized return
 init.constr <- add.objective(constraints=init.constr,
   type="return", # the kind of objective this is
-  #name="pamean",
-  name="pameanLCL",
+  name="pamean",
+  #name="pameanLCL",
   enabled=TRUE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
-  # arguments = list(n=60) # for monthly
-  arguments = list(n=12) # for quarterly
+  arguments = list(n=60) # for monthly
+  # arguments = list(n=12) # for quarterly
 )
 # Add measure 2, annualized standard deviation
 init.constr <- add.objective(init.constr,
   type="risk", # the kind of objective this is
-  name="pasd", # the function to minimize
+  name="pasd", # to minimize from the sample
+  #name='pasd.garch', # to minimize from the predicted sigmas
   enabled=TRUE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
   arguments=list() # from inception 
   )
 # Add measure 3, CVaR with p=(1-1/12)
+
+# set confidence for VaR/ES
 p=1-1/12 # for monthly
-p=.25 # for quarterly
+#p=.25 # for quarterly
+
 init.constr <- add.objective(init.constr,
   type="risk", # the kind of objective this is
   name="CVaR", # the function to minimize
@@ -728,6 +736,68 @@ dev.off()
 
 # --------------------------------------------------------------------
 # Other things we might do:
+
+###############
+#GARCH for mu and sigma estimates 3 months out
+require(rugarch)
+
+
+ctrl = list(rho = 1, delta = 1e-9, outer.iter = 100, tol = 1e-7)
+spec = ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+        mean.model = list(armaOrder = c(1,0), include.mean = TRUE),
+        distribution.model = "std")
+
+dates<-seq.Date(from=as.Date('1975-01-01'), to=as.Date('1996-12-31'),by=1)
+dates<-dates[endpoints(dates,on='months')]
+taildates<-seq.Date(from=as.Date(as.Date(last(index(edhec.R)))+1), to=as.Date(as.Date(last(index(edhec.R)))+150),by=1)
+taildates<-taildates[endpoints(taildates,on='months')]
+tailxts<-xts(rep(0,length(taildates)),order.by=taildates)
+
+garch.out <- foreach(i=1:ncol(edhec.R),.inorder=TRUE) %dopar% {
+
+    oridata  <- edhec.R[,i]
+    start <- first(index(data))
+    end   <- last(index(data))
+    
+    #bootsstrap
+    #we're going to do a simple sample with replacement here
+    # if doing this 'for real', a more sophisticated factor model monte carlo 
+    # or AR tsboot() approach would likely be preferred 
+    data<-rbind(xts(sample(oridata,length(dates),replace=TRUE),order.by=dates),oridata,tailxts)
+    colnames(data)<-colnames(oridata)
+    #add some NA's on the end, hack for now
+    
+    #run the garch
+    rm(bktest)
+    #NOTE forecast.length needs to be evenly divisible by n.ahead and refit.every
+    bktest = ugarchroll(spec, data = data, n.ahead = 3,
+            forecast.length = 186, refit.every = 3, refit.window = "recursive",
+            solver = "solnp", fit.control = list(), solver.control = ctrl,
+            calculate.VaR = TRUE, VaR.alpha = c(0.01, 0.025, 0.05))
+    
+    rawgarchdata<-as.data.frame(bktest)
+    rawgarchdata.xts<-xts(rawgarchdata[,2:5],order.by=as.Date(rawgarchdata[,1]))
+    garchdata<-rawgarchdata.xts[index(oridata)]
+    
+    
+    out<-list(bktest=bktest,spec=spec,oridata=oridata,data=data,rawgarchdata=rawgarchdata.xts,garchdata=garchdata)
+}
+names(garch.out)<-colnames(edhec.R)
+# OK, so now we've got a big unweildy GARCH list.  let's create garchmu and garchsigma
+garch.mu<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$fmu }
+names(garch.mu)<-colnames(edhec.R)
+garch.sigma<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$fsigma }
+names(garch.sigma)<-colnames(edhec.R)
+
+#####
+# you can examine the bktest slots using commands like:
+#report(bktest, type="VaR", n.ahead = 1, VaR.alpha = 0.01, conf.level = 0.95)
+#report(convert.arb.bktest, type="fpm")
+#plot(bktest)
+
+
+
+
 
 # Historical performance of each buoy portfolio
 ## Same statistics as above
