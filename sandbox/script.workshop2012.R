@@ -305,7 +305,9 @@ colnames(weights)= colnames(edhec.R)
 
 ### Evaluate constraint objects
 # Generate a single set of random portfolios to evaluate against all constraint set
+print(paste('constructing random portfolios at',Sys.time()))
 rp = random_portfolios(rpconstraints=init.constr, permutations=permutations)
+print(paste('done constructing random portfolios at',Sys.time()))
 
 ### Choose our 'R' variable
 R=edhec.R # for monthlies
@@ -313,6 +315,7 @@ R=edhec.R # for monthlies
 #R=garch.mu # to use the monthly quarter-ahead predictions from the garch
 
 start_time<-Sys.time()
+print(paste('Starting optimization at',Sys.time()))
 ### Evaluate BUOY 1: Constrained Mean-StdDev Portfolio
 # MeanSD.RND<-optimize.portfolio(R=R,
 #   constraints=MeanSD.constr,
@@ -333,6 +336,7 @@ MeanSD.RND.t = optimize.portfolio.rebalancing(R=R,
 MeanSD.w = extractWeights.rebal(MeanSD.RND.t)
 MeanSD=Return.rebalancing(edhec.R, MeanSD.w)
 colnames(MeanSD) = "MeanSD"
+print(paste('Completed meanSD optimization at',Sys.time(),'moving on to meanmETL'))
 
 ### Evaluate BUOY 2: Constrained Mean-mETL Portfolio
 # MeanmETL.RND<-optimize.portfolio(R=R,
@@ -353,6 +357,7 @@ MeanmETL.RND.t = optimize.portfolio.rebalancing(R=R,
 MeanmETL.w = extractWeights.rebal(MeanmETL.RND.t)
 MeanmETL=Return.rebalancing(edhec.R, MeanmETL.w)
 colnames(MeanmETL) = "MeanmETL"
+print(paste('Completed meanmETL optimization at',Sys.time(),'moving on to MinSD'))
 
 ### Evaluate BUOY 3: Constrained Minimum Variance Portfolio
 # MinSD.RND<-optimize.portfolio(R=R,
@@ -373,6 +378,7 @@ MinSD.RND.t = optimize.portfolio.rebalancing(R=R,
 MinSD.w = extractWeights.rebal(MinSD.RND.t)
 MinSD=Return.rebalancing(edhec.R, MinSD.w)
 colnames(MinSD) = "MinSD"
+print(paste('Completed MinSD optimization at',Sys.time(),'moving on to MinmETL'))
 
 ### Evaluate BUOY 4: Constrained Minimum mETL Portfolio
 # MinmETL.RND<-optimize.portfolio(R=R,
@@ -393,6 +399,7 @@ MinmETL.RND.t = optimize.portfolio.rebalancing(R=R,
 MinmETL.w = extractWeights.rebal(MinmETL.RND.t)
 MinmETL=Return.rebalancing(edhec.R, MinmETL.w)
 colnames(MinmETL) = "MinmETL"
+print(paste('Completed MinmETL optimization at',Sys.time(),'moving on to EqSD'))
 
 ### Evaluate BUOY 5: Constrained Equal Variance Contribution Portfolio
 # EqSD.RND<-optimize.portfolio(R=R,
@@ -412,6 +419,7 @@ EqSD.RND.t = optimize.portfolio.rebalancing(R=R,
 EqSD.w = extractWeights.rebal(EqSD.RND.t)
 EqSD=Return.rebalancing(edhec.R, EqSD.w)
 colnames(EqSD) = "EqSD"
+print(paste('Completed EqSD optimization at',Sys.time(),'moving on to EqmETL'))
 
 ### Evaluate BUOY 6: Constrained Equal mETL Contribution Portfolio
 # EqmETL.RND<-optimize.portfolio(R=R,
@@ -430,6 +438,7 @@ EqmETL.RND.t = optimize.portfolio.rebalancing(R=R,
 EqmETL.w = extractWeights.rebal(EqmETL.RND.t)
 EqmETL=Return.rebalancing(edhec.R, EqmETL.w)
 colnames(EqmETL) = "EqmETL"
+print(paste('Completed EqmETL optimization at',Sys.time(),'moving on to EqWgt'))
 
 ### Evaluate BUOY 7: Equal Weight Portfolio
 # There's only one, so calculate it.  Rebalance the equal-weight portfolio regularly, matching the periods above
