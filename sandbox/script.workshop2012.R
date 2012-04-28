@@ -115,8 +115,8 @@ dev.off()
 png(filename="EDHEC-Distributions.png", units="in", height=5.5, width=9, res=96) 
 op <- par(no.readonly = TRUE)
 # c(bottom, left, top, right)
-par(oma = c(5,12,6,2), mar=c(0,0,0,3))
-layout(matrix(1:21, ncol=3, byrow=TRUE))
+par(oma = c(5,0,6,1), mar=c(0,0,0,3))
+layout(matrix(1:28, ncol=4, byrow=TRUE))
 # layout.show(n=21)
 chart.mins=min(edhec.R)
 chart.maxs=max(edhec.R)
@@ -125,11 +125,13 @@ chart.maxs=max(edhec.R)
 # @TODO: Unify blue default color between fits
 for(i in 1:7){
   if(i==7){
+    plot.new(); text(x=1, y=0.5, adj=c(1,0.5), labels=colnames(edhec.R[,i]))
     chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01), show.outliers=TRUE, methods=c("add.normal"))
     chart.QQPlot(edhec.R[,i], main="", pch="*", envelope=0.95, col=c(1,"#005AFF"), ylim=c(chart.mins, chart.maxs))
     chart.ECDF(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), lwd=2)
   }
   else{
+    plot.new(); text(x=1, y=0.5, adj=c(1,0.5), labels=colnames(edhec.R[,i]))
     chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01), xaxis=FALSE, yaxis=FALSE, show.outliers=TRUE, methods=c("add.normal"))
     chart.QQPlot(edhec.R[,i], main="", xaxis=FALSE, yaxis=FALSE, pch="*", envelope=0.95, col=c(1,"#005AFF"), ylim=c(chart.mins, chart.maxs))
     chart.ECDF(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), xaxis=FALSE, yaxis=FALSE, lwd=2)
