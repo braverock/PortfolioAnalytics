@@ -193,7 +193,7 @@ pasd <- function(R, weights){
 #    as.numeric(StdDev(R=R, weights=weights)*sqrt(4)) # hardcoded for quarterly data
 }
 
-pasd.garch<- function(R,weights.sigmas) {
+pasd.garch<- function(R,weights,sigmas) {
     #sigmas is an input of predicted sigmas on a date, 
     # presumably from a GARCH model
     as.numeric((sigmas[last(index(R)),]*weights)*sqrt(12))
@@ -243,8 +243,9 @@ init.constr <- add.objective(init.constr,
   #name='pasd.garch', # to minimize from the predicted sigmas
   enabled=TRUE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
-  arguments=list() # from inception 
-  )
+  arguments=list() # from inception for pasd 
+  #arguments=list(sigmas=garch.sigmas) # from inception for pasd.garch 
+)
 # Add measure 3, CVaR with p=(1-1/12)
 
 # set confidence for VaR/ES
@@ -790,12 +791,12 @@ garch.out <- foreach(i=1:ncol(edhec.R),.inorder=TRUE) %dopar% {
             solver = "solnp", fit.control = list(), solver.control = ctrl,
             calculate.VaR = TRUE, VaR.alpha = c(0.01, 0.025, 0.05))
     
-    rawgarchdata<-as.data.frame(bktest)
+    rawgarchdata<-as.data.frame(bktest, n.ahead=3) # extract the 3rd n.ahead estimate
     rawgarchdata.xts<-xts(rawgarchdata[,2:5],order.by=as.Date(rawgarchdata[,1]))
     garchdata<-rawgarchdata.xts[index(oridata)]
     
     
-    out<-list(bktest=bktest,spec=spec,oridata=oridata,data=data,rawgarchdata=rawgarchdata.xts,garchdata=garchdata)
+    out<-list(bktest=bktest,spec=spec,oridata=oridata,data=data,rawgarchdata=rawgarchdata.xts,garchdata=garchdata,start=start, end=end)
 }
 names(garch.out)<-colnames(edhec.R)
 # OK, so now we've got a big unweildy GARCH list.  let's create garchmu and garchsigma
