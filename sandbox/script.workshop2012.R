@@ -256,7 +256,8 @@ init.constr <- add.objective(init.constr,
   name="CVaR", # the function to minimize
   enabled=FALSE, # enable or disable the objective
   multiplier=0, # calculate it but don't use it in the objective
-  arguments=list(p=p), clean=clean)
+  arguments=list(p=p), 
+  clean=clean
 )
 
 ### Construct BUOY 1: Constrained Mean-StdDev Portfolio
