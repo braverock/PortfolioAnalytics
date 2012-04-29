@@ -194,9 +194,9 @@ pasd <- function(R, weights){
 }
 
 pasd.garch<- function(R,weights,garch.sigma,...) {
-    #sigmas is an input of predicted sigmas on a date, 
-    # presumably from a GARCH model
-    as.numeric((garch.sigma[last(index(R)),]*weights)*sqrt(12))
+	#sigmas is an input of predicted sigmas on a date, 
+	# presumably from a GARCH model
+	as.numeric(sum((garch.sigma[last(index(R)),]*weights)*sqrt(12)))
 }
 
 ## Apply multi-factor model
