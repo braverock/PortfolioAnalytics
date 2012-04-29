@@ -461,6 +461,31 @@ BHportfs <- foreach(i=1:NROW(rp),.combine=cbind, .inorder=TRUE) %dopar% {
 end_time<-Sys.time()
 end_time-start_time
 
+# Assemble the ex ante result data
+results = c("MeanSD.RND.t", "MeanmETL.RND.t", "MinSD.RND.t", "MinmETL.RND.t", "EqSD.RND.t", "EqmETL.RND.t")
+results.names= c("Eq Wgt", "Mean SD", "Mean mETL", "Min SD", "Min mETL", "Eq SD", "Eq mETL")
+## Extract Weights
+RND.weights = MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$weights #EqWgt
+for(result in results){
+    x=get(result)
+    RND.weights = rbind(RND.weights,x[["2010-12-31"]]$weights)
+}
+rownames(RND.weights)=c(results.names) # @TODO: add prettier labels
+
+## Extract Objective measures
+RND.objectives=rbind(MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$objective_measures[1:3]) #EqWgt
+for(result in results){
+    x=get(result)
+    x.obj=rbind(x[["2010-12-31"]]$objective_measures[1:3])
+    RND.objectives = rbind(RND.objectives,x.obj)
+}
+rownames(RND.objectives)=c("EqWgt",results) # @TODO: add prettier labels
+
+
+#****************************************************************************
+# END main optimization section
+#****************************************************************************
+
 # --------------------------------------------------------------------
 # Chart EqWgt Results against BH RP portfolios
 # --------------------------------------------------------------------
@@ -478,25 +503,6 @@ dev.off()
 # [5] "call"                               "constraints"                       
 # [7] "data_summary"                       "elapsed_time"                      
 # [9] "end_t"      
-# Assemble the ex ante result data
-results = c("MeanSD.RND.t", "MeanmETL.RND.t", "MinSD.RND.t", "MinmETL.RND.t", "EqSD.RND.t", "EqmETL.RND.t")
-results.names= c("Eq Wgt", "Mean SD", "Mean mETL", "Min SD", "Min mETL", "Eq SD", "Eq mETL")
-## Extract Weights
-RND.weights = MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$weights #EqWgt
-for(result in results){
-  x=get(result)
-  RND.weights = rbind(RND.weights,x[["2010-12-31"]]$weights)
-}
-rownames(RND.weights)=c(results.names) # @TODO: add prettier labels
-
-## Extract Objective measures
-RND.objectives=rbind(MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$objective_measures[1:3]) #EqWgt
-for(result in results){
-  x=get(result)
-  x.obj=rbind(x[["2010-12-31"]]$objective_measures[1:3])
-  RND.objectives = rbind(RND.objectives,x.obj)
-}
-rownames(RND.objectives)=c("EqWgt",results) # @TODO: add prettier labels
 
 # --------------------------------------------------------------------
 # Plot Ex Ante scatter of RP and ONLY Equal Weight portfolio
@@ -754,14 +760,14 @@ dev.off()
 # Other things we might do:
 
 ###############
-#GARCH for mu and sigma estimates 3 months out
+#ARMA-GARCH(1,1,1) for mu, sigma, and skew estimates 3 months out
 require(rugarch)
 
 
 ctrl = list(rho = 1, delta = 1e-9, outer.iter = 100, tol = 1e-7)
 spec = ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
         mean.model = list(armaOrder = c(1,0), include.mean = TRUE),
-        distribution.model = "std")
+        distribution.model = "ghyp")
 
 dates<-seq.Date(from=as.Date('1975-01-01'), to=as.Date('1996-12-31'),by=1)
 dates<-dates[endpoints(dates,on='months')]
@@ -804,6 +810,12 @@ garch.mu<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$fmu }
 names(garch.mu)<-colnames(edhec.R)
 garch.sigma<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$fsigma }
 names(garch.sigma)<-colnames(edhec.R)
+garch.skew<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$fskew }
+names(garch.skew)<-colnames(edhec.R)
+
+#diagnose skew
+last(garch.skew)
+skewness(tail(edhec.R,36))
 
 #####
 # you can examine the bktest slots using commands like:
