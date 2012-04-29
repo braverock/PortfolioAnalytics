@@ -337,6 +337,8 @@ MeanSD.RND.t = optimize.portfolio.rebalancing(R=R,
 MeanSD.w = extractWeights.rebal(MeanSD.RND.t)
 MeanSD=Return.rebalancing(edhec.R, MeanSD.w)
 colnames(MeanSD) = "MeanSD"
+save(MeanSD.RND.t,MeanSD.w,MeanSD,file=paste('MeanSD',Sys.Date(),'rda',sep='.'))
+
 print(paste('Completed meanSD optimization at',Sys.time(),'moving on to meanmETL'))
 
 ### Evaluate BUOY 2: Constrained Mean-mETL Portfolio
@@ -358,6 +360,7 @@ MeanmETL.RND.t = optimize.portfolio.rebalancing(R=R,
 MeanmETL.w = extractWeights.rebal(MeanmETL.RND.t)
 MeanmETL=Return.rebalancing(edhec.R, MeanmETL.w)
 colnames(MeanmETL) = "MeanmETL"
+save(MeanmETL.RND.t,MeanmETL.w,MeanmETL,file=paste('MeanmETL',Sys.Date(),'rda',sep='.'))
 print(paste('Completed meanmETL optimization at',Sys.time(),'moving on to MinSD'))
 
 ### Evaluate BUOY 3: Constrained Minimum Variance Portfolio
@@ -379,6 +382,7 @@ MinSD.RND.t = optimize.portfolio.rebalancing(R=R,
 MinSD.w = extractWeights.rebal(MinSD.RND.t)
 MinSD=Return.rebalancing(edhec.R, MinSD.w)
 colnames(MinSD) = "MinSD"
+save(MinSD.RND.t,MinSD.w,MinSD,file=paste('MinSD',Sys.Date(),'rda',sep='.'))
 print(paste('Completed MinSD optimization at',Sys.time(),'moving on to MinmETL'))
 
 ### Evaluate BUOY 4: Constrained Minimum mETL Portfolio
@@ -400,6 +404,7 @@ MinmETL.RND.t = optimize.portfolio.rebalancing(R=R,
 MinmETL.w = extractWeights.rebal(MinmETL.RND.t)
 MinmETL=Return.rebalancing(edhec.R, MinmETL.w)
 colnames(MinmETL) = "MinmETL"
+save(MinmETL.RND.t,MinmETL.w,MinmETL,file=paste('MinmETL',Sys.Date(),'rda',sep='.'))
 print(paste('Completed MinmETL optimization at',Sys.time(),'moving on to EqSD'))
 
 ### Evaluate BUOY 5: Constrained Equal Variance Contribution Portfolio
@@ -420,6 +425,7 @@ EqSD.RND.t = optimize.portfolio.rebalancing(R=R,
 EqSD.w = extractWeights.rebal(EqSD.RND.t)
 EqSD=Return.rebalancing(edhec.R, EqSD.w)
 colnames(EqSD) = "EqSD"
+save(EqSD.RND.t,EqSD.w,EqSD,file=paste('EqSD',Sys.Date(),'rda',sep='.'))
 print(paste('Completed EqSD optimization at',Sys.time(),'moving on to EqmETL'))
 
 ### Evaluate BUOY 6: Constrained Equal mETL Contribution Portfolio
@@ -439,6 +445,7 @@ EqmETL.RND.t = optimize.portfolio.rebalancing(R=R,
 EqmETL.w = extractWeights.rebal(EqmETL.RND.t)
 EqmETL=Return.rebalancing(edhec.R, EqmETL.w)
 colnames(EqmETL) = "EqmETL"
+save(EqmETL.RND.t,EqmETL.w,EqmETL,file=paste('EqmETL',Sys.Date(),'rda',sep='.'))
 print(paste('Completed EqmETL optimization at',Sys.time(),'moving on to EqWgt'))
 
 ### Evaluate BUOY 7: Equal Weight Portfolio
@@ -457,6 +464,7 @@ BHportfs <- foreach(i=1:NROW(rp),.combine=cbind, .inorder=TRUE) %dopar% {
 	tmp = Return.rebalancing(edhec.R,weights_i)
 }
 # BHportfs <- cbind(EqWgt,BHportfs)
+save(rp,BHportfs,EqWgt,file=paste('BHportfs',Sys.Date(),'rda',sep='.'))
 
 end_time<-Sys.time()
 end_time-start_time
