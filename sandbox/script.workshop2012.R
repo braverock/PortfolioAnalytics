@@ -764,7 +764,7 @@ dev.off()
 require(rugarch)
 
 
-ctrl = list(rho = 1, delta = 1e-9, outer.iter = 100, tol = 1e-7)
+ctrl = list(rho = 1, delta = 1e-6, outer.iter = 100, tol = 1e-7,outer.iter=700,inner.iter=1200)
 spec = ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
         mean.model = list(armaOrder = c(1,0), include.mean = TRUE),
         distribution.model = "ghyp")
@@ -778,8 +778,8 @@ tailxts<-xts(rep(0,length(taildates)),order.by=taildates)
 garch.out <- foreach(i=1:ncol(edhec.R),.inorder=TRUE) %dopar% {
 
     oridata  <- edhec.R[,i]
-    start <- first(index(data))
-    end   <- last(index(data))
+    start <- first(index(oridata))
+    end   <- last(index(oridata))
     
     #bootsstrap
     #we're going to do a simple sample with replacement here
@@ -793,30 +793,59 @@ garch.out <- foreach(i=1:ncol(edhec.R),.inorder=TRUE) %dopar% {
     rm(bktest)
     #NOTE forecast.length needs to be evenly divisible by n.ahead and refit.every
     bktest = ugarchroll(spec, data = data, n.ahead = 3,
-            forecast.length = 186, refit.every = 3, refit.window = "recursive",
+            forecast.length = 186, refit.every = 3, refit.window = "moving",
             solver = "solnp", fit.control = list(), solver.control = ctrl,
-            calculate.VaR = TRUE, VaR.alpha = c(0.01, 0.025, 0.05))
+            calculate.VaR = FALSE, VaR.alpha = c(0.01, 0.025, 0.05))
     
-    rawgarchdata<-as.data.frame(bktest, n.ahead=3) # extract the 3rd n.ahead estimate
-    rawgarchdata.xts<-xts(rawgarchdata[,2:5],order.by=as.Date(rawgarchdata[,1]))
-    garchdata<-rawgarchdata.xts[index(oridata)]
+    # the standardized density parameters (rho, zeta)
+    f01density = bktest@roll$f01density[[3]]
+    skew = apply(f01density[,5:6],1, FUN = function(x) dskewness("nig", skew=x[1], shape=x[2]))
+    kurt = apply(f01density[,5:6],1, FUN = function(x) dkurtosis("nig", skew=x[1], shape=x[2])) #excess kurtosis
     
+    # just sum the n.ahead predictions for now, could ocmpound them, not sure 
+    # what trouble that would cause
+    mu3 = rowSums(cbind(as.data.frame(bktest, n.ahead=1, refit = "all", which = "series"), 
+          as.data.frame(bktest, n.ahead=2, refit = "all", which = "series"),
+          as.data.frame(bktest, n.ahead=3, refit = "all", which = "series")))
+  
+    garchmom<-cbind(
+            as.data.frame(bktest, n.ahead=3, refit = "all", which = "series"), 
+            as.data.frame(bktest, n.ahead=3, refit = "all", which = "sigma"),
+            skew, kurt,mu3)
     
-    out<-list(bktest=bktest,spec=spec,oridata=oridata,data=data,rawgarchdata=rawgarchdata.xts,garchdata=garchdata,start=start, end=end)
+    garchmom.xts<-xts(garchmom,order.by=as.Date(rownames(garchmom)))
+    garchdata<-garchmom.xts[index(oridata)]
+    colnames(garchdata)[1]<-'mu'
+
+    out<-list(bktest=bktest,spec=spec,oridata=oridata,data=data,garchmom=garchmom.xts,garchdata=garchdata,start=start, end=end)
 }
 names(garch.out)<-colnames(edhec.R)
 # OK, so now we've got a big unweildy GARCH list.  let's create garchmu and garchsigma
-garch.mu<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$fmu }
+garch.mu<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$mu }
 names(garch.mu)<-colnames(edhec.R)
-garch.sigma<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$fsigma }
+garch.sigma<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$sigma }
 names(garch.sigma)<-colnames(edhec.R)
-garch.skew<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$fskew }
+garch.skew<-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$skew }
 names(garch.skew)<-colnames(edhec.R)
+garch.kurtosis <-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$kurt }
+names(garch.kurtosis)<-colnames(edhec.R)
+garch.mu3 <- foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$mu3 }
+names(garch.mu3)<-colnames(edhec.R)
 
-#diagnose skew
+
+#diagnose skew and kurtosis
 last(garch.skew)
 skewness(tail(edhec.R,36))
+last(garch.kurtosis)
+kurtosis(tail(edhec.R,36))
 
+foreach(i=1:ncol(edhec.R)) %do% {
+    dev.new()
+    par(mfrow=c(3,1))
+    plot(garch.out[[i]]$bktest, n.ahead=1, which = 3,main=paste(names(garch.out)[i],'n-ahead 1'))
+    plot(garch.out[[i]]$bktest, n.ahead=2, which = 3,main=paste(names(garch.out)[i],'n-ahead 2'))
+    plot(garch.out[[i]]$bktest, n.ahead=3, which = 3,main=paste(names(garch.out)[i],'n-ahead 3'))
+}
 #####
 # you can examine the bktest slots using commands like:
 #report(bktest, type="VaR", n.ahead = 1, VaR.alpha = 0.01, conf.level = 0.95)
