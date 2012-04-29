@@ -193,10 +193,10 @@ pasd <- function(R, weights){
 #    as.numeric(StdDev(R=R, weights=weights)*sqrt(4)) # hardcoded for quarterly data
 }
 
-pasd.garch<- function(R,weights,sigmas) {
+pasd.garch<- function(R,weights,garch.sigma,...) {
     #sigmas is an input of predicted sigmas on a date, 
     # presumably from a GARCH model
-    as.numeric((sigmas[last(index(R)),]*weights)*sqrt(12))
+    as.numeric((garch.sigma[last(index(R)),]*weights)*sqrt(12))
 }
 
 ## Apply multi-factor model
@@ -807,16 +807,21 @@ garch.out <- foreach(i=1:ncol(edhec.R),.inorder=TRUE) %dopar% {
     mu3 = rowSums(cbind(as.data.frame(bktest, n.ahead=1, refit = "all", which = "series"), 
           as.data.frame(bktest, n.ahead=2, refit = "all", which = "series"),
           as.data.frame(bktest, n.ahead=3, refit = "all", which = "series")))
+
+    sigma3 = rowMeans(cbind(as.data.frame(bktest, n.ahead=1, refit = "all", which = "sigma"), 
+          as.data.frame(bktest, n.ahead=2, refit = "all", which = "sigma"),
+          as.data.frame(bktest, n.ahead=3, refit = "all", which = "sigma")))
   
     garchmom<-cbind(
             as.data.frame(bktest, n.ahead=3, refit = "all", which = "series"), 
             as.data.frame(bktest, n.ahead=3, refit = "all", which = "sigma"),
-            skew, kurt,mu3)
+            skew, kurt,mu3,sigma3)
     
     garchmom.xts<-xts(garchmom,order.by=as.Date(rownames(garchmom)))
     garchdata<-garchmom.xts[index(oridata)]
     colnames(garchdata)[1]<-'mu'
-
+    colnames(garchdata)[6]<-'sigma3'
+    
     out<-list(bktest=bktest,spec=spec,oridata=oridata,data=data,garchmom=garchmom.xts,garchdata=garchdata,start=start, end=end)
 }
 names(garch.out)<-colnames(edhec.R)
@@ -831,6 +836,8 @@ garch.kurtosis <-foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$kur
 names(garch.kurtosis)<-colnames(edhec.R)
 garch.mu3 <- foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$mu3 }
 names(garch.mu3)<-colnames(edhec.R)
+garch.sigma3 <- foreach(x=iter(garch.out),.combine=cbind)%do% { x$garchdata$sigma3 }
+names(garch.sigma3)<-colnames(edhec.R)
 
 
 #diagnose skew and kurtosis
