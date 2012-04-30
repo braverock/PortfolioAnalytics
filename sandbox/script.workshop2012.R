@@ -150,6 +150,8 @@ dev.off()
 # --------------------------------------------------------------------
 # @TODO: This is frosting, do it last
 
+runname='garch.sigma.and.mu'
+
 #########################################################################
 # Optimization starts here
 ########################################################################
@@ -337,7 +339,7 @@ MeanSD.RND.t = optimize.portfolio.rebalancing(R=R,
 MeanSD.w = extractWeights.rebal(MeanSD.RND.t)
 MeanSD=Return.rebalancing(edhec.R, MeanSD.w)
 colnames(MeanSD) = "MeanSD"
-save(MeanSD.RND.t,MeanSD.w,MeanSD,file=paste('MeanSD',Sys.Date(),'rda',sep='.'))
+save(MeanSD.RND.t,MeanSD.w,MeanSD,file=paste('MeanSD',Sys.Date(),runname,'rda',sep='.'))
 
 print(paste('Completed meanSD optimization at',Sys.time(),'moving on to meanmETL'))
 
@@ -360,7 +362,7 @@ MeanmETL.RND.t = optimize.portfolio.rebalancing(R=R,
 MeanmETL.w = extractWeights.rebal(MeanmETL.RND.t)
 MeanmETL=Return.rebalancing(edhec.R, MeanmETL.w)
 colnames(MeanmETL) = "MeanmETL"
-save(MeanmETL.RND.t,MeanmETL.w,MeanmETL,file=paste('MeanmETL',Sys.Date(),'rda',sep='.'))
+save(MeanmETL.RND.t,MeanmETL.w,MeanmETL,file=paste('MeanmETL',Sys.Date(),runname,'rda',sep='.'))
 print(paste('Completed meanmETL optimization at',Sys.time(),'moving on to MinSD'))
 
 ### Evaluate BUOY 3: Constrained Minimum Variance Portfolio
@@ -382,7 +384,7 @@ MinSD.RND.t = optimize.portfolio.rebalancing(R=R,
 MinSD.w = extractWeights.rebal(MinSD.RND.t)
 MinSD=Return.rebalancing(edhec.R, MinSD.w)
 colnames(MinSD) = "MinSD"
-save(MinSD.RND.t,MinSD.w,MinSD,file=paste('MinSD',Sys.Date(),'rda',sep='.'))
+save(MinSD.RND.t,MinSD.w,MinSD,file=paste('MinSD',Sys.Date(),runname,'rda',sep='.'))
 print(paste('Completed MinSD optimization at',Sys.time(),'moving on to MinmETL'))
 
 ### Evaluate BUOY 4: Constrained Minimum mETL Portfolio
@@ -404,7 +406,7 @@ MinmETL.RND.t = optimize.portfolio.rebalancing(R=R,
 MinmETL.w = extractWeights.rebal(MinmETL.RND.t)
 MinmETL=Return.rebalancing(edhec.R, MinmETL.w)
 colnames(MinmETL) = "MinmETL"
-save(MinmETL.RND.t,MinmETL.w,MinmETL,file=paste('MinmETL',Sys.Date(),'rda',sep='.'))
+save(MinmETL.RND.t,MinmETL.w,MinmETL,file=paste('MinmETL',Sys.Date(),runname,'rda',sep='.'))
 print(paste('Completed MinmETL optimization at',Sys.time(),'moving on to EqSD'))
 
 ### Evaluate BUOY 5: Constrained Equal Variance Contribution Portfolio
@@ -425,7 +427,7 @@ EqSD.RND.t = optimize.portfolio.rebalancing(R=R,
 EqSD.w = extractWeights.rebal(EqSD.RND.t)
 EqSD=Return.rebalancing(edhec.R, EqSD.w)
 colnames(EqSD) = "EqSD"
-save(EqSD.RND.t,EqSD.w,EqSD,file=paste('EqSD',Sys.Date(),'rda',sep='.'))
+save(EqSD.RND.t,EqSD.w,EqSD,file=paste('EqSD',Sys.Date(),runname,'rda',sep='.'))
 print(paste('Completed EqSD optimization at',Sys.time(),'moving on to EqmETL'))
 
 ### Evaluate BUOY 6: Constrained Equal mETL Contribution Portfolio
@@ -445,7 +447,7 @@ EqmETL.RND.t = optimize.portfolio.rebalancing(R=R,
 EqmETL.w = extractWeights.rebal(EqmETL.RND.t)
 EqmETL=Return.rebalancing(edhec.R, EqmETL.w)
 colnames(EqmETL) = "EqmETL"
-save(EqmETL.RND.t,EqmETL.w,EqmETL,file=paste('EqmETL',Sys.Date(),'rda',sep='.'))
+save(EqmETL.RND.t,EqmETL.w,EqmETL,file=paste('EqmETL',Sys.Date(),runname,'rda',sep='.'))
 print(paste('Completed EqmETL optimization at',Sys.time(),'moving on to EqWgt'))
 
 ### Evaluate BUOY 7: Equal Weight Portfolio
@@ -464,31 +466,35 @@ BHportfs <- foreach(i=1:NROW(rp),.combine=cbind, .inorder=TRUE) %dopar% {
 	tmp = Return.rebalancing(edhec.R,weights_i)
 }
 # BHportfs <- cbind(EqWgt,BHportfs)
-save(rp,BHportfs,EqWgt,file=paste('BHportfs',Sys.Date(),'rda',sep='.'))
+save(rp,BHportfs,EqWgt,file=paste('BHportfs',Sys.Date(),runname,'rda',sep='.'))
 
 end_time<-Sys.time()
 end_time-start_time
 
 # Assemble the ex ante result data
-results = c("MeanSD.RND.t", "MeanmETL.RND.t", "MinSD.RND.t", "MinmETL.RND.t", "EqSD.RND.t", "EqmETL.RND.t")
-results.names= c("Eq Wgt", "Mean SD", "Mean mETL", "Min SD", "Min mETL", "Eq SD", "Eq mETL")
+results = list(EqWgt=EqWgt,
+		BHportfs=BHportfs,
+		MeanSD.RND.t=MeanSD.RND.t, 
+		MeanmETL.RND.t=MeanmETL.RND.t, 
+		MinSD.RND.t=MinSD.RND.t, 
+		MinmETL.RND.t=MinmETL.RND.t, 
+		EqSD.RND.t=EqSD.RND.t, 
+		EqmETL.RND.t=EqmETL.RND.t)
 ## Extract Weights
-RND.weights = MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$weights #EqWgt
-for(result in results){
-    x=get(result)
-    RND.weights = rbind(RND.weights,x[["2010-12-31"]]$weights)
-}
-rownames(RND.weights)=c(results.names) # @TODO: add prettier labels
-
-## Extract Objective measures
-RND.objectives=rbind(MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$objective_measures[1:3]) #EqWgt
-for(result in results){
-    x=get(result)
-    x.obj=rbind(x[["2010-12-31"]]$objective_measures[1:3])
-    RND.objectives = rbind(RND.objectives,x.obj)
-}
-rownames(RND.objectives)=c("EqWgt",results) # @TODO: add prettier labels
-
+#RND.weights = MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$weights #EqWgt
+#for(result in results){
+#	RND.weights = rbind(RND.weights,result[["2010-12-31"]]$weights)
+#}
+#results.names= c("Eq Wgt", "Mean SD", "Mean mETL", "Min SD", "Min mETL", "Eq SD", "Eq mETL")
+#rownames(RND.weights)=c(results.names) # @TODO: add prettier labels
+#
+### Extract Objective measures
+#RND.objectives=rbind(MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$objective_measures[1:3]) #EqWgt
+#for(result in results){
+#	RND.objectives = rbind(RND.objectives,rbind(result[["2010-12-31"]]$objective_measures[1:3]))
+#}
+#rownames(RND.objectives)=c("EqWgt",results) # @TODO: add prettier labels
+save(results,file=paste(Sys.Date(),runname,'full-results','rda',sep='.'))
 
 #****************************************************************************
 # END main optimization section
