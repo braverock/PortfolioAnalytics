@@ -209,3 +209,13 @@ update.constraint <- function(object, ...){
   return(constraints)
 }
 
+
+# minor addition
+CommitVerify <- function(){
+  # This function is to just verify that svn is working well
+  # and that I can commit a change to the package
+  print("SVN works!")
+}
+
+
+
