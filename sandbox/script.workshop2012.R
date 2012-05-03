@@ -115,7 +115,7 @@ dev.off()
 png(filename="EDHEC-Distributions.png", units="in", height=5.5, width=9, res=96) 
 op <- par(no.readonly = TRUE)
 # c(bottom, left, top, right)
-par(oma = c(5,0,6,1), mar=c(0,0,0,3))
+par(oma = c(5,0,2,1), mar=c(0,0,0,3))
 layout(matrix(1:28, ncol=4, byrow=TRUE))
 # layout.show(n=21)
 chart.mins=min(edhec.R)
@@ -127,14 +127,20 @@ for(i in 1:7){
   if(i==7){
     plot.new(); text(x=1, y=0.5, adj=c(1,0.5), labels=colnames(edhec.R[,i]))
     chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01), show.outliers=TRUE, methods=c("add.normal"))
+    abline(v=0, col="darkgray", lty=2)
     chart.QQPlot(edhec.R[,i], main="", pch="*", envelope=0.95, col=c(1,"#005AFF"), ylim=c(chart.mins, chart.maxs))
+    abline(v=0, col="darkgray", lty=2)
     chart.ECDF(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), lwd=2)
+    abline(v=0, col="darkgray", lty=2)
   }
   else{
     plot.new(); text(x=1, y=0.5, adj=c(1,0.5), labels=colnames(edhec.R[,i]))
     chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01), xaxis=FALSE, yaxis=FALSE, show.outliers=TRUE, methods=c("add.normal"))
+    abline(v=0, col="darkgray", lty=2)
     chart.QQPlot(edhec.R[,i], main="", xaxis=FALSE, yaxis=FALSE, pch="*", envelope=0.95, col=c(1,"#005AFF"), ylim=c(chart.mins, chart.maxs))
+    abline(v=0, col="darkgray", lty=2)
     chart.ECDF(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), xaxis=FALSE, yaxis=FALSE, lwd=2)
+    abline(v=0, col="darkgray", lty=2)
   }
 }
 par(op)
@@ -472,6 +478,10 @@ end_time<-Sys.time()
 end_time-start_time
 
 # Assemble the ex ante result data
+
+results.obj = c("MeanSD.RND.t", "MeanmETL.RND.t", "MinSD.RND.t", "MinmETL.RND.t", "EqSD.RND.t", "EqmETL.RND.t")
+results.names= c("Eq Wgt", "Mean SD", "Mean mETL", "Min SD", "Min mETL", "Eq SD", "Eq mETL")
+
 results = list(EqWgt=EqWgt,
 		BHportfs=BHportfs,
 		MeanSD.RND.t=MeanSD.RND.t, 
@@ -480,7 +490,18 @@ results = list(EqWgt=EqWgt,
 		MinmETL.RND.t=MinmETL.RND.t, 
 		EqSD.RND.t=EqSD.RND.t, 
 		EqmETL.RND.t=EqmETL.RND.t)
+
+
+evalDate="2010-12-31"
 ## Extract Weights
+
+RND.weights = MeanSD.RND.t[[evalDate]]$random_portfolio_objective_results[[1]]$weights #EqWgt
+for(result in results.obj){
+    x=get(result)
+    RND.weights = rbind(RND.weights,x[[evalDate]]$weights)
+}
+rownames(RND.weights)=results.names # @TODO: add prettier labels
+
 #RND.weights = MeanSD.RND.t[["2010-12-31"]]$random_portfolio_objective_results[[1]]$weights #EqWgt
 #for(result in results){
 #	RND.weights = rbind(RND.weights,result[["2010-12-31"]]$weights)
@@ -496,12 +517,22 @@ results = list(EqWgt=EqWgt,
 #rownames(RND.objectives)=c("EqWgt",results) # @TODO: add prettier labels
 save(results,file=paste(Sys.Date(),runname,'full-results','rda',sep='.'))
 
+## Extract Objective measures
+RND.objectives=rbind(MeanSD.RND.t[[evalDate]]$random_portfolio_objective_results[[1]]$objective_measures[1:3]) #EqWgt
+for(result in results.obj){
+    x=get(result)
+    x.obj=rbind(x[[evalDate]]$objective_measures[1:3])
+    RND.objectives = rbind(RND.objectives,x.obj)
+}
+rownames(RND.objectives)=results.names # @TODO: add prettier labels
+
+
 #****************************************************************************
 # END main optimization section
 #****************************************************************************
 
 # --------------------------------------------------------------------
-# Chart EqWgt Results against BH RP portfolios
+# NOT USED: Chart EqWgt Results against BH RP portfolios
 # --------------------------------------------------------------------
 postscript(file="EqWgtBHPerfSumm.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 charts.PerformanceSummary(BHportfs, main="Equal Weight and Buy & Hold Random Portfolios", methods=c("ModifiedVaR", "ModifiedES"), p=(1-1/12), gap=36, colorset=c("orange",rep("darkgray",NCOL(BHportfs))), lwd=3, legend.loc=NA)
@@ -521,9 +552,9 @@ dev.off()
 # --------------------------------------------------------------------
 # Plot Ex Ante scatter of RP and ONLY Equal Weight portfolio
 # --------------------------------------------------------------------
-xtract = extractStats(MeanSD.RND.t[["2010-12-31"]])
+xtract = extractStats(MeanSD.RND.t[[evalDate]])
 png(filename="RP-EqW-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96) 
-plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
+plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
 points(RND.objectives[1,2],RND.objectives[1,1], col=tol7qualitative, pch=16)
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
@@ -535,7 +566,7 @@ dev.off()
 # Plot Ex Ante scatter of RP and ALL BUOY portfolios
 # --------------------------------------------------------------------
 png(filename="Buoy-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96) 
-plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
+plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
 points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16)
@@ -873,7 +904,8 @@ foreach(i=1:ncol(edhec.R)) %do% {
 #report(convert.arb.bktest, type="fpm")
 #plot(bktest)
 
-
+# fit=ugarchfit(garch.out$"Global Macro"$spec, garch.out$"Global Macro"$data)
+# show(fit)
 
 
 
