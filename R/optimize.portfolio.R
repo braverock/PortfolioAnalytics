@@ -41,6 +41,7 @@
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
 #' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
+#' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments}}
 #' @callGraph 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
@@ -72,8 +73,21 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
   dotargs <-list(...)    
   
   # set portfolio moments only once
-  dotargs <- set.portfolio.moments(R, constraints, momentargs=dotargs)
-  
+  if(!is.function(momentFUN)){
+	  momentFUN<-match.fun(momentFUN)
+  }	
+  # TODO FIXME should match formals later
+  #dotargs <- set.portfolio.moments(R, constraints, momentargs=dotargs)
+  .mformals <- dotargs
+  .mformals$R <- R
+  .mformals$constraints <- constraints
+  mout <- try((do.call(momentFUN,.mformals)) ,silent=TRUE)	
+  if(inherits(mout,"try-error")) { 
+	  message(paste("portfolio moment function failed with message",mout))
+  } else {
+	  dotargs <- mout
+  }
+	  
   normalize_weights <- function(weights){
       # normalize results if necessary
       if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
