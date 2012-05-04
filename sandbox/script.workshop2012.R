@@ -7,8 +7,9 @@
 library(PortfolioAnalytics)
 require(quantmod)
 require(DEoptim)
+require(foreach)
 require(doMC)
-registerDoMC()
+registerDoMC(3)
 require(TTR)
 # Available on r-forge
 require(FactorAnalytics) # development version > build 
@@ -69,17 +70,12 @@ png(filename="EDHEC-Cumulative-Returns.png", units="in", height=5.5, width=9, re
 par(cex.lab=.8) # should set these parameters once at the top
 op <- par(no.readonly = TRUE)
 layout(matrix(c(1, 2)), height = c(2, 1.3), width = 1)
-par(mar = c(1, 4, 4, 2))
-chart.CumReturns(edhec.R, main = "EDHEC Index Returns", xaxis = FALSE, legend.loc = "topleft", ylab = "Cumulative Return", colorset= rainbow8equal, ylog=TRUE, wealth.index=TRUE, cex.legend=.7, cex.axis=.6, cex.lab=.7)
+par(mar = c(1, 4, 1, 2)) #c(bottom, left, top, right)
+chart.CumReturns(edhec.R, main = "", xaxis = FALSE, legend.loc = "topleft", ylab = "Cumulative Return", colorset= rainbow8equal, ylog=TRUE, wealth.index=TRUE, cex.legend=.7, cex.axis=.6, cex.lab=.7)
 par(mar = c(4, 4, 0, 2))
 chart.Drawdown(edhec.R, main = "", ylab = "Drawdown", colorset = rainbow8equal, cex.axis=.6, cex.lab=.7)
 par(op)
 dev.off()
-
-# --------------------------------------------------------------------
-# EDHEC Indexes Distributions
-# --------------------------------------------------------------------
-# @TODO: This is frosting, do it last
 
 # --------------------------------------------------------------------
 # EDHEC Indexes Risk
@@ -87,7 +83,15 @@ dev.off()
 # postscript(file="EDHEC-BarVaR.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 png(filename="EDHEC-BarVaR.png", units="in", height=5.5, width=9, res=96) 
 # Generate charts of EDHEC index returns with ETL and VaR through time
-charts.BarVaR(edhec.R, p=(1-1/12), gap=36, main="EDHEC Index Returns", clean='boudt', show.cleaned=TRUE, show.greenredbars=TRUE, methods=c("ModifiedES", "ModifiedVaR"), show.endvalue=TRUE, colorset=rainbow8equal)
+par(mar=c(3, 4, 0, 2) + 0.1) #c(bottom, left, top, right)
+# charts.BarVaR(edhec.R, p=(1-1/12), gap=36, main="", clean='boudt', show.cleaned=TRUE, show.greenredbars=TRUE, methods=c("ModifiedES", "ModifiedVaR"), show.endvalue=TRUE, colorset=rainbow8equal)
+
+charts.BarVaR(edhec.R, p=(1-1/12), gap=36, main="", show.greenredbars=TRUE, 
+              methods=c("ModifiedES", "ModifiedVaR"), show.endvalue=TRUE, 
+              colorset=rep("Black",7), ylim=c(-.1,.15))
+
+# charts.BarVaR(edhec.R, p=(1-1/12), gap=36, main="", show.greenredbars=TRUE, methods=c("ModifiedES", "ModifiedVaR"), show.endvalue=TRUE, colorset=rainbow8equal)
+par(op)
 dev.off()
 
 # --------------------------------------------------------------------
@@ -95,7 +99,9 @@ dev.off()
 # --------------------------------------------------------------------
 png(filename="EDHEC-RollPerf.png", units="in", height=5.5, width=9, res=96) 
 # Generate charts of EDHEC index returns with ETL and VaR through time
-charts.RollingPerformance(edhec.R, width=36, main="EDHEC Index Rolling 36-Month Performance", colorset=rainbow8equal)
+par(mar=c(5, 4, 0, 2) + 0.1) #c(bottom, left, top, right)
+charts.RollingPerformance(edhec.R, width=36, main="", colorset=rainbow8equal, legend.loc="topleft")
+par(op)
 dev.off()
 
 # --------------------------------------------------------------------
@@ -111,21 +117,24 @@ dev.off()
 # --------------------------------------------------------------------
 ## EDHEC Indexes Table of Return and Risk Statistics
 # --------------------------------------------------------------------
-# @TODO: This is frosting, do it last
+
+# --------------------------------------------------------------------
+## EDHEC Indexes Distributions
+# --------------------------------------------------------------------
+
 png(filename="EDHEC-Distributions.png", units="in", height=5.5, width=9, res=96) 
 op <- par(no.readonly = TRUE)
 # c(bottom, left, top, right)
 par(oma = c(5,0,2,1), mar=c(0,0,0,3))
-layout(matrix(1:28, ncol=4, byrow=TRUE))
+layout(matrix(1:28, ncol=4, byrow=TRUE), widths=rep(c(.6,1,1,1),7))
 # layout.show(n=21)
 chart.mins=min(edhec.R)
 chart.maxs=max(edhec.R)
-# @TODO: Fix chart.ECDF - delete xlim, ylim;
-# @TODO: Fix chart.QQPlot - ylim; add 45 degree line abline(0,1) and dashed best fit line
-# @TODO: Unify blue default color between fits
+row.names = sapply(colnames(RND.weights), function(x) paste(strwrap(x,10), collapse = "\n"), USE.NAMES=FALSE)
 for(i in 1:7){
   if(i==7){
-    plot.new(); text(x=1, y=0.5, adj=c(1,0.5), labels=colnames(edhec.R[,i]))
+    plot.new()
+    text(x=1, y=0.5, adj=c(1,0.5), labels=row.names[i], cex=1.1)
     chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01), show.outliers=TRUE, methods=c("add.normal"))
     abline(v=0, col="darkgray", lty=2)
     chart.QQPlot(edhec.R[,i], main="", pch="*", envelope=0.95, col=c(1,"#005AFF"), ylim=c(chart.mins, chart.maxs))
@@ -134,7 +143,8 @@ for(i in 1:7){
     abline(v=0, col="darkgray", lty=2)
   }
   else{
-    plot.new(); text(x=1, y=0.5, adj=c(1,0.5), labels=colnames(edhec.R[,i]))
+    plot.new()
+    text(x=1, y=0.5, adj=c(1,0.5), labels=row.names[i], cex=1.1)
     chart.Histogram(edhec.R[,i], main="", xlim=c(chart.mins, chart.maxs), breaks=seq(-0.15,0.10, by=0.01), xaxis=FALSE, yaxis=FALSE, show.outliers=TRUE, methods=c("add.normal"))
     abline(v=0, col="darkgray", lty=2)
     chart.QQPlot(edhec.R[,i], main="", xaxis=FALSE, yaxis=FALSE, pch="*", envelope=0.95, col=c(1,"#005AFF"), ylim=c(chart.mins, chart.maxs))
@@ -149,7 +159,26 @@ dev.off()
 # --------------------------------------------------------------------
 # Correlation
 # --------------------------------------------------------------------
-# @TODO: This is frosting, do it last
+require("corrplot")
+col3 <- colorRampPalette(c("darkgreen", "white", "darkred"))
+M <- cor(edhec.R)
+colnames(M) = rownames(M) = row.names
+order.hc2 <- corrMatOrder(M, order="hclust", hclust.method="complete")
+M.hc2 <- M[order.hc2,order.hc2]
+png(filename="EDHEC-cor-inception.png", units="in", height=5.5, width=4.5, res=96) 
+corrplot(M.hc2, tl.col="black", tl.cex=0.8, method="square", col=col3(8), cl.offset=.75, cl.cex=.7, cl.align.text="l", cl.ratio=.25)
+corrRect.hclust(M.hc2, k=3, method="complete", col="blue")
+dev.off()
+
+M36 <- cor(last(edhec.R,36))
+colnames(M36) = rownames(M36) = row.names
+order36.hc2 <- corrMatOrder(M36, order="hclust", hclust.method="complete")
+M36.hc2 <- M36[order36.hc2,order36.hc2]
+png(filename="EDHEC-cor-tr36m.png", units="in", height=5.5, width=4.5, res=96) 
+corrplot(M36.hc2, tl.col="black", tl.cex=0.8, method="square", col=col3(8), cl.offset=.75, cl.cex=.7, cl.align.text="l", cl.ratio=.25)
+corrRect.hclust(M36.hc2, k=3, method="complete", col="blue")
+dev.off()
+
 
 # --------------------------------------------------------------------
 ## Autocorrelation
@@ -530,6 +559,7 @@ rownames(RND.objectives)=results.names # @TODO: add prettier labels
 #****************************************************************************
 # END main optimization section
 #****************************************************************************
+op <- par(no.readonly=TRUE)
 
 # --------------------------------------------------------------------
 # NOT USED: Chart EqWgt Results against BH RP portfolios
@@ -553,27 +583,34 @@ dev.off()
 # Plot Ex Ante scatter of RP and ONLY Equal Weight portfolio
 # --------------------------------------------------------------------
 xtract = extractStats(MeanSD.RND.t[[evalDate]])
+
 png(filename="RP-EqW-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96) 
-plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
-points(RND.objectives[1,2],RND.objectives[1,1], col=tol7qualitative, pch=16)
+par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
+plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col="darkgray", axes=FALSE, main="", cex=.7)
+grid(col = "darkgray")
+abline(h = 0, col = "darkgray")
+points(RND.objectives[1,2],RND.objectives[1,1], col=tol7qualitative, pch=16, cex=1.5)
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
 legend("bottomright",legend=results.names[1], col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=0.8, inset=.02)
+par(op)
 dev.off()
 
 # --------------------------------------------------------------------
 # Plot Ex Ante scatter of RP and ALL BUOY portfolios
 # --------------------------------------------------------------------
 png(filename="Buoy-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96) 
-plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col="darkgray", axes=FALSE, main="Objectives in Mean-Variance Space", cex=.7)
+par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
+plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col="darkgray", axes=FALSE, main="", cex=.7)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
-points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16)
+points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16, cex=1.5)
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
 legend("bottomright", legend=results.names, col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=0.8, inset=.02)
+par(op)
 dev.off()
 
 # --------------------------------------------------------------------
@@ -581,14 +618,12 @@ dev.off()
 # --------------------------------------------------------------------
 # @TODO: add \n to labels
 png(filename="Weights-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96)
-op <- par(no.readonly=TRUE)
-# c(bottom, left, top, right)
-par(oma = c(5,12,6,2), mar=c(0,0,0,1))
-
+par(oma = c(4,8,2,1), mar=c(0,0,0,1)) # c(bottom, left, top, right)
 layout(matrix(c(1:7), nr = 1, byrow = TRUE))
+row.names = sapply(colnames(RND.weights), function(x) paste(strwrap(x,10), collapse = "\n"), USE.NAMES=FALSE)
 for(i in 1:7){
   if(i==1){
-    barplot(RND.weights[i,], col=rainbow8equal, horiz=TRUE, xlim=c(0,max(RND.weights)), axes=FALSE, names.arg=colnames(RND.weights), las=2)
+    barplot(RND.weights[i,], col=rainbow8equal, horiz=TRUE, xlim=c(0,max(RND.weights)), axes=FALSE, names.arg=row.names, las=2, cex.names=1.1)
     abline(v=0, col="darkgray")
     abline(v=1/7, col="darkgray", lty=2)
     axis(1, cex.axis = 1, col = "darkgray", las=1)
@@ -602,7 +637,6 @@ for(i in 1:7){
   }
 }
 par(op)
-title("Portfolio Weights by Objective", outer=TRUE)
 dev.off()
 
 # --------------------------------------------------------------------
@@ -672,15 +706,15 @@ for(i in 1:NROW(RND.weights)){
 }
 rownames(xpost.obj)=rownames(RND.weights)
 colnames(xpost.obj)=c("Realized Returns","Realized SD")
-xmin=min(c(xpost.sd,xtract[,"pasd.pasd"]))
-xmax=max(c(xpost.sd,xtract[,"pasd.pasd"]))
-ymin=min(c(xpost.ret,xtract[,"mean"]))
-ymax=max(c(xpost.ret,xtract[,"mean"]))
+xmin=min(c(xpost.sd,xtract[,"pasd.garch.pasd.garch"]))
+xmax=max(c(xpost.sd,xtract[,"pasd.garch.pasd.garch"]))
+ymin=min(c(xpost.ret,xtract[,"pamean.pamean"]))
+ymax=max(c(xpost.ret,xtract[,"pamean.pamean"]))
 
 png(filename="Scatter-ExPost-2010-12-31.png", units="in", height=5.5, width=9, res=96)
 plot(xpost.sd,xpost.ret, xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Ex Post Results for 2010-12-31", cex=.5,  xlim=c(xmin,xmax), ylim=c(ymin,ymax))
 grid(col = "darkgray")
-points(xpost.obj[,2],xpost.obj[,1], col=tol7qualitative, pch=16)
+points(xpost.obj[,2],xpost.obj[,1], col=tol7qualitative, pch=16, cex=1.5)
 abline(h = 0, col = "darkgray")
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
@@ -732,15 +766,14 @@ dev.off()
 # --------------------------------------------------------------------
 # Ex Post Results Through Time
 # --------------------------------------------------------------------
-# @TODO: remove center panel
 # charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)["2009::2011"], colorset=tol7qualitative)
 # charts.PerformanceSummary(cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)["2000::2011"], colorset=tol7qualitative)
 buoys.R=cbind(EqWgt,MeanSD, MeanmETL,MinSD,MinmETL,EqSD,EqmETL)
 png(filename="Buoy-Cumulative-Returns.png", units="in", height=5.5, width=9, res=96) 
 op <- par(no.readonly = TRUE)
 layout(matrix(c(1, 2)), height = c(2, 1.3), width = 1)
-par(mar = c(1, 4, 4, 2))
-chart.CumReturns(buoys.R["2000::",], main = "Objective Set Returns", xaxis = FALSE, legend.loc = "topleft", ylab = "Cumulative Return", colorset= tol7qualitative, ylog=TRUE, wealth.index=TRUE, cex.legend=.7, cex.axis=.6, cex.lab=.7)
+par(mar = c(1, 4, 1, 2)) # c(bottom, left, top, right)
+chart.CumReturns(buoys.R["2000::",], main = "", xaxis = FALSE, legend.loc = "topleft", ylab = "Cumulative Return", colorset= tol7qualitative, ylog=TRUE, wealth.index=TRUE, cex.legend=.7, cex.axis=.6, cex.lab=.7)
 par(mar = c(4, 4, 0, 2))
 chart.Drawdown(buoys.R["2000::",], main = "", ylab = "Drawdown", colorset = tol7qualitative, cex.axis=.6, cex.lab=.7)
 par(op)
@@ -762,20 +795,21 @@ for(x in 1:NROW(rp)){
 png(filename="Turnover-2010-12-31.png", units="in", height=5.5, width=9, res=96)
 # postscript(file="TurnoverOf20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
-layout(matrix(c(1,2)),height=c(4,1),width=1)
-par(mar=c(4,4,4,2)+.1, cex=1)
+layout(matrix(c(1,2)),height=c(4,1.25),width=1)
+par(mar=c(4,4,1,2)+.1, cex=1) # c(bottom, left, top, right)
   seq.col = heat.colors(11)
   ## Draw the Scatter chart of combined results
   ### Get the random portfolios from one of the result sets
   x=apply(rp, MARGIN=1,FUN=turnover,w2=rp[1,])
-  plot(xtract[,"pasd.pasd"],xtract[,"mean"], xlab="StdDev", ylab="Mean", col=seq.col[ceiling(x*100)], axes=FALSE, main="Turnover of Random Portfolios from Equal-Weight Portfolio", cex=.7, pch=16)
-  points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1)
+  plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col=seq.col[ceiling(x*100)], axes=FALSE, main="", cex=.7, pch=16)
+  grid(col = "darkgray")
+  points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1.5)
   axis(1, cex.axis = 0.8, col = "darkgray")
   axis(2, cex.axis = 0.8, col = "darkgray")
   box(col = "darkgray")
 
 # Add legend to bottom panel
-par(mar=c(5,5.5,2,3)+.1, cex=0.7)
+par(mar=c(5,5.5,1,3)+.1, cex=0.7)
 ## Create a histogramed legend for sequential colorsets
 ## this next bit of code is based on heatmap.2 in gplots package
 x=ceiling(x*100)
