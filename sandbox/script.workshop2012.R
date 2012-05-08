@@ -117,7 +117,12 @@ dev.off()
 # --------------------------------------------------------------------
 ## EDHEC Indexes Table of Return and Risk Statistics
 # --------------------------------------------------------------------
-
+require(Hmisc)
+incept.stats = t(table.RiskStats(R=edhec.R, p=p, Rf=.03/12))
+write.csv(incept.stats, file="inception-stats.csv")
+png(filename="EDHEC-InceptionStats.png", units="in", height=5.5, width=9, res=96) 
+textplot(format.df(incept.stats, na.blank=TRUE, numeric.dollar=FALSE, cdec=c(3,3,1,3,1,3,3,1,3,3,1,1,3,3,1,0), rmar = 0.8, cmar = 1,  max.cex=.9, halign = "center", valign = "top", row.valign="center", wrap.rownames=20, wrap.colnames=10, mar = c(0,0,4,0)+0.1))
+dev.off()
 # --------------------------------------------------------------------
 ## EDHEC Indexes Distributions
 # --------------------------------------------------------------------
@@ -521,9 +526,9 @@ results = list(EqWgt=EqWgt,
 		EqmETL.RND.t=EqmETL.RND.t)
 
 
-evalDate="2010-12-31"
+# evalDate="2010-12-31"
 ## Extract Weights
-
+evalDate="2008-06-30"
 RND.weights = MeanSD.RND.t[[evalDate]]$random_portfolio_objective_results[[1]]$weights #EqWgt
 for(result in results.obj){
     x=get(result)
@@ -547,10 +552,12 @@ rownames(RND.weights)=results.names # @TODO: add prettier labels
 save(results,file=paste(Sys.Date(),runname,'full-results','rda',sep='.'))
 
 ## Extract Objective measures
-RND.objectives=rbind(MeanSD.RND.t[[evalDate]]$random_portfolio_objective_results[[1]]$objective_measures[1:3]) #EqWgt
+RND.objectives=rbind(MeanSD.RND.t[[evalDate]]$random_portfolio_objective_results[[1]]$objective_measures[1:2]) #EqWgt
 for(result in results.obj){
+  print(result)
     x=get(result)
-    x.obj=rbind(x[[evalDate]]$objective_measures[1:3])
+    x.obj=rbind(x[[evalDate]]$objective_measures[1:2])
+  print(x.obj)
     RND.objectives = rbind(RND.objectives,x.obj)
 }
 rownames(RND.objectives)=results.names # @TODO: add prettier labels
@@ -584,9 +591,9 @@ dev.off()
 # --------------------------------------------------------------------
 xtract = extractStats(MeanSD.RND.t[[evalDate]])
 
-png(filename="RP-EqW-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96) 
+png(filename="RP-EqW-ExAnte-2008-06-30.png", units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
-plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col="darkgray", axes=FALSE, main="", cex=.7)
+plot(xtract[,"pasd.pasd"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col="darkgray", axes=FALSE, main="", cex=.7)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
 points(RND.objectives[1,2],RND.objectives[1,1], col=tol7qualitative, pch=16, cex=1.5)
@@ -600,7 +607,7 @@ dev.off()
 # --------------------------------------------------------------------
 # Plot Ex Ante scatter of RP and ALL BUOY portfolios
 # --------------------------------------------------------------------
-png(filename="Buoy-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96) 
+png(filename="Buoy-ExAnte-2008-06-30.png", units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
 plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col="darkgray", axes=FALSE, main="", cex=.7)
 grid(col = "darkgray")
@@ -609,15 +616,14 @@ points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16, cex=1
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
-legend("bottomright", legend=results.names, col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=0.8, inset=.02)
+legend("bottomright", legend=results.names, col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, inset=.02)
 par(op)
 dev.off()
 
 # --------------------------------------------------------------------
-# Plot weights of Buoy portfolios as of 2010-12-31
+# Plot weights of Buoy portfolios as of 2008-06-30
 # --------------------------------------------------------------------
-# @TODO: add \n to labels
-png(filename="Weights-ExAnte-2010-12-31.png", units="in", height=5.5, width=9, res=96)
+png(filename="Weights-ExAnte-2008-06-30.png", units="in", height=5.5, width=9, res=96)
 par(oma = c(4,8,2,1), mar=c(0,0,0,1)) # c(bottom, left, top, right)
 layout(matrix(c(1:7), nr = 1, byrow = TRUE))
 row.names = sapply(colnames(RND.weights), function(x) paste(strwrap(x,10), collapse = "\n"), USE.NAMES=FALSE)
@@ -692,12 +698,12 @@ dev.off()
 # Plot Ex Post scatter of buoy portfolios
 # --------------------------------------------------------------------
 # Calculate ex post results
-xpost.ret=Return.cumulative(BHportfs["2011-01::2011-03"])
-xpost.sd=StdDev.annualized(BHportfs["2011-01::2011-03"])
+xpost.ret=Return.cumulative(BHportfs["2008-06::2008-09"])
+xpost.sd=StdDev.annualized(BHportfs["2008-06::2008-09"])
 
 xpost.obj=NA
 for(i in 1:NROW(RND.weights)){
-  x = Return.portfolio(R=edhec.R["2011-01::2011-03"], weights=RND.weights[i,])
+  x = Return.portfolio(R=edhec.R["2008-06::2008-09"], weights=RND.weights[i,])
   y=c(Return.cumulative(x), StdDev.annualized(x))
   if(is.na(xpost.obj))
     xpost.obj=y
@@ -711,22 +717,23 @@ xmax=max(c(xpost.sd,xtract[,"pasd.garch.pasd.garch"]))
 ymin=min(c(xpost.ret,xtract[,"pamean.pamean"]))
 ymax=max(c(xpost.ret,xtract[,"pamean.pamean"]))
 
-png(filename="Scatter-ExPost-2010-12-31.png", units="in", height=5.5, width=9, res=96)
-plot(xpost.sd,xpost.ret, xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="Ex Post Results for 2010-12-31", cex=.5,  xlim=c(xmin,xmax), ylim=c(ymin,ymax))
+png(filename="Scatter-ExPost-2008-06-30.png", units="in", height=5.5, width=9, res=96)
+par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
+plot(xpost.sd,xpost.ret, xlab="Realized StdDev", ylab="Realized Mean", col="darkgray", axes=FALSE, main="", cex=.7)#,  xlim=c(xmin,xmax), ylim=c(ymin,ymax))
 grid(col = "darkgray")
 points(xpost.obj[,2],xpost.obj[,1], col=tol7qualitative, pch=16, cex=1.5)
 abline(h = 0, col = "darkgray")
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
-legend("bottomright",legend=rownames(RND.weights), col=tol7qualitative, pch=16, ncol=4,  border.col="darkgray", y.intersp=1.2, inset=.02)
+legend("bottomleft",legend=rownames(RND.weights), col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, inset=.02)
 dev.off()
 
 # --------------------------------------------------------------------
 # NOT USED: Show Ex Ante AND Ex Post results for 2010-12-31
 # --------------------------------------------------------------------
 # One more time, chart the ex ante results in mean-sd space
-postscript(file="ExAnteExPost20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
+# postscript(file="ExAnteExPost20070630.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
 layout(matrix(c(1,2,3)),height=c(2,0.25,2),width=1)
 par(mar=c(4,4,4,2)+.1, cex=1)
@@ -834,6 +841,22 @@ x=ceiling(x*100)
   title(xlab="Degree of Turnover from Equal Weight Portfolio")
 par(op)
 dev.off()
+
+# --------------------------------------------------------------------
+# RSGarch results against EqWgt returns
+# --------------------------------------------------------------------
+
+print(load("~/devel/R/RSGarch.rda"))
+
+png(filename="RSGarch.png", units="in", height=5.5, width=9, res=96) 
+layout(matrix(c(1,2)),height=c(2,1.5),width=1)
+par(mar=c(1, 4, 4, 2) + 0.1, cex=0.8) #c(bottom, left, top, right)
+chart.TimeSeries(zoo(f.MC.q,index(EqWgt)[-1]), main='Regime Switching Garch model for the Equal Weight Portfolio', ylab='Volatility Regime from 0(low) to 1(high)', xaxis=FALSE, colorset=rep("blue",2), lty=2, lwd=1)
+par(mar=c(4,4,0,2)+.1, cex=0.8) #c(bottom, left, top, right)
+chart.BarVaR(EqWgt, methods="StdDev", show.symmetric=TRUE, main="", ylab="EqWgt Return", width=12)
+par(op)
+dev.off()
+
 
 # --------------------------------------------------------------------
 # Other things we might do:
