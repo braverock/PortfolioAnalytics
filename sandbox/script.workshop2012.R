@@ -1015,14 +1015,23 @@ dccfit1 = dccfit(spec1, data = bs.data, fit.control = list(eval.se=FALSE))
 #        forecast.length = 186, refit.every = 3, refit.window = "moving",
 #        solver = "solnp", fit.control = list(), solver.control = ctrl)
 
+###
+# garch moments
+# mu
 dccmu<-fitted(dccfit1)
 colnames(dccmu)<-colnames(edhec.R)
 rownames(dccmu)<-as.character(index(bs.data)[-1])
 dccmu<-xts(dccmu,order.by=as.Date(rownames((dccmu))))
+dccmu<-dccmu[index(edhec.R)]
+
+# sigma
 dccsigma<-sigma(dccfit1)
 colnames(dccsigma)<-colnames(edhec.R)
 rownames(dccsigma)<-as.character(index(bs.data)[-1])
 dccsigma<-xts(dccsigma,order.by=as.Date(rownames((dccsigma))))
+dccsigma<-dccsigma[index(edhec.R)]
+
+# conditional covariance
 dcccova<-rcov(dccfit1)
 dcccovl<-list()
 for(i in 1:dim(dcccova)[3]) { dcccovl[[i]]<- dcccova[,,i]; colnames(dcccovl[[i]])<-colnames(edhec.R); rownames(dcccovl[[i]])<-colnames(edhec.R)}
@@ -1030,6 +1039,8 @@ names(dcccovl)<-index(bs.data)[-length(index(bs.data))]
 dcccovls<-dcccovl[1:444] #subset out only the real data
 dcccovls<-dcccovls[263:444] # dump the zero junk from the end
 all.equal(names(dcccovls),as.character(index(edhec.R)))
+
+# conditional correlation
 dcccora<-rcor(dccfit1)
 dcccorl<-list()
 for(i in 1:dim(dcccora)[3]) { dcccorl[[i]]<- dcccora[,,i]; colnames(dcccorl[[i]])<-colnames(edhec.R); rownames(dcccorl[[i]])<-colnames(edhec.R)}
