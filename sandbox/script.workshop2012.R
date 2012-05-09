@@ -331,13 +331,13 @@ MinmETL.constr$objectives[[3]]$enabled = TRUE # mETL
 EqSD.constr <- add.objective(init.constr, type="risk_budget", name="StdDev",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12)))
 # Without a sub-objective, we get a somewhat undefined result, since there are (potentially) many Equal SD contribution portfolios.
 EqSD.constr$objectives[[2]]$multiplier = 1 # min paSD
-EqSD.constr$objectives[[1]]$multiplier = -1 # max pamean
+EqSD.constr$objectives[[1]]$multiplier = 0 # max pamean
 
 ### Construct BUOY 6: Constrained Equal mETL Contribution Portfolio
 EqmETL.constr <- add.objective(init.constr, type="risk_budget", name="CVaR",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12), clean=clean))
 EqmETL.constr$objectives[[3]]$multiplier = 1 # min mETL
 EqmETL.constr$objectives[[3]]$enabled = TRUE # min mETL
-EqmETL.constr$objectives[[1]]$multiplier = -1 # max pamean
+EqmETL.constr$objectives[[1]]$multiplier = 0 # max pamean
 
 ### Construct BUOY 7: Equal Weight Portfolio
 # There's only one, so construct weights for it.  Rebalance the equal-weight portfolio at the same frequency as the others.
@@ -866,14 +866,14 @@ dev.off()
 require(rugarch)
 
 
-ctrl = list(rho = 1, delta = 1e-6, outer.iter = 100, tol = 1e-7,outer.iter=700,inner.iter=1200)
-spec = ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+ctrl = list(rho = 1, delta = 1e-6, outer.iter = 100, tol = 1e-6,outer.iter=700,inner.iter=2000)
+spec = ugarchspec(variance.model = list(model = "gjrGARCH", garchOrder = c(1,1)),
         mean.model = list(armaOrder = c(1,0), include.mean = TRUE),
         distribution.model = "ghyp")
 
-dates<-seq.Date(from=as.Date('1975-01-01'), to=as.Date('1996-12-31'),by=1)
+dates<-seq.Date(from=as.Date('1975-03-01'), to=as.Date('1996-12-31'),by=1)
 dates<-dates[endpoints(dates,on='months')]
-taildates<-seq.Date(from=as.Date(as.Date(last(index(edhec.R)))+1), to=as.Date(as.Date(last(index(edhec.R)))+150),by=1)
+taildates<-seq.Date(from=as.Date(as.Date(last(index(edhec.R)))+1), to=as.Date(as.Date(last(index(edhec.R)))+160),by=1)
 taildates<-taildates[endpoints(taildates,on='months')]
 tailxts<-xts(rep(0,length(taildates)),order.by=taildates)
 
@@ -904,7 +904,7 @@ garch.out <- foreach(i=1:ncol(edhec.R),.inorder=TRUE) %dopar% {
     skew = apply(f01density[,5:6],1, FUN = function(x) dskewness("nig", skew=x[1], shape=x[2]))
     kurt = apply(f01density[,5:6],1, FUN = function(x) dkurtosis("nig", skew=x[1], shape=x[2])) #excess kurtosis
     
-    # just sum the n.ahead predictions for now, could ocmpound them, not sure 
+    # just sum the n.ahead predictions for now, could compound them, not sure 
     # what trouble that would cause
     mu3 = rowSums(cbind(as.data.frame(bktest, n.ahead=1, refit = "all", which = "series"), 
           as.data.frame(bktest, n.ahead=2, refit = "all", which = "series"),
@@ -955,6 +955,9 @@ foreach(i=1:ncol(edhec.R)) %do% {
     plot(garch.out[[i]]$bktest, n.ahead=2, which = 3,main=paste(names(garch.out)[i],'n-ahead 2'))
     plot(garch.out[[i]]$bktest, n.ahead=3, which = 3,main=paste(names(garch.out)[i],'n-ahead 3'))
 }
+
+save(garch.out,garch.mu,garch.mu3,garch.sigma,garch.sigma3,garch.skew,garch.kurtosis,file=paste(Sys.Date(),runname,'garch-results','rda',sep='.'))
+
 #####
 # you can examine the bktest slots using commands like:
 #report(bktest, type="VaR", n.ahead = 1, VaR.alpha = 0.01, conf.level = 0.95)
@@ -965,6 +968,77 @@ foreach(i=1:ncol(edhec.R)) %do% {
 # show(fit)
 
 
+###########
+# Multivariate Garch from rmgarch package
+
+# set up the data
+bs.data <- foreach(i=1:ncol(edhec.R),.inorder=TRUE, .combine=cbind) %dopar% {
+    
+    oridata  <- edhec.R[,i]
+    start <- first(index(oridata))
+    end   <- last(index(oridata))
+    
+    #bootsstrap
+    #we're going to do a simple sample with replacement here
+    # if doing this 'for real', a more sophisticated factor model monte carlo 
+    # or AR tsboot() approach would likely be preferred 
+    data<-rbind(xts(sample(oridata,length(dates),replace=TRUE),order.by=dates),oridata,tailxts)
+    colnames(data)<-colnames(oridata)
+    #add some NA's on the end, hack for now
+    
+    data
+}
+
+#try GO-GARCH
+ggspec = gogarchspec(
+        mean.model = list(model = c("constant", "AR", "VAR")[3], lag = 2), #external.regressors = ex), 
+        variance.model = list(model = "gjrGARCH", garchOrder = c(1,1), submodel = NULL, variance.targeting = FALSE), 
+        distribution.model = c("mvnorm", "manig", "magh")[3], ica = c("fastica", "pearson", "jade", "radical")[1])
+ggfit = gogarchfit(ggspec, data =  bs.data, out.sample = 0, 
+        parallel = FALSE, parallel.control = parallel.control)
+
+gportmoments(ggfit,weights=rep(1/ncol(bs.data),ncol(bs.data)))
+
+rcov(ggfit)
+
+ggroll = gogarchroll(ggspec, data = bs.data, n.ahead = 1,
+        forecast.length = 186, refit.every = 3, refit.window = "moving",
+        solver = "solnp", fit.control = list(), solver.control = ctrl)
+
+# try DCC-GARCH
+spec = spec # use the same spec we used for the univariate GARCH
+spec1 = dccspec(uspec = multispec( replicate(7, spec) ), dccOrder = c(1,1), asymmetric = TRUE, distribution = "mvnorm")
+dccfit1 = dccfit(spec1, data = bs.data, fit.control = list(eval.se=FALSE))
+
+
+#dccroll1 = dccroll(spec1, data = bs.data, n.ahead = 1,
+#        forecast.length = 186, refit.every = 3, refit.window = "moving",
+#        solver = "solnp", fit.control = list(), solver.control = ctrl)
+
+dccmu<-fitted(dccfit1)
+colnames(dccmu)<-colnames(edhec.R)
+rownames(dccmu)<-as.character(index(bs.data)[-1])
+dccmu<-xts(dccmu,order.by=as.Date(rownames((dccmu))))
+dccsigma<-sigma(dccfit1)
+colnames(dccsigma)<-colnames(edhec.R)
+rownames(dccsigma)<-as.character(index(bs.data)[-1])
+dccsigma<-xts(dccsigma,order.by=as.Date(rownames((dccsigma))))
+dcccova<-rcov(dccfit1)
+dcccovl<-list()
+for(i in 1:dim(dcccova)[3]) { dcccovl[[i]]<- dcccova[,,i]; colnames(dcccovl[[i]])<-colnames(edhec.R); rownames(dcccovl[[i]])<-colnames(edhec.R)}
+names(dcccovl)<-index(bs.data)[-length(index(bs.data))]
+dcccovls<-dcccovl[1:444] #subset out only the real data
+dcccovls<-dcccovls[263:444] # dump the zero junk from the end
+all.equal(names(dcccovls),as.character(index(edhec.R)))
+dcccora<-rcor(dccfit1)
+dcccorl<-list()
+for(i in 1:dim(dcccora)[3]) { dcccorl[[i]]<- dcccora[,,i]; colnames(dcccorl[[i]])<-colnames(edhec.R); rownames(dcccorl[[i]])<-colnames(edhec.R)}
+names(dcccorl)<-index(bs.data)[-length(index(bs.data))]
+dcccorls<-dcccorl[1:444] #subset out only the real data
+dcccorls<-dcccorls[263:444] # dump the zero junk from the end
+dcccorl<-dcccorls
+rm(dcccorls,dcccora)
+save(spec,dccfit1,dccmu,dccsigma,dcccovl,dcccorl,file=paste('MVDCCGarch',Sys.Date(),'rda',sep='.'))
 
 # Historical performance of each buoy portfolio
 ## Same statistics as above
