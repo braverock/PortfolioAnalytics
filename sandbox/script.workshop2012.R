@@ -184,7 +184,6 @@ corrplot(M36.hc2, tl.col="black", tl.cex=0.8, method="square", col=col3(8), cl.o
 corrRect.hclust(M36.hc2, k=3, method="complete", col="blue")
 dev.off()
 
-
 # --------------------------------------------------------------------
 ## Autocorrelation
 # --------------------------------------------------------------------
@@ -331,13 +330,14 @@ MinmETL.constr$objectives[[3]]$enabled = TRUE # mETL
 EqSD.constr <- add.objective(init.constr, type="risk_budget", name="StdDev",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12)))
 # Without a sub-objective, we get a somewhat undefined result, since there are (potentially) many Equal SD contribution portfolios.
 EqSD.constr$objectives[[2]]$multiplier = 1 # min paSD
-EqSD.constr$objectives[[1]]$multiplier = 0 # max pamean
+
+# EqSD.constr$objectives[[1]]$multiplier = 0 # pamean
 
 ### Construct BUOY 6: Constrained Equal mETL Contribution Portfolio
 EqmETL.constr <- add.objective(init.constr, type="risk_budget", name="CVaR",  enabled=TRUE, min_concentration=TRUE, arguments = list(p=(1-1/12), clean=clean))
 EqmETL.constr$objectives[[3]]$multiplier = 1 # min mETL
 EqmETL.constr$objectives[[3]]$enabled = TRUE # min mETL
-EqmETL.constr$objectives[[1]]$multiplier = 0 # max pamean
+# EqmETL.constr$objectives[[1]]$multiplier = -1 # max pamean
 
 ### Construct BUOY 7: Equal Weight Portfolio
 # There's only one, so construct weights for it.  Rebalance the equal-weight portfolio at the same frequency as the others.
@@ -609,7 +609,7 @@ dev.off()
 # --------------------------------------------------------------------
 png(filename="Buoy-ExAnte-2008-06-30.png", units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
-plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col="darkgray", axes=FALSE, main="", cex=.7)
+plot(xtract[,"pasd.pasd"],xtract[,"pamean.pamean"], xlab="Sample StdDev", ylab="Sample Mean", col="darkgray", axes=FALSE, main="", cex=.7)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
 points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16, cex=1.5)
@@ -698,13 +698,15 @@ dev.off()
 # Plot Ex Post scatter of buoy portfolios
 # --------------------------------------------------------------------
 # Calculate ex post results
-xpost.ret=Return.cumulative(BHportfs["2008-06::2008-09"])
-xpost.sd=StdDev.annualized(BHportfs["2008-06::2008-09"])
+xpost.ret=Return.cumulative(BHportfs["2008-07::2008-09"])
+xpost.sd=StdDev(BHportfs["2008-07::2008-09"])*sqrt(3)
+xante.ret=xtract[,"pamean.pamean"]/3
+xante.sd=xtract[,"pasd.pasd"]/sqrt(3)
 
 xpost.obj=NA
 for(i in 1:NROW(RND.weights)){
-  x = Return.portfolio(R=edhec.R["2008-06::2008-09"], weights=RND.weights[i,])
-  y=c(Return.cumulative(x), StdDev.annualized(x))
+  x = Return.portfolio(R=edhec.R["2008-07::2008-09"], weights=RND.weights[i,])
+  y=c(Return.cumulative(x), StdDev(x)*sqrt(3))
   if(is.na(xpost.obj))
     xpost.obj=y
   else
@@ -712,21 +714,23 @@ for(i in 1:NROW(RND.weights)){
 }
 rownames(xpost.obj)=rownames(RND.weights)
 colnames(xpost.obj)=c("Realized Returns","Realized SD")
-xmin=min(c(xpost.sd,xtract[,"pasd.garch.pasd.garch"]))
-xmax=max(c(xpost.sd,xtract[,"pasd.garch.pasd.garch"]))
-ymin=min(c(xpost.ret,xtract[,"pamean.pamean"]))
-ymax=max(c(xpost.ret,xtract[,"pamean.pamean"]))
+xmin=min(c(xpost.sd,xante.sd))
+xmax=max(c(xpost.sd,xante.sd))
+ymin=min(c(xpost.ret,xante.ret))
+ymax=max(c(xpost.ret,xante.ret))
 
 png(filename="Scatter-ExPost-2008-06-30.png", units="in", height=5.5, width=9, res=96)
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
-plot(xpost.sd,xpost.ret, xlab="Realized StdDev", ylab="Realized Mean", col="darkgray", axes=FALSE, main="", cex=.7)#,  xlim=c(xmin,xmax), ylim=c(ymin,ymax))
+plot(xpost.sd,xpost.ret, xlab="StdDev", ylab="Mean", col="darkgray", axes=FALSE, main="", cex=.7,  xlim=c(xmin,xmax), ylim=c(ymin,ymax))
 grid(col = "darkgray")
 points(xpost.obj[,2],xpost.obj[,1], col=tol7qualitative, pch=16, cex=1.5)
+points(xante.sd,xante.ret, col="lightgray", cex=.7)
+points(unlist(RND.objectives[,2])/sqrt(3),unlist(RND.objectives[,1])/3, col=tol7qualitative, pch=16, cex=1.5)
 abline(h = 0, col = "darkgray")
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
-legend("bottomleft",legend=rownames(RND.weights), col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, inset=.02)
+legend("topright",legend=rownames(RND.weights), col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, inset=.02)
 dev.off()
 
 # --------------------------------------------------------------------
@@ -786,6 +790,18 @@ chart.Drawdown(buoys.R["2000::",], main = "", ylab = "Drawdown", colorset = tol7
 par(op)
 dev.off()
 
+# --------------------------------------------------------------------
+# Predicted correlation chart
+# --------------------------------------------------------------------
+
+predM <- dcccorl$"2008-06-30"
+colnames(predM) = rownames(predM) = row.names
+order.predM.hc2 <- corrMatOrder(predM, order="hclust", hclust.method="complete")
+predM.hc2 <- predM[order.predM.hc2,order.predM.hc2]
+png(filename="EDHEC-cor-pred-20080630.png", units="in", height=5.5, width=4.5, res=96) 
+corrplot(predM.hc2, tl.col="black", tl.cex=0.8, method="square", col=col3(8), cl.offset=.75, cl.cex=.7, cl.align.text="l", cl.ratio=.25)
+corrRect.hclust(predM.hc2, k=3, method="complete", col="blue")
+dev.off()
 
 # --------------------------------------------------------------------
 # Show turnover of the RP portfolios relative to the EqWgt portfolio
@@ -799,7 +815,7 @@ for(x in 1:NROW(rp)){
   }
 }
 
-png(filename="Turnover-2010-12-31.png", units="in", height=5.5, width=9, res=96)
+png(filename="Turnover-2008-06-30.png", units="in", height=5.5, width=9, res=96)
 # postscript(file="TurnoverOf20101231.eps", height=6, width=5, paper="special", horizontal=FALSE, onefile=FALSE)
 op <- par(no.readonly=TRUE)
 layout(matrix(c(1,2)),height=c(4,1.25),width=1)
@@ -808,7 +824,7 @@ par(mar=c(4,4,1,2)+.1, cex=1) # c(bottom, left, top, right)
   ## Draw the Scatter chart of combined results
   ### Get the random portfolios from one of the result sets
   x=apply(rp, MARGIN=1,FUN=turnover,w2=rp[1,])
-  plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col=seq.col[ceiling(x*100)], axes=FALSE, main="", cex=.7, pch=16)
+  plot(xtract[,"pasd.pasd"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col=seq.col[ceiling(x*100)], axes=FALSE, main="", cex=.7, pch=16)
   grid(col = "darkgray")
   points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1.5)
   axis(1, cex.axis = 0.8, col = "darkgray")
