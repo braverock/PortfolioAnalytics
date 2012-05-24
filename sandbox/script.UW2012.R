@@ -563,7 +563,7 @@ for(result in names(results)[grep('.t',names(results),fixed=TRUE)]){
   
     #RND.objectives = rbind(RND.objectives,x.obj)
 }
-rownames(RND.objectives)=results.names # @TODO: add prettier labels
+rownames(x.obj)=names(results)[grep('.t',names(results),fixed=TRUE)] # @TODO: add prettier labels
 
 
 #****************************************************************************
@@ -615,7 +615,7 @@ par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
 plot(xtract[,"pasd.garch.pasd.garch"],xtract[,"pamean.pamean"], xlab="Predicted StdDev", ylab="Predicted Mean", col="darkgray", axes=FALSE, main="", cex=.7)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
-points(RND.objectives[,2],RND.objectives[,1], col=tol7qualitative, pch=16, cex=1.5)
+points(x.obj[,2],x.obj[,1], col=tol7qualitative, pch=16, cex=1.5)
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
