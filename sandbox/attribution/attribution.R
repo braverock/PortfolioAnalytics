@@ -18,7 +18,7 @@
 #' 
 #' 
 #'
-attribution.arithmetic <- 
+attribution <- 
 function (Rp, wp, Rb, wb, method = c("top.down", "bottom.up", "simple"), 
 linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 { # @author Andrii Babii
@@ -33,6 +33,7 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     # Rb: benchmark returns
     # wb: benchmark weights
     # method: 
+    # linking:
   
     # Outputs:
     # This function returns the attribution effects
@@ -41,9 +42,7 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     # Transform data to the xts
     Rb = checkData(Rb)
     Rp = checkData(Rp)
-    wp = Weight.transform(Rp, wp) 
-    wb = Weight.transform(Rb, wb)
-    
+
     # Compute attribution effects
     allocation = (wp - wb) * Rb
     allocation = cbind(allocation, rowSums(allocation))    # Total allocation effect for each period
@@ -102,6 +101,7 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     }
 
     # Get attribution effects for the whole period
+    total = allocation + selection + interaction
     allocation = as.data.frame(allocation)
     allocation = rbind(allocation, colSums(allocation))
     rownames(allocation)[nrow(allocation)] = "Total"
@@ -114,7 +114,6 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     total = as.data.frame(total)
     total = rbind(total, colSums(total))
     rownames(total)[nrow(total)] = "Total"
-    total = allocation + selection + interaction
 
     # Select the appropriate result corresponding to the chosen method
     result = list()
@@ -144,13 +143,17 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 
 #EXAMPLE:
 data(attrib) # !!! Load attrib.RData workspace
+require(FinancialInstrument)
+require(PerformanceAnalytics)
+wp <- Weight.transform(Rp, wp)
+wb <- Weight.transform(Rb, wb)
 Rp <- Return.level(Rp, wp, h, level = "Sector") # Sector-level attribution
 Rb <- Return.level(Rb, wb, h, level = "Sector")
 wp <- Weight.level(wp, h, level = "Sector")
 wb <- Weight.level(wb, h, level = "Sector")
-attribution.arithmetic(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
-attribution.arithmetic(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
-attribution.arithmetic(Rp, wp, Rb, wb, method = "simple", linking = "carino")
+attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
+attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
+attribution(Rp, wp, Rb, wb, method = "simple", linking = "carino")
 
 #' @export 
 #' @rdname attribution.arithmetic
