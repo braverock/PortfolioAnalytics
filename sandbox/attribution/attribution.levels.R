@@ -78,21 +78,7 @@ function(Rp, Rb, wp, wb, h, ...)
 }
 
 # Example:
-require(FinancialInstrument)
-require(PerformanceAnalytics)
-list <- c("XOM", "IBM", "CVX", "WMT", "GE")
-update_instruments.TTR(list, exchange="NYSE")
-h <- buildHierarchy(ls_stocks(), c("type", "currency", "Sector"))
-getSymbols(list)
-for (i in list){
-    r <- Return.calculate(to.yearly(get(i)))[2:6, 4]
-    colnames(r) <- i
-    if(i == "XOM"){
-        Rp <- r
-    } else{
-        Rp <- cbind(Rp, r)
-    }
-}
+data(attrib) # !!! Load attrib.RData workspace
 Rb <- Rp
 wp <- c(0.3, 0.2, 0.2, 0.1, 0.2)
 wb <- c(0.1, 0.3, 0.2, 0.2, 0.2)
