@@ -24,7 +24,7 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 { # @author Andrii Babii
 
     # DESCRIPTION:
-    # This is a wrapper for attribution analysis.
+    # Attribution analysis.
     # TODO: add GRAP and Frongello linking, Geometric attribution
 
     # Inputs:
@@ -33,9 +33,9 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     # Rb: benchmark returns
     # wb: benchmark weights
     # method: 
-    # linking:
+    # linking: 
   
-    # Outputs:
+    # Outputs: 
     # This function returns the attribution effects
     # FUNCTION:
     
@@ -85,12 +85,24 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 
     if(linking == "grap"){
         # GRAP linking
-        
+        G = rp
+        G[1] = prod(1 + rb[2:length(rp)])
+        G[nrow(rp)] = prod(1 + rp[1:(length(rp) - 1)])
+        for(i in 2:(nrow(Rp) - 1)){   # !!! Fix. Works only if t>3
+            r = 1 + rp[1:(i-1)]
+            b = 1 + rb[(i+1):(nrow(Rp))]
+            G[i] = apply(r, 2, prod) * apply(b, 2, prod)
+        }
+        for(i in 1:ncol(allocation)){
+            allocation[, i] = allocation[, i] * G
+            selection[, i] = selection[, i] * G
+            interaction[, i] = interaction[, i] * G
+        }
     }
 
     if(linking == "frongello"){
         # Frongello linking
-    
+        F = rp
     }
     
     if(linking == "geometric"){
@@ -102,18 +114,17 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 
     # Get attribution effects for the whole period
     total = allocation + selection + interaction
-    allocation = as.data.frame(allocation)
-    allocation = rbind(allocation, colSums(allocation))
-    rownames(allocation)[nrow(allocation)] = "Total"
-    selection = as.data.frame(selection)
-    selection = rbind(selection, colSums(selection))
-    rownames(selection)[nrow(selection)] = "Total"
-    interaction = as.data.frame(interaction)
-    interaction = rbind(interaction, colSums(interaction))
-    rownames(interaction)[nrow(interaction)] = "Total"
-    total = as.data.frame(total)
-    total = rbind(total, colSums(total))
-    rownames(total)[nrow(total)] = "Total"
+    
+    totals <- function(x){
+        x = as.data.frame(x)
+        x = rbind(x, colSums(x))
+        rownames(x)[nrow(x)] = "Total"
+        return(x)
+    }
+    allocation = totals(allocation)
+    selection = totals(selection)
+    interaction = totals(interaction)
+    total = totals(total)
 
     # Select the appropriate result corresponding to the chosen method
     result = list()
@@ -131,7 +142,6 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
         result[[3]] = interaction
     }
 
-    
     # Label the output
     if(method == "simple"){
         names(result) = c("Allocation", "Selection", "Interaction", "Total")
