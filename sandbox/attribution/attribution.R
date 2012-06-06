@@ -25,7 +25,8 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 
     # DESCRIPTION:
     # Attribution analysis.
-    # TODO: add GRAP and Frongello linking, Geometric attribution
+    # TODO: fix bugs in linking methods, multi-level attribution. 
+    # Fix bugs in examples
 
     # Inputs:
     # Rp: portfolio returns
@@ -47,29 +48,33 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 
     # Compute attribution effects
     allocation = (wp - wb) * Rb
-    allocation = cbind(allocation, rowSums(allocation))    # Total allocation effect for each period
-    names(allocation)[ncol(allocation)] = "Total"
     selection = wb * (Rp - Rb)
-    selection = cbind(selection, rowSums(selection))       # Total selection effect for each period
-    names(selection)[ncol(selection)] = "Total"
     interaction = (wp - wb) * (Rp - Rb)
-    interaction = cbind(interaction, rowSums(interaction)) # Total interaction effect for each period
+
+    # Get total attribution effects
+    allocation = cbind(allocation, rowSums(allocation))
+    names(allocation)[ncol(allocation)] = "Total"
+    selection = cbind(selection, rowSums(selection))
+    names(selection)[ncol(selection)] = "Total"
+    interaction = cbind(interaction, rowSums(interaction))
     names(interaction)[ncol(interaction)] = "Total"
-    
+    total = allocation + selection + interaction
+      
     # Get total portfolio returns
     rp = reclass(rowSums(Rp * wp), Rp) 
     rb = reclass(rowSums(Rb * wb), Rb)
     names(rp) = "Total"
     names(rb) = "Total"
+    rp.a = prod(rp + 1) - 1 
+    rb.a = prod(rb + 1) - 1
     Rp = cbind(Rp, rp)
     Rb = cbind(Rb, rb)
-    rp.c = Return.cumulative(rp)
-    rb.c = Return.cumulative(rb)
-   
-    if(linking == "carino"){
+    
+    # Adjust attribution effects using one of linking methods
+    if (linking == "carino"){
         # Carino linking #!!! Correct for equal portfolio and benchmark returns
         kt = (log(1 + rp) - log(1 + rb)) / (rp - rb) # Carino factors
-        k = (log(1 + rp.c) - log(1 + rb.c)) / (rp.c - rb.c)
+        k = (log(1 + rp.a) - log(1 + rb.a)) / (rp.a - rb.a)
         for(i in 1:ncol(allocation)){
             allocation[, i] = allocation[, i] * kt / k
             selection[, i] = selection[, i] * kt / k
@@ -77,10 +82,10 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
         }
     }
 
-    if(linking == "menchero"){
+    if (linking == "menchero"){
         # Menchero linking #!!! Correct for equal portfolio and benchmark returns
-        M = ((rp.c - rb.c) / nrow(Rp)) / ((1 + rp.c)^(1 / nrow(Rp)) - (1 + rb.c)^(1 / nrow(Rp)))
-        at = (rp.c - rb.c - M * sum(rp - rb)) * (rp - rb) / sum((rp - rb)^2)
+        M = ((rp.a - rb.a) / nrow(Rp)) / ((1 + rp.a)^(1 / nrow(Rp)) - (1 + rb.a)^(1 / nrow(Rp)))
+        at = (rp.a - rb.a - M * sum(rp - rb)) * (rp - rb) / sum((rp - rb)^2)
         for(i in 1:ncol(allocation)){
             allocation[, i] = allocation[, i] * (M + at)
             selection[, i] = selection[, i] * (M + at)
@@ -88,7 +93,7 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
         }
     }    
 
-    if(linking == "grap"){
+    if (linking == "grap"){
         # GRAP linking
         G = rp
         G[1] = prod(1 + rb[2:length(rp)])
@@ -105,7 +110,7 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
         }
     }
 
-    if(linking == "frongello"){
+    if (linking == "frongello"){
         # Frongello linking
         allocation[1, ] = allocation[1, ] + Rb[1, ]
         selection[1, ] = selection[1, ] + Rb[1, ]
@@ -117,45 +122,49 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
         }
     }
     
-    if(linking == "geometric"){
-        k = (log(1 + Rp) - log(1 + Rb)) / (Rp - Rb)
-        allocation = exp(allocation * k) - 1
-        selection = exp(selection * k) - 1
-        interaction = exp(interaction * k) - 1
+    if (linking == "geometric"){
+        bs = reclass(rowSums((wp * Rb[, 1:ncol(wp)])), rp) # Seminotional fund returns
+        allocation = ((1 + Rb) / (1 + rb.a) - 1) * cbind((wp - wb), rep(1, nrow(wp)))
+        for (i in 1:ncol(wp)){
+            selection[, i] = ((Rp - Rb) * cbind(wp, rep(1, nrow(wp))))[, i] / (1 + bs)
+        }
     }
-
-    # Get attribution effects for the whole period
-    total = allocation + selection + interaction
     
-    totals <- function(x){
-        x = as.data.frame(x)
-        x = rbind(x, colSums(x))
-        rownames(x)[nrow(x)] = "Total"
-        return(x)
+    if (linking != "geometric"){
+        totals <- function(x){
+            x = as.data.frame(x)
+            x = rbind(x, colSums(x))
+            rownames(x)[nrow(x)] = "Total"
+            return(x)
+        }
+        allocation = totals(allocation)
+        selection = totals(selection)
+        interaction = totals(interaction)
+        total = totals(total)
+    } else{
+        allocation = rbind(as.data.frame(allocation), (apply(1 + allocation, 2, prod) - 1))
+        selection = rbind(as.data.frame(selection), (apply(1 + selection, 2, prod) - 1))
+        rownames(allocation)[nrow(allocation)] = "Total"
+        rownames(selection)[nrow(selection)] = "Total"
     }
-    allocation = totals(allocation)
-    selection = totals(selection)
-    interaction = totals(interaction)
-    total = totals(total)
-
     # Select the appropriate result corresponding to the chosen method
     result = list()
     result[[1]] = allocation
     result[[2]] = selection
     result[[3]] = total
-    if(method == "top.down"){     # Top-down attribution
+    if (method == "top.down"){     # Top-down attribution
         result[[2]] = result[[2]] + interaction
     }
-    if(method == "bottom.up"){    # Bottom-up attribution
+    if (method == "bottom.up"){    # Bottom-up attribution
         result[[1]] = result[[1]] + interaction
     }
-    if(method == "simple"){
+    if (method == "simple"){
         result[[4]] = result[[3]]
         result[[3]] = interaction
     }
 
     # Label the output
-    if(method == "simple"){
+    if (method == "simple" & linking != "geometric"){
         names(result) = c("Allocation", "Selection", "Interaction", "Total")
     } else{
         names(result) = c("Allocation", "Selection", "Total")
@@ -169,11 +178,13 @@ require(FinancialInstrument)
 require(PerformanceAnalytics)
 Rp <- Return.level(Rp, wp, h, level = "Sector") # Sector-level attribution
 Rb <- Return.level(Rb, wb, h, level = "Sector")
-wp <- Weight.level(wp, h, level = "Sector")
-wb <- Weight.level(wb, h, level = "Sector")
+wp <- Weight.level(Rp, wp, h, level = "Sector")
+wb <- Weight.level(Rb, wb, h, level = "Sector")
 attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
 attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
 attribution(Rp, wp, Rb, wb, method = "simple", linking = "grap")
+attribution(Rp, wp, Rb, wb, method = "top.down", linking = "frongello")
+attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "geometric")
 
 #' @export 
 #' @rdname attribution
