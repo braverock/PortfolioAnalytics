@@ -10,8 +10,8 @@ Description: Portfolio optimization and analysis routines and graphics.
 Depends:
     R (>= 2.9.0),
     zoo,
-    xts (>= 0.6-8),
-    PerformanceAnalytics (>=1.0.0)
+    xts (>= 0.8),
+    PerformanceAnalytics (>= 1.0.0)
 Suggests:
     quantmod,
     DEoptim,
