@@ -1,11 +1,11 @@
 #' performs arithmetic attribution
 #' 
-#' @aliases attribution.arithmetic
+#' @aliases attribution.crithmetic
 #' 
 #' Performs arithmetic attribution analysis of returns. Used to uncover the sources 
 #' of portfolio return 
 #'
-#' @aliases attribution.arithmetic
+#' @aliases attribution.crithmetic
 #' @param Rp portfolio returns
 #' @param wp portfolio weights
 #' @param Rb benchmark returns
@@ -42,6 +42,8 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     # Transform data to the xts
     Rb = checkData(Rb)
     Rp = checkData(Rp)
+    wp = Weight.transform(Rp, wp)
+    wb = Weight.transform(Rb, wb)
 
     # Compute attribution effects
     allocation = (wp - wb) * Rb
@@ -54,17 +56,20 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     interaction = cbind(interaction, rowSums(interaction)) # Total interaction effect for each period
     names(interaction)[ncol(interaction)] = "Total"
     
-    
-    # Get aggregated portfolio returns
+    # Get total portfolio returns
     rp = reclass(rowSums(Rp * wp), Rp) 
     rb = reclass(rowSums(Rb * wb), Rb)
-    rp.a = prod(rp + 1) - 1 
-    rb.a = prod(rb + 1) - 1
+    names(rp) = "Total"
+    names(rb) = "Total"
+    Rp = cbind(Rp, rp)
+    Rb = cbind(Rb, rb)
+    rp.c = Return.cumulative(rp)
+    rb.c = Return.cumulative(rb)
    
     if(linking == "carino"){
         # Carino linking #!!! Correct for equal portfolio and benchmark returns
         kt = (log(1 + rp) - log(1 + rb)) / (rp - rb) # Carino factors
-        k = (log(1 + rp.a) - log(1 + rb.a)) / (rp.a - rb.a)
+        k = (log(1 + rp.c) - log(1 + rb.c)) / (rp.c - rb.c)
         for(i in 1:ncol(allocation)){
             allocation[, i] = allocation[, i] * kt / k
             selection[, i] = selection[, i] * kt / k
@@ -74,8 +79,8 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 
     if(linking == "menchero"){
         # Menchero linking #!!! Correct for equal portfolio and benchmark returns
-        M = ((rp.a - rb.a) / nrow(Rp)) / ((1 + rp.a)^(1 / nrow(Rp)) - (1 + rb.a)^(1 / nrow(Rp)))
-        at = (rp.a - rb.a - M * sum(rp - rb)) * (rp - rb) / sum((rp - rb)^2)
+        M = ((rp.c - rb.c) / nrow(Rp)) / ((1 + rp.c)^(1 / nrow(Rp)) - (1 + rb.c)^(1 / nrow(Rp)))
+        at = (rp.c - rb.c - M * sum(rp - rb)) * (rp - rb) / sum((rp - rb)^2)
         for(i in 1:ncol(allocation)){
             allocation[, i] = allocation[, i] * (M + at)
             selection[, i] = selection[, i] * (M + at)
@@ -102,7 +107,14 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 
     if(linking == "frongello"){
         # Frongello linking
-        F = rp
+        allocation[1, ] = allocation[1, ] + Rb[1, ]
+        selection[1, ] = selection[1, ] + Rb[1, ]
+        interaction[1, ] = interaction[1, ] + Rb[1, ]
+        for(i in 2:nrow(Rp)){
+            allocation[i, ] = allocation[i, ] * apply((1 + Rp[1:(i-1), ]), 2, prod) + Rb[i, ] * apply(allocation[1:(i-1)], 2, sum)
+            selection[i, ] = selection[i, ] * apply((1 + Rp[1:(i-1), ]), 2, prod) + Rb[i, ] * apply(selection[1:(i-1)], 2, sum)
+            interaction[i, ] = interaction[i, ] * apply((1 + Rp[1:(i-1), ]), 2, prod) + Rb[i, ] * apply(interaction[1:(i-1)], 2, sum)
+        }
     }
     
     if(linking == "geometric"){
@@ -155,18 +167,16 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 data(attrib) # !!! Load attrib.RData workspace
 require(FinancialInstrument)
 require(PerformanceAnalytics)
-wp <- Weight.transform(Rp, wp)
-wb <- Weight.transform(Rb, wb)
 Rp <- Return.level(Rp, wp, h, level = "Sector") # Sector-level attribution
 Rb <- Return.level(Rb, wb, h, level = "Sector")
 wp <- Weight.level(wp, h, level = "Sector")
 wb <- Weight.level(wb, h, level = "Sector")
 attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
 attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
-attribution(Rp, wp, Rb, wb, method = "simple", linking = "carino")
+attribution(Rp, wp, Rb, wb, method = "simple", linking = "grap")
 
 #' @export 
-#' @rdname attribution.arithmetic
+#' @rdname attribution
 
 ###############################################################################
 # R (http://r-project.org/) Econometrics for Performance and Risk Analysis
