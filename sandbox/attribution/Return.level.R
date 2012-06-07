@@ -13,7 +13,8 @@
 #' @author Andrii Babii
 #' @seealso  \code{\link{buildHierarchy}}
 #' TODO Replace example using portfolio dataset. Make rebalancing working 
-#' correctly, starting from the next day as in the Return.rebalacing
+#' correctly, starting from the next day as in the Return.rebalacing.
+#' Fix bugs. Look at na.locf
 #' @references
 #' @export
 #' @examples
@@ -22,6 +23,7 @@ Return.level <-
 function(Rp, wp, h, level = "Sector")
 {
     Rp = checkData(Rp, method = "xts")
+    wp <- Weight.transform(Rp, wp)
 
     # Aggregate returns to the chosen level from the hierarchy
     h = split(h$primary_id, h[level])
@@ -48,26 +50,9 @@ function(Rp, wp)
     if (is.vector(wp)){
         wp = as.xts(matrix(rep(wp, nrow(Rp)), nrow(Rp), ncol(Rp), byrow = TRUE), index(Rp))
         colnames(wp) = colnames(Rp)
-        wp = checkData(wp, method = "xts")
     } else{
-        wp = checkData(wp, method = "xts")
-        if(as.Date(first(index(Rp))) > (as.Date(index(wp[1,]))+1)) {
-            warning(paste('data series starts on',as.Date(first(index(Rp))),', which is after the first rebalancing period',as.Date(first(index(wp)))+1)) 
-        }
-        if(as.Date(last(index(Rp))) < (as.Date(index(wp[1,]))+1)){
-            stop(paste('last date in series',as.Date(last(index(Rp))),'occurs before beginning of first rebalancing period',as.Date(first(index(wp)))+1))
-        }
-        w = Rp
-        for(i in 1:nrow(w)){
-            j = 1
-            if(index(wp[j + 1, ]) > index(w[i, ])){
-                w[i, ] = wp[j, ]
-            } else{
-                j = j + 1
-                w[i, ] = wp[j, ]
-            }
-        }
-        wp = w
+        wp = merge(wp, xts(, index(Rp)))
+        wp = na.locf(wp)
     }
     return(wp)
 }
@@ -76,8 +61,6 @@ Weight.level <-
 function(wp, h, level = "Sector")
 {
     #aggregate weights to the level chosen from the hierarchy
-    wp = checkData(wp, method = "xts")
-
     h = split(h$primary_id, h[level])
     weights = wp[, 1:length(h)]
     
