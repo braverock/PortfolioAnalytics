@@ -72,8 +72,15 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     
     # Adjust attribution effects using one of linking methods
     if (linking == "carino"){
-        # Carino linking #!!! Correct for equal portfolio and benchmark returns
-        kt = (log(1 + rp) - log(1 + rb)) / (rp - rb) # Carino factors
+        # Carino linking
+        kt = rp
+        for (t in 1:nrow(kt)){
+            if (rp[t] == rb[t]){
+                kt[t] = 1 / (1 + rp[t]) # Carino factors if portfolio and benchmark returns are equal
+            } else{
+                kt[t] = (log(1 + rp[t]) - log(1 + rb[t])) / (rp[t] - rb[t]) # if different
+            }
+        }
         k = (log(1 + rp.a) - log(1 + rb.a)) / (rp.a - rb.a)
         for(i in 1:ncol(allocation)){
             allocation[, i] = allocation[, i] * kt / k
@@ -83,9 +90,15 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     }
 
     if (linking == "menchero"){
-        # Menchero linking #!!! Correct for equal portfolio and benchmark returns
-        M = ((rp.a - rb.a) / nrow(Rp)) / ((1 + rp.a)^(1 / nrow(Rp)) - (1 + rb.a)^(1 / nrow(Rp)))
-        at = (rp.a - rb.a - M * sum(rp - rb)) * (rp - rb) / sum((rp - rb)^2)
+        # Menchero linking
+        T = nrow(Rp)
+        if (rp.a == rb.a){
+            M = (1 + rb.a)^((T - 1) / T)
+            at = 0
+        } else{
+            M = ((rp.a - rb.a) / T) / ((1 + rp.a)^(1 / T) - (1 + rb.a)^(1 / T))
+            at = (rp.a - rb.a - M * sum(rp - rb)) * (rp - rb) / sum((rp - rb)^2)
+        }
         for(i in 1:ncol(allocation)){
             allocation[, i] = allocation[, i] * (M + at)
             selection[, i] = selection[, i] * (M + at)
@@ -96,12 +109,20 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     if (linking == "grap"){
         # GRAP linking
         G = rp
-        G[1] = prod(1 + rb[2:length(rp)])
-        G[nrow(rp)] = prod(1 + rp[1:(length(rp) - 1)])
-        for(i in 2:(nrow(Rp) - 1)){   # !!! Fix. Works only if t>3
-            r = 1 + rp[1:(i-1)]
-            b = 1 + rb[(i+1):(nrow(Rp))]
-            G[i] = apply(r, 2, prod) * apply(b, 2, prod)
+        T = nrow(Rp)
+        G[1] = prod(1 + rb[2:T])           #GRAP factor for the first period
+        if (T == 2){
+            G[2] = (1 + rp[1])
+        }
+        if (T > 2){
+            G[T] = prod(1 + rp[1:(T - 1)]) #GRAP factor for the last period
+        }
+        if (T > 3){
+            for(i in 2:(T - 1)){
+                r = 1 + rp[1:(i-1)]
+                b = 1 + rb[(i+1):T]
+                G[i] = apply(r, 2, prod) * apply(b, 2, prod)
+            }
         }
         for(i in 1:ncol(allocation)){
             allocation[, i] = allocation[, i] * G
@@ -152,17 +173,18 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     result[[1]] = allocation
     result[[2]] = selection
     result[[3]] = total
-    if (method == "top.down"){     # Top-down attribution
-        result[[2]] = result[[2]] + interaction
+    if (linking != "geometric"){
+        if (method == "top.down"){     # Top-down attribution
+            result[[2]] = result[[2]] + interaction
+        }
+        if (method == "bottom.up"){    # Bottom-up attribution
+            result[[1]] = result[[1]] + interaction
+        }
+        if (method == "simple"){
+            result[[4]] = result[[3]]
+            result[[3]] = interaction
+        }
     }
-    if (method == "bottom.up"){    # Bottom-up attribution
-        result[[1]] = result[[1]] + interaction
-    }
-    if (method == "simple"){
-        result[[4]] = result[[3]]
-        result[[3]] = interaction
-    }
-
     # Label the output
     if (method == "simple" & linking != "geometric"){
         names(result) = c("Allocation", "Selection", "Interaction", "Total")
@@ -176,10 +198,6 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 data(attrib) # !!! Load attrib.RData workspace
 require(FinancialInstrument)
 require(PerformanceAnalytics)
-Rp <- Return.level(Rp, wp, h, level = "Sector") # Sector-level attribution
-Rb <- Return.level(Rb, wb, h, level = "Sector")
-wp <- Weight.level(Rp, wp, h, level = "Sector")
-wb <- Weight.level(Rb, wb, h, level = "Sector")
 attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
 attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
 attribution(Rp, wp, Rb, wb, method = "simple", linking = "grap")
