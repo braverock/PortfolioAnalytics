@@ -25,7 +25,7 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
 
     # DESCRIPTION:
     # Attribution analysis.
-    # TODO: fix bugs in linking methods, multi-level attribution. 
+    # TODO: multi-level attribution, documentation
     # Fix bugs in examples
 
     # Inputs:
@@ -65,8 +65,12 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     rb = reclass(rowSums(Rb * wb), Rb)
     names(rp) = "Total"
     names(rb) = "Total"
-    rp.a = prod(rp + 1) - 1 
-    rb.a = prod(rb + 1) - 1
+    rp.a = prod(1 + rp) - 1 
+    rb.a = prod(1 + rb) - 1
+    aer = rp.a - rb.a                  # Arithmetic (annualized) excess returns
+    ger = (1 + rp.a) / (1 + rb.a) - 1  # Geometric (annualized) excess returns
+    excess.return = as.matrix(c(aer, ger))
+    rownames(excess.return) = c("Arithmetic", "Geometric")
     Rp = cbind(Rp, rp)
     Rb = cbind(Rb, rb)
     
@@ -185,11 +189,13 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
             result[[3]] = interaction
         }
     }
+    result[[length(result) + 1]] = excess.return
+
     # Label the output
     if (method == "simple" & linking != "geometric"){
-        names(result) = c("Allocation", "Selection", "Interaction", "Total")
+        names(result) = c("Allocation", "Selection", "Interaction", "Total", "Annualized excess returns")
     } else{
-        names(result) = c("Allocation", "Selection", "Total")
+        names(result) = c("Allocation", "Selection", "Total", "Annualized excess returns")
     }
     return(result)
 }
