@@ -23,7 +23,7 @@ Return.level <-
 function(Rp, wp, h, level = "Sector")
 {
     Rp = checkData(Rp, method = "xts")
-    wp <- Weight.transform(Rp, wp)
+    wp = Weight.transform(wp, Rp)
 
     # Aggregate returns to the chosen level from the hierarchy
     h = split(h$primary_id, h[level])
@@ -44,7 +44,7 @@ function(Rp, wp, h, level = "Sector")
 
 
 Weight.transform <- 
-function(Rp, wp)
+function(wp, Rp)
 {
     # Transform weights to the xts object used by aggregation and attribution functions
     if (is.vector(wp)){
@@ -79,35 +79,16 @@ function(wp, h, level = "Sector")
 }
 
 # Example
-
-# 1. Generate data
-list <- c("XOM", "IBM", "CVX", "WMT", "GE")
-update_instruments.TTR(list, exchange="NYSE")
-hierarchy <- buildHierarchy(ls_stocks(), c("type", "currency", "Sector"))
-getSymbols(list)
-for (i in list){
-    r <- Return.calculate(to.yearly(get(i)))[2:6, 4]
-    colnames(r) <- i
-    if(i == "XOM"){
-        Rp <- r
-    } else{
-        Rp <- cbind(Rp, r)
-    }
-}
-
-# 2. Aggregate portfolio
-Rp
-# with vector weights
 wp <- c(0.3, 0.2, 0.2, 0.1, 0.2)
-wp <- Weight.transform(Rp, wp)
+wp <- Weight.transform(wp, Rp)
 Return.level(Rp, wp, hierarchy, level = "Sector")
 # with xts weights
 wp <- Rp[1:2, ]
 wp[1, ] <- c(0.3, 0.2, 0.2, 0.1, 0.2)
 wp[2, ] <- c(0.3, 0.2, 0.2, 0.1, 0.2)
-wp <- Weight.transform(Rp, wp)
+wp <- Weight.transform(wp, Rp)
 Return.level(Rp, wp, hierarchy, level = "type")
-aggregate.weights(wp, hierarchy, level = "Sector")
+Weight.level(wp, hierarchy, level = "Sector")
 
 
 ###############################################################################

@@ -1,6 +1,6 @@
 #' performs arithmetic attribution
 #' 
-#' @aliases attribution.crithmetic
+#' @aliases attribution.arithmetic
 #' 
 #' Performs arithmetic attribution analysis of returns. Used to uncover the sources 
 #' of portfolio return 
@@ -155,6 +155,7 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
         }
     }
     
+    # Aggregate adjusted multi-period attribution effects
     if (linking != "geometric"){
         totals <- function(x){
             x = as.data.frame(x)
@@ -172,6 +173,7 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
         rownames(allocation)[nrow(allocation)] = "Total"
         rownames(selection)[nrow(selection)] = "Total"
     }
+
     # Select the appropriate result corresponding to the chosen method
     result = list()
     result[[1]] = allocation
