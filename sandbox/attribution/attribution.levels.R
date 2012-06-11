@@ -1,14 +1,21 @@
-# 5-steps attribution (3-levels)
+# Multi-level attribution
+# TODO: find a way to make conformable returns at different levels
 attribution.levels <-
 function(Rp, Rb, wp, wb, h, ...)
 { # @author Andrii Babii
 
-    Rb = checkData(Rb)
     Rp = checkData(Rp)
-
+    Rb = checkData(Rb)
+    wp = Weight.transform(wp, Rp)
+    wb = Weight.transform(wb, Rb)
+    
     levels <- unlist(list(...))
     if (!is.null(levels)) stopifnot(is.character(levels))
-    
+
+    # Get portfolio and benchmark returns
+    r = Return.rebalancing(Rp, wp)
+    b = Return.rebalancing(Rb, wb)
+
     # Get returns and weights at all levels
     returns.p = list()
     weights.p = list()
@@ -20,17 +27,13 @@ function(Rp, Rb, wp, wb, h, ...)
         weights.p[[i]] = Weight.level(wp, h, level = levels[i])
         returns.b[[i]] = Return.level(Rb, wb, h, level = levels[i])
         weights.b[[i]] = Weight.level(wb, h, level = levels[i])
-        bs[[i]] = Return.rebalancing(weights.p[[i]], returns.b[[i]])   # semi-notional funds returns
+        bs[[i]] = reclass(rowSums(returns.b[[i]] * weights.p[[i]]), r)  # semi-notional funds returns
     } 
     names(returns.p) = levels
     names(weights.p) = levels
     names(returns.b) = levels
     names(weights.b) = levels
 
-    # Get portfolio and benchmark returns
-    r = Return.rebalancing(Rp, wp)
-    b = Return.rebalancing(Rb, wb)
-    
     # Total attribution effects
     allocation = list()
     allocation[[1]] = (1 + bs[[1]]) / (1 + b) - 1 # Allocation 1
@@ -41,33 +44,23 @@ function(Rp, Rb, wp, wb, h, ...)
     selection = (1 + r) / (1 + last(bs)[[1]]) - 1
     total = (1 + r) / (1 + b) - 1 # Total excess return
     
-    #level = list()
-    #level[[1]] = (weights.p[[1]] - weights.b[[1]]) * ((1 + returns.b[[1]]) / (1 + b) - 1)
-    #for (i in 2:length(levels)){
-    #    level[[i]] = (weights.p[[i]] - weights.b[[i]]) * ((1 + returns.b[[i]]) / (1 + returns.b[[i-1]]) - 1) * ((1 + returns.b[[i - 1]]) / (1 + bs[[i-1]]))
-    #}
+    # Transform portfolio, benchmark returns and semi-notional funds returns to conformable matrices for multi-level attribution
+    b = as.xts(matrix(rep(b, ncol(returns.b[[1]])), nrow(b), ncol(returns.b[[1]])), index(b))
+    r = as.xts(matrix(rep(r, ncol(last(returns.b)[[1]])), nrow(r), ncol(last(returns.b)[[1]])), index(r))
+   
+    for (i in 1:length(bs)){
+        bs[[i]] = as.xts(matrix(rep(bs[[i]], ncol(returns.p[[i]])), nrow(r), ncol(returns.p[[i]])), index(r))
+    }
 
-    # Level 1 attribution
-    l1 = (weights.p[[1]] - weights.b[[1]]) * ((1 + returns.b[[1]]) / (1 + b) - 1)
-    
-    # Level 2 attribution
-    l2 = (weights.p[[2]] - weights.b[[2]]) * ((1 + returns.b[[2]]) / (1 + returns.b[[1]]) - 1) * ((1 + returns.b[[1]]) / (1 + bs[[1]]))
-    
-    # Level 3 attribution
-    w = (weights.p[[3]] - weights.b[[3]])
-    a1 = 1 + returns.b[[2]]
-    b1 = ((1 + returns.b[[3]]) / (cbind(a1, a1, a1)) - 1)
-    b2 = ((1 + returns.b[[2]]) / (1 + bs[[2]]))
-    b2 = cbind(b2, b2, b2)
-    l3 = w * b1 * b2
+    # Attribution at each level
+    level = list()
+    level[[1]] = (weights.p[[1]] - weights.b[[1]]) * ((1 + returns.b[[1]]) / (1 + b) - 1)
+    for (i in 2:length(levels)){ # This does not work. Need to finish
+        level[[i]] = (weights.p[[i]] - weights.b[[i]]) * ((1 + returns.b[[i]]) / (1 + returns.b[[i-1]]) - 1) * ((1 + returns.b[[i-1]]) / (1 + bs[[i-1]]))
+    }
 
     # Security/Asset selection
-    w = weights.p[[3]]
-    a1 = cbind((1 + r), (1 + r), (1 + r)) 
-    b1 = a1 / (1 + returns.b[[3]]) - 1
-    a2 = cbind((1 + bs[[3]]), (1 + bs[[3]]), (1 + bs[[3]]))
-    b2 = (1 + returns.b[[3]]) / a2
-    select = w * b1 * b2
+    select = as.xts(as.data.frame(last(weights.p))) * ((1 + r) / (1 + as.xts(as.data.frame(last(returns.b)))) - 1) * ((1 + as.xts(as.data.frame(last(returns.b)))) / (1 + as.xts(as.data.frame(last(bs)))))
 
     result = list()
     general = cbind(allocation, selection, total)
@@ -79,11 +72,10 @@ function(Rp, Rb, wp, wb, h, ...)
     result[[5]] = select
     names(result) = c("Multi-level attribution", "Level 1 attribution", "Level 2 attribution", "Level 3 attribution", "Security selection")
     return(result)
-
 }
 
 # Example:
-data(attrib) # !!! Load attrib.RData workspace
+data(attrib)
 attribution.levels(Rp, wp, Rb, wb, h, c("type", "currency", "Sector"))
 
 
