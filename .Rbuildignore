@@ -1,3 +1,4 @@
 sandbox
 .metadata
 .svn
+^\.Rproj\.user$
