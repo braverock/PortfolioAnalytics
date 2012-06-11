@@ -12,36 +12,10 @@
 #' @param level aggregation level from the hierarchy
 #' @author Andrii Babii
 #' @seealso  \code{\link{buildHierarchy}}
-#' TODO Replace example using portfolio dataset. Make rebalancing working 
-#' correctly, starting from the next day as in the Return.rebalacing.
-#' Fix bugs. Look at na.locf
 #' @references
 #' @export
 #' @examples
 #' 
-Return.level <-
-function(Rp, wp, h, level = "Sector")
-{
-    Rp = checkData(Rp, method = "xts")
-    wp = Weight.transform(wp, Rp)
-
-    # Aggregate returns to the chosen level from the hierarchy
-    h = split(h$primary_id, h[level])
-    returns = as.xts(matrix(NA, ncol = length(h), nrow = nrow(Rp)), index(Rp))
-    for(j in 1:length(h)){
-        rp = as.xts(matrix(0, ncol = 1, nrow = nrow(Rp)), index(Rp))
-        for(i in 1:length(h[[j]])){
-            asset = h[[j]][i]
-            r = as.data.frame(Rp)[asset] * as.data.frame(wp)[asset]
-            r = as.xts(r)
-            rp = rp + r
-        }
-        returns[, j] = rp
-        colnames(returns) = names(h)
-        }
-    return(returns)
-}
-
 
 Weight.transform <- 
 function(wp, Rp)
@@ -51,45 +25,61 @@ function(wp, Rp)
         wp = as.xts(matrix(rep(wp, nrow(Rp)), nrow(Rp), ncol(Rp), byrow = TRUE), index(Rp))
         colnames(wp) = colnames(Rp)
     } else{
+        if(as.Date(last(index(Rp))) < (as.Date(index(wp[1,]))+1)){
+            stop(paste('last date in series',as.Date(last(index(Rp))),'occurs before beginning of first rebalancing period',as.Date(first(index(wp)))+1))
+        }
+        wp = checkData(wp, method = "xts")
         wp = merge(wp, xts(, index(Rp)))
         wp = na.locf(wp)
+        if(as.Date(first(index(Rp))) > (as.Date(index(wp[1,]))+1)) {
+            warning(paste('data series starts on',as.Date(first(index(Rp))),', which is after the first rebalancing period',as.Date(first(index(wp)))+1)) 
+            wp = wp
+        } else{
+            wp = wp[2:nrow(wp)]
+        }
     }
     return(wp)
 }
 
+Return.level <-
+function(Rp, wp, h, level = "Sector")
+{
+    Rp = checkData(Rp, method = "xts")
+    wp = Weight.transform(wp, Rp)
+    if (nrow(wp) < nrow(Rp)){ # Rebalancing occurs next day
+        Rp = Rp[2:nrow(Rp)]
+    }
+
+    # Aggregate returns to the chosen level from the hierarchy
+    h = split(h$primary_id, h[level])
+    returns = as.xts(matrix(NA, ncol = length(h), nrow = nrow(Rp)), index(Rp))
+    for(i in 1:length(h)){
+        returns[, i] = rowSums(Rp[, h[[i]]] * wp[, h[[i]]])
+    }
+    colnames(returns) = names(h)
+    return(returns)
+}
+
 Weight.level <-
 function(wp, h, level = "Sector")
-{
-    #aggregate weights to the level chosen from the hierarchy
+{   
+    wp = Weight.transform(wp, Rp)
+
     h = split(h$primary_id, h[level])
     weights = wp[, 1:length(h)]
-    
-    for(j in 1:length(h)){
-        W = as.xts(matrix(0, ncol = 1, nrow = nrow(wp)), index(wp))
-        for(i in 1:length(h[[j]])){
-            asset = h[[j]][i]
-            w = as.data.frame(wp)[asset]
-            w = as.xts(w)
-            W = W + w
-        }
-        weights[, j] = W
-        colnames(weights) = names(h)
+    for(i in 1:length(h)){
+        weights[, i] = rowSums(wp[, h[[i]]])
     }
+    colnames(weights) = names(h)
     return(weights)
 }
 
 # Example
-wp <- c(0.3, 0.2, 0.2, 0.1, 0.2)
-wp <- Weight.transform(wp, Rp)
-Return.level(Rp, wp, hierarchy, level = "Sector")
-# with xts weights
-wp <- Rp[1:2, ]
-wp[1, ] <- c(0.3, 0.2, 0.2, 0.1, 0.2)
-wp[2, ] <- c(0.3, 0.2, 0.2, 0.1, 0.2)
-wp <- Weight.transform(wp, Rp)
-Return.level(Rp, wp, hierarchy, level = "type")
-Weight.level(wp, hierarchy, level = "Sector")
-
+# data(attrib) 
+Weight.transform(wp, Rp)
+Return.level(Rp, wp, h, level = "Sector")
+Return.level(Rp, wp, h, level = "type")
+Weight.level(wp, h, level = "Sector")
 
 ###############################################################################
 # R (http://r-project.org/) Econometrics for Performance and Risk Analysis
