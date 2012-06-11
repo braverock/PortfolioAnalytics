@@ -12,12 +12,24 @@
 #' @param wb benchmark weights
 #' @author Andrii Babii
 #' @seealso
-#' @references Jon A. Christopherson, David R., Wayne E. Ferson 
+#' @references Christopherson, Jon A., Carino, David R., Ferson, Wayne E.  
 #' \emph{Portfolio Performance Measurement and Benchmarking}. McGraw-Hill. 2009.
 #' @examples
 #' 
 #' 
 #'
+#' #EXAMPLE:
+#' data(attrib) # !!! Load attrib.RData workspace
+#' require(FinancialInstrument)
+#' require(PerformanceAnalytics)
+#' attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
+#' attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
+#' attribution(Rp, wp, Rb, wb, method = "simple", linking = "grap")
+#' attribution(Rp, wp, Rb, wb, method = "top.down", linking = "frongello")
+#' attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "geometric")
+#' 
+#' @export 
+#' @rdname attribution
 attribution <- 
 function (Rp, wp, Rb, wb, method = c("top.down", "bottom.up", "simple"), 
 linking = c("carino", "menchero", "grap", "frongello", "geometric"))
@@ -202,18 +214,6 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     return(result)
 }
 
-#EXAMPLE:
-data(attrib) # !!! Load attrib.RData workspace
-require(FinancialInstrument)
-require(PerformanceAnalytics)
-attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
-attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
-attribution(Rp, wp, Rb, wb, method = "simple", linking = "grap")
-attribution(Rp, wp, Rb, wb, method = "top.down", linking = "frongello")
-attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "geometric")
-
-#' @export 
-#' @rdname attribution
 
 ###############################################################################
 # R (http://r-project.org/) Econometrics for Performance and Risk Analysis
