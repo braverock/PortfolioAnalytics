@@ -229,6 +229,18 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
       out$objective_measures<-try(constrained_objective(w=min_objective_weights,R=R,constraints,trace=TRUE)$objective_measures)
       out$call<-call
       #' construct out list to be as similar as possible to DEoptim list, within reason
+
+  } ## end case for random
+  
+  if(optimize_method == "ROI"){
+    # This will take a new constraint object that is of the same structure of a 
+    # ROI constraint object, but with an additional solver arg.
+    # then we can do something like this
+    #
+    # roi.result <- ROI_solve(x=ROI_constraint$constraint, ROI_constraint$solver)
+    # out$weights <- roi.result$solution
+    # out$objective_measures <- roi.result$objval
+    
   }
     end_t<-Sys.time()
     # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
