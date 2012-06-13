@@ -1,62 +1,83 @@
 #' performs arithmetic attribution
 #' 
-#' @aliases attribution.arithmetic
-#' 
-#' Performs arithmetic attribution analysis of returns. Used to uncover the sources 
-#' of portfolio return 
+#' Performance attribution analysis. Portfolio performance measured 
+#' relative to a benchmark gives an indication of the value-added by the 
+#' portfolio. Equipped with weights and returns of portfolio segments, we 
+#' can dissect the value-added into useful components. This function is based
+#' on the sector-based approach to the attribution. The workhorse is the
+#' Brinson model that explains the arithmetic difference between portfolio and 
+#' benchmark returns. That is it breaks down the arithmetic excess returns. 
+#' It also alows to break down the geometric excess returns. The attribution 
+#' effects can be computed for several periods. Different linking methods 
+#' allow to get the multi-period summary. Finally, it annualizes arithmetic 
+#' and geometric excess returns similarly to the portfolio and/or benchmark 
+#' returns annualization.
 #'
-#' @aliases attribution.crithmetic
 #' @param Rp portfolio returns
 #' @param wp portfolio weights
 #' @param Rb benchmark returns
 #' @param wb benchmark weights
+#' @param method Used to select the priority between allocation and selection 
+#' effects in arithmetic attribution. May be any of: \itemize{ \item none - 
+#' present allocation, selection and interaction effects independently, 
+#' \item top.down - the priority is given to the sector allocation. Interaction
+#' term is combined with the security selection effect, \item bottom.up - the 
+#' priority is given to the security selection. Interection term is combined 
+#' with the sector allocation effect}
+#' @param linking Used to select the linking method to present the multi-period 
+#' summary of arithmetic attribution effects. It is also used to select the 
+#' geometric attribution. May be any of: \itemize{ \item carino - logarithmic 
+#' linking coefficient method, \item menchero - Menchero's smoothing algorithm, 
+#' \item grap - linking approach developed by GRAP, \item frongello - 
+#' Frongello's linking method, \item geometric - geometric attribution}
 #' @author Andrii Babii
-#' @seealso
-#' @references Christopherson, Jon A., Carino, David R., Ferson, Wayne E.  
-#' \emph{Portfolio Performance Measurement and Benchmarking}. McGraw-Hill. 2009.
+#' @seealso \code{\link{Attribution.levels}}
+#' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and
+#' Attribution}. Wiley. 2004. Chapter 5, 8
+#' 
+#' Christopherson, Jon A., Carino, David R., Ferson, Wayne E.  
+#' \emph{Portfolio Performance Measurement and Benchmarking}. McGraw-Hill. 2009. 
+#' Chapter 18-19
+#' 
+#' Gary P. Brinson, L. Randolph Hood, and Gilbert L. Beebower, \emph{Determinants of 
+#' Portfolio Performance}, Financial Analysts Journal, vol. 42, no. 4, July/August 
+#' 1986, pp. 39–44.
+#' @keywords attribution
 #' @examples
 #' 
-#' 
-#'
-#' #EXAMPLE:
-#' data(attrib) # !!! Load attrib.RData workspace
-#' require(FinancialInstrument)
-#' require(PerformanceAnalytics)
-#' attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
-#' attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
-#' attribution(Rp, wp, Rb, wb, method = "simple", linking = "grap")
-#' attribution(Rp, wp, Rb, wb, method = "top.down", linking = "frongello")
-#' attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "geometric")
+#' data(attrib)
+#' Attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
+#' Attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
+#' Attribution(Rp, wp, Rb, wb, method = "none", linking = "grap")
+#' Attribution(Rp, wp, Rb, wb, method = "top.down", linking = "frongello")
+#' Attribution(Rp, wp, Rb, wb, linking = "geometric")
 #' 
 #' @export 
-#' @rdname attribution
-attribution <- 
-function (Rp, wp, Rb, wb, method = c("top.down", "bottom.up", "simple"), 
+Attribution <- 
+function (Rp, wp, Rb, wb, method = c("none", "top.down", "bottom.up"), 
 linking = c("carino", "menchero", "grap", "frongello", "geometric"))
-{ # @author Andrii Babii
+{   # @author Andrii Babii
 
     # DESCRIPTION:
-    # Attribution analysis.
-    # TODO: multi-level attribution, documentation
-    # Fix bugs in examples
+    # Function to perform the attribution analysis.
 
     # Inputs:
-    # Rp: portfolio returns
-    # wp: portfolio weights
-    # Rb: benchmark returns
-    # wb: benchmark weights
-    # method: 
-    # linking: 
+    # Rp       portfolio returns
+    # wp       portfolio weights
+    # Rb       benchmark returns
+    # wb       benchmark weights
+    # method   
+    # linking    
   
     # Outputs: 
     # This function returns the attribution effects
+  
     # FUNCTION:
-    
-    # Transform data to the xts
+    # Transform data to the xts objects
     Rb = checkData(Rb)
     Rp = checkData(Rp)
-    wp = Weight.transform(Rp, wp)
-    wb = Weight.transform(Rb, wb)
+    wp = Weight.transform(wp, Rp)
+    wb = Weight.transform(wb, Rb)
 
     # Compute attribution effects
     allocation = (wp - wb) * Rb
@@ -198,7 +219,7 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
         if (method == "bottom.up"){    # Bottom-up attribution
             result[[1]] = result[[1]] + interaction
         }
-        if (method == "simple"){
+        if (method == "none"){
             result[[4]] = result[[3]]
             result[[3]] = interaction
         }
@@ -206,23 +227,10 @@ linking = c("carino", "menchero", "grap", "frongello", "geometric"))
     result[[length(result) + 1]] = excess.return
 
     # Label the output
-    if (method == "simple" & linking != "geometric"){
+    if (method == "none" & linking != "geometric"){
         names(result) = c("Allocation", "Selection", "Interaction", "Total", "Annualized excess returns")
     } else{
         names(result) = c("Allocation", "Selection", "Total", "Annualized excess returns")
     }
     return(result)
 }
-
-
-###############################################################################
-# R (http://r-project.org/) Econometrics for Performance and Risk Analysis
-#
-# Copyright (c) 2004-2012 Peter Carl and Brian G. Peterson
-#
-# This R package is distributed under the terms of the GNU Public License (GPL)
-# for full details see the file COPYING
-#
-# $Id: CalmarRatio.R 1905 2012-04-21 19:23:13Z braverock $
-#
-###############################################################################
