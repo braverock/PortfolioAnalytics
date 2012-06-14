@@ -1,10 +1,61 @@
-# Multi-level attribution
-# TODO: find a way to label vectors of varying length (depending on the number of attribution levels)
-# compute total effects for multiple periods once linking functions are separated from attribution.R
-attribution.levels <-
+#' provides multi-level geometric peformance attribution
+#' 
+#' Provides multi-level geometric peformance attribution. The Brinson model
+#' attribute excess returns at one level of the decision process. This 
+#' function works with more complex decision processes. For instance, the 
+#' 3-level decision process may have the following levels: type of asset - 
+#' country - sector. The levels should be specified in the vector with 
+#' elements in the particular order: from the highest level to the lowest.
+#' The contribution to the allocation in the ith category for the dth level  
+#' is: \deqn{\left(^{d}wp_{i}-^{d}wb_{i}\right)\times\left(\frac{1+^{d}b_{i}}{1+^{d-1}b_{i}}-1\right)\times\frac{1+^{d-1}b_{i}}{1+bs^{d-1}}}
+#' The total attribution for each asset allocation step in the decision process
+#' is: \deqn{\frac{1+^{d}bs}{1+^{d-1}bs}-1}
+#' The final step, stock selection, is measured by:
+#' \deqn{^{d}w_{i}\times\left(\frac{1+r_{i}}{1+^{d}b_{i}}-1\right)\times\frac{1+^{d}b_{i}}{1+^{d}bs}}
+#' 
+#' @aliases Attribution
+#' @param Rp xts, data frame or matrix of portfolio returns
+#' @param wp vector, xts, data frame or matrix of portfolio weights
+#' @param Rb xts, data frame or matrix of benchmark returns
+#' @param wb vector, xts, data frame or matrix of benchmark weights
+#' @param h data.frame with the hierarchy obtained from the buildHierarchy 
+#' function or defined manually in the the same style as buildHierarchy's
+#' output
+#' @author Andrii Babii
+#' @seealso \code{\link{Attribution.geometric}}
+#' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and
+#' Attribution}. Wiley. 2004. p. 215-220
+#' @keywords multi-level attribution, geometric attribution
+#' @examples
+#' 
+#' data(attrib)
+#' Attribution.levels(Rp, wp, Rb, wb, h, c("type", "currency", "Sector"))
+#' Attribution.levels(Rp, wp, Rb, wb, h, c("type", "Sector"))
+#' 
+#' @export
+#' @TODO label the output for arbitrary number of levels (more than 4) 
+#' compute total effects for multiple periods
+Attribution.levels <-
 function(Rp, wp, Rb, wb, h, ...)
-{ # @author Andrii Babii
-
+{   # @author Andrii Babii
+  
+    # DESCRIPTION:
+    # Function to perform the geometric attribution analysis.
+  
+    # Inputs:
+    # Rp       xts, data frame or matrix of portfolio returns
+    # wp       vector, xts, data frame or matrix of portfolio weights
+    # Rb       xts, data frame or matrix of benchmark returns
+    # wb       vector, xts, data frame or matrix of benchmark weights
+    # h        data.frame with the hierarchy
+  
+    # Outputs: 
+    # This function returns the list with total attribution effects 
+    # (allocation, selection and total) including total multi-period 
+    # attribution effects, attribution effects at each level and secruity
+    # selection
+  
+  # FUNCTION:
     Rp = checkData(Rp)
     Rb = checkData(Rb)
     wp = Weight.transform(wp, Rp)
@@ -16,6 +67,9 @@ function(Rp, wp, Rb, wb, h, ...)
 
     levels <- unlist(list(...))
     if (!is.null(levels)) stopifnot(is.character(levels))
+    if (length(levels) == 1){
+      stop("Use Attribution function for the single level. This function is for the multi-level attribution")
+    }
 
     # Get portfolio and benchmark returns
     r = Return.rebalancing(Rp, wp)
@@ -38,7 +92,6 @@ function(Rp, wp, Rb, wb, h, ...)
     names(weights.p) = levels
     names(returns.b) = levels
     names(weights.b) = levels
-
 
     # Total attribution effects
     allocation = list()
@@ -80,18 +133,35 @@ function(Rp, wp, Rb, wb, h, ...)
     # Security/Asset selection
     select = as.xts(as.data.frame(last(weights.p))) * ((1 + r) / (1 + as.xts(as.data.frame(last(returns.b)))) - 1) * ((1 + as.xts(as.data.frame(last(returns.b)))) / (1 + as.xts(as.data.frame(last(bs)))))
 
+    # Get the multi-period summary
+    general = cbind(allocation, selection, total)
+    general = rbind(as.data.frame(general), (apply(1 + general, 2, prod) - 1))
+    for (i in 1:length(level)){
+        level[[i]] = rbind(as.data.frame(level[[i]]), (apply(1 + level[[i]], 2, prod) - 1))
+        rownames(level[[i]])[nrow(level[[i]])] = "Total"
+    }
+    select = rbind(as.data.frame(select), (apply(1 + select, 2, prod) - 1))
+    rownames(general)[nrow(general)] = "Total"
+    rownames(select)[nrow(select)] = "Total"
+        
     # Label output
     result = list()
-    general = cbind(allocation, selection, total)
-    # colnames(general) = c("L1 allocation", "L2 allocation", "L3 allocation", "Selection", "Total")
+    if (length(levels) == 2){
+        colnames(general) = c("L1 allocation", "L2 allocation", "Selection", "Total")
+        names(level) = c("Level 1", "Level 2")
+    }
+    if (length(levels) == 3){
+        colnames(general) = c("L1 allocation", "L2 allocation", "L3 allocation", "Selection", "Total")
+        names(level) = c("Level 1", "Level 2", "Level 3")
+    }
+    if (length(levels) == 4){
+        colnames(general) = c("L1 allocation", "L2 allocation", "L3 allocation", "L4 allocation", "Selection", "Total")
+        names(level) = c("Level 1", "Level 2", "Level 3", "Level 4")
+    }
+    
     result[[1]] = general
     result[[2]] = level
     result[[3]] = select
     names(result) = c("Multi-level attribution", "Attribution at each level", "Security selection")
     return(result)
 }
-
-# Example:
-data(attrib)
-attribution.levels(Rp, wp, Rb, wb, h, c("type", "currency", "Sector"))
-attribution.levels(Rp, wp, Rb, wb, h, c("type", "Sector"))
