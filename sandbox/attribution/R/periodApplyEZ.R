@@ -30,10 +30,6 @@
 #' @return A vector with length of INDEX minus 1 or a matrix with number of
 #' rows length of INDEX minus 1.
 #' @author Original code by Jeff Ryan. Modified by Eric Zivot.
-#' @seealso %% ~~objects to See Also as \code{\link{help}}, ~~~
-#' @examples
-#' 
-#' 
 period.apply.EZ <- function (x, INDEX, FUN, ...)
 {
 # TODO Brian should merge/move this into xts/quantmod.

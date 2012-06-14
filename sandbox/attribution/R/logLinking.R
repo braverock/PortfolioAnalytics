@@ -35,10 +35,6 @@
 #' @seealso \code{\link{relativeAttribution}}
 #' @references Christopherson, J., Carino, D., and Ferson, W. (2009)
 #' \emph{Portfolio Performance Measurement and Benchmarking}, McGrall-Hill.
-#' @examples
-#' 
-#' 
-#' 
 logLinking <- function(weighted.portfolio.returns, weighted.benchmark.returns, component){
 ## inputs
 ## weighted.portfolio.returns	n x p data frame containing asset ID (as rownames) and weighted portfolio returns for p dates

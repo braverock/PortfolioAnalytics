@@ -37,9 +37,6 @@
 #' @references Davis, B. and Menchero, J. (2009) \emph{Beyond Brinson:
 #' Establishing the Link Between Sector and Factor Models}, MSCI Barra Research
 #' Insights.
-#' @examples
-#' 
-#' 
 #' 
 relativeAttributionWithoutFactors <- function(portfolio.df, benchmark.df){
 ## 
