@@ -19,7 +19,6 @@
 #' of adjusted attribution effects: 
 #' \deqn{r - b = \overset{n}{\underset{t=1}{\sum}}\left(Allocation_{t}+Selection_{t}+Interaction_{t}\right)}
 #'
-#'
 #' @aliases Grap
 #' @param rp xts of portfolio returns
 #' @param rb xts of benchmark returns
@@ -30,6 +29,9 @@
 #' \code{\link{Attribution.geometric}}
 #' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and
 #' Attribution}. Wiley. 2004. p. 196-199
+#' 
+#' GRAP (Groupe de Recherche en Attribution de Performance) (1997) 
+#' \emph{Synthese des modeles d’attribution de performance}. Paris, Mars.
 #' @keywords attribution, GRAP linking
 #' @examples
 #' 

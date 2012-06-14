@@ -32,6 +32,9 @@
 #' \code{\link{Attribution.geometric}}
 #' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and
 #' Attribution}. Wiley. 2004. p. 194-196
+#' 
+#' Menchero, J. (2000) \emph{An optimized approach to linking attribution 
+#' effects over time}.Journal of Performance Measurement. Fall, 36–42.
 #' @keywords arithmetic attribution, Menchero linking
 #' @examples
 #' 
