@@ -35,8 +35,8 @@
 #' itermax, if not passed in dots, defaults to the number of parameters (assets/weights) *50.
 #'  
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
-#' @param optimize_method one of "DEoptim" or "random"
+#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}, if using closed for solver, need to pass a \code{\link{constraint_ROI}} object.
+#' @param optimize_method one of "DEoptim", "random", "ROI".  For using ROI, need to use a constraint_ROI object in constraints.
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
@@ -236,12 +236,13 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     # This will take a new constraint object that is of the same structure of a 
     # ROI constraint object, but with an additional solver arg.
     # then we can do something like this
-    #
-    # roi.result <- ROI_solve(x=ROI_constraint$constraint, ROI_constraint$solver)
-    # out$weights <- roi.result$solution
-    # out$objective_measures <- roi.result$objval
-    
-  }
+    weights <- ROI_solve(x=constraints$constraint, constraints$solver)$solution
+    names(weights) <- colnames(R)
+    out$weights<-weights
+    out$objective_measures <- roi.result$objval
+    out$call<-call
+  } ## end case for ROI
+  
     end_t<-Sys.time()
     # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
     message(c("elapsed time:",end_t-start_t))

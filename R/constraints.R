@@ -210,3 +210,33 @@ update.constraint <- function(object, ...){
 }
 
 
+#' constructor for class constraint_ROI
+#' 
+#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
+#' @param op.problem an object of type "OP" (optimization problem, of \code{ROI}) specifying the complete optimization problem, see ROI help pages for proper construction of OP object.
+#' @param solver string argument for what solver package to use, must have ROI plugin installed for that solver.  Currently support is for \code{\link{glpk}} and \code{\link{quadprog}}.
+#' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
+#' @author Hezky Varon
+#' @export
+constraint_ROI <- function(assets, op.problem, solver=c("glpk", "quadprog"),
+                           weight_seq=NULL)
+{
+  if(problem == NULL) stop("Need to pass in optimiztion problem.")
+  solver <- solver[1]
+  require(solver, character.only=TRUE)
+  require(ROI, character.only=TRUE)
+  require(paste("ROI.plugin.", solver.method, sep=""), character.only=TRUE)
+  ## now structure and return
+  return(structure(
+    list(
+      assets = assets,
+      op.problem = op.problem,
+      solver = solver,
+      weight_seq = weight_seq,
+      objectives = list(),
+      call = match.call()
+    ), 
+    class=c("constraint_ROI","constraint")
+  ))
+}
+
