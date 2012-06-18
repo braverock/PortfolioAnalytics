@@ -169,7 +169,6 @@ linking = c("carino", "menchero", "grap", "frongello"), geometric = FALSE)
     }
     
     # Annualize excess returns
-
     rp.a = prod(1 + rp) - 1              
     rb.a = prod(1 + rb) - 1
     if (geometric == FALSE){
@@ -180,11 +179,11 @@ linking = c("carino", "menchero", "grap", "frongello"), geometric = FALSE)
     }
 
     # Select the appropriate result corresponding to the chosen method
-    result = list()
-    result[[1]] = excess.returns
-    result[[2]] = allocation
-    result[[3]] = selection
     if (geometric == FALSE){
+        result = list()
+        result[[1]] = excess.returns
+        result[[2]] = allocation
+        result[[3]] = selection
         if (method == "top.down"){     # Top-down attribution
             result[[3]] = result[[3]] + interaction
         }
