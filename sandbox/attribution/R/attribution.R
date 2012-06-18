@@ -7,12 +7,14 @@
 #' on the sector-based approach to the attribution. The workhorse is the
 #' Brinson model that explains the arithmetic difference between portfolio and 
 #' benchmark returns. That is it breaks down the arithmetic excess returns at 
-#' one level. The attribution effects can be computed for several periods. 
-#' The multi-period summary is obtained using one of linking methods: Carino, 
-#' Menchero, GRAP, Frongello. It also allows to break down the geometric excess 
-#' returns, which link naturally over time. Finally, it annualizes 
-#' arithmetic and geometric excess returns similarly to the portfolio and/or 
-#' benchmark returns annualization. 
+#' one level. If returns and weigths are available at the lowest level (e.g. 
+#' for individual instruments), the aggregation up to the chosen level from the 
+#' hierarchy can be done using Return.level function. The attribution effects 
+#' can be computed for several periods. The multi-period summary is obtained 
+#' using one of linking methods: Carino, Menchero, GRAP, Frongello. It also 
+#' allows to break down the geometric excess returns, which link naturally 
+#' over time. Finally, it annualizes arithmetic and geometric excess returns 
+#' similarly to the portfolio and/or benchmark returns annualization. 
 #' 
 #' The arithmetic exess returns are decomposed into the sum of allocation, 
 #' selection and interaction effects across \deqn{n} sectors:
@@ -117,12 +119,12 @@ linking = c("carino", "menchero", "grap", "frongello"), geometric = FALSE)
       Rb = Rb[2:nrow(Rb)]
     }
     
-    # Compute attribution effects
+    # Compute attribution effects (Brinson, Hood and Beebower model)
     allocation = (wp - wb) * Rb
     selection = wb * (Rp - Rb)
     interaction = (wp - wb) * (Rp - Rb)
 
-    # Get total attribution effects ???
+    # Get total attribution effects 
     n = ncol(allocation)               # number of segments
     allocation = cbind(allocation, rowSums(allocation))
     names(allocation)[n + 1] = "Total"  
@@ -130,81 +132,77 @@ linking = c("carino", "menchero", "grap", "frongello"), geometric = FALSE)
     names(selection)[n + 1] = "Total"   
     interaction = cbind(interaction, rowSums(interaction))
     names(interaction)[n + 1] = "Total"
-    total = allocation + selection + interaction
                                          
-    # Get total portfolio returns and annualized excess returns          
+    # Get total portfolio returns          
     rp = reclass(rowSums(Rp * wp), Rp)  
     rb = reclass(rowSums(Rb * wb), Rb)
     names(rp) = "Total"                    
     names(rb) = "Total"                 
-    rp.a = prod(1 + rp) - 1              
-    rb.a = prod(1 + rb) - 1
-    
-    aer.a = rp.a - rb.a                  # Arithmetic (annualized) excess returns
-    ger.a = (1 + rp.a) / (1 + rb.a) - 1  # Geometric (annualized) excess returns
-    excess.return = as.matrix(c(aer.a, ger.a))
-    rownames(excess.return) = c("Arithmetic", "Geometric")
-
-    
+       
     # Adjust attribution effects using one of linking methods
     if (linking == "carino"){
         allocation = Carino(rp, rb, allocation)
         selection = Carino(rp, rb, selection)
         interaction = Carino(rp, rb, interaction)
-        total = Carino(rp, rb, total)
     }
 
     if (linking == "menchero"){
         allocation = Menchero(rp, rb, allocation)
         selection = Menchero(rp, rb, selection)
         interaction = Menchero(rp, rb, interaction)
-        total = Menchero(rp, rb, total)
     }    
 
     if (linking == "grap"){
         allocation = Grap(rp, rb, allocation)
         selection = Grap(rp, rb, selection)
         interaction = Grap(rp, rb, interaction)
-        total = Grap(rp, rb, total)
     }
 
     if (linking == "frongello"){
-        allocation = Frongello(Rp, wp, Rb, wb, allocation)
-        selection = Frongello(Rp, wp, Rb, wb, selection)
-        interaction = Frongello(Rp, wp, Rb, wb, interaction)
-        total = Frongello(Rp, wp, Rb, wb, total)
+        allocation = Frongello(rp, rb, allocation)
+        selection = Frongello(rp, rb, selection)
+        interaction = Frongello(rp, rb, interaction)
     }
     
     if (geometric == TRUE){
         attrib = Attribution.geometric(Rp, wp, Rb, wb)
     }
     
+    # Annualize excess returns
+
+    rp.a = prod(1 + rp) - 1              
+    rb.a = prod(1 + rb) - 1
+    if (geometric == FALSE){
+        excess.returns = rp - rb
+        aer.a = as.matrix(rp.a - rb.a)                  # Arithmetic (annualized) excess returns
+        rownames(aer.a) = "Total arithmetic"
+        excess.returns = rbind(as.matrix(excess.returns), aer.a)
+    }
+
     # Select the appropriate result corresponding to the chosen method
     result = list()
-    result[[1]] = allocation
-    result[[2]] = selection
-    result[[3]] = total
+    result[[1]] = excess.returns
+    result[[2]] = allocation
+    result[[3]] = selection
     if (geometric == FALSE){
         if (method == "top.down"){     # Top-down attribution
-            result[[2]] = result[[2]] + interaction
+            result[[3]] = result[[3]] + interaction
         }
         if (method == "bottom.up"){    # Bottom-up attribution
-            result[[1]] = result[[1]] + interaction
+            result[[2]] = result[[2]] + interaction
         }
         if (method == "none"){
-            result[[4]] = result[[3]]
-            result[[3]] = interaction
+            result[[4]] = interaction
         }
     } else{
       result = attrib
     }
-    result[[length(result) + 1]] = excess.return
 
     # Label the output
     if (method == "none" & geometric == FALSE){
-        names(result) = c("Allocation", "Selection", "Interaction", "Total", "Annualized excess returns")
+        names(result) = c("Excess returns", "Allocation", "Selection", "Interaction")
     } else{
-      names(result) = c("Allocation", "Selection", "Total", "Annualized excess returns")
+      names(result) = c("Excess returns", "Allocation", "Selection")
     }
     return(result)
 }
