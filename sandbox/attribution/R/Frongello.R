@@ -16,10 +16,8 @@
 #' \deqn{n} - number of periods
 #' 
 #' @aliases Frongello
-#' @param Rp xts of portfolio returns
-#' @param wp xts of portfolio weights
-#' @param Rb xts of benchmark returns
-#' @param wb xts of benchmark weights
+#' @param rp xts of portfolio returns
+#' @param rb xts of benchmark returns
 #' @param attributions  xts with attribution effects
 #' @author Andrii Babii
 #' @seealso  \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr 
@@ -38,11 +36,11 @@
 #' @examples
 #' 
 #' data(attrib)
-#' Frongello(Rp, wp, Rb, wb, allocation)
+#' Frongello(rp, rb, allocation)
 #' 
 #' @export
 Frongello <-
-function(Rp, wp, Rb, wb, attributions)
+function(rp, rb, attributions)
 {   # @author Andrii Babii
   
     # DESCRIPTION:
@@ -50,10 +48,8 @@ function(Rp, wp, Rb, wb, attributions)
     # Frongello linking. Used internally by the Attribution function
   
     # Inputs:
-    # Rp xts of portfolio returns
-    # wp xts of portfolio weights
-    # Rb xts of benchmark returns
-    # wb xts of benchmark weights
+    # rp xts of portfolio returns
+    # rb xts of benchmark returns
     # attributions  attribution effects (e.g. allocation, selection, interaction)
   
     # Outputs: 
@@ -61,15 +57,14 @@ function(Rp, wp, Rb, wb, attributions)
     # and total attribution effects over multiple periods
     
     # FUNCTION:
-    rp = reclass(rowSums(Rp * wp), Rp)  
-    rb = reclass(rowSums(Rb * wb), Rb)
-    Rp = cbind(Rp, rp)
-    Rb = cbind(Rb, rb)
     attr = attributions
-    attr[1, ] = attributions[1, ] + Rb[1, ]
-    
-    for(i in 2:nrow(rp)){
-        attr[i, ] = attr[i, ] * apply((1 + Rp[1:(i-1), ]), 2, prod) + Rb[i, ] * apply(attr[1:(i-1)], 2, sum)
+    if (nrow(rp) > 1){
+        attr[2, ] = attr[2, ] * (1 + rp[1, 1]) + rb[2, 1] * attr[1, ]
+    }
+    if (nrow(rp) > 2){
+        for(i in 3:nrow(rp)){
+            attr[i, ] = attr[i, ] * prod(1 + rp[1:(i-1), 1]) + rb[i, ] * colSums(attr[1:(i-1), ])
+        }
     }
     total = colSums(attr)
     attributions = rbind(as.data.frame(attributions), total)
