@@ -63,25 +63,35 @@ function(Rp, wp, Rb, wb)
     rb = reclass(rowSums(Rb * wb), Rb)  
     names(rp) = "Total"                    
     names(rb) = "Total"                 
-    rp.a = prod(1 + rp) - 1              
-    rb.a = prod(1 + rb) - 1
-    Rp = cbind(Rp, rp)
-    Rb = cbind(Rb, rb)
-    
     bs = reclass(rowSums((wp * Rb[, 1:ncol(wp)])), rp) # Seminotional funds returns
-    allocation = ((1 + Rb) / (1 + rb.a) - 1) * cbind((wp - wb), rep(1, nrow(wp)))
-    selection = allocation
-    for (i in 1:ncol(wp)){
-      selection[, i] = ((Rp - Rb) * cbind(wp, rep(1, nrow(wp))))[, i] / (1 + bs)
-    }
-    allocation = rbind(as.data.frame(allocation), (apply(1 + allocation, 2, prod) - 1))
-    selection = rbind(as.data.frame(selection), (apply(1 + selection, 2, prod) - 1))
+    allocation = ((1 + Rb) / (1 + rep(rb, ncol(Rp))) - 1) * (wp - wb) # Geometric attribution effects for individual categories
+    selection = wp * (Rp - Rb) / (1 + rep(bs, ncol(Rp)))
+    allocation = cbind(allocation, rowSums(allocation)) # Total effects
+    selection = cbind(selection, rowSums(selection))
+    colnames(allocation)[ncol(allocation)] = "Total"
+    colnames(selection)[ncol(selection)] = "Total"
+    
+    # Link single-period attribution effects
+    a = (apply(1 + allocation[, ncol(allocation)], 2, prod) - 1)
+    s = (apply(1 + selection[, ncol(selection)], 2, prod) - 1)
+    (apply(1 + selection[, ncol(selection)], 2, prod) - 1)
+    allocation = rbind(as.data.frame(allocation), c(rep(NA, ncol(allocation) - 1), a))
+    selection = rbind(as.data.frame(selection), c(rep(NA, ncol(selection) - 1), s))
     rownames(allocation)[nrow(allocation)] = "Total"
     rownames(selection)[nrow(selection)] = "Total"
+    
+    # Get annualized geometric excess returns
+    excess.returns = (1 + rp) / (1 + rb) - 1
+    rp.a = prod(1 + rp) - 1              
+    rb.a = prod(1 + rb) - 1
+    ger.a = as.matrix((1 + rp.a) / (1 + rb.a) - 1)  # Geometric (annualized) excess returns
+    rownames(ger.a) = "Total geometric"
+    excess.returns = rbind(as.matrix(excess.returns), ger.a)
+    
     result = list()
-    result[[1]] = allocation
-    result[[2]] = selection
-    result[[3]] = allocation + selection
-    names(result) = c("Allocation", "Selection", "Total")
+    result[[1]] = excess.returns
+    result[[2]] = allocation
+    result[[3]] = selection
+    names(result) = c("Excess returns", "Allocation", "Selection")
     return(result)
 }
