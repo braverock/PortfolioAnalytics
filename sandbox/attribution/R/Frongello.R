@@ -59,11 +59,11 @@ function(rp, rb, attributions)
     # FUNCTION:
     attr = attributions
     if (nrow(rp) > 1){
-        attr[2, ] = attr[2, ] * (1 + rp[1, 1]) + rb[2, 1] * attr[1, ]
+        attr[2, ] = coredata(attr[2, ]) * drop((1 + rp[1, 1])) + drop(rb[2, 1]) * coredata(attr[1, ])
     }
     if (nrow(rp) > 2){
         for(i in 3:nrow(rp)){
-            attr[i, ] = attr[i, ] * prod(1 + rp[1:(i-1), 1]) + rb[i, ] * colSums(attr[1:(i-1), ])
+            attr[i, ] = coredata(attr[i, ]) * drop(prod(1 + rp[1:(i-1), 1])) + drop(rb[i, ]) * coredata(colSums(attr[1:(i-1), ]))
         }
     }
     total = colSums(attr)
