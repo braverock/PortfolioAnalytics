@@ -1,12 +1,14 @@
 #' provides multi-level geometric peformance attribution
 #' 
 #' Provides multi-level geometric peformance attribution. The Brinson model
-#' attribute excess returns at one level of the decision process. This 
-#' function works with more complex decision processes. For instance, the 
-#' 3-level decision process may have the following levels: type of asset - 
-#' country - sector. The levels should be specified in the vector with 
-#' elements in the particular order: from the highest level to the lowest.
-#' The contribution to the allocation in the ith category for the dth level  
+#' attribute excess returns at one level. This function works with more 
+#' complex decision processes. For instance, the 3-level decision process 
+#' may have the following levels: type of asset - country - sector. The 
+#' levels should be specified in the vector with elements in the particular 
+#' order: from the highest level to the lowest. Returns and weighs for 
+#' portfolio and benchmark should be at the lowest level (e.g. individual 
+#' instruments). The contribution to the allocation in the ith category for 
+#' the dth level
 #' is: \deqn{\left(^{d}wp_{i}-^{d}wb_{i}\right)\times\left(\frac{1+^{d}b_{i}}{1+^{d-1}b_{i}}-1\right)\times\frac{1+^{d-1}b_{i}}{1+bs^{d-1}}}
 #' The total attribution for each asset allocation step in the decision process
 #' is: \deqn{\frac{1+^{d}bs}{1+^{d-1}bs}-1}
@@ -21,6 +23,9 @@
 #' @param h data.frame with the hierarchy obtained from the buildHierarchy 
 #' function or defined manually in the the same style as buildHierarchy's
 #' output
+#' @return returns the list with total attribution effects (allocation, selection 
+#' and total) including total multi-period attribution effects, attribution 
+#' effects at each level and secruity selection
 #' @author Andrii Babii
 #' @seealso \code{\link{Attribution.geometric}}
 #' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and
@@ -33,8 +38,8 @@
 #' Attribution.levels(Rp, wp, Rb, wb, h, c("type", "Sector"))
 #' 
 #' @export
-#' @TODO label the output for arbitrary number of levels (more than 4) 
-#' compute total effects for multiple periods
+#' @TODO correct hierarchy, check if everything works correctly, compute total 
+#' effects for multiple periods
 Attribution.levels <-
 function(Rp, wp, Rb, wb, h, ...)
 {   # @author Andrii Babii
@@ -74,7 +79,12 @@ function(Rp, wp, Rb, wb, h, ...)
     # Get portfolio and benchmark returns
     r = Return.rebalancing(Rp, wp)
     b = Return.rebalancing(Rb, wb)
-
+    
+    # Transform hierarchy (incomplete)
+    for (i in levels){
+        paste(h[[levels[1]]], h[[levels[2]]], h[[levels[3]]], sep="-") 
+    }
+    
     # Get returns and weights at all levels
     returns.p = list()
     weights.p = list()
@@ -144,20 +154,11 @@ function(Rp, wp, Rb, wb, h, ...)
     rownames(general)[nrow(general)] = "Total"
     rownames(select)[nrow(select)] = "Total"
         
-    # Label output
+    # Label the output
     result = list()
-    if (length(levels) == 2){
-        colnames(general) = c("L1 allocation", "L2 allocation", "Selection", "Total")
-        names(level) = c("Level 1", "Level 2")
-    }
-    if (length(levels) == 3){
-        colnames(general) = c("L1 allocation", "L2 allocation", "L3 allocation", "Selection", "Total")
-        names(level) = c("Level 1", "Level 2", "Level 3")
-    }
-    if (length(levels) == 4){
-        colnames(general) = c("L1 allocation", "L2 allocation", "L3 allocation", "L4 allocation", "Selection", "Total")
-        names(level) = c("Level 1", "Level 2", "Level 3", "Level 4")
-    }
+    labels = paste(rep("Level", length(levels)), 1:length(levels))
+    names(level) = labels
+    colnames(general) = c(paste(labels, (rep("Allocation", length(levels)))), "Selection", "Total")
     
     result[[1]] = general
     result[[2]] = level
