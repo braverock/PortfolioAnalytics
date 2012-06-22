@@ -236,11 +236,12 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
     # This will take a new constraint object that is of the same structure of a 
     # ROI constraint object, but with an additional solver arg.
     # then we can do something like this
-    weights <- ROI_solve(x=constraints$constraint, constraints$solver)$solution
+    roi.result <- ROI_solve(x=constraints$constrainted_objective, constraints$solver)
+    weights <- roi.result$solution
     names(weights) <- colnames(R)
-    out$weights<-weights
+    out$weights <- weights
     out$objective_measures <- roi.result$objval
-    out$call<-call
+    out$call <- call
   } ## end case for ROI
   
     end_t<-Sys.time()

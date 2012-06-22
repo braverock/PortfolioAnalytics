@@ -218,20 +218,14 @@ update.constraint <- function(object, ...){
 #' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
 #' @author Hezky Varon
 #' @export
-constraint_ROI <- function(assets, op.problem, solver=c("glpk", "quadprog"),
-                           weight_seq=NULL)
+constraint_ROI <- function(assets, op.problem, solver=c("glpk", "quadprog"), weight_seq=NULL) 
 {
   if(problem == NULL) stop("Need to pass in optimiztion problem.")
-  solver <- solver[1]
-  require(solver, character.only=TRUE)
-  require(ROI, character.only=TRUE)
-  require(paste("ROI.plugin.", solver.method, sep=""), character.only=TRUE)
-  ## now structure and return
   return(structure(
     list(
       assets = assets,
-      op.problem = op.problem,
-      solver = solver,
+      constrainted_objective = op.problem,
+      solver = solver[1],
       weight_seq = weight_seq,
       objectives = list(),
       call = match.call()

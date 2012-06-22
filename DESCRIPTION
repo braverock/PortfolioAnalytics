@@ -3,7 +3,7 @@ Type: Package
 Title: Portfolio Analysis, including Numeric Methods for Optimization
     of Portfolios
 Version: 0.7.2
-Date: 2012-05-19
+Date: 2012-06-21
 Author: Kris Boudt, Peter Carl, Brian G. Peterson
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
@@ -16,6 +16,11 @@ Suggests:
     quantmod,
     DEoptim,
     foreach,
-    fGarch
+    fGarch,
+    Rglpk,
+    quadprog,
+    ROI,
+    ROI.plugin.glpk,
+    ROI.plugin.quadprog
 License: GPL
 Copyright: (c) 2004-2012
