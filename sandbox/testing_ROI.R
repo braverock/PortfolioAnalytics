@@ -1,7 +1,7 @@
 # # # # # # # # # # # # # #
 #  OPTIMIZATION TESTING 
 #
-setwd("~/Documents/gsoc_portfolio/tests")
+
 library(xts)
 library(quantmod)
 library(quadprog)
@@ -17,36 +17,11 @@ data(edhec)
 cov.mat <- var(edhec)
 mu.vec <- apply(edhec, 2, mean)
 n.assets <- ncol(edhec)
-mu.port <- 0.002
-Amat <- cbind(rep(1,n.assets),mu.vec)
-q.prob <- OP(objective=Q_objective(Q=-2*cov.mat, L=mu.vec), 
-             constraints=L_constraint(L=t(Amat),
-                                      dir=c("==","=="),
-                                      rhs=c(1,mu.port)),
-             maximum=TRUE)
-wts <- ROI_solve(x=q.prob, solver="quadprog")$solution
 
-
-
-# Comparing resutls wtih Guy's slides of PortfolioOptimization
-# sllide number 24/70, mean-variance optimization 
-# subject to fully-invested and expected portfolio return constraints
-data(CRSPday)
-R <- 100*CRSPday[,4:6]
-mean_vect <- apply(R,2,mean)
-cov_mat <- var(R)
-Amat <- rbind(rep(1,3),mean_vect)
-mu.port <- 0.1
-q.prob <- OP(objective=Q_objective(Q=2*cov_mat, L=rep(0,3)), 
-             constraints=L_constraint(L=Amat,
-                                      dir=c("==","=="),
-                                      rhs=c(1, mu.port)))
-wts <- ROI_solve(x=q.prob, solver="quadprog")$solution
-# this returuns a long-only portfolio, error within ROI
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Sample portfolio optimization problem....
+# Sample portfolio optimization problems....
 
 # =====================
 # Arbitrage
@@ -85,5 +60,38 @@ test <- ROI_solve(x=q.prob, solver="glpk")
 # [10]  0.00000000 -0.41200277 -0.02153654  0.25916374
 
 
+
+
+# =====================
+# Mean-variance
+#
+mu.port <- 0.002
+Amat <- cbind(rep(1,n.assets),mu.vec)
+q.prob <- OP(objective=Q_objective(Q=-2*cov.mat, L=mu.vec), 
+             constraints=L_constraint(L=t(Amat),
+                                      dir=c("==","=="),
+                                      rhs=c(1,mu.port)),
+             bounds=bnds,
+             maximum=TRUE)
+wts <- ROI_solve(x=q.prob, solver="quadprog")$solution
+
+
+# Comparing resutls wtih Guy's slides of PortfolioOptimization
+# sllide number 24/70, mean-variance optimization 
+# subject to fully-invested and expected portfolio return constraints
+data(CRSPday)
+R <- 100*CRSPday[,4:6]
+mean_vect <- apply(R,2,mean)
+cov_mat <- var(R)
+Amat <- rbind(rep(1,3),mean_vect)
+mu.port <- 0.1
+bnds <- list(lower = list(ind = seq.int(1L, as.integer(3)), val = rep(-Inf,3)),
+             upper = list(ind = seq.int(1L, as.integer(3)), val = rep(Inf,3)))
+q.prob <- OP(objective=Q_objective(Q=2*cov_mat, L=rep(0,3)), 
+             constraints=L_constraint(L=Amat,
+                                      dir=c("==","=="),
+                                      rhs=c(1, mu.port)),
+             bounds=bnds)
+wts <- ROI_solve(x=q.prob, solver="quadprog")$solution
 
 
