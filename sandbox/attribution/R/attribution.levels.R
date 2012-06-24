@@ -38,15 +38,13 @@
 #' Attribution.levels(Rp, wp, Rb, wb, h, c("type", "Sector"))
 #' 
 #' @export
-#' @TODO correct hierarchy, check if everything works correctly, compute total 
-#' effects for multiple periods
 Attribution.levels <-
 function(Rp, wp, Rb, wb, h, ...)
 {   # @author Andrii Babii
   
     # DESCRIPTION:
     # Function to perform the geometric attribution analysis.
-  
+    
     # Inputs:
     # Rp       xts, data frame or matrix of portfolio returns
     # wp       vector, xts, data frame or matrix of portfolio weights
@@ -60,9 +58,11 @@ function(Rp, wp, Rb, wb, h, ...)
     # attribution effects, attribution effects at each level and secruity
     # selection
   
-  # FUNCTION:
+    # FUNCTION:
     Rp = checkData(Rp)
     Rb = checkData(Rb)
+    WP = wp   # Save original weights in order to avoid double conversion later
+    WB = wb
     wp = Weight.transform(wp, Rp)
     wb = Weight.transform(wb, Rb)
     if (nrow(wp) < nrow(Rp)){ # Rebalancing occurs next day
@@ -77,12 +77,12 @@ function(Rp, wp, Rb, wb, h, ...)
     }
 
     # Get portfolio and benchmark returns
-    r = Return.rebalancing(Rp, wp)
-    b = Return.rebalancing(Rb, wb)
+    r = reclass(rowSums(Rp * wp), Rp)
+    b = reclass(rowSums(Rb * wb), Rb)
     
-    # Transform hierarchy (incomplete)
-    for (i in levels){
-        paste(h[[levels[1]]], h[[levels[2]]], h[[levels[3]]], sep="-") 
+    # Transform the hierarchy to the correct form
+    for (i in 2:length(levels)){
+        h[[levels[i]]] = paste(h[[levels[i - 1]]],  h[[levels[i]]], sep = "-")
     }
     
     # Get returns and weights at all levels
@@ -92,10 +92,10 @@ function(Rp, wp, Rb, wb, h, ...)
     weights.b = list()
     bs = list()
     for(i in 1:length(levels)){
-        returns.p[[i]] = Return.level(Rp, wp, h, level = levels[i])
-        weights.p[[i]] = Weight.level(wp, h, level = levels[i])
-        returns.b[[i]] = Return.level(Rb, wb, h, level = levels[i])
-        weights.b[[i]] = Weight.level(wb, h, level = levels[i])
+        returns.p[[i]] = Return.level(Rp, WP, h, level = levels[i])
+        weights.p[[i]] = Weight.level(WP, h, level = levels[i])
+        returns.b[[i]] = Return.level(Rb, WB, h, level = levels[i])
+        weights.b[[i]] = Weight.level(WB, h, level = levels[i])
         bs[[i]] = reclass(rowSums(returns.b[[i]] * weights.p[[i]]), r)  # semi-notional funds returns
     } 
     names(returns.p) = levels
@@ -119,8 +119,8 @@ function(Rp, wp, Rb, wb, h, ...)
     
     returns.b2 = list()
     for (j in 1:(length(levels) - 1)){ # make benchmark returns conformable at different levels
-        r_l = Return.level(Rb, wb, h, level = levels[j])
-        r_h = Return.level(Rb, wb, h, level = levels[j+1])
+        r_l = Return.level(Rb, WB, h, level = levels[j])
+        r_h = Return.level(Rb, WB, h, level = levels[j+1])
         hierarchy = split(h[levels[j]], h[levels[j+1]])
         for (i in 1:ncol(r_h)){
             r_h[, i] = r_l[, hierarchy[[i]][1, 1]]
