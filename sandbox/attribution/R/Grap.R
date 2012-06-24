@@ -1,10 +1,10 @@
-#' calculates total attribution effects using GRAP linking 
+#' calculates total attribution effects using GRAP smoothing 
 #' 
 #' Calculates total attribution effects over multiple periods using 
-#' logarithmic linking method. Used internally by the \code{\link{Attribution}} 
+#' GEAP linking method. Used internally by the \code{\link{Attribution}} 
 #' function. Arithmetic attribution effects do not naturally link over time. 
-#' This function uses GRAP smoothing algorithms to adjust
-#' attribution effects so that they can be summed up over multiple periods
+#' This function uses GRAP smoothing algorithm to adjust attribution effects 
+#' so that they can be summed up over multiple periods
 #' Attribution effect are multiplied by the adjustment factor 
 #' \deqn{A_{t}' = A_{t} \times G_{t}}, where 
 #' \deqn{G_{t}=\overset{t-1}{\underset{i=1}{\prod}}(1+r_{i})\times\overset{n}{\underset{i=t+1}{\prod}}(1+b_{i})}
@@ -23,6 +23,10 @@
 #' @param rp xts of portfolio returns
 #' @param rb xts of benchmark returns
 #' @param attributions  xts with attribution effects
+#' @param adjusted TRUE/FALSE, whether to show original or smoothed attribution
+#' effects for each period
+#' @return returns a data frame with original attribution effects and total 
+#' attribution effects over multiple periods
 #' @author Andrii Babii
 #' @seealso  \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr 
 #' \code{\link{Carino}} \cr \code{\link{Frongello}} \cr
@@ -32,15 +36,15 @@
 #' 
 #' GRAP (Groupe de Recherche en Attribution de Performance) (1997) 
 #' \emph{Synthese des modeles d’attribution de performance}. Paris, Mars.
-#' @keywords attribution, GRAP linking
+#' @keywords arithmetic attribution, GRAP linking
 #' @examples
 #' 
 #' data(attrib)
-#' Grap(rp, rb, allocation)
+#' Grap(rp, rb, allocation, adjusted = FALSE)
 #' 
 #' @export
 Grap <-
-function(rp, rb, attributions)
+function(rp, rb, attributions, adjusted)
 {   # @author Andrii Babii
   
   
@@ -75,8 +79,13 @@ function(rp, rb, attributions)
         }
     }
     g = matrix(rep(G, ncol(attributions)), nrow(attributions), ncol(attributions), byrow = FALSE)
-    total = colSums(attributions * g)
-    attributions = rbind(as.data.frame(attributions), total)
+    adj = attributions * g
+    total = colSums(adj)
+    if (adjusted == FALSE){
+      attributions = rbind(as.data.frame(attributions), total)
+    } else{
+      attributions = rbind(as.data.frame(adj), total)
+    }
     rownames(attributions)[nrow(attributions)] = "Total"
     return(attributions)
 }

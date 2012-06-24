@@ -1,9 +1,9 @@
-#' calculates total attribution effects using Frongello linking 
+#' calculates total attribution effects using Frongello smoothing 
 #' 
 #' Calculates total attribution effects over multiple periods using 
-#' logarithmic linking method. Used internally by the \code{\link{Attribution}} 
+#' Frongello linking method. Used internally by the \code{\link{Attribution}} 
 #' function. Arithmetic attribution effects do not naturally link over time. 
-#' This function uses logarithmic smoothing algorithms to adjust
+#' This function uses Frongello smoothing algorithm to adjust
 #' attribution effects so that they can be summed up over multiple periods
 #' Adjusted attribution effect at period t are:
 #' \deqn{A_{t}' = A_{t}\times\overset{t-1}{\underset{i=1}{\prod}}(1+r_{i})+b_{t}\times\overset{t-1}{\underset{i=1}{\sum}}A_{i}'}
@@ -19,28 +19,28 @@
 #' @param rp xts of portfolio returns
 #' @param rb xts of benchmark returns
 #' @param attributions  xts with attribution effects
+#' @param adjusted TRUE/FALSE, whether to show original or smoothed attribution
+#' effects for each period
+#' @return returns a data frame with original attribution effects and total 
+#' attribution effects over multiple periods
 #' @author Andrii Babii
 #' @seealso  \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr 
 #' \code{\link{Grap}} \cr \code{\link{Carino}} \cr
 #' \code{\link{Attribution.geometric}}
-#' @references Christopherson, Jon A., Carino, David R., Ferson, Wayne E.  
-#' \emph{Portfolio Performance Measurement and Benchmarking}. McGraw-Hill. 2009. 
-#' Chapter 19
-#' 
-#' Bacon, C. \emph{Practical Portfolio Performance Measurement and
+#' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and
 #' Attribution}. Wiley. 2004. p. 199-201
 #' 
 #' Frongello, A. (2002) \emph{Linking single period attribution results}.
 #' Journal of Performance Measurement. Spring, 10–22.
-#' @keywords attribution, Frongello linking
+#' @keywords arithmetic attribution, Frongello linking
 #' @examples
 #' 
 #' data(attrib)
-#' Frongello(rp, rb, allocation)
+#' Frongello(rp, rb, allocation, adjusted = FALSE)
 #' 
 #' @export
 Frongello <-
-function(rp, rb, attributions)
+function(rp, rb, attributions, adjusted)
 {   # @author Andrii Babii
   
     # DESCRIPTION:
@@ -57,17 +57,21 @@ function(rp, rb, attributions)
     # and total attribution effects over multiple periods
     
     # FUNCTION:
-    attr = attributions
+    adj = attributions
     if (nrow(rp) > 1){
-        attr[2, ] = coredata(attr[2, ]) * drop((1 + rp[1, 1])) + drop(rb[2, 1]) * coredata(attr[1, ])
+        adj[2, ] = coredata(adj[2, ]) * drop((1 + rp[1, 1])) + drop(rb[2, 1]) * coredata(adj[1, ])
     }
     if (nrow(rp) > 2){
         for(i in 3:nrow(rp)){
-            attr[i, ] = coredata(attr[i, ]) * drop(prod(1 + rp[1:(i-1), 1])) + drop(rb[i, ]) * coredata(colSums(attr[1:(i-1), ]))
+            adj[i, ] = coredata(adj[i, ]) * drop(prod(1 + rp[1:(i-1), 1])) + drop(rb[i, ]) * coredata(colSums(adj[1:(i-1), ]))
         }
     }
-    total = colSums(attr)
-    attributions = rbind(as.data.frame(attributions), total)
+    total = colSums(adj)
+    if (adjusted == FALSE){
+      attributions = rbind(as.data.frame(attributions), total)
+    } else{
+      attributions = rbind(as.data.frame(adj), total)
+    }
     rownames(attributions)[nrow(attributions)] = "Total"
     return(attributions)
 }

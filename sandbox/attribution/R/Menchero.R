@@ -1,9 +1,9 @@
-#' calculates total attribution effects using Menchero linking 
+#' calculates total attribution effects using Menchero smoothing 
 #' 
 #' Calculates total attribution effects over multiple periods using 
 #' Menchero linking method. Used internally by the \code{\link{Attribution}} 
 #' function. Arithmetic attribution effects do not naturally link over time. 
-#' This function uses Menchero smoothing algorithms to adjust
+#' This function uses Menchero smoothing algorithm to adjust
 #' attribution effects so that they can be summed up over multiple periods
 #' Attribution effect are multiplied by the adjustment factor 
 #' \deqn{A_{t}' = A_{t} \times (M +a_{t})},
@@ -26,6 +26,10 @@
 #' @param rp xts of portfolio returns
 #' @param rb xts of benchmark returns
 #' @param attributions  xts with attribution effects
+#' @param adjusted TRUE/FALSE, whether to show original or smoothed attribution
+#' effects for each period
+#' @return returns a data frame with original attribution effects and total 
+#' attribution effects over multiple periods
 #' @author Andrii Babii
 #' @seealso  \code{\link{Attribution}} \cr \code{\link{Carino}} \cr 
 #' \code{\link{Grap}} \cr \code{\link{Frongello}} \cr
@@ -39,11 +43,11 @@
 #' @examples
 #' 
 #' data(attrib)
-#' Menchero(rp, rb, allocation)
+#' Menchero(rp, rb, allocation, adjusted = FALSE)
 #' 
 #' @export
 Menchero <-
-function(rp, rb, attributions)
+function(rp, rb, attributions, adjusted)
 {   # @author Andrii Babii
     
     # DESCRIPTION:
@@ -71,8 +75,13 @@ function(rp, rb, attributions)
         at = (rp.a - rb.a - M * sum(rp - rb)) * (rp - rb) / sum((rp - rb)^2)
     }
     m = matrix(rep(M + at, ncol(attributions)), nrow(attributions), ncol(attributions), byrow = FALSE)
-    total = colSums(attributions * m)
-    attributions = rbind(as.data.frame(attributions), total)
+    adj = attributions * m
+    total = colSums(adj)
+    if (adjusted == FALSE){
+      attributions = rbind(as.data.frame(attributions), total)
+    } else{
+      attributions = rbind(as.data.frame(adj), total)
+    }
     rownames(attributions)[nrow(attributions)] = "Total"
     return(attributions)
 }

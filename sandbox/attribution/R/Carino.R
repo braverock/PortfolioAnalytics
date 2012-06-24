@@ -1,4 +1,4 @@
-#' calculates total attribution effects using logarithmic linking 
+#' calculates total attribution effects using logarithmic smoothing 
 #' 
 #' Calculates total attribution effects over multiple periods using 
 #' logarithmic linking method. Used internally by the \code{\link{Attribution}} 
@@ -25,6 +25,10 @@
 #' @param rp xts of portfolio returns
 #' @param rb xts of benchmark returns
 #' @param attributions  xts with attribution effects
+#' @return returns a data frame with original attribution effects and total 
+#' attribution effects over multiple periods
+#' @param adjusted TRUE/FALSE, whether to show original or smoothed attribution
+#' effects for each period
 #' @author Andrii Babii
 #' @seealso  \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr 
 #' \code{\link{Grap}} \cr \code{\link{Frongello}} \cr
@@ -42,11 +46,11 @@
 #' @examples
 #' 
 #' data(attrib)
-#' Carino(rp, rb, allocation)
+#' Carino(rp, rb, allocation, adjusted = FALSE)
 #' 
 #' @export
 Carino <- 
-function(rp, rb, attributions)
+function(rp, rb, attributions, adjusted)
 {   # @author Andrii Babii
   
     # DESCRIPTION:
@@ -75,8 +79,14 @@ function(rp, rb, attributions)
       }
     }
     kt = matrix(rep(kt, ncol(attributions)), nrow(attributions), ncol(attributions), byrow = FALSE)
-    total = colSums(attributions * kt / k)
-    attributions = rbind(as.data.frame(attributions), total)
+    adj = attributions * kt / k 
+    total = colSums(adj)
+    if (adjusted == FALSE){
+        attributions = rbind(as.data.frame(attributions), total)
+    } else{
+        attributions = rbind(as.data.frame(adj), total)
+    }
     rownames(attributions)[nrow(attributions)] = "Total"
+    
     return(attributions)
 }
