@@ -84,10 +84,30 @@ function(Rp, wp, h, level = "Sector")
     # Transform data to the xts objects    
     Rp = checkData(Rp, method = "xts")
     wp = Weight.transform(wp, Rp)
-    if (nrow(wp) < nrow(Rp)){ # Rebalancing occurs next day
-        Rp = Rp[2:nrow(Rp)]
+    
+    # If level has numeric values we replace numeric values by quintiles
+    if (is.numeric(h[[level]])){
+        hnew = h[[level]]
+        quintiles = quantile(h[[level]], c(0, 0.2, 0.4, 0.6, 0.8, 1))
+        for (i in 1:length(h[[level]])){
+            if (h[[level]][i] >= quintiles[1] & h[[level]][i] < quintiles[2]){
+                hnew[i] = "Quintile 1"
+            }
+            if (h[[level]][i] >= quintiles[2] & h[[level]][i] < quintiles[3]){
+              hnew[i] = "Quintile 2"
+            }
+            if (h[[level]][i] >= quintiles[3] & h[[level]][i] < quintiles[4]){
+              hnew[i] = "Quintile 3"
+            }
+            if (h[[level]][i] >= quintiles[4] & h[[level]][i] < quintiles[5]){
+              hnew[i] = "Quintile 4"
+            }
+            if (h[[level]][i] >= quintiles[5] & h[[level]][i] <= quintiles[6]){
+              hnew[i] = "Quintile 5"
+            }
+        }
+        h[[level]] = hnew
     }
-
     h = split(h$primary_id, h[level])
     returns = as.xts(matrix(NA, ncol = length(h), nrow = nrow(Rp)), index(Rp))
     for(i in 1:length(h)){
