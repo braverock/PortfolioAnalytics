@@ -5,10 +5,10 @@
 #' portfolio. Equipped with weights and returns of portfolio segments, we 
 #' can dissect the value-added into useful components. This function is based
 #' on the sector-based approach to the attribution. The workhorse is the
-#' Brinson model that explains the arithmetic difference between portfolio and 
+#' Brinson model that explains the arithmetic difference between portfolio and
 #' benchmark returns. That is it breaks down the arithmetic excess returns at 
 #' one level. If returns and weigths are available at the lowest level (e.g. 
-#' for individual instruments), the aggregation up to the chosen level from the 
+#' for individual instruments), the aggregation up to the chosen level from the
 #' hierarchy can be done using Return.level function. The attribution effects 
 #' can be computed for several periods. The multi-period summary is obtained 
 #' using one of linking methods: Carino, Menchero, GRAP, Frongello. It also 
@@ -39,11 +39,13 @@
 #' Usually we have more then one period. In that case individual arithmetic 
 #' attribution effects should be adjusted using linking methods. Adjusted
 #' arithmetic attribution effects can be summed up over time to provide the
-#' multi-period summary: \deqn{r-b=\overset{T}{\underset{t=1}{\sum}}\left(A_{t}'+S_{t}'+I_{t}'\right)}
+#' multi-period summary: 
+#' \deqn{r-b=\overset{T}{\underset{t=1}{\sum}}\left(A_{t}'+S_{t}'+I_{t}'\right)}
 #' , where \deqn{T} - number of periods; prime stands for the adjustment.
 #' The geometric attribution effects do not suffer from the linking problem.
 #' Moreover we don't have the interaction term. For more details about the 
-#' geometric attribution see the documentation to \code{link{Attribution.geometric}}
+#' geometric attribution see the documentation to 
+#' \code{link{Attribution.geometric}}
 #' Finally, arithmetic annualized excess returns are computed as the 
 #' arithmetic difference between annualised portfolio and benchmark returns:
 #' \deqn{AAER=r_{a}-b_{a}}; the geometric annualized excess returns are
@@ -51,9 +53,9 @@
 #' and benchmark returns: \deqn{GAER=\frac{1+r_{a}}{1+b_{a}}-1}
 #' 
 #' @aliases Attribution
-#' @param Rp xts, data frame or matrix of portfolio returns
+#' @param Rp T x n xts, data frame or matrix of portfolio returns
 #' @param wp vector, xts, data frame or matrix of portfolio weights
-#' @param Rb xts, data frame or matrix of benchmark returns
+#' @param Rb T x n xts, data frame or matrix of benchmark returns
 #' @param wb vector, xts, data frame or matrix of benchmark weights
 #' @param method Used to select the priority between allocation and selection 
 #' effects in arithmetic attribution. May be any of: \itemize{ \item none - 
@@ -70,6 +72,11 @@
 #' Frongello's linking method
 #' @param geometric TRUE/FALSE, whether to use geometric or arithmetic excess
 #' returns for the attribution analysis
+#' @param adjusted TRUE/FALSE, whether to show original or smoothed attribution
+#' effects for each period
+#' @return returns a list with the following components: excess returns with
+#' annualized excess returns over all periods, attribution effects (allocation, 
+#' selection and interaction)
 #' @author Andrii Babii
 #' @seealso \code{\link{Attribution.levels}}
 #' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and
@@ -87,21 +94,22 @@
 #' 
 #' data(attrib)
 #' Attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
-#' Attribution(Rp, wp, Rb, wb, geometric = TRUE)
 #' 
-#' @export 
+#' @TODO fix bug with annualized excess returns, Brinson-Fachler, check if we can compute 
+#' total effects for individual segments in Davies-Laker and Geometric
+#' @export
 Attribution <- 
 function (Rp, wp, Rb, wb, method = c("none", "top.down", "bottom.up"), 
-linking = c("carino", "menchero", "grap", "frongello"), geometric = FALSE)
+linking = c("carino", "menchero", "grap", "frongello", "davies.laker"), geometric = FALSE, adjusted = FALSE)
 {   # @author Andrii Babii
 
     # DESCRIPTION:
     # Function to perform the attribution analysis.
 
     # Inputs:
-    # Rp       xts, data frame or matrix of portfolio returns
+    # Rp       T x n xts, data frame or matrix of portfolio returns
     # wp       vector, xts, data frame or matrix of portfolio weights
-    # Rb       xts, data frame or matrix of benchmark returns
+    # Rb       T x n xts, data frame or matrix of benchmark returns
     # wb       vector, xts, data frame or matrix of benchmark weights
   
     # Outputs: 
@@ -141,45 +149,49 @@ linking = c("carino", "menchero", "grap", "frongello"), geometric = FALSE)
        
     # Adjust attribution effects using one of linking methods
     if (linking == "carino"){
-        allocation = Carino(rp, rb, allocation)
-        selection = Carino(rp, rb, selection)
-        interaction = Carino(rp, rb, interaction)
+        allocation = Carino(rp, rb, allocation, adjusted)
+        selection = Carino(rp, rb, selection, adjusted)
+        interaction = Carino(rp, rb, interaction, adjusted)
     }
 
     if (linking == "menchero"){
-        allocation = Menchero(rp, rb, allocation)
-        selection = Menchero(rp, rb, selection)
-        interaction = Menchero(rp, rb, interaction)
+        allocation = Menchero(rp, rb, allocation, adjusted)
+        selection = Menchero(rp, rb, selection, adjusted)
+        interaction = Menchero(rp, rb, interaction, adjusted)
     }    
 
     if (linking == "grap"){
-        allocation = Grap(rp, rb, allocation)
-        selection = Grap(rp, rb, selection)
-        interaction = Grap(rp, rb, interaction)
+        allocation = Grap(rp, rb, allocation, adjusted)
+        selection = Grap(rp, rb, selection, adjusted)
+        interaction = Grap(rp, rb, interaction, adjusted)
     }
 
     if (linking == "frongello"){
-        allocation = Frongello(rp, rb, allocation)
-        selection = Frongello(rp, rb, selection)
-        interaction = Frongello(rp, rb, interaction)
+        allocation = Frongello(rp, rb, allocation, adjusted)
+        selection = Frongello(rp, rb, selection, adjusted)
+        interaction = Frongello(rp, rb, interaction, adjusted)
     }
     
     if (geometric == TRUE){
         attrib = Attribution.geometric(Rp, wp, Rb, wb)
     }
     
-    # Annualize excess returns
-    rp.a = prod(1 + rp) - 1              
-    rb.a = prod(1 + rb) - 1
-    if (geometric == FALSE){
+    if (linking == "davies.laker"){
+        attrib = DaviesLaker(Rp, wp, Rb, wb)
+    }
+    
+    # Total arithmetic excess returns
+    rp.c = prod(1 + rp) - 1              
+    rb.c = prod(1 + rb) - 1
+    if (geometric == FALSE | linking != "davies.laker"){
         excess.returns = rp - rb
-        aer.a = as.matrix(rp.a - rb.a)                  # Arithmetic (annualized) excess returns
-        rownames(aer.a) = "Total arithmetic"
-        excess.returns = rbind(as.matrix(excess.returns), aer.a)
+        aer = as.matrix(rp.c - rb.c)
+        rownames(aer) = "Total arithmetic"
+        excess.returns = rbind(as.matrix(excess.returns), aer)
     }
 
     # Select the appropriate result corresponding to the chosen method
-    if (geometric == FALSE){
+    if (geometric == FALSE & linking != "davies.laker"){
         result = list()
         result[[1]] = excess.returns
         result[[2]] = allocation
@@ -198,7 +210,7 @@ linking = c("carino", "menchero", "grap", "frongello"), geometric = FALSE)
     }
 
     # Label the output
-    if (method == "none" & geometric == FALSE){
+    if ((linking == "none" & geometric == FALSE) | linking == "davies.laker"){
         names(result) = c("Excess returns", "Allocation", "Selection", "Interaction")
     } else{
       names(result) = c("Excess returns", "Allocation", "Selection")
