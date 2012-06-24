@@ -1,9 +1,11 @@
 # I. Different options
 data(attrib)
 for (i in c("none", "top.down", "bottom.up")){
-    for (j in c("carino", "menchero", "grap", "frongello")){
+    for (j in c("carino", "menchero", "grap", "frongello", "davies.laker")){
         for (k in c(TRUE, FALSE)){
-            Attribution(Rp, wp, Rb, wb, i, j, k)
+            for (l in c(TRUE, FALSE)){
+            Attribution(Rp, wp, Rb, wb, i, j, k, l)
+            }
         }
     }
 }
@@ -12,7 +14,8 @@ Attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
 Attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
 Attribution(Rp, wp, Rb, wb, method = "none", linking = "grap")
 Attribution(Rp, wp, Rb, wb, method = "none", linking = "frongello")
-Attribution(Rp, wp, Rb, wb, geometric = TRUE)
+Attribution(Rp, wp, Rb, wb, method = "none", linking = "davies.laker")
+Attribution(Rp, wp, Rb, wb, method = "none", geometric = TRUE)
 
 Weight.transform(wp, Rp)
 Return.level(Rp, wp, h, level = "Sector")
@@ -61,20 +64,20 @@ WP=as.vector(wp[1, ])
 Attribution(RP, WP, RB, WB, "none", "carino") # The same as in Table 5.2 (Bacon, 2008)
 
 # 2. Carino linking
-Carino(rp, rb, allocation)   # Total attribution effects are the same as in Table 8.2 (Bacon, 2008)
-Carino(rp, rb, selection)    # Total attribution effects are the same as in Table 8.2 (Bacon, 2008)
+Carino(rp, rb, allocation, TRUE)   # Attribution effects are the same as in Table 8.2 (Bacon, 2008)
+Carino(rp, rb, selection, TRUE)    # Attribution effects are the same as in Table 8.2 (Bacon, 2008)
 
 # 3. Menchero linking
-Menchero(rp, rb, allocation) # Total attribution effects are the same as in Table 8.3 (Bacon, 2008)
-Menchero(rp, rb, selection)  # Total attribution effects are the same as in Table 8.3 (Bacon, 2008)
+Menchero(rp, rb, allocation, TRUE) # Attribution effects are the same as in Table 8.3 (Bacon, 2008)
+Menchero(rp, rb, selection, TRUE)  # Attribution effects are the same as in Table 8.3 (Bacon, 2008)
 
 # 4. GRAP linking
-Grap(rp, rb, allocation)     # Total attribution effects are the same as in Table 8.4 (Bacon, 2008)
-Grap(rp, rb, selection)      # Total attribution effects are the same as in Table 8.4 (Bacon, 2008)
+Grap(rp, rb, allocation, TRUE)     # Attribution effects are the same as in Table 8.4 (Bacon, 2008)
+Grap(rp, rb, selection, TRUE)      # Attribution effects are the same as in Table 8.4 (Bacon, 2008)
 
 # 5. Frongello linking
-Frongello(rp, rb, allocation)# Total attribution effects are the same as in Table 8.5 (Bacon, 2008)
-Frongello(rp, rb, selection) # Total attribution effects are the same as in Table 8.5 (Bacon, 2008)
+Frongello(rp, rb, allocation, TRUE)# Attribution effects are the same as in Table 8.5 (Bacon, 2008)
+Frongello(rp, rb, selection, TRUE) # Attribution effects are the same as in Table 8.5 (Bacon, 2008)
 
 # 6. Geometric attribution
 # 6.1 Single-period
@@ -87,7 +90,5 @@ Attribution.geometric(RP, WP, RB, WB) # The same as in Table 5.5
 # 6.2 Multi-period
 index(wp) <- as.Date(c("2011-12-31", "2012-02-01", "2012-03-01", "2012-04-01"))
 index(wb) <- as.Date(c("2011-12-31", "2012-02-01", "2012-03-01", "2012-04-01"))
-Attribution(Rp, wp, Rb, wb, geometric = TRUE) # Total effects and annualized excess returns are the 
+Attribution(Rp, wp, Rb, wb, geometric = TRUE) # Total effects and total excess returns are the 
                                               # same as in Table 8.6 and Exhibit 8.12 (Bacon, 2008)
-                                    
-# 7. Multi-level geometric attribution
