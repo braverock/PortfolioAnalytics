@@ -280,8 +280,7 @@ optimize.portfolio <- function(
 #' @param rp a set of random portfolios passed into the function, to prevent recalculation
 #' @param rebalance_on a periodicity as returned by xts function periodicity and usable by endpoints
 #' @param training_period period to use as training in the front of the data
-#' @param trailing_periods if set, an integer with the number of periods to roll over, default NULL will run from inception
- 
+#' @param trailing_periods if set, an integer with the number of periods to roll over, default NULL will run from inception 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export

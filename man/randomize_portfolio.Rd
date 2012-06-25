@@ -14,7 +14,7 @@
   iterations to try for a valid portfolio, default 200}
 
   \item{rounding}{integer how many decimals should we round
-  to .}
+  to}
 }
 \value{
   named weighting vector

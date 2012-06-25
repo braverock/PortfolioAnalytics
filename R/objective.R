@@ -21,7 +21,6 @@
 #' @param objclass string class to apply, default 'objective'
 #' @author Brian G. Peterson
 #' @export
-
 objective<-function(name , target=NULL , arguments, enabled=FALSE , ..., multiplier=1, objclass='objective'){
   if(!hasArg(name)) stop("you must specify an objective name")
   if (hasArg(name)) if(is.null(name)) stop("you must specify an objective name")
@@ -70,7 +69,6 @@ is.objective <- function( x ) {
 #' @seealso \code{\link{constraint}}
 #' 
 #' @export
-
 add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE, ..., indexnum=NULL)
 {
     if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}

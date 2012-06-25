@@ -38,7 +38,7 @@
 
   \item{trailing_periods}{if set, an integer with the
   number of periods to roll over, default NULL will run
-  from inception .}
+  from inception}
 }
 \value{
   a list containing the optimal weights, some summary

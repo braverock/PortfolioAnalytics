@@ -50,7 +50,6 @@ generatesequence <- function (min=.01, max=1, by=min/max, rounding=3 )
 #' @param rpconstraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
 #' @param rounding integer how many decimals should we round to
-
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
 #' @export
