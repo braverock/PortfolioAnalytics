@@ -139,6 +139,16 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL,...){
     return(momentargs)
 }
 
+garch.mm <- function(R,mu_ts, covlist,momentargs=list(),...) {
+    #momentargs<-list()
+    #momentargs$mu<-mu_ts[last(index(R)),]
+    momentargs$mu<-mu_ts[last(index(R)),]
+    
+    momentargs$sigma<-covlist[as.character(last(index(R)))]
+    if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
+    if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+    return(momentargs)
+}
 ###############################################################################
 # $Id$
 ###############################################################################

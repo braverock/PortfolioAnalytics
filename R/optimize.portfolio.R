@@ -42,11 +42,19 @@
 #' @param \dots any other passthru parameters
 #' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
 #' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments}}
-#' @callGraph 
+#' 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
-optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL)
+optimize.portfolio <- function(
+		R,
+		constraints,
+		optimize_method=c("DEoptim","random","ROI"), 
+		search_size=20000, 
+		trace=FALSE, ..., 
+		rp=NULL,
+		momentFUN='set.portfolio.moments'
+)
 {
   optimize_method=optimize_method[1]
   tmptrace=NULL
@@ -273,7 +281,7 @@ optimize.portfolio <- function(R,constraints,optimize_method=c("DEoptim","random
 #' @param rebalance_on a periodicity as returned by xts function periodicity and usable by endpoints
 #' @param training_period period to use as training in the front of the data
 #' @param trailing_periods if set, an integer with the number of periods to roll over, default NULL will run from inception
-#' @callGraph 
+#' . 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
@@ -340,7 +348,7 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
 #' @param nodes how many processes to run in the foreach loop, default 4
-#' @callGraph 
+#' . 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export

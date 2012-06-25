@@ -25,7 +25,7 @@
 #' @examples 
 #' exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, weight_seq=generatesequence())
 #' @export
-#' @callGraph
+#' .
 constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,max_sum=1.01,weight_seq=NULL)
 { # based on GPL R-Forge pkg roi by Stefan Thuessel,Kurt Hornik,David Meyer
   if (hasArg(min) & hasArg(max)) {
