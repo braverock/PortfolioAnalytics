@@ -1,4 +1,3 @@
-export(.)
 export(CCCgarch.MM)
 export(chart.Scatter.DE)
 export(chart.Scatter.RP)
