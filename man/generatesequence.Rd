@@ -1,15 +1,31 @@
 \name{generatesequence}
 \alias{generatesequence}
-\title{create a sequence of possible weights for random or brute force portfolios...}
-\usage{generatesequence(min=0.01, max=1, by=min/max, rounding=3)}
-\description{create a sequence of possible weights for random or brute force portfolios}
-\details{This function creates the sequence of min<->max weights for use by
-random or brute force optimization engines.
+\title{create a sequence of possible weights for random or brute force portfolios}
+\usage{
+  generatesequence(min = 0.01, max = 1, by = min/max,
+    rounding = 3)
+}
+\arguments{
+  \item{min}{minimum value of the sequence}
 
-The sequence created is not constrained by asset.}
-\author{Peter Carl, Brian G. Peterson}
-\seealso{\code{\link{constraint}}, \code{\link{objective}}}
-\arguments{\item{min}{minimum value of the sequence}
-\item{max}{maximum value of the sequence}
-\item{by}{number to increment the sequence by}
-\item{rounding}{integrer how many decimals should we round to}}
+  \item{max}{maximum value of the sequence}
+
+  \item{by}{number to increment the sequence by}
+
+  \item{rounding}{integrer how many decimals should we
+  round to}
+}
+\description{
+  This function creates the sequence of min<->max weights
+  for use by random or brute force optimization engines.
+}
+\details{
+  The sequence created is not constrained by asset.
+}
+\author{
+  Peter Carl, Brian G. Peterson
+}
+\seealso{
+  \code{\link{constraint}}, \code{\link{objective}}
+}
+

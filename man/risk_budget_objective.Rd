@@ -1,19 +1,46 @@
 \name{risk_budget_objective}
 \alias{risk_budget_objective}
-\title{constructor for class risk_budget_objective...}
-\usage{risk_budget_objective(assets, name, target, arguments, multiplier=1,
-    enabled=FALSE, ..., min_prisk, max_prisk, min_concentration=FALSE,
-    min_difference=FALSE)}
-\description{constructor for class risk_budget_objective}
-\author{Brian G. Peterson}
-\arguments{\item{assets}{vector of assets to use, should come from constraints object}
-\item{name}{name of the objective, should correspond to a function, though we will try to make allowances}
-\item{target}{univariate target for the objective}
-\item{arguments}{default arguments to be passed to an objective function when executed}
-\item{multiplier}{multiplier to apply to the objective, usually 1 or -1}
-\item{enabled}{TRUE/FALSE}
-\item{\dots}{any other passthru parameters}
-\item{min_prisk}{minimum percentage contribution to risk}
-\item{max_prisk}{maximum percentage contribution to risk}
-\item{min_concentration}{TRUE/FALSE whether to minimize concentration, default FALSE, always TRUE if min_prisk and max_prisk are NULL}
-\item{min_difference}{TRUE/FALSE whether to minimize difference between concentration, default FALSE}}
+\title{constructor for class risk_budget_objective}
+\usage{
+  risk_budget_objective(assets, name, target = NULL,
+    arguments = NULL, multiplier = 1, enabled = FALSE, ...,
+    min_prisk, max_prisk, min_concentration = FALSE,
+    min_difference = FALSE)
+}
+\arguments{
+  \item{assets}{vector of assets to use, should come from
+  constraints object}
+
+  \item{name}{name of the objective, should correspond to a
+  function, though we will try to make allowances}
+
+  \item{target}{univariate target for the objective}
+
+  \item{arguments}{default arguments to be passed to an
+  objective function when executed}
+
+  \item{multiplier}{multiplier to apply to the objective,
+  usually 1 or -1}
+
+  \item{enabled}{TRUE/FALSE}
+
+  \item{\dots}{any other passthru parameters}
+
+  \item{min_prisk}{minimum percentage contribution to risk}
+
+  \item{max_prisk}{maximum percentage contribution to risk}
+
+  \item{min_concentration}{TRUE/FALSE whether to minimize
+  concentration, default FALSE, always TRUE if min_prisk
+  and max_prisk are NULL}
+
+  \item{min_difference}{TRUE/FALSE whether to minimize
+  difference between concentration, default FALSE}
+}
+\description{
+  constructor for class risk_budget_objective
+}
+\author{
+  Brian G. Peterson
+}
+

@@ -18,6 +18,7 @@
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param momentargs list containing arguments to be passed down to lower level functions, default NULL
 #' @param \dots any other passthru parameters
+#' @export
 CCCgarch.MM = function(R, momentargs = NULL , ... )
 {
     stopifnot("package:fGarch" %in% search() || require("fGarch",quietly=TRUE))
@@ -64,6 +65,7 @@ CCCgarch.MM = function(R, momentargs = NULL , ... )
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param momentargs list containing arguments to be passed down to lower level functions, default NULL
 #' @param \dots any other passthru parameters
+#' @export
 set.portfolio.moments <- function(R, constraints, momentargs=NULL,...){
 
     if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()

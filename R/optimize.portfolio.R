@@ -348,7 +348,7 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
 #' @param nodes how many processes to run in the foreach loop, default 4
-#' . 
+#' 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
