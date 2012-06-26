@@ -21,15 +21,15 @@
 #' \deqn{r-b=\overset{n}{\underset{i=1}{\sum}}\left(A_{i}+S_{i}+I_{i}\right)}
 #' The arithmetic attribtion effects for the category \deqn{i} are computed
 #' as suggested in the Brinson, Hood and Beebower (1986):
-#' \deqn{A_{i}=(wp_{i}-wb_{i})\times b_{i}} - allocation effect
-#' \deqn{S_{i}=wp_{i}\times(r_{i}-b_{i})} - selection effect
-#' \deqn{I_{i}=(wp_{i}-wb_{i})\times(r_{i}-b_{i})} - interaction effect
+#' \deqn{A_{i}=(w_{pi}-w_{bi})\times R_{bi}} - allocation effect
+#' \deqn{S_{i}=w_{pi}\times(R_{pi}-R_{bi})} - selection effect
+#' \deqn{I_{i}=(w_{pi}-w_{bi})\times(r_{i}-b_{i})} - interaction effect
 #' \deqn{r} - total portfolio returns
 #' \deqn{b} - total benchmark returns
-#' \deqn{wp_{i}} - weights of the category \deqn{i} in the portfolio
-#' \deqn{wb_{i}} - weigths of the category \deqn{i} in the benchmark
-#' \deqn{r_{i}} - returns of the portfolio category \deqn{i}
-#' \deqn{b_{i}} - returns of the benchmark category \deqn{i}
+#' \deqn{w_{pi}} - weights of the category \deqn{i} in the portfolio
+#' \deqn{w_{bi}} - weigths of the category \deqn{i} in the benchmark
+#' \deqn{R_{pi}} - returns of the portfolio category \deqn{i}
+#' \deqn{R_{bi}} - returns of the benchmark category \deqn{i}
 #' Depending on goals we can give priority to the allocation or to 
 #' the selection effects. If the priority is given to the sector allocation
 #' the interaction term will be combined with the security selection effect
@@ -53,7 +53,28 @@
 #' and benchmark returns: \deqn{GAER=\frac{1+r_{a}}{1+b_{a}}-1}
 #' In the case of multi-currency portfolio, the currency return, currency
 #' surprise and forward premium should be specified. The multi-currency
-#' arithmetic attribution is handled following Ankrim and Hensel (1992)
+#' arithmetic attribution is handled following Ankrim and Hensel (1992).
+#' Currency returns are decomposed into the sum of the currency surprise and
+#' the forward premium: \deqn{R_{ci} = R_{cei} + R_{fpi}}, where 
+#' \deqn{R_{cei} = \frac{S_{i}^{t+1} - F_{i}^{t+1}}{S_{i}^{t}}
+#' \deqn{R_{fpi} = \frac{F_{i}^{t+1}}{S_{i}^{t}} - 1}
+#' \deqn{S_{i}^{t}} - stop rate for asset i at time t
+#' \deqn{F_{i}^{t}} - forward rate for asset i at time t
+#' Excess returns are decomposed into the sum of allocation, selection and 
+#' interaction effects as in the standard Brinson model: 
+#' \deqn{r-b=\overset{n}{\underset{i=1}{\sum}}\left(A_{i}+S_{i}+I_{i}\right)}
+#' However the allocation effect is computed taking into account currency
+#' effects:
+#' \deqn{A_{i}=(w_{pi}-w_{bi})\times (R_{bi} - R_{ci} - R_{l})} - allocation
+#' \deqn{R_{l} = \overset{n}{\underset{i=1}{\sum}}w_{bi}\times(R_{bi}-R_{ci})} - 
+#' benchmark return adjusted for currecy.
+#' The contribution from currency is analogous to asset allocation:
+#' \deqn{C_{i} = (w_{pi} - w_{bi}) \times (R_{cei} - e) + (w_{pfi} - w_{bfi}) \times (R_{fi} - e)}
+#' where \deqn{e = \overset{n}{\underset{i=1}{\sum}}w_{bi}\times R_{cei}}
+#' The final term, forward premium, is also analogous to the asset allocation:
+#' \deqn{R_{fi} = (w_{pi} - w_{bi}) \times (R_{fpi} - d)}
+#' where \deqn{d = \overset{n}{\underset{i=1}{\sum}}w_{bi}\times R_{fpi}}
+#' \deqn{R_{fpi}} - forward premium
 #' 
 #' @aliases Attribution
 #' @param Rp T x n xts, data frame or matrix of portfolio returns
@@ -67,6 +88,14 @@
 #' term is combined with the security selection effect, \item bottom.up - the 
 #' priority is given to the security selection. Interection term is combined 
 #' with the sector allocation effect}
+#' @param wpf vector, xts, data frame or matrix with portfolio weights of 
+#' currency forward contracts
+#' @param wbf vector, xts, data frame or matrix with benchmark weights of 
+#' currency forward contracts
+#' @param S (T+1) x n xts, data.frame or matrix with spot rates. The first date
+#' should coincide with the first date of portfolio returns
+#' @param F (T+1) x n xts, data.frame or matrix with forward rates. The first
+#' date should coincide with the first date of portfolio returns
 #' @param linking Used to select the linking method to present the multi-period 
 #' summary of arithmetic attribution effects. It is also used to select the 
 #' geometric attribution. May be any of: \itemize{ \item carino - logarithmic 
@@ -77,9 +106,6 @@
 #' returns for the attribution analysis
 #' @param adjusted TRUE/FALSE, whether to show original or smoothed attribution
 #' effects for each period
-#' @param c T x n xts, data frame or matrix  of currency return
-#' @param e T x n xts, data frame or matrix  of currency surprise
-#' @param d T x n xts, data frame or matrix  of forward premium
 #' @return returns a list with the following components: excess returns with
 #' annualized excess returns over all periods, attribution effects (allocation, 
 #' selection and interaction)
@@ -104,13 +130,14 @@
 #' data(attrib)
 #' Attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
 #' 
-#' @TODO fix bug with annualized excess returns, Brinson-Fachler, check if we can compute 
+#' @TODO fix bug with annualized excess returns, Brinson-Fachler, check if we can compute
 #' total effects for individual segments in Davies-Laker and Geometric
 #' @export
 Attribution <- 
-function (Rp, wp, Rb, wb, method = c("none", "top.down", "bottom.up"), 
-linking = c("carino", "menchero", "grap", "frongello", "davies.laker"), 
-geometric = FALSE, adjusted = FALSE, c = 0, e = 0, d = 0)
+function (Rp, wp, Rb, wb, wpf = "none", wbf = "none", S = "none", F = "none", 
+          method = c("none", "top.down", "bottom.up"), 
+          linking = c("carino", "menchero", "grap", "frongello", "davies.laker"),
+          geometric = FALSE, adjusted = FALSE)
 {   # @author Andrii Babii
 
     # DESCRIPTION:
@@ -138,17 +165,33 @@ geometric = FALSE, adjusted = FALSE, c = 0, e = 0, d = 0)
     }
     
     # Compute attribution effects (Brinson, Hood and Beebower model)
-    if (c == 0 & d == 0 & e == 0){ # If portfolio is single-currency
+    if (wpf == "none" & wbf == "none" & S == "none" & F =="none"){ 
+             # If portfolio is single-currency
+        Rc = 0
         L = 0
-    } else{
-        l = Rb - c
-        ki = Rp - c
-        E = reclass(matrix(rep(rowSums(wb * e), ncol(Rb)), nrow(Rb), ncol(Rb)), Rp)
-        L = reclass(matrix(rep(rowSums(wb * l), ncol(Rb)), nrow(Rb), ncol(Rb)), Rp)
-        D = reclass(matrix(rep(rowSums(wb * d), ncol(Rb)), nrow(Rb), ncol(Rb)), Rp)
-        Df = (wp - wb) * (d - D) # Forward premium
+    } else{  # If multi-currency portfolio
+        S = checkData(S)
+        F = checkData(F)
+        wpf = Weight.transform(wpf, Rp)
+        wbf = Weight.transform(wbf, Rb)
+        
+        Rc = lag(S, -1)[1:nrow(Rp), ] / S[1:nrow(Rp), ] - 1
+        Rd = lag(F, -1)[1:nrow(Rp), ] / S[1:nrow(Rp), ] - 1
+        Re = Rc - Rd
+        Rl = Rb - Rc
+        Rk = Rp - Rc
+        Rfp = Re / (1 + Rd)
+        E = reclass(matrix(rep(rowSums(wb * Re), ncol(Rb)), nrow(Rb), ncol(Rb)), Rp)
+        L = reclass(matrix(rep(rowSums(wb * Rl), ncol(Rb)), nrow(Rb), ncol(Rb)), Rp)
+        D = reclass(matrix(rep(rowSums(wb * Rd), ncol(Rb)), nrow(Rb), ncol(Rb)), Rp)
+        Cc = (wp - wb) * (Re - E) + (wpf - wbf) * (Rfp - E) # Contribution to currency
+        Df = (wp - wb) * (Rd - D) # Forward premium
+        Cc = cbind(Cc, rowSums(Cc))
+        Df = cbind(Df, rowSums(Df))
+        colnames(Cc) = c(colnames(S), "Total")
+        colnames(Df) = colnames(Cc)
     }
-    allocation = (wp - wb) * (Rb - c - L)
+    allocation = (wp - wb) * (Rb - Rc - L)
     selection = wb * (Rp  - Rb)
     interaction = (wp - wb) * (Rp - Rb)
 
@@ -237,9 +280,10 @@ geometric = FALSE, adjusted = FALSE, c = 0, e = 0, d = 0)
     }
     
     # If multi-currency portfolio
-    if (!is.vector(L)){
+    if (!(wpf == "none" & wbf == "none" & S == "none" & F =="none")){
+        result[[length(result) + 1]] = Cc
         result[[length(result) + 1]] = Df
-        names(result)[length(result)] = "Forward Premium"
+        names(result)[(length(result)-1):length(result)] = c("Contribution from currency", "Forward Premium")
     }
     return(result)
 }
