@@ -45,6 +45,7 @@ constraint_ROI <- function(assets, op.problem, solver=c("glpk", "quadprog"), wei
         }
       }
     }
+  }
   
   return(structure(
     list(
