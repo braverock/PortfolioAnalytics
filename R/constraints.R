@@ -210,27 +210,29 @@ update.constraint <- function(object, ...){
 }
 
 
-#' constructor for class constraint_ROI
-#' 
-#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
-#' @param op.problem an object of type "OP" (optimization problem, of \code{ROI}) specifying the complete optimization problem, see ROI help pages for proper construction of OP object.
-#' @param solver string argument for what solver package to use, must have ROI plugin installed for that solver.  Currently support is for \code{\link{glpk}} and \code{\link{quadprog}}.
-#' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
-#' @author Hezky Varon
-#' @export
-constraint_ROI <- function(assets, op.problem, solver=c("glpk", "quadprog"), weight_seq=NULL) 
-{
-  if(problem == NULL) stop("Need to pass in optimiztion problem.")
-  return(structure(
-    list(
-      assets = assets,
-      constrainted_objective = op.problem,
-      solver = solver[1],
-      weight_seq = weight_seq,
-      objectives = list(),
-      call = match.call()
-    ), 
-    class=c("constraint_ROI","constraint")
-  ))
-}
+# #' constructor for class constraint_ROI
+# #' 
+# #' @param assets number of assets, or optionally a named vector of assets specifying seed weights
+# #' @param op.problem an object of type "OP" (optimization problem, of \code{ROI}) specifying the complete optimization problem, see ROI help pages for proper construction of OP object.
+# #' @param solver string argument for what solver package to use, must have ROI plugin installed for that solver.  Currently support is for \code{glpk} and \code{quadprog}.
+# #' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
+# #' @author Hezky Varon
+# #' @export
+# constraint_ROI <- function(assets, op.problem, solver=c("glpk", "quadprog"), weight_seq=NULL) 
+# {
+#   if(op.problem == NULL || inherits(op.problem, "OP")) {
+#     stop("Need to pass in optimiztion problem of ROI:::OP type.")
+#   if() stop("Need to be ROI:::OP")
+#   return(structure(
+#     list(
+#       assets = assets,
+#       constrainted_objective = op.problem,
+#       solver = solver[1],
+#       weight_seq = weight_seq,
+#       objectives = list(),
+#       call = match.call()
+#     ), 
+#     class=c("constraint_ROI","constraint")
+#   ))
+# }
 

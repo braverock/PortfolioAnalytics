@@ -244,7 +244,7 @@ optimize.portfolio <- function(
     # This will take a new constraint object that is of the same structure of a 
     # ROI constraint object, but with an additional solver arg.
     # then we can do something like this
-    roi.result <- ROI_solve(x=constraints$constrainted_objective, constraints$solver)
+    roi.result <- ROI:::ROI_solve(x=constraints$constrainted_objective, constraints$solver)
     weights <- roi.result$solution
     names(weights) <- colnames(R)
     out$weights <- weights
