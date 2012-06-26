@@ -51,6 +51,9 @@
 #' \deqn{AAER=r_{a}-b_{a}}; the geometric annualized excess returns are
 #' computed as the geometric difference between annualized portfolio
 #' and benchmark returns: \deqn{GAER=\frac{1+r_{a}}{1+b_{a}}-1}
+#' In the case of multi-currency portfolio, the currency return, currency
+#' surprise and forward premium should be specified. The multi-currency
+#' arithmetic attribution is handled following Ankrim and Hensel (1992)
 #' 
 #' @aliases Attribution
 #' @param Rp T x n xts, data frame or matrix of portfolio returns
@@ -74,12 +77,18 @@
 #' returns for the attribution analysis
 #' @param adjusted TRUE/FALSE, whether to show original or smoothed attribution
 #' effects for each period
+#' @param c T x n xts, data frame or matrix  of currency return
+#' @param e T x n xts, data frame or matrix  of currency surprise
+#' @param d T x n xts, data frame or matrix  of forward premium
 #' @return returns a list with the following components: excess returns with
 #' annualized excess returns over all periods, attribution effects (allocation, 
 #' selection and interaction)
 #' @author Andrii Babii
 #' @seealso \code{\link{Attribution.levels}}
-#' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and
+#' @references Ankrim, E. and Hensel, C. \emph{Multi-currency performance
+#' attribution}.Russell Research Commentary.November 2002
+#' 
+#' Bacon, C. \emph{Practical Portfolio Performance Measurement and
 #' Attribution}. Wiley. 2004. Chapter 5, 8
 #' 
 #' Christopherson, Jon A., Carino, David R., Ferson, Wayne E.  
@@ -100,7 +109,8 @@
 #' @export
 Attribution <- 
 function (Rp, wp, Rb, wb, method = c("none", "top.down", "bottom.up"), 
-linking = c("carino", "menchero", "grap", "frongello", "davies.laker"), geometric = FALSE, adjusted = FALSE)
+linking = c("carino", "menchero", "grap", "frongello", "davies.laker"), 
+geometric = FALSE, adjusted = FALSE, c = 0, e = 0, d = 0)
 {   # @author Andrii Babii
 
     # DESCRIPTION:
@@ -128,8 +138,18 @@ linking = c("carino", "menchero", "grap", "frongello", "davies.laker"), geometri
     }
     
     # Compute attribution effects (Brinson, Hood and Beebower model)
-    allocation = (wp - wb) * Rb
-    selection = wb * (Rp - Rb)
+    if (c == 0 & d == 0 & e == 0){ # If portfolio is single-currency
+        L = 0
+    } else{
+        l = Rb - c
+        ki = Rp - c
+        E = reclass(matrix(rep(rowSums(wb * e), ncol(Rb)), nrow(Rb), ncol(Rb)), Rp)
+        L = reclass(matrix(rep(rowSums(wb * l), ncol(Rb)), nrow(Rb), ncol(Rb)), Rp)
+        D = reclass(matrix(rep(rowSums(wb * d), ncol(Rb)), nrow(Rb), ncol(Rb)), Rp)
+        Df = (wp - wb) * (d - D) # Forward premium
+    }
+    allocation = (wp - wb) * (Rb - c - L)
+    selection = wb * (Rp  - Rb)
     interaction = (wp - wb) * (Rp - Rb)
 
     # Get total attribution effects 
@@ -208,12 +228,18 @@ linking = c("carino", "menchero", "grap", "frongello", "davies.laker"), geometri
     } else{
       result = attrib
     }
-
+    
     # Label the output
     if ((linking == "none" & geometric == FALSE) | linking == "davies.laker"){
         names(result) = c("Excess returns", "Allocation", "Selection", "Interaction")
     } else{
-      names(result) = c("Excess returns", "Allocation", "Selection")
+        names(result) = c("Excess returns", "Allocation", "Selection")
+    }
+    
+    # If multi-currency portfolio
+    if (!is.vector(L)){
+        result[[length(result) + 1]] = Df
+        names(result)[length(result)] = "Forward Premium"
     }
     return(result)
 }
