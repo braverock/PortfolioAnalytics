@@ -92,10 +92,14 @@
 #' currency forward contracts
 #' @param wbf vector, xts, data frame or matrix with benchmark weights of 
 #' currency forward contracts
-#' @param S (T+1) x n xts, data.frame or matrix with spot rates. The first date
+#' @param S (T+1) x n xts, data frame or matrix with spot rates. The first date
 #' should coincide with the first date of portfolio returns
-#' @param F (T+1) x n xts, data.frame or matrix with forward rates. The first
+#' @param F (T+1) x n xts, data frame or matrix with forward rates. The first
 #' date should coincide with the first date of portfolio returns
+#' @param Rpl xts, data frame or matrix of portfolio returns in local currency
+#' @param Rbl xts, data frame or matrix of benchmark returns in local currency
+#' @param Rbh xts, data frame or matrix of benchmark returns hedged into the
+#' base currency
 #' @param linking Used to select the linking method to present the multi-period 
 #' summary of arithmetic attribution effects. It is also used to select the 
 #' geometric attribution. May be any of: \itemize{ \item carino - logarithmic 
@@ -110,12 +114,12 @@
 #' annualized excess returns over all periods, attribution effects (allocation, 
 #' selection and interaction)
 #' @author Andrii Babii
-#' @seealso \code{\link{Attribution.levels}}
+#' @seealso \code{\link{Attribution.levels}}, \code{\link{Attribution.geometric}}
 #' @references Ankrim, E. and Hensel, C. \emph{Multi-currency performance
 #' attribution}.Russell Research Commentary.November 2002
 #' 
 #' Bacon, C. \emph{Practical Portfolio Performance Measurement and
-#' Attribution}. Wiley. 2004. Chapter 5, 8
+#' Attribution}. Wiley. 2004. Chapter 5, 6, 8
 #' 
 #' Christopherson, Jon A., Carino, David R., Ferson, Wayne E.  
 #' \emph{Portfolio Performance Measurement and Benchmarking}. McGraw-Hill. 2009. 
@@ -124,6 +128,10 @@
 #' Gary P. Brinson, L. Randolph Hood, and Gilbert L. Beebower, \emph{Determinants of 
 #' Portfolio Performance}, Financial Analysts Journal, vol. 42, no. 4, July/August 
 #' 1986, pp. 39–44.
+#' 
+#' Karnosky, D. and Singer, B. \emph{Global asset management and performance
+#' attribution.The Research Foundation of the Institute of Chartered Financial
+#' Analysts}. February 1994.
 #' @keywords attribution
 #' @examples
 #' 
@@ -134,7 +142,8 @@
 #' total effects for individual segments in Davies-Laker and Geometric
 #' @export
 Attribution <- 
-function (Rp, wp, Rb, wb, wpf = "none", wbf = "none", S = "none", F = "none", 
+function (Rp, wp, Rb, wb, wpf, wbf, S, F, Rpl, Rbl, Rbh, 
+          currency = FALSE,
           method = c("none", "top.down", "bottom.up"), 
           linking = c("carino", "menchero", "grap", "frongello", "davies.laker"),
           geometric = FALSE, adjusted = FALSE)
@@ -165,8 +174,7 @@ function (Rp, wp, Rb, wb, wpf = "none", wbf = "none", S = "none", F = "none",
     }
     
     # Compute attribution effects (Brinson, Hood and Beebower model)
-    if (wpf == "none" & wbf == "none" & S == "none" & F =="none"){ 
-             # If portfolio is single-currency
+    if (!currency){ # If portfolio is single-currency
         Rc = 0
         L = 0
     } else{  # If multi-currency portfolio
@@ -280,10 +288,10 @@ function (Rp, wp, Rb, wb, wpf = "none", wbf = "none", S = "none", F = "none",
     }
     
     # If multi-currency portfolio
-    if (!(wpf == "none" & wbf == "none" & S == "none" & F =="none")){
+    if (currency){
         result[[length(result) + 1]] = Cc
         result[[length(result) + 1]] = Df
-        names(result)[(length(result)-1):length(result)] = c("Contribution from currency", "Forward Premium")
+        names(result)[(length(result)-1):length(result)] = c("Currency management", "Forward Premium")
     }
     return(result)
 }
