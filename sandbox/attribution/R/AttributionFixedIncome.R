@@ -44,26 +44,29 @@
 #' @param Db T x n xts, data frame or matrix with benchmark modified duration
 #' @param wbf vector, xts, data frame or matrix with benchmark weights of 
 #' currency forward contracts
-#' @param S (T+1) x n xts, data frame or matrix with spot rates. The first date
+#' @param S (T + 1) x n xts, data frame or matrix with spot rates. The first date
 #' should coincide with the first date of portfolio returns
 #' @param geometric - TRUE/FALSE for geometric/arithmetic attribution
-#' @returnlist with returns a list with total excess returns decomposed into
-#' allocation, selection and currency effects
+#' @param wbf vector, xts, data frame or matrix with benchmark weights of 
+#' currency forward contracts
+#' @return list with total excess returns decomposed into allocation, selection 
+#' (and currency effects)
 #' @author Andrii Babii
 #' @seealso \code{\link{Attribution.levels}}, \code{\link{Attribution.geometric}}
 #' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and
 #' Attribution}. Wiley. 2004. Chapter 7
 #' 
-#' Van Breukelen, G. \emph{Fixed income attribution}.
-#' Journal of Performance MeasurementSummer, 61–68. 2000
+#' Van Breukelen, G. \emph{Fixed income attribution}. Journal of Performance 
+#' Measurement. Summer, 61–68. 2000
 #' @keywords attribution
 #' @examples
 #' 
 #' data(attrib)
+#' AttributionFixedIncome(Rp, wp, Rb, wb, Rf, Dp, Db, S, wbf, geometric = FALSE)
 #' 
 #' @export
 AttributionFixedIncome <- 
-function (Rp, wp, Rb, wp, Rf, Dp, Db, S, wbf, geometric = FALSE)
+function (Rp, wp, Rb, wb, Rf, Dp, Db, S, wbf, geometric = FALSE)
 {   # @author Andrii Babii
     
     # DESCRIPTION:
@@ -112,10 +115,11 @@ function (Rp, wp, Rb, wp, Rf, Dp, Db, S, wbf, geometric = FALSE)
         currency = (wp - wb) * (Rc + Rf - rep(rc, ncol(Rc)))
         excess.returns = rp - rb
     } else{
-        bd = # Overal duration notional fund
-        allocation = Dp * wp - rep(Dbeta, ncol(Dp)) * Db * wb * (-DeltaYb + deltayb) / bd
-        selection = 
-        excess.returns = 
+        rcprime = rowSums(wb * (Rc + Rf))
+        bd = reclass(rowSums(rep(Dbeta, ncol(Db)) * Db * wb * -DeltaYb), Db) + rcprime # Overal duration notional fund
+        allocation = Dp * wp - rep(Dbeta, ncol(Dp)) * Db * wb * (-DeltaYb + deltayb) / rep(bd, ncol(Db))
+        selection = Dp / Db * (Rb - Rf) + Rf
+        excess.returns = (1 + rp) / (1 + rb) - 1
     }
     
     # Get total attribution effects 
@@ -137,4 +141,5 @@ function (Rp, wp, Rb, wp, Rf, Dp, Db, S, wbf, geometric = FALSE)
         result[[4]] = currency
         names(result) = c("Excess returns", "Market allocation", "Issue selection", "Currency allocation")
     }
+    return(result)
 }
