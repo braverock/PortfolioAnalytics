@@ -49,49 +49,146 @@ set.seed(123)
 S.mat <- 1 + apply(edhec, 2, sample, size=n.assets)
 bnds <- list(lower = list(ind = seq.int(1L, as.integer(n.assets)), val = rep(-Inf,n.assets)),
              upper = list(ind = seq.int(1L, as.integer(n.assets)), val = rep(Inf,n.assets)))
-q.prob <- OP(objective = L_objective(L=rep(1, n.assets)),
-             constraints = L_constraint(L=S.mat,
-                                        dir=rep(">=", n.assets),
-                                        rhs=rep(0.001, n.assets)),
-             bounds=bnds)
-test <- ROI_solve(x=q.prob, solver="glpk")
-# > test$solution
+arb.prob <- OP(objective = L_objective(L=rep(1, n.assets)),
+               constraints = L_constraint(L=S.mat,
+                                          dir=rep(">=", n.assets),
+                                          rhs=rep(0.001, n.assets)),
+               bounds=bnds)
+arb.constr <- constraint_ROI(op.problem=arb.prob, "glpk")
+arb.test <- optimize.portfolio(edhec, arb.constr, "ROI")
+# > test$solution with ROI, same is found via optimize.portfolio(..., method="ROI")
 # [1] -0.37584904  0.00000000  0.00000000  0.18434868  0.00000000  0.00000000  0.00000000  0.32167429  0.14030506
 # [10]  0.00000000 -0.41200277 -0.02153654  0.25916374
-
+# 
+# Issues that I have found:
+# 1) arb.test$constraints returns:
+#
+# > test$constraints
+# An object containing 6 constraints.
+# Some constraints are of type nonlinear.
+#
+# which is meaningless,
+#
+# 2) when not passing in assets into arb.prob, this is returned:
+#
+# assuming equal weighted seed portfolio
+# assuming equal weighted seed portfolio
+# 
+# only should say it once.
 
 
 
 # =====================
-# Mean-variance
+# Mean-variance:  Maximize quadratic utility
 #
+funds <- names(edhec)
 mu.port <- 0.002
-Amat <- cbind(rep(1,n.assets),mu.vec)
-q.prob <- OP(objective=Q_objective(Q=-2*cov.mat, L=mu.vec), 
-             constraints=L_constraint(L=t(Amat),
-                                      dir=c("==","=="),
-                                      rhs=c(1,mu.port)),
-             bounds=bnds,
-             maximum=TRUE)
-wts <- ROI_solve(x=q.prob, solver="quadprog")$solution
+Amat <- cbind(rep(1,n.assets), mu.vec)
+mean.var.prob <- OP(objective=Q_objective(Q=-2*cov.mat, L=mu.vec), 
+                    constraints=L_constraint(L=t(Amat),
+                                             dir=c("==","=="),
+                                             rhs=c(1,mu.port)),
+                    bounds=bnds,
+                    maximum=TRUE)
+mean.var.constr <- constraint_ROI(assets=funds, op.problem=mean.var.prob, solver="quadprog")
+wts <- ROI_solve(x=mean.var.prob, solver="quadprog")$solution
+mean.var.solution <- optimize.portfolio(edhec, mean.var.constr, "ROI")
+# results for this are:
+#
+# > mean.var.solution$weights
+# Convertible Arbitrage             CTA Global  Distressed Securities       Emerging Markets 
+# -0.38704286             0.08062104            -0.35410876            -0.06088908 
+# Equity Market Neutral           Event Driven Fixed Income Arbitrage           Global Macro 
+# 0.49829093            -0.49045547             0.74727967            -0.49173927 
+# Long/Short Equity       Merger Arbitrage         Relative Value          Short Selling 
+# -0.44361180             0.52390274             0.37357962            -0.04284137 
+# Funds of Funds 
+# 1.04701463 
+# > wts
+# [1] -0.38704286  0.08062104 -0.35410876 -0.06088908  0.49829093 -0.49045547  0.74727967
+# [8] -0.49173927 -0.44361180  0.52390274  0.37357962 -0.04284137  1.04701463
+#
+# however, the constraints show up as:
+# $constraints
+# An object containing 6 constraints.
+# Some constraints are of type nonlinear.
 
 
-# Comparing resutls wtih Guy's slides of PortfolioOptimization
-# sllide number 24/70, mean-variance optimization 
-# subject to fully-invested and expected portfolio return constraints
-data(CRSPday)
-R <- 100*CRSPday[,4:6]
-mean_vect <- apply(R,2,mean)
-cov_mat <- var(R)
-Amat <- rbind(rep(1,3),mean_vect)
-mu.port <- 0.1
-bnds <- list(lower = list(ind = seq.int(1L, as.integer(3)), val = rep(-Inf,3)),
-             upper = list(ind = seq.int(1L, as.integer(3)), val = rep(Inf,3)))
-q.prob <- OP(objective=Q_objective(Q=2*cov_mat, L=rep(0,3)), 
-             constraints=L_constraint(L=Amat,
-                                      dir=c("==","=="),
-                                      rhs=c(1, mu.port)),
-             bounds=bnds)
-wts <- ROI_solve(x=q.prob, solver="quadprog")$solution
+# =====================
+# Mean-variance:  Maximize quadratic utility
+#
+funds <- names(edhec)
+mu.port <- 0.002
+Amat <- cbind(rep(1,n.assets), mu.vec)
+mean.var.prob <- OP(objective=Q_objective(Q=-2*cov.mat, L=mu.vec), 
+                    constraints=L_constraint(L=t(Amat),
+                                             dir=c("==","=="),
+                                             rhs=c(1,mu.port)),
+                    bounds=bnds,
+                    maximum=TRUE)
+mean.var.constr <- constraint_ROI(assets=funds, op.problem=mean.var.prob, solver="quadprog")
+wts <- ROI_solve(x=mean.var.prob, solver="quadprog")$solution
+mean.var.solution <- optimize.portfolio(edhec, mean.var.constr, "ROI")
+
+
+# ========================================================
+# Mean-variance:  Maximize quadratic utility --- dollar neutral
+#
+funds <- names(edhec)
+mu.port <- 0.002
+Amat <- cbind(rep(1,n.assets), mu.vec)
+dollar.neutral.prob <- OP(objective=Q_objective(Q=-2*cov.mat, L=mu.vec), 
+                          constraints=L_constraint(L=t(Amat),
+                                                   dir=c("==","=="),
+                                                   rhs=c(0,mu.port)),
+                          bounds=bnds,
+                          maximum=TRUE)
+dollar.neutral.constr <- constraint_ROI(assets=funds, op.problem=dollar.neutral.prob, solver="quadprog")
+wts <- ROI_solve(x=dollar.neutral.prob, solver="quadprog")$solution
+dollar.neutral.solution <- optimize.portfolio(edhec, dollar.neutral.constr, "ROI")
+
+
+
+# =====================
+# Mean-variance:  Maximize return, with constraint on variance
+# setting varaince to be the average variance between the edhec funds.
+#
+avg.var <- mean(apply(edhec, 2, var))
+max.mean.prob <- OP(objective=L_objective(mu.vec), 
+                    constraints=Q_constraint(Q=list(2*cov.mat, matrix(0, nrow=n.assets, ncol=n.assets)),
+                                             L=rbind(rep(0, n.assets),rep(1,n.assets)),
+                                             dir=c("==","=="),
+                                             rhs=c(avg.var,1)),
+                    bounds=bnds,
+                    maximum=TRUE)
+max.mean.constr <- constraint_ROI(assets=funds, op.problem=max.mean.prob, solver="glpk")
+wts <- ROI_solve(x=max.mean.prob, solver="glpk")$solution
+max.mean.solution <- optimize.portfolio(edhec, max.mean.constr, "ROI")
+# 
+#  As expected, attempting to set up this problem leads to failure.
+#  need to implement a second order conic solver.
+#  this solver is in the package CLSOCP
+
+
+# ===================
+# This secion works, and I am puting it aside for now
+#
+# # Comparing resutls wtih Guy's slides of PortfolioOptimization
+# # sllide number 24/70, mean-variance optimization 
+# # subject to fully-invested and expected portfolio return constraints
+# data(CRSPday)
+# R <- 100*CRSPday[,4:6]
+# mean_vect <- apply(R,2,mean)
+# cov_mat <- var(R)
+# Amat <- rbind(rep(1,3),mean_vect)
+# mu.port <- 0.1
+# bnds <- list(lower = list(ind = seq.int(1L, as.integer(3)), val = rep(-Inf,3)),
+#              upper = list(ind = seq.int(1L, as.integer(3)), val = rep(Inf,3)))
+# q.prob <- OP(objective=Q_objective(Q=2*cov_mat, L=rep(0,3)), 
+#              constraints=L_constraint(L=Amat,
+#                                       dir=c("==","=="),
+#                                       rhs=c(1, mu.port)),
+#              bounds=bnds)
+# wts <- ROI_solve(x=q.prob, solver="quadprog")$solution
 
 

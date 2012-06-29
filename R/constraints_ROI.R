@@ -6,12 +6,12 @@
 #' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
 #' @author Hezky Varon
 #' @export
-constraint_ROI <- function(assets, op.problem, solver=c("glpk", "quadprog"), weight_seq=NULL) 
+constraint_ROI <- function(assets=NULL, op.problem, solver=c("glpk", "quadprog"), weight_seq=NULL) 
 {
   #
   # Structure for this constructor function borrowed from "constraints.R"
   #
-  if(op.problem == NULL || class(op.problem) != "OP") 
+  if(is.null(op.problem) | !inherits(op.problem, "OP")) 
     stop("Need to pass in optimization problem of ROI:::OP object type.")
   
   if (is.null(assets)) {
@@ -46,7 +46,7 @@ constraint_ROI <- function(assets, op.problem, solver=c("glpk", "quadprog"), wei
       }
     }
   }
-  
+  print(paste("You chose to use the ",solver[1]," solver", sep=""))
   return(structure(
     list(
          assets = assets,
