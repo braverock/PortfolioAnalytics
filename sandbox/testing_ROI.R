@@ -47,8 +47,8 @@ n.assets <- ncol(edhec)
 
 set.seed(123)
 S.mat <- 1 + apply(edhec, 2, sample, size=n.assets)
-bnds <- list(lower = list(ind = seq.int(1L, as.integer(n.assets)), val = rep(-Inf,n.assets)),
-             upper = list(ind = seq.int(1L, as.integer(n.assets)), val = rep(Inf,n.assets)))
+bnds <- list(lower = list(ind = seq.int(1L, n.assets), val = rep(-Inf,n.assets)),
+             upper = list(ind = seq.int(1L, n.assets), val = rep(Inf,n.assets)))
 arb.prob <- OP(objective = L_objective(L=rep(1, n.assets)),
                constraints = L_constraint(L=S.mat,
                                           dir=rep(">=", n.assets),
