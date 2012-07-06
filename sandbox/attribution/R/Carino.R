@@ -7,9 +7,12 @@
 #' so that they can be summed up over multiple periods. Attribution effect 
 #' are multiplied by the adjustment factor: 
 #' \deqn{A_{t}' = A_{t} \times \frac{k_{t}}{k}},
+#' 
 #' where \deqn{k_{t} = \frac{log(1 + r_{t}) - log(1 + b_{t})}{r_{t} - b_{t}}}, 
-#' \deqn{k = \frac{log(1 + r) - log(1 + b)}{r - b}}. In case if portfolio and 
-#' benchmark returns are equal \deqn{k_{t} = \frac{1}{1 + r_{t}}. 
+#' \deqn{k = \frac{log(1 + r) - log(1 + b)}{r - b}}. 
+#' 
+#' In case if portfolio and benchmark returns are equal:
+#' \deqn{k_{t} = \frac{1}{1 + r_{t}}
 #' \deqn{A_{t}}' - adjusted attribution effects at period \deqn{t}
 #' \deqn{A_{t}} - unadjusted attribution effects at period \deqn{t}
 #' \deqn{r_{t}} - portfolio returns at period \deqn{t}
@@ -67,24 +70,24 @@ function(rp, rb, attributions, adjusted)
     # and total attribution effects over multiple periods
   
     # FUNCTION:
-    rp.a = prod(1 + rp) - 1              
-    rb.a = prod(1 + rb) - 1
-    k = (log(1 + rp.a) - log(1 + rb.a)) / (rp.a - rb.a)
+    rpc = prod(1 + rp) - 1     # Cumulative returns          
+    rbc = prod(1 + rb) - 1
+    k = (log(1 + rpc) - log(1 + rbc)) / (rpc - rbc)
     kt = rp
     for (t in 1:nrow(kt)){
-      if (rp[t] == rb[t]){
-        kt[t] = 1 / (1 + rp[t]) # Carino factors if portfolio and benchmark returns are equal
+      if (rp[[t]] == rb[[t]]){
+        kt[[t]] = 1 / (1 + rp[[t]]) # Carino factors if portfolio and benchmark returns are equal
       } else{
-        kt[t] = (log(1 + rp[t]) - log(1 + rb[t])) / (rp[t] - rb[t]) # if different
+        kt[[t]] = (log(1 + rp[[t]]) - log(1 + rb[[t]])) / (rp[[t]] - rb[[t]]) # if different
       }
     }
     kt = matrix(rep(kt, ncol(attributions)), nrow(attributions), ncol(attributions), byrow = FALSE)
     adj = attributions * kt / k 
     total = colSums(adj)
     if (adjusted == FALSE){
-        attributions = rbind(as.data.frame(attributions), total)
+      attributions = rbind(as.data.frame(attributions), total)
     } else{
-        attributions = rbind(as.data.frame(adj), total)
+      attributions = rbind(as.data.frame(adj), total)
     }
     rownames(attributions)[nrow(attributions)] = "Total"
     

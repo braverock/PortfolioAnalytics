@@ -1,10 +1,12 @@
 #' aggregate portfolio returns and weights up to the chosen level from the 
 #' hierarchy
 #' 
-#' Aggregate returns and weights up to the chosen level from the hierarchy. 
-#' Hierarchy can be used from the buildHierarchy function or 
-#' defined manually in the same way as the buildHierarchy's output.
-#' \code{Weight.transform} makes transformation of weigths to the xts object
+#' Aggregate returns and weights up to the chosen level from the hierarchy.
+#' Hierarchy can be used from the buildHierarchy function or defined manually
+#' in the same way as the buildHierarchy's output. If for the selected level 
+#' the values in the hierarchy are numeric, the aggregation of returns or 
+#' weights is performed by quintiles.
+#' \code{Weight.transform} makes transformation of weights to the xts object
 #' conformable with returns.
 #'
 #' @aliases Weight.transform Return.level Weight.level
@@ -24,7 +26,7 @@
 #' 
 #' data(attrib)
 #' Weight.transform(wp, Rp)
-#' Return.level(Rp, wp, h, level = "Sector")
+#' Return.level(Rp, wp, h, level = "MarketCap")
 #' Weight.level(wp, h, level = "Sector")
 #' 
 #' @export
@@ -45,21 +47,21 @@ function(wp, Rp)
   
     # FUNCTION:
     if (is.vector(wp)){
-        wp = as.xts(matrix(rep(wp, nrow(Rp)), nrow(Rp), ncol(Rp), byrow = TRUE), index(Rp))
-        colnames(wp) = colnames(Rp)
+      wp = as.xts(matrix(rep(wp, nrow(Rp)), nrow(Rp), ncol(Rp), byrow = TRUE), index(Rp))
+      colnames(wp) = colnames(Rp)
     } else{
-        if(as.Date(last(index(Rp))) < (as.Date(index(wp[1,]))+1)){
-            stop(paste('last date in series',as.Date(last(index(Rp))),'occurs before beginning of first rebalancing period',as.Date(first(index(wp)))+1))
-        }
-        wp = checkData(wp, method = "xts")
-        wp = merge(wp, xts(, index(Rp)))
-        wp = na.locf(wp)
-        if(as.Date(first(index(Rp))) > (as.Date(index(wp[1,]))+1)) {
-            warning(paste('data series starts on',as.Date(first(index(Rp))),', which is after the first rebalancing period',as.Date(first(index(wp)))+1)) 
-            wp = wp
-        } else{
-            wp = wp[2:nrow(wp)]
-        }
+      if(as.Date(last(index(Rp))) < (as.Date(index(wp[1,]))+1)){
+        stop(paste('last date in series',as.Date(last(index(Rp))),'occurs before beginning of first rebalancing period',as.Date(first(index(wp)))+1))
+      }
+      wp = checkData(wp, method = "xts")
+      wp = merge(wp, xts(, index(Rp)))
+      wp = na.locf(wp)
+      if(as.Date(first(index(Rp))) > (as.Date(index(wp[1,]))+1)) {
+        warning(paste('data series starts on',as.Date(first(index(Rp))),', which is after the first rebalancing period',as.Date(first(index(wp)))+1)) 
+        wp = wp
+      } else{
+        wp = wp[2:nrow(wp)]
+      }
     }
     return(wp)
 }
@@ -87,31 +89,12 @@ function(Rp, wp, h, level = "Sector")
     
     # If level has numeric values we replace numeric values by quintiles
     if (is.numeric(h[[level]])){
-        hnew = h[[level]]
-        quintiles = quantile(h[[level]], c(0, 0.2, 0.4, 0.6, 0.8, 1))
-        for (i in 1:length(h[[level]])){
-            if (h[[level]][i] >= quintiles[1] & h[[level]][i] < quintiles[2]){
-                hnew[i] = "Quintile 1"
-            }
-            if (h[[level]][i] >= quintiles[2] & h[[level]][i] < quintiles[3]){
-              hnew[i] = "Quintile 2"
-            }
-            if (h[[level]][i] >= quintiles[3] & h[[level]][i] < quintiles[4]){
-              hnew[i] = "Quintile 3"
-            }
-            if (h[[level]][i] >= quintiles[4] & h[[level]][i] < quintiles[5]){
-              hnew[i] = "Quintile 4"
-            }
-            if (h[[level]][i] >= quintiles[5] & h[[level]][i] <= quintiles[6]){
-              hnew[i] = "Quintile 5"
-            }
-        }
-        h[[level]] = hnew
+      h = HierarchyQuintiles(h, level)
     }
     h = split(h$primary_id, h[level])
     returns = as.xts(matrix(NA, ncol = length(h), nrow = nrow(Rp)), index(Rp))
     for(i in 1:length(h)){
-        returns[, i] = rowSums(Rp[, h[[i]]] * wp[, h[[i]]])
+      returns[, i] = rowSums(Rp[, h[[i]]] * coredata(wp[, h[[i]]]))
     }
     colnames(returns) = names(h)
     return(returns)
@@ -135,11 +118,15 @@ function(wp, h, level = "Sector")
     # FUNCTION:
     # Transform data to the xts objects
     wp = Weight.transform(wp, Rp)
-
+    
+    # If level has numeric values we replace numeric values by quintiles
+    if (is.numeric(h[[level]])){
+      h = HierarchyQuintiles(h, level)
+    }
     h = split(h$primary_id, h[level])
     weights = wp[, 1:length(h)]
     for(i in 1:length(h)){
-        weights[, i] = rowSums(wp[, h[[i]]])
+      weights[, i] = rowSums(wp[, h[[i]]])
     }
     colnames(weights) = names(h)
     return(weights)

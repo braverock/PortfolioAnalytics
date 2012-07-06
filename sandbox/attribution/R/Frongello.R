@@ -59,12 +59,12 @@ function(rp, rb, attributions, adjusted)
     # FUNCTION:
     adj = attributions
     if (nrow(rp) > 1){
-        adj[2, ] = coredata(adj[2, ]) * drop((1 + rp[1, 1])) + drop(rb[2, 1]) * coredata(adj[1, ])
+      adj[2, ] = coredata(adj[2, ]) * drop((1 + rp[1, 1])) + drop(rb[2, 1]) * coredata(adj[1, ])
     }
     if (nrow(rp) > 2){
-        for(i in 3:nrow(rp)){
-            adj[i, ] = coredata(adj[i, ]) * drop(prod(1 + rp[1:(i-1), 1])) + drop(rb[i, ]) * coredata(colSums(adj[1:(i-1), ]))
-        }
+      for(i in 3:nrow(rp)){
+        adj[i, ] = coredata(adj[i, ]) * drop(prod(1 + rp[1:(i-1), 1])) + drop(rb[i, ]) * coredata(colSums(adj[1:(i-1), ]))
+      }
     }
     total = colSums(adj)
     if (adjusted == FALSE){

@@ -22,14 +22,16 @@ hierarchy}
   Aggregate returns and weights up to the chosen level from
   the hierarchy. Hierarchy can be used from the
   buildHierarchy function or defined manually in the same
-  way as the buildHierarchy's output.
-  \code{Weight.transform} makes transformation of weigths
-  to the xts object conformable with returns.
+  way as the buildHierarchy's output. If for the selected
+  level the values in the hierarchy are numeric, the
+  aggregation of returns or weights is performed by
+  quintiles. \code{Weight.transform} makes transformation
+  of weights to the xts object conformable with returns.
 }
 \examples{
 data(attrib)
 Weight.transform(wp, Rp)
-Return.level(Rp, wp, h, level = "Sector")
+Return.level(Rp, wp, h, level = "MarketCap")
 Weight.level(wp, h, level = "Sector")
 }
 \author{

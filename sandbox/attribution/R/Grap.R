@@ -1,9 +1,9 @@
 #' calculates total attribution effects using GRAP smoothing 
 #' 
 #' Calculates total attribution effects over multiple periods using 
-#' GEAP linking method. Used internally by the \code{\link{Attribution}} 
-#' function. Arithmetic attribution effects do not naturally link over time. 
-#' This function uses GRAP smoothing algorithm to adjust attribution effects 
+#' GRAP linking method. Used internally by the \code{\link{Attribution}} 
+#' function. Arithmetic attribution effects do not naturally link over time.
+#' This function uses GRAP smoothing algorithm to adjust attribution effects
 #' so that they can be summed up over multiple periods
 #' Attribution effect are multiplied by the adjustment factor 
 #' \deqn{A_{t}' = A_{t} \times G_{t}}, where 
@@ -66,17 +66,17 @@ function(rp, rb, attributions, adjusted)
     T = nrow(rp)
     G[1] = prod(1 + rb[2:T])           #GRAP factor for the first period
     if (T == 2){
-        G[2] = (1 + rp[1])
+      G[2] = (1 + rp[1])
     }
     if (T > 2){
-        G[T] = prod(1 + rp[1:(T - 1)]) #GRAP factor for the last period
+      G[T] = prod(1 + rp[1:(T - 1)]) #GRAP factor for the last period
     }
     if (T > 3){
-        for(i in 2:(T - 1)){
-            r = 1 + rp[1:(i-1)]
-            b = 1 + rb[(i+1):T]
-            G[i] = apply(r, 2, prod) * apply(b, 2, prod)
-        }
+      for(i in 2:(T - 1)){
+        r = 1 + rp[1:(i-1)]
+        b = 1 + rb[(i+1):T]
+        G[i] = apply(r, 2, prod) * apply(b, 2, prod)
+      }
     }
     g = matrix(rep(G, ncol(attributions)), nrow(attributions), ncol(attributions), byrow = FALSE)
     adj = attributions * g

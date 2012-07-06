@@ -1,8 +1,8 @@
 \name{Menchero}
 \alias{Menchero}
-\title{calculates total attribution effects using Menchero linking}
+\title{calculates total attribution effects using Menchero smoothing}
 \usage{
-  Menchero(rp, rb, attributions)
+  Menchero(rp, rb, attributions, adjusted)
 }
 \arguments{
   \item{rp}{xts of portfolio returns}
@@ -10,13 +10,20 @@
   \item{rb}{xts of benchmark returns}
 
   \item{attributions}{xts with attribution effects}
+
+  \item{adjusted}{TRUE/FALSE, whether to show original or
+  smoothed attribution effects for each period}
+}
+\value{
+  returns a data frame with original attribution effects
+  and total attribution effects over multiple periods
 }
 \description{
   Calculates total attribution effects over multiple
   periods using Menchero linking method. Used internally by
   the \code{\link{Attribution}} function. Arithmetic
   attribution effects do not naturally link over time. This
-  function uses Menchero smoothing algorithms to adjust
+  function uses Menchero smoothing algorithm to adjust
   attribution effects so that they can be summed up over
   multiple periods Attribution effect are multiplied by the
   adjustment factor \deqn{A_{t}' = A_{t} \times (M
@@ -38,7 +45,7 @@
 }
 \examples{
 data(attrib)
-Menchero(rp, rb, allocation)
+Menchero(rp, rb, allocation, adjusted = FALSE)
 }
 \author{
   Andrii Babii
@@ -48,7 +55,8 @@ Menchero(rp, rb, allocation)
   Measurement and Attribution}. Wiley. 2004. p. 194-196
 
   Menchero, J. (2000) \emph{An optimized approach to
-  linking attribution
+  linking attribution effects over time}.Journal of
+  Performance Measurement. Fall, 36–42.
 }
 \seealso{
   \code{\link{Attribution}} \cr \code{\link{Carino}} \cr

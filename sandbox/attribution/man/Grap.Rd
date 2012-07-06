@@ -1,8 +1,8 @@
 \name{Grap}
 \alias{Grap}
-\title{calculates total attribution effects using GRAP linking}
+\title{calculates total attribution effects using GRAP smoothing}
 \usage{
-  Grap(rp, rb, attributions)
+  Grap(rp, rb, attributions, adjusted)
 }
 \arguments{
   \item{rp}{xts of portfolio returns}
@@ -10,13 +10,20 @@
   \item{rb}{xts of benchmark returns}
 
   \item{attributions}{xts with attribution effects}
+
+  \item{adjusted}{TRUE/FALSE, whether to show original or
+  smoothed attribution effects for each period}
+}
+\value{
+  returns a data frame with original attribution effects
+  and total attribution effects over multiple periods
 }
 \description{
   Calculates total attribution effects over multiple
-  periods using logarithmic linking method. Used internally
-  by the \code{\link{Attribution}} function. Arithmetic
+  periods using GRAP linking method. Used internally by the
+  \code{\link{Attribution}} function. Arithmetic
   attribution effects do not naturally link over time. This
-  function uses GRAP smoothing algorithms to adjust
+  function uses GRAP smoothing algorithm to adjust
   attribution effects so that they can be summed up over
   multiple periods Attribution effect are multiplied by the
   adjustment factor \deqn{A_{t}' = A_{t} \times G_{t}},
@@ -35,7 +42,7 @@
 }
 \examples{
 data(attrib)
-Grap(rp, rb, allocation)
+Grap(rp, rb, allocation, adjusted = FALSE)
 }
 \author{
   Andrii Babii
@@ -45,13 +52,15 @@ Grap(rp, rb, allocation)
   Measurement and Attribution}. Wiley. 2004. p. 196-199
 
   GRAP (Groupe de Recherche en Attribution de Performance)
-  (1997)
+  (1997) \emph{Synthese des modeles d’attribution de
+  performance}. Paris, Mars.
 }
 \seealso{
   \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr
   \code{\link{Carino}} \cr \code{\link{Frongello}} \cr
   \code{\link{Attribution.geometric}}
 }
+\keyword{arithmetic}
 \keyword{attribution,}
 \keyword{GRAP}
 \keyword{linking}

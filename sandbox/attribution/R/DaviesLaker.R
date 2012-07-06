@@ -58,20 +58,29 @@ function(Rp, wp, Rb, wb)
     # and total attribution effects over multiple periods
     
     # FUNCTION:
-    rp = reclass(rowSums(Rp * wp), Rp)  
-    rb = reclass(rowSums(Rb * wb), Rb)  
-    colnames(rp) = "Total"                    
-    colnames(rb) = "Total"                 
-    bs = reclass(rowSums((wp * Rb[, 1:ncol(wp)])), Rp) # Allocation notional fund returns
-    rs = reclass(rowSums((wb * Rp[, 1:ncol(wb)])), Rp) # Selection notional fund returns
+    WP = wp
+    WB = wb
+    wp = Weight.transform(wp, Rp)
+    wb = Weight.transform(wb, Rb)
+    if (is.vector(WP)  & is.vector(WB)){
+      rp = Return.portfolio(Rp, WP, geometric = FALSE)
+      rb = Return.portfolio(Rb, WB, geometric = FALSE)
+    } else{
+      rp = Return.rebalancing(Rp, WP, geometric = FALSE)
+      rb = Return.rebalancing(Rb, WB, geometric = FALSE)
+    }
+    colnames(rp) = "Total"
+    colnames(rb) = "Total"
+    bs = reclass(rowSums((wp * coredata(Rb[, 1:ncol(wp)]))), Rp) # Allocation notional fund returns
+    rs = reclass(rowSums((wb * coredata(Rp[, 1:ncol(wb)]))), Rp) # Selection notional fund returns
     a = apply(1 + bs, 2, prod) - apply(1 + rb, 2, prod)
     s = apply(1 + rs, 2, prod) - apply(1 + rb, 2, prod)
     i = apply(1 + rp, 2, prod) - apply(1 + rs, 2, prod) - apply(1 + bs, 2, prod) + apply(1 + rb, 2, prod)
     
     # Compute attribution effects (Brinson, Hood and Beebower model)
-    allocation = (wp - wb) * Rb
-    selection = wb * (Rp - Rb)
-    interaction = (wp - wb) * (Rp - Rb)
+    allocation = (wp - wb) * coredata(Rb)
+    selection = wb * (Rp - coredata(Rb))
+    interaction = (wp - wb) * (Rp - coredata(Rb))
     n = ncol(allocation)               # number of segments
     allocation = cbind(allocation, rowSums(allocation))
     names(allocation)[n + 1] = "Total"  
@@ -87,12 +96,13 @@ function(Rp, wp, Rb, wb)
     rownames(selection)[nrow(selection)] = "Total"
     rownames(interaction)[nrow(allocation)] = "Total"
 
-    excess.returns = rp - rb
-    rp.a = prod(1 + rp) - 1              
-    rb.a = prod(1 + rb) - 1
-    aer.a = as.matrix(rp.a - rb.a)                  # Arithmetic (annualized) excess returns
-    rownames(aer.a) = "Total arithmetic"
-    excess.returns = rbind(as.matrix(excess.returns), aer.a)
+    # Arithmetic excess returns + annualized arithmetic excess returns
+    excess.returns = rp - coredata(rb)
+    if (nrow(rp) > 1){
+      er = Return.annualized.excess(rp, rb, geometric = FALSE)
+      excess.returns = rbind(as.matrix(excess.returns), er)
+    }
+    colnames(excess.returns) = "Arithmetic"
     
     result = list()
     result[[1]] = excess.returns

@@ -1,4 +1,4 @@
-#' convert infromation about options, warrants or convertible bonds to the
+#' convert information about options, warrants or convertible bonds to the
 #' equivalent of returns
 #' 
 #' The performance of option contracts are measured in exactly the same way as
