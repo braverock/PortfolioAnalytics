@@ -89,7 +89,7 @@
 #' \item top.down - the priority is given to the sector allocation. Interaction
 #' term is combined with the security selection effect, \item bottom.up - the 
 #' priority is given to the security selection. Interaction term is combined 
-#' with the sector allocation effect}
+#' with the sector allocation effect}. By default "none" is selected
 #' @param wpf vector, xts, data frame or matrix with portfolio weights of 
 #' currency forward contracts
 #' @param wbf vector, xts, data frame or matrix with benchmark weights of 
@@ -111,6 +111,7 @@
 #' \item grap - linking approach developed by GRAP, 
 #' \item frongello - Frongello's linking method
 #' \item davies.laker - Davies and Laker's linking method
+#' By default Carino linking is selected
 #' @param geometric TRUE/FALSE, whether to use geometric or arithmetic excess
 #' returns for the attribution analysis
 #' @param adjusted TRUE/FALSE, whether to show original or smoothed attribution
@@ -153,7 +154,7 @@ function (Rp, wp, Rb, wb,
           wpf = NA, wbf = NA, S = NA, F = NA, Rpl = NA, Rbl = NA, Rbh = NA,
           bf = FALSE,
           method = c("none", "top.down", "bottom.up"), 
-          linking = c("none", "carino", "menchero", "grap", "frongello", "davies.laker"),
+          linking = c("carino", "menchero", "grap", "frongello", "davies.laker"),
           geometric = FALSE, adjusted = FALSE)
 {   # @author Andrii Babii
 
@@ -192,6 +193,9 @@ function (Rp, wp, Rb, wb,
       Rp = Rp[2:nrow(Rp)]
       Rb = Rb[2:nrow(Rb)]
     }
+    method = method[1]
+    linking = linking[1]
+    
     currency = !(is.na(wpf)[1] & is.na(wbf)[1] & is.na(S)[1] & is.na(F)[1] & is.na(Rpl)[1] & is.na(Rbl)[1] & is.na(Rbh)[1])
     
     if (geometric == FALSE & linking != "davies.laker"){ 
