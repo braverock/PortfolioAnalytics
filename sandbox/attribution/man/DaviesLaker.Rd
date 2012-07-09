@@ -25,18 +25,17 @@
   Arithmetic attribution effects do not naturally link over
   time. This function uses Davies and Laker linking method
   to compute total attribution effects. Arithmetic excess
-  returns are decomposed as follows: \deqn{r - b =
+  returns are decomposed as follows: \deqn{R_{p} - R_{b} =
   Allocation + Selection + Interaction} \deqn{Allocation =
-  \overset{T}{\underset{t=1}{\prod}}(1+bs_{t})-\overset{T}{\underset{t=1}{\prod}}(1+rb_{t})}
+  \prod^{T}_{t=1}(1+bs_{t})-\prod^{T}_{t=1}(1+R_{bt})}
   \deqn{Selection =
-  \overset{T}{\underset{t=1}{\prod}}(1+rs_{t})-\overset{T}{\underset{t=1}{\prod}}(1+rb_{t})}
+  \prod^{T}_{t=1}(1+rs_{t})-\prod^{T}_{t=1}(1+R_{bt})}
   \deqn{Interaction =
-  \overset{T}{\underset{t=1}{\prod}}(1+rp_{t})-\overset{T}{\underset{t=1}{\prod}}(1+rs_{t})-\overset{T}{\underset{t=1}{\prod}}(1+bs_{t})+\overset{T}{\underset{t=1}{\prod}}(1+rb_{t})}
-  \deqn{rp_{i}} - portfolio returns at period \deqn{i}
-  \deqn{rb_{i}} - benchmark returns at period \deqn{i}
-  \deqn{rs_{i}} - selection notional fund returns at period
-  \deqn{i} \deqn{bs_{i}} - allocation notional fund returns
-  at period \deqn{i} \deqn{T} - number of periods
+  \prod^{T}_{t=1}(1+R_{pt})-\prod^{T}_{t=1}(1+rs_{t})-\prod^{T}_{t=1}(1+bs_{t})+\prod^{T}_{t=1}(1+R_{bt})}
+  R_pi - portfolio returns at period i, Rb_i - benchmark
+  returns at period i, rs_i - selection notional fund
+  returns at period i, bs_i - allocation notional fund
+  returns at period i, T - number of periods
 }
 \examples{
 data(attrib)
@@ -47,10 +46,10 @@ DaviesLaker(Rp, wp, Rb, wb)
 }
 \references{
   Bacon, C. \emph{Practical Portfolio Performance
-  Measurement and Attribution}. Wiley. 2004. p. 201-204
-
-  Davies, O. and Laker, D. (2001) Multiple-period
-  performance attribution
+  Measurement and Attribution}. Wiley. 2004. p. 201-204 \cr
+  Davies, O. and Laker, D. (2001) \emph{Multiple-period
+  performance attribution using the Brinson model}. Journal
+  of Performance Measurement. Fall. p. 12-22 \cr
 }
 \seealso{
   \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr

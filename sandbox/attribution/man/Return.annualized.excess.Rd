@@ -1,6 +1,6 @@
 \name{Return.annualized.excess}
 \alias{Return.annualized.excess}
-\title{calculate an annualized excess return for comparing instruments with different
+\title{calculates an annualized excess return for comparing instruments with different
 length history}
 \usage{
   Return.annualized.excess(Rp, Rb, scale = NA,
@@ -21,7 +21,7 @@ length history}
 }
 \description{
   An average annualized excess return is convenient for
-  comparing returns.
+  comparing excess returns.
 }
 \details{
   Annualized returns are useful for comparing two assets.

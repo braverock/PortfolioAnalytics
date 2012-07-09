@@ -27,14 +27,12 @@
   attribution effects so that they can be summed up over
   multiple periods Adjusted attribution effect at period t
   are: \deqn{A_{t}' =
-  A_{t}\times\overset{t-1}{\underset{i=1}{\prod}}(1+r_{i})+b_{t}\times\overset{t-1}{\underset{i=1}{\sum}}A_{i}'}
-  \deqn{A_{t}}' - adjusted attribution effects at period
-  \deqn{t} \deqn{A_{t}} - unadjusted attribution effects at
-  period \deqn{t} \deqn{r_{i}} - portfolio returns at
-  period \deqn{i} \deqn{b_{i}} - benchmark returns at
-  period \deqn{i} \deqn{r} - total portfolio returns
-  \deqn{b} - total benchmark returns \deqn{n} - number of
-  periods
+  A_{t}\times\prod^{t-1}_{i=1}(1+r_{pi})+R_{bt}\times\sum^{t-1}_{i=1}A_{i}'}
+  A_t' - adjusted attribution effects at period t, A_t -
+  unadjusted attribution effects at period t, R_pi -
+  portfolio returns at period i, R_bi - benchmark returns
+  at period , Rp - total portfolio returns, Rb - total
+  benchmark returns, n - number of periods
 }
 \examples{
 data(attrib)
@@ -45,10 +43,10 @@ Frongello(rp, rb, allocation, adjusted = FALSE)
 }
 \references{
   Bacon, C. \emph{Practical Portfolio Performance
-  Measurement and Attribution}. Wiley. 2004. p. 199-201
-
+  Measurement and Attribution}. Wiley. 2004. p. 199-201 \cr
   Frongello, A. (2002) \emph{Linking single period
-  attribution results}.
+  attribution results}. Journal of Performance Measurement.
+  Spring, p. 10-22. \cr
 }
 \seealso{
   \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr

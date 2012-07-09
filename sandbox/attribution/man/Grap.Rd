@@ -26,19 +26,18 @@
   function uses GRAP smoothing algorithm to adjust
   attribution effects so that they can be summed up over
   multiple periods Attribution effect are multiplied by the
-  adjustment factor \deqn{A_{t}' = A_{t} \times G_{t}},
+  adjustment factor \deqn{A_{t}' = A_{t} \times G_{t}}
   where
-  \deqn{G_{t}=\overset{t-1}{\underset{i=1}{\prod}}(1+r_{i})\times\overset{n}{\underset{i=t+1}{\prod}}(1+b_{i})}
-  \deqn{A_{t}}' - adjusted attribution effects at period
-  \deqn{t} \deqn{A_{t}} - unadjusted attribution effects at
-  period \deqn{t} \deqn{r_{i}} - portfolio returns at
-  period \deqn{i} \deqn{b_{i}} - benchmark returns at
-  period \deqn{i} \deqn{r} - total portfolio returns
-  \deqn{b} - total benchmark returns \deqn{n} - number of
-  periods The total arithmetic excess returns can be
-  explained in terms of the sum of adjusted attribution
-  effects: \deqn{r - b =
-  \overset{n}{\underset{t=1}{\sum}}\left(Allocation_{t}+Selection_{t}+Interaction_{t}\right)}
+  \deqn{G_{t}=\prod^{t-1}_{i=1}(1+R_{pi})\times\prod^{n}_{t+1}(1+R_{bi})}
+  A_t' - adjusted attribution effects at period t, A_t -
+  unadjusted attribution effects at period t, R_pi -
+  portfolio returns at period i, R_bi - benchmark returns
+  at period i, Rp - total portfolio returns, Rb - total
+  benchmark returns, n - number of periods The total
+  arithmetic excess returns can be explained in terms of
+  the sum of adjusted attribution effects: \deqn{R_{p} -
+  R_{b} =
+  \sum^{n}_{t=1}\left(Allocation_{t}+Selection_{t}+Interaction_{t}\right)}
 }
 \examples{
 data(attrib)
@@ -49,10 +48,10 @@ Grap(rp, rb, allocation, adjusted = FALSE)
 }
 \references{
   Bacon, C. \emph{Practical Portfolio Performance
-  Measurement and Attribution}. Wiley. 2004. p. 196-199
-
+  Measurement and Attribution}. Wiley. 2004. p. 196-199 \cr
   GRAP (Groupe de Recherche en Attribution de Performance)
-  (1997)
+  (1997) \emph{Synthese des modeles d'attribution de
+  performance}. Paris, Mars.\cr
 }
 \seealso{
   \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr
