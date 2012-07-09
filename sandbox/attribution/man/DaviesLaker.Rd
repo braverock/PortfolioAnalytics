@@ -50,8 +50,7 @@ DaviesLaker(Rp, wp, Rb, wb)
   Measurement and Attribution}. Wiley. 2004. p. 201-204
 
   Davies, O. and Laker, D. (2001) Multiple-period
-  performance attribution using the brinson model.Journal
-  of Performance MeasurementFall, 12–22.
+  performance attribution
 }
 \seealso{
   \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr

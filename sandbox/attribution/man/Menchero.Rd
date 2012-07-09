@@ -55,8 +55,7 @@ Menchero(rp, rb, allocation, adjusted = FALSE)
   Measurement and Attribution}. Wiley. 2004. p. 194-196
 
   Menchero, J. (2000) \emph{An optimized approach to
-  linking attribution effects over time}.Journal of
-  Performance Measurement. Fall, 36–42.
+  linking attribution
 }
 \seealso{
   \code{\link{Attribution}} \cr \code{\link{Carino}} \cr

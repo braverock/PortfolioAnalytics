@@ -99,7 +99,7 @@ AttributionFixedIncome(Rp, wp, Rb, wb, Rf, Dp, Db, S, wbf, geometric = FALSE)
   Measurement and Attribution}. Wiley. 2004. Chapter 7
 
   Van Breukelen, G. \emph{Fixed income attribution}.
-  Journal of Performance Measurement. Summer, 61–68. 2000
+  Journal of Performance
 }
 \seealso{
   \code{\link{Attribution.levels}},

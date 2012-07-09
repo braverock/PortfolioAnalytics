@@ -52,8 +52,7 @@ Grap(rp, rb, allocation, adjusted = FALSE)
   Measurement and Attribution}. Wiley. 2004. p. 196-199
 
   GRAP (Groupe de Recherche en Attribution de Performance)
-  (1997) \emph{Synthese des modeles d’attribution de
-  performance}. Paris, Mars.
+  (1997)
 }
 \seealso{
   \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr

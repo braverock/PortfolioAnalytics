@@ -48,8 +48,7 @@ Frongello(rp, rb, allocation, adjusted = FALSE)
   Measurement and Attribution}. Wiley. 2004. p. 199-201
 
   Frongello, A. (2002) \emph{Linking single period
-  attribution results}. Journal of Performance Measurement.
-  Spring, 10–22.
+  attribution results}.
 }
 \seealso{
   \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr

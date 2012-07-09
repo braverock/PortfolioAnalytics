@@ -5,7 +5,7 @@
   Attribution(Rp, wp, Rb, wb, wpf = NA, wbf = NA, S = NA,
     F = NA, Rpl = NA, Rbl = NA, Rbh = NA, bf = FALSE,
     method = c("none", "top.down", "bottom.up"),
-    linking = c("none", "carino", "menchero", "grap", "frongello", "davies.laker"),
+    linking = c("carino", "menchero", "grap", "frongello", "davies.laker"),
     geometric = FALSE, adjusted = FALSE)
 }
 \arguments{
@@ -29,7 +29,8 @@
   the sector allocation. Interaction term is combined with
   the security selection effect, \item bottom.up - the
   priority is given to the security selection. Interaction
-  term is combined with the sector allocation effect}}
+  term is combined with the sector allocation effect}. By
+  default "none" is selected}
 
   \item{wpf}{vector, xts, data frame or matrix with
   portfolio weights of currency forward contracts}
@@ -64,7 +65,8 @@
   menchero - Menchero's smoothing algorithm, \item grap -
   linking approach developed by GRAP, \item frongello -
   Frongello's linking method \item davies.laker - Davies
-  and Laker's linking method}
+  and Laker's linking method By default Carino linking is
+  selected}
 
   \item{geometric}{TRUE/FALSE, whether to use geometric or
   arithmetic excess returns for the attribution analysis}
@@ -196,13 +198,11 @@ Attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
   Benchmarking}. McGraw-Hill. 2009. Chapter 18-19
 
   Brinson, G. and Fachler, N. (1985) \emph{Measuring non-US
-  equity portfolio performance}. Journal of Portfolio
-  Management. Spring, 73–76.
+  equity portfolio
 
   Gary P. Brinson, L. Randolph Hood, and Gilbert L.
   Beebower, \emph{Determinants of Portfolio Performance},
-  Financial Analysts Journal, vol. 42, no. 4, July/August
-  1986, pp. 39–44.
+  Financial Analysts Journal,
 
   Karnosky, D. and Singer, B. \emph{Global asset management
   and performance attribution. The Research Foundation of

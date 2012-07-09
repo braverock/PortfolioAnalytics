@@ -62,8 +62,7 @@ Carino(rp, rb, allocation, adjusted = FALSE)
   Measurement and Attribution}. Wiley. 2004. p. 191-193
 
   Carino, D. (1999) \emph{Combining attribution effects
-  over time}. The Journal of Performance Measurement.
-  Summer, 5–14.
+  over time}.
 }
 \seealso{
   \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr

@@ -23,10 +23,7 @@ equivalent of returns}
   exactly the same way as any other asset but they also
   generate economic exposures. The key to attribution
   analysis with options is to include the appropriate
-  economic exposure for which we can use the option’s
-  delta. The option itself will provide part of the
-  valuation; the remainder of the option’s economic value
-  must be achieved again by using notional assets:
+  economic must be achieved again by using notional assets:
   \deqn{option economic exposure = \delta \times number of
   options \times strike price = option valuation + notional
   exposure}
