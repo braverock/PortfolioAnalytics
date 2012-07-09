@@ -4,22 +4,13 @@
 #' geometric attribution effects over multiple periods. Used internally by the
 #' \code{\link{Attribution}} function. Geometric attribution effects in the
 #' contrast with arithmetic do naturally link over time multiplicatively:
-#' \deqn{\frac{(1+r)}{1+b}-1=\overset{n}{\underset{t=1}{\prod}}(1+A_{t}^{G})\times\overset{n}{\underset{t=1}{\prod}}(1+S{}_{t}^{G})-1}
-#' 
-#' where
-#' \deqn{A_{t}^{G}} - total allocation effect at time t
-#' \deqn{S_{t}^{G}} - total selection effect at time t
-#' \deqn{A_{t}^{G}=\frac{1+b_{S}}{1+b_{t}}-1}
-#' \deqn{S_{t}^{G}=\frac{1+r_{t}}{1+b_{S}}-1}
-#' \deqn{b_{S}=\overset{n}{\underset{i=1}{\sum}}wp_{i}\times rb_{i}}
-#' \deqn{b_{S}} - semi-notional fund
-#' \deqn{w_{pt}} - portfolio weights at time t
-#' \deqn{w_{bt}} - benchmark weights at time t
-#' \deqn{r_{t}} - portfolio returns at time t
-#' \deqn{b_{t}} - benchmark returns at time t
-#' \deqn{r} - total portfolio returns
-#' \deqn{b} - total benchmark returns
-#' \deqn{n} - number of periods
+#' \deqn{\frac{(1+R_{p})}{1+R_{b}}-1=\prod^{n}_{t=1}(1+A_{t}^{G})\times\prod^{n}_{t=1}(1+S{}_{t}^{G})-1}
+#' Total allocation effect at time t:
+#' \deqn{A_{t}^{G}=\frac{1+b_{S}}{1+R_{bt}}-1}
+#' Total selection effect at time t:
+#' \deqn{S_{t}^{G}=\frac{1+R_{pt}}{1+b_{S}}-1}
+#' Semi-notional fund:
+#' \deqn{b_{S}=\sum^{n}_{i=1}w_{pi}\times R_{bi}}
 #' 
 #' The multi-currency geometric attribution is handled following the Appendix A
 #' (Bacon, 2004). 
@@ -30,21 +21,23 @@
 #' The individual allocation effects are computed using:
 #' \deqn{(w_{pi}-w_{bi})\times\left(\frac{1+R_{bHi}}{1+b_{L}}-1\right)}
 #' 
-#' where
-#' \deqn{b_{SH} = \underset{i}{\sum}((w_{pi} - w_{bi})R_{bHi} + w_{bi}R_{bLi})}
-#' - total semi-notional return hedged into the base currency 
-#' 
-#' \deqn{b_{SL} = \underset{i}{\sum}w_{pi}R_{bLi}} - total semi-notional return
-#' in the local currency
-#' \deqn{w_{pi}} - portfolio weights of asset i
-#' \deqn{w_{bi}} - benchmark weights of asset i
-#' \deqn{R_{pLi}} - portfolio returns in the local currency
-#' \deqn{R_{bLi}}} - benchmark returns in the local currency
-#' \deqn{R_{bHi}} - benchmark returns hedged into the base currency
-#' \deqn{b_{L}} - total benchmark returns in the local currency
-#' \deqn{r_{L}} - total portfolio returns in the local currency
+#' Where the total semi-notional returns hedged into the base currency were
+#' used:
+#' \deqn{b_{SH} = \sum_{i}w_{pi}\times R_{bi}((w_{pi} - w_{bi})R_{bHi} + w_{bi}R_{bLi})}
+#' Total semi-notional returns in the local currency:
+#' \deqn{b_{SL} = \sum_{i}w_{pi}R_{bLi}}
+#' Portfolio returns in the local currency:
+#' \deqn{R_{pLi}}
+#' Benchmark returns in the local currency:
+#' \deqn{R_{bLi}}
+#' Benchmark returns hedged into the base currency:
+#' \deqn{R_{bHi}}
+#' Total benchmark returns in the local currency:
+#' \deqn{b_{L}}
+#' Total portfolio returns in the local currency:
+#' \deqn{r_{L}}
 #' The total excess returns are decomposed into:
-#' \deqn{\frac{(1+r)}{1+b}-1=\frac{1+r_{L}}{1+b_{SL}}\times\frac{1+b_{SH}}{1+b_{L}}\times\frac{1+b_{SL}}{1+b_{SH}}\times\frac{1+r}{1+r_{L}}\times\frac{1+b_{L}}{1+b}-1}
+#' \deqn{\frac{(1+R_{p})}{1+R_{b}}-1=\frac{1+r_{L}}{1+b_{SL}}\times\frac{1+b_{SH}}{1+b_{L}}\times\frac{1+b_{SL}}{1+b_{SH}}\times\frac{1+R_{p}}{1+r_{L}}\times\frac{1+b_{L}}{1+R_{b}}-1}
 #' 
 #' where the first term corresponds to the selection, second to the allocation,
 #' third to the hedging cost transferred and the last two to the naive currency
@@ -65,10 +58,8 @@
 #' @seealso  \code{\link{Attribution}}
 #' @references Christopherson, Jon A., Carino, David R., Ferson, Wayne E.  
 #' \emph{Portfolio Performance Measurement and Benchmarking}. McGraw-Hill. 
-#' 2009. Chapter 18-19
-#' 
-#' Bacon, C. \emph{Practical Portfolio Performance Measurement and
-#' Attribution}. Wiley. 2004. Chapter 5, 8, Appendix A
+#' 2009. Chapter 18-19 \cr Bacon, C. \emph{Practical Portfolio Performance 
+#' Measurement and Attribution}. Wiley. 2004. Chapter 5, 8, Appendix A \cr
 #' @keywords attribution, geometric attribution, geometric linking
 #' @examples
 #' 

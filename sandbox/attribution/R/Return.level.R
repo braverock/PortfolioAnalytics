@@ -1,11 +1,11 @@
-#' aggregate portfolio returns and weights up to the chosen level from the 
+#' aggregates portfolio returns and weights up to the chosen level from the 
 #' hierarchy
 #' 
-#' Aggregate returns and weights up to the chosen level from the hierarchy.
-#' Hierarchy can be used from the buildHierarchy function or defined manually
-#' in the same way as the buildHierarchy's output. If for the selected level 
-#' the values in the hierarchy are numeric, the aggregation of returns or 
-#' weights is performed by quintiles.
+#' Aggregates returns and weights up to the chosen level from the hierarchy.
+#' Hierarchy can be used from the \code{buildHierarchy} function or 
+#' defined manually in the same way as the buildHierarchy's output. If for the
+#' selected level the values in the hierarchy are numeric, the aggregation of 
+#' returns or weights is performed by quintiles.
 #' \code{Weight.transform} makes transformation of weights to the xts object
 #' conformable with returns.
 #'
@@ -30,42 +30,6 @@
 #' Weight.level(wp, h, level = "Sector")
 #' 
 #' @export
-Weight.transform <- 
-function(wp, Rp)
-{   # @author Andrii Babii
-  
-    # DESCRIPTION:
-    # Function to transform weights to the xts object conformable with returns 
-    # used by aggregation and attribution functions
-    
-    # Inputs:
-    # wp      vector, xts, data frame or matrix of portfolio weights
-    # Rp      xts, data frame or matrix of portfolio returns
-  
-    # Outputs: 
-    # This function returns the xts object with weights conformable with returns
-  
-    # FUNCTION:
-    if (is.vector(wp)){
-      wp = as.xts(matrix(rep(wp, nrow(Rp)), nrow(Rp), ncol(Rp), byrow = TRUE), index(Rp))
-      colnames(wp) = colnames(Rp)
-    } else{
-      if(as.Date(last(index(Rp))) < (as.Date(index(wp[1,]))+1)){
-        stop(paste('last date in series',as.Date(last(index(Rp))),'occurs before beginning of first rebalancing period',as.Date(first(index(wp)))+1))
-      }
-      wp = checkData(wp, method = "xts")
-      wp = merge(wp, xts(, index(Rp)))
-      wp = na.locf(wp)
-      if(as.Date(first(index(Rp))) > (as.Date(index(wp[1,]))+1)) {
-        warning(paste('data series starts on',as.Date(first(index(Rp))),', which is after the first rebalancing period',as.Date(first(index(wp)))+1)) 
-        wp = wp
-      } else{
-        wp = wp[2:nrow(wp)]
-      }
-    }
-    return(wp)
-}
-
 Return.level <-
 function(Rp, wp, h, level = "Sector")
 {   # @author Andrii Babii
@@ -130,4 +94,40 @@ function(wp, h, level = "Sector")
     }
     colnames(weights) = names(h)
     return(weights)
+}
+
+Weight.transform <- 
+  function(wp, Rp)
+  {   # @author Andrii Babii
+    
+    # DESCRIPTION:
+    # Function to transform weights to the xts object conformable with returns 
+    # used by aggregation and attribution functions
+    
+    # Inputs:
+    # wp      vector, xts, data frame or matrix of portfolio weights
+    # Rp      xts, data frame or matrix of portfolio returns
+    
+    # Outputs: 
+    # This function returns the xts object with weights conformable with returns
+    
+    # FUNCTION:
+    if (is.vector(wp)){
+      wp = as.xts(matrix(rep(wp, nrow(Rp)), nrow(Rp), ncol(Rp), byrow = TRUE), index(Rp))
+      colnames(wp) = colnames(Rp)
+    } else{
+      if(as.Date(last(index(Rp))) < (as.Date(index(wp[1,]))+1)){
+        stop(paste('last date in series',as.Date(last(index(Rp))),'occurs before beginning of first rebalancing period',as.Date(first(index(wp)))+1))
+      }
+      wp = checkData(wp, method = "xts")
+      wp = merge(wp, xts(, index(Rp)))
+      wp = na.locf(wp)
+      if(as.Date(first(index(Rp))) > (as.Date(index(wp[1,]))+1)) {
+        warning(paste('data series starts on',as.Date(first(index(Rp))),', which is after the first rebalancing period',as.Date(first(index(wp)))+1)) 
+        wp = wp
+      } else{
+        wp = wp[2:nrow(wp)]
+      }
+    }
+    return(wp)
 }

@@ -1,7 +1,8 @@
-#' calculate an annualized excess return for comparing instruments with different
+#' calculates an annualized excess return for comparing instruments with different
 #' length history
 #' 
-#' An average annualized excess return is convenient for comparing returns.
+#' An average annualized excess return is convenient for comparing excess 
+#' returns.
 #' 
 #' Annualized returns are useful for comparing two assets. To do so, you must
 #' scale your observations to an annual scale by raising the compound return to

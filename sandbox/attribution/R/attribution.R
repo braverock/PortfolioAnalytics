@@ -17,21 +17,22 @@
 #' similarly to the portfolio and/or benchmark returns annualization. 
 #' 
 #' The arithmetic excess returns are decomposed into the sum of allocation, 
-#' selection and interaction effects across \deqn{n} sectors:
-#' \deqn{r-b=\overset{n}{\underset{i=1}{\sum}}\left(A_{i}+S_{i}+I_{i}\right)}
-#' The arithmetic attribution effects for the category \deqn{i} are computed
+#' selection and interaction effects across n sectors:
+#' \deqn{R_{p}-R_{b}=\sum^{n}_{i=1}\left(A_{i}+S_{i}+I_{i}\right)}
+#' The arithmetic attribution effects for the category i are computed
 #' as suggested in the Brinson, Hood and Beebower (1986):
-#' \deqn{A_{i}=(w_{pi}-w_{bi})\times R_{bi}} - allocation effect
-#' \deqn{S_{i}=w_{pi}\times(R_{pi}-R_{bi})} - selection effect
-#' \deqn{I_{i}=(w_{pi}-w_{bi})\times(r_{i}-b_{i})} - interaction effect
-#' \deqn{r} - total portfolio returns
-#' \deqn{b} - total benchmark returns
-#' \deqn{w_{pi}} - weights of the category \deqn{i} in the portfolio
-#' \deqn{w_{bi}} - weigths of the category \deqn{i} in the benchmark
-#' \deqn{R_{pi}} - returns of the portfolio category \deqn{i}
-#' \deqn{R_{bi}} - returns of the benchmark category \deqn{i}
+#' Allocation effect
+#' \deqn{A_{i}=(w_{pi}-w_{bi})\times R_{bi}}
+#' Selection effect
+#' \deqn{S_{i}=w_{pi}\times(R_{pi}-R_{bi})}
+#' Interaction effect
+#' \deqn{I_{i}=(w_{pi}-w_{bi})\times(R_{pi}-R_{bi})}
+#' r - total portfolio returns, b - total benchmark returns, w_pi - weights of
+#' the category i in the portfolio, w_bi - weigths of the category i in the 
+#' benchmark, R_pi - returns of the portfolio category i, R_bi - returns of the
+#'  benchmark category i.
 #' If Brinson and Fachler (1985) is selected the allocation effect differs:
-#' \deqn{A_{i}=(w_{pi}-w_{bi})\times (R_{bi} - b)}
+#' \deqn{A_{i}=(w_{pi}-w_{bi})\times (R_{bi} - R_{b})}
 #' Depending on goals we can give priority to the allocation or to 
 #' the selection effects. If the priority is given to the sector allocation
 #' the interaction term will be combined with the security selection effect
@@ -42,41 +43,40 @@
 #' attribution effects should be adjusted using linking methods. Adjusted
 #' arithmetic attribution effects can be summed up over time to provide the
 #' multi-period summary: 
-#' \deqn{r-b=\overset{T}{\underset{t=1}{\sum}}\left(A_{t}'+S_{t}'+I_{t}'\right)}
-#' , where \deqn{T} - number of periods; prime stands for the adjustment.
+#' \deqn{R_{p}-R_{b}=\sum^{T}_{t=1}\left(A_{t}'+S_{t}'+I_{t}'\right)}
+#' where T is the number of periods and prime stands for the adjustment.
 #' The geometric attribution effects do not suffer from the linking problem.
 #' Moreover we don't have the interaction term. For more details about the 
-#' geometric attribution see the documentation to 
-#' \code{link{Attribution.geometric}}
-#' Finally, arithmetic annualized excess returns are computed as the 
-#' arithmetic difference between annualised portfolio and benchmark returns:
-#' \deqn{AAER=r_{a}-b_{a}}; the geometric annualized excess returns are
+#' geometric attribution see the documentation to \code{Attribution.geometric}
+#' Finally, arithmetic annualized excess returns are computed as the arithmetic
+#' difference between annualised portfolio and benchmark returns:
+#' \deqn{AAER=r_{a}-b_{a}} the geometric annualized excess returns are
 #' computed as the geometric difference between annualized portfolio
 #' and benchmark returns: \deqn{GAER=\frac{1+r_{a}}{1+b_{a}}-1}
 #' In the case of multi-currency portfolio, the currency return, currency
 #' surprise and forward premium should be specified. The multi-currency
 #' arithmetic attribution is handled following Ankrim and Hensel (1992).
 #' Currency returns are decomposed into the sum of the currency surprise and
-#' the forward premium: \deqn{R_{ci} = R_{cei} + R_{fpi}}, where 
-#' \deqn{R_{cei} = \frac{S_{i}^{t+1} - F_{i}^{t+1}}{S_{i}^{t}}
+#' the forward premium: \deqn{R_{ci} = R_{cei} + R_{fpi}} where 
+#' \deqn{R_{cei} = \frac{S_{i}^{t+1} - F_{i}^{t+1}}{S_{i}^{t}}}
 #' \deqn{R_{fpi} = \frac{F_{i}^{t+1}}{S_{i}^{t}} - 1}
-#' \deqn{S_{i}^{t}} - stop rate for asset i at time t
-#' \deqn{F_{i}^{t}} - forward rate for asset i at time t
-#' Excess returns are decomposed into the sum of allocation, selection and 
-#' interaction effects as in the standard Brinson model: 
-#' \deqn{r-b=\overset{n}{\underset{i=1}{\sum}}\left(A_{i}+S_{i}+I_{i}\right)}
+#' S^t_i - stop rate for asset i at time t
+#' F^t_i - forward rate for asset i at time t. Excess returns are decomposed
+#' into the sum of allocation, selection and interaction effects as in the 
+#' standard Brinson model: 
+#' \deqn{R_{p}-R_{b}=\sum^{n}_{i=1}\left(A_{i}+S_{i}+I_{i}\right)}
 #' However the allocation effect is computed taking into account currency
 #' effects:
-#' \deqn{A_{i}=(w_{pi}-w_{bi})\times (R_{bi} - R_{ci} - R_{l})} - allocation
-#' \deqn{R_{l} = \overset{n}{\underset{i=1}{\sum}}w_{bi}\times(R_{bi}-R_{ci})} - 
-#' benchmark return adjusted for currecy.
+#' \deqn{A_{i}=(w_{pi}-w_{bi})\times (R_{bi} - R_{ci} - R_{l})}
+#' Benchmark returns adjusted fo the currency:
+#' \deqn{R_{l} = \sum^{n}_{i=1}w_{bi}\times(R_{bi}-R_{ci})}
 #' The contribution from currency is analogous to asset allocation:
 #' \deqn{C_{i} = (w_{pi} - w_{bi}) \times (R_{cei} - e) + (w_{pfi} - w_{bfi}) \times (R_{fi} - e)}
-#' where \deqn{e = \overset{n}{\underset{i=1}{\sum}}w_{bi}\times R_{cei}}
+#' where \deqn{e = \sum^{n}_{i=1}w_{bi}\times R_{cei}}
 #' The final term, forward premium, is also analogous to the asset allocation:
 #' \deqn{R_{fi} = (w_{pi} - w_{bi}) \times (R_{fpi} - d)}
-#' where \deqn{d = \overset{n}{\underset{i=1}{\sum}}w_{bi}\times R_{fpi}}
-#' \deqn{R_{fpi}} - forward premium
+#' where \deqn{d = \sum^{n}_{i=1}w_{bi}\times R_{fpi}}
+#' and R_fpi - forward premium
 #' 
 #' @aliases Attribution
 #' @param Rp T x n xts, data frame or matrix of portfolio returns
@@ -106,11 +106,11 @@
 #' Beebower arithmetic attribution
 #' @param linking Used to select the linking method to present the multi-period
 #' summary of arithmetic attribution effects. May be any of: 
-#' \itemize{ \item carino - logarithmic linking coefficient method, 
-#' \item menchero - Menchero's smoothing algorithm, 
-#' \item grap - linking approach developed by GRAP, 
+#' \itemize{\item carino - logarithmic linking coefficient method
+#' \item menchero - Menchero's smoothing algorithm
+#' \item grap - linking approach developed by GRAP
 #' \item frongello - Frongello's linking method
-#' \item davies.laker - Davies and Laker's linking method
+#' \item davies.laker - Davies and Laker's linking method}
 #' By default Carino linking is selected
 #' @param geometric TRUE/FALSE, whether to use geometric or arithmetic excess
 #' returns for the attribution analysis
@@ -123,25 +123,18 @@
 #' @seealso \code{\link{Attribution.levels}}, 
 #' \code{\link{Attribution.geometric}}
 #' @references Ankrim, E. and Hensel, C. \emph{Multi-currency performance
-#' attribution}.Russell Research Commentary. November 2002
-#' 
-#' Bacon, C. \emph{Practical Portfolio Performance Measurement and
-#' Attribution}. Wiley. 2004. Chapter 5, 6, 8
-#' 
-#' Christopherson, Jon A., Carino, David R., Ferson, Wayne E.  
-#' \emph{Portfolio Performance Measurement and Benchmarking}. McGraw-Hill. 
-#' 2009. Chapter 18-19
-#' 
-#' Brinson, G. and Fachler, N. (1985) \emph{Measuring non-US equity portfolio
-#' performance}. Journal of Portfolio Management. Spring, 73–76.
-#' 
-#' Gary P. Brinson, L. Randolph Hood, and Gilbert L. Beebower, 
-#' \emph{Determinants of Portfolio Performance}, Financial Analysts Journal,
-#' vol. 42, no. 4, July/August 1986, pp. 39–44.
-#' 
-#' Karnosky, D. and Singer, B. \emph{Global asset management and performance
+#' attribution}. Russell Research Commentary. November 2002 \cr Bacon, C. 
+#' \emph{Practical Portfolio Performance Measurement and Attribution}. Wiley.
+#' 2004. Chapter 5, 6, 8 \cr Christopherson, Jon A., Carino, David R., Ferson, 
+#' Wayne E. \emph{Portfolio Performance Measurement and Benchmarking}. 
+#' McGraw-Hill. 2009. Chapter 18-19 \cr Brinson, G. and Fachler, N. (1985)
+#' \emph{Measuring non-US equity portfolio performance}. Journal of Portfolio
+#' Management. Spring. p. 73 -76. \cr Gary P. Brinson, L. Randolph Hood, and 
+#' Gilbert L. Beebower, \emph{Determinants of Portfolio Performance}. Financial
+#' Analysts Journal. vol. 42, no. 4, July/August 1986, p. 39-44 \cr 
+#' Karnosky, D. and Singer, B. \emph{Global asset management and performance 
 #' attribution. The Research Foundation of the Institute of Chartered Financial
-#' Analysts}. February 1994.
+#' Analysts}. February 1994. \cr
 #' @keywords attribution
 #' @examples
 #' 
