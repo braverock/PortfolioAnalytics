@@ -6,13 +6,17 @@
 #' naturally link over time. This function uses Davies and Laker linking method
 #' to compute total attribution effects. 
 #' Arithmetic excess returns are decomposed as follows:
-#' \deqn{R_{p} - R_{b} = Allocation + Selection + Interaction}
+#' \deqn{R_{p} - R_{b} = Allocation + Selection + Interaction}{Rp - Rb = 
+#' Allocation + Selection + Interaction}
 #' \deqn{Allocation = \prod^{T}_{t=1}(1+bs_{t})-\prod^{T}_{t=1}(1+R_{bt})}
 #' \deqn{Selection = \prod^{T}_{t=1}(1+rs_{t})-\prod^{T}_{t=1}(1+R_{bt})}
-#' \deqn{Interaction = \prod^{T}_{t=1}(1+R_{pt})-\prod^{T}_{t=1}(1+rs_{t})-\prod^{T}_{t=1}(1+bs_{t})+\prod^{T}_{t=1}(1+R_{bt})}
-#' R_pi - portfolio returns at period i, Rb_i - benchmark returns at period i,
-#' rs_i - selection notional fund returns at period i, bs_i - allocation 
-#' notional fund returns at period i, T - number of periods
+#' \deqn{Interaction = \prod^{T}_{t=1}(1+R_{pt})-\prod^{T}_{t=1}(1+rs_{t})-
+#' \prod^{T}_{t=1}(1+bs_{t})+\prod^{T}_{t=1}(1+R_{bt})}
+#' \eqn{R_{pi}}{Rpi} - portfolio returns at period \eqn{i}, 
+#' \eqn{R_{bi}}{Rbi} - benchmark returns at period \eqn{i},
+#' \eqn{rs_{i}}{rsi} - selection notional fund returns at period \eqn{i}, 
+#' \eqn{bs_{i}}{bsi} - allocation notional fund returns at period \eqn{i}, 
+#' \eqn{T} - number of periods
 #' 
 #' @aliases DaviesLaker
 #' @param Rp xts of portfolio returns
@@ -25,7 +29,7 @@
 #' @seealso  \code{\link{Attribution}} \cr \code{\link{Menchero}} \cr 
 #' \code{\link{Grap}} \cr \code{\link{Carino}} \cr
 #' \code{\link{Attribution.geometric}} \cr \code{\link{Frongello}}
-#' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and 
+#' @references Bacon, C. \emph{Practical Portfolio Performance Measurement and
 #' Attribution}. Wiley. 2004. p. 201-204 \cr Davies, O. and Laker, D. (2001) 
 #' \emph{Multiple-period performance attribution using the Brinson model}. 
 #' Journal of Performance Measurement. Fall. p. 12-22 \cr
@@ -68,11 +72,14 @@ function(Rp, wp, Rb, wb)
     }
     colnames(rp) = "Total"
     colnames(rb) = "Total"
-    bs = reclass(rowSums((wp * coredata(Rb[, 1:ncol(wp)]))), Rp) # Allocation notional fund returns
-    rs = reclass(rowSums((wb * coredata(Rp[, 1:ncol(wb)]))), Rp) # Selection notional fund returns
+    # Allocation notional fund returns
+    bs = reclass(rowSums((wp * coredata(Rb[, 1:ncol(wp)]))), Rp) 
+    # Selection notional fund returns
+    rs = reclass(rowSums((wb * coredata(Rp[, 1:ncol(wb)]))), Rp) 
     a = apply(1 + bs, 2, prod) - apply(1 + rb, 2, prod)
     s = apply(1 + rs, 2, prod) - apply(1 + rb, 2, prod)
-    i = apply(1 + rp, 2, prod) - apply(1 + rs, 2, prod) - apply(1 + bs, 2, prod) + apply(1 + rb, 2, prod)
+    i = apply(1 + rp, 2, prod) - apply(1 + rs, 2, prod) - 
+      apply(1 + bs, 2, prod) + apply(1 + rb, 2, prod)
     
     # Compute attribution effects (Brinson, Hood and Beebower model)
     allocation = (wp - wb) * coredata(Rb)
@@ -86,9 +93,12 @@ function(Rp, wp, Rb, wb)
     interaction = cbind(interaction, rowSums(interaction))
     names(interaction)[n + 1] = "Total"
     
-    allocation = rbind(as.data.frame(allocation), c(rep(NA, ncol(allocation) - 1), a))
-    selection = rbind(as.data.frame(selection), c(rep(NA, ncol(selection) - 1), s))
-    interaction = rbind(as.data.frame(interaction), c(rep(NA, ncol(interaction) - 1), i))
+    allocation = rbind(as.data.frame(allocation), 
+                       c(rep(NA, ncol(allocation) - 1), a))
+    selection = rbind(as.data.frame(selection), 
+                      c(rep(NA, ncol(selection) - 1), s))
+    interaction = rbind(as.data.frame(interaction), 
+                        c(rep(NA, ncol(interaction) - 1), i))
     rownames(allocation)[nrow(allocation)] = "Total"
     rownames(selection)[nrow(selection)] = "Total"
     rownames(interaction)[nrow(allocation)] = "Total"
@@ -106,6 +116,7 @@ function(Rp, wp, Rb, wb)
     result[[2]] = allocation
     result[[3]] = selection
     result[[4]] = interaction
-    names(result) = c("Excess returns", "Allocation", "Selection", "Interaction")
+    names(result) = c("Excess returns", "Allocation", "Selection", 
+                      "Interaction")
     return(result)
 }

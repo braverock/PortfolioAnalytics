@@ -9,14 +9,16 @@
 #' portfolio and benchmark should be at the lowest level (e.g. individual 
 #' instruments). Benchmark should have the same number of columns as portfolio.
 #' That is there should be a benchmark for each instrument in the portfolio 
-#' (possibly 0). The contribution to the allocation in the ith category for the
-#' dth level is: \deqn{\left(^{d}w_{pi}-^{d}w_{bi}\right)\times\left(\frac{1+^{d}R_{bi}}{1+^{d-1}R_{bi}}-1\right)\times\frac{1+^{d-1}R_{bi}}{1+bs^{d-1}}}
-#' 
+#' (possibly 0). The contribution to the allocation in the \eqn{i^{th}}
+#' category for the \eqn{d^{th}} level is: 
+#' \deqn{\left(^{d}w_{pi}-^{d}w_{bi}\right)\times
+#' \left(\frac{1+^{d}R_{bi}}{1+^{d-1}R_{bi}}-1\right)
+#' \times\frac{1+^{d-1}R_{bi}}{1+bs^{d-1}}}
 #' The total attribution for each asset allocation step in the decision process
 #' is: \deqn{\frac{1+^{d}bs}{1+^{d-1}bs}-1}
-#' 
 #' The final step, stock selection, is measured by:
-#' \deqn{^{d}w_{pi}\times\left(\frac{1+R_{pi}}{1+^{d}R_{bi}}-1\right)\times\frac{1+^{d}R_{bi}}{1+^{d}bs}}
+#' \deqn{^{d}w_{pi}\times\left(\frac{1+R_{pi}}{1+^{d}R_{bi}}-1\right)
+#' \times\frac{1+^{d}R_{bi}}{1+^{d}bs}}
 #' 
 #' @aliases Attribution
 #' @param Rp xts, data frame or matrix of portfolio returns
@@ -129,7 +131,8 @@ function(Rp, wp, Rb, wb, h, ...)
     names(weights.b) = levels
 
     # Total attribution effects
-    allocation = matrix(rep(NA, nrow(Rp) * length(levels)), nrow(Rp), length(levels))
+    allocation = matrix(rep(NA, nrow(Rp) * length(levels)), nrow(Rp), 
+                        length(levels))
     allocation[, 1] = (1 + bs[[1]]) / coredata(1 + rb) - 1 # Allocation 1
     for (i in 2:length(levels)){
       allocation[, i] = (1 + bs[[i]]) / (1 + bs[[i-1]]) - 1
@@ -139,11 +142,14 @@ function(Rp, wp, Rb, wb, h, ...)
     
     # Transform portfolio, benchmark returns and semi-notional funds returns to
     # conformable matrices for multi-level attribution
-    b = as.xts(matrix(rep(rb, ncol(returns.b[[1]])), nrow(rb), ncol(returns.b[[1]])), index(rb))
-    r = as.xts(matrix(rep(rp, ncol(last(returns.b)[[1]])), nrow(rp), ncol(last(returns.b)[[1]])), index(rp))
+    b = as.xts(matrix(rep(rb, ncol(returns.b[[1]])), nrow(rb), 
+                      ncol(returns.b[[1]])), index(rb))
+    r = as.xts(matrix(rep(rp, ncol(last(returns.b)[[1]])), nrow(rp), 
+                      ncol(last(returns.b)[[1]])), index(rp))
     
     returns.b2 = list()
-    for (j in 1:(length(levels) - 1)){ # make benchmark returns conformable at different levels
+    for (j in 1:(length(levels) - 1)){ 
+      # make benchmark returns conformable at different levels
       r_l = Return.level(Rb, WB, h, level = levels[j])
       r_h = Return.level(Rb, WB, h, level = levels[j + 1])
       hierarchy = split(h[levels[j]], h[levels[j + 1]])
@@ -154,13 +160,15 @@ function(Rp, wp, Rb, wb, h, ...)
     }
 
     for (i in 1:(length(bs) - 1)){
-      bs[[i]] = as.xts(matrix(rep(bs[[i]], ncol(returns.b2[[i]])), nrow(r), ncol(returns.b2[[i]])), index(r))
+      bs[[i]] = as.xts(matrix(rep(bs[[i]], ncol(returns.b2[[i]])), nrow(r), 
+                              ncol(returns.b2[[i]])), index(r))
     }
     bs[length(bs)] = bs[length(bs) - 1]
 
     # Attribution at each level
     level = list()
-    level[[1]] = (weights.p[[1]] - weights.b[[1]]) * ((1 + returns.b[[1]]) / (1 + b) - 1)
+    level[[1]] = (weights.p[[1]] - weights.b[[1]]) * ((1 + returns.b[[1]]) 
+                                                      / (1 + b) - 1)
     for (i in 2:length(levels)){ 
       level[[i]] = (weights.p[[i]] - weights.b[[i]]) * 
                    ((1 + returns.b[[i]]) / (1 + returns.b2[[i-1]]) - 1) * 
@@ -175,7 +183,8 @@ function(Rp, wp, Rb, wb, h, ...)
     general = cbind(allocation, selection)
     general = rbind(as.data.frame(general), (apply(1 + general, 2, prod) - 1))
     for (i in 1:length(level)){
-      level[[i]] = rbind(as.data.frame(level[[i]]), (apply(1 + level[[i]], 2, prod) - 1))
+      level[[i]] = rbind(as.data.frame(level[[i]]), 
+                         (apply(1 + level[[i]], 2, prod) - 1))
       rownames(level[[i]])[nrow(level[[i]])] = "Total"
     }
     select = rbind(as.data.frame(select), (apply(1 + select, 2, prod) - 1))
@@ -186,13 +195,14 @@ function(Rp, wp, Rb, wb, h, ...)
     result = list()
     labels = paste(rep("Level", length(levels)), 1:length(levels))
     names(level) = labels
-    colnames(general) = c(paste(labels, (rep("Allocation", length(levels)))), "Selection")
+    colnames(general) = c(paste(labels, (rep("Allocation", 
+                                             length(levels)))), "Selection")
     
     result[[1]] = excess.returns
     result[[2]] = general
     result[[3]] = level
     result[[4]] = select
-    names(result) = c("Excess returns", "Multi-level attribution", "Attribution 
-                      at each level", "Security selection")
+    names(result) = c("Excess returns", "Multi-level attribution", 
+                      "Attribution at each level", "Security selection")
     return(result)
 }

@@ -22,19 +22,24 @@ function(h, level)
     hnew = h[[level]]
     quintiles = quantile(h[[level]], c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = TRUE)
     for (i in 1:length(h[[level]])){
-      if (h[[level]][i] >= quintiles[1] & h[[level]][i] < quintiles[2] & !is.na(h[[level]][i])){
+      if (h[[level]][i] >= quintiles[1] & h[[level]][i] < quintiles[2] 
+          & !is.na(h[[level]][i])){
         hnew[i] = "Quintile 1"
       }
-    if (h[[level]][i] >= quintiles[2] & h[[level]][i] < quintiles[3] & !is.na(h[[level]][i])){
+    if (h[[level]][i] >= quintiles[2] & h[[level]][i] < quintiles[3] 
+        & !is.na(h[[level]][i])){
       hnew[i] = "Quintile 2"
     }
-    if (h[[level]][i] >= quintiles[3] & h[[level]][i] < quintiles[4] & !is.na(h[[level]][i])){
+    if (h[[level]][i] >= quintiles[3] & h[[level]][i] < quintiles[4] 
+        & !is.na(h[[level]][i])){
       hnew[i] = "Quintile 3"
     }
-    if (h[[level]][i] >= quintiles[4] & h[[level]][i] < quintiles[5] & !is.na(h[[level]][i])){
+    if (h[[level]][i] >= quintiles[4] & h[[level]][i] < quintiles[5] 
+        & !is.na(h[[level]][i])){
       hnew[i] = "Quintile 4"
     }
-    if (h[[level]][i] >= quintiles[5] & h[[level]][i] <= quintiles[6] & !is.na(h[[level]][i])){
+    if (h[[level]][i] >= quintiles[5] & h[[level]][i] <= quintiles[6] 
+        & !is.na(h[[level]][i])){
       hnew[i] = "Quintile 5"
     }
     }

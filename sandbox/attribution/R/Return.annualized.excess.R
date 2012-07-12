@@ -8,8 +8,8 @@
 #' scale your observations to an annual scale by raising the compound return to
 #' the number of periods in a year, and taking the root to the number of total 
 #' observations:
-#' \deqn{prod(1+R_{a})^{\frac{scale}{n}}-1=\sqrt[n]{prod(1+R_{a})^{scale}}-1}{prod(1
-#' + Ra)^(scale/n) - 1}
+#' \deqn{prod(1+R_{a})^{\frac{scale}{n}}-1=\sqrt[n]{prod(1+R_{a})^{scale}}-
+#' 1}{prod(1 + Ra)^(scale/n) - 1}
 #' 
 #' where scale is the number of periods in a year, and n is the total number of
 #' periods for which you have observations.
@@ -17,10 +17,10 @@
 #' Finally having annualized returns for portfolio and benchmark we can compute
 #' annualized excess return as difference in the annualized portfolio and 
 #' benchmark returns in the arithmetic case:
-#' \deqn{er = R_{pa} - R_{ba}}
+#' \deqn{er = R_{pa} - R_{ba}}{er = Rpa - Rba}
 #' 
 #' and as a geometric difference in the geometric case:
-#' \deqn{er = (1 + R_{pa}) / (1 + R_{ba}) - 1}
+#' \deqn{er = (1 + R_{pa}) / (1 + R_{ba}) - 1}{er = (1 + Rpa) / (1 + Rba) - 1}
 #' 
 #' @param Rp an xts, vector, matrix, data frame, timeSeries or zoo object of
 #' portfolio returns

@@ -1,16 +1,20 @@
 #' calculates total attribution effects using Frongello smoothing 
 #' 
 #' Calculates total attribution effects over multiple periods using 
-#' Frongello linking method. Used internally by the \code{\link{Attribution}} 
+#' Frongello linking method. Used internally by the \code{\link{Attribution}}
 #' function. Arithmetic attribution effects do not naturally link over time. 
 #' This function uses Frongello smoothing algorithm to adjust
 #' attribution effects so that they can be summed up over multiple periods
 #' Adjusted attribution effect at period t are:
-#' \deqn{A_{t}' = A_{t}\times\prod^{t-1}_{i=1}(1+r_{pi})+R_{bt}\times\sum^{t-1}_{i=1}A_{i}'}
-#' A_t' - adjusted attribution effects at period t, A_t - unadjusted
-#' attribution effects at period t, R_pi - portfolio returns at period i,
-#' R_bi - benchmark returns at period , Rp - total portfolio returns,
-#' Rb - total benchmark returns, n - number of periods
+#' \deqn{A_{t}' = A_{t}\times\prod^{t-1}_{i=1}(1+r_{pi})+R_{bt}
+#' \times\sum^{t-1}_{i=1}A_{i}'}
+#' \eqn{A_{t}'}{At'} - adjusted attribution effects at period \eqn{t}, 
+#' \eqn{A_{t}}{At} - unadjusted attribution effects at period \eqn{t}, 
+#' \eqn{R_{pi}}{Rpi} - portfolio returns at period \eqn{i},
+#' \eqn{R_{bi}}{Rbi} - benchmark returns at period, 
+#' \eqn{R_{p}}{Rp} - total portfolio returns,
+#' \eqn{R_{b}}{Rb} - total benchmark returns, 
+#' \eqn{n} - number of periods
 #' 
 #' @aliases Frongello
 #' @param rp xts of portfolio returns
@@ -55,11 +59,13 @@ function(rp, rb, attributions, adjusted)
     # FUNCTION:
     adj = attributions
     if (nrow(rp) > 1){
-      adj[2, ] = coredata(adj[2, ]) * drop((1 + rp[1, 1])) + drop(rb[2, 1]) * coredata(adj[1, ])
+      adj[2, ] = coredata(adj[2, ]) * drop((1 + rp[1, 1])) + drop(rb[2, 1]) * 
+        coredata(adj[1, ])
     }
     if (nrow(rp) > 2){
       for(i in 3:nrow(rp)){
-        adj[i, ] = coredata(adj[i, ]) * drop(prod(1 + rp[1:(i-1), 1])) + drop(rb[i, ]) * coredata(colSums(adj[1:(i-1), ]))
+        adj[i, ] = coredata(adj[i, ]) * drop(prod(1 + rp[1:(i-1), 1])) + 
+          drop(rb[i, ]) * coredata(colSums(adj[1:(i-1), ]))
       }
     }
     total = colSums(adj)

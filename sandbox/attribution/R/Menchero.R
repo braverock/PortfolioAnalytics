@@ -1,25 +1,31 @@
 #' calculates total attribution effects using Menchero smoothing 
 #' 
 #' Calculates total attribution effects over multiple periods using 
-#' Menchero linking method. Used internally by the \code{\link{Attribution}} 
+#' Menchero linking method. Used internally by the \code{\link{Attribution}}
 #' function. Arithmetic attribution effects do not naturally link over time. 
 #' This function uses Menchero smoothing algorithm to adjust
 #' attribution effects so that they can be summed up over multiple periods
 #' Attribution effect are multiplied by the adjustment factor 
-#' \deqn{A_{t}' = A_{t} \times (M +a_{t})} 
-#' where \deqn{M=\frac{\frac{1}{n}(R_{p}-R_{b})}{(1+R_{p})^{\frac{1}{n}}-(1+R_{b})^{\frac{1}{n}}}}
-#' \deqn{a_{t} = \left(\frac{R_{p}-R_{b}-M\times\sum^{n}_{t=1}(R_{pt}-R_{bt})}{\sum^{n}_{t=1}(R_{pt}-R_{bt})^{2}}\right)\times(R_{pt}-R_{bt})}
+#' \deqn{A_{t}' = A_{t} \times (M +a_{t})}{At' = At * (M + at)}
+#' where \deqn{M=\frac{\frac{1}{n}(R_{p}-R_{b})}{(1+R_{p})^{\frac{1}{n}}-
+#' (1+R_{b})^{\frac{1}{n}}}}
+#' \deqn{a_{t} = \left(\frac{R_{p}-R_{b}-M\times\sum^{n}_{t=1}(R_{pt}-
+#' R_{bt})}{\sum^{n}_{t=1}(R_{pt}-R_{bt})^{2}}\right)\times(R_{pt}-R_{bt})}
 #' In case if portfolio and benchmark returns are equal the limit of the
 #' above value is used:
-#' \deqn{M = (1 + r_{p})^\frac{n-1}{n}}
-#' A_t' - adjusted attribution effects at period t, A_t - unadjusted 
-#' attribution effects at period t, R_pt - portfolio returns at period t, 
-#' R_bt - benchmark returns at period t, Rp - total portfolio returns, 
-#' Rb - total benchmark returns, n - number of periods
+#' \deqn{M = (1 + r_{p})^\frac{n-1}{n}}{M = (1 + rp)^((n - 1) / n)}
+#' \eqn{A_{t}'}{At'} - adjusted attribution effects at period \eqn{t}, 
+#' \eqn{A_{t}}{At} - unadjusted attribution effects at period \eqn{t}, 
+#' \eqn{R_{pt}}{Rpt} - portfolio returns at period \eqn{t}, 
+#' \eqn{R_{bt}}{Rbt} - benchmark returns at period \eqn{t}, 
+#' \eqn{R_{p}}{Rp} - total portfolio returns, 
+#' \eqn{R_{b}}{Rb} - total benchmark returns, 
+#' \eqn{n} - number of periods
 #' 
 #' The total arithmetic excess returns can be explained in terms of the sum 
 #' of adjusted attribution effects: 
-#' \deqn{R_{p} - R_{b} = \sum^{n}_{t=1}\left(Allocation_{t}+Selection_{t}+Interaction_{t}\right)}
+#' \deqn{R_{p} - R_{b} = \sum^{n}_{t=1}\left(Allocation_{t}+Selection_{t}+
+#' Interaction_{t}\right)}
 #'
 #' @aliases Menchero
 #' @param rp xts of portfolio returns
@@ -55,7 +61,7 @@ function(rp, rb, attributions, adjusted)
     # Inputs:
     # rp            xts of portfolio returns
     # rb            xts of benchmark returns
-    # attributions  attribution effects (e.g. allocation, selection, interaction)
+    # attributions  attribution effects (allocation, selection, interaction)
   
     # Outputs: 
     # This function returns the data.frame with original attribution effects
@@ -70,9 +76,11 @@ function(rp, rb, attributions, adjusted)
       at = 0
     } else{
       M = ((rpc - rbc) / T) / ((1 + rpc)^(1 / T) - (1 + rbc)^(1 / T))
-      at = (rpc - rbc - M * sum(rp - rb)) * (rp - coredata(rb)) / sum((rp - coredata(rb))^2)
+      at = (rpc - rbc - M * sum(rp - rb)) * (rp - coredata(rb)) / sum((rp - 
+        coredata(rb))^2)
     }
-    m = matrix(rep(M + at, ncol(attributions)), nrow(attributions), ncol(attributions), byrow = FALSE)
+    m = matrix(rep(M + at, ncol(attributions)), nrow(attributions), 
+               ncol(attributions), byrow = FALSE)
     adj = attributions * m
     total = colSums(adj)
     if (adjusted == FALSE){
