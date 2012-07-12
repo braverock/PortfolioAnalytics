@@ -26,18 +26,20 @@
   function uses GRAP smoothing algorithm to adjust
   attribution effects so that they can be summed up over
   multiple periods Attribution effect are multiplied by the
-  adjustment factor \deqn{A_{t}' = A_{t} \times G_{t}}
-  where
+  adjustment factor \deqn{A_{t}' = A_{t} \times G_{t}}{At'
+  = At * Gt} where
   \deqn{G_{t}=\prod^{t-1}_{i=1}(1+R_{pi})\times\prod^{n}_{t+1}(1+R_{bi})}
-  A_t' - adjusted attribution effects at period t, A_t -
-  unadjusted attribution effects at period t, R_pi -
-  portfolio returns at period i, R_bi - benchmark returns
-  at period i, Rp - total portfolio returns, Rb - total
-  benchmark returns, n - number of periods The total
-  arithmetic excess returns can be explained in terms of
-  the sum of adjusted attribution effects: \deqn{R_{p} -
-  R_{b} =
-  \sum^{n}_{t=1}\left(Allocation_{t}+Selection_{t}+Interaction_{t}\right)}
+  \eqn{A_{t}'}{At'} - adjusted attribution effects at
+  period \eqn{t}, \eqn{A_{t}}{At} - unadjusted attribution
+  effects at period \eqn{t}, \eqn{R_{pi}}{Rpi} - portfolio
+  returns at period \eqn{i}, \eqn{R_{bi}}{Rbi} - benchmark
+  returns at period \eqn{i}, \eqn{R_{p}}{Rp} - total
+  portfolio returns, \eqn{R_{b}}{Rb} - total benchmark
+  returns, \eqn{n} - number of periods The total arithmetic
+  excess returns can be explained in terms of the sum of
+  adjusted attribution effects: \deqn{R_{p} - R_{b} =
+  \sum^{n}_{t=1}\left(Allocation_{t}+Selection_{t}+
+  Interaction_{t}\right)}
 }
 \examples{
 data(attrib)

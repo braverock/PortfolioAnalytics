@@ -40,17 +40,16 @@
   instruments). Benchmark should have the same number of
   columns as portfolio. That is there should be a benchmark
   for each instrument in the portfolio (possibly 0). The
-  contribution to the allocation in the ith category for
-  the dth level is:
-  \deqn{\left(^{d}w_{pi}-^{d}w_{bi}\right)\times\left(\frac{1+^{d}R_{bi}}{1+^{d-1}R_{bi}}-1\right)\times\frac{1+^{d-1}R_{bi}}{1+bs^{d-1}}}
-}
-\details{
-  The total attribution for each asset allocation step in
-  the decision process is:
-  \deqn{\frac{1+^{d}bs}{1+^{d-1}bs}-1}
-
+  contribution to the allocation in the \eqn{i^{th}}
+  category for the \eqn{d^{th}} level is:
+  \deqn{\left(^{d}w_{pi}-^{d}w_{bi}\right)\times
+  \left(\frac{1+^{d}R_{bi}}{1+^{d-1}R_{bi}}-1\right)
+  \times\frac{1+^{d-1}R_{bi}}{1+bs^{d-1}}} The total
+  attribution for each asset allocation step in the
+  decision process is: \deqn{\frac{1+^{d}bs}{1+^{d-1}bs}-1}
   The final step, stock selection, is measured by:
-  \deqn{^{d}w_{pi}\times\left(\frac{1+R_{pi}}{1+^{d}R_{bi}}-1\right)\times\frac{1+^{d}R_{bi}}{1+^{d}bs}}
+  \deqn{^{d}w_{pi}\times\left(\frac{1+R_{pi}}{1+^{d}R_{bi}}-1\right)
+  \times\frac{1+^{d}R_{bi}}{1+^{d}bs}}
 }
 \examples{
 data(attrib)

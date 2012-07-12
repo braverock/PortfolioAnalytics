@@ -61,33 +61,40 @@
   risk-adjusted attribution. The arithmetic attribution is
   handled using weighted duration approach (Van Breukelen,
   2000). The allocation, selection and currency allocation
-  effects for category i are: \deqn{A_{i} = (D_{pi}\times
-  w_{pi}-D_{\beta}\times D_{bi}\times w_{pi})\times
-  (-\Delta y_{bi} + \Delta y_{b})} \deqn{S_{i} =
+  effects for category \eqn{i} are: \deqn{A_{i} =
+  (D_{pi}\times w_{pi}-D_{\beta}\times D_{bi}\times w_{pi})
+  \times (-\Delta y_{bi} + \Delta y_{b})} \deqn{S_{i} =
   D_{i}\times w_{pi}\times (-\Delta y_{ri} + \Delta
   y_{bi})} \deqn{C_{i} = (w_{pi} - w_{bi})\times (c_{i} +
-  R_{fi} - c')} where w_pi - portfolio weights, w_bi -
-  benchmark weights, D_i - modified duration in bond
-  category i. Duration beta:
-  \deqn{D_{\beta}=\frac{D_{r}}{D_{b}}} D_r - portfolio
-  duration, D_b - benchmark duration, D_bi - benchmark
-  duration for category i, D_pi - portfolio duration for
-  category i, Delta y_ri - change in portfolio yield for
-  category i, Delta y_bi - change in benchmark yield for
-  category i, Delta y_b - change in benchmark yield, R_ci-
-  currency returns for category i, R_fi - risk-free rate in
-  currency of asset i, \deqn{c'=
+  R_{fi} - c')}{Ci = (wpi - wbi) * (ci + Rfi - c')} where
+  \eqn{w_{pi}}{wpi} - portfolio weights, \eqn{w_{bi}}{wbi}
+  - benchmark weights, \eqn{D_{i}}{Di} - modified duration
+  in bond category \eqn{i}. Duration beta:
+  \deqn{D_{\beta}=\frac{D_{r}}{D_{b}}}{Dbeta = Dr / Db}
+  \eqn{D_{r}}{Dr} - portfolio duration, \eqn{D_{b}}{Db} -
+  benchmark duration, \eqn{D_{bi}}{Dbi} - benchmark
+  duration for category \eqn{i}, \eqn{D_{pi}}{Dpi} -
+  portfolio duration for category \eqn{i}, \eqn{\Delta
+  y_{ri}}{Delta yri} - change in portfolio yield for
+  category \eqn{i}, \eqn{\Delta y_{bi}}{Delta ybi} - change
+  in benchmark yield for category \eqn{i}, \eqn{\Delta
+  y_{b}}{Delta yb} - change in benchmark yield,
+  \eqn{R_{ci}}{Rci} - currency returns for category
+  \eqn{i}, \eqn{R_{fi}}{Rfi} - risk-free rate in currency
+  of asset \eqn{i}, \deqn{c'=
   \sum_{i}w_{bi}\times(R_{ci}+R_{fi})} The geometric
   attribution is adapted using Van Breukelen (2000)
   approach for the arithmetic attribution. The individual
   allocation and selection effects are computed as follows:
-  \deqn{A_{i}=D_{i}w_{pi}-D_{\beta}D_{bi}w_{bi}}
+  \deqn{A_{i}=D_{i}w_{pi}-D_{\beta}D_{bi}w_{bi}}{Ai = Di *
+  wpi - Dbeta * Dbi * wbi}
   \deqn{S_{i}=\frac{D_{pi}}{D_{bi}}\times (R_{bi} - R_{fi})
-  + R_{fi}}
+  + R_{fi}}{Si = Dpi / Dbi * (Rbi - Rfi) + Rfi}
 }
 \examples{
 data(attrib)
-AttributionFixedIncome(Rp, wp, Rb, wb, Rf, Dp, Db, S, wbf, geometric = FALSE)
+AttributionFixedIncome(Rp, wp, Rb, wb, Rf, Dp, Db, S, wbf,
+geometric = FALSE)
 }
 \author{
   Andrii Babii

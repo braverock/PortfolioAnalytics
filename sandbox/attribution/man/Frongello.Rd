@@ -27,12 +27,15 @@
   attribution effects so that they can be summed up over
   multiple periods Adjusted attribution effect at period t
   are: \deqn{A_{t}' =
-  A_{t}\times\prod^{t-1}_{i=1}(1+r_{pi})+R_{bt}\times\sum^{t-1}_{i=1}A_{i}'}
-  A_t' - adjusted attribution effects at period t, A_t -
-  unadjusted attribution effects at period t, R_pi -
-  portfolio returns at period i, R_bi - benchmark returns
-  at period , Rp - total portfolio returns, Rb - total
-  benchmark returns, n - number of periods
+  A_{t}\times\prod^{t-1}_{i=1}(1+r_{pi})+R_{bt}
+  \times\sum^{t-1}_{i=1}A_{i}'} \eqn{A_{t}'}{At'} -
+  adjusted attribution effects at period \eqn{t},
+  \eqn{A_{t}}{At} - unadjusted attribution effects at
+  period \eqn{t}, \eqn{R_{pi}}{Rpi} - portfolio returns at
+  period \eqn{i}, \eqn{R_{bi}}{Rbi} - benchmark returns at
+  period, \eqn{R_{p}}{Rp} - total portfolio returns,
+  \eqn{R_{b}}{Rb} - total benchmark returns, \eqn{n} -
+  number of periods
 }
 \examples{
 data(attrib)

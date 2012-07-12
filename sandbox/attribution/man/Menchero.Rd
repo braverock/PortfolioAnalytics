@@ -26,25 +26,29 @@
   function uses Menchero smoothing algorithm to adjust
   attribution effects so that they can be summed up over
   multiple periods Attribution effect are multiplied by the
-  adjustment factor \deqn{A_{t}' = A_{t} \times (M +a_{t})}
-  where
-  \deqn{M=\frac{\frac{1}{n}(R_{p}-R_{b})}{(1+R_{p})^{\frac{1}{n}}-(1+R_{b})^{\frac{1}{n}}}}
-  \deqn{a_{t} =
-  \left(\frac{R_{p}-R_{b}-M\times\sum^{n}_{t=1}(R_{pt}-R_{bt})}{\sum^{n}_{t=1}(R_{pt}-R_{bt})^{2}}\right)\times(R_{pt}-R_{bt})}
+  adjustment factor \deqn{A_{t}' = A_{t} \times (M
+  +a_{t})}{At' = At * (M + at)} where
+  \deqn{M=\frac{\frac{1}{n}(R_{p}-R_{b})}{(1+R_{p})^{\frac{1}{n}}-
+  (1+R_{b})^{\frac{1}{n}}}} \deqn{a_{t} =
+  \left(\frac{R_{p}-R_{b}-M\times\sum^{n}_{t=1}(R_{pt}-
+  R_{bt})}{\sum^{n}_{t=1}(R_{pt}-R_{bt})^{2}}\right)\times(R_{pt}-R_{bt})}
   In case if portfolio and benchmark returns are equal the
   limit of the above value is used: \deqn{M = (1 +
-  r_{p})^\frac{n-1}{n}} A_t' - adjusted attribution effects
-  at period t, A_t - unadjusted attribution effects at
-  period t, R_pt - portfolio returns at period t, R_bt -
-  benchmark returns at period t, Rp - total portfolio
-  returns, Rb - total benchmark returns, n - number of
-  periods
+  r_{p})^\frac{n-1}{n}}{M = (1 + rp)^((n - 1) / n)}
+  \eqn{A_{t}'}{At'} - adjusted attribution effects at
+  period \eqn{t}, \eqn{A_{t}}{At} - unadjusted attribution
+  effects at period \eqn{t}, \eqn{R_{pt}}{Rpt} - portfolio
+  returns at period \eqn{t}, \eqn{R_{bt}}{Rbt} - benchmark
+  returns at period \eqn{t}, \eqn{R_{p}}{Rp} - total
+  portfolio returns, \eqn{R_{b}}{Rb} - total benchmark
+  returns, \eqn{n} - number of periods
 }
 \details{
   The total arithmetic excess returns can be explained in
   terms of the sum of adjusted attribution effects:
   \deqn{R_{p} - R_{b} =
-  \sum^{n}_{t=1}\left(Allocation_{t}+Selection_{t}+Interaction_{t}\right)}
+  \sum^{n}_{t=1}\left(Allocation_{t}+Selection_{t}+
+  Interaction_{t}\right)}
 }
 \examples{
 data(attrib)

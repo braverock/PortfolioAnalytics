@@ -27,19 +27,23 @@
   effects so that they can be summed up over multiple
   periods. Attribution effect are multiplied by the
   adjustment factor: \deqn{A_{t}' = A_{t} \times
-  \frac{k_{t}}{k}} where \deqn{k_{t} = \frac{log(1 +
-  R_{pt}) - log(1 + R_{bt})}{R_{pt} - R_{bt}}} \deqn{k =
-  \frac{log(1 + R_{p}) - log(1 + R_{b})}{R_{p} - R_{b}}} In
-  case if portfolio and benchmark returns are equal:
-  \deqn{k_{t} = \frac{1}{1 + R_{pt}}} where A_t' - adjusted
-  attribution effects at period t, A_t - unadjusted
-  attribution effects at period t, R_pt - portfolio returns
-  at period t, R_bt - benchmark returns at period t, Rp -
-  total portfolio returns, Rb - total benchmark returns, n
-  - number of periods The total arithmetic excess returns
-  can be explained in terms of the sum of adjusted
+  \frac{k_{t}}{k}}{At' = At * kt / k} where \deqn{k_{t} =
+  \frac{log(1 + R_{pt}) - log(1 + R_{bt})}{R_{pt} -
+  R_{bt}}} \deqn{k = \frac{log(1 + R_{p}) - log(1 +
+  R_{b})}{R_{p} - R_{b}}} In case if portfolio and
+  benchmark returns are equal: \deqn{k_{t} = \frac{1}{1 +
+  R_{pt}}}{kt = 1 / (1 + Rpt)} where \eqn{A_{t}'}{At'} -
+  adjusted attribution effects at period \eqn{t},
+  \eqn{A_{t}}{At} - unadjusted attribution effects at
+  period \eqn{t}, \eqn{R_{pt}}{Rpt} - portfolio returns at
+  period \eqn{t}, \eqn{R_{bt}}{Rbt} - benchmark returns at
+  period \eqn{t}, \eqn{R_{p}}{Rp} - total portfolio
+  returns, \eqn{R_{b}}{Rb} - total benchmark returns,
+  \eqn{n} - number of periods The total arithmetic excess
+  returns can be explained in terms of the sum of adjusted
   attribution effects: \deqn{R_{p} - R_{b} =
-  \sum^{n}_{t=1}\left(Allocation_{t}+Selection_{t}+Interaction_{t}\right)}
+  \sum^{n}_{t=1}\left(Allocation_{t}+Selection_{t}+
+  Interaction_{t}\right)}
 }
 \examples{
 data(attrib)

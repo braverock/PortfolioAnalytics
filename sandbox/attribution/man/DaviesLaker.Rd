@@ -26,16 +26,20 @@
   time. This function uses Davies and Laker linking method
   to compute total attribution effects. Arithmetic excess
   returns are decomposed as follows: \deqn{R_{p} - R_{b} =
+  Allocation + Selection + Interaction}{Rp - Rb =
   Allocation + Selection + Interaction} \deqn{Allocation =
   \prod^{T}_{t=1}(1+bs_{t})-\prod^{T}_{t=1}(1+R_{bt})}
   \deqn{Selection =
   \prod^{T}_{t=1}(1+rs_{t})-\prod^{T}_{t=1}(1+R_{bt})}
   \deqn{Interaction =
-  \prod^{T}_{t=1}(1+R_{pt})-\prod^{T}_{t=1}(1+rs_{t})-\prod^{T}_{t=1}(1+bs_{t})+\prod^{T}_{t=1}(1+R_{bt})}
-  R_pi - portfolio returns at period i, Rb_i - benchmark
-  returns at period i, rs_i - selection notional fund
-  returns at period i, bs_i - allocation notional fund
-  returns at period i, T - number of periods
+  \prod^{T}_{t=1}(1+R_{pt})-\prod^{T}_{t=1}(1+rs_{t})-
+  \prod^{T}_{t=1}(1+bs_{t})+\prod^{T}_{t=1}(1+R_{bt})}
+  \eqn{R_{pi}}{Rpi} - portfolio returns at period \eqn{i},
+  \eqn{R_{bi}}{Rbi} - benchmark returns at period \eqn{i},
+  \eqn{rs_{i}}{rsi} - selection notional fund returns at
+  period \eqn{i}, \eqn{bs_{i}}{bsi} - allocation notional
+  fund returns at period \eqn{i}, \eqn{T} - number of
+  periods
 }
 \examples{
 data(attrib)

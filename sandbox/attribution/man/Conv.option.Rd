@@ -32,9 +32,11 @@ equivalent of returns}
   exposure}
 }
 \examples{
-option = matrix(c(1000, 1000, 1000, 300, 400, 10, 20, 30, 40, 50, 10, 11, 12, 13, 14, 12, 13,
-14, 15, 16, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.1, 0.2, 0.2, 0.3), 5, 6)
-colnames(option) = c("Strike", "Number", "Current option", "End option", "delta", "returns")
+option = matrix(c(1000, 1000, 1000, 300, 400, 10, 20, 30, 40, 50, 10, 11,
+12, 13, 14, 12, 13, 14, 15, 16, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.1, 0.2,
+0.2, 0.3), 5, 6)
+colnames(option) = c("Strike", "Number", "Current option", "End option",
+"delta", "returns")
 rownames(option) = c("CVX", "XOM", "GE", "WMT", "FB")
 Conv.option(option)
 }
