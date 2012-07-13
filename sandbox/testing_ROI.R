@@ -83,13 +83,13 @@ arb.test <- optimize.portfolio(edhec, arb.constr, "ROI")
 #
 funds <- names(edhec)
 mu.port <- 0.002
-Amat <- cbind(rep(1,n.assets), mu.vec)
-mean.var.prob <- OP(objective=Q_objective(Q=-2*cov.mat, L=mu.vec), 
-                    constraints=L_constraint(L=t(Amat),
+Amat <- rbind(rep(1,n.assets), mu.vec)
+lambda <- 1
+mean.var.prob <- OP(objective=Q_objective(Q=2*lambda*cov.mat, L=-mu.vec), 
+                    constraints=L_constraint(L=Amat,
                                              dir=c("==","=="),
                                              rhs=c(1,mu.port)),
-                    bounds=bnds,
-                    maximum=TRUE)
+                    bounds=bnds)
 mean.var.constr <- constraint_ROI(assets=funds, op.problem=mean.var.prob, solver="quadprog")
 wts <- ROI_solve(x=mean.var.prob, solver="quadprog")$solution
 mean.var.solution <- optimize.portfolio(edhec, mean.var.constr, "ROI")
@@ -114,22 +114,6 @@ mean.var.solution <- optimize.portfolio(edhec, mean.var.constr, "ROI")
 # Some constraints are of type nonlinear.
 
 
-# =====================
-# Mean-variance:  Maximize quadratic utility
-#
-funds <- names(edhec)
-mu.port <- 0.002
-Amat <- cbind(rep(1,n.assets), mu.vec)
-mean.var.prob <- OP(objective=Q_objective(Q=-2*cov.mat, L=mu.vec), 
-                    constraints=L_constraint(L=t(Amat),
-                                             dir=c("==","=="),
-                                             rhs=c(1,mu.port)),
-                    bounds=bnds,
-                    maximum=TRUE)
-mean.var.constr <- constraint_ROI(assets=funds, op.problem=mean.var.prob, solver="quadprog")
-wts <- ROI_solve(x=mean.var.prob, solver="quadprog")$solution
-mean.var.solution <- optimize.portfolio(edhec, mean.var.constr, "ROI")
-
 
 # ========================================================
 # Mean-variance:  Maximize quadratic utility --- dollar neutral
@@ -137,15 +121,32 @@ mean.var.solution <- optimize.portfolio(edhec, mean.var.constr, "ROI")
 funds <- names(edhec)
 mu.port <- 0.002
 Amat <- cbind(rep(1,n.assets), mu.vec)
-dollar.neutral.prob <- OP(objective=Q_objective(Q=-2*cov.mat, L=mu.vec), 
+dollar.neutral.prob <- OP(objective=Q_objective(Q=2*cov.mat, L=-mu.vec), 
                           constraints=L_constraint(L=t(Amat),
                                                    dir=c("==","=="),
                                                    rhs=c(0,mu.port)),
-                          bounds=bnds,
-                          maximum=TRUE)
+                          bounds=bnds)
 dollar.neutral.constr <- constraint_ROI(assets=funds, op.problem=dollar.neutral.prob, solver="quadprog")
 wts <- ROI_solve(x=dollar.neutral.prob, solver="quadprog")$solution
 dollar.neutral.solution <- optimize.portfolio(edhec, dollar.neutral.constr, "ROI")
+paste(funds, dollar.neutral.solution$weights)
+
+# using integrated ROI
+mean.var <- constraint(assets = colnames(edhec), min = -Inf, max = Inf, min_sum=0, max_sum=0, risk_aversion=1)
+mean.var <- add.objective(constraints=mean.var, type="return", name="mean", enabled=TRUE, multiplier=0, target=mu.port)
+mean.var <- add.objective(constraints=mean.var, type="risk", name="var", enabled=TRUE, multiplier=0)
+solution <- optimize.portfolio(edhec, mean.var, "ROI_new")
+paste(names(edhec),solution$weights)
+
+
+# =====================
+# Maximize return given box constraints
+#
+# A set of box constraints used to initialize portfolios
+init.constr <- constraint(assets = colnames(edhec), min = .05, max = .3, min_sum=1, max_sum=1)
+init.constr <- add.objective(constraints=init.constr, type="return", name="mean", enabled=TRUE, multiplier=0)
+test <- optimize.portfolio(edhec, init.constr, "ROI_new")
+
 
 
 

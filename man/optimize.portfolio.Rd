@@ -3,7 +3,7 @@
 \title{wrapper for constrained optimization of portfolios}
 \usage{
   optimize.portfolio(R, constraints,
-    optimize_method = c("DEoptim", "random", "ROI"),
+    optimize_method = c("DEoptim", "random", "ROI", "ROI_new", "pso"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
     momentFUN = "set.portfolio.moments")
 }
@@ -16,9 +16,12 @@
   \code{\link{constraint}}, if using closed for solver,
   need to pass a \code{\link{constraint_ROI}} object.}
 
-  \item{optimize_method}{one of "DEoptim", "random", "ROI".
-  For using ROI, need to use a constraint_ROI object in
-  constraints.}
+  \item{optimize_method}{one of "DEoptim", "random",
+  "ROI","ROI_new", "pso".  For using \code{ROI}, need to
+  use a constraint_ROI object in constraints. For using
+  \code{ROI_new}, pass standard \code{constratint} object
+  in \code{constraints} argument.  Presently, ROI has
+  plugins for \code{quadprog}}
 
   \item{search_size}{integer, how many portfolios to test,
   default 20,000}

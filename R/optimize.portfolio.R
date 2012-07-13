@@ -259,8 +259,8 @@ optimize.portfolio <- function(
     # This takes in a regular constraint object and extracts the desired business objectives
     # and converts them to matrix form to be inputed into a closed form solver
     # Applying box constraints
-    bnds <- list(lower = list(ind = seq.int(1L, N), val = rep(constraints$min, N)),
-                 upper = list(ind = seq.int(1L, N), val = rep(constraints$max, N)))
+    bnds <- list(lower = list(ind = seq.int(1L, N), val = as.numeric(constraints$min)),
+                 upper = list(ind = seq.int(1L, N), val = as.numeric(constraints$max)))
     # retrive the objectives to minimize, these should either be "var" and/or "mean"
     # we can eight miniminze variance or maximize quiadratic utility (we will be minimizing the neg. quad. utility)
     objectives <- do.call(cbind, sapply(constraints$objectives, "[", "name"))
@@ -268,22 +268,23 @@ optimize.portfolio <- function(
     for(i in 1:length(objectives)) moments[[i]]<- eval(as.symbol(objectives[i]))(R)
     names(moments) <- objectives
     plugin <- ifelse(any(objectives=="var"), "quadprog", "glpk")
+    target.return <- do.call(cbind,sapply(init.constr$objectives, "[", "target"))
+    lambda <- do.call(cbind,sapply(init.constr$objectives, "[", "risk_aversion"))
+    if(is.null(lambda)) lambda <- 1    
     if(plugin == "quadprog") ROI_objective <- ROI:::Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
     if(plugin == "glpk") ROI_objective <- ROI:::L_objective(L=-moments$mean)
-    if(!hasArg(constraints$lambda)) constraints$lambda <- 1
-    target.return <- do.call(cbind,sapply(init.constr$objectives, "[", "target"))
     Amat <- rbind(rep(1, N), rep(1, N))
     dir.vec <- c(">=","<=")
     rhs.vec <- c(constraints$min_sum, constraints$max_sum)
     if(!is.null(target.return)) {
       Amat <- rbind(Amat, moments$mean)
-      dir.vec <- cbind(dir.vec, "=="))
+      dir.vec <- cbind(dir.vec, "==")
       rhs.vec <- cbind(rhs.vec, target.return)
     }
     q.prob <- ROI:::OP(objective=ROI_objective, 
                        constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
                        bounds=bnds)
-    roi.results <- ROI:::ROI_solve(x=q.prob, solver=plugin)
+    roi.result <- ROI:::ROI_solve(x=q.prob, solver=plugin)
     weights <- roi.result$solution
     names(weights) <- colnames(R)
     out$weights <- weights
