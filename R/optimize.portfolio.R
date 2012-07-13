@@ -36,7 +36,7 @@
 #'  
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}, if using closed for solver, need to pass a \code{\link{constraint_ROI}} object.
-#' @param optimize_method one of "DEoptim", "random", "ROI".  For using ROI, need to use a constraint_ROI object in constraints.
+#' @param optimize_method one of "DEoptim", "random", "ROI","ROI_new", "pso".  For using \code{ROI}, need to use a constraint_ROI object in constraints. For using \code{ROI_new}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} 
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
@@ -49,7 +49,7 @@
 optimize.portfolio <- function(
 		R,
 		constraints,
-		optimize_method=c("DEoptim","random","ROI"), 
+		optimize_method=c("DEoptim","random","ROI","ROI_new","pso"), 
 		search_size=20000, 
 		trace=FALSE, ..., 
 		rp=NULL,
@@ -200,6 +200,8 @@ optimize.portfolio <- function(
     }
     
   } ## end case for DEoptim
+  
+  
   if(optimize_method=="random"){
       #' call random_portfolios() with constraints and search_size to create matrix of portfolios
       if(missing(rp) | is.null(rp)){
@@ -251,6 +253,99 @@ optimize.portfolio <- function(
     out$objective_measures <- roi.result$objval
     out$call <- call
   } ## end case for ROI
+  
+  
+  if(optimize_method == "ROI_new"){
+    # This takes in a regular constraint object and extracts the desired business objectives
+    # and converts them to matrix form to be inputed into a closed form solver
+    # Applying box constraints
+    bnds <- list(lower = list(ind = seq.int(1L, N), val = rep(constraints$min, N)),
+                 upper = list(ind = seq.int(1L, N), val = rep(constraints$max, N)))
+    # retrive the objectives to minimize, these should either be "var" and/or "mean"
+    # we can eight miniminze variance or maximize quiadratic utility (we will be minimizing the neg. quad. utility)
+    objectives <- do.call(cbind, sapply(constraints$objectives, "[", "name"))
+    moments <- list()
+    for(i in 1:length(objectives)) moments[[i]]<- eval(as.symbol(objectives[i]))(R)
+    names(moments) <- objectives
+    plugin <- ifelse(any(objectives=="var"), "quadprog", "glpk")
+    if(plugin == "quadprog") ROI_objective <- ROI:::Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
+    if(plugin == "glpk") ROI_objective <- ROI:::L_objective(L=-moments$mean)
+    if(!hasArg(constraints$lambda)) constraints$lambda <- 1
+    target.return <- do.call(cbind,sapply(init.constr$objectives, "[", "target"))
+    Amat <- rbind(rep(1, N), rep(1, N))
+    dir.vec <- c(">=","<=")
+    rhs.vec <- c(constraints$min_sum, constraints$max_sum)
+    if(!is.null(target.return)) {
+      Amat <- rbind(Amat, moments$mean)
+      dir.vec <- cbind(dir.vec, "=="))
+      rhs.vec <- cbind(rhs.vec, target.return)
+    }
+    q.prob <- ROI:::OP(objective=ROI_objective, 
+                       constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
+                       bounds=bnds)
+    roi.results <- ROI:::ROI_solve(x=q.prob, solver=plugin)
+    weights <- roi.result$solution
+    names(weights) <- colnames(R)
+    out$weights <- weights
+    out$objective_measures <- roi.result$objval
+    out$call <- call
+  } ## end case for ROI
+
+  
+  
+  
+  
+  ## case if method=pso---particle swarm
+  if(optimize_method=="pso"){
+    stopifnot("package:pso" %in% search()  ||  require("pso",quietly = TRUE) )
+    # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
+    if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
+    PSOcformals  <- formals(psoptim.control)
+    PSOcargs <- names(PSOcformals)
+    if( is.list(dotargs) ){
+      pm <- pmatch(names(dotargs), PSOcargs, nomatch = 0L)
+      names(dotargs[pm > 0L]) <- PSOcargs[pm]
+      DEcformals$maxit <- maxit
+      if(!hasArg(reltol)) PSOcformals$reltol=.000001 # 1/1000 of 1% change in objective is significant
+      if(!hasArg(fnscale)) PSOcformals$fnscale=1
+      if(!hasArg(abstol)) PSOcformals$asbtol=-Inf
+      if(!hasArg(trace)) PSOcformals$trace=FALSE
+    }
+    
+    # get upper and lower weights parameters from constraints
+    upper = constraints$max
+    lower = constraints$min
+    
+    controlPSO <- do.call(psoptim.control,PSOcformals)
+    
+    minw = try(psoptim( constrained_objective ,  lower = lower[1:N] , upper = upper[1:N] , 
+                        control = controlPSO, R=R, constraints=constraints, nargs = dotargs , ...=...)) # add ,silent=TRUE here?
+    
+    if(inherits(minw,"try-error")) { minw=NULL }
+    if(is.null(minw)){
+      message(paste("Optimizer was unable to find a solution for target"))
+      return (paste("Optimizer was unable to find a solution for target"))
+    }
+    
+    if(isTRUE(tmptrace)) trace <- tmptrace
+    
+    weights = as.vector( minw$optim$bestmem)
+    weights <- normalize_weights(weights)
+    names(weights) = colnames(R)
+    
+    out = list(weights=weights, 
+               objective_measures=constrained_objective(w=weights,R=R,constraints,trace=TRUE)$objective_measures,
+               out=minw$optim$bestval, 
+               call=call)
+    if (isTRUE(trace)){
+      out$PSOoutput=minw
+      out$psoptim_objective_results<-try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
+      rm('.objectivestorage',pos='.GlobalEnv')
+    }
+    
+  } ## end case for pso
+  
+  
   
     end_t<-Sys.time()
     # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
