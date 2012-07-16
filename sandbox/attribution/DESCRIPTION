@@ -9,7 +9,8 @@ Description: GSoC stub for attribution
 Depends:
     R (>= 2.14.0),
     zoo,
-    xts (>= 0.8)
+    xts (>= 0.8),
+    PerformanceAnalytics(>= 1.0.4.3)
 Suggests:
     Hmisc,
     MASS,
@@ -23,23 +24,3 @@ Suggests:
 License: GPL
 URL: http://r-forge.r-project.org/projects/returnanalytics/
 Copyright: (c) 2004-2012
-Collate:
-    'AttributionFixedIncome.R'
-    'Attribution.geometric.R'
-    'attribution.levels.R'
-    'attribution.R'
-    'Carino.R'
-    'Conv.option.R'
-    'DaviesLaker.R'
-    'Frongello.R'
-    'Grap.R'
-    'HierarchyQuintiles.R'
-    'logLinking.R'
-    'logLinkingZoo.R'
-    'Menchero.R'
-    'Modigliani.R'
-    'periodApplyEZ.R'
-    'relativeAttribution.R'
-    'relativeAttributionWithoutFactors.R'
-    'Return.annualized.excess.R'
-    'Return.level.R'
