@@ -8,9 +8,9 @@
 #' below zero and is 1 when it is above zero:
 #' \deqn{R_{p}-R_{f}=\alpha+\beta (R_{b}-R_{f})+\gamma D+\varepsilon_{p}}{Rp - 
 #' Rf = alpha + beta * (Rb - Rf) + gamma * D + epsilonp}
-#' where all variables are familiar from the CAPM model, except for up-market 
-#' return \eqn{D=max(0,R_{b}-R_{f}){D = max(0, Rb - Rf)} and market timing 
-#' abilities \eqn{\gamma}{gamma}
+#' where all variables are familiar from the CAPM model, except for the 
+#' up-market return \eqn{D=max(0,R_{b}-R_{f})}{D = max(0, Rb - Rf)} and market 
+#' timing abilities \eqn{\gamma}{gamma}
 #' 
 #' @param Ra an xts, vector, matrix, data frame, timeSeries or zoo object of
 #' the asset returns
@@ -46,17 +46,20 @@ MertonHenriksson <- function (Ra, Rb, Rf = 0, ...)
     Rb.ncols = NCOL(Rb)
     pairs = expand.grid(1:Ra.ncols, 1:Rb.ncols)
     
-    mh <- function (Ra, Rb, Rf)
+    xRa = Return.excess(Ra, Rf)
+    xRb = Return.excess(Rb, Rf)
+    
+    mh <- function (xRa, xRb)
     {
-      D = pmax(0, Rb - Rf)
-      y = Ra - Rf
-      X = cbind(rep(1, length(Ra)), Rb - Rf, D)
+      D = pmax(0, xRb)
+      y = xRa
+      X = cbind(rep(1, length(xRa)), xRb, D)
       bhat = solve(t(X) %*% X) %*% t(X) %*% y
       return(bhat[3])
     }
     
-    result = apply(pairs, 1, FUN = function(n, Ra, Rb, Rf) 
-      mh(Ra[, n[1]], Rb[, n[2]], Rf), Ra = Ra, Rb = Rb, Rf = Rf)
+    result = apply(pairs, 1, FUN = function(n, xRa, xRb) 
+      mh(xRa[, n[1]], xRb[, n[2]]), xRa = xRa, xRb = xRb)
     
     if(length(result) == 1)
       return(result)
