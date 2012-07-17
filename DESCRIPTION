@@ -22,7 +22,8 @@ Suggests:
     quadprog,
     ROI,
     ROI.plugin.glpk,
-    ROI.plugin.quadprog
+    ROI.plugin.quadprog,
+    pso
 License: GPL
 Copyright: (c) 2004-2012
 Collate:
