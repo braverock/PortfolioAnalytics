@@ -40,7 +40,7 @@
 #' Di * wpi - Dbeta * Dbi * wbi}
 #' \deqn{S_{i}=\frac{D_{pi}}{D_{bi}}\times (R_{bi} - R_{fi}) + R_{fi}}{Si = 
 #' Dpi / Dbi * (Rbi - Rfi) + Rfi}
-#' @aliases fixed income attribution
+#' @aliases AttributionFixedIncome
 #' @param Rp T x n xts, data frame or matrix of portfolio returns
 #' @param wp vector, xts, data frame or matrix of portfolio weights
 #' @param Rb T x n xts, data frame or matrix of benchmark returns
@@ -53,8 +53,6 @@
 #' @param S (T + 1) x n xts, data frame or matrix with spot rates. The first 
 #' date should coincide with the first date of portfolio returns
 #' @param geometric - TRUE/FALSE for geometric/arithmetic attribution
-#' @param wbf vector, xts, data frame or matrix with benchmark weights of 
-#' currency forward contracts
 #' @return list with total excess returns decomposed into allocation, selection 
 #' (and currency effects)
 #' @author Andrii Babii
@@ -68,8 +66,9 @@
 #' @examples
 #' 
 #' data(attrib)
-#' AttributionFixedIncome(Rp, wp, Rb, wb, Rf, Dp, Db, S, wbf, 
-#' geometric = FALSE)
+#' AttributionFixedIncome(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ], Rb = attrib.returns[, 11:20], 
+#' wb = attrib.weights[2, ], Rf = attrib.returns[, 23:32], Dp = attrib.returns[, 63:72], Db = attrib.returns[, 73:82], 
+#' S = attrib.currency[, 11:20], wbf = attrib.weights[4, ], geometric = FALSE)
 #' 
 #' @export
 AttributionFixedIncome <- 

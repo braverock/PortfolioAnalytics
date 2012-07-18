@@ -40,7 +40,7 @@
 #' @examples
 #' 
 #' data(attrib)
-#' Grap(rp, rb, allocation, adjusted = FALSE)
+#' Grap(rp = attrib.returns[, 21], rb = attrib.returns[, 22], attributions = attrib.allocation, adjusted = FALSE)
 #' 
 #' @export
 Grap <-

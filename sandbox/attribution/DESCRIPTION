@@ -24,3 +24,23 @@ Suggests:
 License: GPL
 URL: http://r-forge.r-project.org/projects/returnanalytics/
 Copyright: (c) 2004-2012
+Collate:
+    'AppraisalRatio.R'
+    'Attribution.geometric.R'
+    'attribution.levels.R'
+    'attribution.R'
+    'AttributionFixedIncome.R'
+    'CAPM.dynamic.R'
+    'Carino.R'
+    'Conv.option.R'
+    'DaviesLaker.R'
+    'Frongello.R'
+    'Grap.R'
+    'HierarchyQuintiles.R'
+    'Menchero.R'
+    'Modigliani.R'
+    'Return.annualized.excess.R'
+    'Return.level.R'
+    'MarketTiming.R'
+    'Weight.level.R'
+    'Weight.transform.R'

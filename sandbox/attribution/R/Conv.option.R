@@ -9,8 +9,8 @@
 #' must be achieved again by using notional assets: \emph{option economic 
 #' exposure = Delta x number of options x strike price = option valuation + 
 #' notional exposure}
-#' @aliases options attribution
-#' @param \emph{nx8} matrix containing option ID (as rownames), and columns
+#' @aliases Conv.option
+#' @param option \emph{nx8} matrix containing option ID (as rownames), and columns
 #' corresponding to (in particular order): strike price, number of options, 
 #' current option price, end option price, option's delta, returns on the 
 #' underlying

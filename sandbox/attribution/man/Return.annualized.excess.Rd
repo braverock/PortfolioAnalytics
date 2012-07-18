@@ -48,7 +48,7 @@ length history}
 }
 \examples{
 data(attrib)
-Return.annualized.excess(rp, rb)
+Return.annualized.excess(Rp = attrib.returns[, 21], Rb = attrib.returns[, 22])
 }
 \author{
   Andrii Babii

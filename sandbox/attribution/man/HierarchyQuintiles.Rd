@@ -16,13 +16,13 @@
 }
 \examples{
 data(attrib)
-HierarchyQuintiles(h, "MarketCap")
+HierarchyQuintiles(h = attrib.hierarchy, "MarketCap")
 }
 \author{
   Andrii Babii
 }
 \seealso{
-  \code{\link{buildHierarchy}}
+  \code{buildHierarchy}
 }
 \keyword{attribution,}
 \keyword{hierarchy}

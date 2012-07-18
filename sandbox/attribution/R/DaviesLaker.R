@@ -37,7 +37,7 @@
 #' @examples
 #' 
 #' data(attrib)
-#' DaviesLaker(Rp, wp, Rb, wb)
+#' DaviesLaker(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ], Rb = attrib.returns[, 11:20], wb = attrib.weights[2, ])
 #' 
 #' @export
 DaviesLaker <-

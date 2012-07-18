@@ -7,12 +7,12 @@
 #' @param h  data.frame with portfolio hierarchy
 #' @param level level from the hierarchy for which there are numeric values
 #' @author Andrii Babii
-#' @seealso  \code{\link{buildHierarchy}}
+#' @seealso  \code{buildHierarchy}
 #' @keywords attribution, hierarchy
 #' @examples
 #' 
 #' data(attrib)
-#' HierarchyQuintiles(h, "MarketCap")
+#' HierarchyQuintiles(h = attrib.hierarchy, "MarketCap")
 #' 
 #' @export
 HierarchyQuintiles <-

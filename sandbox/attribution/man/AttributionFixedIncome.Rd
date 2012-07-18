@@ -1,8 +1,5 @@
 \name{AttributionFixedIncome}
-\alias{attribution}
 \alias{AttributionFixedIncome}
-\alias{fixed}
-\alias{income}
 \title{fixed income attribution}
 \usage{
   AttributionFixedIncome(Rp, wp, Rb, wb, Rf, Dp, Db, S,
@@ -39,9 +36,6 @@
 
   \item{geometric}{- TRUE/FALSE for geometric/arithmetic
   attribution}
-
-  \item{wbf}{vector, xts, data frame or matrix with
-  benchmark weights of currency forward contracts}
 }
 \value{
   list with total excess returns decomposed into
@@ -93,8 +87,9 @@
 }
 \examples{
 data(attrib)
-AttributionFixedIncome(Rp, wp, Rb, wb, Rf, Dp, Db, S, wbf,
-geometric = FALSE)
+AttributionFixedIncome(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ], Rb = attrib.returns[, 11:20],
+wb = attrib.weights[2, ], Rf = attrib.returns[, 23:32], Dp = attrib.returns[, 63:72], Db = attrib.returns[, 73:82],
+S = attrib.currency[, 11:20], wbf = attrib.weights[4, ], geometric = FALSE)
 }
 \author{
   Andrii Babii

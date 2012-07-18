@@ -2,8 +2,8 @@
 \alias{Attribution.geometric}
 \title{performs geometric attribution}
 \usage{
-  Attribution.geometric(Rp, wp, Rb, wb, Rpl, Rbl, Rbh,
-    currency = FALSE)
+  Attribution.geometric(Rp, wp, Rb, wb, Rpl = NA, Rbl = NA,
+    Rbh = NA)
 }
 \arguments{
   \item{Rp}{xts of portfolio returns}
@@ -82,7 +82,8 @@
 }
 \examples{
 data(attrib)
-Attribution.geometric(Rp, wp, Rb, wb)
+Attribution.geometric(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ],
+Rb = attrib.returns[, 11:20], wb = attrib.weights[2, ])
 }
 \author{
   Andrii Babii

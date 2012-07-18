@@ -47,7 +47,7 @@
 #' @examples
 #' 
 #' data(attrib)
-#' Menchero(rp, rb, allocation, adjusted = FALSE)
+#' Menchero(rp = attrib.returns[, 21], rb = attrib.returns[, 22], attributions = attrib.allocation, adjusted = FALSE)
 #' 
 #' @export
 Menchero <-

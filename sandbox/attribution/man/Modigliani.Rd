@@ -19,7 +19,11 @@
   adjusted upward or downward to match the benchmark's
   standard deviation.  This puts the portfolio return and
   the benchmark return on 'equal footing' from a standard
-  deviation perspective.
+  deviation perspective. \deqn{MM_{p}=\frac{E[R_{p} -
+  R_{f}]}{\sigma_{p}}=SR_{p} * \sigma_{b} + E[R_{f}]}{MMp =
+  SRp * sigmab + E[Rf]} where \eqn{SR_{p}}{SRp} - Sharpe
+  ratio, \eqn{sigma_{b}}{sigmab} - benchmark standard
+  deviation
 }
 \details{
   This is also analogous to some approaches to 'risk
@@ -29,16 +33,20 @@
 }
 \examples{
 data(managers)
-round(Modigliani(managers[,1,drop=FALSE], managers[,8,drop=FALSE], Rf=.035/12),4)
-round(Modigliani(managers[,1:6], managers[,8,drop=FALSE], Rf=.035/12),4)
+Modigliani(managers[,1,drop=FALSE], managers[,8,drop=FALSE], Rf=.035/12)
+Modigliani(managers[,1:6], managers[,8,drop=FALSE], managers[,8,drop=FALSE])
+Modigliani(managers[,1:6], managers[,8:7], managers[,8,drop=FALSE])
 }
 \author{
   Andrii Babii, Brian G. Peterson
 }
 \references{
-  J. Christopherson, D. Carino, W. Ferson. Portfolio
-  Performance Measurement and Benchmarking. 2009.
-  McGraw-Hill, 97-99.
+  J. Christopherson, D. Carino, W. Ferson. \emph{Portfolio
+  Performance Measurement and Benchmarking}. 2009.
+  McGraw-Hill, p. 97-99. \cr Franco Modigliani and Leah
+  Modigliani, "Risk-Adjusted Performance: How to Measure It
+  and Why," \emph{Journal of Portfolio Management}, vol.23,
+  no., Winter 1997, pp.45-54 \cr
 }
 \seealso{
   \code{\link{SharpeRatio}}, \code{\link{TreynorRatio}}

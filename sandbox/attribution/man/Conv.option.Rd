@@ -1,14 +1,12 @@
 \name{Conv.option}
-\alias{attribution}
 \alias{Conv.option}
-\alias{options}
 \title{convert information about options, warrants or convertible bonds to the
 equivalent of returns}
 \usage{
   Conv.option(option)
 }
 \arguments{
-  \item{\emph{nx8}}{matrix containing option ID (as
+  \item{option}{\emph{nx8} matrix containing option ID (as
   rownames), and columns corresponding to (in particular
   order): strike price, number of options, current option
   price, end option price, option's delta, returns on the

@@ -153,7 +153,8 @@
 #' @examples
 #' 
 #' data(attrib)
-#' Attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
+#' Attribution(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ], Rb = attrib.returns[, 11:20], 
+#' wb = attrib.weights[2, ], method = "top.down", linking = "carino")
 #' 
 #' @export
 Attribution <- 
@@ -207,8 +208,10 @@ function (Rp, wp, Rb, wb,
     method = method[1]
     linking = linking[1]
     
-    currency = !(is.na(wpf)[1] & is.na(wbf)[1] & is.na(S)[1] & is.na(F)[1] & 
-      is.na(Rpl)[1] & is.na(Rbl)[1] & is.na(Rbh)[1])
+    currency = !(is.null(dim(wpf)) & is.null(dim(wbf)) & 
+                   is.null(dim(S)) & is.null(dim(F)) & 
+                   is.null(dim(Rpl)) & is.null(dim(Rpl)) & 
+                   is.null(dim(Rpl)))
     
     if (geometric == FALSE & linking != "davies.laker"){ 
       # The function makes all computations for the arithmetic attribution

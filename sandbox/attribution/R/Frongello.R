@@ -36,7 +36,7 @@
 #' @examples
 #' 
 #' data(attrib)
-#' Frongello(rp, rb, allocation, adjusted = FALSE)
+#' Frongello(rp = attrib.returns[, 21], rb = attrib.returns[, 22], attributions = attrib.allocation, adjusted = FALSE)
 #' 
 #' @export
 Frongello <-

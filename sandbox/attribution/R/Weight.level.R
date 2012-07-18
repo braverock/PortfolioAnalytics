@@ -1,14 +1,12 @@
-#' aggregates portfolio returns up to the chosen level from the hierarchy
-#' 
-#' Aggregates returns and weights up to the chosen level from the hierarchy.
+#' aggregates portfolio weights up to the chosen level from the hierarchy
+#'
+#' Aggregates weights up to the chosen level from the hierarchy.
 #' Hierarchy can be used from the \code{buildHierarchy} function or 
 #' defined manually in the same way as the \code{buildHierarchy}'s 
 #' output. If for the selected level the values in the hierarchy are numeric, 
 #' the aggregation of returns or weights is performed by quintiles.
-#' \code{Weight.transform} makes transformation of weights to the xts object
-#' conformable with returns.
 #'
-#' @aliases Return.level
+#' @aliases Weight.level
 #' @param Rp xts, data frame or matrix of portfolio returns
 #' @param wp vector, xts, data frame or matrix of portfolio weights
 #' @param h  data.frame with portfolio hierarchy
@@ -16,7 +14,7 @@
 #' aggregated
 #' @author Andrii Babii
 #' @seealso  \code{buildHierarchy} \cr \code{\link{Attribution}} \cr 
-#' \code{\link{Weight.level}}
+#' \code{\link{Return.level}}
 #' @references Christopherson, Jon A., Carino, David R., Ferson, Wayne E.  
 #' \emph{Portfolio Performance Measurement and Benchmarking}. McGraw-Hill. 
 #' 2009. Chapter 17
@@ -24,28 +22,26 @@
 #' @examples
 #' 
 #' data(attrib)
-#' Return.level(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ], h = attrib.hierarchy, level = "MarketCap")
+#' Weight.level(wp = attrib.weights[1, ], Rp = attrib.returns[, 1:10], attrib.hierarchy, level = "Sector")
 #' 
 #' @export
-Return.level <-
-function(Rp, wp, h, level = "Sector")
-{   # @author Andrii Babii
-  
+Weight.level <-
+  function(wp, Rp, h, level = "Sector")
+  {   # @author Andrii Babii
+    
     # DESCRIPTION:
-    # Function to aggregate returns up to the chosen level from the hierarchy
+    # Function to aggregate weights up to the chosen level from the hierarchy
     
     # Inputs:
-    # Rp      xts, data frame or matrix of portfolio returns
     # wp      vector, xts, data frame or matrix of portfolio weights
     # h       data.frame with portfolio hierarchy
     # level   level from the hierarchy to which the aggregation will be done
-  
+    
     # Outputs: 
-    # This function returns portfolio returns at the chosen level
-  
+    # This function returns portfolio weights at the chosen level
+    
     # FUNCTION:
-    # Transform data to the xts objects    
-    Rp = checkData(Rp, method = "xts")
+    # Transform data to the xts objects
     wp = Weight.transform(wp, Rp)
     
     # If level has numeric values we replace numeric values by quintiles
@@ -53,10 +49,10 @@ function(Rp, wp, h, level = "Sector")
       h = HierarchyQuintiles(h, level)
     }
     h = split(h$primary_id, h[level])
-    returns = as.xts(matrix(NA, ncol = length(h), nrow = nrow(Rp)), index(Rp))
+    weights = wp[, 1:length(h)]
     for(i in 1:length(h)){
-      returns[, i] = rowSums(Rp[, h[[i]]] * coredata(wp[, h[[i]]]))
+      weights[, i] = rowSums(wp[, h[[i]]])
     }
-    colnames(returns) = names(h)
-    return(returns)
+    colnames(weights) = names(h)
+    return(weights)
 }

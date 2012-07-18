@@ -30,10 +30,10 @@
 #' @param Rf risk free rate, in same period as your returns
 #' @param method used to select between Treynor-Mazuy and Henriksson-Merton
 #' models. May be any of: \itemize{ \item TM - Treynor-Mazuy model, 
-#' \item HM - Henriksson-Merton model}}
+#' \item HM - Henriksson-Merton model}. By default Treynor-Mazuy is selected
 #' @param \dots any other passthrough parameters
-#' @author Andrii Babii
-#' @seealso \code{\link{CAPM.beta}}, \code{\link{MertonHendriksson}}
+#' @author Andrii Babii, Peter Carl
+#' @seealso \code{\link{CAPM.beta}}
 #' @references J. Christopherson, D. Carino, W. Ferson. \emph{Portfolio 
 #' Performance Measurement and Benchmarking}. 2009. McGraw-Hill, p. 127-133.
 #' \cr J. L. Treynor and K. Mazuy, "Can Mutual Funds Outguess the Market?" 
@@ -50,7 +50,7 @@
 #'
 #' @export
 MarketTiming <- function (Ra, Rb, Rf = 0, method = c("TM", "HM"))
-{ # @author Andrii Babii
+{ # @author Andrii Babii, Peter Carl
   
     # FUNCTION
   
@@ -65,7 +65,6 @@ MarketTiming <- function (Ra, Rb, Rf = 0, method = c("TM", "HM"))
     xRa = Return.excess(Ra, Rf)
     xRb = Return.excess(Rb, Rf)
 
-  
     mt <- function (xRa, xRb)
     {
       switch(method,

@@ -71,11 +71,12 @@
 #' @examples
 #' 
 #' data(attrib)
-#' Attribution.geometric(Rp, wp, Rb, wb)
+#' Attribution.geometric(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ],
+#' Rb = attrib.returns[, 11:20], wb = attrib.weights[2, ])
 #' 
 #' @export
 Attribution.geometric <-
-function(Rp, wp, Rb, wb, Rpl, Rbl, Rbh, currency = FALSE)
+function(Rp, wp, Rb, wb, Rpl = NA, Rbl = NA, Rbh = NA)
 {   # @author Andrii Babii
   
     # DESCRIPTION:
@@ -96,6 +97,7 @@ function(Rp, wp, Rb, wb, Rpl, Rbl, Rbh, currency = FALSE)
     WB = wb
     wp = Weight.transform(wp, Rp)
     wb = Weight.transform(wb, Rb)
+    currency = !(is.null(dim(Rpl)) & is.null(dim(Rpl)) & is.null(dim(Rpl)))
     
     # Get total portfolio returns
     if (is.vector(WP)  & is.vector(WB)){
@@ -114,6 +116,7 @@ function(Rp, wp, Rb, wb, Rpl, Rbl, Rbh, currency = FALSE)
       # Geometric attribution effects for individual categories
       allocation = ((1 + Rb) / (1 + rep(rb, ncol(Rp))) - 1) * coredata(wp - wb) 
       selection = wp * (Rp - coredata(Rb)) / (1 + rep(bs, ncol(Rp)))
+      colnames(allocation) = colnames(Rp)
 
     } else{
       Rpl = checkData(Rpl)

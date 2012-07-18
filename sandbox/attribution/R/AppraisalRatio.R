@@ -52,8 +52,8 @@ AppraisalRatio <- function (Ra, Rb, Rf = 0, ...)
     {
       alpha = CAPM.alpha(Ra, Rb, Rf)
       beta = CAPM.beta(Ra, Rb, Rf)
-      epsilon = Ra - Rf - rep(alpha, nrow(Ra)) - beta %x% Rb
-      sigma = diag(t(epsilon) %*% epsilon) / (length(managers) - 2)
+      epsilon = Ra - Rf - matrix(rep(alpha, nrow(Ra)), nrow(Ra), ncol(Ra), byrow = TRUE) - beta %x% (Rb - Rf)
+      sigma = diag(t(epsilon) %*% epsilon) / (length(epsilon) - 2)
       AR = alpha / sigma
       return(AR)
     }

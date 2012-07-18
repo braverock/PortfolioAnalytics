@@ -20,7 +20,7 @@
 #' \deqn{^{d}w_{pi}\times\left(\frac{1+R_{pi}}{1+^{d}R_{bi}}-1\right)
 #' \times\frac{1+^{d}R_{bi}}{1+^{d}bs}}
 #' 
-#' @aliases Attribution
+#' @aliases Attribution.levels
 #' @param Rp xts, data frame or matrix of portfolio returns
 #' @param wp vector, xts, data frame or matrix of portfolio weights
 #' @param Rb xts, data frame or matrix of benchmark returns
@@ -28,6 +28,7 @@
 #' @param h data.frame with the hierarchy obtained from the buildHierarchy 
 #' function or defined manually in the same style as buildHierarchy's
 #' output
+#' @param \dots any other passthrough parameters
 #' @return returns the list with geometric excess returns including annualized
 #' geometric excess returns, total attribution effects (allocation, selection 
 #' and total) including total multi-period attribution effects, attribution 
@@ -40,8 +41,10 @@
 #' @examples
 #' 
 #' data(attrib)
-#' Attribution.levels(Rp, wp, Rb, wb, h, c("type", "MarketCap", "Sector"))
-#' Attribution.levels(Rp, wp, Rb, wb, h, c("type", "Sector"))
+#' Attribution.levels(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ], Rb = attrib.returns[, 11:20], 
+#' wb = attrib.weights[2, ], h = attrib.hierarchy, c("type", "MarketCap", "Sector"))
+#' Attribution.levels(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ], Rb = attrib.returns[, 11:20], 
+#' wb = attrib.weights[2, ], h = attrib.hierarchy, c("type", "Sector"))
 #' 
 #' @export
 Attribution.levels <-
@@ -119,9 +122,9 @@ function(Rp, wp, Rb, wb, h, ...)
     bs = list()
     for(i in 1:length(levels)){
       returns.p[[i]] = Return.level(Rp, WP, h, level = levels[i])
-      weights.p[[i]] = Weight.level(WP, h, level = levels[i])
+      weights.p[[i]] = Weight.level(WP, Rp, h, level = levels[i])
       returns.b[[i]] = Return.level(Rb, WB, h, level = levels[i])
-      weights.b[[i]] = Weight.level(WB, h, level = levels[i])
+      weights.b[[i]] = Weight.level(WB, Rp, h, level = levels[i])
       # semi-notional funds returns
       bs[[i]] = reclass(rowSums(returns.b[[i]] * weights.p[[i]]), rp)  
     }

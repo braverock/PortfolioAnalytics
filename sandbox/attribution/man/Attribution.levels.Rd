@@ -1,5 +1,4 @@
 \name{Attribution.levels}
-\alias{Attribution}
 \alias{Attribution.levels}
 \title{provides multi-level geometric performance attribution}
 \usage{
@@ -19,6 +18,8 @@
   \item{h}{data.frame with the hierarchy obtained from the
   buildHierarchy function or defined manually in the same
   style as buildHierarchy's output}
+
+  \item{\dots}{any other passthrough parameters}
 }
 \value{
   returns the list with geometric excess returns including
@@ -53,8 +54,10 @@
 }
 \examples{
 data(attrib)
-Attribution.levels(Rp, wp, Rb, wb, h, c("type", "MarketCap", "Sector"))
-Attribution.levels(Rp, wp, Rb, wb, h, c("type", "Sector"))
+Attribution.levels(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ], Rb = attrib.returns[, 11:20],
+wb = attrib.weights[2, ], h = attrib.hierarchy, c("type", "MarketCap", "Sector"))
+Attribution.levels(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ], Rb = attrib.returns[, 11:20],
+wb = attrib.weights[2, ], h = attrib.hierarchy, c("type", "Sector"))
 }
 \author{
   Andrii Babii

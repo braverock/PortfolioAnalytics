@@ -190,7 +190,8 @@
 }
 \examples{
 data(attrib)
-Attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
+Attribution(Rp = attrib.returns[, 1:10], wp = attrib.weights[1, ], Rb = attrib.returns[, 11:20],
+wb = attrib.weights[2, ], method = "top.down", linking = "carino")
 }
 \author{
   Andrii Babii
