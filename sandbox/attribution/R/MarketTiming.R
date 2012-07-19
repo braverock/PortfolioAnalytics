@@ -60,7 +60,7 @@ MarketTiming <- function (Ra, Rb, Rf = 0, method = c("TM", "HM"))
       Rf = checkData(Rf)
     Ra.ncols = NCOL(Ra)
     Rb.ncols = NCOL(Rb)
-    pairs = expand.grid(1:Ra.ncols, 1:Rb.ncols)
+    pairs = expand.grid(1:Ra.ncols, 1)
     method = method[1]
     xRa = Return.excess(Ra, Rf)
     xRb = Return.excess(Rb, Rf)
@@ -74,18 +74,23 @@ MarketTiming <- function (Ra, Rb, Rf = 0, method = c("TM", "HM"))
       R = merge(xRa, xRb, xRb*S)
       R.df = as.data.frame(R)
       model = lm(R.df[, 1] ~ 1 + ., data = R.df[, -1])
-      return(coef(model)[3])
+      return(coef(model))
     }
   
     result = apply(pairs, 1, FUN = function(n, xRa, xRb) 
-      mt(xRa[, n[1]], xRb[, n[2]]), xRa = xRa, xRb = xRb)
-  
-    if(length(result) == 1)
-      return(result)
-    else {
-      result = matrix(result, ncol = Ra.ncols, nrow = Rb.ncols, byrow = TRUE)
-      rownames(result) = paste("Gamma:", colnames(Rb))
-      colnames(result) = colnames(Ra)
-      return(result)
+      mt(xRa[, n[1]], xRb[, 1]), xRa = xRa, xRb = xRb)
+    result = t(result)
+    
+    if (ncol(Rb) > 1){
+      for (i in 2:ncol(xRb)){
+        res = apply(pairs, 1, FUN = function(n, xRa, xRb) 
+          mt(xRa[, n[1]], xRb[, i]), xRa = xRa, xRb = xRb)
+        res = t(res)
+        result = rbind(result, res)
+      }
     }
+  
+    rownames(result) = paste(rep(colnames(Ra), ncol(Rb)), "to",  rep(colnames(Rb), each = ncol(Ra)))
+    colnames(result) = c("Alpha", "Beta", "Gamma")
+    return(result)
 }

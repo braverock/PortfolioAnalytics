@@ -24,8 +24,7 @@
 #' @param Ra an xts, vector, matrix, data frame, timeSeries or zoo object of
 #' the asset returns
 #' @param Rb an xts, vector, matrix, data frame, timeSeries or zoo object of 
-#' the benchmark asset return. On the contrary to other similar functions it
-#' works only with a single benchmark (of dimenstion T x 1)
+#' the benchmark asset return
 #' @param Rf risk free rate, in same period as your returns
 #' @param Z an xts, vector, matrix, data frame, timeSeries or zoo object of 
 #' k variables that reflect public information
@@ -42,9 +41,10 @@
 #' @examples
 #' 
 #' data(managers)
-#' CAPM.dynamic(managers[,1,drop=FALSE], managers[,8,drop=FALSE], Rf=.035/12, Z=managers[, 9:10], lags = 2)
-#' CAPM.dynamic(managers[80:120,1:6], managers[80:120,7,drop=FALSE], Rf=managers[80:120,10,drop=FALSE], Z=managers[80:120, 9:10], lags = 1)
-#' 
+#' CAPM.dynamic(managers[,1,drop=FALSE], managers[,8,drop=FALSE], Rf=.035/12, Z=managers[, 9:10])
+#' CAPM.dynamic(managers[80:120,1:6], managers[80:120,7,drop=FALSE], Rf=managers[80:120,10,drop=FALSE], Z=managers[80:120, 9:10])
+#' CAPM.dynamic(managers[80:120,1:6], managers[80:120,8:7], managers[80:120,10,drop=FALSE], Z=managers[80:120, 9:10])
+#'
 #' @export
 CAPM.dynamic <- function (Ra, Rb, Rf = 0, Z, lags = 1, ...)
 { # @author Andrii Babii
@@ -74,16 +74,27 @@ CAPM.dynamic <- function (Ra, Rb, Rf = 0, Z, lags = 1, ...)
         
     dynamic <- function (xRa, xRb, z){
       y = xRa[1:nrow(z)]
-      X = cbind(rep(1, length(index(z))), z, coredata(xRb[1:nrow(z)]), z * matrix(rep(xRb[1:nrow(z)], ncol(z)), nrow(z), ncol(z)))
-      bhat = solve(t(X) %*% X) %*% t(X) %*% y
-      return(bhat)
+      X = cbind(z, coredata(xRb[1:nrow(z)]), z * matrix(rep(xRb[1:nrow(z)], ncol(z)), nrow(z), ncol(z)))
+      X.df = as.data.frame(X)
+      model = lm(xRa[1:nrow(z)] ~ 1 + ., data = X.df)
+      return(coef(model))
     }
     result = apply(pairs, 1, FUN = function(n, xRa, xRb, z) 
-      dynamic(xRa[, n[1]], xRb, z), xRa = xRa, xRb = xRb, z = z)
+      dynamic(xRa[, n[1]], xRb[, 1], z), xRa = xRa, xRb = xRb, z = z)
+    result = t(result)
+    
+    if (ncol(Rb) > 1){
+      for (i in 2:ncol(xRb)){
+        res = apply(pairs, 1, FUN = function(n, xRa, xRb, z) 
+          dynamic(xRa[, n[1]], xRb[, i], z), xRa = xRa, xRb = xRb, z = z)
+        res = t(res)
+        result = rbind(result, res)
+      }
+    }
     
     a = paste(rep(colnames(Z), lags), "alpha at t -", expand.grid(1:ncol(Z), 1:lags)[, 2])
     b = paste(rep(colnames(Z), lags), "beta at t -", expand.grid(1:ncol(Z), 1:lags)[, 2])
-    rownames(result) = c("Average alpha", a, "Average beta", b)
-    colnames(result) = colnames(Ra)
+    colnames(result) = c("Average alpha", a, "Average beta", b)
+    rownames(result) = paste(rep(colnames(Ra), ncol(Rb)), "to",  rep(colnames(Rb), each = ncol(Ra)))
     return(result)
 }
