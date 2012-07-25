@@ -3,7 +3,6 @@
 #
 
 library(xts)
-library(quantmod)
 library(quadprog)
 library(Rglpk)
 library(PerformanceAnalytics)
@@ -92,7 +91,15 @@ mean.var.prob <- OP(objective=Q_objective(Q=2*lambda*cov.mat, L=-mu.vec),
                     bounds=bnds)
 mean.var.constr <- constraint_ROI(assets=funds, op.problem=mean.var.prob, solver="quadprog")
 wts <- ROI_solve(x=mean.var.prob, solver="quadprog")$solution
-mean.var.solution <- optimize.portfolio(edhec, mean.var.constr, "ROI")
+mean.var.solution <- optimize.portfolio(edhec, mean.var.constr, "ROI_old")
+# using integrated ROI
+
+mean.var <- constraint(assets = colnames(edhec), min=-Inf, max =Inf, min_sum=1, max_sum=1, risk_aversion=1)
+mean.var <- add.objective(constraints=mean.var, type="return", name="mean", enabled=TRUE, multiplier=0, target=mu.port)
+mean.var <- add.objective(constraints=mean.var, type="risk", name="var", enabled=TRUE, multiplier=0)
+
+solution <- optimize.portfolio(edhec, mean.var, "ROI")
+paste(names(edhec),solution$weights)
 # results for this are:
 #
 # > mean.var.solution$weights

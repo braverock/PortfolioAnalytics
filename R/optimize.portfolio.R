@@ -33,10 +33,19 @@
 #' DEoptim, and by default is the number of parameters (assets/weights) *10.
 #' 
 #' itermax, if not passed in dots, defaults to the number of parameters (assets/weights) *50.
+#' 
+#' The extension to ROI solves a limit type of convex optimization problems:
+#' 1)  Maxmimize portfolio return subject box constraints on weights
+#' 2)  Minimize portfolio variance subject to box constraints (otherwise known as global minimum variance portfolio)
+#' 3)  Minimize portfolio variance subject to box constraints and a desired portfolio return
+#' 4)  Maximize quadratic utility subject to box constraints and risk aversion parameter (this is passed into \code{optimize.portfolio} as as added argument to the \code{constraints} object)
+#' 5)  Mean CVaR optiimization subject to box constraints and target portfolio return
+#' Lastly, because these closed-form optimizations are standardized, there is no need for a penalty term. Therefore, the \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the solver.  
+#' If you would like to interface with \code{optimize.portfolio} using matrix formulations, then use \code{ROI_old}. 
 #'  
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}, if using closed for solver, need to pass a \code{\link{constraint_ROI}} object.
-#' @param optimize_method one of "DEoptim", "random", "ROI","ROI_new", "pso".  For using \code{ROI}, need to use a constraint_ROI object in constraints. For using \code{ROI_new}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} 
+#' @param optimize_method one of "DEoptim", "random", "ROI","ROI_old", "pso".  For using \code{ROI_old}, need to use a constraint_ROI object in constraints. For using \code{ROI}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} and \code{Rglpk}.
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
@@ -49,7 +58,7 @@
 optimize.portfolio <- function(
 		R,
 		constraints,
-		optimize_method=c("DEoptim","random","ROI","ROI_new","pso"), 
+		optimize_method=c("DEoptim","random","ROI","ROI_old","pso"), 
 		search_size=20000, 
 		trace=FALSE, ..., 
 		rp=NULL,
@@ -242,7 +251,7 @@ optimize.portfolio <- function(
 
   } ## end case for random
   
-  if(optimize_method == "ROI"){
+  if(optimize_method == "ROI_old"){
     # This will take a new constraint object that is of the same structure of a 
     # ROI constraint object, but with an additional solver arg.
     # then we can do something like this
@@ -252,10 +261,46 @@ optimize.portfolio <- function(
     out$weights <- weights
     out$objective_measures <- roi.result$objval
     out$call <- call
-  } ## end case for ROI
+  } ## end case for ROI_old
   
   
-  if(optimize_method == "ROI_new"){
+  
+## The first draft of the integrated ROI:  
+#   if (optimize_method == "ROI") {
+#     bnds <- list(lower = list(ind = seq.int(1L, N), val = constraints$min), 
+#                  upper = list(ind = seq.int(1L, N), val = constraints$max))
+#     objectives <- do.call(cbind, sapply(constraints$objectives,"[", "name"))
+#     moments <- list()
+#     for (i in 1:length(objectives)) moments[[i]] <- eval(as.symbol(objectives[i]))(R)
+#     names(moments) <- objectives
+#     plugin <- ifelse(any(objectives == "var"), "quadprog", "glpk")
+#     target.return <- do.call(cbind, sapply(constraints$objectives,"[", "target"))
+#     lambda <- do.call(cbind, sapply(constraints$objectives, "[", "risk_aversion"))
+#     if (is.null(lambda)) lambda <- 1
+#     if (plugin == "quadprog")  ROI_objective <- ROI:::Q_objective(Q = 2 * lambda * moments$var, L = -moments$mean)
+#     if (plugin == "glpk")  ROI_objective <- ROI:::L_objective(L = -moments$mean)
+#     Amat <- rbind(rep(1, N), rep(1, N))
+#     dir.vec <- c(">=", "<=")
+#     rhs.vec <- c(constraints$min_sum, constraints$max_sum)
+#     if (!is.null(target.return)) {
+#       Amat <- rbind(Amat, moments$mean)
+#       dir.vec <- cbind(dir.vec, "==")
+#       rhs.vec <- cbind(rhs.vec, target.return)
+#     }
+#     q.prob <- ROI:::OP(objective = ROI_objective, 
+#                        constraints = L_constraint(L = Amat, dir = dir.vec, rhs = rhs.vec), 
+#                        bounds = bnds)
+#     roi.result <- ROI:::ROI_solve(x = q.prob, solver = plugin)
+#     weights <- roi.result$solution
+#     names(weights) <- colnames(R)
+#     out$weights <- weights
+#     out$objective_measures <- roi.result$objval
+#     out$call <- call
+#   }
+  
+  
+  
+  if(optimize_method == "ROI"){
     # This takes in a regular constraint object and extracts the desired business objectives
     # and converts them to matrix form to be inputed into a closed form solver
     # Applying box constraints
@@ -263,38 +308,50 @@ optimize.portfolio <- function(
                  upper = list(ind = seq.int(1L, N), val = as.numeric(constraints$max)))
     # retrive the objectives to minimize, these should either be "var" and/or "mean"
     # we can eight miniminze variance or maximize quiadratic utility (we will be minimizing the neg. quad. utility)
-    objectives <- do.call(cbind, sapply(constraints$objectives, "[", "name"))
-    moments <- list()
-    for(i in 1:length(objectives)) moments[[i]]<- eval(as.symbol(objectives[i]))(R)
-    names(moments) <- objectives
-    plugin <- ifelse(any(objectives=="var"), "quadprog", "glpk")
-    target.return <- do.call(cbind,sapply(init.constr$objectives, "[", "target"))
-    lambda <- do.call(cbind,sapply(init.constr$objectives, "[", "risk_aversion"))
-    if(is.null(lambda)) lambda <- 1    
+    moments <- list(mean=rep(0, N), var=NULL)
+    target <- NULL
+    lambda <- NULL
+    alpha <- 0.05
+    for(objective in constraints$objectives){
+      if(objective$enabled){
+        if(objective$name != "mean" || objective$name != "var" || objective$name != "CVaR")
+          stop("ROI only solves mean, var, or sample CVaR type business objectives, 
+               choose a different optimize_method.")
+        moments[[objective$name]] <- eval(as.symbol(objective$name))(R)
+        target <- ifelse(!is.null(objective$target),objective$target, NA)
+        alpha <- ifelse(!is.null(objective$alpha), objective$alpha, alpha)
+        lambda <- ifelse(!is.null(objective$risk_aversion),objective$risk_aversion,1)
+      }
+    }
+    plugin <- ifelse(any(names(moments)=="var"), "quadprog", "glpk")  
     if(plugin == "quadprog") ROI_objective <- ROI:::Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
     if(plugin == "glpk") ROI_objective <- ROI:::L_objective(L=-moments$mean)
     Amat <- rbind(rep(1, N), rep(1, N))
     dir.vec <- c(">=","<=")
     rhs.vec <- c(constraints$min_sum, constraints$max_sum)
-    if(!is.null(target.return)) {
+    if(!is.na(target)) {
       Amat <- rbind(Amat, moments$mean)
       dir.vec <- cbind(dir.vec, "==")
-      rhs.vec <- cbind(rhs.vec, target.return)
+      rhs.vec <- cbind(rhs.vec, target)
     }
-    q.prob <- ROI:::OP(objective=ROI_objective, 
-                       constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
-                       bounds=bnds)
-    roi.result <- ROI:::ROI_solve(x=q.prob, solver=plugin)
-    weights <- roi.result$solution
+    if(any(names(moments)=="CVaR")) {
+      Rmin <- ifelse(is.na(target), 0, target)
+      ROI_objective <- ROI:::L_objective(c(rep(0,N), rep(-1/(alpha*T),T), -1))
+      Amat <- rbind(cbind(rbind(1,1,moments$mean)), matrix(0,nrow=3, ncol=T+1), cbind(R, diag(T), 1))
+      dir.vec <- c(">=","<=",">=",rep(">=",T))
+      rhs.vec <- c(constraints$min_sum, constraints$max_sum, Rmin ,rep(0, T))
+    }
+    opt.prob <- ROI:::OP(objective=ROI_objective, 
+                         constraints=ROI:::L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
+                         bounds=bnds)
+    roi.result <- ROI:::ROI_solve(x=opt.prob, solver=plugin)
+    weights <- roi.result$solution[1:N]
     names(weights) <- colnames(R)
     out$weights <- weights
     out$objective_measures <- roi.result$objval
     out$call <- call
   } ## end case for ROI
 
-  
-  
-  
   
   ## case if method=pso---particle swarm
   if(optimize_method=="pso"){
