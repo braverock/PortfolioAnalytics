@@ -25,7 +25,6 @@ License: GPL
 URL: http://r-forge.r-project.org/projects/returnanalytics/
 Copyright: (c) 2004-2012
 Collate:
-    'AppraisalRatio.R'
     'Attribution.geometric.R'
     'attribution.levels.R'
     'attribution.R'
@@ -44,3 +43,4 @@ Collate:
     'MarketTiming.R'
     'Weight.level.R'
     'Weight.transform.R'
+    'AcctReturns.R'
