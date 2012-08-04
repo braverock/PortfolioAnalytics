@@ -265,41 +265,6 @@ optimize.portfolio <- function(
   
   
   
-## The first draft of the integrated ROI:  
-#   if (optimize_method == "ROI") {
-#     bnds <- list(lower = list(ind = seq.int(1L, N), val = constraints$min), 
-#                  upper = list(ind = seq.int(1L, N), val = constraints$max))
-#     objectives <- do.call(cbind, sapply(constraints$objectives,"[", "name"))
-#     moments <- list()
-#     for (i in 1:length(objectives)) moments[[i]] <- eval(as.symbol(objectives[i]))(R)
-#     names(moments) <- objectives
-#     plugin <- ifelse(any(objectives == "var"), "quadprog", "glpk")
-#     target.return <- do.call(cbind, sapply(constraints$objectives,"[", "target"))
-#     lambda <- do.call(cbind, sapply(constraints$objectives, "[", "risk_aversion"))
-#     if (is.null(lambda)) lambda <- 1
-#     if (plugin == "quadprog")  ROI_objective <- ROI:::Q_objective(Q = 2 * lambda * moments$var, L = -moments$mean)
-#     if (plugin == "glpk")  ROI_objective <- ROI:::L_objective(L = -moments$mean)
-#     Amat <- rbind(rep(1, N), rep(1, N))
-#     dir.vec <- c(">=", "<=")
-#     rhs.vec <- c(constraints$min_sum, constraints$max_sum)
-#     if (!is.null(target.return)) {
-#       Amat <- rbind(Amat, moments$mean)
-#       dir.vec <- cbind(dir.vec, "==")
-#       rhs.vec <- cbind(rhs.vec, target.return)
-#     }
-#     q.prob <- ROI:::OP(objective = ROI_objective, 
-#                        constraints = L_constraint(L = Amat, dir = dir.vec, rhs = rhs.vec), 
-#                        bounds = bnds)
-#     roi.result <- ROI:::ROI_solve(x = q.prob, solver = plugin)
-#     weights <- roi.result$solution
-#     names(weights) <- colnames(R)
-#     out$weights <- weights
-#     out$objective_measures <- roi.result$objval
-#     out$call <- call
-#   }
-  
-  
-  
   if(optimize_method == "ROI"){
     # This takes in a regular constraint object and extracts the desired business objectives
     # and converts them to matrix form to be inputed into a closed form solver
@@ -309,18 +274,15 @@ optimize.portfolio <- function(
     # retrive the objectives to minimize, these should either be "var" and/or "mean"
     # we can eight miniminze variance or maximize quiadratic utility (we will be minimizing the neg. quad. utility)
     moments <- list(mean=rep(0, N), var=NULL)
-    target <- NULL
-    lambda <- NULL
     alpha <- 0.05
     for(objective in constraints$objectives){
       if(objective$enabled){
-        if(objective$name != "mean" || objective$name != "var" || objective$name != "CVaR")
-          stop("ROI only solves mean, var, or sample CVaR type business objectives, 
-               choose a different optimize_method.")
+        if(!any(c(objective$name == "mean", objective$name == "var", objective$name == "CVaR")))
+          stop("ROI only solves mean, var, or sample CVaR type business objectives, choose a different optimize_method.")
         moments[[objective$name]] <- eval(as.symbol(objective$name))(R)
         target <- ifelse(!is.null(objective$target),objective$target, NA)
         alpha <- ifelse(!is.null(objective$alpha), objective$alpha, alpha)
-        lambda <- ifelse(!is.null(objective$risk_aversion),objective$risk_aversion,1)
+        lambda <- ifelse(!is.null(objective$risk_aversion), objective$risk_aversion, 1)
       }
     }
     plugin <- ifelse(any(names(moments)=="var"), "quadprog", "glpk")  
@@ -356,9 +318,8 @@ optimize.portfolio <- function(
   ## case if method=pso---particle swarm
   if(optimize_method=="pso"){
     stopifnot("package:pso" %in% search()  ||  require("pso",quietly = TRUE) )
-    # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
     if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
-    PSOcformals  <- formals(psoptim.control)
+    PSOcformals <- list(trace=FALSE, fnscale=1, maxit=1000, maxf=Inf, abstol=-Inf, reltol=0)
     PSOcargs <- names(PSOcformals)
     if( is.list(dotargs) ){
       pm <- pmatch(names(dotargs), PSOcargs, nomatch = 0L)
