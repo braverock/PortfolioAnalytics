@@ -100,12 +100,12 @@ function(Account, Dates = NULL, Portfolios = NULL, method = c("timeweighted", "d
     V = initEq + reclass(rowSums(table), table)                  # Account values
     method = method[1]
     
-    if (method == timeweighted){
+    if (method == "timeweighted"){
       # Time-weighted returns
       returns = V  / (lag(V) + CF) - 1
     }
     
-    if (method == dietz){
+    if (method == "dietz"){
       # Linked modified Dietz
       C = apply.monthly(CF, sum)   # total monthly cashflow
       V = apply.monthly(V, first)  # monthly account values
