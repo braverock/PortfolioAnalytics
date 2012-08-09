@@ -79,6 +79,13 @@ function(Rp, wp, Rb, wb, h, ...)
       Rp = Rp[2:nrow(Rp)]
       Rb = Rb[2:nrow(Rb)]
     }
+    if (ncol(Rb) == 1){
+      Rb = matrix(rep(coredata(Rb), ncol(Rp)), nrow(Rp), ncol(Rp))
+    }
+    if (ncol(Rb) != ncol(Rp)){
+      stop("Please use benchmark xts that has columns with benchmarks for each
+            asset or one common benchmark for all assets")
+    }
 
     levels <- unlist(list(...))
     if (!is.null(levels)) stopifnot(is.character(levels))

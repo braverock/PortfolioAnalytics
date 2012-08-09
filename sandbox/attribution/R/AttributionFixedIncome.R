@@ -106,7 +106,20 @@ function (Rp, wp, Rb, wb, Rf, Dp, Db, S, wbf, geometric = FALSE)
     wp = Weight.transform(wp, Rp)
     wb = Weight.transform(wb, Rb)
     wbf = Weight.transform(wbf, Rb)
-    
+    if (ncol(Rb) == 1){
+      Rb = matrix(rep(coredata(Rb), ncol(Rp)), nrow(Rp), ncol(Rp))
+    }
+    if (ncol(Rb) != ncol(Rp)){
+      stop("Please use benchmark xts that has columns with benchmarks for each
+            asset or one common benchmark for all assets")
+    }
+    if (ncol(Db) == 1){
+      Db = matrix(rep(coredata(Db), ncol(Dp)), nrow(Dp), ncol(Dp))
+    }
+    if (ncol(Db) != ncol(Dp)){
+      print("Please use benchmark xts that has columns with benchmarks for each
+            asset or one common benchmark for all assets")
+    }
     if (is.vector(WP)  & is.vector(WB) & is.vector(WBF)){
       rp = Return.portfolio(Rp, WP, geometric = geometric)
       rb = Return.portfolio(Rb, WB, geometric = geometric)
