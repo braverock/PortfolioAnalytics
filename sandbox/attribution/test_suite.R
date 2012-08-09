@@ -1,6 +1,26 @@
-# TODO: test currencies, fixed effects and Brinson-Fachler
-# I. Check different options
+# Load the data
 data(attrib)
+Rp = attrib.returns[, 1:10]
+Rb = attrib.returns[, 11:20]
+rp = attrib.returns[, 21]
+rb = attrib.returns[, 22]
+Rf = attrib.returns[, 23:32]
+Rpl = attrib.returns[, 33:42]
+Rbl = attrib.returns[, 43:52]
+Rbh = attrib.returns[, 53:62]
+
+Dp = attrib.returns[, 63:72]
+Db = attrib.returns[, 73:82]
+wp = attrib.weights[1, ]
+wb = attrib.weights[2, ]
+wpf = attrib.weights[3, ]
+wbf = attrib.weights[4, ]
+h = attrib.hierarchy
+allocation = attrib.allocation
+F = attrib.currency[, 1:10]
+S = attrib.currency[, 11:20]
+
+# I. Check different options
 
 Attribution(Rp, wp, Rb, wb, method = "top.down", linking = "carino")
 Attribution(Rp, wp, Rb, wb, method = "bottom.up", linking = "menchero")
@@ -16,7 +36,7 @@ Attribution(Rp, wp, Rb, wb, wpf, wbf, S, F, Rpl, Rbl, Rbh, method = "none", link
 
 Weight.transform(wp, Rp)
 Return.level(Rp, wp, h, level = "MarketCap")
-Weight.level(wp, h, level = "Sector")
+Weight.level(wp, Rp, h, level = "Sector")
 
 Attribution.levels(Rp, wp, Rb, wb, h, c("type", "MarketCap", "currency", "Sector"))
 Attribution.levels(Rp, wp, Rb, wb, h, c("type", "currency", "Sector"))
@@ -24,6 +44,22 @@ Attribution.levels(Rp, wp, Rb, wb, h, c("type", "Sector"))
 
 Return.annualized.excess(rp, rb)
 HierarchyQuintiles(h, "MarketCap")
+
+data(managers)
+Modigliani(managers[,1,drop=FALSE], managers[,8,drop=FALSE], Rf=.035/12)
+Modigliani(managers[,1:6], managers[,8,drop=FALSE], managers[,8,drop=FALSE])
+Modigliani(managers[,1:6], managers[,8:7], managers[,8,drop=FALSE])
+MarketTiming(managers[,1,drop=FALSE], managers[,8,drop=FALSE], Rf=.035/12, method = "HM")
+MarketTiming(managers[80:120,1:6], managers[80:120,7,drop=FALSE], managers[80:120,10,drop=FALSE])
+MarketTiming(managers[80:120,1:6], managers[80:120,8:7], managers[80:120,10,drop=FALSE], method = "TM")
+CAPM.dynamic(managers[,1,drop=FALSE], managers[,8,drop=FALSE], Rf=.035/12, Z=managers[, 9:10])
+CAPM.dynamic(managers[80:120,1:6], managers[80:120,7,drop=FALSE], Rf=managers[80:120,10,drop=FALSE], Z=managers[80:120, 9:10])
+CAPM.dynamic(managers[80:120,1:6], managers[80:120,8:7], managers[80:120,10,drop=FALSE], Z=managers[80:120, 9:10])
+
+
+# !!! Run after amzn_test.R demo (from the blotter package) to get a dataset
+AcctReturns("amzn_acct", method = "timeweighted")
+AcctReturns("amzn_acct", method = "dietz") # NA because only 1 month in the data
 
 # II. Comparing with results in books
 # Data
