@@ -9,9 +9,7 @@
   or zoo object of the asset returns}
 
   \item{Rb}{an xts, vector, matrix, data frame, timeSeries
-  or zoo object of the benchmark asset return. On the
-  contrary to other similar functions it works only with a
-  single benchmark (of dimenstion T x 1)}
+  or zoo object of the benchmark asset return}
 
   \item{Rf}{risk free rate, in same period as your returns}
 
@@ -51,8 +49,9 @@
 }
 \examples{
 data(managers)
-CAPM.dynamic(managers[,1,drop=FALSE], managers[,8,drop=FALSE], Rf=.035/12, Z=managers[, 9:10], lags = 2)
-CAPM.dynamic(managers[80:120,1:6], managers[80:120,7,drop=FALSE], Rf=managers[80:120,10,drop=FALSE], Z=managers[80:120, 9:10], lags = 1)
+CAPM.dynamic(managers[,1,drop=FALSE], managers[,8,drop=FALSE], Rf=.035/12, Z=managers[, 9:10])
+CAPM.dynamic(managers[80:120,1:6], managers[80:120,7,drop=FALSE], Rf=managers[80:120,10,drop=FALSE], Z=managers[80:120, 9:10])
+CAPM.dynamic(managers[80:120,1:6], managers[80:120,8:7], managers[80:120,10,drop=FALSE], Z=managers[80:120, 9:10])
 }
 \author{
   Andrii Babii

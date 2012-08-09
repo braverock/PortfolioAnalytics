@@ -16,7 +16,7 @@
   \item{method}{used to select between Treynor-Mazuy and
   Henriksson-Merton models. May be any of: \itemize{ \item
   TM - Treynor-Mazuy model, \item HM - Henriksson-Merton
-  model}. By default Treynor-Mazuy is selected}
+  model} By default Treynor-Mazuy is selected}
 
   \item{\dots}{any other passthrough parameters}
 }

@@ -30,7 +30,7 @@
 #' @param Rf risk free rate, in same period as your returns
 #' @param method used to select between Treynor-Mazuy and Henriksson-Merton
 #' models. May be any of: \itemize{ \item TM - Treynor-Mazuy model, 
-#' \item HM - Henriksson-Merton model}. By default Treynor-Mazuy is selected
+#' \item HM - Henriksson-Merton model} By default Treynor-Mazuy is selected
 #' @param \dots any other passthrough parameters
 #' @author Andrii Babii, Peter Carl
 #' @seealso \code{\link{CAPM.beta}}
