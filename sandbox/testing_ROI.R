@@ -17,6 +17,7 @@ library(PortfolioAnalytics)
 data(edhec)
 funds <- names(edhec)
 mu.port <- mean(colMeans(edhec))
+N <- length(funds)
 
 gen.constr <- constraint(assets = colnames(edhec), min=-Inf, max =Inf, min_sum=1, max_sum=1, risk_aversion=1)
 gen.constr <- add.objective(constraints=no.box.constr, type="return", name="mean", enabled=FALSE, multiplier=0, target=mu.port)
@@ -28,8 +29,8 @@ gen.constr <- add.objective(constraints=no.box.constr, type="risk", name="CVaR",
 # Max return under box constraints, fully invested
 #
 max.port <- gen.constr
-max.port$min <- 0.01
-max.port$max <- 0.30
+max.port$min <- rep(0.01,N)
+max.port$max <- rep(0.30,N)
 max.port$objectives[[1]]$enabled <- TRUE
 max.port$objectives[[1]]$target <- NULL
 max.solution <- optimize.portfolio(edhec, max.port, "ROI")
@@ -69,6 +70,7 @@ dollar.neu.solution <- optimize.portfolio(edhec, dollar.neu.port, "ROI")
 #
 cvar.port <- gen.constr
 cvar.port$objectives[[1]]$enabled <- TRUE
+cvar.port$objectives[[1]]$target <- NULL
 cvar.port$objectives[[3]]$enabled <- TRUE
 cvar.solution <- optimize.portfolio(edhec, cvar.port, "ROI")
 

@@ -273,14 +273,15 @@ optimize.portfolio <- function(
                  upper = list(ind = seq.int(1L, N), val = as.numeric(constraints$max)))
     # retrive the objectives to minimize, these should either be "var" and/or "mean"
     # we can eight miniminze variance or maximize quiadratic utility (we will be minimizing the neg. quad. utility)
-    moments <- list(mean=rep(0, N), var=NULL)
+    moments <- list(mean=rep(0, N))
     alpha <- 0.05
+    target <- NA
     for(objective in constraints$objectives){
       if(objective$enabled){
         if(!any(c(objective$name == "mean", objective$name == "var", objective$name == "CVaR")))
           stop("ROI only solves mean, var, or sample CVaR type business objectives, choose a different optimize_method.")
-        moments[[objective$name]] <- eval(as.symbol(objective$name))(R)
-        target <- ifelse(!is.null(objective$target),objective$target, NA)
+        moments[[objective$name]] <- try(eval(as.symbol(objective$name))(R), silent=TRUE)
+        target <- ifelse(!is.null(objective$target),objective$target, target)
         alpha <- ifelse(!is.null(objective$alpha), objective$alpha, alpha)
         lambda <- ifelse(!is.null(objective$risk_aversion), objective$risk_aversion, 1)
       }
@@ -293,13 +294,15 @@ optimize.portfolio <- function(
     rhs.vec <- c(constraints$min_sum, constraints$max_sum)
     if(!is.na(target)) {
       Amat <- rbind(Amat, moments$mean)
-      dir.vec <- cbind(dir.vec, "==")
-      rhs.vec <- cbind(rhs.vec, target)
+      dir.vec <- c(dir.vec, "==")
+      rhs.vec <- c(rhs.vec, target)
     }
     if(any(names(moments)=="CVaR")) {
       Rmin <- ifelse(is.na(target), 0, target)
-      ROI_objective <- ROI:::L_objective(c(rep(0,N), rep(-1/(alpha*T),T), -1))
-      Amat <- rbind(cbind(rbind(1,1,moments$mean)), matrix(0,nrow=3, ncol=T+1), cbind(R, diag(T), 1))
+      ROI_objective <- ROI:::L_objective(c(rep(0,N), rep(1/(alpha*T),T), 1))
+      Amat <- cbind(rbind(1, 1, moments$mean, coredata(R)), rbind(0, 0, 0, cbind(diag(T), 1))) 
+      #lower <- cbind(matrix(0,nrow=T,ncol=N),diag(T),0)
+      #Amat <- rbind(Amat, lower)
       dir.vec <- c(">=","<=",">=",rep(">=",T))
       rhs.vec <- c(constraints$min_sum, constraints$max_sum, Rmin ,rep(0, T))
     }
@@ -324,7 +327,7 @@ optimize.portfolio <- function(
     if( is.list(dotargs) ){
       pm <- pmatch(names(dotargs), PSOcargs, nomatch = 0L)
       names(dotargs[pm > 0L]) <- PSOcargs[pm]
-      DEcformals$maxit <- maxit
+      PSOcformals$maxit <- maxit
       if(!hasArg(reltol)) PSOcformals$reltol=.000001 # 1/1000 of 1% change in objective is significant
       if(!hasArg(fnscale)) PSOcformals$fnscale=1
       if(!hasArg(abstol)) PSOcformals$asbtol=-Inf
@@ -335,7 +338,7 @@ optimize.portfolio <- function(
     upper = constraints$max
     lower = constraints$min
     
-    controlPSO <- do.call(psoptim.control,PSOcformals)
+    controlPSO <- PSOcformals
     
     minw = try(psoptim( constrained_objective ,  lower = lower[1:N] , upper = upper[1:N] , 
                         control = controlPSO, R=R, constraints=constraints, nargs = dotargs , ...=...)) # add ,silent=TRUE here?
