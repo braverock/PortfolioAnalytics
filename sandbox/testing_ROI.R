@@ -70,7 +70,6 @@ dollar.neu.solution <- optimize.portfolio(edhec, dollar.neu.port, "ROI")
 #
 cvar.port <- gen.constr
 cvar.port$objectives[[1]]$enabled <- TRUE
-cvar.port$objectives[[1]]$target <- NULL
 cvar.port$objectives[[3]]$enabled <- TRUE
 cvar.solution <- optimize.portfolio(edhec, cvar.port, "ROI")
 
