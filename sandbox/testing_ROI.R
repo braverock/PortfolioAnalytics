@@ -73,3 +73,29 @@ cvar.port$objectives[[1]]$enabled <- TRUE
 cvar.port$objectives[[3]]$enabled <- TRUE
 cvar.solution <- optimize.portfolio(edhec, cvar.port, "ROI")
 
+
+# =====================
+# Mean-variance:  Fully invested, Global Minimum Variance Portfolio, Groups Constraints
+#
+groups.port <- gen.constr
+groups <- c(3,3,3,4)
+groups.port$groups <- groups 
+groups.port$cLO <- rep(0.15,length(groups))
+groups.port$cUP <- rep(0.30,length(groups)) 
+groups.port$objectives[[2]]$enabled <- TRUE
+groups.port$objectives[[2]]$risk_aversion <- 1
+groups.solution <- optimize.portfolio(edhec, groups.port, "ROI")
+
+
+# ========================
+# Minimize CVaR with target return and group constraints
+#
+group.cvar.port <- gen.constr
+groups <- c(3,3,3,4)
+group.cvar.port$groups <- groups
+group.cvar.port$cLO <- rep(0.15,length(groups))
+group.cvar.port$cUP <- rep(0.30,length(groups))
+group.cvar.port$objectives[[1]]$enabled <- TRUE
+group.cvar.port$objectives[[3]]$enabled <- TRUE
+group.cvar.solution <- optimize.portfolio(edhec, group.cvar.port, "ROI")
+

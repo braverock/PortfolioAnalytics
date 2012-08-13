@@ -84,13 +84,35 @@
   passed into \code{optimize.portfolio} as as added
   argument to the \code{constraints} object) 5) Mean CVaR
   optiimization subject to box constraints and target
-  portfolio return Lastly, because these closed-form
-  optimizations are standardized, there is no need for a
-  penalty term. Therefore, the \code{multiplier} argument
-  in \code{\link{add.objective}} passed into the complete
-  constraint object are ingnored by the solver. If you
-  would like to interface with \code{optimize.portfolio}
-  using matrix formulations, then use \code{ROI_old}.
+  portfolio return Lastly, because these convex
+  optimization problem are standardized, there is no need
+  for a penalty term. Therefore, the \code{multiplier}
+  argument in \code{\link{add.objective}} passed into the
+  complete constraint object are ingnored by the solver.
+  ROI also can solve quadratic and linear problems with
+  group constraints by added a \code{groups} argument into
+  the constraints object. This argument is a vector with
+  each of its elements the number of assets per group. The
+  group constraints, \code{cLO} and \code{cUP}, are also
+  added to the constraints object.
+
+  For example, if you have 9 assets, and would like to
+  require that the the first 3 assets are in one group, the
+  second 3 are in another, and the third are in another,
+  then you add the grouping by \code{constraints$groups <-
+  c(3,3,3)}. To apply the constraints that the first group
+  must compose of at least 20% of the weight, the second
+  group 15%, and the third group 10%, and that now signle
+  group should compose of more that 50% of the weight, then
+  you would add the lower group constraint as
+  \code{constraints$cLO <- c(0.20, 0.15, 0.10)} and the
+  upper constraints as \code{constraints$cUP <-
+  rep(0.5,3)}. These group constraint can be set for all
+  five optimization problems listed above.
+
+  If you would like to interface with
+  \code{optimize.portfolio} using matrix formulations, then
+  use \code{ROI_old}.
 }
 \author{
   Kris Boudt, Peter Carl, Brian G. Peterson

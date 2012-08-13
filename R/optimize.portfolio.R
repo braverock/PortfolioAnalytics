@@ -40,7 +40,16 @@
 #' 3)  Minimize portfolio variance subject to box constraints and a desired portfolio return
 #' 4)  Maximize quadratic utility subject to box constraints and risk aversion parameter (this is passed into \code{optimize.portfolio} as as added argument to the \code{constraints} object)
 #' 5)  Mean CVaR optiimization subject to box constraints and target portfolio return
-#' Lastly, because these closed-form optimizations are standardized, there is no need for a penalty term. Therefore, the \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the solver.  
+#' Lastly, because these convex optimization problem are standardized, there is no need for a penalty term. 
+#' Therefore, the \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the solver. 
+#' ROI also can solve quadratic and linear problems with group constraints by added a \code{groups} argument into the constraints object. 
+#' This argument is a vector with each of its elements the number of assets per group.  
+#' The group constraints, \code{cLO} and \code{cUP}, are also added to the constraints object.
+#' 
+#' For example, if you have 9 assets, and would like to require that the the first 3 assets are in one group, the second 3 are in another, and the third are in another, then you add the grouping by \code{constraints$groups <- c(3,3,3)}.
+#' To apply the constraints that the first group must compose of at least 20% of the weight, the second group 15%, and the third group 10%, and that now signle group should compose of more that 50% of the weight, then you would add the lower group constraint as \code{constraints$cLO <- c(0.20, 0.15, 0.10)} and the upper constraints as \code{constraints$cUP <- rep(0.5,3)}. 
+#' These group constraint can be set for all five optimization problems listed above. 
+#'   
 #' If you would like to interface with \code{optimize.portfolio} using matrix formulations, then use \code{ROI_old}. 
 #'  
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
@@ -297,14 +306,38 @@ optimize.portfolio <- function(
       dir.vec <- c(dir.vec, "==")
       rhs.vec <- c(rhs.vec, target)
     }
+    if(!is.null(constraints$groups)){
+      if(sum(constraints$groups) != N)
+        stop("Number of assets in each group needs to sum to number of total assets.")
+      if(!all(c(length(constraints$cLO),length(constraints$cLO)) == length(constraints$groups)) )
+         stop("Number of group constraints exceeds number of groups.")
+      n.groups <- length(constraints$groups)
+      Amat.group <- matrix(0, nrow=n.groups, ncol=N)
+      k <- 1; l <- 0
+      for(i in 1:n.groups){
+        j <- constraints$groups[i] 
+        Amat.group[i, k:(l+j)] <- 1
+        k <- l + j + 1
+        l <- k - 1
+      }
+      if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
+      if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
+      Amat <- rbind(Amat, Amat.group, -Amat.group)
+      dir.vec <- c(dir.vec, rep(">=", (n.groups + n.groups)))
+      rhs.vec <- c(rhs.vec, constraints$cLO, -constraints$cUP)
+    }
     if(any(names(moments)=="CVaR")) {
       Rmin <- ifelse(is.na(target), 0, target)
       ROI_objective <- ROI:::L_objective(c(rep(0,N), rep(1/(alpha*T),T), 1))
       Amat <- cbind(rbind(1, 1, moments$mean, coredata(R)), rbind(0, 0, 0, cbind(diag(T), 1))) 
-      #lower <- cbind(matrix(0,nrow=T,ncol=N),diag(T),0)
-      #Amat <- rbind(Amat, lower)
       dir.vec <- c(">=","<=",">=",rep(">=",T))
       rhs.vec <- c(constraints$min_sum, constraints$max_sum, Rmin ,rep(0, T))
+      if(!is.null(groups)){
+        zeros <- matrix(0, nrow=n.groups, ncol=(T+1))
+        Amat <- rbind(Amat, cbind(Amat.group, zeros), cbind(-Amat.group, zeros))
+        dir.vec <- c(dir.vec, rep(">=", (n.groups + n.groups)))
+        rhs.vec <- c(rhs.vec, constraints$cLO, -constraints$cUP)
+      }
     }
     opt.prob <- ROI:::OP(objective=ROI_objective, 
                          constraints=ROI:::L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
