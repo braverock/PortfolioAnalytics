@@ -264,6 +264,7 @@ optimize.portfolio <- function(
     # This will take a new constraint object that is of the same structure of a 
     # ROI constraint object, but with an additional solver arg.
     # then we can do something like this
+    print("ROI_old is going to be depricated.")
     roi.result <- ROI:::ROI_solve(x=constraints$constrainted_objective, constraints$solver)
     weights <- roi.result$solution
     names(weights) <- colnames(R)
@@ -306,14 +307,15 @@ optimize.portfolio <- function(
       dir.vec <- c(dir.vec, "==")
       rhs.vec <- c(rhs.vec, target)
     }
-    if(!is.null(constraints$groups)){
+    if(try(!is.null(constraints$groups), silent=TRUE)){
       if(sum(constraints$groups) != N)
         stop("Number of assets in each group needs to sum to number of total assets.")
-      if(!all(c(length(constraints$cLO),length(constraints$cLO)) == length(constraints$groups)) )
-         stop("Number of group constraints exceeds number of groups.")
       n.groups <- length(constraints$groups)
+      if(!all(c(length(constraints$cLO),length(constraints$cLO)) == n.groups) )
+        stop("Number of group constraints exceeds number of groups.")
       Amat.group <- matrix(0, nrow=n.groups, ncol=N)
-      k <- 1; l <- 0
+      k <- 1
+      l <- 0
       for(i in 1:n.groups){
         j <- constraints$groups[i] 
         Amat.group[i, k:(l+j)] <- 1
@@ -332,7 +334,7 @@ optimize.portfolio <- function(
       Amat <- cbind(rbind(1, 1, moments$mean, coredata(R)), rbind(0, 0, 0, cbind(diag(T), 1))) 
       dir.vec <- c(">=","<=",">=",rep(">=",T))
       rhs.vec <- c(constraints$min_sum, constraints$max_sum, Rmin ,rep(0, T))
-      if(!is.null(groups)){
+      if(try(!is.null(groups), silent=TRUE)){
         zeros <- matrix(0, nrow=n.groups, ncol=(T+1))
         Amat <- rbind(Amat, cbind(Amat.group, zeros), cbind(-Amat.group, zeros))
         dir.vec <- c(dir.vec, rep(">=", (n.groups + n.groups)))
@@ -357,24 +359,33 @@ optimize.portfolio <- function(
     if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
     PSOcformals <- list(trace=FALSE, fnscale=1, maxit=1000, maxf=Inf, abstol=-Inf, reltol=0)
     PSOcargs <- names(PSOcformals)
+    
     if( is.list(dotargs) ){
       pm <- pmatch(names(dotargs), PSOcargs, nomatch = 0L)
       names(dotargs[pm > 0L]) <- PSOcargs[pm]
       PSOcformals$maxit <- maxit
-      if(!hasArg(reltol)) PSOcformals$reltol=.000001 # 1/1000 of 1% change in objective is significant
-      if(!hasArg(fnscale)) PSOcformals$fnscale=1
-      if(!hasArg(abstol)) PSOcformals$asbtol=-Inf
-      if(!hasArg(trace)) PSOcformals$trace=FALSE
+      PSOcformals[pm] <- dotargs[pm > 0L]
+      if(!hasArg(reltol)) PSOcformals$reltol <- .000001 # 1/1000 of 1% change in objective is significant
+      if(!hasArg(fnscale)) PSOcformals$fnscale <- 1
+      if(!hasArg(abstol)) PSOcformals$abstol <- -Inf
+      if(!hasArg(trace)) PSOcformals$trace <- FALSE
     }
     
+#     if(isTRUE(trace)) { 
+#       #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
+#       tmptrace=trace 
+#       assign('.objectivestorage', list(), pos='.GlobalEnv')
+#       trace=FALSE
+#     }
+    
     # get upper and lower weights parameters from constraints
-    upper = constraints$max
-    lower = constraints$min
+    upper <- constraints$max
+    lower <- constraints$min
     
     controlPSO <- PSOcformals
     
-    minw = try(psoptim( constrained_objective ,  lower = lower[1:N] , upper = upper[1:N] , 
-                        control = controlPSO, R=R, constraints=constraints, nargs = dotargs , ...=...)) # add ,silent=TRUE here?
+    minw = try(psoptim( par = rep(NA, N), fn = constrained_objective ,  R=R, constraints=constraints,
+                        lower = lower[1:N] , upper = upper[1:N] , control = controlPSO)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
     if(is.null(minw)){
@@ -384,13 +395,13 @@ optimize.portfolio <- function(
     
     if(isTRUE(tmptrace)) trace <- tmptrace
     
-    weights = as.vector( minw$optim$bestmem)
+    weights <- as.vector( minw$par)
     weights <- normalize_weights(weights)
-    names(weights) = colnames(R)
+    names(weights) <- colnames(R)
     
     out = list(weights=weights, 
                objective_measures=constrained_objective(w=weights,R=R,constraints,trace=TRUE)$objective_measures,
-               out=minw$optim$bestval, 
+               out=minw$value, 
                call=call)
     if (isTRUE(trace)){
       out$PSOoutput=minw

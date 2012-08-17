@@ -34,7 +34,7 @@ out <- DEoptim(fn=obj,
 out$optim$bestval
 wts.deoptim <- out$optim$bestmem / sum(out$optim$bestmem)
 
-test <- psoptim(rep(NA,N), obj, lower=0, upper=5, control=list(abstol=1e-8))
+test <- psoptim(rep(NA,N), obj, lower=0, upper=1, control=list(abstol=1e-8, trace=TRUE))
 test$value
 wts.pso <- test$par/sum(test$par)
 

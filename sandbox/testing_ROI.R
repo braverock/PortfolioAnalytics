@@ -20,9 +20,9 @@ mu.port <- mean(colMeans(edhec))
 N <- length(funds)
 
 gen.constr <- constraint(assets = colnames(edhec), min=-Inf, max =Inf, min_sum=1, max_sum=1, risk_aversion=1)
-gen.constr <- add.objective(constraints=no.box.constr, type="return", name="mean", enabled=FALSE, multiplier=0, target=mu.port)
-gen.constr <- add.objective(constraints=no.box.constr, type="risk", name="var", enabled=FALSE, multiplier=0, risk_aversion=10)
-gen.constr <- add.objective(constraints=no.box.constr, type="risk", name="CVaR", enabled=FALSE, multiplier=0)
+gen.constr <- add.objective(constraints=gen.constr, type="return", name="mean", enabled=FALSE, multiplier=0, target=mu.port)
+gen.constr <- add.objective(constraints=gen.constr, type="risk", name="var", enabled=FALSE, multiplier=0, risk_aversion=10)
+gen.constr <- add.objective(constraints=gen.constr, type="risk", name="CVaR", enabled=FALSE, multiplier=0)
 
 
 # =====================
