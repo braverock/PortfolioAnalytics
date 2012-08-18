@@ -67,7 +67,7 @@
 optimize.portfolio <- function(
 		R,
 		constraints,
-		optimize_method=c("DEoptim","random","ROI","ROI_old","pso"), 
+		optimize_method=c("DEoptim","random","ROI","ROI_old","pso","GenSA"), 
 		search_size=20000, 
 		trace=FALSE, ..., 
 		rp=NULL,
@@ -357,32 +357,23 @@ optimize.portfolio <- function(
   if(optimize_method=="pso"){
     stopifnot("package:pso" %in% search()  ||  require("pso",quietly = TRUE) )
     if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
-    PSOcformals <- list(trace=FALSE, fnscale=1, maxit=1000, maxf=Inf, abstol=-Inf, reltol=0)
-    PSOcargs <- names(PSOcformals)
+    controlPSO <- list(trace=FALSE, fnscale=1, maxit=1000, maxf=Inf, abstol=-Inf, reltol=0)
+    PSOcargs <- names(controlPSO)
     
     if( is.list(dotargs) ){
       pm <- pmatch(names(dotargs), PSOcargs, nomatch = 0L)
       names(dotargs[pm > 0L]) <- PSOcargs[pm]
-      PSOcformals$maxit <- maxit
-      PSOcformals[pm] <- dotargs[pm > 0L]
-      if(!hasArg(reltol)) PSOcformals$reltol <- .000001 # 1/1000 of 1% change in objective is significant
-      if(!hasArg(fnscale)) PSOcformals$fnscale <- 1
-      if(!hasArg(abstol)) PSOcformals$abstol <- -Inf
-      if(!hasArg(trace)) PSOcformals$trace <- FALSE
+      controlPSO$maxit <- maxit
+      controlPSO[pm] <- dotargs[pm > 0L]
+      if(!hasArg(reltol)) controlPSO$reltol <- .000001 # 1/1000 of 1% change in objective is significant
+      if(!hasArg(fnscale)) controlPSO$fnscale <- 1
+      if(!hasArg(abstol)) controlPSO$abstol <- -Inf
+      if(hasArg(trace) && try(trace==TRUE,silent=TRUE)) controlPSO$trace <- TRUE
     }
-    
-#     if(isTRUE(trace)) { 
-#       #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
-#       tmptrace=trace 
-#       assign('.objectivestorage', list(), pos='.GlobalEnv')
-#       trace=FALSE
-#     }
     
     # get upper and lower weights parameters from constraints
     upper <- constraints$max
     lower <- constraints$min
-    
-    controlPSO <- PSOcformals
     
     minw = try(psoptim( par = rep(NA, N), fn = constrained_objective ,  R=R, constraints=constraints,
                         lower = lower[1:N] , upper = upper[1:N] , control = controlPSO)) # add ,silent=TRUE here?
@@ -411,6 +402,52 @@ optimize.portfolio <- function(
     
   } ## end case for pso
   
+  
+  ## case if method=GenSA---Generalized Simulated Annealing
+  if(optimize_method=="GenSA"){
+    stopifnot("package:GenSA" %in% search()  ||  require("GenSA",quietly = TRUE) )
+    if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
+    controlGenSA <- list(maxit = 5000, threshold.stop = NULL, temp = 5230, 
+                          visiting.param = 2.62, acceptance.param = -5, max.time = NULL, 
+                          nb.stop.improvement = 1e+06, smooth = TRUE, max.call = 1e+07, 
+                          verbose = FALSE)
+    GenSAcargs <- names(controlGenSA)
+    
+    if( is.list(dotargs) ){
+      pm <- pmatch(names(dotargs), GenSAcargs, nomatch = 0L)
+      names(dotargs[pm > 0L]) <- GenSAcargs[pm]
+      controlGenSA$maxit <- maxit
+      controlGenSA[pm] <- dotargs[pm > 0L]
+      if(hasArg(trace) && try(trace==TRUE,silent=TRUE)) controlGenSA$verbose <- TRUE
+    }
+    
+    upper <- constraints$max
+    lower <- constraints$min
+    
+    minw = try(GenSA( par = rep(1/N, N), lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
+                      fn = constrained_objective ,  R=R, constraints=constraints)) # add ,silent=TRUE here?
+    
+    if(inherits(minw,"try-error")) { minw=NULL }
+    if(is.null(minw)){
+      message(paste("Optimizer was unable to find a solution for target"))
+      return (paste("Optimizer was unable to find a solution for target"))
+    }
+    
+    weights <- as.vector( minw$par)
+    weights <- normalize_weights(weights)
+    names(weights) <- colnames(R)
+    
+    out = list(weights=weights, 
+               objective_measures=constrained_objective(w=weights,R=R,constraints,trace=TRUE)$objective_measures,
+               out=minw$value, 
+               call=call)
+    if (isTRUE(trace)){
+      out$GenSAoutput=minw
+      out$GenSA_objective_results<-try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
+      rm('.objectivestorage',pos='.GlobalEnv')
+    }
+    
+  } ## end case for GenSA
   
   
     end_t<-Sys.time()
