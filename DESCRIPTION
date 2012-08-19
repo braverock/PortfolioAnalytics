@@ -23,7 +23,8 @@ Suggests:
     ROI,
     ROI.plugin.glpk,
     ROI.plugin.quadprog,
-    pso
+    pso,
+    GenSA
 License: GPL
 Copyright: (c) 2004-2012
 Collate:
