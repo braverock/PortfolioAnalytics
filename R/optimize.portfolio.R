@@ -34,6 +34,8 @@
 #' 
 #' itermax, if not passed in dots, defaults to the number of parameters (assets/weights) *50.
 #' 
+#' When using GenSA and want to set \code{verbose=TRUE}, instead use \code{trace}. 
+#' 
 #' The extension to ROI solves a limit type of convex optimization problems:
 #' 1)  Maxmimize portfolio return subject box constraints on weights
 #' 2)  Minimize portfolio variance subject to box constraints (otherwise known as global minimum variance portfolio)
@@ -54,7 +56,7 @@
 #'  
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}, if using closed for solver, need to pass a \code{\link{constraint_ROI}} object.
-#' @param optimize_method one of "DEoptim", "random", "ROI","ROI_old", "pso".  For using \code{ROI_old}, need to use a constraint_ROI object in constraints. For using \code{ROI}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} and \code{Rglpk}.
+#' @param optimize_method one of "DEoptim", "random", "ROI","ROI_old", "pso", "GenSA".  For using \code{ROI_old}, need to use a constraint_ROI object in constraints. For using \code{ROI}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} and \code{Rglpk}.
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
@@ -260,6 +262,7 @@ optimize.portfolio <- function(
 
   } ## end case for random
   
+  
   if(optimize_method == "ROI_old"){
     # This will take a new constraint object that is of the same structure of a 
     # ROI constraint object, but with an additional solver arg.
@@ -366,8 +369,6 @@ optimize.portfolio <- function(
       controlPSO$maxit <- maxit
       controlPSO[pm] <- dotargs[pm > 0L]
       if(!hasArg(reltol)) controlPSO$reltol <- .000001 # 1/1000 of 1% change in objective is significant
-      if(!hasArg(fnscale)) controlPSO$fnscale <- 1
-      if(!hasArg(abstol)) controlPSO$abstol <- -Inf
       if(hasArg(trace) && try(trace==TRUE,silent=TRUE)) controlPSO$trace <- TRUE
     }
     
@@ -384,8 +385,6 @@ optimize.portfolio <- function(
       return (paste("Optimizer was unable to find a solution for target"))
     }
     
-    if(isTRUE(tmptrace)) trace <- tmptrace
-    
     weights <- as.vector( minw$par)
     weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
@@ -396,8 +395,6 @@ optimize.portfolio <- function(
                call=call)
     if (isTRUE(trace)){
       out$PSOoutput=minw
-      out$psoptim_objective_results<-try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
-      rm('.objectivestorage',pos='.GlobalEnv')
     }
     
   } ## end case for pso
@@ -433,7 +430,7 @@ optimize.portfolio <- function(
       return (paste("Optimizer was unable to find a solution for target"))
     }
     
-    weights <- as.vector( minw$par)
+    weights <- as.vector(minw$par)
     weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
     
@@ -443,8 +440,6 @@ optimize.portfolio <- function(
                call=call)
     if (isTRUE(trace)){
       out$GenSAoutput=minw
-      out$GenSA_objective_results<-try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
-      rm('.objectivestorage',pos='.GlobalEnv')
     }
     
   } ## end case for GenSA

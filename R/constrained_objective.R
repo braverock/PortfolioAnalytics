@@ -166,7 +166,6 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
               StdDev = { 
                   fun= match.fun(StdDev)
               },
-              var =,
               mVaR =,
               VaR = {
                   fun= match.fun(VaR) 

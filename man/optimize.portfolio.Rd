@@ -3,7 +3,7 @@
 \title{wrapper for constrained optimization of portfolios}
 \usage{
   optimize.portfolio(R, constraints,
-    optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso"),
+    optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
     momentFUN = "set.portfolio.moments")
 }
@@ -17,11 +17,12 @@
   need to pass a \code{\link{constraint_ROI}} object.}
 
   \item{optimize_method}{one of "DEoptim", "random",
-  "ROI","ROI_old", "pso".  For using \code{ROI_old}, need
-  to use a constraint_ROI object in constraints. For using
-  \code{ROI}, pass standard \code{constratint} object in
-  \code{constraints} argument.  Presently, ROI has plugins
-  for \code{quadprog} and \code{Rglpk}.}
+  "ROI","ROI_old", "pso", "GenSA".  For using
+  \code{ROI_old}, need to use a constraint_ROI object in
+  constraints. For using \code{ROI}, pass standard
+  \code{constratint} object in \code{constraints} argument.
+  Presently, ROI has plugins for \code{quadprog} and
+  \code{Rglpk}.}
 
   \item{search_size}{integer, how many portfolios to test,
   default 20,000}
@@ -72,6 +73,9 @@
 
   itermax, if not passed in dots, defaults to the number of
   parameters (assets/weights) *50.
+
+  When using GenSA and want to set \code{verbose=TRUE},
+  instead use \code{trace}.
 
   The extension to ROI solves a limit type of convex
   optimization problems: 1) Maxmimize portfolio return
