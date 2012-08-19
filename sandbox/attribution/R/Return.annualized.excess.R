@@ -20,7 +20,7 @@
 #' \deqn{er = R_{pa} - R_{ba}}{er = Rpa - Rba}
 #' 
 #' and as a geometric difference in the geometric case:
-#' \deqn{er = (1 + R_{pa}) / (1 + R_{ba}) - 1}{er = (1 + Rpa) / (1 + Rba) - 1}
+#' \deqn{er = \frac{(1 + R_{pa})}{(1 + R_{ba})} - 1}{er = (1 + Rpa) / (1 + Rba) - 1}
 #' 
 #' @param Rp an xts, vector, matrix, data frame, timeSeries or zoo object of
 #' portfolio returns

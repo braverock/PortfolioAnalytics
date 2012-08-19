@@ -1,6 +1,6 @@
 \name{Attribution.geometric}
 \alias{Attribution.geometric}
-\title{performs geometric attribution}
+\title{performs sector-based geometric attribution}
 \usage{
   Attribution.geometric(Rp, wp, Rb, wb, Rpl = NA, Rbl = NA,
     Rbh = NA)
@@ -29,9 +29,9 @@
   multi-period attribution effects
 }
 \description{
-  Performance attribution of geometric excess returns.
-  Calculates total geometric attribution effects over
-  multiple periods. Used internally by the
+  Performs sector-based geometric attribution of excess
+  return. Calculates total geometric attribution effects
+  over multiple periods. Used internally by the
   \code{\link{Attribution}} function. Geometric attribution
   effects in the contrast with arithmetic do naturally link
   over time multiplicatively:

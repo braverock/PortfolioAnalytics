@@ -1,17 +1,17 @@
 #' Modigliani-Modigliani measure
 #' 
-#' The Modigliani-Modigliani measure is the portfolio return 
-#' adjusted upward or downward to match the benchmark's standard 
-#' deviation.  This puts the portfolio return and the benchmark
-#' return on 'equal footing' from a standard deviation perspective.
+#' The Modigliani-Modigliani measure is the portfolio return adjusted upward
+#' or downward to match the benchmark's standard deviation. This puts the 
+#' portfolio return and the benchmark return on 'equal footing' from a standard
+#' deviation perspective.
 #' \deqn{MM_{p}=\frac{E[R_{p} - R_{f}]}{\sigma_{p}}=SR_{p} * \sigma_{b} + 
 #' E[R_{f}]}{MMp = SRp * sigmab + E[Rf]}
-#' where \eqn{SR_{p}}{SRp} - Sharpe ratio, \eqn{sigma_{b}}{sigmab} - benchmark
+#' where \eqn{SR_{p}}{SRp} - Sharpe ratio, \eqn{\sigma_{b}}{sigmab} - benchmark
 #' standard deviation
 #' 
-#' This is also analogous to some approaches to 'risk parity' 
-#' portfolios, which use (presumably costless) leverage
-#' to increase the portfolio standard deviation to some target.
+#' This is also analogous to some approaches to 'risk parity' portfolios, which
+#' use (presumably costless) leverage to increase the portfolio standard 
+#' deviation to some target.
 #' 
 #' @param Ra an xts, vector, matrix, data frame, timeSeries or zoo object of
 #' asset returns

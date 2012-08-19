@@ -1,6 +1,6 @@
 \name{Attribution}
 \alias{Attribution}
-\title{performs arithmetic attribution}
+\title{performs sector-based single-level attribution}
 \usage{
   Attribution(Rp, wp, Rb, wb, wpf = NA, wbf = NA, S = NA,
     F = NA, Rpl = NA, Rbl = NA, Rbh = NA, bf = FALSE,
@@ -84,16 +84,16 @@
   interaction)
 }
 \description{
-  Performance attribution analysis. Portfolio performance
-  measured relative to a benchmark gives an indication of
-  the value-added by the portfolio. Equipped with weights
-  and returns of portfolio segments, we can dissect the
-  value-added into useful components. This function is
-  based on the sector-based approach to the attribution.
-  The workhorse is the Brinson model that explains the
-  arithmetic difference between portfolio and benchmark
-  returns. That is it breaks down the arithmetic excess
-  returns at one level. If returns and weights are
+  Performs sector-based single-level attribution analysis.
+  Portfolio performance measured relative to a benchmark
+  gives an indication of the value-added by the portfolio.
+  Equipped with weights and returns of portfolio segments,
+  we can dissect the value-added into useful components.
+  This function is based on the sector-based approach to
+  the attribution. The workhorse is the Brinson model that
+  explains the arithmetic difference between portfolio and
+  benchmark returns. That is it breaks down the arithmetic
+  excess returns at one level. If returns and weights are
   available at the lowest level (e.g. for individual
   instruments), the aggregation up to the chosen level from
   the hierarchy can be done using
@@ -123,7 +123,7 @@
   \eqn{R_{p}}{Rp} - total portfolio returns,
   \eqn{R_{b}}{Rb} - total benchmark returns,
   \eqn{w_{pi}}{wpi} - weights of the category \eqn{i} in
-  the portfolio, \eqn{w_{bi}}{wbi} - weigths of the
+  the portfolio, \eqn{w_{bi}}{wbi} - weights of the
   category \eqn{i} in the benchmark, \eqn{R_{pi}}{Rpi} -
   returns of the portfolio category \eqn{i},
   \eqn{R_{bi}}{Rbi} - returns of the benchmark category
@@ -176,7 +176,7 @@
   account currency effects:
   \deqn{A_{i}=(w_{pi}-w_{bi})\times (R_{bi} - R_{ci} -
   R_{l})}{Ai = (wpi - wbi) * (Rbi - Rci - Rl)} Benchmark
-  returns adjusted fo the currency: \deqn{R_{l} =
+  returns adjusted to the currency: \deqn{R_{l} =
   \sum^{n}_{i=1}w_{bi}\times(R_{bi}-R_{ci})} The
   contribution from the currency is analogous to asset
   allocation: \deqn{C_{i} = (w_{pi} - w_{bi}) \times
@@ -186,7 +186,12 @@
   asset allocation: \deqn{R_{fi} = (w_{pi} - w_{bi}) \times
   (R_{fpi} - d)}{Rfi = (wpi - wbi) * (Rfpi - d)} where
   \deqn{d = \sum^{n}_{i=1}w_{bi}\times R_{fpi}} and
-  \eqn{R_{fpi}} - forward premium
+  \eqn{R_{fpi}} - forward premium In general if the intent
+  is to estimate statistical parameters, the arithmetic
+  excess return is preferred. However, due to the linking
+  challenges, it may be preferable to use geometric excess
+  return if the intent is to link and annualize excess
+  returns.
 }
 \examples{
 data(attrib)

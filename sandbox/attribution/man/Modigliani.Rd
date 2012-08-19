@@ -17,12 +17,12 @@
 \description{
   The Modigliani-Modigliani measure is the portfolio return
   adjusted upward or downward to match the benchmark's
-  standard deviation.  This puts the portfolio return and
+  standard deviation. This puts the portfolio return and
   the benchmark return on 'equal footing' from a standard
   deviation perspective. \deqn{MM_{p}=\frac{E[R_{p} -
   R_{f}]}{\sigma_{p}}=SR_{p} * \sigma_{b} + E[R_{f}]}{MMp =
   SRp * sigmab + E[Rf]} where \eqn{SR_{p}}{SRp} - Sharpe
-  ratio, \eqn{sigma_{b}}{sigmab} - benchmark standard
+  ratio, \eqn{\sigma_{b}}{sigmab} - benchmark standard
   deviation
 }
 \details{

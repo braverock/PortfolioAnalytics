@@ -1,9 +1,9 @@
-#' performs geometric attribution 
+#' performs sector-based geometric attribution 
 #' 
-#' Performance attribution of geometric excess returns. Calculates total 
-#' geometric attribution effects over multiple periods. Used internally by the
-#' \code{\link{Attribution}} function. Geometric attribution effects in the
-#' contrast with arithmetic do naturally link over time multiplicatively:
+#' Performs sector-based geometric attribution of excess return. Calculates 
+#' total geometric attribution effects over multiple periods. Used internally
+#' by the \code{\link{Attribution}} function. Geometric attribution effects in
+#' the contrast with arithmetic do naturally link over time multiplicatively:
 #' \deqn{\frac{(1+R_{p})}{1+R_{b}}-1=\prod^{n}_{t=1}(1+A_{t}^{G})\times
 #' \prod^{n}_{t=1}(1+S{}_{t}^{G})-1}
 #' Total allocation effect at time \eqn{t}:

@@ -1,6 +1,6 @@
-#' provides multi-level geometric performance attribution
+#' provides multi-level sector-based geometric attribution
 #' 
-#' Provides multi-level geometric performance attribution. The Brinson model
+#' Provides multi-level sector-based geometric attribution. The Brinson model
 #' attributes excess returns at one level. This function works with more 
 #' complex decision processes. For instance, the 3-level decision process 
 #' may have the following levels: type of asset - country - sector. The 

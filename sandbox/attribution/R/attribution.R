@@ -1,21 +1,21 @@
-#' performs arithmetic attribution
+#' performs sector-based single-level attribution
 #' 
-#' Performance attribution analysis. Portfolio performance measured 
-#' relative to a benchmark gives an indication of the value-added by the 
-#' portfolio. Equipped with weights and returns of portfolio segments, we 
-#' can dissect the value-added into useful components. This function is based
-#' on the sector-based approach to the attribution. The workhorse is the
-#' Brinson model that explains the arithmetic difference between portfolio and
-#' benchmark returns. That is it breaks down the arithmetic excess returns at 
-#' one level. If returns and weights are available at the lowest level (e.g. 
-#' for individual instruments), the aggregation up to the chosen level from the
-#' hierarchy can be done using \code{\link{Return.level}} function. The 
-#' attribution effects can be computed for several periods. The multi-period 
-#' summary is obtained using one of linking methods: Carino, Menchero, GRAP, 
-#' Frongello or Davies Laker. It also allows to break down the geometric excess
-#' returns, which link naturally over time. Finally, it annualizes arithmetic 
-#' and geometric excess returns similarly to the portfolio and/or benchmark 
-#' returns annualization. 
+#' Performs sector-based single-level attribution analysis. Portfolio 
+#' performance measured relative to a benchmark gives an indication of the 
+#' value-added by the portfolio. Equipped with weights and returns of portfolio
+#' segments, we can dissect the value-added into useful components. This 
+#' function is based on the sector-based approach to the attribution. The 
+#' workhorse is the Brinson model that explains the arithmetic difference 
+#' between portfolio and benchmark returns. That is it breaks down the 
+#' arithmetic excess returns at one level. If returns and weights are available
+#' at the lowest level (e.g. for individual instruments), the aggregation up to
+#' the chosen level from the hierarchy can be done using 
+#' \code{\link{Return.level}} function. The attribution effects can be computed
+#' for several periods. The multi-period summary is obtained using one of 
+#' linking methods: Carino, Menchero, GRAP, Frongello or Davies Laker. It also
+#' allows to break down the geometric excess returns, which link naturally over
+#' time. Finally, it annualizes arithmetic and geometric excess returns 
+#' similarly to the portfolio and/or benchmark returns annualization. 
 #' 
 #' The arithmetic excess returns are decomposed into the sum of allocation, 
 #' selection and interaction effects across \eqn{n} sectors:
@@ -32,7 +32,7 @@
 #' \eqn{R_{p}}{Rp} - total portfolio returns,
 #' \eqn{R_{b}}{Rb} - total benchmark returns, 
 #' \eqn{w_{pi}}{wpi} - weights of the category \eqn{i} in the portfolio, 
-#' \eqn{w_{bi}}{wbi} - weigths of the category \eqn{i} in the benchmark, 
+#' \eqn{w_{bi}}{wbi} - weights of the category \eqn{i} in the benchmark, 
 #' \eqn{R_{pi}}{Rpi} - returns of the portfolio category \eqn{i}, 
 #' \eqn{R_{bi}}{Rbi} - returns of the  benchmark category \eqn{i}.
 #' If Brinson and Fachler (1985) is selected the allocation effect differs:
@@ -77,7 +77,7 @@
 #' effects:
 #' \deqn{A_{i}=(w_{pi}-w_{bi})\times (R_{bi} - R_{ci} - R_{l})}{Ai = 
 #' (wpi - wbi) * (Rbi - Rci - Rl)}
-#' Benchmark returns adjusted fo the currency:
+#' Benchmark returns adjusted to the currency:
 #' \deqn{R_{l} = \sum^{n}_{i=1}w_{bi}\times(R_{bi}-R_{ci})}
 #' The contribution from the currency is analogous to asset allocation:
 #' \deqn{C_{i} = (w_{pi} - w_{bi}) \times (R_{cei} - e) + (w_{pfi} - w_{bfi}) 
@@ -88,6 +88,10 @@
 #' (Rfpi - d)}
 #' where \deqn{d = \sum^{n}_{i=1}w_{bi}\times R_{fpi}}
 #' and \eqn{R_{fpi}} - forward premium
+#' In general if the intent is to estimate statistical parameters, the 
+#' arithmetic excess return is preferred. However, due to the linking 
+#' challenges, it may be preferable to use geometric excess return if the 
+#' intent is to link and annualize excess returns.
 #' 
 #' @aliases Attribution
 #' @param Rp T x n xts, data frame or matrix of portfolio returns

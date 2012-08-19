@@ -1,6 +1,6 @@
 \name{Attribution.levels}
 \alias{Attribution.levels}
-\title{provides multi-level geometric performance attribution}
+\title{provides multi-level sector-based geometric attribution}
 \usage{
   Attribution.levels(Rp, wp, Rb, wb, h, ...)
 }
@@ -29,7 +29,7 @@
   each level and security selection
 }
 \description{
-  Provides multi-level geometric performance attribution.
+  Provides multi-level sector-based geometric attribution.
   The Brinson model attributes excess returns at one level.
   This function works with more complex decision processes.
   For instance, the 3-level decision process may have the
