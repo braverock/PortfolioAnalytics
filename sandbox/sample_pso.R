@@ -18,7 +18,7 @@ obj <- function(w){
   if (sum(w)==0) {w <- w + 1e-2}
   w <- w/sum(w)
   CVaR <- ES(weights= w, 
-             method="gaussian", max.
+             method="gaussian",
              portfolio_method="component",
              mu=mu,
              sigma=sigma)

@@ -351,7 +351,7 @@ optimize.portfolio <- function(
     weights <- roi.result$solution[1:N]
     names(weights) <- colnames(R)
     out$weights <- weights
-    out$objective_measures <- roi.result$objval
+    out$out <- roi.result$objval
     out$call <- call
   } ## end case for ROI
 
