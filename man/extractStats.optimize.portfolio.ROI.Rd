@@ -1,6 +1,6 @@
 \name{extractStats.optimize.portfolio.ROI}
 \alias{extractStats.optimize.portfolio.ROI}
-\title{extract some stats from a portfolio list run with DEoptim via
+\title{extract some stats from a portfolio list run with ROI via
 \code{\link{optimize.portfolio}}}
 \usage{
   extractStats.optimize.portfolio.ROI(object,

@@ -180,7 +180,7 @@ extractWeights.rebal <- function(RebalResults, ...){
 }
 
 
-#' extract some stats from a portfolio list run with DEoptim via
+#' extract some stats from a portfolio list run with ROI via
 #' \code{\link{optimize.portfolio}}
 #' 
 #' This function will take everything in the objective_measures slot and \code{unlist} it.  
