@@ -2,6 +2,7 @@
 \usepackage[round]{natbib}
 \usepackage{bm}
 \usepackage{verbatim}
+\usepackage[latin1]{inputenc}
 % \VignetteIndexEntry{Portfolio Optimization with CVaR budgets in PortfolioAnalytics}
 \bibliographystyle{abbrvnat}
 
@@ -351,7 +352,7 @@ $last
 2009-12-31  -0.0175      0.0189         0.0143      0.0086
 \end{verbatim}
 
-Of course, DE is a stochastic optimizaer and typically will only find a near-optimal solution that depends on the seed. The function \verb"optimize.portfolio.parallel" in \verb"PortfolioAnalytics" allows to run an arbitrary number of portfolio sets in parallel in order to develop "confidence bands" around your solution. It is based on Revolution’s    \verb"foreach" package \citep{foreach}.  
+Of course, DE is a stochastic optimizaer and typically will only find a near-optimal solution that depends on the seed. The function \verb"optimize.portfolio.parallel" in \verb"PortfolioAnalytics" allows to run an arbitrary number of portfolio sets in parallel in order to develop "confidence bands" around your solution. It is based on Revolution's    \verb"foreach" package \citep{foreach}.  
 
 \bibliography{PA}
 
