@@ -148,6 +148,10 @@ optimize.portfolio <- function(
     NP = round(search_size/itermax)
     if(NP<(N*10)) NP <- N*10
     if(NP>2000) NP=2000
+    if(!hasArg(itermax)) {
+        itermax<-round(search_size/NP)
+        if(itermax<50) itermax=50 #set minimum number of generations
+    }
     
     #check to see whether we need to disable foreach for parallel optimization, esp if called from inside foreach
     if(hasArg(parallel)) parallel=match.call(expand.dots=TRUE)$parallel else parallel=TRUE
@@ -371,7 +375,11 @@ optimize.portfolio <- function(
       controlPSO[pm] <- dotargs[pm > 0L]
       if(!hasArg(reltol)) controlPSO$reltol <- .000001 # 1/1000 of 1% change in objective is significant
       if(hasArg(trace) && try(trace==TRUE,silent=TRUE)) controlPSO$trace <- TRUE
-    }
+      if(hasArg(trace) && isTRUE(trace)) {
+          controlPSO$trace <- TRUE
+          controlPSO$trace.stats=TRUE
+      }
+  }
     
     # get upper and lower weights parameters from constraints
     upper <- constraints$max
