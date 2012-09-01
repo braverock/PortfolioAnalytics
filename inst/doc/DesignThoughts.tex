@@ -58,8 +58,6 @@
 \def \unvec{{\mbox{unvec}}}
 \def \diag{{\mbox{diag }}}
 
-\urldef\web\url{www.econ.kuleuven.be/kris.boudt/public/riskbudgets.htm}
-\newtheorem{Def}{Definition}
 
 \synctex=1
 
@@ -71,7 +69,7 @@
 \vspace{-2cm}
 %\baselineskip=20pt
 \renewcommand{\baselinestretch}{1}
-\title{Discussion of Upcoming and Desired \\ Design and Coding Decisions in PortfolioAnalytics\citet{PortfolioAnalytics}}
+\title{Discussion of Upcoming and Desired \\ Design and Coding Decisions \\ in PortfolioAnalytics\citet{PortfolioAnalytics}}
 
 
 
@@ -152,7 +150,9 @@ The normalization method simply scales the supplied parameters to either the min
 	\item full investment or leverage constratint
 	\end{enumerate}
 
-\item[Creating a mapping function] \code{DEoptim} contains the ability to use a \quote{mapping function} to manage constraints, but there are no generalized mapping functions available.  For Portfolioanalytics, I think that we can write a constraint mapping function that could do the trick, even with general optimization solvers that use only box constraints.
+\item[Creating a mapping function] 
+
+\code{DEoptim} contains the ability to use a mapping function to manage constraints, but there are no generalized mapping functions available.  For PortfolioAnalytics, I think that we can write a constraint mapping function that could do the trick, even with general optimization solvers that use only box constraints.
 The mapping function should have the following features:
 	\begin{itemize}
 		\item[methods:] the methods should be able to be turned on and off, and applied in different orders.  For some constraint mapping, it will be important to do things in a particular order.  Also, for solvers that support certain types of constraints directly, it will be important to use the solver's features, and not use the corresponding mapping functionality.
@@ -161,6 +161,7 @@ The mapping function should have the following features:
 		\item[relax constraints:]we need the ability to relax infeasible constraints, either via the penalty method (just find the closest) or when transforming the weights vector to a feasible set.
 	\end{itemize}
 	
+The mapping function could easily be incorporated directly into random portfolios, and some vcode might even move from random portfolios into the mapping function.  DEoptim can call the mapping function directly when generating a population.  For outher solvers, we'll need to read the specification, determine what types of constraints need to be applied, and utilize any solver-specific functionality to support as many of them as possible.  For any remaining constraints that the solever cannot apply directly, we can call the mapping function to either penalize or transfrom the weights on the remaining methods inside \code{constrained\_objective}.
 
 \end{description}
 
