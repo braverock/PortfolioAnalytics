@@ -146,6 +146,7 @@ optimize.portfolio <- function(
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
     if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=N*50
     NP = round(search_size/itermax)
+    if(NP<(N*10)) NP <- N*10
     if(NP>2000) NP=2000
     
     #check to see whether we need to disable foreach for parallel optimization, esp if called from inside foreach
