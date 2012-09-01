@@ -2,7 +2,7 @@ Package: PortfolioAnalytics
 Type: Package
 Title: Portfolio Analysis, including Numeric Methods for Optimization
     of Portfolios
-Version: 0.8.1
+Version: 0.8.2
 Date: $Date$
 Author: Kris Boudt, Peter Carl, Brian G. Peterson
 Contributors: Hezky Varon, Guy Yollin
