@@ -115,9 +115,11 @@ Relaxing constraints  penalized versus direct
 
 
 
-\section{Generalizing Constraints \label{sec:constraints}}
-Our overall goal with Portfolioanalytics is to allow the use of many different portfolio solvers to solve the same portfolio problem specification.  On the constraints front, this includes support for box constraints, inequality constraints, turnover, and full investment.
-\subsection{Current State \label{ss:currentstate}}
+\section{Current State \label{sec:currentstate}}
+Our overall goal with Portfolioanalytics is to allow the use of many different portfolio solvers to solve the same portfolio problem specification.  
+
+\subsection{Constraints Current State\label{sec:constraints}}
+On the constraints front, this includes support for box constraints, inequality constraints, turnover, and full investment.
 
 \begin{description}
 
@@ -138,10 +140,11 @@ The normalization method simply scales the supplied parameters to either the min
 
 \end{description}
 
-\subsection{Improving the Current State of Constraints}
+\section{Improving the Current State}
 
-\begin{description}
-\item[Modularize Constraints] today, the cox constraints are included in the \code{constraints} constructor.  It would be better to have a portfolio specification object that included multiple sections: constraints, objectives, assets. (this is how the object is organized, but that's not obvious to the user).  I think that we should have an \code{add.constraint} function like \code{add.objective} that would add specific types of constraints:
+
+\subsection{Modularize Constraints}  
+Today, the box constraints are included in the \code{constraints} constructor.  It would be better to have a portfolio specification object that included multiple sections: constraints, objectives, assets. (this is how the object is organized, but that's not obvious to the user).  I think that we should have an \code{add.constraint} function like \code{add.objective} that would add specific types of constraints:
 	\begin{enumerate}
 	\item box constraints
 	\item asset inequality constraints
@@ -150,9 +153,9 @@ The normalization method simply scales the supplied parameters to either the min
 	\item full investment or leverage constratint
 	\end{enumerate}
 
-\item[Creating a mapping function] 
+\subsection{Creating a mapping function}
 
-\code{DEoptim} contains the ability to use a mapping function to manage constraints, but there are no generalized mapping functions available.  For PortfolioAnalytics, I think that we can write a constraint mapping function that could do the trick, even with general optimization solvers that use only box constraints.
+\code{DEoptim} contains the ability to use a \emph{mapping function} to manage constraints, but there are no generalized mapping functions available. The mapping function takes in a vector of optimization parameters(weights), tests it for feasibility, and either transforms the vector to a vector of feasible weights or provides a penalty term to add to the objective value. For PortfolioAnalytics, I think that we can write a constraint mapping function that could do the trick, even with general optimization solvers that use only box constraints.
 The mapping function should have the following features:
 	\begin{itemize}
 		\item[methods:] the methods should be able to be turned on and off, and applied in different orders.  For some constraint mapping, it will be important to do things in a particular order.  Also, for solvers that support certain types of constraints directly, it will be important to use the solver's features, and not use the corresponding mapping functionality.
@@ -162,16 +165,16 @@ The mapping function should have the following features:
 		
 	\end{itemize}
 	
-The mapping function could easily be incorporated directly into random portfolios, and some vcode might even move from random portfolios into the mapping function.  DEoptim can call the mapping function directly when generating a population.  For outher solvers, we'll need to read the specification, determine what types of constraints need to be applied, and utilize any solver-specific functionality to support as many of them as possible.  For any remaining constraints that the solver cannot apply directly, we can call the mapping function to either penalize or transfrom the weights on the remaining methods inside \code{constrained\_objective}.
+The mapping function could easily be incorporated directly into random portfolios, and some code might even move from random portfolios into the mapping function.  DEoptim can call the mapping function directly when generating a population.  For other solvers, we'll need to read the constraint specification, determine what types of constraints need to be applied, and utilize any solver-specific functionality to support as many of them as possible.  For any remaining constraints that the solver cannot apply directly, we can call the mapping function to either penalize or transfrom the weights on the remaining methods inside \code{constrained\_objective}.
 
-\end{description}
 
-\section{Penalty Functions \label{sec:penalty}}
+\subsection{Penalty Functions \label{sec:penalty}}
 The current state uses a user-defined fixed penalty function for each objective, multiplying the exceedence or difference of the objective from a target against a fixed penalty.  This requires the user to understand how penalty terms influence optimization, and to modify their terms as required.
 
 The multiple papers since 2003 or so suggest that an adaptive penalty that changes with the number of iterations and the variability of the answers for the objective can significantly improve convergence. [add references].  As we re-do the constraints, we should consider applying the penalty there for small feasible constraint areas (e.g. after trying several hundred times to get a random draw that fits, use adaptively penalized contraints to get as close as possible), but even more importantly perhaps we should support an adaptive constraint in the objectives.
 
-Several different methods have been proposed.  In the case of constraints, penalties should probably be relaxed as more infeasible solutions are found, as the feasible space is likely to be small.  In the sase of objectives, arguably the opposte is true, where penalties should increase as the number of iterations increases, to speed convergence to a sinlge solution, hopefully at or near the global minima.
+Several different methods have been proposed.  In the case of constraints,
+penalties should probably be relaxed as more infeasible solutions are found, as the feasible space is likely to be small.  In the sase of objectives, arguably the opposte is true, where penalties should increase as the number of iterations increases, to speed convergence to a single solution, hopefully at or near the global minima.
 
 \bibliographystyle{chicago}
 \bibliography{PA.bib}
