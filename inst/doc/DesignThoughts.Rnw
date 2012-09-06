@@ -12,6 +12,8 @@
 \usepackage[bottom]{footmisc}% places footnotes at page bottom
 \usepackage{ctable}
 \usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{verbatim}
 \usepackage{hyperref}
 % see the list of further useful packages
@@ -69,7 +71,7 @@
 \vspace{-2cm}
 %\baselineskip=20pt
 \renewcommand{\baselinestretch}{1}
-\title{Discussion of Upcoming and Desired \\ Design and Coding Decisions \\ in PortfolioAnalytics\citet{PortfolioAnalytics}}
+\title{Discussion of Upcoming and Desired \\ Design and Coding Decisions \\ in PortfolioAnalytics (\citeyear{PortfolioAnalytics})}
 
 
 
@@ -159,8 +161,8 @@ Today, the box constraints are included in the \code{constraints} constructor.  
 The mapping function should have the following features:
 	\begin{itemize}
 		\item[methods:] the methods should be able to be turned on and off, and applied in different orders.  For some constraint mapping, it will be important to do things in a particular order.  Also, for solvers that support certain types of constraints directly, it will be important to use the solver's features, and not use the corresponding mapping functionality.
-		\item[layering:] \code{ROI} constains function \code{rbind.L\_constraint}, which combines the various linear inwequality constraints into a single model.  We should examine this and see if we can make use of it, or something like it, to create a consolidated inequality constraint mapping capability
-		\item[relocatable:] for some solvers such as \code{DEoptim}, the solver can use the mapping function to only evaluate the objective for portfolios that meet the constraints.  For other solvers, where only box constraints are supported, we will need to either penalize or transform (see discussussion above in \ref{ss:currentstate}) weights vector later in the process, inside the \code{constrained\_objective} function.
+		\item[layering:] \code{ROI} constains function \code{rbind.L\_constraint}, which combines the various linear inequality constraints into a single model.  We should examine this and see if we can make use of it, or something like it, to create a consolidated inequality constraint mapping capability
+		\item[relocatable:] for some solvers such as \code{DEoptim}, the solver can use the mapping function to only evaluate the objective for portfolios that meet the constraints.  For other solvers, where only box constraints are supported, we will need to either penalize or transform (see discussion above in \ref{sec:currentstate}) weights vector later in the process, inside the \code{constrained\_objective} function.
 		\item[relax constraints:]we need the ability to relax infeasible constraints, either via the penalty method (just find the closest) or when transforming the weights vector to a feasible set. see also \ref{sec:penalty} for a discussion of adaptive penalties.
 		
 	\end{itemize}
@@ -176,7 +178,9 @@ The multiple papers since 2003 or so suggest that an adaptive penalty that chang
 Several different methods have been proposed.  In the case of constraints,
 penalties should probably be relaxed as more infeasible solutions are found, as the feasible space is likely to be small.  In the sase of objectives, arguably the opposte is true, where penalties should increase as the number of iterations increases, to speed convergence to a single solution, hopefully at or near the global minima.
 
+
+\section{Bibliography}
 \bibliographystyle{chicago}
-\bibliography{PA.bib}
+\bibliography{PA}
 
 \end{document}
