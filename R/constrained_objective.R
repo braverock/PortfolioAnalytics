@@ -227,21 +227,21 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
           # now set the new value of the objective output
           if(inherits(objective,"return_objective")){ 
               if (!is.null(objective$target) & is.numeric(objective$target)){ # we have a target
-                  out = out + penalty*objective$multiplier*abs(tmp_measure-objective$target)
+                  out = out + penalty*abs(objective$multiplier)*abs(tmp_measure-objective$target)
               }  
               # target is null or doesn't exist, just maximize, or minimize violation of constraint
-              out = out + objective$multiplier*tmp_measure
+              out = out + abs(objective$multiplier)*tmp_measure
           } # end handling for return objectives
 
           if(inherits(objective,"portfolio_risk_objective")){
             if (!is.null(objective$target) & is.numeric(objective$target)){ # we have a target
-                out = out + penalty*objective$multiplier*abs(tmp_measure-objective$target)
+                out = out + penalty*abs(objective$multiplier)*abs(tmp_measure-objective$target)
                 #should we also penalize risk too low for risk targets? or is a range another objective?
                 #    # half penalty for risk lower than target
                 #    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
             }  
             # target is null or doesn't exist, just maximize, or minimize violation of constraint
-            out = out + objective$multiplier*tmp_measure
+            out = out + abs(objective$multiplier)*tmp_measure
           } #  univariate risk objectives
           
           if(inherits(objective,"risk_budget_objective")){
@@ -253,7 +253,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
               #in addition to a risk budget constraint, we have a univariate target
               # the first element of the returned list is the univariate measure
               # we'll use the  univariate measure exactly like we would as a separate objective
-                out = out + penalty*objective$multiplier*abs(tmp_measure[[1]]-objective$target)
+                out = out + penalty*abs(objective$multiplier)*abs(tmp_measure[[1]]-objective$target)
               #should we also penalize risk too low for risk targets? or is a range another objective?
               #    # half penalty for risk lower than target
               #    if(  prw < (.9*Riskupper) ){ out = out + .5*(penalty*( prw - Riskupper)) }
