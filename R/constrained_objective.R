@@ -264,18 +264,21 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
             if(!is.null(RBupper) | !is.null(RBlower)){
                 out = out + penalty * objective$multiplier * sum( (percrisk-RBupper)*( percrisk > RBupper ),na.rm=TRUE ) + penalty*sum( (RBlower-percrisk)*( percrisk < RBlower  ),na.rm=TRUE  )
             }
-            if(!is.null(objective$min_concentration)){
-                if(isTRUE(objective$min_concentration)){
-                    max_conc<-max(tmp_measure[[2]]) #second element is the contribution in absolute terms
-                    # out=out + penalty * objective$multiplier * max_conc
-                    out = out + objective$multiplier * max_conc
-                }
-            }
-            if(!is.null(objective$min_difference)){
+#             if(!is.null(objective$min_concentration)){
+#                 if(isTRUE(objective$min_concentration)){
+#                     max_conc<-max(tmp_measure[[2]]) #second element is the contribution in absolute terms
+#                     # out=out + penalty * objective$multiplier * max_conc
+#                     out = out + objective$multiplier * max_conc
+#                 }
+#             }
+            # Combined min_con and min_dif to take advantage of a better concentration obj measure
+            if(!is.null(objective$min_difference) || !is.null(objective$min_concentration)){
                 if(isTRUE(objective$min_difference)){
-                    max_diff<-max(tmp_measure[[2]]-(sum(tmp_measure[[2]])/length(tmp_measure[[2]]))) #second element is the contribution in absolute terms
+#                     max_diff<-max(tmp_measure[[2]]-(sum(tmp_measure[[2]])/length(tmp_measure[[2]]))) #second element is the contribution in absolute terms
+                  # Uses Herfindahl index to calculate concentration; added scaling perc diffs back to univariate numbers
+                    max_diff <- sqrt(sum(tmp_measure[[3]]^2))/100  #third element is the contribution in percentage terms
                     # out = out + penalty * objective$multiplier * max_diff
-                    out = out + objective$multiplier * max_diff
+                    out = out + penalty*objective$multiplier * max_diff
                 }
             }
           } # end handling of risk_budget objective
