@@ -221,7 +221,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
 #' @param constrclass character to name the constraint class
 #' @author Ross Bennett
 #' @export
-constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="constraint"){
+constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="v2_constraint"){
   if(!hasArg(type)) stop("you must specify a constraint type")
   if (hasArg(type)) if(is.null(type)) stop("you must specify a constraint type")
   
@@ -234,50 +234,55 @@ constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="constraint"){
   )
 }
 
-#' General interface for adding and/or updating optimization constraints, currently supports box and group constraints.
+#' General interface for adding and/or updating optimization constraints, currently supports weight, box and group constraints.
 #' 
-#' This is the main function for adding and/or updating constraints in an object of type \code{\link{constraint}}.
+#' This is the main function for adding and/or updating constraints in an object of type \code{\link{portfolio}}.
 #' 
-#' In general, you will define your constraints as one of two types: 'box' or 'group'.  
+#' In general, you will define your constraints as one of three types: 'weight_sum', 'box', or 'group'.  
 #' 
-#' @param constraints an object of type "constraint" to add the constraint to, specifying the constraints for the optimization, see \code{\link{constraint_v2}}
-#' @param type character type of the constraint to add or update, currently 'box' or 'group'
+#' @param portfolio an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
+#' @param type character type of the constraint to add or update, currently 'weight_sum', 'box', or 'group'
+#' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
 #' @author Ross Bennett
-#' 
 #' @seealso \code{\link{constraint}}
-#' 
-#' @examples 
-#' exconstr <- constraint_v2(assets=10, min_sum=1, max_sum=1)
-#' # Add box constraints with a minimum weight of 0.1 and maximum weight of 0.4
-#' exconstr <- add.constraint(exconstr, type="box", min=0.1, max=0.4)
 #' @export
-add.constraint <- function(constraints, type, ...){
-  # Check to make sure that the constraints passed in is a constraints object
-  if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
+add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
+  # Check to make sure that the portfolio passed in is a portfolio object
+  if (!is.portfolio(portfolio)) {stop("portfolio passed in is not of class portfolio")}
   
   # Check to make sure a type is passed in as an argument
   if (!hasArg(type)) stop("you must supply a type of constraints to create")
   
-  assets <- constraints$assets
+  assets <- portfolio$assets
   tmp_constraint = NULL
   
   # Currently supports box and group constraints. Will add more later.
   switch(type,
          # Box constraints
-         box = {tmp_constraint <- box_constraint(assets, ...=...)
-                constraints$min <- tmp_constraint$min
-                constraints$max <- tmp_constraint$max
+         box = {tmp_constraint <- box_constraint(assets=assets,
+                                                 type=type,
+                                                 ...=...)
          },
          # Group constraints
-         group = {tmp_constraint <- group_constraint(assets, ...=...)
-                  constraints$groups <- tmp_constraint$groups
-                  constraints$cLO <- tmp_constraint$cLO
-                  constraints$cUP <- tmp_constraint$cUP
+         group = {tmp_constraint <- group_constraint(assets=assets, 
+                                                     type=type,
+                                                     ...=...)
          },
-         null = {return(constraints)}
+         # Sum of weights constraints
+         weight=, weight_sum = {tmp_constraint <- weight_sum_constraint(type=type,
+                                                                        ...=...)
+         },
+         # Do nothing and return the portfolio object if type is NULL
+         null = {return(portfolio)}
   )
-  return(constraints)
+  if(is.constraint(tmp_constraint)) {
+    if(!hasArg(indexnum) | (hasArg(indexnum) & is.null(indexnum))) indexnum <- length(portfolio$constraints)+1
+    tmp_constraint$call <- match.call()
+    portfolio$constraints[[indexnum]] <- tmp_constraint
+  }
+  return(portfolio)
 }
 
 #' constructor for box_constraint.
