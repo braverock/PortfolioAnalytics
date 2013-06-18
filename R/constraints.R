@@ -354,6 +354,43 @@ box_constraint <- function(assets, min, max, min_mult, max_mult){
   return(list(min=min, max=max))
 }
 
+#' constructor for group_constraint
+#' 
+#' This function is called by add.constraint when type="group" is specified. see \code{\link{add.constraint}}
+#'  
+#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
+#' @param groups vector specifying the groups of the assets
+#' @param group_min numeric or vector specifying minimum weight group constraints
+#' @param group_max numeric or vector specifying minimum weight group constraints
+#' @author Ross Bennett
+#' @seealso \code{\link{add.constraint}}
+#' @export
+group_constraint <- function(assets, groups, group_min, group_max) {
+  nassets <- length(assets)
+  ngroups <- length(groups)
+  
+  if(sum(groups) != nassets) {
+    stop("sum of groups must be equal to the number of assets")
+  }
+  
+  # Checks for group_min
+  if (length(group_min) == 1) {
+    message("group_min not passed in as vector, replicating group_min to length of groups")
+    group_min <- rep(group_min, ngroups)
+  }
+  if (length(group_min) != ngroups) stop(paste("length of group_min must be equal to 1 or the length of groups:", ngroups))
+  
+  # Checks for group_max
+  if (length(group_max) == 1) {
+    message("group_max not passed in as vector, replicating group_max to length of groups")
+    group_max <- rep(group_max, ngroups)
+  }
+  if (length(group_max) != ngroups) stop(paste("length of group_max must be equal to 1 or the length of groups:", ngroups))
+  
+  return(list(groups=groups, cLO=group_min, cUP=group_max))
+}
+
+
 #' check function for constraints
 #' 
 #' @param x object to test for type \code{constraint}
