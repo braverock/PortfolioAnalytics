@@ -288,16 +288,19 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
 #' constructor for box_constraint.
 #' 
 #' This function is called by add.constraint when type="box" is specified. see \code{\link{add.constraint}}
-#'  
+#'
+#' @param type character type of the constraint
 #' @param assets number of assets, or optionally a named vector of assets specifying seed weights
 #' @param min numeric or named vector specifying minimum weight box constraints
 #' @param max numeric or named vector specifying minimum weight box constraints
 #' @param min_mult numeric or named vector specifying minimum multiplier box constraint from seed weight in \code{assets}
 #' @param max_mult numeric or named vector specifying maximum multiplier box constraint from seed weight in \code{assets}
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @export
-box_constraint <- function(assets, min, max, min_mult, max_mult){
+box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=FALSE, ...){
   # Based on the constraint function for object of class constraint_v1 that
   # included specifying box constraints.
   
@@ -376,7 +379,10 @@ box_constraint <- function(assets, min, max, min_mult, max_mult){
     max[which(tmp_max < max)] <- tmp_max[which(tmp_max < max)]
   }
   
-  return(list(min=min, max=max))
+  Constraint <- constraint_v2(type=type, ...)
+  Constraint$min <- min
+  Constraint$max <- max
+  return(Constraint)
 }
 
 #' constructor for group_constraint
