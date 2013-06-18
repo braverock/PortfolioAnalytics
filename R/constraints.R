@@ -388,15 +388,18 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=F
 #' constructor for group_constraint
 #' 
 #' This function is called by add.constraint when type="group" is specified. see \code{\link{add.constraint}}
-#'  
+#'
+#' @param type character type of the constraint
 #' @param assets number of assets, or optionally a named vector of assets specifying seed weights
 #' @param groups vector specifying the groups of the assets
 #' @param group_min numeric or vector specifying minimum weight group constraints
 #' @param group_max numeric or vector specifying minimum weight group constraints
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @export
-group_constraint <- function(assets, groups, group_min, group_max) {
+group_constraint <- function(type, assets, groups, group_min, group_max, enabled=FALSE, ...) {
   nassets <- length(assets)
   ngroups <- length(groups)
   
@@ -418,7 +421,11 @@ group_constraint <- function(assets, groups, group_min, group_max) {
   }
   if (length(group_max) != ngroups) stop(paste("length of group_max must be equal to 1 or the length of groups:", ngroups))
   
-  return(list(groups=groups, cLO=group_min, cUP=group_max))
+  Constraint <- constraint_v2(type, ...)
+  Constraint$groups <- groups
+  Constraint$cLO <- group_min
+  Constraint$cUP <- group_max
+  return(Constraint)
 }
 
 
