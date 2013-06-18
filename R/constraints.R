@@ -428,6 +428,24 @@ group_constraint <- function(type, assets, groups, group_min, group_max, enabled
   return(Constraint)
 }
 
+#' constructor for weight_sum_constraint
+#' 
+#' This function is called by add.constraint when type="weight_sum" is specified. see \code{\link{add.constraint}}
+#' This function allows the user to specify the minimum and maximum that the weights sum to
+#' 
+#' @param type character type of the constraint
+#' @param min_sum minimum sum of all asset weights, default 0.99
+#' @param max_sum maximum sum of all asset weights, default 1.01
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @author Ross Bennett
+#' @export
+weight_sum_constraint <- function(type, min_sum=0.99, max_sum=1.01, enabled=FALSE, ...){
+  Constraint <- constraint_v2(type, ...)
+  Constraint$min_sum <- min_sum
+  Constraint$max_sum <- max_sum
+  return(Constraint)
+}
 
 #' check function for constraints
 #' 
