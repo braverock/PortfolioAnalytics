@@ -260,6 +260,100 @@ add.constraint <- function(constraints, type, ...){
   return(constraints)
 }
 
+#' constructor for box_constraint.
+#' 
+#' This function is called by add.constraint when type="box" is specified. see \code{\link{add.constraint}}
+#'  
+#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
+#' @param min numeric or named vector specifying minimum weight box constraints
+#' @param max numeric or named vector specifying minimum weight box constraints
+#' @param min_mult numeric or named vector specifying minimum multiplier box constraint from seed weight in \code{assets}
+#' @param max_mult numeric or named vector specifying maximum multiplier box constraint from seed weight in \code{assets}
+#' @author Ross Bennett
+#' @seealso \code{\link{add.constraint}}
+#' @export
+box_constraint <- function(assets, min, max, min_mult, max_mult){
+  # Based on the constraint function for object of class constraint_v1 that
+  # included specifying box constraints.
+  
+  # Get the length of the assets vector
+  nassets <- length(assets)
+  
+  # Check that the length of min and max are the same
+  if(hasArg(min) | hasArg(max)) {
+    if (length(min) > 1 & length(max) > 1){
+      if (length(min) != length(max)) { stop("length of min and max must be the same") }
+    } 
+    
+    # If the user passes in a scalar for min, then create a min vector 
+    if (length(min) == 1) {
+      message("min not passed in as vector, replicating min to length of length(assets)")
+      min <- rep(min, nassets)
+    }
+    if (length(min) != nassets) stop(paste("length of min must be equal to 1 or the number of assets:", nassets))
+    
+    # If the user passes in a scalar for max, then create a max vector
+    if (length(max) == 1) {
+      message("max not passed in as vector, replicating max to length of length(assets)")
+      max <- rep(max, nassets)
+    }
+    if (length(max) != nassets) stop(paste("length of max must be equal to 1 or the number of assets:", nassets))
+    
+  } else {
+    # Default to min=0 and max=1 if min or max are not passed in
+    message("no min or max passed in, assuming 0 and 1")
+    min <- rep(0, nassets)
+    max <- rep(1, nassets)
+  }
+  
+  # Set the names of the min and max vector to the names of the assets vector
+  names(min) <- names(assets)
+  names(max) <- names(assets)
+  
+  # Checks for min_mult and max_mult
+  if(hasArg(min_mult) | hasArg(max_mult)) {
+    if (length(min_mult) > 1 & length(max_mult) > 1){
+      if (length(min_mult) != length(max_mult) ) { stop("length of min_mult and max_mult must be the same") }
+    } else {
+      message("min_mult and max_mult not passed in as vectors, replicating min_mult and max_mult to length of assets vector")
+      min_mult = rep(min_mult, nassets)
+      max_mult = rep(max_mult, nassets)
+    }
+  }
+  
+  if (!is.null(names(assets))) {
+    assetnames <- names(assets)
+    if(hasArg(min)){
+      names(min) <- assetnames
+      names(max) <- assetnames
+    } else {
+      min = NULL
+      max = NULL
+    }
+    if(hasArg(min_mult)){
+      names(min_mult) <- assetnames
+      names(max_mult) <- assetnames
+    } else {
+      min_mult = NULL
+      max_mult = NULL
+    }
+  }
+  
+  # now adjust min and max to account for min_mult and max_mult from seed
+  if(!is.null(min_mult) & !is.null(min)) {
+    tmp_min <- assets * min_mult
+    #TODO FIXME this creates a list, and it should create a named vector or matrix
+    min[which(tmp_min > min)] <- tmp_min[which(tmp_min > min)]
+  }
+  if(!is.null(max_mult) & !is.null(max)) {
+    tmp_max <- assets * max_mult
+    #TODO FIXME this creates a list, and it should create a named vector or matrix
+    max[which(tmp_max < max)] <- tmp_max[which(tmp_max < max)]
+  }
+  
+  return(list(min=min, max=max))
+}
+
 #' check function for constraints
 #' 
 #' @param x object to test for type \code{constraint}
