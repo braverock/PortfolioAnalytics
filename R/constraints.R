@@ -214,6 +214,52 @@ constraint_v2 <- function(assets=NULL, ..., min_sum=.99, max_sum=1.01, weight_se
   ))
 }
 
+#' General interface for adding and/or updating optimization constraints, currently supports box and group constraints.
+#' 
+#' This is the main function for adding and/or updating constraints in an object of type \code{\link{constraint}}.
+#' 
+#' In general, you will define your constraints as one of two types: 'box' or 'group'.  
+#' 
+#' @param constraints an object of type "constraint" to add the constraint to, specifying the constraints for the optimization, see \code{\link{constraint_v2}}
+#' @param type character type of the constraint to add or update, currently 'box' or 'group'
+#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @author Ross Bennett
+#' 
+#' @seealso \code{\link{constraint}}
+#' 
+#' @examples 
+#' exconstr <- constraint_v2(assets=10, min_sum=1, max_sum=1)
+#' # Add box constraints with a minimum weight of 0.1 and maximum weight of 0.4
+#' exconstr <- add.constraint(exconstr, type="box", min=0.1, max=0.4)
+#' @export
+add.constraint <- function(constraints, type, ...){
+  # Check to make sure that the constraints passed in is a constraints object
+  if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
+  
+  # Check to make sure a type is passed in as an argument
+  if (!hasArg(type)) stop("you must supply a type of constraints to create")
+  
+  assets <- constraints$assets
+  tmp_constraint = NULL
+  
+  # Currently supports box and group constraints. Will add more later.
+  switch(type,
+         # Box constraints
+         box = {tmp_constraint <- box_constraint(assets, ...=...)
+                constraints$min <- tmp_constraint$min
+                constraints$max <- tmp_constraint$max
+         },
+         # Group constraints
+         group = {tmp_constraint <- group_constraint(assets, ...=...)
+                  constraints$groups <- tmp_constraint$groups
+                  constraints$cLO <- tmp_constraint$cLO
+                  constraints$cUP <- tmp_constraint$cUP
+         },
+         null = {return(constraints)}
+  )
+  return(constraints)
+}
+
 #' check function for constraints
 #' 
 #' @param x object to test for type \code{constraint}
