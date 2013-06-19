@@ -120,6 +120,79 @@ add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE
     return(constraints)
 }
 
+#' General interface for adding optimization objectives, including risk, return, and risk budget
+#' 
+#' This function is the main function for adding and updating business objectives in an object of type \code{\link{portfolio}}.
+#' 
+#' In general, you will define your objective as one of three types: 'return', 'risk', or 'risk_budget'.  
+#' These have special handling and intelligent defaults for dealing with the function most likely to be 
+#' used as objectives, including mean, median, VaR, ES, etc.
+#' 
+#' @param portfolio an object of type 'portfolio' to add the objective to, specifying the portfolio for the optimization, see \code{\link{portfolio}}
+#' @param type character type of the objective to add or update, currently 'return','risk', or 'risk_budget'
+#' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param arguments default arguments to be passed to an objective function when executed
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters 
+#' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
+#' @author Brian G. Peterson and Ross Bennett
+#' 
+#' @seealso \code{\link{objective}}
+#' 
+#' @export
+add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=FALSE, ..., indexnum=NULL){
+  # This function is based on the original add.objective function, but modified
+  # to add objectives to a portfolio object instead of a constraint object.
+  if (!is.portfolio(portfolio)) {stop("portfolio passed in is not of class portfolio")}
+  
+  if (!hasArg(name)) stop("you must supply a name for the objective")
+  if (!hasArg(type)) stop("you must supply a type of objective to create")
+  if (!hasArg(enabled)) enabled=FALSE
+  if (!hasArg(arguments) | is.null(arguments)) arguments<-list()
+  if (!is.list(arguments)) stop("arguments must be passed as a named list")
+  
+  assets=portfolio$assets
+  
+  tmp_objective=NULL
+  
+  switch(type,
+         return=, return_objective= 
+           {tmp_objective = return_objective(name=name,
+                                  enabled=enabled,
+                                  arguments=arguments,
+                                  ... = ...
+                                             )
+            },
+         
+         risk=, portfolio_risk=, portfolio_risk_objective =
+           {tmp_objective = portfolio_risk_objective(name=name,
+                                          enabled=enabled,
+                                          arguments=arguments,
+                                          ...=...
+                                                     )
+            },
+         
+         risk_budget=, risk_budget_objective=
+           {tmp_objective = risk_budget_objective(assets=portfolio$assets,
+                                       name=name,
+                                       enabled=enabled,
+                                       arguments=arguments,
+                                       ...=...
+                                                  )
+            },
+         
+         null = 
+           {return(portfolio)} # got nothing, default to simply returning
+         ) # end objective type switch
+  
+  if(is.objective(tmp_objective)) {
+    if(!hasArg(indexnum) | (hasArg(indexnum) & is.null(indexnum))) indexnum = length(portfolio$objectives)+1
+    tmp_objective$call <- match.call()
+    portfolio$objectives[[indexnum]] <- tmp_objective
+  }
+  return(portfolio)
+}
+
 # update.objective <- function(object, ...) {
 #   # here we do a bunch of magic to update the correct index'd objective
 # 
