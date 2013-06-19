@@ -229,7 +229,7 @@ constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="v2_constraint")
   return(structure( c(list(type = type,
                            enabled=enabled),
                       list(...)),
-                    class=constrclass
+                    class=c(constrclass, "constraint")
   ) # end structure
   )
 }
