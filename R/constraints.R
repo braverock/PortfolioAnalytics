@@ -456,6 +456,45 @@ is.constraint <- function( x ) {
   inherits( x, "constraint" )
 }
 
+#'  Helper function to get the enabled constraints out of the portfolio object, see \code{\link{portfolio.spec}}
+#'  Returns an object of class constraint which is a flat list of weight_sum, box, and group constraints.
+#'  Uses the same naming as the v1_constraint object which may be useful when passed to other functions.
+#'  @param portfolio an object of class 'portfolio'
+#'  @author Ross Bennett
+#'  @seealso \code{\link{portfolio.spec}}, \code{\link{constraint_v2}}
+#'  @export
+get.constraints <- function(portfolio){
+  # Check that object passed in is a portfolio objec
+  if(!is.portfolio(portfolio)) stop("portfolio passed in is not of class portfolio")
+  
+  tmp.constraints <- portfolio$constraints
+  out <- list()
+  for(i in 1:length(tmp.constraints)){
+    if(tmp.constraints[[i]]$enabled){
+      # weight_sum constraint
+      if(tmp.constraints[[i]]$type == "weight_sum"){
+        # Extract min_sum and max_sum
+        out$min_sum <- tmp.constraints[[i]]$min_sum
+        out$max_sum <- tmp.constraints[[i]]$max_sum
+      }
+      # box constraints
+      if(tmp.constraints[[i]]$type == "box"){
+        # Extract min and max
+        out$min <- tmp.constraints[[i]]$min
+        out$max <- tmp.constraints[[i]]$max
+      }
+      # group constraints
+      if(tmp.constraints[[i]]$type == "group"){
+        # Extract groups, cLO, and cUP
+        out$groups <- tmp.constraints[[i]]$groups
+        out$cLO <- tmp.constraints[[i]]$cLO
+        out$cUP <- tmp.constraints[[i]]$cUP
+      }
+    }
+  }
+  return(structure(out, class="constraint"))
+}
+
 #' function for updating constrints, not well tested, may be broken
 #' 
 #' can we use the generic update.default function?
