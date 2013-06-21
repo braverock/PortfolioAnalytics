@@ -274,6 +274,10 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
          weight=, weight_sum = {tmp_constraint <- weight_sum_constraint(type=type,
                                                                         ...=...)
          },
+         # Turnover constraint
+         turnover = {tmp_constraint <- turnover_constraint(type=type,
+                                                           ...=...)
+         },
          # Do nothing and return the portfolio object if type is NULL
          null = {return(portfolio)}
   )
@@ -493,6 +497,25 @@ get.constraints <- function(portfolio){
     }
   }
   return(structure(out, class="constraint"))
+}
+
+#' constructor for turnover_constraint
+#' 
+#' This function is called by add.constraint when type="turnover" is specified. see \code{\link{add.constraint}}
+#' This function allows the user to specify a maximum turnover constraint
+#' 
+#' Note that turnover constraint is currently only supported for global minimum variance problem with solve.QP plugin
+#' 
+#' @param type character type of the constraint
+#' @param max.turnover maximum turnover value
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @author Ross Bennett
+#' @export
+turnover_constraint <- function(type, max.turnover, enabled=FALSE, ...){
+  Constraint <- constraint_v2(type, ...)
+  Constraint$toc <- max.turnover
+  return(Constraint)
 }
 
 #' function for updating constrints, not well tested, may be broken
