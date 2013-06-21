@@ -4,6 +4,7 @@
 library(PortfolioAnalytics)
 library(PerformanceAnalytics)
 library(quadprog)
+library(corpcor)
 
 # TODO Add documentation for function
 # Computes optimal weights for global minimum variance portfolio with
@@ -13,13 +14,14 @@ turnover.gmv <- function(R, toc, weight.i, min, max){
   # number of assets in R
   p <- ncol(R)
   
-  # Modify the returns matrix. Why do we do this?
+  # Modify the returns matrix. This is done because there are 3 sets of
+  # variables w.initial, w.buy, and w.sell
   returns <- cbind(R, R, R)
   
   V <- cov(returns)
-  # V <- make.positive.definite(V)
+  V <- make.positive.definite(V)
   
-  # matrix for initial weights
+  # A matrix for initial weights
   A2 <- cbind(rep(1, p*3), rbind(diag(p), matrix(0, nrow=2*p, ncol=p)))
   
   # A matrix for lower box constraints
@@ -46,7 +48,7 @@ turnover.gmv <- function(R, toc, weight.i, min, max){
   # no linear term so set this equal to 0s
   d <- rep(0, p*3)
   
-  sol <- solve.QP(Dmat=make.positive.definite(V), dvec=d, Amat=A.c, bvec=b, meq=6)
+  sol <- solve.QP(Dmat=V, dvec=d, Amat=A.c, bvec=b, meq=6)
   wts <- sol$solution
   wts.final <- wts[(1:p)] + wts[(1+p):(2*p)] + wts[(2*p+1):(3*p)]
   wts.final
@@ -73,7 +75,8 @@ to <- sum(abs(diff(rbind(weight.i, opt.wts))))
 to
 
 ##### ROI Turnover constraints using ROI solver #####
-# Not working correctly. Failing with error in ROI_solve
+# Not working correctly. 
+# Getting a solution now, but results are different than turnover.gmv
 
 # library(ROI)
 # library(ROI.plugin.quadprog)
@@ -84,6 +87,7 @@ to
 # returns <- cbind(ret, ret, ret)
 # 
 # V <- cov(returns)
+# V <- corpcor:::make.positive.definite(V)
 # mu <- apply(returns, 2, mean)
 # # number of assets
 # N <- ncol(returns)
@@ -116,10 +120,14 @@ to
 # dir.vec <- c(">=","<=", rep("==", N/3), "<=", rep(">=", 2*N/3))
 # min_sum=1
 # max_sum=1
+# w.init <- rep(1/5, 5)
+# toc <- 0.3
 # rhs.vec <- c(min_sum, max_sum, w.init, toc, rep(0, 2*N/3))
 # 
 # opt.prob <- ROI:::OP(objective=ROI_objective, 
 #                      constraints=ROI:::L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
 #                      bounds=bnds)
 # roi.result <- ROI:::ROI_solve(x=opt.prob, solver="quadprog")
-# roi.result$solution
+# wts.tmp <- roi.result$solution
+# wts <- wts.tmp[1:(N/3)] + wts.tmp[(N/3+1):(2*N/3)] + wts.tmp[(2*N/3+1):N]
+# wts
