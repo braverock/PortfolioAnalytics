@@ -1,0 +1,26 @@
+\name{constraint_v2}
+\alias{constraint_v2}
+\title{constructor for class v2_constraint}
+\usage{
+  constraint_v2(type, enabled = FALSE, ...,
+    constrclass = "v2_constraint")
+}
+\arguments{
+  \item{type}{character type of the constraint to add or
+  update, currently 'weight_sum', 'box', or 'group'}
+
+  \item{assets}{number of assets, or optionally a named
+  vector of assets specifying seed weights}
+
+  \item{...}{any other passthru parameters}
+
+  \item{constrclass}{character to name the constraint
+  class}
+}
+\description{
+  constructor for class v2_constraint
+}
+\author{
+  Ross Bennett
+}
+
