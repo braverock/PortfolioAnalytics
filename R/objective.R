@@ -306,3 +306,25 @@ risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, mul
   
   return(Objective)
 } # end risk_budget_objective constructor
+
+#' constructor for class turnover_objective
+#'
+#' if target is null, we'll try to minimize the turnover metric
+#' 
+#' if target is set, we'll try to meet the metric
+#'  
+#' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param target univariate target for the objective
+#' @param arguments default arguments to be passed to an objective function when executed
+#' @param multiplier multiplier to apply to the objective, usually 1 or -1
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters 
+#' @author Ross Bennett
+#' @export
+turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ... )
+{
+  if(!hasArg(target)) target = NULL
+  ##' if target is null, we'll try to minimize the turnover metric
+  if(!hasArg(multiplier)) multiplier=1
+  return(objective(name=name, target=target, arguments=arguments, enabled=enabled, multiplier=multiplier,objclass=c("turnover_objective","objective"), ... ))
+} # end turnover_objective constructor
