@@ -181,6 +181,9 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
                   if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method)& is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
                   if(is.null(objective$arguments$invert)) objective$arguments$invert = FALSE
               },
+                 turnover = {
+                   fun = match.fun(turnover) # turnover function included in objectiveFUN.R
+                   },
               {   # see 'S Programming p. 67 for this matching
                   fun<-try(match.fun(objective$name))
               }
@@ -243,6 +246,15 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
             # target is null or doesn't exist, just maximize, or minimize violation of constraint
             out = out + abs(objective$multiplier)*tmp_measure
           } #  univariate risk objectives
+          
+          if(inherits(objective,"turnover_objective")){
+            if (!is.null(objective$target) & is.numeric(objective$target)){ # we have a target
+              out = out + penalty*abs(objective$multiplier)*abs(tmp_measure-objective$target)
+              # Does this penalize for turnover below target
+            }  
+            # target is null or doesn't exist, just maximize, or minimize violation of constraint
+            out = out + abs(objective$multiplier)*tmp_measure
+          } #  univariate turnover objectives
           
           if(inherits(objective,"risk_budget_objective")){
             # setup
