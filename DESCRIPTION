@@ -41,3 +41,5 @@ Collate:
     'optimize.portfolio.R'
     'random_portfolios.R'
     'trailingFUN.R'
+    'objectiveFUN.R'
+    'portfolio.R'
