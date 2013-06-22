@@ -181,6 +181,12 @@ add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=FALS
                                                   )
             },
          
+         turnover = {tmp_objective = turnover_objective(name=name,
+                                                        enabled=enabled,
+                                                        arguments=arguments,
+                                                        ...=...)
+         },
+         
          null = 
            {return(portfolio)} # got nothing, default to simply returning
          ) # end objective type switch
