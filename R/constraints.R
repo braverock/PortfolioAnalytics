@@ -151,70 +151,9 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
   ))
 }
 
-# #' constructor for class constraint_v2
-# #' 
-# #' @param assets number of assets, or optionally a named vector of assets specifying seed weights
-# #' @param ... any other passthru parameters
-# #' @param min_sum minimum sum of all asset weights, default .99
-# #' @param max_sum maximum sum of all asset weights, default 1.01
-# #' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
-# #' @author Peter Carl, Brian G. Peterson, and Ross Bennett
-# #' @examples 
-# #' exconstr <- constraint_v2(assets=10, min_sum=1, max_sum=1, weight_seq=generatesequence())
-# #' @export
-# constraint_v2 <- function(assets=NULL, ..., min_sum=.99, max_sum=1.01, weight_seq=NULL) {
-#   # based on GPL R-Forge pkg roi by Stefan Thuessel,Kurt Hornik,David Meyer
-#   # constraint_v2 is based on the constraint_v1 object, but removes box
-#   # constraint specification
-#   if (is.null(assets)) {
-#     stop("You must specify the assets")
-#   }
-#   
-#   if(!is.null(assets)){
-#     # TODO FIXME this doesn't work quite right on matrix of assets
-#     if(is.numeric(assets)){
-#       if (length(assets) == 1) {
-#         nassets = assets
-#         # we passed in a number of assets, so we need to create the vector
-#         message("assuming equal weighted seed portfolio")
-#         assets <- rep(1 / nassets, nassets)
-#       } else {
-#         nassets = length(assets)
-#       }
-#       # and now we may need to name them
-#       if (is.null(names(assets))) {
-#         for(i in 1:length(assets)){
-#           names(assets)[i] <- paste("Asset",i,sep=".")
-#         }
-#       }
-#     }
-#     if(is.character(assets)){
-#       nassets = length(assets)
-#       assetnames = assets
-#       message("assuming equal weighted seed portfolio")
-#       assets <- rep(1 / nassets, nassets)
-#       names(assets) <- assetnames  # set names, so that other code can access it,
-#       # and doesn't have to know about the character vector
-#       # print(assets)
-#     }
-#     # if assets is a named vector, we'll assume it is current weights
-#   }
-#   
-#   ## now structure and return
-#   return(structure(
-#     list(
-#       assets = assets,
-#       min_sum = min_sum,
-#       max_sum = max_sum,
-#       weight_seq = weight_seq,
-#       objectives = list(),
-#       call = match.call()
-#     ),
-#     class=c("v2_constraint","constraint")
-#   ))
-# }
 
 #' constructor for class v2_constraint
+#' 
 #' @param type character type of the constraint to add or update, currently 'weight_sum', 'box', or 'group'
 #' @param assets number of assets, or optionally a named vector of assets specifying seed weights
 #' @param ... any other passthru parameters
