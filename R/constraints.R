@@ -202,19 +202,23 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
          # Box constraints
          box = {tmp_constraint <- box_constraint(assets=assets,
                                                  type=type,
+                                                 enabled=enabled,
                                                  ...=...)
          },
          # Group constraints
          group = {tmp_constraint <- group_constraint(assets=assets, 
                                                      type=type,
+                                                     enabled=enabled,
                                                      ...=...)
          },
          # Sum of weights constraints
          weight=, weight_sum = {tmp_constraint <- weight_sum_constraint(type=type,
+                                                                        enabled=enabled,
                                                                         ...=...)
          },
          # Turnover constraint
          turnover = {tmp_constraint <- turnover_constraint(type=type,
+                                                           enabled=enabled,
                                                            ...=...)
          },
          # Do nothing and return the portfolio object if type is NULL
