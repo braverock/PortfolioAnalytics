@@ -1,0 +1,121 @@
+\documentclass[12pt,letterpaper,english]{article}
+\usepackage[OT1]{fontenc}
+\usepackage{Sweave}
+\usepackage{verbatim}
+\usepackage{Rd}
+\usepackage{Sweave}
+
+\begin{document}
+
+\title{Creating a Portfolio Object with PortfolioAnalytics}
+\author{Ross Bennett}
+
+\maketitle
+
+\begin{abstract}
+The purpose of this vignette is to demonstrate the new interface in PortfolioAnalytics to specify a portfolio object and to add constraints and objectives.
+\end{abstract}
+
+\tableofcontents
+
+\section{Getting Started}
+\subsection{Load Packages}
+Load the necessary packages.
+
+<<>>=
+library(PortfolioAnalytics)
+library(PerformanceAnalytics) # just for edhec data set
+@
+
+\subsection{Data}
+The edhec data set from the PerformanceAnalytics package will be used as example data.
+<<>>=
+data(edhec)
+
+# Use the first 4 indices in edhec for a returns object
+returns <- edhec[, 1:4]
+print(head(returns, 5))
+
+# Get a character vector of the fund names
+fund.names <- colnames(returns)
+@
+
+\section{Creating the "portfolio" object}
+The portfolio object is instantiated with the \code{portfolio.spec} function. The main argument to \code{portfolio.spec} is assets, this is a required argument. The assets argument can be a scalar value for the number of assets, a character vector of fund names, or a named vector of seed weights. If seed weights are not specified, an equal weight portfolio will be assumed.
+
+The \code{pspec} object is an S3 object of class "portfolio". When first created, the portfolio object has an element named assets with the seed weights, an element named weight\_seq with a seed sequence of weights if specified, an empty constraints list and an empty objectives list.
+
+<<>>=
+# Specify a portfolio object by passing a character vector for the 
+# assets argument.
+pspec <- portfolio.spec(assets=fund.names)
+print(pspec)
+@
+
+\section{Adding Constraints}
+Adding constraints to the portfolio object is done with \code{add.constraint}. The \code{add.constraint} function is the main interface for adding and/or updating constraints to the portfolio object. This function allows the user to specify the portfolio to add the constraints to, the type of constraints (currently 'weight\_sum', 'box', or 'group'), arguments for the constraint, and whether or not to enable the constraint. If updating an existing constraint, the indexnum argument can be specified.
+
+Here we add a constraint that the weights must sum to 1, or the full investment constraint.
+<<>>=
+# Add the full investment constraint that specifies the weights must sum to 1.
+pspec <- add.constraint(portfolio=pspec, 
+                        type="weight_sum", 
+                        min_sum=1, 
+                        max_sum=1, 
+                        enabled=TRUE)
+@
+
+Here we add box constraints for the asset weights. The minimum weight of any asset must be greater than or equal to 0.05 and the maximum weight of any asset must be less than or equal to 0.4. The values for min and max can be passed in as scalars or vectors. If min and max are scalars, the values for min and max will be replicated as vectors to the length of assets. If min and max are not specified, a minimum weight of 0 and maximum weight of 1 are assumed. Note that min and max can be specified as vectors with different weights for linear inequality constraints.
+<<>>=
+pspec <- add.constraint(portfolio=pspec,
+                        type="box",
+                        min=0.05,
+                        max=0.4,
+                        enabled=TRUE)
+@
+
+The portfolio object now has 2 objects in the constraints list. One object for the sum of weights constraint and another for the box constraint.
+<<>>=
+print(pspec$constraints)
+@
+
+Another common constraint that can be added is a group constraint. Group constraints are currently only supported by the ROI solvers, see the ROI vignette [still need to make this] for examples using group constraints. Box constraints and weight\_sum constraints are required by \code{optimize.portfolio}. Other constraint types will be added.
+
+\section{Adding Objectives}
+Business objectives can be added to the portfolio object with \code{add.objective\_v2}. The \code{add.objective\_v2} function is the main function for adding and/or updating business objectives to the portfolio object. This function allows the user to specify the portfolio to add the objectives to, the type (currently 'return', 'risk', or 'risk\_budget'), name of the objective function, arguments to the objective function, and whether or not to enable the objective. If updating an existing constraint, the indexnum argument can be specified.
+
+Here we add a risk objective to minimize portfolio variance. Note that the name of the function must correspond to a function in R. Many functions are available in the PerformanceAnalytics package.
+<<>>=
+pspec <- add.objective_v2(portfolio=pspec,
+                          type='risk',
+                          name='var',
+                          enabled=TRUE)
+@
+
+The portfolio object now has 1 object in the objectives list for the risk objective we just added.
+<<>>=
+print(pspec$objectives)
+@
+
+We now have a portfolio object with the following constraints and objectives to pass to \code{optimize.portfolio}.
+\begin{itemize}
+  \item Constraints
+  \begin{itemize}
+  \item weight\_sum: The weights sum to 1 (i.e. full investment constraint)
+  \item box: minimum weight of any asset must be greater than or equal to 0.05 and the maximum weight of any asset must be less than or equal to 0.4.
+\end{itemize}
+  \item Objectives
+  \begin{itemize}
+  \item risk objective: minimize portfolio var(iance).
+\end{itemize}
+
+\end{itemize}
+
+\section{Optimization}
+Note that this currently does not work, but is how I envision the portfolio object replacing the current constraint object.
+<<>>=
+#out <- optimize.portfolio(R=returns, portfolio=pspec, optimize_method="ROI")
+@
+
+
+\end{document}
