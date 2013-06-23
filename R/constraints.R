@@ -404,6 +404,15 @@ is.constraint <- function( x ) {
 }
 
 #'  Helper function to get the enabled constraints out of the portfolio object, see \code{\link{portfolio.spec}}
+#'  
+#'  When the v1_constraint object is instantiated via constraint, the arguments
+#'  min_sum, max_sum, min, and max are either specified by the user or default
+#'  values are assigned. These are required by other functions such as
+#'  optimize.portfolio. This function will check that these variables are in
+#'  the portfolio object in the constraints list. This function could be used
+#'  at the beginning of optimize.portfolio to check the constraints in the 
+#'  portfolio object.
+#' 
 #'  Returns an object of class constraint which is a flat list of weight_sum, box, and group constraints.
 #'  Uses the same naming as the v1_constraint object which may be useful when passed to other functions.
 #'  @param portfolio an object of class 'portfolio'
@@ -415,7 +424,18 @@ get.constraints <- function(portfolio){
   if(!is.portfolio(portfolio)) stop("portfolio passed in is not of class portfolio")
   
   tmp.constraints <- portfolio$constraints
+  
+  # Check that constraints are passed in
+  if(length(tmp.constraints) == 0) stop("No constraints passed in")
+  
   out <- list()
+  
+  # Required constraints
+  out$min_sum <- NULL
+  out$max_sum <- NULL
+  out$min <- NULL
+  out$max <- NULL
+  
   for(i in 1:length(tmp.constraints)){
     if(tmp.constraints[[i]]$enabled){
       # weight_sum constraint
@@ -438,6 +458,13 @@ get.constraints <- function(portfolio){
         out$cUP <- tmp.constraints[[i]]$cUP
       }
     }
+  }
+  # Error if no constraints are enabled
+  if(length(out) == 0) stop("No constraints are enabled")
+  
+  # Error if required constraints are not specified
+  if(is.null(out$min) | is.null(out$max) | is.null(out$max_sum) | is.null(out$min_sum) {
+    stop("Must specify weight_sum constraints (min_sum and max_sum) and box constraints ( min and max")
   }
   return(structure(out, class="constraint"))
 }
