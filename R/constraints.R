@@ -463,7 +463,7 @@ get.constraints <- function(portfolio){
   if(length(out) == 0) stop("No constraints are enabled")
   
   # Error if required constraints are not specified
-  if(is.null(out$min) | is.null(out$max) | is.null(out$max_sum) | is.null(out$min_sum) {
+  if(is.null(out$min) | is.null(out$max) | is.null(out$max_sum) | is.null(out$min_sum)) {
     stop("Must specify weight_sum constraints (min_sum and max_sum) and box constraints ( min and max")
   }
   return(structure(out, class="constraint"))
