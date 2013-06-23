@@ -27,8 +27,14 @@ pspec <- add.constraint(portfolio=pspec, type="weight_sum",
                         min_sum=0.99, max_sum=1.01)
 print(pspec)
 
+# Forgot to enable the weight_sum constraint
+pspec <- add.constraint(portfolio=pspec, type="weight_sum",
+                        min_sum=0.99, max_sum=1.01, enabled=TRUE,
+                        indexnum=1)
+print(pspec)
+
 # Add box constraints to the pspec object
-pspec <- add.constraint(portfolio=pspec, type="box", min=0.1, max=0.4)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0.1, max=0.4, enabled=TRUE)
 print(pspec)
 
 # Update the box constraints to pass in a vector for min and max. Updates the
