@@ -43,3 +43,4 @@ Collate:
     'trailingFUN.R'
     'objectiveFUN.R'
     'portfolio.R'
+    'constraintsFUN.R'
