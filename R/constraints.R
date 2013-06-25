@@ -221,6 +221,11 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
                                                            enabled=enabled,
                                                            ...=...)
          },
+         # Diversification constraint
+         diversification = {tmp_constraint <- diversification_constraint(type=type,
+                                                                         enabled=enabled,
+                                                                         ...=...)
+         },
          # Do nothing and return the portfolio object if type is NULL
          null = {return(portfolio)}
   )
@@ -485,6 +490,22 @@ get.constraints <- function(portfolio){
 turnover_constraint <- function(type, max.turnover, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, ...)
   Constraint$toc <- max.turnover
+  return(Constraint)
+}
+
+#' constructor for diversification_constraint
+#' 
+#' This function is called by add.constraint when type="diversification" is specified, \code{\link{add.constraint}}
+#' 
+#' @param type character type of the constraint
+#' @param div.target diversification target value
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @author Ross Bennett
+#' @export
+diversification_constraint <- function(type, div.target, enabled=FALSE, ...){
+  Constraint <- constraint_v2(type, enabled=enabled, ...)
+  Constraint$div <- div.target
   return(Constraint)
 }
 
