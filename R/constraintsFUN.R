@@ -62,3 +62,16 @@ constrained_group_tmp <- function(groups, cLO, cUP, weights, min_sum, max_sum, n
   # the group constraints? Or another way?
   return(weights)
 }
+
+#' Function to compute diversification as a constraint
+#' 
+#' Diversification is defined as 1 minus the sum of the squared weights
+#' diversification <- 1 - sum(w^2)
+#' 
+#' @param weights vector of asset weights
+#' @author Ross Bennett
+#' @export
+diversification <- function(weights){
+   div <- 1 - sum(weights^2)
+   return(div)
+}
