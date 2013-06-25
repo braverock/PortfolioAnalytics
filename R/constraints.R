@@ -226,6 +226,11 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
                                                                          enabled=enabled,
                                                                          ...=...)
          },
+         # Volatility constraint
+         volatility = {tmp_constraint <- volatility_constraint(type=type,
+                                                               enabled=enabled,
+                                                               ...=...)
+         },
          # Do nothing and return the portfolio object if type is NULL
          null = {return(portfolio)}
   )
@@ -506,6 +511,26 @@ turnover_constraint <- function(type, max.turnover, enabled=FALSE, ...){
 diversification_constraint <- function(type, div.target, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, ...)
   Constraint$div <- div.target
+  return(Constraint)
+}
+
+#' constructor for volatility_constraint
+#' 
+#' This function is called by add.constraint when type="volatility" is specified, \code{\link{add.constraint}}
+#' If portfolio standard deviation is less than min.vol, add penalty to maximize
+#' If portfolio standard deviation is greater than max.vol, add penalty to minimize
+#' 
+#' @param type character type of the constraint
+#' @param min.vol minimum volatility constraint
+#' @param max.vol maximum volatilty constraint
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @author Ross Bennett
+#' @export
+volatility_constraint <- function(type, min.vol, max.vol, enabled=FALSE, ...){
+  Constraint <- constraint_v2(type, enabled=enabled, ...)
+  Constraint$min.vol <- min.vol
+  Constraint$max.vol <- max.vol
   return(Constraint)
 }
 
