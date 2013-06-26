@@ -7,13 +7,15 @@
 turnover <- function(weights, wts.init=NULL) {
   # turnover function from https://r-forge.r-project.org/scm/viewvc.php/pkg/PortfolioAnalytics/sandbox/script.workshop2012.R?view=markup&root=returnanalytics
   
-  # Check that weights and wts.init are the same length
-  if(length(weights) != length(wts.init)) stop("weights and wts.init are not the same length")
+  N <- length(weights)
   
   # If wts.init is not given, then assume a vector of equal weights
   if(is.null(wts.init)) {
-    N <- length(weights)
     wts.init <- rep(1/N, N)
   }
-  return(sum(abs(wts.init-weights))/N)
+  
+  # Check that weights and wts.init are the same length
+  if(length(weights) != length(wts.init)) stop("weights and wts.init are not the same length")
+  
+  return(sum(abs(wts.init - weights)) / N)
 }
