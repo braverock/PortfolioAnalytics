@@ -108,6 +108,11 @@ add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE
                                                  ...=...
                                                 )
           },
+           turnover = {tmp_objective = turnover_objective(name=name,
+                                                          enabled=enabled,
+                                                          arguments=arguments,
+                                                          ...=...)
+           },
           
         null =
           {return(constraints)} # got nothing, default to simply returning
