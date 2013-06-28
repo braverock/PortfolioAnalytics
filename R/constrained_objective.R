@@ -249,19 +249,6 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
           
           if(inherits(objective,"turnover_objective")){
             if (!is.null(objective$target) & is.numeric(objective$target)){ # we have a target
-              # out = out + penalty*abs(objective$multiplier)*abs(tmp_measure-objective$target)
-              # Does this penalize for turnover below target?
-              # I want to only penalize turnover above the given target. 
-              # Seems to be giving correct results, but only if multiplier=0.01
-              # I would expect this to be the same result when multiplier=0, but it is not.
-              # max(tmp_measure - objective$target, 0) should equal 0 when tmp_measure is less than objective$target
-              # print(max(tmp_measure - objective$target, 0))
-              # Only penalize if tmp_measure violates target to the upside
-              # if(tmp_measure > objective$target) {
-              #  print(tmp_measure)
-              #  out = out + penalty*abs(objective$multiplier)*abs(tmp_measure-objective$target)
-              # }
-              # out = out + penalty * objective$multiplier * max(tmp_measure - objective$target, 0)
               out = out + penalty*abs(objective$multiplier)*abs(tmp_measure-objective$target)
             }  
             # target is null or doesn't exist, just maximize, or minimize violation of constraint
