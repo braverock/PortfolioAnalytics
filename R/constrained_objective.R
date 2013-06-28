@@ -257,7 +257,12 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
           
           if(inherits(objective,"minmax_objective")){
             if (!is.null(objective$min) & !is.null(objective$max)){ # we have a min and max
-              out = out + penalty * objective$multiplier * ((tmp_measure - objective$max) + (objective$min - tmp_measure))
+              if(tmp_measure > objective$max){
+                out = out + penalty * objective$multiplier * (tmp_measure - objective$max)
+              }
+              if(tmp_measure < objective$min){
+                out = out + penalty * objective$multiplier * (objective$min - tmp_measure)
+              }
             }
           } # temporary minmax objective
           

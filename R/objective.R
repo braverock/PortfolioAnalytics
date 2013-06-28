@@ -113,6 +113,11 @@ add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE
                                                           arguments=arguments,
                                                           ...=...)
            },
+           tmp_minmax = {tmp_objective = minmax_objective(name=name,
+                                                          enabled=enabled,
+                                                          arguments=arguments,
+                                                          ...=...)
+           },
           
         null =
           {return(constraints)} # got nothing, default to simply returning
