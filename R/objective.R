@@ -191,6 +191,11 @@ add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=FALS
                                                         arguments=arguments,
                                                         ...=...)
          },
+         tmp_minmax = {tmp_objective = minmax_objective(name=name,
+                                                        enabled=enabled,
+                                                        arguments=arguments,
+                                                        ...=...)
+         },
          
          null = 
            {return(portfolio)} # got nothing, default to simply returning
@@ -333,3 +338,39 @@ turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, 
   if(!hasArg(multiplier)) multiplier=1
   return(objective(name=name, target=target, arguments=arguments, enabled=enabled, multiplier=multiplier,objclass=c("turnover_objective","objective"), ... ))
 } # end turnover_objective constructor
+
+#' constructor for class tmp_minmax_objective
+#'
+#' I am add this as a temporary objective allowing for a min and max to be specified. Testing
+#' to understand how the objective function responds to a range of allowable values. I will
+#' likely add this to the turnover, diversification, and volatility constraints 
+#' allowing the user to specify a range of values.
+#' 
+#' if target is null, we'll try to minimize the metric
+#' 
+#' if target is set, we'll try to meet the metric
+#' 
+#' If max is violated to the upside, penalize the metric
+#' If min is violated to the downside, penalize the metric
+#' Try to meet the range between min and max
+#'  
+#' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param target univariate target for the objective
+#' @param min minimum value
+#' @param max maximum value
+#' @param arguments default arguments to be passed to an objective function when executed
+#' @param multiplier multiplier to apply to the objective, usually 1 or -1
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters 
+#' @author Ross Bennett
+#' @export
+minmax_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ..., min, max )
+{
+  if(!hasArg(target)) target = NULL
+  ##' if target is null, we'll try to minimize the metric
+  if(!hasArg(multiplier)) multiplier=1
+  Objective <- objective(name=name, target=target, arguments=arguments, enabled=enabled, multiplier=multiplier,objclass=c("minmax_objective","objective"), ... )
+  Objective$min <- min
+  Objective$max <- max
+  return(Objective)
+} # end minmax_objective constructor

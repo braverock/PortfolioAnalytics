@@ -255,6 +255,12 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
             out = out + abs(objective$multiplier)*tmp_measure
           } #  univariate turnover objectives
           
+          if(inherits(objective,"minmax_objective")){
+            if (!is.null(objective$min) & !is.null(objective$max)){ # we have a min and max
+              out = out + penalty * objective$multiplier * ((tmp_measure - objective$max) + (objective$min - tmp_measure))
+            }
+          } # temporary minmax objective
+          
           if(inherits(objective,"risk_budget_objective")){
             # setup
             
