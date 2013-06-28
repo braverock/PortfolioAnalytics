@@ -233,7 +233,7 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
                   out = out + penalty*abs(objective$multiplier)*abs(tmp_measure-objective$target)
               }  
               # target is null or doesn't exist, just maximize, or minimize violation of constraint
-              out = out + abs(objective$multiplier)*tmp_measure
+              out = out + objective$multiplier*tmp_measure
           } # end handling for return objectives
 
           if(inherits(objective,"portfolio_risk_objective")){
