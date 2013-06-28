@@ -173,11 +173,11 @@ constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="v2_constraint")
   )
 }
 
-#' General interface for adding and/or updating optimization constraints, currently supports weight, box and group constraints.
+#' General interface for adding and/or updating optimization constraints.
 #' 
 #' This is the main function for adding and/or updating constraints in an object of type \code{\link{portfolio}}.
 #' 
-#' In general, you will define your constraints as: 'weight_sum', 'box', 'group', 'turnover', 'diversification', or 'volatility'.  
+#' In general, you will define your constraints as: 'weight_sum', 'box', 'group', 'turnover', 'diversification', 'volatility', or 'position_limit'.  
 #' 
 #' @param portfolio an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
 #' @param type character type of the constraint to add or update, currently 'weight_sum', 'box', 'group', 'turnover', 'diversification', or 'volatility'
@@ -185,7 +185,7 @@ constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="v2_constraint")
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
 #' @author Ross Bennett
-#' @seealso \code{\link{constraint_v2}}, \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{volatility_constraint}}
+#' @seealso \code{\link{constraint_v2}}, \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{volatility_constraint}}, \code{\link{position_limit_constraint}}
 #' @export
 add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
   # Check to make sure that the portfolio passed in is a portfolio object
@@ -230,6 +230,11 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
          volatility = {tmp_constraint <- volatility_constraint(type=type,
                                                                enabled=enabled,
                                                                ...=...)
+         },
+         # Position limit constraint
+         position_limit = {tmp_constraint <- position_limit_constraint(type=type,
+                                                                       enabled=enabled,
+                                                                       ...=...)
          },
          # Do nothing and return the portfolio object if type is NULL
          null = {return(portfolio)}
@@ -531,6 +536,23 @@ volatility_constraint <- function(type, vol.target, enabled=FALSE, ...){
   # Constraint$min.vol <- min.vol
   # Constraint$max.vol <- max.vol
   Constraint$vol.target <- vol.target
+  return(Constraint)
+}
+
+#' constructor for position_limit_constraint
+#' 
+#' This function is called by add.constraint when type="position_limit" is specified, \code{\link{add.constraint}}
+#' Allows the user to specify the maximum number of positions (i.e. number of assets with non-zero weights)
+#' 
+#' @param type character type of the constraint
+#' @param max.pos maximum number of positions
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @author Ross Bennett
+#' @export
+position_limit_constraint <- function(type, max.pos, enabled=FALSE, ...){
+  Constraint <- constraint_v2(type, enabled=enabled, constrclass="position_limit_constraint", ...)
+  Constraint$max.pos <- max.pos
   return(Constraint)
 }
 

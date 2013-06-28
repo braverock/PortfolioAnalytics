@@ -1,6 +1,6 @@
 \name{add.constraint}
 \alias{add.constraint}
-\title{General interface for adding and/or updating optimization constraints, currently supports weight, box and group constraints.}
+\title{General interface for adding and/or updating optimization constraints.}
 \usage{
   add.constraint(portfolio, type, enabled = FALSE, ...,
     indexnum = NULL)
@@ -30,7 +30,7 @@
 \details{
   In general, you will define your constraints as:
   'weight_sum', 'box', 'group', 'turnover',
-  'diversification', or 'volatility'.
+  'diversification', 'volatility', or 'position_limit'.
 }
 \author{
   Ross Bennett
@@ -42,6 +42,7 @@
   \code{\link{group_constraint}},
   \code{\link{turnover_constraint}},
   \code{\link{diversification_constraint}},
-  \code{\link{volatility_constraint}}
+  \code{\link{volatility_constraint}},
+  \code{\link{position_limit_constraint}}
 }
 

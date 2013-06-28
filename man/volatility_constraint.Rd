@@ -2,15 +2,13 @@
 \alias{volatility_constraint}
 \title{constructor for volatility_constraint}
 \usage{
-  volatility_constraint(type, min.vol, max.vol,
-    enabled = FALSE, ...)
+  volatility_constraint(type, vol.target, enabled = FALSE,
+    ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
 
-  \item{min.vol}{minimum volatility constraint}
-
-  \item{max.vol}{maximum volatilty constraint}
+  \item{vol.target}{target volatilty constraint}
 
   \item{enabled}{TRUE/FALSE}
 
@@ -20,10 +18,8 @@
 \description{
   This function is called by add.constraint when
   type="volatility" is specified,
-  \code{\link{add.constraint}} If portfolio standard
-  deviation is less than min.vol, add penalty to maximize
-  If portfolio standard deviation is greater than max.vol,
-  add penalty to minimize
+  \code{\link{add.constraint}} Penalize if portfolio
+  standard deviation deviates from volatility target
 }
 \author{
   Ross Bennett
