@@ -11,7 +11,8 @@
   optimization, see \code{\link{portfolio.spec}}}
 
   \item{type}{character type of the constraint to add or
-  update, currently 'weight_sum', 'box', or 'group'}
+  update, currently 'weight_sum', 'box', 'group',
+  'turnover', 'diversification', or 'volatility'}
 
   \item{enabled}{TRUE/FALSE}
 
@@ -27,13 +28,20 @@
   constraints in an object of type \code{\link{portfolio}}.
 }
 \details{
-  In general, you will define your constraints as one of
-  three types: 'weight_sum', 'box', or 'group'.
+  In general, you will define your constraints as:
+  'weight_sum', 'box', 'group', 'turnover',
+  'diversification', or 'volatility'.
 }
 \author{
   Ross Bennett
 }
 \seealso{
-  \code{\link{constraint}}
+  \code{\link{constraint_v2}},
+  \code{\link{weight_sum_constraint}},
+  \code{\link{box_constraint}},
+  \code{\link{group_constraint}},
+  \code{\link{turnover_constraint}},
+  \code{\link{diversification_constraint}},
+  \code{\link{volatility_constraint}}
 }
 

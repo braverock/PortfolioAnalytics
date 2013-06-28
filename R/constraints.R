@@ -177,15 +177,15 @@ constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="v2_constraint")
 #' 
 #' This is the main function for adding and/or updating constraints in an object of type \code{\link{portfolio}}.
 #' 
-#' In general, you will define your constraints as one of three types: 'weight_sum', 'box', or 'group'.  
+#' In general, you will define your constraints as: 'weight_sum', 'box', 'group', 'turnover', 'diversification', or 'volatility'.  
 #' 
 #' @param portfolio an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
-#' @param type character type of the constraint to add or update, currently 'weight_sum', 'box', or 'group'
+#' @param type character type of the constraint to add or update, currently 'weight_sum', 'box', 'group', 'turnover', 'diversification', or 'volatility'
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
 #' @author Ross Bennett
-#' @seealso \code{\link{constraint}}
+#' @seealso \code{\link{constraint_v2}}, \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{volatility_constraint}}
 #' @export
 add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
   # Check to make sure that the portfolio passed in is a portfolio object
