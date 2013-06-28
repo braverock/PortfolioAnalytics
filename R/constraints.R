@@ -495,7 +495,7 @@ get.constraints <- function(portfolio){
 #' @export
 turnover_constraint <- function(type, turnover.target, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="turnover_constraint", ...)
-  Constraint$toc <- turnover,target
+  Constraint$toc <- turnover.target
   return(Constraint)
 }
 
