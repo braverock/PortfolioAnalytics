@@ -19,7 +19,7 @@ constraints <- add.objective(constraints, type="return", name="mean", multiplier
 # add "tmp_minmax" type objective with "sd" as the name of the function. # This is matched to StdDev
 # Penalize if sd is outside of the range of min and max
 constraints <- add.objective(constraints, type="tmp_minmax", name="sd", 
-                             min=0.005, max=0.02, multiplier=0, enabled=TRUE)
+                             min=0.02, max=0.04, multiplier=0, enabled=TRUE)
 
 # Maximize return subject to a range portfolio volatility values
 
@@ -27,7 +27,7 @@ constraints <- add.objective(constraints, type="tmp_minmax", name="sd",
 set.seed(123)
 opt_out_rp1 <- optimize.portfolio(R=ret, constraints, optimize_method="random", search_size=2000, trace=FALSE)
 
-# sd = 0.01385472 when when multiplier = 0
+# sd = 0.03541473 when when multiplier = 0
 # This calculates the portfolio sd, but does not use it in the objective function
 opt_out_rp1$objective_measures$sd
 
@@ -35,8 +35,8 @@ opt_out_rp1$objective_measures$sd
 # Change the multiplier to 1 and set the min and max outside of the calculated
 # portfolio sd. 
 constraints$objectives[[2]]$multiplier=1
-constraints$objectives[[2]]$min=0.011
-constraints$objectives[[2]]$max=0.015
+constraints$objectives[[2]]$min=0.02
+constraints$objectives[[2]]$max=0.04
 
 set.seed(123)
 opt_out_rp2 <- optimize.portfolio(R=ret, constraints, optimize_method="random", search_size=2000, trace=TRUE)
@@ -45,25 +45,25 @@ opt_out_rp2 <- optimize.portfolio(R=ret, constraints, optimize_method="random", 
 opt_out_rp2$objective_measures$sd
 
 ##### test 3: lower max #####
-# Lower the max below 0.01385472
-constraints$objectives[[2]]$min=0.005
-constraints$objectives[[2]]$max=0.011
+# Lower the max below 0.03541473
+constraints$objectives[[2]]$min=0.02
+constraints$objectives[[2]]$max=0.031
 
 set.seed(123)
 opt_out_rp3 <- optimize.portfolio(R=ret, constraints, optimize_method="random", search_size=2000, trace=TRUE)
 
-# Portfolio sd should now be less than 0.011
+# Portfolio sd should now be less
 opt_out_rp3$objective_measures$sd
 
 ##### test 4: raise min #####
-# Raise the min above 0.01385472
-constraints$objectives[[2]]$min=0.015
-constraints$objectives[[2]]$max=0.02
+# Raise the min above 0.03541473
+constraints$objectives[[2]]$min=0.037
+constraints$objectives[[2]]$max=0.04
 
 set.seed(123)
 opt_out_rp4 <- optimize.portfolio(R=ret, constraints, optimize_method="random", search_size=2000, trace=TRUE)
 
-# Portfolio sd should now be greater than 0.15
+# Portfolio sd should now be greater
 opt_out_rp4$objective_measures$sd
 
 # constraints <- add.objective(constraints, type="risk", name="sd", target=0.012, multiplier=1, enabled=TRUE)
