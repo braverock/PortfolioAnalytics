@@ -336,7 +336,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=F
     max[which(tmp_max < max)] <- tmp_max[which(tmp_max < max)]
   }
   
-  Constraint <- constraint_v2(type=type, enabled=enabled, ...)
+  Constraint <- constraint_v2(type=type, enabled=enabled, constrclass="box_constraint", ...)
   Constraint$min <- min
   Constraint$max <- max
   return(Constraint)
@@ -378,7 +378,7 @@ group_constraint <- function(type, assets, groups, group_min, group_max, enabled
   }
   if (length(group_max) != ngroups) stop(paste("length of group_max must be equal to 1 or the length of groups:", ngroups))
   
-  Constraint <- constraint_v2(type, enabled=enabled, ...)
+  Constraint <- constraint_v2(type, enabled=enabled, constrclass="group_constraint", ...)
   Constraint$groups <- groups
   Constraint$cLO <- group_min
   Constraint$cUP <- group_max
@@ -398,7 +398,7 @@ group_constraint <- function(type, assets, groups, group_min, group_max, enabled
 #' @author Ross Bennett
 #' @export
 weight_sum_constraint <- function(type, min_sum=0.99, max_sum=1.01, enabled=FALSE, ...){
-  Constraint <- constraint_v2(type, enabled=enabled, ...)
+  Constraint <- constraint_v2(type, enabled=enabled, constrclass="weight_sum_constraint", ...)
   Constraint$min_sum <- min_sum
   Constraint$max_sum <- max_sum
   return(Constraint)
@@ -493,7 +493,7 @@ get.constraints <- function(portfolio){
 #' @author Ross Bennett
 #' @export
 turnover_constraint <- function(type, max.turnover, enabled=FALSE, ...){
-  Constraint <- constraint_v2(type, enabled=enabled, ...)
+  Constraint <- constraint_v2(type, enabled=enabled, constrclass="turnover_constraint", ...)
   Constraint$toc <- max.turnover
   return(Constraint)
 }
@@ -509,7 +509,7 @@ turnover_constraint <- function(type, max.turnover, enabled=FALSE, ...){
 #' @author Ross Bennett
 #' @export
 diversification_constraint <- function(type, div.target, enabled=FALSE, ...){
-  Constraint <- constraint_v2(type, enabled=enabled, ...)
+  Constraint <- constraint_v2(type, enabled=enabled, constrclass="diversification_constraint", ...)
   Constraint$div <- div.target
   return(Constraint)
 }
@@ -528,7 +528,7 @@ diversification_constraint <- function(type, div.target, enabled=FALSE, ...){
 #' @author Ross Bennett
 #' @export
 volatility_constraint <- function(type, min.vol, max.vol, enabled=FALSE, ...){
-  Constraint <- constraint_v2(type, enabled=enabled, ...)
+  Constraint <- constraint_v2(type, enabled=enabled, constrclass="volatility_constraint", ...)
   Constraint$min.vol <- min.vol
   Constraint$max.vol <- max.vol
   return(Constraint)

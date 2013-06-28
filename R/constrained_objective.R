@@ -256,7 +256,13 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
               # I would expect this to be the same result when multiplier=0, but it is not.
               # max(tmp_measure - objective$target, 0) should equal 0 when tmp_measure is less than objective$target
               # print(max(tmp_measure - objective$target, 0))
-              out = out + penalty * objective$multiplier * max(tmp_measure - objective$target, 0)
+              # Only penalize if tmp_measure violates target to the upside
+              # if(tmp_measure > objective$target) {
+              #  print(tmp_measure)
+              #  out = out + penalty*abs(objective$multiplier)*abs(tmp_measure-objective$target)
+              # }
+              # out = out + penalty * objective$multiplier * max(tmp_measure - objective$target, 0)
+              out = out + penalty*abs(objective$multiplier)*abs(tmp_measure-objective$target)
             }  
             # target is null or doesn't exist, just maximize, or minimize violation of constraint
             out = out + abs(objective$multiplier)*tmp_measure
