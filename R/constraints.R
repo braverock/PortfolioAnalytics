@@ -482,19 +482,20 @@ get.constraints <- function(portfolio){
 #' constructor for turnover_constraint
 #' 
 #' This function is called by add.constraint when type="turnover" is specified. see \code{\link{add.constraint}}
-#' This function allows the user to specify a maximum turnover constraint
+#' This function allows the user to specify a target turnover value
 #' 
-#' Note that turnover constraint is currently only supported for global minimum variance problem with solve.QP plugin
+#' Note that turnover constraint is currently only supported for global minimum 
+#' variance problem with ROI quadprog plugin
 #' 
 #' @param type character type of the constraint
-#' @param max.turnover maximum turnover value
+#' @param turnover.target target turnover value
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
 #' @export
-turnover_constraint <- function(type, max.turnover, enabled=FALSE, ...){
+turnover_constraint <- function(type, turnover.target, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="turnover_constraint", ...)
-  Constraint$toc <- max.turnover
+  Constraint$toc <- turnover,target
   return(Constraint)
 }
 
@@ -517,20 +518,19 @@ diversification_constraint <- function(type, div.target, enabled=FALSE, ...){
 #' constructor for volatility_constraint
 #' 
 #' This function is called by add.constraint when type="volatility" is specified, \code{\link{add.constraint}}
-#' If portfolio standard deviation is less than min.vol, add penalty to maximize
-#' If portfolio standard deviation is greater than max.vol, add penalty to minimize
+#' Penalize if portfolio standard deviation deviates from volatility target
 #' 
 #' @param type character type of the constraint
-#' @param min.vol minimum volatility constraint
-#' @param max.vol maximum volatilty constraint
+#' @param vol.target target volatilty constraint
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
 #' @export
-volatility_constraint <- function(type, min.vol, max.vol, enabled=FALSE, ...){
+volatility_constraint <- function(type, vol.target, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="volatility_constraint", ...)
-  Constraint$min.vol <- min.vol
-  Constraint$max.vol <- max.vol
+  # Constraint$min.vol <- min.vol
+  # Constraint$max.vol <- max.vol
+  Constraint$vol.target <- vol.target
   return(Constraint)
 }
 
