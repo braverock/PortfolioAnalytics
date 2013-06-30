@@ -212,9 +212,9 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
                                                      ...=...)
          },
          # Sum of weights constraints
-         weight=, weight_sum = {tmp_constraint <- weight_sum_constraint(type=type,
-                                                                        enabled=enabled,
-                                                                        ...=...)
+         weight=, leverage=, weight_sum = {tmp_constraint <- weight_sum_constraint(type=type,
+                                                                                   enabled=enabled,
+                                                                                   ...=...)
          },
          # Turnover constraint
          turnover = {tmp_constraint <- turnover_constraint(type=type,
