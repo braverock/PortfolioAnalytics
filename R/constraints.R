@@ -216,6 +216,20 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
                                                                                    enabled=enabled,
                                                                                    ...=...)
          },
+         # Special case of weight_sum constraint for full investment
+         full_investment = {tmp_constraint <- weight_sum_constraint(type=type,
+                                                                    min_sum=1,
+                                                                    max_sum=1,
+                                                                    enabled=enabled,
+                                                                    ...=...)
+         },
+         # Special case of weight_sum constraint for dollar neutral or active
+         dollar_neutral=, active= {tmp_constraint <- weight_sum_constraint(type=type,
+                                                                           min_sum=0,
+                                                                           max_sum=0,
+                                                                           enabled=enabled,
+                                                                           ...=...)
+         },
          # Turnover constraint
          turnover = {tmp_constraint <- turnover_constraint(type=type,
                                                            enabled=enabled,
