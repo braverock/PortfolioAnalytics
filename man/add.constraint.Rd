@@ -12,12 +12,12 @@
 
   \item{type}{character type of the constraint to add or
   update, currently 'weight_sum', 'box', 'group',
-  'turnover', 'diversification', or 'volatility'}
+  'turnover', 'diversification', or 'position_limit'}
 
   \item{enabled}{TRUE/FALSE}
 
-  \item{\dots}{any other passthru parameters to specify box
-  and/or group constraints}
+  \item{\dots}{any other passthru parameters to specify
+  constraints}
 
   \item{indexnum}{if you are updating a specific
   constraint, the index number in the $objectives list to
@@ -30,7 +30,12 @@
 \details{
   In general, you will define your constraints as:
   'weight_sum', 'box', 'group', 'turnover',
-  'diversification', 'volatility', or 'position_limit'.
+  'diversification', or 'position_limit'.
+
+  Special cases for the weight_sum constraint are
+  "full_investment" and "dollar_nuetral" or "active" with
+  appropriate values set for min_sum and max_sum. see
+  \code{\link{weight_sum_constraint}}
 }
 \author{
   Ross Bennett

@@ -15,7 +15,7 @@
   \item{groups}{vector specifying the groups of the assets}
 
   \item{group_labels}{character vector to label the groups
-  (i.e. size, asset class, style, etc.)}
+  (e.g. size, asset class, style, etc.)}
 
   \item{group_min}{numeric or vector specifying minimum
   weight group constraints}
@@ -25,8 +25,8 @@
 
   \item{enabled}{TRUE/FALSE}
 
-  \item{\dots}{any other passthru parameters to specify box
-  and/or group constraints}
+  \item{\dots}{any other passthru parameters to specify
+  group constraints}
 }
 \description{
   This function is called by add.constraint when

@@ -16,15 +16,25 @@
 
   \item{enabled}{TRUE/FALSE}
 
-  \item{\dots}{any other passthru parameters to specify box
-  and/or group constraints}
+  \item{\dots}{any other passthru parameters to specify
+  weight_sum constraints}
 }
 \description{
   This function is called by add.constraint when
-  type="weight_sum" is specified. see
-  \code{\link{add.constraint}} This function allows the
+  "weight_sum", "leverage", "full_investment",
+  "dollar_neutral", or "active" is specified as the type.
+  see \code{\link{add.constraint}} This function allows the
   user to specify the minimum and maximum that the weights
   sum to
+}
+\details{
+  Special cases for the weight_sum constraint are
+  "full_investment" and "dollar_nuetral" or "active"
+
+  If type="full_investment", min_sum=1 and max_sum=1
+
+  If type="dollar_neutral" or type="active", min_sum=0, and
+  max_sum=0
 }
 \author{
   Ross Bennett

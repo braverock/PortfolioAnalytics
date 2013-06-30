@@ -28,7 +28,7 @@
   \item{enabled}{TRUE/FALSE}
 
   \item{\dots}{any other passthru parameters to specify box
-  and/or group constraints}
+  constraints}
 }
 \description{
   This function is called by add.constraint when type="box"

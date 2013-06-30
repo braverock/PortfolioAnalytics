@@ -177,12 +177,14 @@ constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="v2_constraint")
 #' 
 #' This is the main function for adding and/or updating constraints in an object of type \code{\link{portfolio}}.
 #' 
-#' In general, you will define your constraints as: 'weight_sum', 'box', 'group', 'turnover', 'diversification', 'volatility', or 'position_limit'.  
+#' In general, you will define your constraints as: 'weight_sum', 'box', 'group', 'turnover', 'diversification', or 'position_limit'.
+#' 
+#' Special cases for the weight_sum constraint are "full_investment" and "dollar_nuetral" or "active" with appropriate values set for min_sum and max_sum. see \code{\link{weight_sum_constraint}}
 #' 
 #' @param portfolio an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
-#' @param type character type of the constraint to add or update, currently 'weight_sum', 'box', 'group', 'turnover', 'diversification', or 'volatility'
+#' @param type character type of the constraint to add or update, currently 'weight_sum', 'box', 'group', 'turnover', 'diversification', or 'position_limit'
 #' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @param \dots any other passthru parameters to specify constraints
 #' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
 #' @author Ross Bennett
 #' @seealso \code{\link{constraint_v2}}, \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{volatility_constraint}}, \code{\link{position_limit_constraint}}
@@ -272,7 +274,7 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
 #' @param min_mult numeric or named vector specifying minimum multiplier box constraint from seed weight in \code{assets}
 #' @param max_mult numeric or named vector specifying maximum multiplier box constraint from seed weight in \code{assets}
 #' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @param \dots any other passthru parameters to specify box constraints
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @export
@@ -372,7 +374,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=F
 #' @param group_min numeric or vector specifying minimum weight group constraints
 #' @param group_max numeric or vector specifying minimum weight group constraints
 #' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @param \dots any other passthru parameters to specify group constraints
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @export
@@ -415,14 +417,20 @@ group_constraint <- function(type, assets, groups, group_labels=NULL, group_min,
 
 #' constructor for weight_sum_constraint
 #' 
-#' This function is called by add.constraint when type="weight_sum" is specified. see \code{\link{add.constraint}}
+#' This function is called by add.constraint when "weight_sum", "leverage", "full_investment", "dollar_neutral", or "active" is specified as the type. see \code{\link{add.constraint}}
 #' This function allows the user to specify the minimum and maximum that the weights sum to
+#' 
+#' Special cases for the weight_sum constraint are "full_investment" and "dollar_nuetral" or "active"
+#' 
+#' If type="full_investment", min_sum=1 and max_sum=1
+#' 
+#' If type="dollar_neutral" or type="active", min_sum=0, and max_sum=0
 #' 
 #' @param type character type of the constraint
 #' @param min_sum minimum sum of all asset weights, default 0.99
 #' @param max_sum maximum sum of all asset weights, default 1.01
 #' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @param \dots any other passthru parameters to specify weight_sum constraints
 #' @author Ross Bennett
 #' @export
 weight_sum_constraint <- function(type, min_sum=0.99, max_sum=1.01, enabled=FALSE, ...){
