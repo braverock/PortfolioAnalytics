@@ -44,3 +44,4 @@ Collate:
     'objectiveFUN.R'
     'portfolio.R'
     'constraintsFUN.R'
+    'constraint_fnMap.R'

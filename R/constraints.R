@@ -354,6 +354,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=F
 #' @param type character type of the constraint
 #' @param assets number of assets, or optionally a named vector of assets specifying seed weights
 #' @param groups vector specifying the groups of the assets
+#' @param group_labels character vector to label the groups (e.g. size, asset class, style, etc.)
 #' @param group_min numeric or vector specifying minimum weight group constraints
 #' @param group_max numeric or vector specifying minimum weight group constraints
 #' @param enabled TRUE/FALSE
@@ -361,7 +362,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=F
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @export
-group_constraint <- function(type, assets, groups, group_min, group_max, enabled=FALSE, ...) {
+group_constraint <- function(type, assets, groups, group_labels=NULL, group_min, group_max, enabled=FALSE, ...) {
   nassets <- length(assets)
   ngroups <- length(groups)
   
@@ -383,8 +384,16 @@ group_constraint <- function(type, assets, groups, group_min, group_max, enabled
   }
   if (length(group_max) != ngroups) stop(paste("length of group_max must be equal to 1 or the length of groups:", ngroups))
   
+  # Construct the group_label vector if it is not passed in
+  if(is.null(group_labels)){
+    group_labels <- paste(rep("group", ngroups), 1:ngroups, sep="")
+  }
+  
+  if(length(group_labels) != length(groups)) stop("length of group_labels must be equal to the length of groups")
+  
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="group_constraint", ...)
   Constraint$groups <- groups
+  Constraint$group_labels <- group_labels
   Constraint$cLO <- group_min
   Constraint$cUP <- group_max
   return(Constraint)

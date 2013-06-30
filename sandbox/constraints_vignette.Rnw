@@ -80,10 +80,12 @@ Add group constraints.
 The assets are grouped in 2 groups of 2 assets.
 The sum of asset weights of the first group must be greater than or equal to 0.15 and less than or equal to 0.65.
 The sum asset weights of the second group must be greater than or equal to 0.25 and less than or equal to 0.55.
+Labels for the groups can be specified (e.g. size, asset class, style, etc.). By default, the group labels will be group1, group2, ..., groupN for N groups. 
 <<>>=
 pspec <- add.constraint(portfolio=pspec, 
                         type="group", 
                         groups=c(2, 2),
+                        group_labels=c("Style A", "Style B"),
                         group_min=c(0.15, 0.25),
                         group_max=c(0.65, 0.55),
                         enabled=TRUE)
