@@ -22,7 +22,15 @@
   the maximum number of positions (i.e. number of assets
   with non-zero weights)
 }
+\examples{
+data(edhec)
+ret <- edhec[, 1:4]
+
+pspec <- portfolio.spec(assets=colnames(ret))
+
+pspec <- add.constraint(portfolio=pspec, type="position_limit", max.pos=3)
+}
 \author{
-  Ross Bennett
+  Ross Bennett #'
 }
 

@@ -277,6 +277,20 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
 #' @param \dots any other passthru parameters to specify box constraints
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
+#' @examples
+#' data(edhec)
+#' ret <- edhec[, 1:4]
+#' 
+#' pspec <- portfolio.spec(assets=colnames(ret))
+#' 
+#' # defaults to min=0 and max=1
+#' pspec <- add.constraint(pspec, type="box")
+#' 
+#' # specify box constraints as a scalar
+#' pspec <- add.constraint(pspec, type="box", min=0.05, max=0.45)
+#' 
+#' # specify box constraints per asset
+#' pspec <- add.constraint(pspec, type="box", min=c(0.05, 0.10, 0.08, 0.06), max=c(0.45, 0.55, 0.35, 0.65))
 #' @export
 box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=FALSE, ...){
   # Based on the constraint function for object of class constraint_v1 that
@@ -377,6 +391,18 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=F
 #' @param \dots any other passthru parameters to specify group constraints
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
+#' @examples
+#' data(edhec)
+#' ret <- edhec[, 1:4]
+#' 
+#' pspec <- portfolio.spec(assets=colnames(ret))
+#' 
+#' pspec <- add.constraint(portfolio=pspec, 
+#'                         type="group", 
+#'                         groups=c(2, 2),
+#'                         group_labels=c("Style A", "Style B"),
+#'                         group_min=c(0.15, 0.25),
+#'                         group_max=c(0.65, 0.55))
 #' @export
 group_constraint <- function(type, assets, groups, group_labels=NULL, group_min, group_max, enabled=FALSE, ...) {
   nassets <- length(assets)
@@ -432,6 +458,21 @@ group_constraint <- function(type, assets, groups, group_labels=NULL, group_min,
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify weight_sum constraints
 #' @author Ross Bennett
+#' @examples
+#' data(edhec)
+#' ret <- edhec[, 1:4]
+#' 
+#' pspec <- portfolio.spec(assets=colnames(ret))
+#' 
+#' # min_sum and max_sum can be specified with type="weight_sum" or type="leverage"
+#' pspec <- add.constraint(pspec, type="weight_sum", min_sum=1, max_sum=1)
+#' 
+#' # Specify type="full_investment" to set min_sum=1 and max_sum=1
+#' pspec <- add.constraint(pspec, type="full_investment")
+#' 
+#' # Specify type="dollar_neutral" or type="active" to set min_sum=0 and max_sum=0
+#' pspec <- add.constraint(pspec, type="dollar_neutral")
+#' pspec <- add.constraint(pspec, type="active")
 #' @export
 weight_sum_constraint <- function(type, min_sum=0.99, max_sum=1.01, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="weight_sum_constraint", ...)
@@ -528,6 +569,13 @@ get.constraints <- function(portfolio){
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
+#' @examples
+#' data(edhec)
+#' ret <- edhec[, 1:4]
+#' 
+#' pspec <- portfolio.spec(assets=colnames(ret))
+#' 
+#' pspec <- add.constraint(portfolio=pspec, type="turnover", turnover.target=0.6)
 #' @export
 turnover_constraint <- function(type, turnover.target, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="turnover_constraint", ...)
@@ -544,6 +592,13 @@ turnover_constraint <- function(type, turnover.target, enabled=FALSE, ...){
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
+#' @examples
+#' data(edhec)
+#' ret <- edhec[, 1:4]
+#' 
+#' pspec <- portfolio.spec(assets=colnames(ret))
+#' 
+#' pspec <- add.constraint(portfolio=pspec, type="diversification", div.target=0.7)
 #' @export
 diversification_constraint <- function(type, div.target, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="diversification_constraint", ...)
@@ -580,6 +635,13 @@ volatility_constraint <- function(type, vol.target, enabled=FALSE, ...){
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
+#' #' @examples
+#' data(edhec)
+#' ret <- edhec[, 1:4]
+#' 
+#' pspec <- portfolio.spec(assets=colnames(ret))
+#' 
+#' pspec <- add.constraint(portfolio=pspec, type="position_limit", max.pos=3)
 #' @export
 position_limit_constraint <- function(type, max.pos, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="position_limit_constraint", ...)

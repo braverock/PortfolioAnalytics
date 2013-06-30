@@ -33,6 +33,19 @@
   type="group" is specified. see
   \code{\link{add.constraint}}
 }
+\examples{
+data(edhec)
+ret <- edhec[, 1:4]
+
+pspec <- portfolio.spec(assets=colnames(ret))
+
+pspec <- add.constraint(portfolio=pspec,
+                        type="group",
+                        groups=c(2, 2),
+                        group_labels=c("Style A", "Style B"),
+                        group_min=c(0.15, 0.25),
+                        group_max=c(0.65, 0.55))
+}
 \author{
   Ross Bennett
 }

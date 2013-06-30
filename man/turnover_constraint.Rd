@@ -26,6 +26,14 @@
   for global minimum variance problem with ROI quadprog
   plugin
 }
+\examples{
+data(edhec)
+ret <- edhec[, 1:4]
+
+pspec <- portfolio.spec(assets=colnames(ret))
+
+pspec <- add.constraint(portfolio=pspec, type="turnover", turnover.target=0.6)
+}
 \author{
   Ross Bennett
 }

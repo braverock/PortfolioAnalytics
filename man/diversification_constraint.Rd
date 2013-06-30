@@ -20,6 +20,14 @@
   type="diversification" is specified,
   \code{\link{add.constraint}}
 }
+\examples{
+data(edhec)
+ret <- edhec[, 1:4]
+
+pspec <- portfolio.spec(assets=colnames(ret))
+
+pspec <- add.constraint(portfolio=pspec, type="diversification", div.target=0.7)
+}
 \author{
   Ross Bennett
 }
