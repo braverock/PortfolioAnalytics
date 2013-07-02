@@ -2,13 +2,13 @@
 \alias{volatility_constraint}
 \title{constructor for volatility_constraint}
 \usage{
-  volatility_constraint(type, vol.target, enabled = FALSE,
+  volatility_constraint(type, vol_target, enabled = FALSE,
     ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
 
-  \item{vol.target}{target volatilty constraint}
+  \item{vol_target}{target volatilty constraint}
 
   \item{enabled}{TRUE/FALSE}
 

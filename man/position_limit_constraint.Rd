@@ -2,13 +2,13 @@
 \alias{position_limit_constraint}
 \title{constructor for position_limit_constraint}
 \usage{
-  position_limit_constraint(type, max.pos, enabled = FALSE,
+  position_limit_constraint(type, max_pos, enabled = FALSE,
     ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
 
-  \item{max.pos}{maximum number of positions}
+  \item{max_pos}{maximum number of positions}
 
   \item{enabled}{TRUE/FALSE}
 
@@ -28,7 +28,7 @@ ret <- edhec[, 1:4]
 
 pspec <- portfolio.spec(assets=colnames(ret))
 
-pspec <- add.constraint(portfolio=pspec, type="position_limit", max.pos=3)
+pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
 }
 \author{
   Ross Bennett #'

@@ -565,7 +565,7 @@ get.constraints <- function(portfolio){
 #' variance problem with ROI quadprog plugin
 #' 
 #' @param type character type of the constraint
-#' @param turnover.target target turnover value
+#' @param turnover_target target turnover value
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
@@ -575,11 +575,11 @@ get.constraints <- function(portfolio){
 #' 
 #' pspec <- portfolio.spec(assets=colnames(ret))
 #' 
-#' pspec <- add.constraint(portfolio=pspec, type="turnover", turnover.target=0.6)
+#' pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.6)
 #' @export
-turnover_constraint <- function(type, turnover.target, enabled=FALSE, ...){
+turnover_constraint <- function(type, turnover_target, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="turnover_constraint", ...)
-  Constraint$toc <- turnover.target
+  Constraint$turnover_target <- turnover_target
   return(Constraint)
 }
 
@@ -588,7 +588,7 @@ turnover_constraint <- function(type, turnover.target, enabled=FALSE, ...){
 #' This function is called by add.constraint when type="diversification" is specified, \code{\link{add.constraint}}
 #' 
 #' @param type character type of the constraint
-#' @param div.target diversification target value
+#' @param div_target diversification target value
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
@@ -598,11 +598,11 @@ turnover_constraint <- function(type, turnover.target, enabled=FALSE, ...){
 #' 
 #' pspec <- portfolio.spec(assets=colnames(ret))
 #' 
-#' pspec <- add.constraint(portfolio=pspec, type="diversification", div.target=0.7)
+#' pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
 #' @export
-diversification_constraint <- function(type, div.target, enabled=FALSE, ...){
+diversification_constraint <- function(type, div_target, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="diversification_constraint", ...)
-  Constraint$div <- div.target
+  Constraint$div_target <- div_target
   return(Constraint)
 }
 
@@ -612,16 +612,16 @@ diversification_constraint <- function(type, div.target, enabled=FALSE, ...){
 #' Penalize if portfolio standard deviation deviates from volatility target
 #' 
 #' @param type character type of the constraint
-#' @param vol.target target volatilty constraint
+#' @param vol_target target volatilty constraint
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
 #' @export
-volatility_constraint <- function(type, vol.target, enabled=FALSE, ...){
+volatility_constraint <- function(type, vol_target, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="volatility_constraint", ...)
   # Constraint$min.vol <- min.vol
   # Constraint$max.vol <- max.vol
-  Constraint$vol.target <- vol.target
+  Constraint$vol_target <- vol_target
   return(Constraint)
 }
 

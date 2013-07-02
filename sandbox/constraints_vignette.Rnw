@@ -24,10 +24,10 @@ The following constraints are currently supported
   \item[weight\_sum] The weight\_sum constraint is used to constrain the sum of weights. Common use cases of this are to apply a full investment, dollar neutral, or leverage constraint.
   \item[box] Box constraints are used to constrain the minimum and maximum weights of assets. Standard box constraints with a single upper bound and single lower bound as well as per asset inequality constraints on weights can be specified. A special case of box constraints is a long only constraint where the minimum weight is 0 and maximum weight is 1.
   \item[group] Group constraints are used to specify the minimum and maximum weights of groups of assets. A common use case to group assets by market cap or style. Note that group constraints is only implemented for the ROI solvers. Implementing the group constraints for other solvers should be possible in \code{constrained\_objective} using the \code{constrained\_group\_tmp} function.
-  \item[turnover] Turnover can be specified as a constraint, but is not currently implemented in any solvers. Turnover constraint may not be able to be implemented in the ROI glpk solver. It is implemented for the ROI quadprog solver in sandbox/testing\_turnover.gmv.R. Currently, turnover can be implemented as an objective function and the function has been added to the file \code{R/objectiveFUN.R}. The user can specify a turnover target \code{turnover.target}. Any deviation from the target will be penalized.
-  \item[diversification] Diversification can be specified as a constraint, but is not currently implemented in any solvers. This can be done in the mapping function in the next part or implemented inside \code{constrained\_objective}. The user can  specify a diversification target value \code{div.target}. Any deviation from the target will be penalized.
-  \item[volatility] Volatility can be specified as a constraint, but it is not currently implemented for any solvers. This can be done in the mapping function in the next part or implemented inside \code{constrained\_objective}. See \code{constrained\_objective} for how volatility is handled as an objective. The user can specify a volatility target value \code{vol.target}. Any deviation from the target will be penalized.
-  \item[position\_limit] Integer constraint for max position cardinality constraint. This may be able to be implemented in \code{randomize\_portfolio} by generating portfolios with the number of non-zero weights equal to \code{max.pos}, then fill in weights of zero so the length of the weights vector is equal to the number of assets, then scramble the weights vector. The number of non-zero weights could also be random so that the number of non-zero weights is not always equal to \code{max.pos}. This could be implemented in the DEoptim solver with the mapping function. This might be do-able in Rglpk for max return and min ETL. Rglpk supports mixed integer types, but solve.QP does not. May be able to use branch-and-bound technique using solve.QP.
+  \item[turnover] Turnover can be specified as a constraint, but is not currently implemented in any solvers. Turnover constraint may not be able to be implemented in the ROI glpk solver. It is implemented for the ROI quadprog solver in sandbox/testing\_turnover.gmv.R. Currently, turnover can be implemented as an objective function and the function has been added to the file \code{R/objectiveFUN.R}. The user can specify a turnover target \code{turnover\_target}. Any deviation from the target will be penalized.
+  \item[diversification] Diversification can be specified as a constraint, but is not currently implemented in any solvers. This can be done in the mapping function in the next part or implemented inside \code{constrained\_objective}. The user can  specify a diversification target value \code{div\_target}. Any deviation from the target will be penalized.
+  \item[volatility] Volatility can be specified as a constraint, but it is not currently implemented for any solvers. This can be done in the mapping function in the next part or implemented inside \code{constrained\_objective}. See \code{constrained\_objective} for how volatility is handled as an objective. The user can specify a volatility target value \code{vol\_target}. Any deviation from the target will be penalized.
+  \item[position\_limit] Integer constraint for max position cardinality constraint. This may be able to be implemented in \code{randomize\_portfolio} by generating portfolios with the number of non-zero weights equal to \code{max\_pos}, then fill in weights of zero so the length of the weights vector is equal to the number of assets, then scramble the weights vector. The number of non-zero weights could also be random so that the number of non-zero weights is not always equal to \code{max\_pos}. This could be implemented in the DEoptim solver with the mapping function. This might be do-able in Rglpk for max return and min ETL. Rglpk supports mixed integer types, but solve.QP does not. May be able to use branch-and-bound technique using solve.QP.
 \end{itemize}
 
 Constraint TODO
@@ -92,29 +92,29 @@ pspec <- add.constraint(portfolio=pspec,
 pspec$constraints[[3]]
 @
 
-Add turnover constraint. Any deviation from \code{turnover.target} is penalized.
+Add turnover constraint. Any deviation from \code{turnover\_target} is penalized.
 <<>>=
 pspec <- add.constraint(portfolio=pspec,
                         type="turnover", 
-                        turnover.target=0.6,
+                        turnover_target=0.6,
                         enabled=TRUE)
 pspec$constraints[[4]]
 @
 
-Add diversification constraint. Any deviation from \code{div.target} will be penalized. 
+Add diversification constraint. Any deviation from \code{div\_target} will be penalized. 
 <<>>=
 pspec <- add.constraint(portfolio=pspec,
                         type="diversification",
-                        div.target=0.7,
+                        div_target=0.7,
                         enabled=TRUE)
 pspec$constraints[[5]]
 @
 
-Add volatility constraint. Any deviation from \code{vol.target} will be penalized.
+Add volatility constraint. Any deviation from \code{vol\_target} will be penalized.
 <<>>=
 pspec <- add.constraint(portfolio=pspec,
                         type="volatility",
-                        vol.target=0.035,
+                        vol_target=0.035,
                         enabled=TRUE)
 pspec$constraints[[6]]
 @
@@ -123,7 +123,7 @@ Add position\_limit constraint. Constraint on the maximum number of positions or
 <<>>=
 pspec <- add.constraint(portfolio=pspec,
                         type="position_limit",
-                        max.pos=3,
+                        max_pos=3,
                         enabled=TRUE)
 pspec$constraints[[7]]
 @

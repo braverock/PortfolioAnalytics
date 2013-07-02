@@ -2,13 +2,13 @@
 \alias{diversification_constraint}
 \title{constructor for diversification_constraint}
 \usage{
-  diversification_constraint(type, div.target,
+  diversification_constraint(type, div_target,
     enabled = FALSE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
 
-  \item{div.target}{diversification target value}
+  \item{div_target}{diversification target value}
 
   \item{enabled}{TRUE/FALSE}
 
@@ -26,7 +26,7 @@ ret <- edhec[, 1:4]
 
 pspec <- portfolio.spec(assets=colnames(ret))
 
-pspec <- add.constraint(portfolio=pspec, type="diversification", div.target=0.7)
+pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
 }
 \author{
   Ross Bennett

@@ -2,13 +2,13 @@
 \alias{turnover_constraint}
 \title{constructor for turnover_constraint}
 \usage{
-  turnover_constraint(type, turnover.target,
+  turnover_constraint(type, turnover_target,
     enabled = FALSE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
 
-  \item{turnover.target}{target turnover value}
+  \item{turnover_target}{target turnover value}
 
   \item{enabled}{TRUE/FALSE}
 
@@ -32,7 +32,7 @@ ret <- edhec[, 1:4]
 
 pspec <- portfolio.spec(assets=colnames(ret))
 
-pspec <- add.constraint(portfolio=pspec, type="turnover", turnover.target=0.6)
+pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.6)
 }
 \author{
   Ross Bennett
