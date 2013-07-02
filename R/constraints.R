@@ -631,7 +631,7 @@ volatility_constraint <- function(type, vol.target, enabled=FALSE, ...){
 #' Allows the user to specify the maximum number of positions (i.e. number of assets with non-zero weights)
 #' 
 #' @param type character type of the constraint
-#' @param max.pos maximum number of positions
+#' @param max_pos maximum number of positions
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
@@ -641,11 +641,11 @@ volatility_constraint <- function(type, vol.target, enabled=FALSE, ...){
 #' 
 #' pspec <- portfolio.spec(assets=colnames(ret))
 #' 
-#' pspec <- add.constraint(portfolio=pspec, type="position_limit", max.pos=3)
+#' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
 #' @export
-position_limit_constraint <- function(type, max.pos, enabled=FALSE, ...){
+position_limit_constraint <- function(type, max_pos, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="position_limit_constraint", ...)
-  Constraint$max.pos <- max.pos
+  Constraint$max_pos <- max_pos
   return(Constraint)
 }
 
