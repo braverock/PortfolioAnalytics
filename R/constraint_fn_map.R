@@ -21,6 +21,9 @@ constraint_fn_map <- function(weights, portfolio) {
     stop("Portfolio passed in is not of class portfolio")
   }
   
+  # number of assets
+  nassets <- length(portfolio$assets)
+  
   # This is in a loop so the order of transformation depends on how the constraints are added by the user.
   # Maybe take this out of a loop because the order of transformation is important
   for(constraint in portfolio$constraints) {
@@ -72,6 +75,15 @@ constraint_fn_map <- function(weights, portfolio) {
       
       # Diversification constraints
       # TODO
+      
+      ## position_limit constraint
+      if(inherits(constraint, "group_constraint")){
+        max_pos <- constraint$max_pos
+        
+        w <- txfrm_position_limit_constraint(weights=weights, max_pos=max_pos, nassets=nassets)
+        
+      } # end position_limit_constraint transformation
+      
     }
   }
   return(w)
@@ -161,6 +173,26 @@ txfrm_weight_sum_constraint <- function(weights, min_sum, max_sum){
   if(sum(weights) > max_sum) { weights <- (max_sum / sum(weights)) * weights }
   # normalize to min_sum
   if(sum(weights) < min_sum) { weights <- (min_sum / sum(weights)) * weights }
+  return(weights)
+}
+
+#' Transform weights for position_limit constraints
+#' 
+#' This is a helper function called inside constraint_fnMap to transform the weights vector to satisfy position_limit constraints.
+#' This function sets the minimum nassets-max_pos assets equal to 0 such that the max_pos number of assets will have non-zero weights.
+#' 
+#' @param weights vector of weights
+#' @param max_pos maximum position of assets with non_zero weights
+#' @param nassets number of assets
+#' @author Ross Bennett
+#' @export
+txfrm_position_limit_constraint <- function(weights, max_pos, nassets, tolerance=.Machine$double.eps^0.5){
+  # account for weights that are very small (less than .Machine$double.eps^0.5) and are basically zero
+  # check if max_pos is violated
+  if(sum(abs(weights) > tolerance) > max_pos){
+    # set the minimum nassets-max_pos weights equal to 0
+    weights[head(order(weights), nassets - max_pos)] <- 0
+  }
   return(weights)
 }
 
