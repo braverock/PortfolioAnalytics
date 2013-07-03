@@ -196,11 +196,11 @@ txfrm_position_limit_constraint <- function(weights, max_pos, nassets, tolerance
   return(weights)
 }
 
-#' Transform a weights vector to min_sum/max_sum leverage and min/max box constraints using logic from randomize_portfolio
+#' Transform a weights vector to satisfy leverage, box, and group constraints using logic from \code{randomize_portfolio}
 #' 
 #' This function uses a block of code from \code{\link{randomize_portfolio}} 
 #' to transform the weight vector if either the weight_sum (leverage) 
-#' constraints or box constraints are violated.
+#' constraints, box constraints, or group constraints are violated.
 #' The resulting weights vector might be quite different from the original weights vector.
 #' 
 #' @param w weights vector to be transformed
@@ -208,17 +208,27 @@ txfrm_position_limit_constraint <- function(weights, max_pos, nassets, tolerance
 #' @param max_sum maximum sum of all asset weights, default 1.01
 #' @param min numeric or named vector specifying minimum weight box constraints
 #' @param max numeric or named vector specifying maximum weight box constraints
+#' @param groups vector specifying the groups of the assets
+#' @param cLO numeric or vector specifying minimum weight group constraints
+#' @param cUP numeric or vector specifying minimum weight group constraints
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, Ross Bennett (based on an idea by Pat Burns)
 #' @export
-rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, max_permutations=200){
+rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, cUP, max_permutations=200){
   # Uses logic from randomize_portfolio to "normalize" a weights vector to 
-  # satisfy min_sum and max_sum while account for min and max box constraints
+  # satisfy min_sum and max_sum while accounting for box and group constraints
   # Modified from randomize_portfolio to trigger the while loops if any weights 
   # violate min or max box constraints. A weights vector would not be transformed
   # in randomize_portfolio if min_sum and max_sum were satisfied, but the
   # min/max constraints were violated.
+  
+  # return w if all constraints are satisfied
+  if((sum(w) >= min_sum & sum(w) <= max_sum) & 
+       (all(w >= min) & all(w <= max)) & 
+       (all(!group_fail(weights, groups, cLO, cUP)))){
+    return(w)
+  }
   
   # generate a sequence of weights based on min/max box constraints
   weight_seq <- generatesequence(min=min(min), max=max(max), by=0.005)
@@ -229,8 +239,8 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, max_permutatio
   # create a temporary weights vector that will be modified in the while loops
   tmp_w <- w
   
-  # while portfolio is outside min_sum/max_sum or min/max and we have not reached max_permutations
-  while ((sum(tmp_w) <= min_sum | sum(tmp_w) >= max_sum | any(tmp_w < min) | any(tmp_w > max)) & permutations <= max_permutations) {
+  # while portfolio is outside min_sum/max_sum or min/max or group constraints and we have not reached max_permutations
+  while ((sum(tmp_w) <= min_sum | sum(tmp_w) >= max_sum | any(tmp_w < min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP))) & permutations <= max_permutations) {
     permutations = permutations + 1
     # check our box constraints on total portfolio weight
     # reduce(increase) total portfolio size till you get a match
@@ -240,8 +250,8 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, max_permutatio
     
     random_index <- sample(1:length(tmp_w), length(tmp_w))
     i = 1
-    # while sum of weights is less than min_sum or min/max box constraint is violated
-    while ((sum(tmp_w) <= min_sum | any(tmp_w < min) | any(tmp_w > max)) & i <= length(tmp_w)) {
+    # while sum of weights is less than min_sum or min/max box or group constraint is violated
+    while ((sum(tmp_w) <= min_sum | any(tmp_w < min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP))) & i <= length(tmp_w)) {
       # randomly permute and increase a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tmp_w[cur_index]
@@ -256,8 +266,11 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, max_permutatio
       }
       i=i+1 # increment our counter
     } # end increase loop
-    # while sum of weights is greater than max_sum or min/max box constraint is violated
-    while ((sum(tmp_w) >= max_sum | any(tmp_w < min) | any(tmp_w > max)) & i <= length(tmp_w)) {
+    # need to reset i here otherwise the decreasing loop will be ignored
+    # group_fail does not test for direction of violation, just that group constraints were violated
+    i = 1 
+    # while sum of weights is greater than max_sum or min/max box or group constraint is violated
+    while ((sum(tmp_w) >= max_sum | any(tmp_w < min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP))) & i <= length(tmp_w)) {
       # randomly permute and decrease a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tmp_w[cur_index]
@@ -292,6 +305,40 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, max_permutatio
     }
   }
   return(portfolio)
+}
+
+#' Test if group constraints have been violated
+#' 
+#' The function loops through each group and tests if cLO or cUP have been violated
+#' for the given group. This is a helper function for \code{\link{rp_transform}}.
+#' 
+#' @param weights weights vector to test
+#' @param groups vector specifying the groups of the assets
+#' @param cLO numeric or vector specifying minimum weight group constraints
+#' @param cUP numeric or vector specifying minimum weight group constraints
+#' @return logical vector: TRUE if group constraints are violated for a given group
+#' @author Ross Bennett
+#' @export
+group_fail <- function(weights, groups, cLO, cUP){
+  # return FALSE if groups, cLO, or cUP is NULL
+  if(is.null(groups) | is.null(cLO) | is.null(cUP)) return(FALSE)
+  
+  n.groups <- length(groups)
+  group_fail <- vector(mode="logical", length=n.groups)
+  k <- 1
+  l <- 0
+  for(i in 1:n.groups){
+    j <- groups[i]
+    tmp.w <- weights[k:(l+j)]
+    grp.min <- cLO[i]
+    grp.max <- cUP[i]
+    # return TRUE if grp.min or grp.max is violated
+    group_fail[i] <- ( sum(tmp.w) < grp.min | sum(tmp.w) > grp.max )
+    k <- k + j
+    l <- k - 1
+  }
+  # returns logical vector of groups. TRUE if either cLO or cUP is violated
+  return(group_fail)
 }
 
 # test

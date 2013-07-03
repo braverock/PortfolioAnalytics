@@ -1,9 +1,9 @@
 \name{rp_transform}
 \alias{rp_transform}
-\title{Transform a weights vector to min_sum/max_sum leverage and min/max box constraints using logic from randomize_portfolio}
+\title{Transform a weights vector to satisfy leverage, box, and group constraints using logic from \code{randomize_portfolio}}
 \usage{
   rp_transform(w, min_sum = 0.99, max_sum = 1.01, min, max,
-    max_permutations = 200)
+    groups, cLO, cUP, max_permutations = 200)
 }
 \arguments{
   \item{w}{weights vector to be transformed}
@@ -20,6 +20,14 @@
   \item{max}{numeric or named vector specifying maximum
   weight box constraints}
 
+  \item{groups}{vector specifying the groups of the assets}
+
+  \item{cLO}{numeric or vector specifying minimum weight
+  group constraints}
+
+  \item{cUP}{numeric or vector specifying minimum weight
+  group constraints}
+
   \item{max_permutations}{integer: maximum number of
   iterations to try for a valid portfolio, default 200}
 }
@@ -29,10 +37,10 @@
 \description{
   This function uses a block of code from
   \code{\link{randomize_portfolio}} to transform the weight
-  vector if either the weight_sum (leverage) constraints or
-  box constraints are violated. The resulting weights
-  vector might be quite different from the original weights
-  vector.
+  vector if either the weight_sum (leverage) constraints,
+  box constraints, or group constraints are violated. The
+  resulting weights vector might be quite different from
+  the original weights vector.
 }
 \author{
   Peter Carl, Brian G. Peterson, Ross Bennett (based on an
