@@ -198,7 +198,7 @@ txfrm_position_limit_constraint <- function(weights, max_pos, nassets, tolerance
 
 #' Transform a weights vector to min_sum/max_sum leverage and min/max box constraints using logic from randomize_portfolio
 #' 
-#' This function uses a block of code from \link{\code{randomize_portfolio}} 
+#' This function uses a block of code from \code{\link{randomize_portfolio}} 
 #' to transform the weight vector if either the weight_sum (leverage) 
 #' constraints or box constraints are violated.
 #' The resulting weights vector might be quite different from the original weights vector.
