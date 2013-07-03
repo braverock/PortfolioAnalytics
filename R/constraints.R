@@ -187,7 +187,7 @@ constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="v2_constraint")
 #' @param \dots any other passthru parameters to specify constraints
 #' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
 #' @author Ross Bennett
-#' @seealso \code{\link{constraint_v2}}, \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{volatility_constraint}}, \code{\link{position_limit_constraint}}
+#' @seealso \code{\link{constraint_v2}}, \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{position_limit_constraint}}
 #' @export
 add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
   # Check to make sure that the portfolio passed in is a portfolio object
@@ -241,11 +241,6 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
          diversification = {tmp_constraint <- diversification_constraint(type=type,
                                                                          enabled=enabled,
                                                                          ...=...)
-         },
-         # Volatility constraint
-         volatility = {tmp_constraint <- volatility_constraint(type=type,
-                                                               enabled=enabled,
-                                                               ...=...)
          },
          # Position limit constraint
          position_limit = {tmp_constraint <- position_limit_constraint(type=type,
@@ -603,25 +598,6 @@ turnover_constraint <- function(type, turnover_target, enabled=FALSE, ...){
 diversification_constraint <- function(type, div_target, enabled=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="diversification_constraint", ...)
   Constraint$div_target <- div_target
-  return(Constraint)
-}
-
-#' constructor for volatility_constraint
-#' 
-#' This function is called by add.constraint when type="volatility" is specified, \code{\link{add.constraint}}
-#' Penalize if portfolio standard deviation deviates from volatility target
-#' 
-#' @param type character type of the constraint
-#' @param vol_target target volatilty constraint
-#' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters to specify box and/or group constraints
-#' @author Ross Bennett
-#' @export
-volatility_constraint <- function(type, vol_target, enabled=FALSE, ...){
-  Constraint <- constraint_v2(type, enabled=enabled, constrclass="volatility_constraint", ...)
-  # Constraint$min.vol <- min.vol
-  # Constraint$max.vol <- max.vol
-  Constraint$vol_target <- vol_target
   return(Constraint)
 }
 
