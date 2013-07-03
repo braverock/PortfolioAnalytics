@@ -196,6 +196,114 @@ txfrm_position_limit_constraint <- function(weights, max_pos, nassets, tolerance
   return(weights)
 }
 
+#' Transform a weights vector to min_sum/max_sum leverage and min/max box constraints using logic from randomize_portfolio
+#' 
+#' This function uses a block of code from \link{\code{randomize_portfolio}} 
+#' to transform the weight vector if either the weight_sum (leverage) 
+#' constraints or box constraints are violated.
+#' The resulting weights vector might be quite different from the original weights vector.
+#' 
+#' @param w weights vector to be transformed
+#' @param min_sum minimum sum of all asset weights, default 0.99
+#' @param max_sum maximum sum of all asset weights, default 1.01
+#' @param min numeric or named vector specifying minimum weight box constraints
+#' @param max numeric or named vector specifying maximum weight box constraints
+#' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
+#' @return named weighting vector
+#' @author Peter Carl, Brian G. Peterson, Ross Bennett (based on an idea by Pat Burns)
+#' @export
+rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, max_permutations=200){
+  # Uses logic from randomize_portfolio to "normalize" a weights vector to 
+  # satisfy min_sum and max_sum while account for min and max box constraints
+  # Modified from randomize_portfolio to trigger the while loops if any weights 
+  # violate min or max box constraints. A weights vector would not be transformed
+  # in randomize_portfolio if min_sum and max_sum were satisfied, but the
+  # min/max constraints were violated.
+  
+  # generate a sequence of weights based on min/max box constraints
+  weight_seq <- generatesequence(min=min(min), max=max(max), by=0.005)
+  
+  # start the permutations counter
+  permutations <- 1
+  
+  # create a temporary weights vector that will be modified in the while loops
+  tmp_w <- w
+  
+  # while portfolio is outside min_sum/max_sum or min/max and we have not reached max_permutations
+  while ((sum(tmp_w) <= min_sum | sum(tmp_w) >= max_sum | any(tmp_w < min) | any(tmp_w > max)) & permutations <= max_permutations) {
+    permutations = permutations + 1
+    # check our box constraints on total portfolio weight
+    # reduce(increase) total portfolio size till you get a match
+    # 1> check to see which bound you've failed on, brobably set this as a pair of while loops
+    # 2> randomly select a column and move only in the direction *towards the bound*, maybe call a function inside a function
+    # 3> check and repeat
+    
+    random_index <- sample(1:length(tmp_w), length(tmp_w))
+    i = 1
+    # while sum of weights is less than min_sum or min/max box constraint is violated
+    while ((sum(tmp_w) <= min_sum | any(tmp_w < min) | any(tmp_w > max)) & i <= length(tmp_w)) {
+      # randomly permute and increase a random portfolio element
+      cur_index <- random_index[i]
+      cur_val <- tmp_w[cur_index]
+      if (length(weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]) > 1) {
+        # randomly sample an element from weight_seq that is greater than cur_val and less than max
+        tmp_w[cur_index] <- sample(weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])], 1)
+        # print(paste("new val:",tmp_w[cur_index]))
+      } else {
+        if (length(weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]) == 1) {
+          tmp_w[cur_index] <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]
+        }
+      }
+      i=i+1 # increment our counter
+    } # end increase loop
+    # while sum of weights is greater than max_sum or min/max box constraint is violated
+    while ((sum(tmp_w) >= max_sum | any(tmp_w < min) | any(tmp_w > max)) & i <= length(tmp_w)) {
+      # randomly permute and decrease a random portfolio element
+      cur_index <- random_index[i]
+      cur_val <- tmp_w[cur_index]
+      if (length(weight_seq <= cur_val & weight_seq >= min[cur_index] ) > 1) {
+        # randomly sample an element from weight_seq that is less than cur_val and greater than min
+        tmp_w[cur_index] <- sample(weight_seq[which(weight_seq <= cur_val & weight_seq >= min[cur_index] )], 1)
+      } else {
+        if (length(weight_seq <= cur_val & weight_seq >= min[cur_index] ) == 1) {
+          tmp_w[cur_index] <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index])]
+        }
+      }
+      i=i+1 # increment our counter
+    } # end decrease loop
+  } # end final walk towards the edges
+  
+  portfolio <- tmp_w
+  
+  colnames(portfolio)<-colnames(w)
+  
+  # checks for infeasible portfolio
+  if (sum(portfolio)<=min_sum | sum(portfolio)>=max_sum){
+    portfolio <- w
+    warning("Infeasible portfolio created, defaulting to w, perhaps increase max_permutations.")
+  }
+  if(isTRUE(all.equal(w,portfolio))) {
+    if (sum(w)>=min_sum & sum(w)<=max_sum) {
+      warning("Unable to generate a feasible portfolio different from w, perhaps adjust your parameters.")
+      return(w)
+    } else {
+      warning("Unable to generate a feasible portfolio, perhaps adjust your parameters.")
+      return(NULL)
+    }
+  }
+  return(portfolio)
+}
+
+# test
+# w <- c(0.1, 0.25, 0.3, 0.15, 0.05, 0.15)
+# min <- rep(0.1, length(w))
+# max <- rep(0.45, length(w))
+# w1 <- rp_normalize(w=w, min_sum=0.99, max_sum=1.01, min=min, max=max)
+# w1
+# sum(w1)
+# any(w1 < min)
+# any(w1 > max)
+
 # library(PortfolioAnalytics)
 # data(edhec)
 # ret <- edhec[, 1:4]
