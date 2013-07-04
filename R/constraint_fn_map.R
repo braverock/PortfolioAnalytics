@@ -89,6 +89,122 @@ constraint_fn_map <- function(weights, portfolio) {
   return(w)
 }
 
+#' mapping function to transform or penalize weights that violate constraints
+#' 
+#' The purpose of the mapping function is to transform a weights vector
+#' that does not meet all the constraints into a weights vector that
+#' does meet the constraints, if one exists, hopefully with a minimum
+#' of transformation.
+#' 
+#' I think our first step should be to test each constraint type, in
+#' some sort of hierarchy, starting with box constraints (almost all
+#' solvers support box constraints, of course), since some of the other
+#' transformations will violate the box constraints, and we'll need to
+#' transform back again.
+#' 
+#' This function will replace constraint_fn_map
+#' 
+#' leverage, box, group, and position limit constraints are transformed
+#' diversification and turnover constraints are penalized
+#' 
+#' @param weights vector of weights
+#' @param portfolio object of class portfolio
+#' @return 
+#' \itemize{
+#' \item{weights: }{vector of transformed weights meeting constraints}
+#' \item{out: }{penalty term}
+#' }
+#' @author Ross Bennett
+#' @export
+fn_map <- function(weights, portfolio, ...){
+  
+  if(!is.portfolio(portfolio)) stop("portfolio passed in is not of class 'portfolio'")
+  
+  nassets <- length(portfolio$assets)
+  
+  # step 1: Get the constraints out of the portfolio object
+  constraints <- get_constraints(portfolio)
+  min_sum <- constraints$min_sum
+  max_sum <- constraints$max_sum
+  # rp_transform will rarely find a feasible portfolio if there is not some 
+  # 'wiggle room' between min_sum and max_sum
+  if((max_sum - min_sum) < 0.02){
+    min_sum <- min_sum - 0.01
+    max_sum <- max_sum + 0.01
+  }
+  min <- constraints$min
+  max <- constraints$max
+  groups <- constraints$groups
+  cLO <- constraints$cLO
+  cUP <- constraints$cUP
+  div_target <- constraints$div_target
+  turnover_target <- constraints$turnover_target
+  max_pos <- constraints$max_pos
+  tolerance <- .Machine$double.eps^0.5
+  if(!hasArg(penalty)) penalty <- 1e4
+  if(!hasArg(multiplier)) multiplier <- 1
+  
+  out <- 0
+  
+  tmp_weights <- weights
+  
+  # step 2: check that the vector of weights satisfies the constraints, 
+  # transform weights if constraint is violated
+  # TRUE if the weights vector is in compliance with the constraints
+  # FALSE if the weights vector violates the constraint
+  
+  # check leverage constraints
+  if(!is.null(min_sum) & !is.null(max_sum)){
+    if(!(sum(tmp_weights) >= min_sum & sum(tmp_weights) <= max_sum)){
+      print("leverage constraint violated, transforming weights.")
+      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, 500)
+      # tmp_weights <- txfrm_weight_sum_constraint(tmp_weights, min_sum, max_sum)
+    }
+  }
+  
+  # check box constraints
+  if(!is.null(min) & !is.null(max)){
+    if(!(all(tmp_weights >= min) & all(tmp_weights <= max))){
+      print("box constraints violated, transforming weights.")
+      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, 500)
+      # tmp_weights <- txfrm_box_constraint(tmp_weights, min, max)
+    }
+  }
+  
+  # check group constraints
+  if(!is.null(groups) & !is.null(cLO) & !is.null(cUP)){
+    if(any(group_fail(tmp_weights, groups, cLO, cUP))){
+      print("group constraints violated, transforming weights.")
+      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, 500)
+      # tmp_weights <- txfrm_group_constraint(tmp_weights, groups, cLO, cUP)
+    }
+  }
+  
+  # check position_limit constraints
+  if(!is.null(max_pos)){
+    if(!(sum(abs(tmp_weights) > tolerance) <= max_pos)){
+      # print("position_limit constraint violated, transforming weights.")
+      # tmp_weights <- txfrm_position_limit_constraint(tmp_weights, max_pos, nassets)
+    }
+  }
+  
+  # check diversification constraint
+  if(!is.null(div_target)){
+    print("transform or penalize to meet diversification target")
+    # penalize instead of transform?
+    div <- diversification(tmp_weights)
+    out = out + penalty * abs(multiplier) * abs(div - div_target)
+  }
+  
+  if(!is.null(turnover_target)){
+    # print("transform or penalize to meet turnover target")
+    # penalize instead of transform
+    to <- turnover(tmp_weights)
+    out = out + penalty * abs(multiplier) * abs(to - turnover_target)
+  }
+  return(list(weights=tmp_weights, out=out))
+}
+
 #' Transform weights that violate min or max box constraints
 #' 
 #' This is a helper function called inside constraint_fnMap to transform the weights vector to satisfy box constraints.
