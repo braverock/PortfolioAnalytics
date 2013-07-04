@@ -485,69 +485,74 @@ is.constraint <- function( x ) {
   inherits( x, "constraint" )
 }
 
-#'  Helper function to get the enabled constraints out of the portfolio object, see \code{\link{portfolio.spec}}
+#'  Helper function to get the enabled constraints out of the portfolio object
 #'  
 #'  When the v1_constraint object is instantiated via constraint, the arguments
 #'  min_sum, max_sum, min, and max are either specified by the user or default
 #'  values are assigned. These are required by other functions such as
-#'  optimize.portfolio. This function will check that these variables are in
-#'  the portfolio object in the constraints list. This function could be used
-#'  at the beginning of optimize.portfolio to check the constraints in the 
-#'  portfolio object.
-#' 
-#'  Returns an object of class constraint which is a flat list of weight_sum, box, and group constraints.
-#'  Uses the same naming as the v1_constraint object which may be useful when passed to other functions.
+#'  optimize.portfolio and constrained . This function will check that these 
+#'  variables are in the portfolio object in the constraints list. This 
+#'  function could be used at the beginning of optimize.portfolio or other 
+#'  functions to extract the constraints from the portfolio object. Uses the 
+#'  same naming as the v1_constraint object which may be useful when passed 
+#'  to other functions.
+#'  
 #'  @param portfolio an object of class 'portfolio'
+#'  @return an object of class 'constraint' which is a flattened list of enabled constraints
 #'  @author Ross Bennett
-#'  @seealso \code{\link{portfolio.spec}}, \code{\link{constraint_v2}}
+#'  @seealso \code{\link{portfolio.spec}}
 #'  @export
-get.constraints <- function(portfolio){
-  # Check that object passed in is a portfolio objec
+get_constraints <- function(portfolio){
   if(!is.portfolio(portfolio)) stop("portfolio passed in is not of class portfolio")
   
-  tmp.constraints <- portfolio$constraints
-  
-  # Check that constraints are passed in
-  if(length(tmp.constraints) == 0) stop("No constraints passed in")
+  if(length(pspec$constraints) == 0) stop("No constraints passed in")
   
   out <- list()
+  out$min_sum <- NA
+  out$max_sum <- NA
+  out$min <- NA
+  out$max <- NA
   
-  # Required constraints
-  out$min_sum <- NULL
-  out$max_sum <- NULL
-  out$min <- NULL
-  out$max <- NULL
-  
-  for(i in 1:length(tmp.constraints)){
-    if(tmp.constraints[[i]]$enabled){
-      # weight_sum constraint
-      if(tmp.constraints[[i]]$type == "weight_sum"){
-        # Extract min_sum and max_sum
-        out$min_sum <- tmp.constraints[[i]]$min_sum
-        out$max_sum <- tmp.constraints[[i]]$max_sum
+  for(constraint in portfolio$constraints) {
+    if(constraint$enabled){
+      if(inherits(constraint, "weight_sum_constraint")){
+        out$min_sum <- constraint$min_sum
+        out$max_sum <- constraint$max_sum
       }
-      # box constraints
-      if(tmp.constraints[[i]]$type == "box"){
-        # Extract min and max
-        out$min <- tmp.constraints[[i]]$min
-        out$max <- tmp.constraints[[i]]$max
+      if(inherits(constraint, "box_constraint")){
+        out$min <- constraint$min
+        out$max <- constraint$max
       }
-      # group constraints
-      if(tmp.constraints[[i]]$type == "group"){
-        # Extract groups, cLO, and cUP
-        out$groups <- tmp.constraints[[i]]$groups
-        out$cLO <- tmp.constraints[[i]]$cLO
-        out$cUP <- tmp.constraints[[i]]$cUP
+      if(inherits(constraint, "group_constraint")){
+        out$groups <- constraint$groups
+        out$group_labels <- constraint$group_labels
+        out$cLO <- constraint$cLO
+        out$cUP <- constraint$cUP
+      }
+      if(inherits(constraint, "turnover_constraint")){
+        out$turnover_target <- constraint$turnover_target
+      }
+      if(inherits(constraint, "diversification_constraint")){
+        out$div_target <- constraint$div_target
+      }
+      if(inherits(constraint, "position_limit_constraint")){
+        out$max_pos <- constraint$max_pos
       }
     }
   }
-  # Error if no constraints are enabled
-  if(length(out) == 0) stop("No constraints are enabled")
   
-  # Error if required constraints are not specified
-  if(is.null(out$min) | is.null(out$max) | is.null(out$max_sum) | is.null(out$min_sum)) {
-    stop("Must specify weight_sum constraints (min_sum and max_sum) and box constraints ( min and max")
+  # min_sum, max_sum, min, and max are required to be passed in and enabled
+  if(is.na(out$min_sum) | is.na(out$max_sum)) {
+    # return(NULL)
+    stop("Leverage constraint min_sum and max_sum are not enabled or passed in")
   }
+  if(length(out$min) == 1 | length(out$max) == 1) {
+    if(is.na(out$min) | is.na(out$max)){
+      # return(NULL)
+      stop("Box constraints min and max are not enabled or passed in")
+    }
+  }
+  # structure and return class of type constraint
   return(structure(out, class="constraint"))
 }
 

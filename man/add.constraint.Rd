@@ -47,7 +47,6 @@
   \code{\link{group_constraint}},
   \code{\link{turnover_constraint}},
   \code{\link{diversification_constraint}},
-  \code{\link{volatility_constraint}},
   \code{\link{position_limit_constraint}}
 }
 
