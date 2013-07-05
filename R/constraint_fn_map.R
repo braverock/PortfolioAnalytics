@@ -156,8 +156,9 @@ fn_map <- function(weights, portfolio, ...){
   # check leverage constraints
   if(!is.null(min_sum) & !is.null(max_sum)){
     if(!(sum(tmp_weights) >= min_sum & sum(tmp_weights) <= max_sum)){
-      print("leverage constraint violated, transforming weights.")
-      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, 500)
+      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500)
+      # print("leverage constraint violated, transforming weights.")
+      # print(tmp_weights)
       # tmp_weights <- txfrm_weight_sum_constraint(tmp_weights, min_sum, max_sum)
     }
   }
@@ -165,8 +166,9 @@ fn_map <- function(weights, portfolio, ...){
   # check box constraints
   if(!is.null(min) & !is.null(max)){
     if(!(all(tmp_weights >= min) & all(tmp_weights <= max))){
-      print("box constraints violated, transforming weights.")
-      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, 500)
+      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500)
+      # print("box constraints violated, transforming weights.")
+      # print(tmp_weights)
       # tmp_weights <- txfrm_box_constraint(tmp_weights, min, max)
     }
   }
@@ -174,8 +176,9 @@ fn_map <- function(weights, portfolio, ...){
   # check group constraints
   if(!is.null(groups) & !is.null(cLO) & !is.null(cUP)){
     if(any(group_fail(tmp_weights, groups, cLO, cUP))){
-      print("group constraints violated, transforming weights.")
-      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, 500)
+      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500)
+      # print("group constraints violated, transforming weights.")
+      # print(tmp_weights)
       # tmp_weights <- txfrm_group_constraint(tmp_weights, groups, cLO, cUP)
     }
   }
@@ -183,25 +186,35 @@ fn_map <- function(weights, portfolio, ...){
   # check position_limit constraints
   if(!is.null(max_pos)){
     if(!(sum(abs(tmp_weights) > tolerance) <= max_pos)){
+      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500)
       # print("position_limit constraint violated, transforming weights.")
+      # print(tmp_weights)
       # tmp_weights <- txfrm_position_limit_constraint(tmp_weights, max_pos, nassets)
     }
   }
   
   # check diversification constraint
   if(!is.null(div_target)){
-    print("transform or penalize to meet diversification target")
     # penalize instead of transform?
     div <- diversification(tmp_weights)
-    out = out + penalty * abs(multiplier) * abs(div - div_target)
+    # only penalize if not within +/- 5% of target
+    if((div < div_target * .95) | (div > div_target * 1.05)){
+      # print("transform or penalize to meet diversification target")
+      out = out + penalty * abs(multiplier) * abs(div - div_target)
+    }
   }
   
+  # check turnover constraint
   if(!is.null(turnover_target)){
-    # print("transform or penalize to meet turnover target")
     # penalize instead of transform
     to <- turnover(tmp_weights)
-    out = out + penalty * abs(multiplier) * abs(to - turnover_target)
+    # only penalize if not within +/- 5% of target
+    if((to < turnover_target * 0.95) | (to > turnover_target * 1.05)){
+      # print("transform or penalize to meet turnover target")
+      out = out + penalty * abs(multiplier) * abs(to - turnover_target)
+    }
   }
+  names(tmp_weights) <- names(weights)
   return(list(weights=tmp_weights, out=out))
 }
 
@@ -343,9 +356,24 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   tolerance=.Machine$double.eps^0.5
   if(is.null(max_pos)) max_pos <- length(w)
   
+  # Create a temporary min vector that will be modified, because a feasible
+  # portfolio is rarely created if all(min > 0). This is due to the while
+  # loop that checks any(tmp_w < min).
+  tmp_min <- min
+  
+  # If weight_i = 0 and min_i > 0, then this will violate box constraints
+  # even though weight_i = 0 to satisfy position_limit constraints. Modify
+  # the tmp_min vector and set tmp_min_i equal to zero where weights_i = 0.
+  # If w is less than or equal to tolerance then it is essentially 0
+  if(any(abs(w) <= tolerance)){
+    if(any(tmp_min[which(abs(w) <= tolerance)] > 0)){
+      tmp_min[which(abs(w) <= tolerance)] <- -tolerance
+    }
+  }
+  
   # return w if all constraints are satisfied
   if((sum(w) >= min_sum & sum(w) <= max_sum) & 
-       (all(w >= min) & all(w <= max)) & 
+       (all(w >= tmp_min) & all(w <= max)) & 
        (all(!group_fail(weights, groups, cLO, cUP))) &
        (sum(abs(w) > tolerance) <= max_pos)){
     return(w)
@@ -361,11 +389,6 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   
   # create a temporary weights vector that will be modified in the while loops
   tmp_w <- w
-  
-  # Create a temporary min vector that will be modified, because a feasible
-  # portfolio is rarely created if all(min > 0). This is due to the while
-  # loop that checks any(tmp_w < min).
-  tmp_min <- min
   
   # while portfolio is outside min_sum/max_sum or tmp_min/max or group or postion_limit constraints and we have not reached max_permutations
   while ((sum(tmp_w) <= min_sum | sum(tmp_w) >= max_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP)) | (sum(abs(tmp_w) > tolerance) > max_pos)) & permutations <= max_permutations) {
