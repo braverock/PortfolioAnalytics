@@ -116,10 +116,10 @@ randomize_portfolio <- function (rpconstraints, max_permutations=200, rounding=3
           # randomly permute and decrease a random portfolio element
           cur_index<-random_index[i]
           cur_val <- tportfolio[cur_index]
-            if (length(weight_seq<=cur_val & weight_seq>=min[cur_index] )>1) {
-              tportfolio[cur_index]<-sample(weight_seq[which(weight_seq<=cur_val & weight_seq>=min[cur_index] )],1)
+            if (length(weight_seq[(weight_seq<=cur_val) & (weight_seq>=min[cur_index])] )>1) {
+              tportfolio[cur_index]<-sample(weight_seq[(weight_seq<=cur_val) & (weight_seq>=min[cur_index] )],1)
             } else {
-              if (length(weight_seq<=cur_val & weight_seq>=min[cur_index] )==1) {
+              if (length(weight_seq[(weight_seq<=cur_val) & (weight_seq>=min[cur_index])] )==1) {
                 tportfolio[cur_index]<-weight_seq[(weight_seq<=cur_val) & (weight_seq>=min[cur_index])]
               }
             }
