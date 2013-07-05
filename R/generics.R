@@ -39,3 +39,68 @@ summary.optimize.portfolio.rebalancing <- function(object, ...) {
         }
     }    
 }
+
+#' Summary method for objects of class 'portfolio'
+#' 
+#' @param portfolio object of class portfolio
+#' @author Ross Bennett
+#' @export
+summary.portfolio <- function(portfolio){
+  if(!is.portfolio(portfolio)) stop("object passed in is not of class 'portfolio'")
+  
+  cat(rep("*", 50) ,"\n", sep="")
+  cat("PortfolioAnalytics Portfolio Specification", "\n")
+  cat(rep("*", 50) ,"\n", sep="")
+  
+  # Assets
+  cat("\nAssets\n")
+  nassets <- length(portfolio$assets)
+  cat("Number of assets:", nassets, "\n")
+  
+  # Constraints
+  cat("\nConstraints\n")
+  nconstraints <- length(portfolio$constraints)
+  # logical vector of enabled constraints
+  enabled.constraints <- sapply(pspec$constraints, function(x) x$enabled)
+  # character vector of constraint types
+  names.constraints <- sapply(pspec$constraints, function(x) x$type)
+  cat("Number of constraints:", nconstraints, "\n")
+  cat("Number of enabled constraints:", sum(enabled.constraints), "\n")
+  if(sum(enabled.constraints) > 0){
+    cat("Enabled constraint types\n")
+    for(type in names.constraints[enabled.constraints]) {
+      cat("\t\t-", type, "\n")
+    }
+  }
+  cat("Number of disabled constraints:", nconstraints - sum(enabled.constraints), "\n")
+  if((nconstraints - sum(enabled.constraints)) > 0){
+    cat("Disabled constraint types\n")
+    for(type in setdiff(names.constraints, names.constraints[enabled.constraints])) {
+      cat("\t\t-", type, "\n")
+    }
+  }
+  
+  # Objectives
+  cat("\nObjectives\n")
+  nobjectives <- length(portfolio$objectives)
+  # logical vector of enabled objectives
+  enabled.objectives <- sapply(pspec$objectives, function(x) x$enabled)
+  # character vector of objective names
+  names.objectives <- sapply(pspec$objectives, function(x) x$name)
+  cat("Number of objectives:", nobjectives, "\n")
+  cat("Number of enabled objectives:", sum(enabled.objectives), "\n")
+  if(sum(enabled.objectives) > 0){
+    cat("Enabled objective names\n")
+    for(name in names.objectives[enabled.objectives]) {
+      cat("\t\t-", name, "\n")
+    }
+  }
+  cat("Number of disabled objectives:", nobjectives - sum(enabled.objectives), "\n")
+  if((nobjectives - sum(enabled.objectives)) > 0){
+    cat("Disabled objective types\n")
+    for(name in setdiff(names.objectives, names.objectives[enabled.objectives])) {
+      cat("\t\t-", name, "\n")
+    }
+  }
+  cat("\n")
+}
