@@ -17,7 +17,7 @@ max <- rep(0.65, length(weights))
 
 group_fail(weights, groups, cLO, cUP)
 
-w <- rp_transform(weights, min_sum, max_sum, min, max, groups, cLO, cUP, 200)
+w <- rp_transform(weights, min_sum, max_sum, min, max, groups, cLO, cUP, 2, 200)
 w
 group_fail(w, groups, cLO, cUP)
 
@@ -42,13 +42,13 @@ max <- rep(0.65, length(weights))
 
 group_fail(weights, groups, cLO, cUP)
 
-# groups is NULL and box and leverage constraints are satisfied so this should
+# groups and max_pos are NULL and box and leverage constraints are satisfied so this should
 # just return the original weights vector
-w <- rp_transform(weights, min_sum, max_sum, min, max, groups=NULL, cLO, cUP, 500)
+w <- rp_transform(weights, min_sum, max_sum, min, max, groups=NULL, cLO, cUP, max_pos=NULL, 500)
 w
 
 # The first group exceeds cUP so the weights vector should be modified
-w <- rp_transform(weights, min_sum, max_sum, min, max, groups, cLO, cUP, 1000)
+w <- rp_transform(weights, min_sum, max_sum, min, max, groups, cLO, cUP, 4, 1000)
 w
 group_fail(w, groups, cLO, cUP)
 
@@ -68,7 +68,7 @@ max <- rep(0.65, length(weights))
 
 group_fail(weights, groups, cLO, cUP)
 
-w <- rp_transform(weights, min_sum, max_sum, min, max, groups, cLO, cUP, 500)
+w <- rp_transform(weights, min_sum, max_sum, min, max, groups, cLO, cUP, 5, 500)
 w
 group_fail(w, groups, cLO, cUP)
 
@@ -93,4 +93,5 @@ group_fail(weights, groups, cLO, cUP)
 
 # Note that this was typically not working with max_permutations=200
 # Relax constraints or increase max_permutations
-rp_transform(weights, min_sum, max_sum, min, max, groups, cLO, cUP, 1000)
+w <- rp_transform(weights, min_sum, max_sum, min, max, groups, cLO, cUP, 7, 1000)
+w

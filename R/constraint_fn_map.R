@@ -312,11 +312,11 @@ txfrm_position_limit_constraint <- function(weights, max_pos, nassets, tolerance
   return(weights)
 }
 
-#' Transform a weights vector to satisfy leverage, box, and group constraints using logic from \code{randomize_portfolio}
+#' Transform a weights vector to satisfy leverage, box, group, and position_limit constraints using logic from \code{randomize_portfolio}
 #' 
 #' This function uses a block of code from \code{\link{randomize_portfolio}} 
 #' to transform the weight vector if either the weight_sum (leverage) 
-#' constraints, box constraints, or group constraints are violated.
+#' constraints, box constraints, group constraints, or position_limit constraints are violated.
 #' The resulting weights vector might be quite different from the original weights vector.
 #' 
 #' @param w weights vector to be transformed
@@ -327,11 +327,12 @@ txfrm_position_limit_constraint <- function(weights, max_pos, nassets, tolerance
 #' @param groups vector specifying the groups of the assets
 #' @param cLO numeric or vector specifying minimum weight group constraints
 #' @param cUP numeric or vector specifying minimum weight group constraints
+#' @param max_pos maximum assets with non-zero weights
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, Ross Bennett (based on an idea by Pat Burns)
 #' @export
-rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, cUP, max_permutations=200){
+rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, cUP, max_pos=NULL, max_permutations=200){
   # Uses logic from randomize_portfolio to "normalize" a weights vector to 
   # satisfy min_sum and max_sum while accounting for box and group constraints
   # Modified from randomize_portfolio to trigger the while loops if any weights 
@@ -339,15 +340,21 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   # in randomize_portfolio if min_sum and max_sum were satisfied, but the
   # min/max constraints were violated.
   
+  tolerance=.Machine$double.eps^0.5
+  if(is.null(max_pos)) max_pos <- length(w)
+  
   # return w if all constraints are satisfied
   if((sum(w) >= min_sum & sum(w) <= max_sum) & 
        (all(w >= min) & all(w <= max)) & 
-       (all(!group_fail(weights, groups, cLO, cUP)))){
+       (all(!group_fail(weights, groups, cLO, cUP))) &
+       (sum(abs(w) > tolerance) <= max_pos)){
     return(w)
   }
   
   # generate a sequence of weights based on min/max box constraints
   weight_seq <- generatesequence(min=min(min), max=max(max), by=0.005)
+  # make sure there is a 0 in weight_seq
+  if(!is.null(max_pos) & !is.element(0, weight_seq)) weight_seq <- c(0, weight_seq)
   
   # start the permutations counter
   permutations <- 1
@@ -355,19 +362,38 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   # create a temporary weights vector that will be modified in the while loops
   tmp_w <- w
   
-  # while portfolio is outside min_sum/max_sum or min/max or group constraints and we have not reached max_permutations
-  while ((sum(tmp_w) <= min_sum | sum(tmp_w) >= max_sum | any(tmp_w < min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP))) & permutations <= max_permutations) {
+  # Create a temporary min vector that will be modified, because a feasible
+  # portfolio is rarely created if all(min > 0). This is due to the while
+  # loop that checks any(tmp_w < min).
+  tmp_min <- min
+  
+  # while portfolio is outside min_sum/max_sum or tmp_min/max or group or postion_limit constraints and we have not reached max_permutations
+  while ((sum(tmp_w) <= min_sum | sum(tmp_w) >= max_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP)) | (sum(abs(tmp_w) > tolerance) > max_pos)) & permutations <= max_permutations) {
     permutations = permutations + 1
     # check our box constraints on total portfolio weight
     # reduce(increase) total portfolio size till you get a match
-    # 1> check to see which bound you've failed on, brobably set this as a pair of while loops
+    # 1> check to see which bound you've failed on, probably set this as a pair of while loops
     # 2> randomly select a column and move only in the direction *towards the bound*, maybe call a function inside a function
     # 3> check and repeat
     
-    random_index <- sample(1:length(tmp_w), length(tmp_w))
+    # reset tmp_w and tmp_min to their original values
+    tmp_w <- w
+    tmp_min <- min
+    
+    random_index <- sample(1:length(tmp_w), max_pos)
+    
+    # Get the index values that are not in random_index and set them equal to 0
+    full_index <- 1:length(tmp_w)
+    not_index <- setdiff(full_index, random_index)
+    tmp_w[not_index] <- 0
+    
+    # set some tmp_min values equal to zero so the while loops do not see a
+    # violation of any(tmp_w < tmp_min)
+    tmp_min[not_index] <- 0
+    
     i = 1
-    # while sum of weights is less than min_sum or min/max box or group constraint is violated
-    while ((sum(tmp_w) <= min_sum | any(tmp_w < min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP))) & i <= length(tmp_w)) {
+    # while sum of weights is less than min_sum or tmp_min/max box or group constraint is violated
+    while ((sum(tmp_w) <= min_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP))) & i <= length(tmp_w)) {
       # randomly permute and increase a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tmp_w[cur_index]
@@ -385,17 +411,17 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
     # need to reset i here otherwise the decreasing loop will be ignored
     # group_fail does not test for direction of violation, just that group constraints were violated
     i = 1 
-    # while sum of weights is greater than max_sum or min/max box or group constraint is violated
-    while ((sum(tmp_w) >= max_sum | any(tmp_w < min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP))) & i <= length(tmp_w)) {
+    # while sum of weights is greater than max_sum or tmp_min/max box or group constraint is violated
+    while ((sum(tmp_w) >= max_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP))) & i <= length(tmp_w)) {
       # randomly permute and decrease a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tmp_w[cur_index]
-      if (length(weight_seq <= cur_val & weight_seq >= min[cur_index] ) > 1) {
-        # randomly sample an element from weight_seq that is less than cur_val and greater than min
-        tmp_w[cur_index] <- sample(weight_seq[which(weight_seq <= cur_val & weight_seq >= min[cur_index] )], 1)
+      if (length(weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])] ) > 1) {
+        # randomly sample an element from weight_seq that is less than cur_val and greater than tmp_min
+        tmp_w[cur_index] <- sample(weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])] , 1)
       } else {
-        if (length(weight_seq <= cur_val & weight_seq >= min[cur_index] ) == 1) {
-          tmp_w[cur_index] <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index])]
+        if (length(weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])] ) == 1) {
+          tmp_w[cur_index] <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])]
         }
       }
       i=i+1 # increment our counter
