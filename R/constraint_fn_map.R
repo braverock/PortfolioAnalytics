@@ -66,7 +66,15 @@ fn_map <- function(weights, portfolio, ...){
   # check leverage constraints
   if(!is.null(min_sum) & !is.null(max_sum)){
     if(!(sum(tmp_weights) >= min_sum & sum(tmp_weights) <= max_sum)){
-      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500))
+      if(inherits(tmp_weights, "try-error")){
+        # Default to initial weights
+        tmp_weights <- weights
+        # Other actions to consider
+        # relax constraints (rp_transform checks all constraints together so we may not know which constraint is too restrictive)
+        # different normalization method
+        # return initial weights and penalize?
+      }
       # print("leverage constraint violated, transforming weights.")
       # print(tmp_weights)
       # tmp_weights <- txfrm_weight_sum_constraint(tmp_weights, min_sum, max_sum)
@@ -76,7 +84,15 @@ fn_map <- function(weights, portfolio, ...){
   # check box constraints
   if(!is.null(min) & !is.null(max)){
     if(!(all(tmp_weights >= min) & all(tmp_weights <= max))){
-      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500))
+      if(inherits(tmp_weights, "try-error")){
+        # Default to initial weights
+        tmp_weights <- weights
+        # Other actions to consider
+        # relax constraints (rp_transform checks all constraints together so we may not know which constraint is too restrictive)
+        # different normalization method
+        # return initial weights and penalize?
+      }
       # print("box constraints violated, transforming weights.")
       # print(tmp_weights)
       # tmp_weights <- txfrm_box_constraint(tmp_weights, min, max)
@@ -86,7 +102,15 @@ fn_map <- function(weights, portfolio, ...){
   # check group constraints
   if(!is.null(groups) & !is.null(cLO) & !is.null(cUP)){
     if(any(group_fail(tmp_weights, groups, cLO, cUP))){
-      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500))
+      if(inherits(tmp_weights, "try-error")){
+        # Default to initial weights
+        tmp_weights <- weights
+        # Other actions to consider
+        # relax constraints (rp_transform checks all constraints together so we may not know which constraint is too restrictive)
+        # different normalization method
+        # return initial weights and penalize?
+      }
       # print("group constraints violated, transforming weights.")
       # print(tmp_weights)
       # tmp_weights <- txfrm_group_constraint(tmp_weights, groups, cLO, cUP)
@@ -96,7 +120,15 @@ fn_map <- function(weights, portfolio, ...){
   # check position_limit constraints
   if(!is.null(max_pos)){
     if(!(sum(abs(tmp_weights) > tolerance) <= max_pos)){
-      tmp_weights <- rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500))
+      if(inherits(tmp_weights, "try-error")){
+        # Default to initial weights
+        tmp_weights <- weights
+        # Other actions to consider
+        # relax constraints (rp_transform checks all constraints together so we may not know which constraint is too restrictive)
+        # different normalization method
+        # return initial weights and penalize?
+      }
       # print("position_limit constraint violated, transforming weights.")
       # print(tmp_weights)
       # tmp_weights <- txfrm_position_limit_constraint(tmp_weights, max_pos, nassets)
