@@ -12,8 +12,6 @@
 #' transformations will violate the box constraints, and we'll need to
 #' transform back again.
 #' 
-#' This function will replace constraint_fn_map
-#' 
 #' leverage, box, group, and position limit constraints are transformed
 #' diversification and turnover constraints are penalized
 #' 
@@ -56,7 +54,11 @@ fn_map <- function(weights, portfolio, ...){
   
   out <- 0
   
+  # We will modify the weights vector so create a temporary copy
+  # modified for transformation or to relax constraints
   tmp_weights <- weights
+  tmp_min <- min
+  tmp_max <- max
   
   # step 2: check that the vector of weights satisfies the constraints, 
   # transform weights if constraint is violated
@@ -66,7 +68,8 @@ fn_map <- function(weights, portfolio, ...){
   # check leverage constraints
   if(!is.null(min_sum) & !is.null(max_sum)){
     if(!(sum(tmp_weights) >= min_sum & sum(tmp_weights) <= max_sum)){
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500))
+      # Try to transform only considering leverage and box constraints
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, 500), silent=TRUE)
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -82,12 +85,40 @@ fn_map <- function(weights, portfolio, ...){
   }
   
   # check box constraints
-  if(!is.null(min) & !is.null(max)){
-    if(!(all(tmp_weights >= min) & all(tmp_weights <= max))){
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500))
+  if(!is.null(tmp_min) & !is.null(tmp_max)){
+    if(!(all(tmp_weights >= tmp_min) & all(tmp_weights <= tmp_max))){
+      # Try to transform only considering leverage and box constraints
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, 500), silent=TRUE)
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
+        i <- 1
+        # loop while constraints are violated and relax constraints
+        while((sum(tmp_weights) < min_sum | sum(tmp_weights) > max_sum | any(tmp_weights < tmp_min) | any(tmp_weights > tmp_max)) & i <= 5){
+          # check if min is violated
+          if(any(tmp_weights < tmp_min)){
+            # Find which elements of min are violated and decrease by a random amount
+            tmp_min[which(tmp_weights < tmp_min)] <- tmp_min[which(tmp_weights < tmp_min)] - runif(1, 0.01, 0.05)
+          }
+          # check if max is violated
+          if(any(tmp_weights > tmp_max)){
+            # Find which elements of min are violated and increase by a random amount
+            tmp_max[which(tmp_weights < tmp_max)] <- tmp_max[which(tmp_weights < tmp_max)] + runif(1, 0.01, 0.05)
+          }
+          
+          # Now try the transformation again
+          tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, 500), silent=TRUE)
+          # Default to original weights if this fails again
+          if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
+          i <- i + 1
+        }
+        # We have a feasible portfolio in terms of min_sum and max_sum, 
+        # but were unable to produce a portfolio that satisfies box constraints
+        if(isTRUE(all.equal(tmp_weights, weights))){
+          # reset min and max to their original values and penalize later
+          tmp_min <- min
+          tmp_max <- max
+        }
         # Other actions to consider
         # relax constraints (rp_transform checks all constraints together so we may not know which constraint is too restrictive)
         # different normalization method
@@ -102,7 +133,8 @@ fn_map <- function(weights, portfolio, ...){
   # check group constraints
   if(!is.null(groups) & !is.null(cLO) & !is.null(cUP)){
     if(any(group_fail(tmp_weights, groups, cLO, cUP))){
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500))
+      # Try to transform only considering leverage, box, and group constraints
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos=NULL, 500), silent=TRUE)
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -120,7 +152,8 @@ fn_map <- function(weights, portfolio, ...){
   # check position_limit constraints
   if(!is.null(max_pos)){
     if(!(sum(abs(tmp_weights) > tolerance) <= max_pos)){
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500))
+      # Try to transform only considering leverage, box, group, and position_limit constraints
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500), silent=TRUE)
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -157,7 +190,7 @@ fn_map <- function(weights, portfolio, ...){
     }
   }
   names(tmp_weights) <- names(weights)
-  return(list(weights=tmp_weights, out=out))
+  return(list(weights=tmp_weights, min=tmp_min, max=tmp_max, out=out))
 }
 
 #' Transform weights that violate min or max box constraints

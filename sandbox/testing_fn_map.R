@@ -33,7 +33,7 @@ sum(weights)
 
 fn_map(weights, portfolio)
 
-# group constraints are violated
+# group and position limit constraints are violated
 weights <- c(0.1, 0.65, 0.1, 0.15)
 sum(weights)
 
@@ -44,3 +44,19 @@ weights <- portfolio$assets
 sum(weights)
 
 fn_map(weights, portfolio)
+
+##### relaxing box constraints #####
+pspec <- portfolio.spec(assets=funds)
+
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=T)
+# make min infeasible and too restrictive
+pspec <- add.constraint(portfolio=pspec, type="box", min=0.3, max=0.75, enabled=T)
+
+# weights satisfy leverage constraints but not box constraints
+weights <- c(0.15, 0.05, 0.25, 0.55)
+sum(weights)
+
+# min constraint needs to be relaxed
+# note how min has been changed
+fn_map(weights, pspec)
+
