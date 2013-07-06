@@ -366,19 +366,23 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   colnames(portfolio)<-colnames(w)
   
   # checks for infeasible portfolio
+  # Stop execution and return an error if an infeasible portfolio is created
+  # This will be useful in fn_map so that we can catch the error and take
+  # action (try again with more permutations, relax constraints, different
+  # method to normalize, etc.)
   if (sum(portfolio)<=min_sum | sum(portfolio)>=max_sum){
     portfolio <- w
-    warning("Infeasible portfolio created, defaulting to w, perhaps increase max_permutations.")
+    stop("Infeasible portfolio created, perhaps increase max_permutations and/or adjust your parameters.")
   }
-  if(isTRUE(all.equal(w,portfolio))) {
-    if (sum(w)>=min_sum & sum(w)<=max_sum) {
-      warning("Unable to generate a feasible portfolio different from w, perhaps adjust your parameters.")
-      return(w)
-    } else {
-      warning("Unable to generate a feasible portfolio, perhaps adjust your parameters.")
-      return(NULL)
-    }
-  }
+#   if(isTRUE(all.equal(w,portfolio))) {
+#     if (sum(w)>=min_sum & sum(w)<=max_sum) {
+#       warning("Unable to generate a feasible portfolio different from w, perhaps adjust your parameters.")
+#       return(w)
+#     } else {
+#       warning("Unable to generate a feasible portfolio, perhaps adjust your parameters.")
+#       return(NULL)
+#     }
+#   }
   return(portfolio)
 }
 
