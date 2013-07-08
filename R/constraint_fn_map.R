@@ -59,6 +59,8 @@ fn_map <- function(weights, portfolio, ...){
   tmp_weights <- weights
   tmp_min <- min
   tmp_max <- max
+  tmp_cLO <- cLO
+  tmp_cUP <- cUP
   
   # step 2: check that the vector of weights satisfies the constraints, 
   # transform weights if constraint is violated
@@ -94,6 +96,7 @@ fn_map <- function(weights, portfolio, ...){
         tmp_weights <- weights
         i <- 1
         # loop while constraints are violated and relax constraints
+        # try to relax constraints up to 5 times
         while((sum(tmp_weights) < min_sum | sum(tmp_weights) > max_sum | any(tmp_weights < tmp_min) | any(tmp_weights > tmp_max)) & i <= 5){
           # check if min is violated
           if(any(tmp_weights < tmp_min)){
@@ -131,13 +134,36 @@ fn_map <- function(weights, portfolio, ...){
   }
   
   # check group constraints
-  if(!is.null(groups) & !is.null(cLO) & !is.null(cUP)){
-    if(any(group_fail(tmp_weights, groups, cLO, cUP))){
+  if(!is.null(groups) & !is.null(tmp_cLO) & !is.null(tmp_cUP)){
+    if(any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP))){
       # Try to transform only considering leverage, box, and group constraints
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos=NULL, 500), silent=TRUE)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, 500), silent=TRUE)
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
+        i <- 1
+        # loop while constraints are violated and relax constraints
+        # Try to relax constraints up to 5 times
+        while(((sum(tmp_weights) < min_sum | sum(tmp_weights) > max_sum) | (any(tmp_weights < tmp_min) | any(tmp_weights > tmp_max)) | any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP))) & i <= 5){
+          if(any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP))){
+            # I know which group failed, but not if it was cUP or cLO that was violated
+            # Maybe I can modify group_fail to report back what was violated and only relax cLO or cUP, not both
+            # This relaxes both cLO and cUP
+            tmp_cLO[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] <- tmp_cLO[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] - runif(1, 0.01, 0.05)
+            tmp_cUP[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] <- tmp_cUP[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] + runif(1, 0.01, 0.05)
+          }
+          # Now try the transformation again
+          tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, 500))
+          if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
+          i <- i + 1
+        }
+        # We have a feasible portfolio in terms of min_sum and max_sum, 
+        # but were unable to produce a portfolio that satisfies group constraints
+        if(isTRUE(all.equal(tmp_weights, weights))){
+          # reset min and max to their original values and penalize later
+          tmp_cLO <- cLO
+          tmp_cUP <- cUP
+        }
         # Other actions to consider
         # relax constraints (rp_transform checks all constraints together so we may not know which constraint is too restrictive)
         # different normalization method
@@ -153,7 +179,7 @@ fn_map <- function(weights, portfolio, ...){
   if(!is.null(max_pos)){
     if(!(sum(abs(tmp_weights) > tolerance) <= max_pos)){
       # Try to transform only considering leverage, box, group, and position_limit constraints
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups, cLO, cUP, max_pos, 500), silent=TRUE)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos, 500), silent=TRUE)
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -190,7 +216,7 @@ fn_map <- function(weights, portfolio, ...){
     }
   }
   names(tmp_weights) <- names(weights)
-  return(list(weights=tmp_weights, min=tmp_min, max=tmp_max, out=out))
+  return(list(weights=tmp_weights, min=tmp_min, max=tmp_max, cLO=tmp_cLO, cUP=tmp_cUP, out=out))
 }
 
 #' Transform weights that violate min or max box constraints
