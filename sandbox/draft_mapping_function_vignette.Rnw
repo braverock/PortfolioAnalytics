@@ -1,0 +1,127 @@
+\documentclass[12pt,letterpaper,english]{article}
+\usepackage[OT1]{fontenc}
+\usepackage{Sweave}
+\usepackage{verbatim}
+\usepackage{Rd}
+\usepackage{Sweave}
+\usepackage{amsmath}
+
+\begin{document}
+
+\title{Constraint Mapping Function in PortfolioAnalytics}
+% \author{Ross Bennett}
+
+\maketitle
+
+\begin{abstract}
+The purpose of this vignette is to discuss how the constraint mapping function is implemented in PortfolioAnalytics. The content is based on emails about the mapping function and my documentation of the \code{fn\_map} function and those functions used within.
+\end{abstract}
+
+\tableofcontents
+
+\section{Purpose of Mapping Function}
+The purpose of the mapping function is to transform a weights vector that does not meet all the constraints into a weights vector that does meet the constraints, if one exists, hopefully with a minimum of transformation.
+
+\section{Random Portfolios}
+In the random portfolios code, we've used a couple of techniques pioneered by Pat Burns.  The philosophical idea is that your optimum portfolio is most likely to exist at the edges of the feasible space.
+
+At the first R/Finance conference, Pat used the analogy of a mountain lake, where the lake represents the feasible space.  With a combination of lots of different constraints, the shore of the lake will not be smooth or regular.  The lake (the feasible space) may not take up a large percentage of the terrain.
+
+If we randomly place a rock anywhere in the terrain, some of them will land in the lake, inside the feasible space, but most will land outside, on the slopes of the mountains that surround the lake.  The goal should be to nudge these towards the shores of the lake (our feasible space).
+
+\subsection{Random Portfolios Algorithm Outline}
+The function used to transform the weights vector to satisfy constraints is the \code{rp\_transform} function. This function uses logic from random portfolios and the basic outline is described by the following steps:
+
+\begin{enumerate}
+\item Generate a set to draw from of uniform numbers that satisfy all box constraints.
+\item Check if leverage, box, group, or position limit constraints are satisfied. Assuming constraints are violated...
+\item Check to see if \code{min\_sum}, box, group, or leverage constraints are violated. If violated, do a random draw for a weight that is greater than the value of the current weight and less than maximum box constraint for the selected weight.
+\item Check to see if \code{max\_sum}, box, group, or leverage constraints are violated. If violated, do a random draw for a weight that is less than the value of the current weight and greater than minimum box constraint for the selected weight
+\item Return to check if leverage, box, group, or position limit constraints are satisfied.
+\end{enumerate}
+
+Note that leverage and box constraints are required arguments to \code{rp\_transform} while group and position limit constraints are optional.
+
+
+\section{Hierarchy}
+\begin{enumerate}
+\item leverage
+\item box
+\item group
+\item position limit
+\item turnover (currently just penalized)
+\item diversification (currently just penalized)
+\end{enumerate}
+
+\section{Implementation Steps}
+The \code{fn\_map} function is implemented in the following steps:
+\begin{enumerate}
+\item[Step 1] Test weights vector for violation \code{min\_sum} or {max\_sum}.
+If violated, transform the weights vector with \code{rp\_transform} taking into account both leverage and box constraints.
+
+\item[Step 2] Test weights vector for violation of \code{min} or \code{max} box constraints.
+If violated, transform the weights vector with \code{rp\_transform} taking into account both leverage and box constraints.
+
+If we can't generate a feasible portfolio and \code{relax=TRUE}, we try relaxing \code{min} or \code{max}. For example, if the $i^{th}$ element of \code{min} is violated, we relax the $i^{th}$ element of \code{min}. We attempt to relax the constraint up to 5 times, successively decreasing the $i^{th}$ element of \code{min} by a randomly generated number drawn from $U \sim [0.01, 0.05]$. If we still can't generate a feasible portfolio after relaxing constraints, then default to the \code{weights} vector passed in to the box constraints transformation.
+
+\item[Step 3] Test weights vector for violation of \code{cLO} or \code{cUP} group constraints.
+If violated, transform the weights vector with \code{rp\_transform} taking into account leverage, box, and group constraints.
+
+If we can't generate a feasible portfolio, try relaxing \code{cLO} and \code{cUP}. For example, if the $i^{th}$ element of \code{cLO} of \code{cUP} is violated, we relax the $i^{th}$element of \code{cLO} and \code{cUP} that was violated. We attempt to relax the constraint up to 5 times, successively decreasing \code{cLO} and increasing \code{cUP} by a randomly generated number drawn from $U \sim [0.01, 0.05]$. If we still can't generate a feasible portfolio after relaxing constraints, then default to the \code{weights} vector passed in to the group constraints transformation.
+
+\item[Step 4] Test weights vector for violation of \code{max\_pos}.
+If violated, transform the weights vector with \code{rp\_transform} taking into account leverage, box, and position limit constraints.
+
+If we can't generate a feasible portfolio, try relaxing \code{max\_pos} incrementing \code{max\_pos} by 1 up to 5 times or until \code{max\_pos} is equal to the number of assets. If we still can't generate a feasible portfolio after relaxing constraints, then default to the \code{weights} vector passed in to the position limit constraints transformation.
+\end{enumerate}
+
+\subsection{Challenges}
+\begin{itemize}
+\item Recovering the transformed vector from a optimization solver that doesn't directly support a mapping function.  I've got some tricks for this using environments that we can revisit after we get the basic methodology working.
+\item Allowing for progressively relaxing constraints when the constraints are simply too restrictive.  Perhaps Doug has some documentation on this as he's done it in the past, or perhaps we can simply deal with it in the penalty part of \code{constrained\_objective}.
+\end{itemize}
+
+\section{Extra}
+I think our first step should be to test each constraint type, in some sort of hierarchy, starting with box constraints (almost all solvers support box constraints, of course), since some of the other transformations will violate the box constraints, and we'll need to transform back again.
+
+\begin{itemize}
+%% Box
+\item Box Constraints
+\begin{itemize}
+\item \code{rp\_transform} uses logic from random portfolios to transform a weights vector while taking into account leverage, box and constraints.
+\item \code{txfrm\_box\_constraint} takes a weight vector that violates min/max box constraints and will set any weight that violates min or max to its min or max, respectively. This is too simplistic and does not take into account leverage or group constraints.
+\end{itemize}
+%% Leverage
+\item Leverage Constraints
+\begin{itemize}
+\item \code{rp\_transform} uses logic from random portfolios to transform a weights vector while taking into account leverage and box constraints.
+\item \code{txfrm\_weight\_sum\_constraint} takes a weight vector that violates min\_sum/max\_sum leverage constraints and normalizes the entire weights vector to satisfy leverage constraints. This is too simplistic and does not take into account min/max box constraints. This is similar to the code used in \code{constrained\_objective} to normalize weights.
+\end{itemize}
+%% Group
+\item Group Constraints
+\begin{itemize}
+\item \code{txfrm\_group\_constraint} loops through the groups and checks if cLO or cUP is violated. If cLO or cUP is violated, then the weights of the given group are normalized to equal cLO or cUP, whichever is violated. This will likely change the sum of the weights vector and violate min\_sum/max\_sum so we will have to "re-transform".
+\item \code{rp\_transform} uses logic from random portfolios to transform a weights vector while taking into account leverage, box, group, and position limit constraints.
+\end{itemize}
+%% Diversification
+\item Diversification Constraints
+\begin{itemize}
+\item I'm having a hard time coming up with a straightforward solution to transform the vector of weights to meet the diversification constraint. One idea I was working on was to generate N random portfolios and select the portfolio with the closest diversification value.
+\item Would it be better to just handle this like an objective and penalize in \code{constrained\_objective}?
+\end{itemize}
+%% Turnover
+\item Turnover Constraints
+\begin{itemize}
+\item I'm having a hard time coming up with a straightforward solution to transform the vector of weights to meet the turnover constraint. One idea I was working on was to generate N random portfolios and select the portfolio with the closest turnover value.
+\item Would it be better to just handle this like an objective and penalize in \code{constrained\_objective}?
+\end{itemize}
+%% Position Limit
+\item Position Limit Constraints
+\begin{itemize}
+\item \code{txfrm\_position\_limit\_constraint} sets the \code{nassets} - \code{max\_pos} minimum weights equal to 0.
+\item \code{rp\_transform} uses logic from random portfolios to transform a weights vector while taking into account leverage, box, group, and position limit constraints.
+\item An issue is that for any $min\_i > 0$, this will violate the min box constraint and be penalized later. Would it make sense to change min\_i to 0 for asset\_i that is set equal to 0?
+\end{itemize}
+\end{itemize}
+
+\end{document}
