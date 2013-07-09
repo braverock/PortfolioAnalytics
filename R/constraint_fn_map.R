@@ -12,15 +12,24 @@
 #' transformations will violate the box constraints, and we'll need to
 #' transform back again.
 #' 
-#' leverage, box, group, and position limit constraints are transformed
-#' diversification and turnover constraints are penalized
+#' If relax=TRUE, we will attempt to relax the constraints if a feasible 
+#' portfolio could not be formed with an initial call to \code{rp_transform}. 
+#' We will attempt to relax the constraints up to 5 times. If we do not have a 
+#' feasible portfolio after attempting to relax the constraints, then we will 
+#' default to returning the weights vector that violates the constraints.
+#' 
+#' Leverage, box, group, and position limit constraints are transformed. Diversification and turnover constraints are penalized
 #' 
 #' @param weights vector of weights
 #' @param portfolio object of class portfolio
-#' @param relax TRUE/FALSE, default FALSE. Enable constraints to be relaxed
+#' @param relax TRUE/FALSE, default FALSE. Enable constraints to be relaxed.
 #' @return 
 #' \itemize{
 #' \item{weights: }{vector of transformed weights meeting constraints}
+#' \item{min: }{vector of min box constraints that may have been modified if relax=TRUE}
+#' \item{max: }{vector of max box constraints that may have been modified if relax=TRUE}
+#' \item{cLO: }{vector of lower bound group constraints that may have been modified if relax=TRUE}
+#' \item{cUP: }{vector of upper bound group constraints that may have been modified if relax=TRUE}
 #' \item{out: }{penalty term}
 #' }
 #' @author Ross Bennett

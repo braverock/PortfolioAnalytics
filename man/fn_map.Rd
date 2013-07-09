@@ -2,16 +2,26 @@
 \alias{fn_map}
 \title{mapping function to transform or penalize weights that violate constraints}
 \usage{
-  fn_map(weights, portfolio, ...)
+  fn_map(weights, portfolio, relax = FALSE, ...)
 }
 \arguments{
   \item{weights}{vector of weights}
 
   \item{portfolio}{object of class portfolio}
+
+  \item{relax}{TRUE/FALSE, default FALSE. Enable
+  constraints to be relaxed.}
 }
 \value{
   \itemize{ \item{weights: }{vector of transformed weights
-  meeting constraints} \item{out: }{penalty term} }
+  meeting constraints} \item{min: }{vector of min box
+  constraints that may have been modified if relax=TRUE}
+  \item{max: }{vector of max box constraints that may have
+  been modified if relax=TRUE} \item{cLO: }{vector of lower
+  bound group constraints that may have been modified if
+  relax=TRUE} \item{cUP: }{vector of upper bound group
+  constraints that may have been modified if relax=TRUE}
+  \item{out: }{penalty term} }
 }
 \description{
   The purpose of the mapping function is to transform a
@@ -27,10 +37,16 @@
   violate the box constraints, and we'll need to transform
   back again.
 
-  This function will replace constraint_fn_map
+  If relax=TRUE, we will attempt to relax the constraints
+  if a feasible portfolio could not be formed with an
+  initial call to \code{rp_transform}. We will attempt to
+  relax the constraints up to 5 times. If we do not have a
+  feasible portfolio after attempting to relax the
+  constraints, then we will default to returning the
+  weights vector that violates the constraints.
 
-  leverage, box, group, and position limit constraints are
-  transformed diversification and turnover constraints are
+  Leverage, box, group, and position limit constraints are
+  transformed. Diversification and turnover constraints are
   penalized
 }
 \author{
