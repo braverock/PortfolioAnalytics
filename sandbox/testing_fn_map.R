@@ -58,7 +58,7 @@ sum(weights)
 
 # min constraint needs to be relaxed
 # note how min has been changed
-fn_map(weights, pspec)
+fn_map(weights, pspec, TRUE)
 
 ##### relaxing group constraints #####
 pspec <- portfolio.spec(assets=funds)
@@ -67,11 +67,11 @@ pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=T)
 pspec <- add.constraint(portfolio=pspec, type="box", min=0.05, max=0.7, enabled=T)
 # Make group constraints too restrictive
 pspec <- add.constraint(portfolio=pspec, type="group", groups=c(2, 2), 
-                        group_min=c(0.05, 0.01), group_max=c(0.45, 0.55), enabled=T)
+                        group_min=c(0.05, 0.01), group_max=c(0.45, 0.5), enabled=T)
 
 # weights satisfy leverage and box constraints, but not group
 weights <- c(0.15, 0.05, 0.10, 0.7)
 
 # group constraints needs to be relaxed
 # note how cLO and cUP have been changed
-fn_map(weights, pspec)
+fn_map(weights, pspec, TRUE)

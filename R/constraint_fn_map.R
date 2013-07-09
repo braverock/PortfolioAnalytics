@@ -17,6 +17,7 @@
 #' 
 #' @param weights vector of weights
 #' @param portfolio object of class portfolio
+#' @param relax TRUE/FALSE, default FALSE. Enable constraints to be relaxed
 #' @return 
 #' \itemize{
 #' \item{weights: }{vector of transformed weights meeting constraints}
@@ -24,7 +25,7 @@
 #' }
 #' @author Ross Bennett
 #' @export
-fn_map <- function(weights, portfolio, ...){
+fn_map <- function(weights, portfolio, relax=FALSE, ...){
   
   if(!is.portfolio(portfolio)) stop("portfolio passed in is not of class 'portfolio'")
   
@@ -94,44 +95,40 @@ fn_map <- function(weights, portfolio, ...){
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
-        i <- 1
-        # loop while constraints are violated and relax constraints
-        # try to relax constraints up to 5 times
-        while((sum(tmp_weights) < min_sum | sum(tmp_weights) > max_sum | any(tmp_weights < tmp_min) | any(tmp_weights > tmp_max)) & i <= 5){
-          # check if min is violated
-          if(any(tmp_weights < tmp_min)){
-            # Find which elements of min are violated and decrease by a random amount
-            tmp_min[which(tmp_weights < tmp_min)] <- tmp_min[which(tmp_weights < tmp_min)] - runif(1, 0.01, 0.05)
+        # Try to relax constraints if relax=TRUE
+        if(relax){
+          i <- 1
+          # loop while constraints are violated and relax constraints
+          # try to relax constraints up to 5 times
+          while((sum(tmp_weights) < min_sum | sum(tmp_weights) > max_sum | any(tmp_weights < tmp_min) | any(tmp_weights > tmp_max)) & i <= 5){
+            # check if min is violated
+            if(any(tmp_weights < tmp_min)){
+              # Find which elements of min are violated and decrease by a random amount
+              tmp_min[which(tmp_weights < tmp_min)] <- tmp_min[which(tmp_weights < tmp_min)] - runif(1, 0.01, 0.05)
+            }
+            # check if max is violated
+            if(any(tmp_weights > tmp_max)){
+              # Find which elements of min are violated and increase by a random amount
+              tmp_max[which(tmp_weights < tmp_max)] <- tmp_max[which(tmp_weights < tmp_max)] + runif(1, 0.01, 0.05)
+            }
+            
+            # Now try the transformation again
+            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, 500), silent=TRUE)
+            # Default to original weights if this fails again
+            if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
+            i <- i + 1
           }
-          # check if max is violated
-          if(any(tmp_weights > tmp_max)){
-            # Find which elements of min are violated and increase by a random amount
-            tmp_max[which(tmp_weights < tmp_max)] <- tmp_max[which(tmp_weights < tmp_max)] + runif(1, 0.01, 0.05)
+          # We have a feasible portfolio in terms of min_sum and max_sum, 
+          # but were unable to produce a portfolio that satisfies box constraints
+          if(isTRUE(all.equal(tmp_weights, weights))){
+            # reset min and max to their original values and penalize later
+            tmp_min <- min
+            tmp_max <- max
           }
-          
-          # Now try the transformation again
-          tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, 500), silent=TRUE)
-          # Default to original weights if this fails again
-          if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
-          i <- i + 1
-        }
-        # We have a feasible portfolio in terms of min_sum and max_sum, 
-        # but were unable to produce a portfolio that satisfies box constraints
-        if(isTRUE(all.equal(tmp_weights, weights))){
-          # reset min and max to their original values and penalize later
-          tmp_min <- min
-          tmp_max <- max
-        }
-        # Other actions to consider
-        # relax constraints (rp_transform checks all constraints together so we may not know which constraint is too restrictive)
-        # different normalization method
-        # return initial weights and penalize?
-      }
-      # print("box constraints violated, transforming weights.")
-      # print(tmp_weights)
-      # tmp_weights <- txfrm_box_constraint(tmp_weights, min, max)
-    }
-  }
+        } # end if(relax) statement
+      } # end try-error recovery
+    } # end check for box constraint violation
+  } # end check for NULL arguments
   
   # check group constraints
   if(!is.null(groups) & !is.null(tmp_cLO) & !is.null(tmp_cUP)){
@@ -141,39 +138,35 @@ fn_map <- function(weights, portfolio, ...){
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
-        i <- 1
-        # loop while constraints are violated and relax constraints
-        # Try to relax constraints up to 5 times
-        while(((sum(tmp_weights) < min_sum | sum(tmp_weights) > max_sum) | (any(tmp_weights < tmp_min) | any(tmp_weights > tmp_max)) | any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP))) & i <= 5){
-          if(any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP))){
-            # I know which group failed, but not if it was cUP or cLO that was violated
-            # Maybe I can modify group_fail to report back what was violated and only relax cLO or cUP, not both
-            # This relaxes both cLO and cUP
-            tmp_cLO[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] <- tmp_cLO[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] - runif(1, 0.01, 0.05)
-            tmp_cUP[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] <- tmp_cUP[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] + runif(1, 0.01, 0.05)
+        # Try to relax constraints if relax=TRUE
+        if(relax){
+          i <- 1
+          # loop while constraints are violated and relax constraints
+          # Try to relax constraints up to 5 times
+          while(((sum(tmp_weights) < min_sum | sum(tmp_weights) > max_sum) | (any(tmp_weights < tmp_min) | any(tmp_weights > tmp_max)) | any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP))) & i <= 5){
+            if(any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP))){
+              # I know which group failed, but not if it was cUP or cLO that was violated
+              # Maybe I can modify group_fail to report back what was violated and only relax cLO or cUP, not both
+              # This relaxes both cLO and cUP
+              tmp_cLO[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] <- tmp_cLO[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] - runif(1, 0.01, 0.05)
+              tmp_cUP[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] <- tmp_cUP[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] + runif(1, 0.01, 0.05)
+            }
+            # Now try the transformation again
+            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, 500), silent=TRUE)
+            if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
+            i <- i + 1
           }
-          # Now try the transformation again
-          tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, 500))
-          if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
-          i <- i + 1
-        }
-        # We have a feasible portfolio in terms of min_sum and max_sum, 
-        # but were unable to produce a portfolio that satisfies group constraints
-        if(isTRUE(all.equal(tmp_weights, weights))){
-          # reset min and max to their original values and penalize later
-          tmp_cLO <- cLO
-          tmp_cUP <- cUP
-        }
-        # Other actions to consider
-        # relax constraints (rp_transform checks all constraints together so we may not know which constraint is too restrictive)
-        # different normalization method
-        # return initial weights and penalize?
-      }
-      # print("group constraints violated, transforming weights.")
-      # print(tmp_weights)
-      # tmp_weights <- txfrm_group_constraint(tmp_weights, groups, cLO, cUP)
-    }
-  }
+          # We have a feasible portfolio in terms of min_sum and max_sum, 
+          # but were unable to produce a portfolio that satisfies group constraints
+          if(isTRUE(all.equal(tmp_weights, weights))){
+            # reset min and max to their original values and penalize later
+            tmp_cLO <- cLO
+            tmp_cUP <- cUP
+          }
+        } # end if(relax) statement
+      } # end try-error recovery
+    } # end check for group constraint violation
+  } # end check for NULL arguments
   
   # check position_limit constraints
   if(!is.null(max_pos)){
