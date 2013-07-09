@@ -75,3 +75,19 @@ weights <- c(0.15, 0.05, 0.10, 0.7)
 # group constraints needs to be relaxed
 # note how cLO and cUP have been changed
 fn_map(weights, pspec, TRUE)
+
+##### relaxing position limits constraints #####
+pspec <- portfolio.spec(assets=funds)
+
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=T)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0.05, max=0.4, enabled=T)
+# Make position limit constraint too restrictive
+pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=2, enabled=T)
+
+# weights satisfy leverage and box constraints, but not group
+weights <- c(0.4, 0.05, 0.15, 0.4)
+
+# position limit constraint needs to be relaxed
+# note how max_pos has been increased to 3
+fn_map(weights, pspec, TRUE)
+
