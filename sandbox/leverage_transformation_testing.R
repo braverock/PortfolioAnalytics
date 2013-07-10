@@ -11,7 +11,9 @@ sum_seq <- seq(from=0.8, to=1.5, by=0.1)
 ##### Random Portfolios: 50 assets 5,000 portfolios
 nassets <- 50
 npermutations <- 500
-min <- rep(0.02, nassets)
+min <- rep(0, nassets)
+# random_index <- sample(1:nassets, 5)
+# min[random_index] <- 0.01
 max <- rep(0.5, nassets)
 rp <- list()
 for(i in 1:10){
@@ -20,7 +22,7 @@ max_sum <- min_sum + 0.01
 
 cset <- constraint(assets=nassets, min=min, max=max, 
                    min_sum=min_sum, max_sum=max_sum,
-                   weight_seq=generatesequence(min=0.02, max=0.4, by=0.005))
+                   weight_seq=generatesequence(min=0, max=0.5, by=0.005))
 
 rp[[i]] <- random_portfolios(rpconstraints=cset, permutations=npermutations)
 }
@@ -42,6 +44,8 @@ new_rp <- t(apply(tmp_rp, 1, rp_transform, min=rep(-0.05, nassets), max=rep(0.5,
 nassets <- 250
 npermutations <- 500
 min <- rep(0, nassets)
+random_index <- sample(1:nassets, 10)
+min[random_index] <- 0.01
 max <- rep(0.5, nassets)
 rp <- list()
 for(i in 1:10){
@@ -59,7 +63,7 @@ rp <- do.call(rbind, rp)
 
 # transform the entire vector to meet leverage constraints
 tmp_rp <- t(apply(rp, 1, txfrm_weight_sum_constraint, min_sum=0.99, max_sum=1.01))
-summary(rowSums(tmp_rp))
+
 # percentage of portfolios that satisfy box constraints after the simple transformation
 sum(apply(tmp_rp, 1, function(x) all(x >= min & x <= max))) / (nrow(tmp_rp)) * 100
 
