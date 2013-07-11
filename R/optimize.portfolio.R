@@ -807,6 +807,50 @@ optimize.portfolio_v2 <- function(
     
   } ## end case for pso
   
+  ## case if method=GenSA---Generalized Simulated Annealing
+  if(optimize_method=="GenSA"){
+    stopifnot("package:GenSA" %in% search()  ||  require("GenSA",quietly = TRUE) )
+    if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
+    controlGenSA <- list(maxit = 5000, threshold.stop = NULL, temp = 5230, 
+                         visiting.param = 2.62, acceptance.param = -5, max.time = NULL, 
+                         nb.stop.improvement = 1e+06, smooth = TRUE, max.call = 1e+07, 
+                         verbose = FALSE)
+    GenSAcargs <- names(controlGenSA)
+    
+    if( is.list(dotargs) ){
+      pm <- pmatch(names(dotargs), GenSAcargs, nomatch = 0L)
+      names(dotargs[pm > 0L]) <- GenSAcargs[pm]
+      controlGenSA$maxit <- maxit
+      controlGenSA[pm] <- dotargs[pm > 0L]
+      if(hasArg(trace) && try(trace==TRUE,silent=TRUE)) controlGenSA$verbose <- TRUE
+    }
+    
+    upper <- constraints$max
+    lower <- constraints$min
+    
+    minw = try(GenSA( par = rep(1/N, N), lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
+                      fn = constrained_objective_v2 ,  R=R, portfolio=portfolio)) # add ,silent=TRUE here?
+    
+    if(inherits(minw,"try-error")) { minw=NULL }
+    if(is.null(minw)){
+      message(paste("Optimizer was unable to find a solution for target"))
+      return (paste("Optimizer was unable to find a solution for target"))
+    }
+    
+    weights <- as.vector(minw$par)
+    weights <- normalize_weights(weights)
+    names(weights) <- colnames(R)
+    
+    out = list(weights=weights, 
+               objective_measures=constrained_objective_v2(w=weights, R=R, portfolio=portfolio, trace=TRUE)$objective_measures,
+               out=minw$value, 
+               call=call)
+    if (isTRUE(trace)){
+      out$GenSAoutput=minw
+    }
+    
+  } ## end case for GenSA
+  
   # Prepare for final object to return
   end_t <- Sys.time()
   # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
