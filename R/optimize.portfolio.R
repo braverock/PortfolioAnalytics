@@ -465,6 +465,58 @@ optimize.portfolio <- function(
     return(out)
 }
 
+##### version 2 of optimize.portfolio #####
+optimize.portfolio_v2 <- function(
+  R,
+  portfolio,
+  optimize_method=c("DEoptim","random","ROI","ROI_old","pso","GenSA"), 
+  search_size=20000, 
+  trace=FALSE, ..., 
+  rp=NULL,
+  momentFUN='set.portfolio.moments_v2'
+)
+{
+  optimize_method=optimize_method[1]
+  tmptrace=NULL
+  start_t<-Sys.time()
+  
+  #store the call for later
+  call <- match.call()
+  
+  if (is.null(portfolio) | !is.portfolio(portfolio)){
+    stop("you must pass in an object of class portfolio to control the optimization")
+  }
+  
+  R <- checkData(R)
+  N <- length(portfolio$assets)
+  if (ncol(R) > N) {
+    R <- R[,names(portfolio$assets)]
+  }
+  T <- nrow(R)
+  
+  out <- list()
+  
+  weights <- NULL
+  
+  dotargs <- list(...)    
+  
+  # set portfolio moments only once
+  if(!is.function(momentFUN)){
+    momentFUN <- match.fun(momentFUN)
+  }	
+  # TODO FIXME should match formals later
+  #dotargs <- set.portfolio.moments(R, constraints, momentargs=dotargs)
+  .mformals <- dotargs
+  .mformals$R <- R
+  .mformals$portfolio <- portfolio
+  mout <- try((do.call(momentFUN,.mformals)) ,silent=TRUE)	
+  if(inherits(mout,"try-error")) { 
+    message(paste("portfolio moment function failed with message",mout))
+  } else {
+    dotargs <- mout
+  }
+}
+
 #' portfolio optimization with support for rebalancing or rolling periods
 #' 
 #' This function may eventually be wrapped into optimize.portfolio

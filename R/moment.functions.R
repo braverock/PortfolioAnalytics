@@ -141,6 +141,89 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL,...){
     return(momentargs)
 }
 
+#' set portfolio moments for use by lower level optimization functions
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
+#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization, see \code{\link{portfolio.spec}}
+#' @param momentargs list containing arguments to be passed down to lower level functions, default NULL
+#' @param \dots any other passthru parameters
+#' @export
+set.portfolio.moments_v2 <- function(R, portfolio, momentargs=NULL,...){
+  
+  if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
+  if(is.null(portfolio$objectives)) {
+    warning("no objectives specified in portfolio")
+    next()
+  } else {
+    
+    # How would this be specified in the new portfolio.spec? As a constraint or in the portfolio part?
+    # 
+    lcl <- grep('garch', portfolio)
+    if (!identical(lcl, integer(0))) {
+      for (objective in portfolio[lcl]) {
+        objective = unlist(objective)
+        if( is.null( objective$garch ) ) next
+        if (objective$garch){
+          if (is.null(momentargs$mu)|is.null(momentargs$sigma)|is.null(momentargs$m3)|is.null(momentargs$m4))
+          {
+            momentargs =  CCCgarch.MM(R,clean=objective$arguments.clean,...)
+          }
+        }
+      }
+    }
+    
+    
+    lcl<-grep('clean',portfolio)
+    if(!identical(lcl,integer(0))) {
+      for (objective in portfolio[lcl]){
+        objective = unlist(objective)
+        #if(!is.null(objective$arguments$clean)) {
+        if (!is.null(objective$arguments.clean)){
+          if (is.null(momentargs$mu)|is.null(momentargs$sigma)|is.null(momentargs$m3)|is.null(momentargs$m4))
+          {
+            # cleanR<-try(Return.clean(R,method=objective$arguments$clean))
+            cleanR <- try(Return.clean(R, method = objective$arguments.clean,...))
+            if(!inherits(cleanR,"try-error")) {
+              momentargs$mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
+              momentargs$sigma = cov(cleanR);
+              momentargs$m3 = PerformanceAnalytics:::M3.MM(cleanR)
+              momentargs$m4 = PerformanceAnalytics:::M4.MM(cleanR)
+              #' FIXME NOTE: this isn't perfect as it overwrites the moments for all objectives, not just one with clean='boudt'
+            }
+          }
+        }    
+      }
+    }
+    for (objective in portfolio$objectives){
+      switch(objective$name,
+             sd =,
+             StdDev = { 
+               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean', na.rm=TRUE)),ncol=1);
+               if(is.null(momentargs$sigma)) momentargs$sigma = cov(R, use='pairwise.complete.obs')
+             },
+             var =,
+             mVaR =,
+             VaR = {
+               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+               if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
+               if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
+               if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+             },
+             es =,
+             mES =,
+             CVaR =,
+             cVaR =,
+             ES = {
+               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+               if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
+               if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
+               if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+             }
+      ) # end switch on objectives    
+    }    
+  }    
+  return(momentargs)
+}
+
 garch.mm <- function(R,mu_ts, covlist,momentargs=list(),...) {
     #momentargs<-list()
     #momentargs$mu<-mu_ts[last(index(R)),]
