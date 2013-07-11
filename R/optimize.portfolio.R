@@ -683,6 +683,83 @@ optimize.portfolio_v2 <- function(
     
   } ## end case for random
   
+  if(optimize_method == "ROI"){
+    # This takes in a regular portfolio object and extracts the desired business objectives
+    # and converts them to matrix form to be inputed into a closed form solver
+    # Applying box constraints
+    bnds <- list(lower = list(ind = seq.int(1L, N), val = as.numeric(constraints$min)),
+                 upper = list(ind = seq.int(1L, N), val = as.numeric(constraints$max)))
+    # retrieve the objectives to minimize, these should either be "var" and/or "mean"
+    # we can either miniminze variance or maximize quiadratic utility (we will be minimizing the neg. quad. utility)
+    moments <- list(mean=rep(0, N))
+    alpha <- 0.05
+    target <- NA
+    for(objective in portfolio$objectives){
+      if(objective$enabled){
+        if(!any(c(objective$name == "mean", objective$name == "var", objective$name == "CVaR", objective$name == "ES", objective$name == "ETL")))
+          stop("ROI only solves mean, var, or sample ETL/ES/CVaR type business objectives, choose a different optimize_method.")
+        moments[[objective$name]] <- try(eval(as.symbol(objective$name))(R), silent=TRUE)
+        target <- ifelse(!is.null(objective$target), objective$target, target)
+        alpha <- ifelse(!is.null(objective$alpha), objective$alpha, alpha)
+        lambda <- ifelse(!is.null(objective$risk_aversion), objective$risk_aversion, 1)
+      }
+    }
+    plugin <- ifelse(any(names(moments)=="var"), "quadprog", "glpk")  
+    if(plugin == "quadprog") ROI_objective <- ROI:::Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
+    if(plugin == "glpk") ROI_objective <- ROI:::L_objective(L=-moments$mean)
+    Amat <- rbind(rep(1, N), rep(1, N))
+    dir.vec <- c(">=","<=")
+    rhs.vec <- c(constraints$min_sum, constraints$max_sum)
+    if(!is.na(target)) {
+      Amat <- rbind(Amat, moments$mean)
+      dir.vec <- c(dir.vec, "==")
+      rhs.vec <- c(rhs.vec, target)
+    }
+    if(try(!is.null(constraints$groups), silent=TRUE)){
+      if(sum(constraints$groups) != N)
+        stop("Number of assets in each group needs to sum to number of total assets.")
+      n.groups <- length(constraints$groups)
+      if(!all(c(length(constraints$cLO),length(constraints$cLO)) == n.groups) )
+        stop("Number of group constraints exceeds number of groups.")
+      Amat.group <- matrix(0, nrow=n.groups, ncol=N)
+      k <- 1
+      l <- 0
+      for(i in 1:n.groups){
+        j <- constraints$groups[i] 
+        Amat.group[i, k:(l+j)] <- 1
+        k <- l + j + 1
+        l <- k - 1
+      }
+      if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
+      if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
+      Amat <- rbind(Amat, Amat.group, -Amat.group)
+      dir.vec <- c(dir.vec, rep(">=", (n.groups + n.groups)))
+      rhs.vec <- c(rhs.vec, constraints$cLO, -constraints$cUP)
+    }
+    if( any(c("CVaR", "ES", "ETL") %in% names(moments)) ) {
+      Rmin <- ifelse(is.na(target), 0, target)
+      ROI_objective <- ROI:::L_objective(c(rep(0,N), rep(1/(alpha*T),T), 1))
+      Amat <- cbind(rbind(1, 1, moments$mean, coredata(R)), rbind(0, 0, 0, cbind(diag(T), 1))) 
+      dir.vec <- c(">=","<=",">=",rep(">=",T))
+      rhs.vec <- c(constraints$min_sum, constraints$max_sum, Rmin ,rep(0, T))
+      if(try(!is.null(constraints$groups), silent=TRUE)){
+        zeros <- matrix(0, nrow=n.groups, ncol=(T+1))
+        Amat <- rbind(Amat, cbind(Amat.group, zeros), cbind(-Amat.group, zeros))
+        dir.vec <- c(dir.vec, rep(">=", (n.groups + n.groups)))
+        rhs.vec <- c(rhs.vec, constraints$cLO, -constraints$cUP)
+      }
+    }
+    opt.prob <- ROI:::OP(objective=ROI_objective, 
+                         constraints=ROI:::L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
+                         bounds=bnds)
+    roi.result <- ROI:::ROI_solve(x=opt.prob, solver=plugin)
+    weights <- roi.result$solution[1:N]
+    names(weights) <- colnames(R)
+    out$weights <- weights
+    out$out <- roi.result$objval
+    out$call <- call
+  } ## end case for ROI
+  
   # Prepare for final object to return
   end_t <- Sys.time()
   # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
