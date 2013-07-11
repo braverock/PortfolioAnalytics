@@ -476,9 +476,9 @@ optimize.portfolio_v2 <- function(
   momentFUN='set.portfolio.moments_v2'
 )
 {
-  optimize_method=optimize_method[1]
-  tmptrace=NULL
-  start_t<-Sys.time()
+  optimize_method <- optimize_method[1]
+  tmptrace <- NULL
+  start_t <- Sys.time()
   
   #store the call for later
   call <- match.call()
@@ -500,6 +500,9 @@ optimize.portfolio_v2 <- function(
   
   dotargs <- list(...)    
   
+  # Get the constraints from the portfolio object
+  constraints <- get_constraints(portfolio)
+  
   # set portfolio moments only once
   if(!is.function(momentFUN)){
     momentFUN <- match.fun(momentFUN)
@@ -515,6 +518,131 @@ optimize.portfolio_v2 <- function(
   } else {
     dotargs <- mout
   }
+  
+  # Function to normalize weights to min_sum and max_sum
+  # This function could be replaced by rp_transform
+  normalize_weights <- function(weights){
+    # normalize results if necessary
+    if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
+      # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
+      # we'll normalize the weights passed in to whichever boundary condition has been violated
+      # NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
+      # might violate your constraints, so you'd need to renormalize them after optimizing
+      # we'll create functions for that so the user is less likely to mess it up.
+      
+      ##' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
+      ##' In Kris' original function, this was manifested as a full investment constraint
+      if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
+        max_sum=constraints$max_sum
+        if(sum(weights)>max_sum) { weights<-(max_sum/sum(weights))*weights } # normalize to max_sum
+      }
+      
+      if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
+        min_sum=constraints$min_sum
+        if(sum(weights)<min_sum) { weights<-(min_sum/sum(weights))*weights } # normalize to min_sum
+      }
+      
+    } # end min_sum and max_sum normalization
+    return(weights)
+  }
+  
+  # DEoptim optimization method
+  if(optimize_method == "DEoptim"){
+    stopifnot("package:DEoptim" %in% search()  ||  require("DEoptim",quietly = TRUE))
+    # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
+    if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=N*50
+    NP <- round(search_size/itermax)
+    if(NP < (N * 10)) NP <- N * 10
+    if(NP > 2000) NP <- 2000
+    if(!hasArg(itermax)) {
+      itermax <- round(search_size / NP)
+      if(itermax < 50) itermax <- 50 #set minimum number of generations
+    }
+    
+    #check to see whether we need to disable foreach for parallel optimization, esp if called from inside foreach
+    if(hasArg(parallel)) parallel <- match.call(expand.dots=TRUE)$parallel else parallel <- TRUE
+    if(!isTRUE(parallel) && 'package:foreach' %in% search()){
+      registerDoSEQ()
+    }
+    
+    DEcformals <- formals(DEoptim.control)
+    DEcargs <- names(DEcformals)
+    if( is.list(dotargs) ){
+      pm <- pmatch(names(dotargs), DEcargs, nomatch = 0L)
+      names(dotargs[pm > 0L]) <- DEcargs[pm]
+      DEcformals$NP <- NP
+      DEcformals$itermax <- itermax
+      DEcformals[pm] <- dotargs[pm > 0L]
+      if(!hasArg(strategy)) DEcformals$strategy=6 # use DE/current-to-p-best/1
+      if(!hasArg(reltol)) DEcformals$reltol=.000001 # 1/1000 of 1% change in objective is significant
+      if(!hasArg(steptol)) DEcformals$steptol=round(N*1.5) # number of assets times 1.5 tries to improve
+      if(!hasArg(c)) DEcformals$c=.4 # JADE mutation parameter, this could maybe use some adjustment
+      if(!hasArg(storepopfrom)) DEcformals$storepopfrom=1
+      if(isTRUE(parallel) && 'package:foreach' %in% search()){
+        if(!hasArg(parallelType) ) DEcformals$parallelType='auto' #use all cores
+        if(!hasArg(packages) ) DEcformals$packages <- names(sessionInfo()$otherPkgs) #use all packages
+      }
+      
+      #TODO FIXME also check for a passed in controlDE list, including checking its class, and match formals
+    }
+    
+    if(isTRUE(trace)) { 
+      #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
+      tmptrace <- trace 
+      assign('.objectivestorage', list(), pos='.GlobalEnv')
+      trace=FALSE
+    } 
+    
+    # get upper and lower weights parameters from constraints
+    upper <- constraints$max
+    lower <- constraints$min
+    
+    if(hasArg(rpseed)) seed=match.call(expand.dots=TRUE)$rpseed else rpseed=TRUE
+    if(isTRUE(rpseed)) {
+      # initial seed population is generated with random_portfolios function
+      if(hasArg(eps)) eps=match.call(expand.dots=TRUE)$eps else eps = 0.01
+      # This part should still work, but will need to change random_portfolios over to accept portfolio object
+      rpconstraint <- constraint(assets=length(lower), min_sum=constraints$min_sum - eps, max_sum=constraints$max_sum + eps, 
+                                 min=lower, max=upper, weight_seq=generatesequence())
+      rp <- random_portfolios(rpconstraints=rpconstraint, permutations=NP)
+      DEcformals$initialpop=rp
+    }
+    controlDE <- do.call(DEoptim.control, DEcformals)
+    
+    # need to modify constrained_objective to accept a portfolio object
+    minw = try(DEoptim( constrained_objective_v2,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, nargs = dotargs , ...=...)) # add ,silent=TRUE here?
+    
+    if(inherits(minw, "try-error")) { minw=NULL }
+    if(is.null(minw)){
+      message(paste("Optimizer was unable to find a solution for target"))
+      return (paste("Optimizer was unable to find a solution for target"))
+    }
+    
+    if(isTRUE(tmptrace)) trace <- tmptrace
+    
+    weights <- as.vector(minw$optim$bestmem)
+    weights <- normalize_weights(weights)
+    names(weights) <- colnames(R)
+    
+    out <- list(weights=weights, objective_measures=constrained_objective_v2(w=weights, R=R, portfolio, trace=TRUE)$objective_measures, out=minw$optim$bestval, call=call)
+    if (isTRUE(trace)){
+      out$DEoutput <- minw
+      out$DEoptim_objective_results <- try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
+      rm('.objectivestorage',pos='.GlobalEnv')
+    }
+    
+  } ## end case for DEoptim
+  
+  # Prepare for final object to return
+  end_t <- Sys.time()
+  # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
+  message(c("elapsed time:", end_t-start_t))
+  out$portfolio <- portfolio
+  out$data_summary <- list(first=first(R), last=last(R))
+  out$elapsed_time <- end_t - start_t
+  out$end_t <- as.character(Sys.time())
+  class(out) <- c(paste("optimize.portfolio", optimize_method, sep='.'), "optimize.portfolio")
+  return(out)
 }
 
 #' portfolio optimization with support for rebalancing or rolling periods
