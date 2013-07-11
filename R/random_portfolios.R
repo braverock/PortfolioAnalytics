@@ -214,9 +214,9 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
   # get the constraints from the portfolio object
   constraints <- get_constraints(portfolio)
   
-  min_mult <- pconstraints$min_mult
+  min_mult <- constraints$min_mult
   if(is.null(min_mult)) min_mult <- rep(-Inf,nassets)
-  max_mult <- rpconstraints$max_mult
+  max_mult <- constraints$max_mult
   if(is.null(max_mult)) max_mult <- rep(Inf,nassets)
   min_sum  <- constraints$min_sum
   max_sum  <- constraints$max_sum
@@ -225,8 +225,8 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
     weight_seq <- generatesequence(min=min(constraints$min), max=max(constraints$max), by=0.002)
   }
   weight_seq <- as.vector(weight_seq)
-  max <- rpconstraints$max
-  min <- rpconstraints$min
+  max <- constraints$max
+  min <- constraints$min
   portfolio <- as.vector(seed)
   rownames(portfolio) <- NULL
   
