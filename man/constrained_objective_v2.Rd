@@ -1,0 +1,93 @@
+\name{constrained_objective_v2}
+\alias{constrained_objective_v2}
+\title{constrained_objective_v2 2 function to calculate a numeric return value for a portfolio based on a set of constraints and objectives}
+\usage{
+  constrained_objective_v2(w, R, portfolio, ...,
+    trace = FALSE, normalize = TRUE, storage = FALSE)
+}
+\arguments{
+  \item{R}{an xts, vector, matrix, data frame, timeSeries
+  or zoo object of asset returns}
+
+  \item{w}{a vector of weights to test}
+
+  \item{portfolio}{an object of type "portfolio" specifying
+  the constraints and objectives for the optimization, see
+  \code{\link{constraint}}}
+
+  \item{\dots}{any other passthru parameters}
+
+  \item{trace}{TRUE/FALSE whether to include debugging and
+  additional detail in the output list}
+
+  \item{normalize}{TRUE/FALSE whether to normalize results
+  to min/max sum (TRUE), or let the optimizer penalize
+  portfolios that do not conform (FALSE)}
+
+  \item{storage}{TRUE/FALSE default TRUE for DEoptim with
+  trace, otherwise FALSE. not typically user-called}
+}
+\description{
+  function to calculate a numeric return value for a
+  portfolio based on a set of constraints, we'll try to
+  make as few assumptions as possible, and only run
+  objectives that are required by the user
+}
+\details{
+  If the user has passed in either min_sum or max_sum
+  constraints for the portfolio, or both, and are using a
+  numerical optimization method like DEoptim, and
+  normalize=TRUE, the default, we'll normalize the weights
+  passed in to whichever boundary condition has been
+  violated. If using random portfolios, all the portfolios
+  generated will meet the constraints by construction.
+  NOTE: this means that the weights produced by a numeric
+  optimization algorithm like DEoptim might violate your
+  constraints, so you'd need to renormalize them after
+  optimizing We apply the same normalization in
+  \code{\link{optimize.portfolio}} so that the weights you
+  see have been normalized to min_sum if the generated
+  portfolio is smaller than min_sum or max_sum if the
+  generated portfolio is larger than max_sum. This
+  normalization increases the speed of optimization and
+  convergence by several orders of magnitude in many cases.
+
+  You may find that for some portfolios, normalization is
+  not desirable, if the algorithm cannot find a direction
+  in which to move to head towards an optimal portfolio.
+  In these cases, it may be best to set normalize=FALSE,
+  and penalize the portfolios if the sum of the weighting
+  vector lies outside the min_sum and/or max_sum.
+
+  Whether or not we normalize the weights using min_sum and
+  max_sum, and are using a numerical optimization engine
+  like DEoptim, we will penalize portfolios that violate
+  weight constraints in much the same way we penalize other
+  constraints.  If a min_sum/max_sum normalization has not
+  occurred, convergence can take a very long time.  We
+  currently do not allow for a non-normalized full
+  investment constraint. Future version of this function
+  could include this additional constraint penalty.
+
+  When you are optimizing a return objective, you must
+  specify a negative multiplier for the return objective so
+  that the function will maximize return.  If you specify a
+  target return, any return less than your target will be
+  penalized.  If you do not specify a target return, you
+  may need to specify a negative VTR (value to reach) , or
+  the function will not converge. Try the maximum expected
+  return times the multiplier (e.g. -1 or -10). Adding a
+  return objective defaults the multiplier to -1.
+
+  Additional parameters for random portfolios or
+  \code{\link[DEoptim]{DEoptim.control}} may be passed in
+  via \dots
+}
+\author{
+  Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
+}
+\seealso{
+  \code{\link{constraint}}, \code{\link{objective}},
+  \code{\link[DEoptim]{DEoptim.control}}
+}
+

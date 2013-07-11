@@ -104,3 +104,12 @@ summary.portfolio <- function(portfolio){
   }
   cat("\n")
 }
+
+#' print method for objects of class 'constraint'
+#' 
+#' @param portfolio object of class constraint
+#' @author Ross Bennett
+#' @export
+print.constraint <- function(obj){
+  print.default(obj)
+}
