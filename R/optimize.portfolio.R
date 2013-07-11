@@ -642,6 +642,47 @@ optimize.portfolio_v2 <- function(
     
   } ## end case for DEoptim
   
+  # case for random portfolios optimization method
+  if(optimize_method=="random"){
+    #' call random_portfolios() with portfolio and search_size to create matrix of portfolios
+    if(missing(rp) | is.null(rp)){
+      rp <- random_portfolios_v2(portfolio=portfolio, permutations=search_size)
+    }
+    #' store matrix in out if trace=TRUE
+    if (isTRUE(trace)) out$random_portfolios <- rp
+    #' write foreach loop to call constrained_objective() with each portfolio
+    if ("package:foreach" %in% search() & !hasArg(parallel)){
+      rp_objective_results <- foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective_v2(w=rp[ii,], R, portfolio, trace=trace,...=dotargs)
+    } else {
+      rp_objective_results <- apply(rp, 1, constrained_objective_v2, R=R, portfolio=portfolio, trace=trace, ...=dotargs)
+    }
+    #' if trace=TRUE , store results of foreach in out$random_results
+    if(isTRUE(trace)) out$random_portfolio_objective_results <- rp_objective_results
+    #' loop through results keeping track of the minimum value of rp_objective_results[[objective]]$out
+    search <- vector(length=length(rp_objective_results))
+    # first we construct the vector of results
+    for (i in 1:length(search)) {
+      if (isTRUE(trace)) {
+        search[i] <- ifelse(try(rp_objective_results[[i]]$out), rp_objective_results[[i]]$out,1e6)
+      } else {
+        search[i] <- as.numeric(rp_objective_results[[i]])
+      }
+    }
+    # now find the weights that correspond to the minimum score from the constrained objective
+    # and normalize_weights so that we meet our min_sum/max_sum constraints
+    if (isTRUE(trace)) {
+      min_objective_weights <- try(normalize_weights(rp_objective_results[[which.min(search)]]$weights))
+    } else {
+      min_objective_weights <- try(normalize_weights(rp[which.min(search),]))
+    }
+    #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
+    out$weights <- min_objective_weights
+    out$objective_measures <- try(constrained_objective_v2(w=min_objective_weights, R=R, portfolio=portfolio,trace=TRUE)$objective_measures)
+    out$call <- call
+    #' construct out list to be as similar as possible to DEoptim list, within reason
+    
+  } ## end case for random
+  
   # Prepare for final object to return
   end_t <- Sys.time()
   # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
