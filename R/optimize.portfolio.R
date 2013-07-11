@@ -191,8 +191,14 @@ optimize.portfolio <- function(
     upper = constraints$max
     lower = constraints$min
 
-	if(hasArg(rpseed)) seed=match.call(expand.dots=TRUE)$rpseed else rpseed=TRUE
-	if(isTRUE(rpseed)) {
+    if(hasArg(rpseed)){ 
+      seed <- match.call(expand.dots=TRUE)$rpseed
+      DEcformals$initialpop <- seed
+      rpseed <- FALSE
+    } else {
+      rpseed <- TRUE
+    }
+	if(hasArg(rpseed) & isTRUE(rpseed)) {
 	    # initial seed population is generated with random_portfolios function
 	    if(hasArg(eps)) eps=match.call(expand.dots=TRUE)$eps else eps = 0.01
     	rpconstraint<-constraint(assets=length(lower), min_sum=constraints$min_sum-eps, max_sum=constraints$max_sum+eps, 
@@ -469,9 +475,9 @@ optimize.portfolio <- function(
 optimize.portfolio_v2 <- function(
   R,
   portfolio,
-  optimize_method=c("DEoptim","random","ROI","ROI_old","pso","GenSA"), 
-  search_size=20000, 
-  trace=FALSE, ..., 
+  optimize_method=c("DEoptim","random","ROI","ROI_old","pso","GenSA"),
+  search_size=20000,
+  trace=FALSE, ...,
   rp=NULL,
   momentFUN='set.portfolio.moments_v2'
 )
@@ -558,7 +564,7 @@ optimize.portfolio_v2 <- function(
       itermax <- round(search_size / NP)
       if(itermax < 50) itermax <- 50 #set minimum number of generations
     }
-    
+    print(NP)
     #check to see whether we need to disable foreach for parallel optimization, esp if called from inside foreach
     if(hasArg(parallel)) parallel <- match.call(expand.dots=TRUE)$parallel else parallel <- TRUE
     if(!isTRUE(parallel) && 'package:foreach' %in% search()){
@@ -597,15 +603,18 @@ optimize.portfolio_v2 <- function(
     upper <- constraints$max
     lower <- constraints$min
     
-    if(hasArg(rpseed)) seed=match.call(expand.dots=TRUE)$rpseed else rpseed=TRUE
-    if(isTRUE(rpseed)) {
+    if(hasArg(rpseed)){ 
+      seed <- match.call(expand.dots=TRUE)$rpseed
+      DEcformals$initialpop <- seed
+      rpseed <- FALSE
+    } else {
+      rpseed <- TRUE
+    }
+    if(hasArg(rpseed) & isTRUE(rpseed)) {
       # initial seed population is generated with random_portfolios function
-      if(hasArg(eps)) eps=match.call(expand.dots=TRUE)$eps else eps = 0.01
-      # This part should still work, but will need to change random_portfolios over to accept portfolio object
-      rpconstraint <- constraint(assets=length(lower), min_sum=constraints$min_sum - eps, max_sum=constraints$max_sum + eps, 
-                                 min=lower, max=upper, weight_seq=generatesequence())
-      rp <- random_portfolios(rpconstraints=rpconstraint, permutations=NP)
-      DEcformals$initialpop=rp
+      # if(hasArg(eps)) eps=match.call(expand.dots=TRUE)$eps else eps = 0.01
+      rp <- random_portfolios_v2(portfolio=portfolio, permutations=NP)
+      DEcformals$initialpop <- rp
     }
     controlDE <- do.call(DEoptim.control, DEcformals)
     
