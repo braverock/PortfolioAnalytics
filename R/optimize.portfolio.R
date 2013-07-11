@@ -760,6 +760,53 @@ optimize.portfolio_v2 <- function(
     out$call <- call
   } ## end case for ROI
   
+  ## case if method=pso---particle swarm
+  if(optimize_method=="pso"){
+    stopifnot("package:pso" %in% search()  ||  require("pso",quietly = TRUE) )
+    if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
+    controlPSO <- list(trace=FALSE, fnscale=1, maxit=1000, maxf=Inf, abstol=-Inf, reltol=0)
+    PSOcargs <- names(controlPSO)
+    
+    if( is.list(dotargs) ){
+      pm <- pmatch(names(dotargs), PSOcargs, nomatch = 0L)
+      names(dotargs[pm > 0L]) <- PSOcargs[pm]
+      controlPSO$maxit <- maxit
+      controlPSO[pm] <- dotargs[pm > 0L]
+      if(!hasArg(reltol)) controlPSO$reltol <- .000001 # 1/1000 of 1% change in objective is significant
+      if(hasArg(trace) && try(trace==TRUE,silent=TRUE)) controlPSO$trace <- TRUE
+      if(hasArg(trace) && isTRUE(trace)) {
+        controlPSO$trace <- TRUE
+        controlPSO$trace.stats=TRUE
+      }
+    }
+    
+    # get upper and lower weights parameters from constraints
+    upper <- constraints$max
+    lower <- constraints$min
+    
+    minw <- try(psoptim( par = rep(NA, N), fn = constrained_objective_v2,  R=R, portfolio=portfolio,
+                         lower = lower[1:N] , upper = upper[1:N] , control = controlPSO)) # add ,silent=TRUE here?
+    
+    if(inherits(minw,"try-error")) { minw=NULL }
+    if(is.null(minw)){
+      message(paste("Optimizer was unable to find a solution for target"))
+      return (paste("Optimizer was unable to find a solution for target"))
+    }
+    
+    weights <- as.vector( minw$par)
+    weights <- normalize_weights(weights)
+    names(weights) <- colnames(R)
+    
+    out <- list(weights=weights, 
+                objective_measures=constrained_objective_v2(w=weights, R=R, portfolio=portfolio, trace=TRUE)$objective_measures,
+                out=minw$value, 
+                call=call)
+    if (isTRUE(trace)){
+      out$PSOoutput=minw
+    }
+    
+  } ## end case for pso
+  
   # Prepare for final object to return
   end_t <- Sys.time()
   # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
