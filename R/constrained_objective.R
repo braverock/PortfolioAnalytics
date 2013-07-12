@@ -419,10 +419,10 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   store_output <- try(get('.objectivestorage',pos='.GlobalEnv'), silent=TRUE)
   if(inherits(store_output,"try-error")) storage <- FALSE else storage <- TRUE        
   
-  # may be replaced by fn_map later
+  # use fn_map to normalize the weights
   if(isTRUE(normalize)){
-      w <- fn_map(weights=w, portfolio=portfolio)$weights
-      # end fn_map transformation
+    w <- fn_map(weights=w, portfolio=portfolio)$weights
+    # end fn_map transformation
   } else {
     # the user wants the optimization algorithm to figure it out
     if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
@@ -438,19 +438,85 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   # penalize weights outside min and max box constraints (can be caused by normalization)
   if (!is.null(constraints$max)){
     max <- constraints$max
-    out <- out + sum(w[which(w > max[1:N])] - constraints$max[which(w > max[1:N])]) * penalty
+    # Only go to penalty term if any of the weights violate max
+    if(any(w > max)){
+      out <- out + sum(w[which(w > max[1:N])] - constraints$max[which(w > max[1:N])]) * penalty
+    }
   }
   if (!is.null(constraints$min)){
     min <- constraints$min
-    out <- out + sum(constraints$min[which(w < min[1:N])] - w[which(w < min[1:N])]) * penalty
+    # Only go to penalty term if any of the weights violate min
+    if(any(w < min)){
+      out <- out + sum(constraints$min[which(w < min[1:N])] - w[which(w < min[1:N])]) * penalty
+    }
   }
 
-  # TODO
   # penalize weights that violate group constraints
+  if(!is.null(constraints$groups) & !is.null(constraints$cLO) & !is.null(constraints$cUP)){
+    groups <- constraints$groups
+    cLO <- constraints$cLO
+    cUP <- constraints$cUP
+    # Only go to penalty term if group constraint is violated
+    if(any(group_fail(w, groups, cLO, cUP))){
+      ngroups <- length(groups)
+      k <- 1
+      l <- 0
+      for(i in 1:ngroups){
+        j <- groups[i]
+        tmp_w <- w[k:(l+j)]
+        # penalize weights for a given group that sum to less than specified group min
+        grp_min <- cLO[i]
+        if(sum(tmp_w) < grp_min) {
+          out <- out + penalty * (grp_min - sum(tmp_w))
+        }
+        # penalize weights for a given group that sum to greater than specified group max
+        grp_max <- cUP[i]
+        if(sum(tmp_w) > grp_max) {
+          out <- out + penalty * (sum(tmp_w) - grp_max)
+        }
+        k <- k + j
+        l <- k - 1
+      }
+    }
+  } # End group constraint penalty
+    
   # penalize weights that violate max_pos constraints
+    if(!is.null(constraints$max_pos)){
+      max_pos <- constraints$max_pos
+      tolerance <- .Machine$double.eps^0.5
+      mult <- 1
+      # sum(abs(w) > tolerance) is the number of non-zero assets
+      nzassets <- sum(abs(w) > tolerance)
+      if(nzassets > max_pos){
+        # Do we need a small multiplier term here since (nzassets - max_pos) 
+        # will be an integer and much larger than the weight penalty terms
+        out <- out + penalty * mult * (nzassets - max_pos)
+      }
+    } # End position_limit constraint penalty
+    
   # penalize weights that violate diversification constraint
+    if(!is.null(constraints$div_target)){
+      div_target <- constraints$div_target
+      div <- diversification(w)
+      mult <- 1
+      # only penalize if not within +/- 5% of target
+      if((div < div_target * 0.95) | (div > div_target * 1.05)){
+        out <- out + penalty * mult * abs(div - div_target)
+      }
+    } # End diversification constraint penalty
+    
   # penalize weights that violate turnover constraint
-  
+    if(!is.null(constraints$turnover_target)){
+      turnover_target <- constraints$turnover_target
+      to <- turnover(w)
+      mult <- 1
+      # only penalize if not within +/- 5% of target
+      if((to < turnover_target * 0.95) | (to > turnover_target * 1.05)){
+        # print("transform or penalize to meet turnover target")
+        out = out + penalty * mult * abs(to - turnover_target)
+      }
+    } # End turnover constraint penalty
+    
   nargs <- list(...)
   if(length(nargs)==0) nargs <- NULL
   if (length('...')==0 | is.null('...')) {
