@@ -613,7 +613,7 @@ optimize.portfolio_v2 <- function(
       itermax <- round(search_size / NP)
       if(itermax < 50) itermax <- 50 #set minimum number of generations
     }
-    print(NP)
+    
     #check to see whether we need to disable foreach for parallel optimization, esp if called from inside foreach
     if(hasArg(parallel)) parallel <- match.call(expand.dots=TRUE)$parallel else parallel <- TRUE
     if(!isTRUE(parallel) && 'package:foreach' %in% search()){
@@ -669,7 +669,7 @@ optimize.portfolio_v2 <- function(
     
     # We are passing fn_map to the optional fnMap function to do the 
     # transformation so we need to force normalize=FALSE in call to constrained_objective
-    minw = try(DEoptim( constrained_objective_v2,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, nargs = dotargs , ...=..., normalize=FALSE, fnMap=function(x) fn_map(x, portfolio=portfolio))) # add ,silent=TRUE here?
+    minw = try(DEoptim( constrained_objective_v2,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, nargs = dotargs , ...=..., normalize=FALSE, fnMap=function(x) fn_map(x, portfolio=portfolio)$weights)) # add ,silent=TRUE here?
     
     if(inherits(minw, "try-error")) { minw=NULL }
     if(is.null(minw)){
@@ -680,6 +680,7 @@ optimize.portfolio_v2 <- function(
     if(isTRUE(tmptrace)) trace <- tmptrace
     
     weights <- as.vector(minw$optim$bestmem)
+    print(weights)
     # is it necessary to normalize the weights here?
     weights <- normalize_weights(weights)
     names(weights) <- colnames(R)

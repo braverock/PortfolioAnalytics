@@ -35,6 +35,9 @@ opt_de <- optimize.portfolio_v2(R=ret, portfolio=pspec, optimize_method="DEoptim
 all.equal(opt_out_de$weights, opt_de$weights)
 all.equal(opt_out_de$objective_measures, opt_de$objective_measures)
 
+# Note that values are now different since I added fnMap=fn_map to DEoptim in optimize.portfolio_v2
+# This is likely due to how normalization/transformation is handled
+
 ##### Simple test for random method with optimize.portfolio_v2 #####
 
 set.seed(123)
