@@ -397,6 +397,9 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     verbose <- match.call(expand.dots=TRUE)$verbose 
   else verbose <- FALSE 
   
+  # initial weights
+  init_weights <- w
+  
   # get the constraints from the portfolio object
   constraints <- get_constraints(portfolio)
   
@@ -418,28 +421,8 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   
   # may be replaced by fn_map later
   if(isTRUE(normalize)){
-    if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
-      # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
-      # we'll normalize the weights passed in to whichever boundary condition has been violated
-      # NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
-      # might violate your constraints, so you'd need to renormalize them after optimizing
-      # we'll create functions for that so the user is less likely to mess it up.
-      
-      #' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
-      #' In Kris' original function, this was manifested as a full investment constraint
-      #' the normalization process produces much faster convergence, 
-      #' and then we penalize parameters outside the constraints in the next block
-      if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
-        max_sum <- constraints$max_sum
-        if(sum(w) > max_sum) { w <- (max_sum / sum(w)) * w } # normalize to max_sum
-      }
-      
-      if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
-        min_sum <- constraints$min_sum
-        if(sum(w) < min_sum) { w <- (min_sum / sum(w)) * w } # normalize to min_sum
-      }
-      
-    } # end min_sum and max_sum normalization
+      w <- fn_map(weights=w, portfolio=portfolio)$weights
+    } # end fn_map transformation
   } else {
     # the user wants the optimization algorithm to figure it out
     if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
@@ -452,7 +435,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     }
   }
   
-  #' penalize weights outside my constraints (can be caused by normalization)
+  # penalize weights outside min and max box constraints (can be caused by normalization)
   if (!is.null(constraints$max)){
     max <- constraints$max
     out <- out + sum(w[which(w > max[1:N])] - constraints$max[which(w > max[1:N])]) * penalty
@@ -461,6 +444,12 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     min <- constraints$min
     out <- out + sum(constraints$min[which(w < min[1:N])] - w[which(w < min[1:N])]) * penalty
   }
+
+# TODO
+# penalize weights that violate group constraints
+# penalize weights that violate max_pos constraints
+# penalize weights that violate diversification constraint
+# penalize weights that violate turnover constraint
   
   nargs <- list(...)
   if(length(nargs)==0) nargs <- NULL
@@ -650,7 +639,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   #return
   if (isTRUE(storage)){
     #add the new objective results
-    store_output[[length(store_output)+1]] <- list(out=as.numeric(out), weights=w, objective_measures=tmp_return)
+    store_output[[length(store_output)+1]] <- list(out=as.numeric(out), weights=w, init_weights=init_weights, objective_measures=tmp_return)
     # do the assign here
     assign('.objectivestorage', store_output, pos='.GlobalEnv')
   }
