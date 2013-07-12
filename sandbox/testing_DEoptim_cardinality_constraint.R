@@ -58,7 +58,7 @@ out1$optim$bestval
 
 # Implement a cardinality constraint for max positions with DEoptim
 # http://grokbase.com/t/r/r-help/126fsz99gh/r-deoptim-example-illustrating-use-of-fnmap-parameter-for-enforcement-of-cardinality-constraints
-mappingFun <- function(x, max.pos=10) {
+mappingFun <- function(x, max.pos) {
   N <- length(x)
   num <- N - max.pos
   # Two smallest weights are given a value of 0
@@ -66,7 +66,7 @@ mappingFun <- function(x, max.pos=10) {
   x / sum(x)
 }
 
-out2 <- DEoptim(fn = obj, lower=lower, upper=upper, control=controlDE, fnMap=mappingFun)
+out2 <- DEoptim(fn = obj, lower=lower, upper=upper, control=controlDE, fnMap=function(x) mappingFun(x, max.pos=10))
 weights2 <- out2$optim$bestmem
 weights2 <- weights2 / sum(weights2)
 out2$optim$bestval

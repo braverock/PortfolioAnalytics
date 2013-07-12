@@ -667,8 +667,9 @@ optimize.portfolio_v2 <- function(
     }
     controlDE <- do.call(DEoptim.control, DEcformals)
     
-    # need to modify constrained_objective to accept a portfolio object
-    minw = try(DEoptim( constrained_objective_v2,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, nargs = dotargs , ...=...)) # add ,silent=TRUE here?
+    # We are passing fn_map to the optional fnMap function to do the 
+    # transformation so we need to force normalize=FALSE in call to constrained_objective
+    minw = try(DEoptim( constrained_objective_v2,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, nargs = dotargs , ...=..., normalize=FALSE, fnMap=function(x) fn_map(x, portfolio=portfolio))) # add ,silent=TRUE here?
     
     if(inherits(minw, "try-error")) { minw=NULL }
     if(is.null(minw)){
@@ -679,10 +680,11 @@ optimize.portfolio_v2 <- function(
     if(isTRUE(tmptrace)) trace <- tmptrace
     
     weights <- as.vector(minw$optim$bestmem)
+    # is it necessary to normalize the weights here?
     weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
     
-    out <- list(weights=weights, objective_measures=constrained_objective_v2(w=weights, R=R, portfolio, trace=TRUE)$objective_measures, out=minw$optim$bestval, call=call)
+    out <- list(weights=weights, objective_measures=constrained_objective_v2(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=minw$optim$bestval, call=call)
     if (isTRUE(trace)){
       out$DEoutput <- minw
       out$DEoptim_objective_results <- try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
