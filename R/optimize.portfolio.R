@@ -699,11 +699,12 @@ optimize.portfolio_v2 <- function(
     }
     #' store matrix in out if trace=TRUE
     if (isTRUE(trace)) out$random_portfolios <- rp
+    # rp is already being generated with a call to fn_map so set normalize=FALSE in the call to constrained_objective
     #' write foreach loop to call constrained_objective() with each portfolio
     if ("package:foreach" %in% search() & !hasArg(parallel)){
-      rp_objective_results <- foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective_v2(w=rp[ii,], R, portfolio, trace=trace,...=dotargs)
+      rp_objective_results <- foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective_v2(w=rp[ii,], R, portfolio, trace=trace,...=dotargs, normalize=FALSE)
     } else {
-      rp_objective_results <- apply(rp, 1, constrained_objective_v2, R=R, portfolio=portfolio, trace=trace, ...=dotargs)
+      rp_objective_results <- apply(rp, 1, constrained_objective_v2, R=R, portfolio=portfolio, trace=trace, ...=dotargs, normalize=FALSE)
     }
     #' if trace=TRUE , store results of foreach in out$random_results
     if(isTRUE(trace)) out$random_portfolio_objective_results <- rp_objective_results
@@ -719,6 +720,7 @@ optimize.portfolio_v2 <- function(
     }
     # now find the weights that correspond to the minimum score from the constrained objective
     # and normalize_weights so that we meet our min_sum/max_sum constraints
+    # Is it necessary to normalize the weights at all with random portfolios?
     if (isTRUE(trace)) {
       min_objective_weights <- try(normalize_weights(rp_objective_results[[which.min(search)]]$weights))
     } else {
@@ -726,7 +728,7 @@ optimize.portfolio_v2 <- function(
     }
     #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
     out$weights <- min_objective_weights
-    out$objective_measures <- try(constrained_objective_v2(w=min_objective_weights, R=R, portfolio=portfolio,trace=TRUE)$objective_measures)
+    out$objective_measures <- try(constrained_objective_v2(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE)$objective_measures)
     out$call <- call
     #' construct out list to be as similar as possible to DEoptim list, within reason
     
