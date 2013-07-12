@@ -30,7 +30,6 @@
 #' \item{max: }{vector of max box constraints that may have been modified if relax=TRUE}
 #' \item{cLO: }{vector of lower bound group constraints that may have been modified if relax=TRUE}
 #' \item{cUP: }{vector of upper bound group constraints that may have been modified if relax=TRUE}
-#' \item{out: }{penalty term}
 #' }
 #' @author Ross Bennett
 #' @export
@@ -59,10 +58,6 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   turnover_target <- constraints$turnover_target
   max_pos <- constraints$max_pos
   tolerance <- .Machine$double.eps^0.5
-  if(!hasArg(penalty)) penalty <- 1e4
-  if(!hasArg(multiplier)) multiplier <- 1
-  
-  out <- 0
   
   # We will modify the weights vector so create a temporary copy
   # modified for transformation or to relax constraints
@@ -193,36 +188,14 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
       } # end try-error recovery
     } # end check for position limit constraint violation
   } # end check for NULL arguments
-  
-  # check diversification constraint
-  if(!is.null(div_target)){
-    # penalize instead of transform?
-    div <- diversification(tmp_weights)
-    # only penalize if not within +/- 5% of target
-    if((div < div_target * .95) | (div > div_target * 1.05)){
-      # print("transform or penalize to meet diversification target")
-      out = out + penalty * abs(multiplier) * abs(div - div_target)
-    }
-  }
-  
-  # check turnover constraint
-  if(!is.null(turnover_target)){
-    # penalize instead of transform
-    to <- turnover(tmp_weights)
-    # only penalize if not within +/- 5% of target
-    if((to < turnover_target * 0.95) | (to > turnover_target * 1.05)){
-      # print("transform or penalize to meet turnover target")
-      out = out + penalty * abs(multiplier) * abs(to - turnover_target)
-    }
-  }
+
   names(tmp_weights) <- names(weights)
   return(list(weights=tmp_weights, 
               min=tmp_min, 
               max=tmp_max, 
               cLO=tmp_cLO, 
               cUP=tmp_cUP, 
-              max_pos=tmp_max_pos, 
-              out=out))
+              max_pos=tmp_max_pos))
 }
 
 #' Transform weights that violate min or max box constraints

@@ -20,8 +20,7 @@
   been modified if relax=TRUE} \item{cLO: }{vector of lower
   bound group constraints that may have been modified if
   relax=TRUE} \item{cUP: }{vector of upper bound group
-  constraints that may have been modified if relax=TRUE}
-  \item{out: }{penalty term} }
+  constraints that may have been modified if relax=TRUE} }
 }
 \description{
   The purpose of the mapping function is to transform a
