@@ -381,7 +381,7 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   # return w if all constraints are satisfied
   if((sum(w) >= min_sum & sum(w) <= max_sum) & 
        (all(w >= tmp_min) & all(w <= max)) & 
-       (all(!group_fail(weights, groups, cLO, cUP))) &
+       (all(!group_fail(w, groups, cLO, cUP))) &
        (sum(abs(w) > tolerance) <= max_pos)){
     return(w)
   }

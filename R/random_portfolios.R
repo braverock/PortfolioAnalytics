@@ -227,14 +227,15 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
   weight_seq <- as.vector(weight_seq)
   max <- constraints$max
   min <- constraints$min
-  portfolio <- as.vector(seed)
-  rownames(portfolio) <- NULL
+  # initial portfolio
+  iportfolio <- as.vector(seed)
+  rownames(iportfolio) <- NULL
   
   # initialize our loop
   permutations <- 1
   
   # create a temporary portfolio so we don't return a non-feasible portfolio
-  tportfolio <- portfolio
+  tportfolio <- iportfolio
   # first randomly permute each element of the temporary portfolio
   random_index <- sample(1:length(tportfolio), length(tportfolio))
   for (i in 1:length(tportfolio)) {
@@ -286,14 +287,15 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
     } # end decrease loop
   } # end final walk towards the edges
   
-  portfolio <- tportfolio
+  # final portfolio
+  fportfolio <- fn_map(weights=tportfolio, portfolio=portfolio, relax=FALSE)$weights
   
-  colnames(portfolio) <- colnames(seed)
-  if (sum(portfolio) <= min_sum | sum(tportfolio) >= max_sum){
-    portfolio <- seed
+  colnames(fportfolio) <- colnames(seed)
+  if (sum(fportfolio) <= min_sum | sum(fportfolio) >= max_sum){
+    fportfolio <- seed
     warning("Infeasible portfolio created, defaulting to seed, perhaps increase max_permutations.")
   }
-  if(isTRUE(all.equal(seed,portfolio))) {
+  if(isTRUE(all.equal(seed, fportfolio))) {
     if (sum(seed) >= min_sum & sum(seed) <= max_sum) {
       warning("Unable to generate a feasible portfolio different from seed, perhaps adjust your parameters.")
       return(seed)
@@ -302,7 +304,7 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
       return(NULL)
     }
   }
-  return(portfolio)
+  return(fportfolio)
 }
 
 #' version 2 generate an arbitary number of constrained random portfolios
