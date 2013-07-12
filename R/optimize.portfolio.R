@@ -348,7 +348,7 @@ optimize.portfolio <- function(
       Amat <- cbind(rbind(1, 1, moments$mean, coredata(R)), rbind(0, 0, 0, cbind(diag(T), 1))) 
       dir.vec <- c(">=","<=",">=",rep(">=",T))
       rhs.vec <- c(constraints$min_sum, constraints$max_sum, Rmin ,rep(0, T))
-      if(try(!is.null(groups), silent=TRUE)){
+      if(try(!is.null(constraints$groups), silent=TRUE)){
         zeros <- matrix(0, nrow=n.groups, ncol=(T+1))
         Amat <- rbind(Amat, cbind(Amat.group, zeros), cbind(-Amat.group, zeros))
         dir.vec <- c(dir.vec, rep(">=", (n.groups + n.groups)))
