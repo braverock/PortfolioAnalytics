@@ -422,7 +422,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   # may be replaced by fn_map later
   if(isTRUE(normalize)){
       w <- fn_map(weights=w, portfolio=portfolio)$weights
-    } # end fn_map transformation
+      # end fn_map transformation
   } else {
     # the user wants the optimization algorithm to figure it out
     if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
@@ -445,11 +445,11 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     out <- out + sum(constraints$min[which(w < min[1:N])] - w[which(w < min[1:N])]) * penalty
   }
 
-# TODO
-# penalize weights that violate group constraints
-# penalize weights that violate max_pos constraints
-# penalize weights that violate diversification constraint
-# penalize weights that violate turnover constraint
+  # TODO
+  # penalize weights that violate group constraints
+  # penalize weights that violate max_pos constraints
+  # penalize weights that violate diversification constraint
+  # penalize weights that violate turnover constraint
   
   nargs <- list(...)
   if(length(nargs)==0) nargs <- NULL
