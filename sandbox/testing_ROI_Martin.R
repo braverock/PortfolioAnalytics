@@ -7,7 +7,6 @@
 rm(list=ls())
 
 # Load packages
-library(PerformanceAnalytics)
 library(PortfolioAnalytics)
 library(ROI)
 library(ROI.plugin.glpk)
@@ -49,6 +48,20 @@ round(gmv.opt$weights, 3)
 # Portfolio standard deviation
 sqrt(gmv.opt$out)
 
+# GMV portfolio using new interface
+pspec <- portfolio.spec(assets=funds)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=-Inf, max=Inf, enabled=TRUE)
+pspec <- add.objective_v2(portfolio=pspec, type="risk", name="var", enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+# Portfolio standard deviation
+sqrt(opt$out)
+
 ##### Example 1.2: Long Only GMV Portfolio #####
 gmv.longonly.constr <- gen.constr
 
@@ -68,6 +81,20 @@ round(gmv.longonly.opt$weights, 3)
 
 # Portfolio standard deviation
 sqrt(gmv.longonly.opt$out)
+
+# GMV long only portfolio using new interface
+pspec <- portfolio.spec(assets=funds)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0, max=1, enabled=TRUE)
+pspec <- add.objective_v2(portfolio=pspec, type="risk", name="var", enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+# Portfolio standard deviation
+sqrt(opt$out)
 
 ##### Example 1.3: GMV Box Constraints #####
 gmv.box.constr <- gen.constr
@@ -90,6 +117,20 @@ round(gmv.box.opt$weights, 3)
 
 # Portfolio standard deviation
 sqrt(gmv.box.opt$out)
+
+# GMV box constraints portfolio using new interface
+pspec <- portfolio.spec(assets=funds)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0.03, max=0.25, enabled=TRUE)
+pspec <- add.objective_v2(portfolio=pspec, type="risk", name="var", enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+# Portfolio standard deviation
+sqrt(opt$out)
 
 ##### Example 1.3a: GMV Box Constraints #####
 gmv.box.constr <- gen.constr
@@ -150,6 +191,42 @@ round(gmv.lo.group.opt$weights, 3)
 # Group weights
 gmv.lo.group.opt$weights[c(1, 3, 5, 7)] + gmv.lo.group.opt$weights[c(2, 4, 6, 8)]
 
+# GMV group constraints portfolio using new interface
+pspec <- portfolio.spec(assets=funds.cap)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0, max=1, enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="group", enabled=TRUE,
+                        groups=c(2, 2, 2, 2),
+                        group_min=c(0.1, 0.15, 0, 0), 
+                        group_max=c(0.25, .35, 0.35, 0.45),
+                        group_labels=c("MICRO", "SMALL", "MID", "LARGE"))
+pspec <- add.objective_v2(portfolio=pspec, type="risk", name="var", enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns.cap, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+# Get the group weights
+# This is something I will work to include in the summary.optimize.portfolio.ROI
+groups <- pspec$constraints[[3]]$groups
+group_labels <- pspec$constraints[[3]]$group_labels
+group_weights <- rep(0, n.groups)
+n.groups <- length(groups)
+k <- 1
+l <- 0
+for(i in 1:n.groups){
+  j <- groups[i]
+  group_weights[i] <- sum(opt$weights[k:(l+j)])
+  k <- k + j
+  l <- k - 1
+}
+names(group_weights) <- group_labels
+group_weights
+
+# Portfolio standard deviation
+sqrt(opt$out)
+
 # In the previous examples, we were solving global minimum variance with optmize_method="ROI". 
 # The solve.QP plugin is selected automatically by optimize.portfolio when "var" is the objective
 
@@ -170,6 +247,20 @@ maxret.opt <- optimize.portfolio(R=returns, constraints=maxret.constr, optimize_
 # Optimal weights
 maxret.opt$weights
 
+# Maximize mean return with box constraints portfolio using new interface
+pspec <- portfolio.spec(assets=funds)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0.03, max=0.25, enabled=TRUE)
+pspec <- add.objective_v2(portfolio=pspec, type="return", name="mean", enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+# Portfolio standard deviation
+sqrt(opt$out)
+
 ##### Example 1.7 Maximize mean-return Long Only with Group Constraints #####
 # Re-use lo.group.constr from Example 1.5
 maxret.lo.group.constr <- lo.group.constr
@@ -183,6 +274,42 @@ maxret.lo.group.opt$weights
 
 # Group weights
 maxret.lo.group.opt$weights[c(1, 3, 5, 7)] + maxret.lo.group.opt$weights[c(2, 4, 6, 8)]
+
+# GMV group constraints portfolio using new interface
+pspec <- portfolio.spec(assets=funds.cap)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0, max=1, enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="group", enabled=TRUE,
+                        groups=c(2, 2, 2, 2),
+                        group_min=c(0.1, 0.15, 0, 0), 
+                        group_max=c(0.25, .35, 0.35, 0.45),
+                        group_labels=c("MICRO", "SMALL", "MID", "LARGE"))
+pspec <- add.objective_v2(portfolio=pspec, type="return", name="mean", enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns.cap, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+# Get the group weights
+# This is something I will work to include in the summary.optimize.portfolio.ROI
+groups <- pspec$constraints[[3]]$groups
+group_labels <- pspec$constraints[[3]]$group_labels
+group_weights <- rep(0, n.groups)
+n.groups <- length(groups)
+k <- 1
+l <- 0
+for(i in 1:n.groups){
+  j <- groups[i]
+  group_weights[i] <- sum(opt$weights[k:(l+j)])
+  k <- k + j
+  l <- k - 1
+}
+names(group_weights) <- group_labels
+group_weights
+
+# Portfolio standard deviation
+sqrt(opt$out)
 
 ##### Example 1.X: Maximize Quadratic Utility #####
 # Quadratic utility maximize return penalizing variance
@@ -238,15 +365,115 @@ qu.opt <- optimize.portfolio(R=returns, constraints=qu.constr, optimize_method="
 round(qu.opt$weights, 4)
 
 ##### Example X: Mean Variance Optimization (MVO) with target mean return constraint #####
-# TODO Add type="return" for constraint to solve the mean-return constrained mvo
-# Will also need to modify optimize.portfolio for optimize_method="ROI"
+
+# MVO with target mean return
+pspec <- portfolio.spec(assets=funds)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=-Inf, max=Inf, enabled=TRUE)
+pspec <- add.objective_v2(portfolio=pspec, type="risk", name="var", risk_aversion=1e6, enabled=TRUE)
+pspec <- add.objective_v2(portfolio=pspec, type="return", name="mean", target=0.014, enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+# Portfolio return
+t(opt$weights) %*% colMeans(returns)
+
 
 ##### Example X: Mean Variance Optimization (MVO) with target mean return and long only constraints #####
-# TODO Add type="return" for constraint to solve the mean-return constrained mvo
-# Will also need to modify optimize.portfolio for optimize_method="ROI"
+
+# MVO with long only and target mean return
+pspec <- portfolio.spec(assets=funds)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0, max=1, enabled=TRUE)
+pspec <- add.objective_v2(portfolio=pspec, type="risk", name="var", risk_aversion=1e6, enabled=TRUE)
+pspec <- add.objective_v2(portfolio=pspec, type="return", name="mean", target=0.014, enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+# Portfolio return
+t(opt$weights) %*% colMeans(returns)
 
 ##### Example X: Mean Variance Optimization (MVO) with target mean return and box constraints #####
-# TODO Add type="return" for constraint to solve the mean-return constrained mvo
-# Will also need to modify optimize.portfolio for optimize_method="ROI"
 
-# ROI only solves mean, var, or sample CVaR type business objectives
+# MVO with box constraints and target mean return
+pspec <- portfolio.spec(assets=funds)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0.03, max=0.25, enabled=TRUE)
+pspec <- add.objective_v2(portfolio=pspec, type="risk", name="var", risk_aversion=1e6, enabled=TRUE)
+pspec <- add.objective_v2(portfolio=pspec, type="return", name="mean", target=0.014, enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+# Portfolio return
+t(opt$weights) %*% colMeans(returns)
+
+##### Example X: ETL Long Only #####
+
+pspec <- portfolio.spec(assets=funds)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0, max=1, enabled=TRUE)
+# This can be specified with ETL, ES, or CVaR for name
+pspec <- add.objective_v2(portfolio=pspec, type="risk", name="ETL", alpha=0.05, enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+##### Example X: ETL with box constraints #####
+
+pspec <- portfolio.spec(assets=funds)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0.03, max=0.25, enabled=TRUE)
+# This can be specified with ETL, ES, or CVaR for name
+pspec <- add.objective_v2(portfolio=pspec, type="risk", name="ETL", alpha=0.05, enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+##### Example X: ETL long only with group constraints #####
+
+# GMV group constraints portfolio using new interface
+pspec <- portfolio.spec(assets=funds.cap)
+pspec <- add.constraint(portfolio=pspec, type="full_investment", enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0, max=1, enabled=TRUE)
+pspec <- add.constraint(portfolio=pspec, type="group", enabled=TRUE,
+                        groups=c(2, 2, 2, 2),
+                        group_min=c(0.1, 0.15, 0, 0), 
+                        group_max=c(0.25, .35, 0.35, 0.45),
+                        group_labels=c("MICRO", "SMALL", "MID", "LARGE"))
+pspec <- add.objective_v2(portfolio=pspec, type="risk", name="ETL", alpha=0.05, enabled=TRUE)
+
+opt <- optimize.portfolio_v2(R=returns.cap, portfolio=pspec, optimize_method="ROI")
+
+# Optimal weights
+round(opt$weights, 3)
+
+# Get the group weights
+# This is something I will work to include in the summary.optimize.portfolio.ROI
+groups <- pspec$constraints[[3]]$groups
+group_labels <- pspec$constraints[[3]]$group_labels
+group_weights <- rep(0, n.groups)
+n.groups <- length(groups)
+k <- 1
+l <- 0
+for(i in 1:n.groups){
+  j <- groups[i]
+  group_weights[i] <- sum(opt$weights[k:(l+j)])
+  k <- k + j
+  l <- k - 1
+}
+names(group_weights) <- group_labels
+group_weights
+
