@@ -3,7 +3,7 @@
 \title{constructor for class portfolio_risk_objective}
 \usage{
   portfolio_risk_objective(name, target = NULL,
-    arguments = NULL, multiplier = 1, enabled = FALSE, ...)
+    arguments = NULL, multiplier = 1, enabled = TRUE, ...)
 }
 \arguments{
   \item{name}{name of the objective, should correspond to a

@@ -3,7 +3,7 @@
 \title{constructor for class risk_budget_objective}
 \usage{
   risk_budget_objective(assets, name, target = NULL,
-    arguments = NULL, multiplier = 1, enabled = FALSE, ...,
+    arguments = NULL, multiplier = 1, enabled = TRUE, ...,
     min_prisk, max_prisk, min_concentration = FALSE,
     min_difference = FALSE)
 }

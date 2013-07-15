@@ -3,7 +3,7 @@
 \title{constructor for turnover_constraint}
 \usage{
   turnover_constraint(type, turnover_target,
-    enabled = FALSE, ...)
+    enabled = TRUE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}

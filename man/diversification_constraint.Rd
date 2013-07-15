@@ -3,7 +3,7 @@
 \title{constructor for diversification_constraint}
 \usage{
   diversification_constraint(type, div_target,
-    enabled = FALSE, ...)
+    enabled = TRUE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}

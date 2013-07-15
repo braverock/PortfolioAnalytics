@@ -2,7 +2,7 @@
 \alias{position_limit_constraint}
 \title{constructor for position_limit_constraint}
 \usage{
-  position_limit_constraint(type, max_pos, enabled = FALSE,
+  position_limit_constraint(type, max_pos, enabled = TRUE,
     ...)
 }
 \arguments{

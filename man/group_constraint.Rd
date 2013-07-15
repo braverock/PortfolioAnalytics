@@ -4,7 +4,7 @@
 \usage{
   group_constraint(type, assets, groups,
     group_labels = NULL, group_min, group_max,
-    enabled = FALSE, ...)
+    enabled = TRUE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}

@@ -3,7 +3,7 @@
 \title{General interface for adding optimization objectives, including risk, return, and risk budget}
 \usage{
   add.objective_v2(portfolio, type, name, arguments = NULL,
-    enabled = FALSE, ..., indexnum = NULL)
+    enabled = TRUE, ..., indexnum = NULL)
 }
 \arguments{
   \item{portfolio}{an object of type 'portfolio' to add the

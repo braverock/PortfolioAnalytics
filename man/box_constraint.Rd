@@ -3,7 +3,7 @@
 \title{constructor for box_constraint.}
 \usage{
   box_constraint(type, assets, min, max, min_mult,
-    max_mult, enabled = FALSE, ...)
+    max_mult, enabled = TRUE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}

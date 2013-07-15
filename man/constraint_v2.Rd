@@ -2,7 +2,7 @@
 \alias{constraint_v2}
 \title{constructor for class v2_constraint}
 \usage{
-  constraint_v2(type, enabled = FALSE, ...,
+  constraint_v2(type, enabled = TRUE, ...,
     constrclass = "v2_constraint")
 }
 \arguments{

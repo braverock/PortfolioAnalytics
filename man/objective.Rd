@@ -2,9 +2,8 @@
 \alias{objective}
 \title{constructor for class 'objective'}
 \usage{
-  objective(name, target = NULL, arguments,
-    enabled = FALSE, ..., multiplier = 1,
-    objclass = "objective")
+  objective(name, target = NULL, arguments, enabled = TRUE,
+    ..., multiplier = 1, objclass = "objective")
 }
 \arguments{
   \item{name}{name of the objective which will be used to

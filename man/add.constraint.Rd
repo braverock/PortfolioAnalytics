@@ -2,7 +2,7 @@
 \alias{add.constraint}
 \title{General interface for adding and/or updating optimization constraints.}
 \usage{
-  add.constraint(portfolio, type, enabled = FALSE, ...,
+  add.constraint(portfolio, type, enabled = TRUE, ...,
     indexnum = NULL)
 }
 \arguments{

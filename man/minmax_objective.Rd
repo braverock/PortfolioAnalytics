@@ -3,7 +3,7 @@
 \title{constructor for class tmp_minmax_objective}
 \usage{
   minmax_objective(name, target = NULL, arguments = NULL,
-    multiplier = 1, enabled = FALSE, ..., min, max)
+    multiplier = 1, enabled = TRUE, ..., min, max)
 }
 \arguments{
   \item{name}{name of the objective, should correspond to a
