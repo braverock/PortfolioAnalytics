@@ -160,7 +160,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
 #' @param constrclass character to name the constraint class
 #' @author Ross Bennett
 #' @export
-constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="v2_constraint"){
+constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
   if(!hasArg(type)) stop("you must specify a constraint type")
   if (hasArg(type)) if(is.null(type)) stop("you must specify a constraint type")
   
@@ -189,7 +189,7 @@ constraint_v2 <- function(type, enabled=FALSE, ..., constrclass="v2_constraint")
 #' @author Ross Bennett
 #' @seealso \code{\link{constraint_v2}}, \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{position_limit_constraint}}
 #' @export
-add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
+add.constraint <- function(portfolio, type, enabled=TRUE, ..., indexnum=NULL){
   # Check to make sure that the portfolio passed in is a portfolio object
   if (!is.portfolio(portfolio)) {stop("portfolio passed in is not of class portfolio")}
   
@@ -287,7 +287,7 @@ add.constraint <- function(portfolio, type, enabled=FALSE, ..., indexnum=NULL){
 #' # specify box constraints per asset
 #' pspec <- add.constraint(pspec, type="box", min=c(0.05, 0.10, 0.08, 0.06), max=c(0.45, 0.55, 0.35, 0.65))
 #' @export
-box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=FALSE, ...){
+box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=TRUE, ...){
   # Based on the constraint function for object of class constraint_v1 that
   # included specifying box constraints.
   
@@ -399,7 +399,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=F
 #'                         group_min=c(0.15, 0.25),
 #'                         group_max=c(0.65, 0.55))
 #' @export
-group_constraint <- function(type, assets, groups, group_labels=NULL, group_min, group_max, enabled=FALSE, ...) {
+group_constraint <- function(type, assets, groups, group_labels=NULL, group_min, group_max, enabled=TRUE, ...) {
   nassets <- length(assets)
   ngroups <- length(groups)
   
@@ -469,7 +469,7 @@ group_constraint <- function(type, assets, groups, group_labels=NULL, group_min,
 #' pspec <- add.constraint(pspec, type="dollar_neutral")
 #' pspec <- add.constraint(pspec, type="active")
 #' @export
-weight_sum_constraint <- function(type, min_sum=0.99, max_sum=1.01, enabled=FALSE, ...){
+weight_sum_constraint <- function(type, min_sum=0.99, max_sum=1.01, enabled=TRUE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="weight_sum_constraint", ...)
   Constraint$min_sum <- min_sum
   Constraint$max_sum <- max_sum
@@ -577,7 +577,7 @@ get_constraints <- function(portfolio){
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.6)
 #' @export
-turnover_constraint <- function(type, turnover_target, enabled=FALSE, ...){
+turnover_constraint <- function(type, turnover_target, enabled=TRUE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="turnover_constraint", ...)
   Constraint$turnover_target <- turnover_target
   return(Constraint)
@@ -600,7 +600,7 @@ turnover_constraint <- function(type, turnover_target, enabled=FALSE, ...){
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
 #' @export
-diversification_constraint <- function(type, div_target, enabled=FALSE, ...){
+diversification_constraint <- function(type, div_target, enabled=TRUE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="diversification_constraint", ...)
   Constraint$div_target <- div_target
   return(Constraint)
@@ -624,7 +624,7 @@ diversification_constraint <- function(type, div_target, enabled=FALSE, ...){
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
 #' @export
-position_limit_constraint <- function(type, max_pos, enabled=FALSE, ...){
+position_limit_constraint <- function(type, max_pos, enabled=TRUE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="position_limit_constraint", ...)
   Constraint$max_pos <- max_pos
   return(Constraint)
