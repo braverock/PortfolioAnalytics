@@ -21,7 +21,7 @@
 #' @param objclass string class to apply, default 'objective'
 #' @author Brian G. Peterson
 #' @export
-objective<-function(name , target=NULL , arguments, enabled=FALSE , ..., multiplier=1, objclass='objective'){
+objective<-function(name , target=NULL , arguments, enabled=TRUE , ..., multiplier=1, objclass='objective'){
   if(!hasArg(name)) stop("you must specify an objective name")
   if (hasArg(name)) if(is.null(name)) stop("you must specify an objective name")
   if (!is.list(arguments)) stop("arguments must be passed as a named list")
@@ -69,13 +69,13 @@ is.objective <- function( x ) {
 #' @seealso \code{\link{constraint}}
 #' 
 #' @export
-add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE, ..., indexnum=NULL)
+add.objective <- function(constraints, type, name, arguments=NULL, enabled=TRUE, ..., indexnum=NULL)
 {
     if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
 
     if (!hasArg(name)) stop("you must supply a name for the objective")
     if (!hasArg(type)) stop("you must supply a type of objective to create")
-    if (!hasArg(enabled)) enabled=FALSE
+    if (!hasArg(enabled)) enabled=TRUE
     if (!hasArg(arguments) | is.null(arguments)) arguments<-list()
     if (!is.list(arguments)) stop("arguments must be passed as a named list")
 
@@ -150,14 +150,14 @@ add.objective <- function(constraints, type, name, arguments=NULL, enabled=FALSE
 #' @seealso \code{\link{objective}}
 #' 
 #' @export
-add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=FALSE, ..., indexnum=NULL){
+add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=TRUE, ..., indexnum=NULL){
   # This function is based on the original add.objective function, but modified
   # to add objectives to a portfolio object instead of a constraint object.
   if (!is.portfolio(portfolio)) {stop("portfolio passed in is not of class portfolio")}
   
   if (!hasArg(name)) stop("you must supply a name for the objective")
   if (!hasArg(type)) stop("you must supply a type of objective to create")
-  if (!hasArg(enabled)) enabled=FALSE
+  if (!hasArg(enabled)) enabled=TRUE
   if (!hasArg(arguments) | is.null(arguments)) arguments<-list()
   if (!is.list(arguments)) stop("arguments must be passed as a named list")
   
@@ -241,7 +241,7 @@ add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=FALS
 #' @param \dots any other passthru parameters 
 #' @author Brian G. Peterson
 #' @export
-return_objective <- function(name, target=NULL, arguments=NULL, multiplier=-1, enabled=FALSE, ... )
+return_objective <- function(name, target=NULL, arguments=NULL, multiplier=-1, enabled=TRUE, ... )
 {
   if(!hasArg(target)) target = NULL
   ##' if target is null, we'll try to maximize the return metric
@@ -260,7 +260,7 @@ return_objective <- function(name, target=NULL, arguments=NULL, multiplier=-1, e
 #' @param \dots any other passthru parameters 
 #' @author Brian G. Peterson
 #' @export
-portfolio_risk_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ... )
+portfolio_risk_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=TRUE, ... )
 {
     if(is.null(arguments$portfolio_method)) arguments$portfolio_method="single" #use multivariate risk calcs
     return(objective(name=name,target=target, arguments=arguments, multiplier=multiplier,enabled=enabled, objclass=c("portfolio_risk_objective","objective"), ... ))
@@ -281,7 +281,7 @@ portfolio_risk_objective <- function(name, target=NULL, arguments=NULL, multipli
 #' @param min_difference TRUE/FALSE whether to minimize difference between concentration, default FALSE
 #' @author Brian G. Peterson
 #' @export
-risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ..., min_prisk, max_prisk, min_concentration=FALSE, min_difference=FALSE )
+risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, multiplier=1, enabled=TRUE, ..., min_prisk, max_prisk, min_concentration=FALSE, min_difference=FALSE )
 {
   if(is.null(arguments$portfolio_method)) arguments$portfolio_method="component"
   
@@ -336,7 +336,7 @@ risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, mul
 #' @param \dots any other passthru parameters 
 #' @author Ross Bennett
 #' @export
-turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ... )
+turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=TRUE, ... )
 {
   if(!hasArg(target)) target = NULL
   ##' if target is null, we'll try to minimize the turnover metric
@@ -369,7 +369,7 @@ turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, 
 #' @param \dots any other passthru parameters 
 #' @author Ross Bennett
 #' @export
-minmax_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=FALSE, ..., min, max )
+minmax_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=TRUE, ..., min, max )
 {
   if(!hasArg(target)) target = NULL
   ##' if target is null, we'll try to minimize the metric
