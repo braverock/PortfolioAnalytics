@@ -45,3 +45,4 @@ Collate:
     'portfolio.R'
     'constraintsFUN.R'
     'constraint_fn_map.R'
+    'optFUN.R'

@@ -757,19 +757,34 @@ optimize.portfolio_v2 <- function(
       }
     }
     if("var" %in% names(moments)){
-      # Then this is a QP problem
+      # Minimize variance if the only objective specified is variance
+      # Maximize Quadratic Utility if var and mean are specified as objectives
       out <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target)
       out$call <- call
     }
-    if(names(moments) == "mean") {
-      # This is a maximize return problem if the only name in moments == mean
-      out <- maxret_opt(R=R, constraints=constraints, moments=moments, target=target)
-      out$call <- call
+    if(length(names(moments)) == 1 & "mean" %in% names(moments)) {
+      # Maximize return if the only objective specified is mean
+      if(!is.null(constraints$max_pos)) {
+        # This is an MILP problem if max_pos is specified as a constraint
+        out <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=target)
+        out$call <- call
+      } else {
+        # Maximize return LP problem
+        out <- maxret_opt(R=R, constraints=constraints, moments=moments, target=target)
+        out$call <- call
+      }
     }
     if( any(c("CVaR", "ES", "ETL") %in% names(moments)) ) {
-      # This is an ETL LP problem
-      out <- etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
-      out$call <- call
+      # Minimize sample ETL/ES/CVaR if CVaR, ETL, or ES is specified as an objective
+      if(!is.null(constraints$max_pos)) {
+        # This is an MILP problem if max_pos is specified as a constraint
+        out <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
+        out$call <- call
+      } else {
+        # Minimize sample ETL/ES/CVaR LP Problem
+        out <- etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
+        out$call <- call
+      }
     }
   } ## end case for ROI
   
