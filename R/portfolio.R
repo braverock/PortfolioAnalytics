@@ -13,12 +13,13 @@
 #' constructor for class portfolio
 #' 
 #' @param assets number of assets, or optionally a named vector of assets specifying seed weights. If seed weights are not specified, an equal weight portfolio will be assumed.
+#' @param category_labels character vector to categorize assets by sector, industry, geography, market-cap, currency, etc.
 #' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
 #' @author Ross Bennett
 #' @examples 
 #' pspec <- portfolio.spec(assets=10, weight_seq=generatesequence())
 #' @export
-portfolio.spec <- function(assets=NULL, weight_seq=NULL) {
+portfolio.spec <- function(assets=NULL, category_labels=NULL, weight_seq=NULL) {
   # portfolio.spec is based on the v1_constraint object, but removes
   # constraint specification
   if (is.null(assets)) {
@@ -55,10 +56,21 @@ portfolio.spec <- function(assets=NULL, weight_seq=NULL) {
     # if assets is a named vector, we'll assume it is current weights
   }
   
+  # If category_labels is not null then the user has passed in category_labels
+  if(!is.null(category_labels)){
+    if(!is.character(category_labels)){
+      stop("category_labels must be a character vector")
+    }
+    if(length(category_labels) != length(assets)) {
+      stop("length(category_labels) must be equal to length(assets)")
+    }
+  }
+  
   ## now structure and return
   return(structure(
     list(
       assets = assets,
+      category_labels = category_labels,
       weight_seq = weight_seq,
       constraints = list(),
       objectives = list(),
