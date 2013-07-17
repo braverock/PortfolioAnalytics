@@ -54,6 +54,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   groups <- constraints$groups
   cLO <- constraints$cLO
   cUP <- constraints$cUP
+  group_pos <- constraints$group_pos
   div_target <- constraints$div_target
   turnover_target <- constraints$turnover_target
   max_pos <- constraints$max_pos
@@ -77,7 +78,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   if(!is.null(min_sum) & !is.null(max_sum)){
     if(!(sum(tmp_weights) >= min_sum & sum(tmp_weights) <= max_sum)){
       # Try to transform only considering leverage and box constraints
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, 500), silent=TRUE)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, group_pos=NULL, 500), silent=TRUE)
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -89,7 +90,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   if(!is.null(tmp_min) & !is.null(tmp_max)){
     if(!(all(tmp_weights >= tmp_min) & all(tmp_weights <= tmp_max))){
       # Try to transform only considering leverage and box constraints
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, 500), silent=TRUE)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, group_pos=NULL, 500), silent=TRUE)
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -111,7 +112,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
             }
             
             # Now try the transformation again
-            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, 500), silent=TRUE)
+            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, group_pos, 500), silent=TRUE)
             # Default to original weights if this fails again
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
@@ -130,9 +131,9 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   
   # check group constraints
   if(!is.null(groups) & !is.null(tmp_cLO) & !is.null(tmp_cUP)){
-    if(any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP))){
+    if(any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP, group_pos))){
       # Try to transform only considering leverage, box, and group constraints
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, 500), silent=TRUE)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, group_pos, 500), silent=TRUE)
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -141,8 +142,8 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
           i <- 1
           # loop while constraints are violated and relax constraints
           # Try to relax constraints up to 5 times
-          while(((sum(tmp_weights) < min_sum | sum(tmp_weights) > max_sum) | (any(tmp_weights < tmp_min) | any(tmp_weights > tmp_max)) | any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP))) & i <= 5){
-            if(any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP))){
+          while(((sum(tmp_weights) < min_sum | sum(tmp_weights) > max_sum) | (any(tmp_weights < tmp_min) | any(tmp_weights > tmp_max)) | any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP, group_pos))) & i <= 5){
+            if(any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP, group_pos))){
               # I know which group failed, but not if it was cUP or cLO that was violated
               # Maybe I can modify group_fail to report back what was violated and only relax cLO or cUP, not both
               # This relaxes both cLO and cUP
@@ -150,7 +151,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
               tmp_cUP[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] <- tmp_cUP[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] + runif(1, 0.01, 0.05)
             }
             # Now try the transformation again
-            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, 500), silent=TRUE)
+            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, group_pos, 500), silent=TRUE)
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
           }
@@ -170,7 +171,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   if(!is.null(tmp_max_pos)){
     if(!(sum(abs(tmp_weights) > tolerance) <= tmp_max_pos)){
       # Try to transform only considering leverage, box, group, and position_limit constraints
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, tmp_max_pos, 500), silent=TRUE)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, tmp_max_pos, group_pos, 500), silent=TRUE)
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -180,7 +181,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
             # increment tmp_max_pos by 1
             tmp_max_pos <- tmp_max_pos + 1
             # Now try the transformation again
-            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, tmp_max_pos, 500), silent=TRUE)
+            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, tmp_max_pos, group_pos, 500), silent=TRUE)
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
           }
@@ -321,11 +322,12 @@ txfrm_position_limit_constraint <- function(weights, max_pos, nassets, tolerance
 #' @param cLO numeric or vector specifying minimum weight group constraints
 #' @param cUP numeric or vector specifying minimum weight group constraints
 #' @param max_pos maximum assets with non-zero weights
+#' @param group_pos vector specifying maximum number assets with non-zero weights per group
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, Ross Bennett (based on an idea by Pat Burns)
 #' @export
-rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, cUP, max_pos=NULL, max_permutations=200){
+rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, cUP, max_pos=NULL, group_pos=NULL, max_permutations=200){
   # Uses logic from randomize_portfolio to "normalize" a weights vector to 
   # satisfy min_sum and max_sum while accounting for box and group constraints
   # Modified from randomize_portfolio to trigger the while loops if any weights 
@@ -335,6 +337,9 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   
   tolerance=.Machine$double.eps^0.5
   if(is.null(max_pos)) max_pos <- length(w)
+  
+  if(!is.null(group_pos)) max_group_pos <- sum(group_pos)
+  max_assets <- min(max_pos, max_group_pos)
   
   # Create a temporary min vector that will be modified, because a feasible
   # portfolio is rarely created if all(min > 0). This is due to the while
@@ -354,7 +359,7 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   # return w if all constraints are satisfied
   if((sum(w) >= min_sum & sum(w) <= max_sum) & 
        (all(w >= tmp_min) & all(w <= max)) & 
-       (all(!group_fail(w, groups, cLO, cUP))) &
+       (all(!group_fail(w, groups, cLO, cUP, group_pos))) &
        (sum(abs(w) > tolerance) <= max_pos)){
     return(w)
   }
@@ -362,7 +367,7 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   # generate a sequence of weights based on min/max box constraints
   weight_seq <- generatesequence(min=min(min), max=max(max), by=0.005)
   # make sure there is a 0 in weight_seq
-  if(!is.null(max_pos) & !is.element(0, weight_seq)) weight_seq <- c(0, weight_seq)
+  if((!is.null(max_pos) | !is.null(group_pos)) & !is.element(0, weight_seq)) weight_seq <- c(0, weight_seq)
   
   # start the permutations counter
   permutations <- 1
@@ -371,7 +376,7 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   tmp_w <- w
   
   # while portfolio is outside min_sum/max_sum or tmp_min/max or group or postion_limit constraints and we have not reached max_permutations
-  while ((sum(tmp_w) <= min_sum | sum(tmp_w) >= max_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP)) | (sum(abs(tmp_w) > tolerance) > max_pos)) & permutations <= max_permutations) {
+  while ((sum(tmp_w) <= min_sum | sum(tmp_w) >= max_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP, group_pos)) | (sum(abs(tmp_w) > tolerance) > max_pos)) & permutations <= max_permutations) {
     permutations = permutations + 1
     # check our box constraints on total portfolio weight
     # reduce(increase) total portfolio size till you get a match
@@ -383,7 +388,7 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
     tmp_w <- w
     tmp_min <- min
     
-    random_index <- sample(1:length(tmp_w), max_pos)
+    random_index <- sample(1:length(tmp_w), max_assets)
     
     # Get the index values that are not in random_index and set them equal to 0
     full_index <- 1:length(tmp_w)
@@ -396,7 +401,7 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
     
     i = 1
     # while sum of weights is less than min_sum or tmp_min/max box or group constraint is violated
-    while ((sum(tmp_w) <= min_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP))) & i <= length(tmp_w)) {
+    while ((sum(tmp_w) <= min_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP, group_pos))) & i <= length(tmp_w)) {
       # randomly permute and increase a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tmp_w[cur_index]
@@ -415,7 +420,7 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
     # group_fail does not test for direction of violation, just that group constraints were violated
     i = 1 
     # while sum of weights is greater than max_sum or tmp_min/max box or group constraint is violated
-    while ((sum(tmp_w) >= max_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP))) & i <= length(tmp_w)) {
+    while ((sum(tmp_w) >= max_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP, group_pos))) & i <= length(tmp_w)) {
       # randomly permute and decrease a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tmp_w[cur_index]
@@ -489,7 +494,7 @@ group_fail <- function(weights, groups, cLO, cUP, group_pos=NULL){
     grp.max <- cUP[i]
     grp.pos <- group_pos[i]
     # return TRUE if grp.min or grp.max is violated
-    group_fail[i] <- ( sum(tmp.w) < grp.min | sum(tmp.w) > grp.max (sum(abs(tmp.w) > tolerance) > grp.pos))
+    group_fail[i] <- ( sum(tmp.w) < grp.min | sum(tmp.w) > grp.max | (sum(abs(tmp.w) > tolerance) > grp.pos))
     k <- k + j
     l <- k - 1
   }

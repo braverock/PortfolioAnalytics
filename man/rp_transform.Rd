@@ -3,7 +3,7 @@
 \title{Transform a weights vector to satisfy leverage, box, group, and position_limit constraints using logic from \code{randomize_portfolio}}
 \usage{
   rp_transform(w, min_sum = 0.99, max_sum = 1.01, min, max,
-    groups, cLO, cUP, max_pos = NULL,
+    groups, cLO, cUP, max_pos = NULL, group_pos = NULL,
     max_permutations = 200)
 }
 \arguments{
@@ -30,6 +30,9 @@
   group constraints}
 
   \item{max_pos}{maximum assets with non-zero weights}
+
+  \item{group_pos}{vector specifying maximum number assets
+  with non-zero weights per group}
 
   \item{max_permutations}{integer: maximum number of
   iterations to try for a valid portfolio, default 200}
