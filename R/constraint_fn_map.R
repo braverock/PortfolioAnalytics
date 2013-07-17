@@ -78,7 +78,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   if(!is.null(min_sum) & !is.null(max_sum)){
     if(!(sum(tmp_weights) >= min_sum & sum(tmp_weights) <= max_sum)){
       # Try to transform only considering leverage and box constraints
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, group_pos=NULL, 500), silent=TRUE)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, min, max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, group_pos=NULL, 500), silent=FALSE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -90,7 +90,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   if(!is.null(tmp_min) & !is.null(tmp_max)){
     if(!(all(tmp_weights >= tmp_min) & all(tmp_weights <= tmp_max))){
       # Try to transform only considering leverage and box constraints
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, group_pos=NULL, 500), silent=TRUE)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, group_pos=NULL, 500), silent=FALSE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -112,7 +112,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
             }
             
             # Now try the transformation again
-            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, group_pos, 500), silent=TRUE)
+            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups=NULL, cLO=NULL, cUP=NULL, max_pos=NULL, group_pos, 500), silent=FALSE) # FALSE for testing
             # Default to original weights if this fails again
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
@@ -133,7 +133,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   if(!is.null(groups) & !is.null(tmp_cLO) & !is.null(tmp_cUP)){
     if(any(group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP, group_pos))){
       # Try to transform only considering leverage, box, and group constraints
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, group_pos, 500), silent=TRUE)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, group_pos, 500), silent=FALSE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -151,7 +151,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
               tmp_cUP[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] <- tmp_cUP[group_fail(tmp_weights, groups, tmp_cLO, tmp_cUP)] + runif(1, 0.01, 0.05)
             }
             # Now try the transformation again
-            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, group_pos, 500), silent=TRUE)
+            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, max_pos=NULL, group_pos, 500), silent=FALSE) # FALSE for testing
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
           }
@@ -171,7 +171,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   if(!is.null(tmp_max_pos)){
     if(!(sum(abs(tmp_weights) > tolerance) <= tmp_max_pos)){
       # Try to transform only considering leverage, box, group, and position_limit constraints
-      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, tmp_max_pos, group_pos, 500), silent=TRUE)
+      tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, tmp_max_pos, group_pos, 500), silent=FALSE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -181,7 +181,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
             # increment tmp_max_pos by 1
             tmp_max_pos <- tmp_max_pos + 1
             # Now try the transformation again
-            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, tmp_max_pos, group_pos, 500), silent=TRUE)
+            tmp_weights <- try(rp_transform(tmp_weights, min_sum, max_sum, tmp_min, tmp_max, groups, tmp_cLO, tmp_cUP, tmp_max_pos, group_pos, 500), silent=FALSE) # FALSE for testing
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
           }
@@ -338,7 +338,11 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   tolerance=.Machine$double.eps^0.5
   if(is.null(max_pos)) max_pos <- length(w)
   
-  if(!is.null(group_pos)) max_group_pos <- sum(group_pos)
+  if(!is.null(group_pos)) {
+    max_group_pos <- sum(group_pos)
+  } else {
+    max_group_pos <- length(w)
+  }
   max_assets <- min(max_pos, max_group_pos)
   
   # Create a temporary min vector that will be modified, because a feasible
