@@ -491,8 +491,10 @@ is.constraint <- function( x ) {
 #'  min_sum, max_sum, min, and max are either specified by the user or default
 #'  values are assigned. These are required by other functions such as
 #'  optimize.portfolio and constrained . This function will check that these 
-#'  variables are in the portfolio object in the constraints list. This 
-#'  function could be used at the beginning of optimize.portfolio or other 
+#'  variables are in the portfolio object in the constraints list. We will 
+#'  default to min_sum=1 and max_sum=1 if leverage constraints are not specified.
+#'  We will default to min=-Inf and max=Inf if box constraints are not specified.
+#'  This function is used at the beginning of optimize.portfolio and other 
 #'  functions to extract the constraints from the portfolio object. Uses the 
 #'  same naming as the v1_constraint object which may be useful when passed 
 #'  to other functions.
@@ -544,12 +546,19 @@ get_constraints <- function(portfolio){
   # min_sum, max_sum, min, and max are required to be passed in and enabled
   if(is.na(out$min_sum) | is.na(out$max_sum)) {
     # return(NULL)
-    stop("Leverage constraint min_sum and max_sum are not enabled or passed in")
+    # stop("Leverage constraint min_sum and max_sum are not enabled or passed in")
+    # Default to full investment constraint
+    out$min_sum <- 1
+    out$max_sum <- 1
   }
   if(length(out$min) == 1 | length(out$max) == 1) {
     if(is.na(out$min) | is.na(out$max)){
       # return(NULL)
-      stop("Box constraints min and max are not enabled or passed in")
+      # stop("Box constraints min and max are not enabled or passed in")
+      # Default to min=-Inf and max=Inf for unconstrained weights
+      nassets <- length(portfolio$assets)
+      out$min <- rep(-Inf, nassets)
+      out$max <- rep(Inf, nassets)
     }
   }
   # structure and return class of type constraint

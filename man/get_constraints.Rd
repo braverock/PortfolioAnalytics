@@ -18,8 +18,11 @@
   assigned. These are required by other functions such as
   optimize.portfolio and constrained . This function will
   check that these variables are in the portfolio object in
-  the constraints list. This function could be used at the
-  beginning of optimize.portfolio or other functions to
+  the constraints list. We will default to min_sum=1 and
+  max_sum=1 if leverage constraints are not specified.  We
+  will default to min=-Inf and max=Inf if box constraints
+  are not specified.  This function is used at the
+  beginning of optimize.portfolio and other functions to
   extract the constraints from the portfolio object. Uses
   the same naming as the v1_constraint object which may be
   useful when passed to other functions.
