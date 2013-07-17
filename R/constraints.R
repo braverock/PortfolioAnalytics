@@ -382,6 +382,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=T
 #' @param group_labels character vector to label the groups (e.g. size, asset class, style, etc.)
 #' @param group_min numeric or vector specifying minimum weight group constraints
 #' @param group_max numeric or vector specifying minimum weight group constraints
+#' @param group_pos vector specifying the number of non-zero weights per group
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify group constraints
 #' @author Ross Bennett
@@ -399,7 +400,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=T
 #'                         group_min=c(0.15, 0.25),
 #'                         group_max=c(0.65, 0.55))
 #' @export
-group_constraint <- function(type, assets, groups, group_labels=NULL, group_min, group_max, enabled=TRUE, ...) {
+group_constraint <- function(type, assets, groups, group_labels=NULL, group_min, group_max, group_pos=NULL, enabled=TRUE, ...) {
   nassets <- length(assets)
   ngroups <- length(groups)
   
@@ -428,11 +429,24 @@ group_constraint <- function(type, assets, groups, group_labels=NULL, group_min,
   
   if(length(group_labels) != length(groups)) stop("length of group_labels must be equal to the length of groups")
   
+  # Construct group_pos vector
+  if(!is.null(group_pos)){
+    # Check the length of the group_pos vector
+    if(length(group_poss) != length(groups)) stop("length of group_pos must be equal to the length of groups")
+    # Check for negative values in group_pos
+    if(any(group_pos < 0)) stop("all elements of group_pos must be positive")
+    # Elements of group_pos cannot be greater than groups
+    if(any(group_pos > groups)){
+      group_pos <- pmin(group_pos, groups)
+    }
+  }
+  
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="group_constraint", ...)
   Constraint$groups <- groups
   Constraint$group_labels <- group_labels
   Constraint$cLO <- group_min
   Constraint$cUP <- group_max
+  Constraint$group_pos <- group_pos
   return(Constraint)
 }
 

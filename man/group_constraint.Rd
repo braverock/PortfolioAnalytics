@@ -4,7 +4,7 @@
 \usage{
   group_constraint(type, assets, groups,
     group_labels = NULL, group_min, group_max,
-    enabled = TRUE, ...)
+    group_pos = NULL, enabled = TRUE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
@@ -22,6 +22,9 @@
 
   \item{group_max}{numeric or vector specifying minimum
   weight group constraints}
+
+  \item{group_pos}{vector specifying the number of non-zero
+  weights per group}
 
   \item{enabled}{TRUE/FALSE}
 
