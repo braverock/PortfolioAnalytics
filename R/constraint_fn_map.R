@@ -465,12 +465,18 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
 #' @param groups vector specifying the groups of the assets
 #' @param cLO numeric or vector specifying minimum weight group constraints
 #' @param cUP numeric or vector specifying minimum weight group constraints
+#' @param group_pos vector specifying the number of non-zero weights per group
 #' @return logical vector: TRUE if group constraints are violated for a given group
 #' @author Ross Bennett
 #' @export
-group_fail <- function(weights, groups, cLO, cUP){
+group_fail <- function(weights, groups, cLO, cUP, group_pos=NULL){
   # return FALSE if groups, cLO, or cUP is NULL
   if(is.null(groups) | is.null(cLO) | is.null(cUP)) return(FALSE)
+  
+  # group_pos sets a limit on the number of non-zero weights by group
+  # Set equal to groups if NULL
+  if(is.null(group_pos)) group_pos <- groups
+  tolerance <- .Machine$double.eps^0.5
   
   n.groups <- length(groups)
   group_fail <- vector(mode="logical", length=n.groups)
@@ -481,8 +487,9 @@ group_fail <- function(weights, groups, cLO, cUP){
     tmp.w <- weights[k:(l+j)]
     grp.min <- cLO[i]
     grp.max <- cUP[i]
+    grp.pos <- group_pos[i]
     # return TRUE if grp.min or grp.max is violated
-    group_fail[i] <- ( sum(tmp.w) < grp.min | sum(tmp.w) > grp.max )
+    group_fail[i] <- ( sum(tmp.w) < grp.min | sum(tmp.w) > grp.max (sum(abs(tmp.w) > tolerance) > grp.pos))
     k <- k + j
     l <- k - 1
   }

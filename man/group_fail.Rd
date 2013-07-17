@@ -2,7 +2,7 @@
 \alias{group_fail}
 \title{Test if group constraints have been violated}
 \usage{
-  group_fail(weights, groups, cLO, cUP)
+  group_fail(weights, groups, cLO, cUP, group_pos = NULL)
 }
 \arguments{
   \item{weights}{weights vector to test}
@@ -14,6 +14,9 @@
 
   \item{cUP}{numeric or vector specifying minimum weight
   group constraints}
+
+  \item{group_pos}{vector specifying the number of non-zero
+  weights per group}
 }
 \value{
   logical vector: TRUE if group constraints are violated
