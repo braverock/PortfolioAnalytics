@@ -506,6 +506,46 @@ group_fail <- function(weights, groups, cLO, cUP, group_pos=NULL){
   return(group_fail)
 }
 
+#' function to check for violation of position limits constraints
+#' 
+#' This is used as a helper function for \code{\link{rp_transform}} to check
+#' for violation of position limit constraints. The position limit constraints
+#' checked are max_pos, max_pos_long, and max_pos_short. 
+#' 
+#' @param weights vector of weights to test
+#' @param max_pos maximum number of assets with non-zero weights
+#' @param max_pos_long maximum number of assets with long (i.e. buy) positions
+#' @param max_pos_short maximum number of assets with short (i.e. sell) positions
+#' @return TRUE if any position_limit is violated. FALSE if all position limits are satisfied
+#' @export
+pos_limit_fail <- function(weights, max_pos, max_pos_long, max_pos_short){
+  # tolerance for "non-zero" definition
+  tolerance <- .Machine$double.eps^0.5
+  
+  # Check if max_pos is violated
+  if(!is.null(max_pos)){
+    if(sum(abs(weights) > tolerance) > max_pos){
+      return(TRUE)
+    }
+  }
+  
+  # Check if max_pos_long is violated
+  if(!is.null(max_pos_long)){
+    if(sum(weights > tolerance) > max_pos_long){
+      return(TRUE)
+    }
+  }
+  
+  # Check if max_pos_short is violated
+  if(!is.null(max_pos_short)){
+    if(sum(weights < -tolerance) > max_pos_short){
+      return(TRUE)
+    }
+  }
+  # Return FALSE if nothing is violated
+  return(FALSE)
+}
+
 # test
 # w <- c(0.1, 0.25, 0.3, 0.15, 0.05, 0.15)
 # min <- rep(0.1, length(w))
