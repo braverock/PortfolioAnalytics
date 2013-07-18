@@ -243,7 +243,8 @@ add.constraint <- function(portfolio, type, enabled=TRUE, ..., indexnum=NULL){
                                                                          ...=...)
          },
          # Position limit constraint
-         position_limit = {tmp_constraint <- position_limit_constraint(type=type,
+         position_limit = {tmp_constraint <- position_limit_constraint(assets=assets,
+                                                                       type=type,
                                                                        enabled=enabled,
                                                                        ...=...)
          },
@@ -544,6 +545,7 @@ get_constraints <- function(portfolio){
         out$group_labels <- constraint$group_labels
         out$cLO <- constraint$cLO
         out$cUP <- constraint$cUP
+        out$group_pos <- constraint$group_pos
       }
       if(inherits(constraint, "turnover_constraint")){
         out$turnover_target <- constraint$turnover_target
@@ -553,6 +555,8 @@ get_constraints <- function(portfolio){
       }
       if(inherits(constraint, "position_limit_constraint")){
         out$max_pos <- constraint$max_pos
+        out$max_pos_long <- constraint$max_pos_long
+        out$max_pos_short <- constraint$max_pos_short
       }
     }
   }
@@ -635,9 +639,11 @@ diversification_constraint <- function(type, div_target, enabled=TRUE, ...){
 #' Allows the user to specify the maximum number of positions (i.e. number of assets with non-zero weights)
 #' 
 #' @param type character type of the constraint
-#' @param max_pos maximum number of positions
+#' @param max_pos maximum number of assets with non-zero weights
+#' @param max_pos_long maximum number of assets with long (i.e. buy) positions
+#' @param max_pos_short maximum number of assets with short (i.e. sell) positions
 #' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @param \dots any other passthru parameters to specify position limit constraints
 #' @author Ross Bennett
 #' #' @examples
 #' data(edhec)
@@ -647,9 +653,49 @@ diversification_constraint <- function(type, div_target, enabled=TRUE, ...){
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
 #' @export
-position_limit_constraint <- function(type, max_pos, enabled=TRUE, ...){
+position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=NULL, max_pos_short=NULL, enabled=TRUE, ...){
+  # Get the length of the assets vector
+  nassets <- length(assets)
+  
+  # Checks for max_pos
+  if(!is.null(max_pos)){
+    if(length(max_pos != 1)) stop("max_pos must be a scalar value of length 1")
+    if(max_pos < 0) stop("max_pos must be a positive value")
+    if(max_pos > nassets){
+      message("max_pos must be less than or equal to the number of assets")
+      max_pos <- nassets
+    }
+    # coerce to integer
+    max_pos <- as.integer(max_pos)
+  }
+  
+  # Checks for max_pos_long
+  if(!is.null(max_pos_long)){
+    if(length(max_pos_long != 1)) stop("max_pos_long must be a scalar value of length 1")
+    if(max_pos_long < 0) stop("max_pos_long must be a positive value")
+    if(max_pos_long > nassets){
+      message("max_pos_long must be less than or equal to the number of assets")
+      max_pos_long <- nassets
+    }
+    # coerce to integer
+    max_pos_long <- as.integer(max_pos_long)
+  }
+  
+  # Checks for max_pos_short
+  if(!is.null(max_pos_short)){
+    if(length(max_pos_short != 1)) stop("max_pos_short must be a scalar value of length 1")
+    if(max_pos_short < 0) stop("max_pos_short must be a positive value")
+    if(max_pos_short > nassets){
+      message("max_pos_short must be less than or equal to the number of assets")
+      max_pos_short <- nassets
+    }
+    # coerce to integer
+    max_pos_short <- as.integer(max_pos_short)
+  }
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="position_limit_constraint", ...)
   Constraint$max_pos <- max_pos
+  Constraint$max_pos_long <- max_pos_long
+  Constraint$max_pos_short <- max_pos_short
   return(Constraint)
 }
 
