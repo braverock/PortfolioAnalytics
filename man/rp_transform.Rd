@@ -4,6 +4,7 @@
 \usage{
   rp_transform(w, min_sum = 0.99, max_sum = 1.01, min, max,
     groups, cLO, cUP, max_pos = NULL, group_pos = NULL,
+    max_pos_long = NULL, max_pos_short = NULL,
     max_permutations = 200)
 }
 \arguments{
@@ -33,6 +34,12 @@
 
   \item{group_pos}{vector specifying maximum number assets
   with non-zero weights per group}
+
+  \item{max_pos_long}{maximum number of assets with long
+  (i.e. buy) positions}
+
+  \item{max_pos_short}{maximum number of assets with short
+  (i.e. sell) positions}
 
   \item{max_permutations}{integer: maximum number of
   iterations to try for a valid portfolio, default 200}

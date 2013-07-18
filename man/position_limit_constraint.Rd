@@ -2,18 +2,26 @@
 \alias{position_limit_constraint}
 \title{constructor for position_limit_constraint}
 \usage{
-  position_limit_constraint(type, max_pos, enabled = TRUE,
-    ...)
+  position_limit_constraint(type, assets, max_pos = NULL,
+    max_pos_long = NULL, max_pos_short = NULL,
+    enabled = TRUE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
 
-  \item{max_pos}{maximum number of positions}
+  \item{max_pos}{maximum number of assets with non-zero
+  weights}
+
+  \item{max_pos_long}{maximum number of assets with long
+  (i.e. buy) positions}
+
+  \item{max_pos_short}{maximum number of assets with short
+  (i.e. sell) positions}
 
   \item{enabled}{TRUE/FALSE}
 
-  \item{\dots}{any other passthru parameters to specify box
-  and/or group constraints}
+  \item{\dots}{any other passthru parameters to specify
+  position limit constraints}
 }
 \description{
   This function is called by add.constraint when
