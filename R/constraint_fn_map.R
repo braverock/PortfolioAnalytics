@@ -337,14 +337,20 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   # in randomize_portfolio if min_sum and max_sum were satisfied, but the
   # min/max constraints were violated.
   
+  # Set the tolerance to determine non-zero weights
   tolerance=.Machine$double.eps^0.5
+  
+  # Set value for max_pos if it is not specified
   if(is.null(max_pos)) max_pos <- length(w)
   
+  # Determine maximum number of non-zero weights
   if(!is.null(group_pos)) {
     max_group_pos <- sum(group_pos)
   } else {
     max_group_pos <- length(w)
   }
+  
+  # Set maximum number of assets based on max_pos and group_pos
   max_assets <- min(max_pos, max_group_pos)
   
   # Create a temporary min vector that will be modified, because a feasible
@@ -404,6 +410,45 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
     # set some tmp_min values equal to zero so the while loops do not see a
     # violation of any(tmp_w < tmp_min)
     tmp_min[not_index] <- 0
+    
+    # Transform weights to satisfy max_pos_long and max_pos_short before being
+    # passed into the main loops
+    # Both max_pos_long and max_pos_short should be specified
+    if(!is.null(max_pos_long) & !is.null(max_pos_short)){
+      pos_idx <- which(tmp_w > 0)
+      neg_idx <- which(tmp_w < 0)
+      
+      # Check if number of positive weights exceeds max_pos_long
+      if(length(pos_idx) > max_pos_long){
+        # Randomly sample positive weights that cause violation of max_pos_long
+        # and replace with randomly sampled negative weights from weight_seq
+        make_neg_idx <- sample(pos_idx, length(pos_idx) - max_pos_long)
+        for(i in make_neg_idx){
+          tmp_idx <- weight_seq[weight_seq < 0 & weight_seq >= min[i]]
+          if(length(tmp_idx) > 0){
+            tmp_w[i] <- sample(tmp_idx, 1)
+          } else {
+            # This should never happen if the correct weight_seq and min is specified
+            tmp_w[i] <- -tmp_w[i]
+          }
+        }
+      }
+      # Check if number of negative weights exceeds max_pos_short
+      if(length(neg_idx) > max_pos_short){
+        # Randomly sample negative weights that cause violation of max_pos_short
+        # and replace with randomly sampled positive weights from weight_seq
+        make_pos_idx <- sample(neg_idx, length(neg_idx) - max_pos_short)
+        for(i in make_pos_idx){
+          tmp_seq <- weight_seq[weight_seq > 0 & weight_seq <= max[i]]
+          if(length(tmp_seq) > 0){
+            tmp_w[i] <- sample(tmp_seq, 1)
+          } else {
+            # This should never happen if the correct weight_seq and max is specified
+            tmp_w[i] <- -tmp_w[i]
+          }
+        }
+      }
+    }
     
     i = 1
     # while sum of weights is less than min_sum or tmp_min/max box or group constraint is violated
