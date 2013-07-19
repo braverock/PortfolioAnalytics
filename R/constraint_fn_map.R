@@ -408,13 +408,16 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
     tmp_w[not_index] <- 0
     
     # set some tmp_min values equal to zero so the while loops do not see a
-    # violation of any(tmp_w < tmp_min)
-    tmp_min[not_index] <- 0
+    # violation of any(tmp_w < tmp_min). This tends to force weights to 0 and
+    # works well for long only, but we may want to allow negative weights.
+    # tmp_min[not_index] <- 0
+    # Only set values of tmp_min that are greater than 0 to 0
+    tmp_min[not_index[which(tmp_min[not_index] > 0)]] <- 0
     
     # Transform weights to satisfy max_pos_long and max_pos_short before being
     # passed into the main loops
     # Both max_pos_long and max_pos_short should be specified
-    if(!is.null(max_pos_long) & !is.null(max_pos_short)){
+    if(!is.null(max_pos_long)){
       pos_idx <- which(tmp_w > 0)
       neg_idx <- which(tmp_w < 0)
       
@@ -433,6 +436,8 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
           }
         }
       }
+    }
+    if(!is.null(max_pos_short)){
       # Check if number of negative weights exceeds max_pos_short
       if(length(neg_idx) > max_pos_short){
         # Randomly sample negative weights that cause violation of max_pos_short
