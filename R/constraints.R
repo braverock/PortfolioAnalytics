@@ -659,7 +659,7 @@ position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=N
   
   # Checks for max_pos
   if(!is.null(max_pos)){
-    if(length(max_pos != 1)) stop("max_pos must be a scalar value of length 1")
+    if(length(max_pos) != 1) stop("max_pos must be a scalar value of length 1")
     if(max_pos < 0) stop("max_pos must be a positive value")
     if(max_pos > nassets){
       message("max_pos must be less than or equal to the number of assets")
@@ -671,7 +671,7 @@ position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=N
   
   # Checks for max_pos_long
   if(!is.null(max_pos_long)){
-    if(length(max_pos_long != 1)) stop("max_pos_long must be a scalar value of length 1")
+    if(length(max_pos_long) != 1) stop("max_pos_long must be a scalar value of length 1")
     if(max_pos_long < 0) stop("max_pos_long must be a positive value")
     if(max_pos_long > nassets){
       message("max_pos_long must be less than or equal to the number of assets")
@@ -683,7 +683,7 @@ position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=N
   
   # Checks for max_pos_short
   if(!is.null(max_pos_short)){
-    if(length(max_pos_short != 1)) stop("max_pos_short must be a scalar value of length 1")
+    if(length(max_pos_short) != 1) stop("max_pos_short must be a scalar value of length 1")
     if(max_pos_short < 0) stop("max_pos_short must be a positive value")
     if(max_pos_short > nassets){
       message("max_pos_short must be less than or equal to the number of assets")
