@@ -220,7 +220,13 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
   if(is.null(max_mult)) max_mult <- rep(Inf,nassets)
   min_sum  <- constraints$min_sum
   max_sum  <- constraints$max_sum
-  weight_seq <- constraints$weight_seq
+  # randomize_portfolio will rarely find a feasible portfolio if there is not some 
+  # 'wiggle room' between min_sum and max_sum
+  if((max_sum - min_sum) < 0.02){
+    min_sum <- min_sum - 0.01
+    max_sum <- max_sum + 0.01
+  }
+  weight_seq <- portfolio$weight_seq
   if(is.null(weight_seq)){
     weight_seq <- generatesequence(min=min(constraints$min), max=max(constraints$max), by=0.002)
   }

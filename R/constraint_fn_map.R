@@ -88,7 +88,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                       groups=NULL, cLO=NULL, cUP=NULL, 
                                       max_pos=NULL, group_pos=NULL, 
                                       max_pos_long=NULL, max_pos_short=NULL, 
-                                      max_permutations=500), silent=FALSE) # FALSE for testing
+                                      max_permutations=500), silent=TRUE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -106,7 +106,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                       groups=NULL, cLO=NULL, cUP=NULL, 
                                       max_pos=NULL, group_pos=NULL, 
                                       max_pos_long=NULL, max_pos_short=NULL, 
-                                      max_permutations=500), silent=FALSE) # FALSE for testing
+                                      max_permutations=500), silent=TRUE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -134,7 +134,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                             groups=NULL, cLO=NULL, cUP=NULL, 
                                             max_pos=NULL, group_pos=NULL, 
                                             max_pos_long=NULL, max_pos_short=NULL, 
-                                            max_permutations=500), silent=FALSE) # FALSE for testing
+                                            max_permutations=500), silent=TRUE) # FALSE for testing
             # Default to original weights if this fails again
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
@@ -161,7 +161,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                       groups=groups, cLO=tmp_cLO, cUP=tmp_cUP, 
                                       max_pos=NULL, group_pos=group_pos, 
                                       max_pos_long=NULL, max_pos_short=NULL, 
-                                      max_permutations=500), silent=FALSE) # FALSE for testing
+                                      max_permutations=500), silent=TRUE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -185,7 +185,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                             groups=groups, cLO=tmp_cLO, cUP=tmp_cUP, 
                                             max_pos=NULL, group_pos=group_pos, 
                                             max_pos_long=NULL, max_pos_short=NULL, 
-                                            max_permutations=500), silent=FALSE) # FALSE for testing
+                                            max_permutations=500), silent=TRUE) # FALSE for testing
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
           }
@@ -211,7 +211,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                       groups=groups, cLO=tmp_cLO, cUP=tmp_cUP, 
                                       max_pos=tmp_max_pos, group_pos=group_pos, 
                                       max_pos_long=tmp_max_pos_long, max_pos_short=tmp_max_pos_short, 
-                                      max_permutations=500), silent=FALSE) # FALSE for testing
+                                      max_permutations=500), silent=TRUE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -229,7 +229,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                             groups=groups, cLO=tmp_cLO, cUP=tmp_cUP, 
                                             max_pos=tmp_max_pos, group_pos=group_pos, 
                                             max_pos_long=tmp_max_pos_long, max_pos_short=tmp_max_pos_short, 
-                                            max_permutations=500), silent=FALSE) # FALSE for testing
+                                            max_permutations=500), silent=TRUE) # FALSE for testing
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
           }
