@@ -209,6 +209,15 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
                                                  message=message,
                                                  ...=...)
          },
+         # special case of box constraints for long_only
+         long_only = {tmp_constraint <- box_constraint(assets=assets,
+                                                       type=type,
+                                                       enabled=enabled,
+                                                       message=message,
+                                                       min=0,
+                                                       max=1,
+                                                       ...=...)
+         },
          # Group constraints
          group = {tmp_constraint <- group_constraint(assets=assets, 
                                                      type=type,
