@@ -15,11 +15,12 @@
 #' @param assets number of assets, or optionally a named vector of assets specifying seed weights. If seed weights are not specified, an equal weight portfolio will be assumed.
 #' @param category_labels character vector to categorize assets by sector, industry, geography, market-cap, currency, etc.
 #' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @author Ross Bennett
 #' @examples 
 #' pspec <- portfolio.spec(assets=10, weight_seq=generatesequence())
 #' @export
-portfolio.spec <- function(assets=NULL, category_labels=NULL, weight_seq=NULL) {
+portfolio.spec <- function(assets=NULL, category_labels=NULL, weight_seq=NULL, message=FALSE) {
   # portfolio.spec is based on the v1_constraint object, but removes
   # constraint specification
   if (is.null(assets)) {
@@ -32,7 +33,7 @@ portfolio.spec <- function(assets=NULL, category_labels=NULL, weight_seq=NULL) {
       if (length(assets) == 1) {
         nassets = assets
         # we passed in a number of assets, so we need to create the vector
-        message("assuming equal weighted seed portfolio")
+        if(message) message("assuming equal weighted seed portfolio")
         assets <- rep(1 / nassets, nassets)
       } else {
         nassets = length(assets)
@@ -47,7 +48,7 @@ portfolio.spec <- function(assets=NULL, category_labels=NULL, weight_seq=NULL) {
     if(is.character(assets)){
       nassets = length(assets)
       assetnames = assets
-      message("assuming equal weighted seed portfolio")
+      if(message) message("assuming equal weighted seed portfolio")
       assets <- rep(1 / nassets, nassets)
       names(assets) <- assetnames  # set names, so that other code can access it,
       # and doesn't have to know about the character vector

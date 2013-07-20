@@ -184,12 +184,13 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' @param portfolio an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
 #' @param type character type of the constraint to add or update, currently 'weight_sum', 'box', 'group', 'turnover', 'diversification', or 'position_limit'
 #' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify constraints
 #' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
 #' @author Ross Bennett
 #' @seealso \code{\link{constraint_v2}}, \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{position_limit_constraint}}
 #' @export
-add.constraint <- function(portfolio, type, enabled=TRUE, ..., indexnum=NULL){
+add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., indexnum=NULL){
   # Check to make sure that the portfolio passed in is a portfolio object
   if (!is.portfolio(portfolio)) {stop("portfolio passed in is not of class portfolio")}
   
@@ -205,17 +206,20 @@ add.constraint <- function(portfolio, type, enabled=TRUE, ..., indexnum=NULL){
          box = {tmp_constraint <- box_constraint(assets=assets,
                                                  type=type,
                                                  enabled=enabled,
+                                                 message=message,
                                                  ...=...)
          },
          # Group constraints
          group = {tmp_constraint <- group_constraint(assets=assets, 
                                                      type=type,
                                                      enabled=enabled,
+                                                     message=message,
                                                      ...=...)
          },
          # Sum of weights constraints
          weight=, leverage=, weight_sum = {tmp_constraint <- weight_sum_constraint(type=type,
                                                                                    enabled=enabled,
+                                                                                   message=message,
                                                                                    ...=...)
          },
          # Special case of weight_sum constraint for full investment
@@ -223,6 +227,7 @@ add.constraint <- function(portfolio, type, enabled=TRUE, ..., indexnum=NULL){
                                                                     min_sum=1,
                                                                     max_sum=1,
                                                                     enabled=enabled,
+                                                                    message=message,
                                                                     ...=...)
          },
          # Special case of weight_sum constraint for dollar neutral or active
@@ -230,22 +235,26 @@ add.constraint <- function(portfolio, type, enabled=TRUE, ..., indexnum=NULL){
                                                                            min_sum=0,
                                                                            max_sum=0,
                                                                            enabled=enabled,
+                                                                           message=message,
                                                                            ...=...)
          },
          # Turnover constraint
          turnover = {tmp_constraint <- turnover_constraint(type=type,
                                                            enabled=enabled,
+                                                           message=message,
                                                            ...=...)
          },
          # Diversification constraint
          diversification = {tmp_constraint <- diversification_constraint(type=type,
                                                                          enabled=enabled,
+                                                                         message=message,
                                                                          ...=...)
          },
          # Position limit constraint
          position_limit = {tmp_constraint <- position_limit_constraint(assets=assets,
                                                                        type=type,
                                                                        enabled=enabled,
+                                                                       message=message,
                                                                        ...=...)
          },
          # Do nothing and return the portfolio object if type is NULL
@@ -270,6 +279,7 @@ add.constraint <- function(portfolio, type, enabled=TRUE, ..., indexnum=NULL){
 #' @param min_mult numeric or named vector specifying minimum multiplier box constraint from seed weight in \code{assets}
 #' @param max_mult numeric or named vector specifying maximum multiplier box constraint from seed weight in \code{assets}
 #' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box constraints
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
@@ -288,7 +298,7 @@ add.constraint <- function(portfolio, type, enabled=TRUE, ..., indexnum=NULL){
 #' # specify box constraints per asset
 #' pspec <- add.constraint(pspec, type="box", min=c(0.05, 0.10, 0.08, 0.06), max=c(0.45, 0.55, 0.35, 0.65))
 #' @export
-box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=TRUE, ...){
+box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=TRUE, message=FALSE, ...){
   # Based on the constraint function for object of class constraint_v1 that
   # included specifying box constraints.
   
@@ -303,21 +313,21 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=T
     
     # If the user passes in a scalar for min, then create a min vector 
     if (length(min) == 1) {
-      message("min not passed in as vector, replicating min to length of length(assets)")
+      if(message) message("min not passed in as vector, replicating min to length of length(assets)")
       min <- rep(min, nassets)
     }
     if (length(min) != nassets) stop(paste("length of min must be equal to 1 or the number of assets:", nassets))
     
     # If the user passes in a scalar for max, then create a max vector
     if (length(max) == 1) {
-      message("max not passed in as vector, replicating max to length of length(assets)")
+      if(message) message("max not passed in as vector, replicating max to length of length(assets)")
       max <- rep(max, nassets)
     }
     if (length(max) != nassets) stop(paste("length of max must be equal to 1 or the number of assets:", nassets))
     
   } else {
     # Default to min=0 and max=1 if min or max are not passed in
-    message("no min or max passed in, assuming 0 and 1")
+    if(message) message("no min or max passed in, assuming 0 and 1")
     min <- rep(0, nassets)
     max <- rep(1, nassets)
   }
@@ -331,7 +341,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=T
     if (length(min_mult) > 1 & length(max_mult) > 1){
       if (length(min_mult) != length(max_mult) ) { stop("length of min_mult and max_mult must be the same") }
     } else {
-      message("min_mult and max_mult not passed in as vectors, replicating min_mult and max_mult to length of assets vector")
+      if(message) message("min_mult and max_mult not passed in as vectors, replicating min_mult and max_mult to length of assets vector")
       min_mult = rep(min_mult, nassets)
       max_mult = rep(max_mult, nassets)
     }
@@ -385,6 +395,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=T
 #' @param group_max numeric or vector specifying minimum weight group constraints
 #' @param group_pos vector specifying the number of non-zero weights per group
 #' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify group constraints
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
@@ -401,7 +412,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=T
 #'                         group_min=c(0.15, 0.25),
 #'                         group_max=c(0.65, 0.55))
 #' @export
-group_constraint <- function(type, assets, groups, group_labels=NULL, group_min, group_max, group_pos=NULL, enabled=TRUE, ...) {
+group_constraint <- function(type, assets, groups, group_labels=NULL, group_min, group_max, group_pos=NULL, enabled=TRUE, message=FALSE, ...) {
   nassets <- length(assets)
   ngroups <- length(groups)
   
@@ -411,14 +422,14 @@ group_constraint <- function(type, assets, groups, group_labels=NULL, group_min,
   
   # Checks for group_min
   if (length(group_min) == 1) {
-    message("group_min not passed in as vector, replicating group_min to length of groups")
+    if(message) message("group_min not passed in as vector, replicating group_min to length of groups")
     group_min <- rep(group_min, ngroups)
   }
   if (length(group_min) != ngroups) stop(paste("length of group_min must be equal to 1 or the length of groups:", ngroups))
   
   # Checks for group_max
   if (length(group_max) == 1) {
-    message("group_max not passed in as vector, replicating group_max to length of groups")
+    if(message) message("group_max not passed in as vector, replicating group_max to length of groups")
     group_max <- rep(group_max, ngroups)
   }
   if (length(group_max) != ngroups) stop(paste("length of group_max must be equal to 1 or the length of groups:", ngroups))
@@ -466,6 +477,7 @@ group_constraint <- function(type, assets, groups, group_labels=NULL, group_min,
 #' @param min_sum minimum sum of all asset weights, default 0.99
 #' @param max_sum maximum sum of all asset weights, default 1.01
 #' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify weight_sum constraints
 #' @author Ross Bennett
 #' @examples
@@ -594,6 +606,7 @@ get_constraints <- function(portfolio){
 #' @param type character type of the constraint
 #' @param turnover_target target turnover value
 #' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
 #' @examples
@@ -604,7 +617,7 @@ get_constraints <- function(portfolio){
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.6)
 #' @export
-turnover_constraint <- function(type, turnover_target, enabled=TRUE, ...){
+turnover_constraint <- function(type, turnover_target, enabled=TRUE, message=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="turnover_constraint", ...)
   Constraint$turnover_target <- turnover_target
   return(Constraint)
@@ -617,6 +630,7 @@ turnover_constraint <- function(type, turnover_target, enabled=TRUE, ...){
 #' @param type character type of the constraint
 #' @param div_target diversification target value
 #' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
 #' @examples
@@ -627,7 +641,7 @@ turnover_constraint <- function(type, turnover_target, enabled=TRUE, ...){
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
 #' @export
-diversification_constraint <- function(type, div_target, enabled=TRUE, ...){
+diversification_constraint <- function(type, div_target, enabled=TRUE, message=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="diversification_constraint", ...)
   Constraint$div_target <- div_target
   return(Constraint)
@@ -643,6 +657,7 @@ diversification_constraint <- function(type, div_target, enabled=TRUE, ...){
 #' @param max_pos_long maximum number of assets with long (i.e. buy) positions
 #' @param max_pos_short maximum number of assets with short (i.e. sell) positions
 #' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify position limit constraints
 #' @author Ross Bennett
 #' #' @examples
@@ -653,7 +668,7 @@ diversification_constraint <- function(type, div_target, enabled=TRUE, ...){
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
 #' @export
-position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=NULL, max_pos_short=NULL, enabled=TRUE, ...){
+position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=NULL, max_pos_short=NULL, enabled=TRUE, message=FALSE, ...){
   # Get the length of the assets vector
   nassets <- length(assets)
   
@@ -662,7 +677,7 @@ position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=N
     if(length(max_pos) != 1) stop("max_pos must be a scalar value of length 1")
     if(max_pos < 0) stop("max_pos must be a positive value")
     if(max_pos > nassets){
-      message("max_pos must be less than or equal to the number of assets")
+      warning("max_pos must be less than or equal to the number of assets")
       max_pos <- nassets
     }
     # coerce to integer
@@ -674,7 +689,7 @@ position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=N
     if(length(max_pos_long) != 1) stop("max_pos_long must be a scalar value of length 1")
     if(max_pos_long < 0) stop("max_pos_long must be a positive value")
     if(max_pos_long > nassets){
-      message("max_pos_long must be less than or equal to the number of assets")
+      warning("max_pos_long must be less than or equal to the number of assets")
       max_pos_long <- nassets
     }
     # coerce to integer
@@ -686,7 +701,7 @@ position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=N
     if(length(max_pos_short) != 1) stop("max_pos_short must be a scalar value of length 1")
     if(max_pos_short < 0) stop("max_pos_short must be a positive value")
     if(max_pos_short > nassets){
-      message("max_pos_short must be less than or equal to the number of assets")
+      warning("max_pos_short must be less than or equal to the number of assets")
       max_pos_short <- nassets
     }
     # coerce to integer

@@ -517,6 +517,7 @@ optimize.portfolio <- function(
 #' @param \dots any other passthru parameters
 #' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
 #' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments_v2}}
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
@@ -528,7 +529,8 @@ optimize.portfolio_v2 <- function(
   search_size=20000,
   trace=FALSE, ...,
   rp=NULL,
-  momentFUN='set.portfolio.moments_v2'
+  momentFUN='set.portfolio.moments_v2',
+  message=FALSE
 )
 {
   optimize_method <- optimize_method[1]
@@ -882,7 +884,7 @@ optimize.portfolio_v2 <- function(
   # Prepare for final object to return
   end_t <- Sys.time()
   # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
-  message(c("elapsed time:", end_t-start_t))
+  if(message) message(c("elapsed time:", end_t-start_t))
   out$portfolio <- portfolio
   out$data_summary <- list(first=first(R), last=last(R))
   out$elapsed_time <- end_t - start_t
