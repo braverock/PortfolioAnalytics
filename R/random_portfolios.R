@@ -297,7 +297,7 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
   fportfolio <- fn_map(weights=tportfolio, portfolio=portfolio, relax=FALSE)$weights
   
   colnames(fportfolio) <- colnames(seed)
-  if (sum(fportfolio) <= min_sum | sum(fportfolio) >= max_sum){
+  if (sum(fportfolio) < min_sum | sum(fportfolio) > max_sum){
     fportfolio <- seed
     warning("Infeasible portfolio created, defaulting to seed, perhaps increase max_permutations.")
   }
