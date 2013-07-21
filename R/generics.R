@@ -113,3 +113,151 @@ summary.portfolio <- function(portfolio){
 print.constraint <- function(obj){
   print.default(obj)
 }
+
+#' Printing Output of optimize.portfolio
+#' 
+#' print method for optimize.portfolio.ROI
+#' 
+#' @param object an object of class "optimize.portfolio.ROI" resulting from a call to optimize.portfolio
+#' @param digits the number of significant digits to use when printing.
+#' @param ... any other passthru parameters
+#' @export
+print.optimize.portfolio.ROI <- function(object, digits = max(3, getOption("digits") - 3), ...){
+  cat(rep("*", 35) ,"\n", sep="")
+  cat("PortfolioAnalytics Optimization\n")
+  cat(rep("*", 35) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  # get optimal weights
+  cat("Optimal Weights:\n")
+  print.default(object$weights, digits=digits)
+  cat("\n")
+  
+  # get objective measure
+  cat("Objective Measure:\n")
+  print.default(object$out, digits=digits)
+  cat("\n")
+}
+
+#' Printing Output of optimize.portfolio
+#' 
+#' print method for optimize.portfolio.random
+#' 
+#' @param object an object of class "optimize.portfolio.random" resulting from a call to optimize.portfolio
+#' @param digits the number of significant digits to use when printing.
+#' @param ... any other passthru parameters
+#' @export
+print.optimize.portfolio.random <- function(object, digits=max(3, getOption("digits")-3), ...){
+  cat(rep("*", 35) ,"\n", sep="")
+  cat("PortfolioAnalytics Optimization\n")
+  cat(rep("*", 35) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  # get optimal weights
+  cat("Optimal Weights:\n")
+  print.default(object$weights, digits=digits)
+  cat("\n")
+  
+  # get objective measure
+  cat("Objective Measures:\n")
+  for(obj in object$objective_measures){
+    print.default(obj, digits=digits)
+    cat("\n")
+  }
+  cat("\n")
+}
+
+#' Printing Output of optimize.portfolio
+#' 
+#' print method for optimize.portfolio.DEoptim
+#' 
+#' @param object an object of class "optimize.portfolio.DEoptim" resulting from a call to optimize.portfolio
+#' @param digits the number of significant digits to use when printing.
+#' @param ... any other passthru parameters
+#' @export
+print.optimize.portfolio.DEoptim <- function(object, digits=max(3, getOption("digits")-3), ...){
+  cat(rep("*", 35) ,"\n", sep="")
+  cat("PortfolioAnalytics Optimization\n")
+  cat(rep("*", 35) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  # get optimal weights
+  cat("Optimal Weights:\n")
+  print.default(object$weights, digits=digits)
+  cat("\n")
+  
+  # get objective measure
+  cat("Objective Measures:\n")
+  for(obj in object$objective_measures){
+    print.default(obj, digits=digits)
+    cat("\n")
+  }
+  cat("\n")
+}
+
+#' Printing Output of optimize.portfolio
+#' 
+#' print method for optimize.portfolio.GenSA
+#' 
+#' @param object an object of class "optimize.portfolio.GenSA" resulting from a call to optimize.portfolio
+#' @param digits the number of significant digits to use when printing
+#' @param ... any other passthru parameters
+#' @export
+print.optimize.portfolio.GenSA <- function(object, digits=max(3, getOption("digits")-3), ...){
+  cat(rep("*", 35) ,"\n", sep="")
+  cat("PortfolioAnalytics Optimization\n")
+  cat(rep("*", 35) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  # get optimal weights
+  cat("Optimal Weights:\n")
+  print.default(object$weights, digits=digits)
+  cat("\n")
+  
+  # get objective measure
+  cat("Objective Measures:\n")
+  for(obj in object$objective_measures){
+    print.default(obj, digits=digits)
+    cat("\n")
+  }
+  cat("\n")
+}
+
+#' Printing Output of optimize.portfolio
+#' 
+#' print method for optimize.portfolio.pso
+#' 
+#' @param object an object of class "optimize.portfolio.pso" resulting from a call to optimize.portfolio
+#' @param digits the number of significant digits to use when printing.
+#' @param ... any other passthru parameters
+#' @export
+print.optimize.portfolio.pso <- function(object, digits=max(3, getOption("digits")-3), ...){
+  cat(rep("*", 35) ,"\n", sep="")
+  cat("PortfolioAnalytics Optimization\n")
+  cat(rep("*", 35) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  # get optimal weights
+  cat("Optimal Weights:\n")
+  print.default(object$weights, digits=digits)
+  cat("\n")
+  
+  # get objective measure
+  cat("Objective Measures:\n")
+  for(obj in object$objective_measures){
+    print.default(obj, digits=digits)
+    cat("\n")
+  }
+  cat("\n")
+}
+
