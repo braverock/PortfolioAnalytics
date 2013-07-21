@@ -4,7 +4,7 @@
 \usage{
   group_constraint(type, assets, groups,
     group_labels = NULL, group_min, group_max,
-    group_pos = NULL, enabled = TRUE, ...)
+    group_pos = NULL, enabled = TRUE, message = FALSE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
@@ -27,6 +27,9 @@
   weights per group}
 
   \item{enabled}{TRUE/FALSE}
+
+  \item{message}{TRUE/FALSE. The default is message=FALSE.
+  Display messages if TRUE.}
 
   \item{\dots}{any other passthru parameters to specify
   group constraints}

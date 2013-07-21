@@ -5,7 +5,8 @@
   optimize.portfolio_v2(R, portfolio,
     optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
-    momentFUN = "set.portfolio.moments_v2")
+    momentFUN = "set.portfolio.moments_v2",
+    message = FALSE)
 }
 \arguments{
   \item{R}{an xts, vector, matrix, data frame, timeSeries
@@ -40,6 +41,9 @@
   \item{momentFUN}{the name of a function to call to set
   portfolio moments, default
   \code{\link{set.portfolio.moments_v2}}}
+
+  \item{message}{TRUE/FALSE. The default is message=FALSE.
+  Display messages if TRUE.}
 }
 \value{
   a list containing the optimal weights, some summary

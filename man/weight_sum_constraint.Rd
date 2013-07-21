@@ -16,6 +16,9 @@
 
   \item{enabled}{TRUE/FALSE}
 
+  \item{message}{TRUE/FALSE. The default is message=FALSE.
+  Display messages if TRUE.}
+
   \item{\dots}{any other passthru parameters to specify
   weight_sum constraints}
 }

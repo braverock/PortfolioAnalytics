@@ -4,7 +4,7 @@
 \usage{
   position_limit_constraint(type, assets, max_pos = NULL,
     max_pos_long = NULL, max_pos_short = NULL,
-    enabled = TRUE, ...)
+    enabled = TRUE, message = FALSE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
@@ -19,6 +19,9 @@
   (i.e. sell) positions}
 
   \item{enabled}{TRUE/FALSE}
+
+  \item{message}{TRUE/FALSE. The default is message=FALSE.
+  Display messages if TRUE.}
 
   \item{\dots}{any other passthru parameters to specify
   position limit constraints}

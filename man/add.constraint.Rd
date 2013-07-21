@@ -2,8 +2,8 @@
 \alias{add.constraint}
 \title{General interface for adding and/or updating optimization constraints.}
 \usage{
-  add.constraint(portfolio, type, enabled = TRUE, ...,
-    indexnum = NULL)
+  add.constraint(portfolio, type, enabled = TRUE,
+    message = FALSE, ..., indexnum = NULL)
 }
 \arguments{
   \item{portfolio}{an object of class 'portfolio' to add
@@ -15,6 +15,9 @@
   'turnover', 'diversification', or 'position_limit'}
 
   \item{enabled}{TRUE/FALSE}
+
+  \item{message}{TRUE/FALSE. The default is message=FALSE.
+  Display messages if TRUE.}
 
   \item{\dots}{any other passthru parameters to specify
   constraints}

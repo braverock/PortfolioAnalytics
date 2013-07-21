@@ -3,7 +3,7 @@
 \title{constructor for turnover_constraint}
 \usage{
   turnover_constraint(type, turnover_target,
-    enabled = TRUE, ...)
+    enabled = TRUE, message = FALSE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
@@ -11,6 +11,9 @@
   \item{turnover_target}{target turnover value}
 
   \item{enabled}{TRUE/FALSE}
+
+  \item{message}{TRUE/FALSE. The default is message=FALSE.
+  Display messages if TRUE.}
 
   \item{\dots}{any other passthru parameters to specify box
   and/or group constraints}

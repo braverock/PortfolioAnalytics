@@ -3,7 +3,7 @@
 \title{constructor for box_constraint.}
 \usage{
   box_constraint(type, assets, min, max, min_mult,
-    max_mult, enabled = TRUE, ...)
+    max_mult, enabled = TRUE, message = FALSE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
@@ -26,6 +26,9 @@
   \code{assets}}
 
   \item{enabled}{TRUE/FALSE}
+
+  \item{message}{TRUE/FALSE. The default is message=FALSE.
+  Display messages if TRUE.}
 
   \item{\dots}{any other passthru parameters to specify box
   constraints}

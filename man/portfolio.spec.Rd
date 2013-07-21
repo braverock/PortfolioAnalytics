@@ -3,7 +3,7 @@
 \title{constructor for class portfolio}
 \usage{
   portfolio.spec(assets = NULL, category_labels = NULL,
-    weight_seq = NULL)
+    weight_seq = NULL, message = FALSE)
 }
 \arguments{
   \item{assets}{number of assets, or optionally a named
@@ -17,6 +17,9 @@
 
   \item{weight_seq}{seed sequence of weights, see
   \code{\link{generatesequence}}}
+
+  \item{message}{TRUE/FALSE. The default is message=FALSE.
+  Display messages if TRUE.}
 }
 \description{
   constructor for class portfolio
