@@ -66,7 +66,7 @@
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
-optimize.portfolio <- function(
+optimize.portfolio_v1 <- function(
 		R,
 		constraints,
 		optimize_method=c("DEoptim","random","ROI","ROI_old","pso","GenSA"), 
@@ -521,6 +521,8 @@ optimize.portfolio <- function(
 #' 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
+#' @aliases optimize.portfolio
+#' @rdname optimize.portfolio
 #' @export
 optimize.portfolio_v2 <- function(
   R,
@@ -892,6 +894,9 @@ optimize.portfolio_v2 <- function(
   class(out) <- c(paste("optimize.portfolio", optimize_method, sep='.'), "optimize.portfolio")
   return(out)
 }
+
+# Alias for optimize.portfolio_v2
+optimize.portfolio <- optimize.portfolio_v2
 
 #' portfolio optimization with support for rebalancing or rolling periods
 #' 
