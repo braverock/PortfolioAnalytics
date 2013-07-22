@@ -62,7 +62,7 @@
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
-constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize=TRUE, storage=FALSE)
+constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normalize=TRUE, storage=FALSE)
 { 
     if (ncol(R)>length(w)) {
         R=R[,1:length(w)]
@@ -382,6 +382,8 @@ constrained_objective <- function(w, R, constraints, ..., trace=FALSE, normalize
 #' @param storage TRUE/FALSE default TRUE for DEoptim with trace, otherwise FALSE. not typically user-called
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
+#' @aliases constrained_objective
+#' @rdname constrained_objective
 #' @export
 constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normalize=TRUE, storage=FALSE)
 { 
@@ -715,3 +717,5 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     return(list(out=as.numeric(out), weights=w, objective_measures=tmp_return))
   }
 }
+
+constrained_objective <- constrained_objective_v1

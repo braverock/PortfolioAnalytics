@@ -1,9 +1,8 @@
-\name{constrained_objective_v2}
-\alias{constrained_objective}
-\alias{constrained_objective_v2}
-\title{constrained_objective_v2 2 function to calculate a numeric return value for a portfolio based on a set of constraints and objectives}
+\name{constrained_objective_v1}
+\alias{constrained_objective_v1}
+\title{function to calculate a numeric return value for a portfolio based on a set of constraints}
 \usage{
-  constrained_objective_v2(w, R, portfolio, ...,
+  constrained_objective_v1(w, R, constraints, ...,
     trace = FALSE, normalize = TRUE, storage = FALSE)
 }
 \arguments{
@@ -12,8 +11,8 @@
 
   \item{w}{a vector of weights to test}
 
-  \item{portfolio}{an object of type "portfolio" specifying
-  the constraints and objectives for the optimization, see
+  \item{constraints}{an object of type "constraints"
+  specifying the constraints for the optimization, see
   \code{\link{constraint}}}
 
   \item{\dots}{any other passthru parameters}
@@ -85,7 +84,7 @@
   via \dots
 }
 \author{
-  Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
+  Kris Boudt, Peter Carl, Brian G. Peterson
 }
 \seealso{
   \code{\link{constraint}}, \code{\link{objective}},
