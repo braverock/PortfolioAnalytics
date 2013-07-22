@@ -69,7 +69,7 @@ is.objective <- function( x ) {
 #' @seealso \code{\link{constraint}}
 #' 
 #' @export
-add.objective <- function(constraints, type, name, arguments=NULL, enabled=TRUE, ..., indexnum=NULL)
+add.objective_v1 <- function(constraints, type, name, arguments=NULL, enabled=TRUE, ..., indexnum=NULL)
 {
     if (!is.constraint(constraints)) {stop("constraints passed in are not of class constraint")}
 
@@ -146,7 +146,8 @@ add.objective <- function(constraints, type, name, arguments=NULL, enabled=TRUE,
 #' @param \dots any other passthru parameters 
 #' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
 #' @author Brian G. Peterson and Ross Bennett
-#' 
+#' @aliases add.objective
+#' @rdname add.objective
 #' @seealso \code{\link{objective}}
 #' 
 #' @export
@@ -213,6 +214,9 @@ add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=TRUE
   }
   return(portfolio)
 }
+
+# Alias add.objective_v2 to add.objective
+add.objective <- add.objective_v2
 
 # update.objective <- function(object, ...) {
 #   # here we do a bunch of magic to update the correct index'd objective

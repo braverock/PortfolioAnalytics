@@ -1,6 +1,6 @@
 export(add.constraint)
+export(add.objective_v1)
 export(add.objective_v2)
-export(add.objective)
 export(box_constraint)
 export(CCCgarch.MM)
 export(chart.Scatter.DE)

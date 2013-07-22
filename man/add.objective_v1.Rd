@@ -1,15 +1,14 @@
-\name{add.objective_v2}
-\alias{add.objective}
-\alias{add.objective_v2}
+\name{add.objective_v1}
+\alias{add.objective_v1}
 \title{General interface for adding optimization objectives, including risk, return, and risk budget}
 \usage{
-  add.objective_v2(portfolio, type, name, arguments = NULL,
-    enabled = TRUE, ..., indexnum = NULL)
+  add.objective_v1(constraints, type, name,
+    arguments = NULL, enabled = TRUE, ..., indexnum = NULL)
 }
 \arguments{
-  \item{portfolio}{an object of type 'portfolio' to add the
-  objective to, specifying the portfolio for the
-  optimization, see \code{\link{portfolio}}}
+  \item{constraints}{an object of type "constraints" to add
+  the objective to, specifying the constraints for the
+  optimization, see \code{\link{constraint}}}
 
   \item{type}{character type of the objective to add or
   update, currently 'return','risk', or 'risk_budget'}
@@ -31,7 +30,7 @@
 \description{
   This function is the main function for adding and
   updating business objectives in an object of type
-  \code{\link{portfolio}}.
+  \code{\link{constraint}}.
 }
 \details{
   In general, you will define your objective as one of
@@ -41,9 +40,9 @@
   objectives, including mean, median, VaR, ES, etc.
 }
 \author{
-  Brian G. Peterson and Ross Bennett
+  Brian G. Peterson
 }
 \seealso{
-  \code{\link{objective}}
+  \code{\link{constraint}}
 }
 
