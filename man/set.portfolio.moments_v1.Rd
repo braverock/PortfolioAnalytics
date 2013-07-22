@@ -1,18 +1,17 @@
-\name{set.portfolio.moments_v2}
-\alias{set.portfolio.moments}
-\alias{set.portfolio.moments_v2}
+\name{set.portfolio.moments_v1}
+\alias{set.portfolio.moments_v1}
 \title{set portfolio moments for use by lower level optimization functions}
 \usage{
-  set.portfolio.moments_v2(R, portfolio, momentargs = NULL,
-    ...)
+  set.portfolio.moments_v1(R, constraints,
+    momentargs = NULL, ...)
 }
 \arguments{
   \item{R}{an xts, vector, matrix, data frame, timeSeries
   or zoo object of asset returns}
 
-  \item{portfolio}{an object of type "portfolio" specifying
-  the constraints and objectives for the optimization, see
-  \code{\link{portfolio.spec}}}
+  \item{constraints}{an object of type "constraints"
+  specifying the constraints for the optimization, see
+  \code{\link{constraint}}}
 
   \item{momentargs}{list containing arguments to be passed
   down to lower level functions, default NULL}

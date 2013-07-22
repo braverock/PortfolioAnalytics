@@ -66,7 +66,7 @@ CCCgarch.MM = function(R, momentargs = NULL , ... )
 #' @param momentargs list containing arguments to be passed down to lower level functions, default NULL
 #' @param \dots any other passthru parameters
 #' @export
-set.portfolio.moments <- function(R, constraints, momentargs=NULL,...){
+set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
 
     if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
     if(is.null(constraints$objectives)) {
@@ -146,6 +146,8 @@ set.portfolio.moments <- function(R, constraints, momentargs=NULL,...){
 #' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization, see \code{\link{portfolio.spec}}
 #' @param momentargs list containing arguments to be passed down to lower level functions, default NULL
 #' @param \dots any other passthru parameters
+#' @aliases set.portfolio.moments
+#' @rdname set.portfolio.moments
 #' @export
 set.portfolio.moments_v2 <- function(R, portfolio, momentargs=NULL,...){
   
@@ -223,6 +225,9 @@ set.portfolio.moments_v2 <- function(R, portfolio, momentargs=NULL,...){
   }    
   return(momentargs)
 }
+
+# Alias for set.portfolio.moments
+set.portfolio.moments <- set.portfolio.moments_v2
 
 garch.mm <- function(R,mu_ts, covlist,momentargs=list(),...) {
     #momentargs<-list()
