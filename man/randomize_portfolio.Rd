@@ -1,14 +1,14 @@
-\name{randomize_portfolio}
+\name{randomize_portfolio_v2}
 \alias{randomize_portfolio}
-\title{generate random permutations of a portfolio seed meeting your constraints on the weights of each asset}
+\alias{randomize_portfolio_v2}
+\title{version 2 generate random permutations of a portfolio seed meeting your constraints on the weights of each asset}
 \usage{
-  randomize_portfolio(rpconstraints,
-    max_permutations = 200, rounding = 3)
+  randomize_portfolio_v2(portfolio, max_permutations = 200)
 }
 \arguments{
-  \item{rpconstraints}{an object of type "constraints"
-  specifying the constraints for the optimization, see
-  \code{\link{constraint}}}
+  \item{portfolio}{an object of type "portfolio" specifying
+  the constraints for the optimization, see
+  \code{\link{portfolio.spec}}}
 
   \item{max_permutations}{integer: maximum number of
   iterations to try for a valid portfolio, default 200}
@@ -20,8 +20,9 @@
   named weighting vector
 }
 \description{
-  generate random permutations of a portfolio seed meeting
-  your constraints on the weights of each asset
+  version 2 generate random permutations of a portfolio
+  seed meeting your constraints on the weights of each
+  asset
 }
 \author{
   Peter Carl, Brian G. Peterson, (based on an idea by Pat

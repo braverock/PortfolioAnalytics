@@ -53,7 +53,7 @@ generatesequence <- function (min=.01, max=1, by=min/max, rounding=3 )
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
 #' @export
-randomize_portfolio <- function (rpconstraints, max_permutations=200, rounding=3)
+randomize_portfolio_v1 <- function (rpconstraints, max_permutations=200, rounding=3)
 
 { # @author: Peter Carl, Brian Peterson (based on an idea by Pat Burns)
   # generate random permutations of a portfolio seed meeting your constraints on the weights of each asset
@@ -173,7 +173,7 @@ random_walk_portfolios <-function(...) {
 #' rpconstraint<-constraint(assets=10, min_mult=-Inf, max_mult=Inf, min_sum=.99, max_sum=1.01, min=.01, max=.4, weight_seq=generatesequence())
 #' rp<- random_portfolios(rpconstraints=rpconstraint,permutations=1000)
 #' head(rp)
-random_portfolios <- function (rpconstraints,permutations=100,...)
+random_portfolios_v1 <- function (rpconstraints,permutations=100,...)
 { # 
   # this function generates a series of portfolios that are a "random walk" from the current portfolio
   seed=rpconstraints$assets
@@ -203,9 +203,10 @@ random_portfolios <- function (rpconstraints,permutations=100,...)
 #' @param rounding integer how many decimals should we round to
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
+#' @aliases randomize_portfolio
+#' @rdname randomize_portfolio
 #' @export
 randomize_portfolio_v2 <- function (portfolio, max_permutations=200) { 
-  # @author: Peter Carl, Brian Peterson (based on an idea by Pat Burns)
   # generate random permutations of a portfolio seed meeting your constraints on the weights of each asset
   # set the portfolio to the seed
   seed <- portfolio$assets
@@ -324,6 +325,8 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #' @return matrix of random portfolio weights
 #' @seealso \code{\link{portfolio.spec}}, \code{\link{objective}}, \code{\link{randomize_portfolio_v2}}
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
+#' @aliases random_portfolios
+#' @rdname random_portfolios
 #' @export
 random_portfolios_v2 <- function( portfolio, permutations=100, ...)
 { # 
@@ -347,6 +350,12 @@ random_portfolios_v2 <- function( portfolio, permutations=100, ...)
   colnames(result) <- names(seed)
   return(result)
 }
+
+# Alias randomize_portfolio_v2 to randomize_portfolio
+randomize_portfolio <- randomize_portfolio_v2
+
+# Alias random_portfolios_v2 to random_portfolios
+random_portfolios <- random_portfolios_v2
 
 # EXAMPLE: start_t<- Sys.time(); x=random_walk_portfolios(rep(1/5,5), generatesequence(min=0.01, max=0.30, by=0.01), max_permutations=500, permutations=5000, min_sum=.99, max_sum=1.01); end_t<-Sys.time(); end_t-start_t;
 # > nrow(unique(x))

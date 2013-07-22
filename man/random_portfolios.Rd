@@ -1,12 +1,13 @@
-\name{random_portfolios}
+\name{random_portfolios_v2}
 \alias{random_portfolios}
-\title{generate an arbitary number of constrained random portfolios}
+\alias{random_portfolios_v2}
+\title{version 2 generate an arbitary number of constrained random portfolios}
 \usage{
-  random_portfolios(rpconstraints, permutations = 100, ...)
+  random_portfolios_v2(portfolio, permutations = 100, ...)
 }
 \arguments{
-  \item{rpconstraints}{an object of type "constraints"
-  specifying the constraints for the optimization, see
+  \item{portfolio}{an object of type "portfolio" specifying
+  the constraints for the optimization, see
   \code{\link{constraint}}}
 
   \item{permutations}{integer: number of unique constrained
@@ -22,17 +23,12 @@
   generate an arbitrary number of constrained random
   portfolios.
 }
-\examples{
-rpconstraint<-constraint(assets=10, min_mult=-Inf, max_mult=Inf, min_sum=.99, max_sum=1.01, min=.01, max=.4, weight_seq=generatesequence())
-rp<- random_portfolios(rpconstraints=rpconstraint,permutations=1000)
-head(rp)
-}
 \author{
   Peter Carl, Brian G. Peterson, (based on an idea by Pat
   Burns)
 }
 \seealso{
-  \code{\link{constraint}}, \code{\link{objective}},
-  \code{\link{randomize_portfolio}}
+  \code{\link{portfolio.spec}}, \code{\link{objective}},
+  \code{\link{randomize_portfolio_v2}}
 }
 
