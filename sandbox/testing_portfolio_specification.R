@@ -1,7 +1,6 @@
 # Testing for the new portfolio specification
 
 # Load necessary packages
-library(PerformanceAnalytics)
 library(PortfolioAnalytics)
 
 # Load the edhec data
@@ -46,15 +45,15 @@ pspec <- add.constraint(portfolio=pspec, type="box",
 print(pspec)
 
 # Add objectives to the pspec object
-pspec <- add.objective_v2(portfolio=pspec, type="return", name="mean", 
+pspec <- add.objective(portfolio=pspec, type="return", name="mean", 
                        enabled=FALSE, multiplier=0)
 print(pspec)
 
-pspec <- add.objective_v2(portfolio=pspec, type="risk", name="var", 
+pspec <- add.objective(portfolio=pspec, type="risk", name="var", 
                        enabled=FALSE, multiplier=0, risk_aversion=10)
 print(pspec)
 
-pspec <- add.objective_v2(portfolio=pspec, type="risk", name="CVaR", 
+pspec <- add.objective(portfolio=pspec, type="risk", name="CVaR", 
                        enabled=FALSE, multiplier=0)
 print(pspec)
 
