@@ -52,6 +52,9 @@ summary.portfolio <- function(portfolio){
   cat("PortfolioAnalytics Portfolio Specification", "\n")
   cat(rep("*", 50) ,"\n", sep="")
   
+  cat("\nCall:\n", paste(deparse(portfolio$call), sep = "\n", collapse = "\n"), 
+      "\n", sep = "")
+  
   # Assets
   cat("\nAssets\n")
   nassets <- length(portfolio$assets)
@@ -60,20 +63,25 @@ summary.portfolio <- function(portfolio){
   # Constraints
   cat("\nConstraints\n")
   nconstraints <- length(portfolio$constraints)
-  # logical vector of enabled constraints
-  enabled.constraints <- sapply(pspec$constraints, function(x) x$enabled)
+  if(nconstraints > 0){
+    # logical vector of enabled constraints
+    enabled.constraints <- which(sapply(portfolio$constraints, function(x) x$enabled))
+    n.enabled.constraints <- ifelse(length(enabled.constraints) > 0, length(enabled.constraints), 0)
+  } else {
+    n.enabled.constraints <- 0
+  }
   # character vector of constraint types
-  names.constraints <- sapply(pspec$constraints, function(x) x$type)
+  names.constraints <- sapply(portfolio$constraints, function(x) x$type)
   cat("Number of constraints:", nconstraints, "\n")
-  cat("Number of enabled constraints:", sum(enabled.constraints), "\n")
-  if(sum(enabled.constraints) > 0){
+  cat("Number of enabled constraints:", n.enabled.constraints, "\n")
+  if(length(enabled.constraints) > 0){
     cat("Enabled constraint types\n")
     for(type in names.constraints[enabled.constraints]) {
       cat("\t\t-", type, "\n")
     }
   }
-  cat("Number of disabled constraints:", nconstraints - sum(enabled.constraints), "\n")
-  if((nconstraints - sum(enabled.constraints)) > 0){
+  cat("Number of disabled constraints:", nconstraints - n.enabled.constraints, "\n")
+  if((nconstraints - n.enabled.constraints) > 0){
     cat("Disabled constraint types\n")
     for(type in setdiff(names.constraints, names.constraints[enabled.constraints])) {
       cat("\t\t-", type, "\n")
@@ -83,20 +91,25 @@ summary.portfolio <- function(portfolio){
   # Objectives
   cat("\nObjectives\n")
   nobjectives <- length(portfolio$objectives)
-  # logical vector of enabled objectives
-  enabled.objectives <- sapply(pspec$objectives, function(x) x$enabled)
+  if(nobjectives > 0){
+    # logical vector of enabled objectives
+    enabled.objectives <- which(sapply(portfolio$objectives, function(x) x$enabled))
+    n.enabled.objectives <- ifelse(length(enabled.objectives) > 0, length(enabled.objectives), 0)
+  } else {
+    n.enabled.objectives <- 0
+  }
   # character vector of objective names
-  names.objectives <- sapply(pspec$objectives, function(x) x$name)
+  names.objectives <- sapply(portfolio$objectives, function(x) x$name)
   cat("Number of objectives:", nobjectives, "\n")
-  cat("Number of enabled objectives:", sum(enabled.objectives), "\n")
-  if(sum(enabled.objectives) > 0){
+  cat("Number of enabled objectives:", n.enabled.objectives, "\n")
+  if(n.enabled.objectives > 0){
     cat("Enabled objective names\n")
     for(name in names.objectives[enabled.objectives]) {
       cat("\t\t-", name, "\n")
     }
   }
-  cat("Number of disabled objectives:", nobjectives - sum(enabled.objectives), "\n")
-  if((nobjectives - sum(enabled.objectives)) > 0){
+  cat("Number of disabled objectives:", nobjectives - n.enabled.objectives, "\n")
+  if((nobjectives - n.enabled.objectives) > 0){
     cat("Disabled objective types\n")
     for(name in setdiff(names.objectives, names.objectives[enabled.objectives])) {
       cat("\t\t-", name, "\n")
