@@ -531,7 +531,7 @@ optimize.portfolio_v2 <- function(
   search_size=20000,
   trace=FALSE, ...,
   rp=NULL,
-  momentFUN='set.portfolio.moments_v2',
+  momentFUN='set.portfolio.moments',
   message=FALSE
 )
 {
@@ -666,14 +666,14 @@ optimize.portfolio_v2 <- function(
     if(hasArg(rpseed) & isTRUE(rpseed)) {
       # initial seed population is generated with random_portfolios function
       # if(hasArg(eps)) eps=match.call(expand.dots=TRUE)$eps else eps = 0.01
-      rp <- random_portfolios_v2(portfolio=portfolio, permutations=NP)
+      rp <- random_portfolios(portfolio=portfolio, permutations=NP)
       DEcformals$initialpop <- rp
     }
     controlDE <- do.call(DEoptim.control, DEcformals)
     
     # We are passing fn_map to the optional fnMap function to do the 
     # transformation so we need to force normalize=FALSE in call to constrained_objective
-    minw = try(DEoptim( constrained_objective_v2,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, nargs = dotargs , ...=..., normalize=FALSE, fnMap=function(x) fn_map(x, portfolio=portfolio)$weights)) # add ,silent=TRUE here?
+    minw = try(DEoptim( constrained_objective,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, nargs = dotargs , ...=..., normalize=FALSE, fnMap=function(x) fn_map(x, portfolio=portfolio)$weights)) # add ,silent=TRUE here?
     
     if(inherits(minw, "try-error")) { minw=NULL }
     if(is.null(minw)){
@@ -689,7 +689,7 @@ optimize.portfolio_v2 <- function(
     weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
     
-    out <- list(weights=weights, objective_measures=constrained_objective_v2(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=minw$optim$bestval, call=call)
+    out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=minw$optim$bestval, call=call)
     if (isTRUE(trace)){
       out$DEoutput <- minw
       out$DEoptim_objective_results <- try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
@@ -702,16 +702,16 @@ optimize.portfolio_v2 <- function(
   if(optimize_method=="random"){
     #' call random_portfolios() with portfolio and search_size to create matrix of portfolios
     if(missing(rp) | is.null(rp)){
-      rp <- random_portfolios_v2(portfolio=portfolio, permutations=search_size)
+      rp <- random_portfolios(portfolio=portfolio, permutations=search_size)
     }
     #' store matrix in out if trace=TRUE
     if (isTRUE(trace)) out$random_portfolios <- rp
     # rp is already being generated with a call to fn_map so set normalize=FALSE in the call to constrained_objective
     #' write foreach loop to call constrained_objective() with each portfolio
     if ("package:foreach" %in% search() & !hasArg(parallel)){
-      rp_objective_results <- foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective_v2(w=rp[ii,], R, portfolio, trace=trace,...=dotargs, normalize=FALSE)
+      rp_objective_results <- foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,], R, portfolio, trace=trace,...=dotargs, normalize=FALSE)
     } else {
-      rp_objective_results <- apply(rp, 1, constrained_objective_v2, R=R, portfolio=portfolio, trace=trace, ...=dotargs, normalize=FALSE)
+      rp_objective_results <- apply(rp, 1, constrained_objective, R=R, portfolio=portfolio, trace=trace, ...=dotargs, normalize=FALSE)
     }
     #' if trace=TRUE , store results of foreach in out$random_results
     if(isTRUE(trace)) out$random_portfolio_objective_results <- rp_objective_results
@@ -735,7 +735,7 @@ optimize.portfolio_v2 <- function(
     }
     #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
     out$weights <- min_objective_weights
-    out$objective_measures <- try(constrained_objective_v2(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE)$objective_measures)
+    out$objective_measures <- try(constrained_objective(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE)$objective_measures)
     out$call <- call
     #' construct out list to be as similar as possible to DEoptim list, within reason
     
@@ -816,7 +816,7 @@ optimize.portfolio_v2 <- function(
     upper <- constraints$max
     lower <- constraints$min
     
-    minw <- try(psoptim( par = rep(NA, N), fn = constrained_objective_v2,  R=R, portfolio=portfolio,
+    minw <- try(psoptim( par = rep(NA, N), fn = constrained_objective,  R=R, portfolio=portfolio,
                          lower = lower[1:N] , upper = upper[1:N] , control = controlPSO)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
@@ -830,7 +830,7 @@ optimize.portfolio_v2 <- function(
     names(weights) <- colnames(R)
     
     out <- list(weights=weights, 
-                objective_measures=constrained_objective_v2(w=weights, R=R, portfolio=portfolio, trace=TRUE)$objective_measures,
+                objective_measures=constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE)$objective_measures,
                 out=minw$value, 
                 call=call)
     if (isTRUE(trace)){
@@ -861,7 +861,7 @@ optimize.portfolio_v2 <- function(
     lower <- constraints$min
     
     minw = try(GenSA( par = rep(1/N, N), lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
-                      fn = constrained_objective_v2 ,  R=R, portfolio=portfolio)) # add ,silent=TRUE here?
+                      fn = constrained_objective ,  R=R, portfolio=portfolio)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
     if(is.null(minw)){
@@ -874,7 +874,7 @@ optimize.portfolio_v2 <- function(
     names(weights) <- colnames(R)
     
     out = list(weights=weights, 
-               objective_measures=constrained_objective_v2(w=weights, R=R, portfolio=portfolio, trace=TRUE)$objective_measures,
+               objective_measures=constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE)$objective_measures,
                out=minw$value, 
                call=call)
     if (isTRUE(trace)){
