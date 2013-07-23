@@ -25,7 +25,7 @@
 #' @examples 
 #' exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, weight_seq=generatesequence())
 #' @export
-constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,max_sum=1.01,weight_seq=NULL)
+constraint_v1 <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,max_sum=1.01,weight_seq=NULL)
 { # based on GPL R-Forge pkg roi by Stefan Thuessel,Kurt Hornik,David Meyer
   if (hasArg(min) & hasArg(max)) {
     if (is.null(assets) & (!length(min)>1) & (!length(max)>1)) {
@@ -159,6 +159,8 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
 #' @param ... any other passthru parameters
 #' @param constrclass character to name the constraint class
 #' @author Ross Bennett
+#' @aliases constraint
+#' @rdname constraint
 #' @export
 constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
   if(!hasArg(type)) stop("you must specify a constraint type")
@@ -172,6 +174,10 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
   ) # end structure
   )
 }
+
+# Alias constraint_v2 to constraint
+#' @export
+constraint <- constraint_v2
 
 #' General interface for adding and/or updating optimization constraints.
 #' 
@@ -386,7 +392,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=T
     max[which(tmp_max < max)] <- tmp_max[which(tmp_max < max)]
   }
   
-  Constraint <- constraint_v2(type=type, enabled=enabled, constrclass="box_constraint", ...)
+  Constraint <- constraint(type=type, enabled=enabled, constrclass="box_constraint", ...)
   Constraint$min <- min
   Constraint$max <- max
   return(Constraint)
@@ -462,7 +468,7 @@ group_constraint <- function(type, assets, groups, group_labels=NULL, group_min,
     }
   }
   
-  Constraint <- constraint_v2(type, enabled=enabled, constrclass="group_constraint", ...)
+  Constraint <- constraint(type, enabled=enabled, constrclass="group_constraint", ...)
   Constraint$groups <- groups
   Constraint$group_labels <- group_labels
   Constraint$cLO <- group_min
@@ -506,7 +512,7 @@ group_constraint <- function(type, assets, groups, group_labels=NULL, group_min,
 #' pspec <- add.constraint(pspec, type="active")
 #' @export
 weight_sum_constraint <- function(type, min_sum=0.99, max_sum=1.01, enabled=TRUE, ...){
-  Constraint <- constraint_v2(type, enabled=enabled, constrclass="weight_sum_constraint", ...)
+  Constraint <- constraint(type, enabled=enabled, constrclass="weight_sum_constraint", ...)
   Constraint$min_sum <- min_sum
   Constraint$max_sum <- max_sum
   return(Constraint)
@@ -627,7 +633,7 @@ get_constraints <- function(portfolio){
 #' pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.6)
 #' @export
 turnover_constraint <- function(type, turnover_target, enabled=TRUE, message=FALSE, ...){
-  Constraint <- constraint_v2(type, enabled=enabled, constrclass="turnover_constraint", ...)
+  Constraint <- constraint(type, enabled=enabled, constrclass="turnover_constraint", ...)
   Constraint$turnover_target <- turnover_target
   return(Constraint)
 }
@@ -651,7 +657,7 @@ turnover_constraint <- function(type, turnover_target, enabled=TRUE, message=FAL
 #' pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
 #' @export
 diversification_constraint <- function(type, div_target, enabled=TRUE, message=FALSE, ...){
-  Constraint <- constraint_v2(type, enabled=enabled, constrclass="diversification_constraint", ...)
+  Constraint <- constraint(type, enabled=enabled, constrclass="diversification_constraint", ...)
   Constraint$div_target <- div_target
   return(Constraint)
 }
@@ -716,7 +722,7 @@ position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=N
     # coerce to integer
     max_pos_short <- as.integer(max_pos_short)
   }
-  Constraint <- constraint_v2(type, enabled=enabled, constrclass="position_limit_constraint", ...)
+  Constraint <- constraint(type, enabled=enabled, constrclass="position_limit_constraint", ...)
   Constraint$max_pos <- max_pos
   Constraint$max_pos_long <- max_pos_long
   Constraint$max_pos_short <- max_pos_short
