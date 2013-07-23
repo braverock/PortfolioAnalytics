@@ -336,7 +336,7 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
     }
 }
 
-#' constrained_objective_v2 2 function to calculate a numeric return value for a portfolio based on a set of constraints and objectives
+#' constrained_objective_v2 function to calculate a numeric return value for a portfolio based on a set of constraints and objectives
 #' 
 #' function to calculate a numeric return value for a portfolio based on a set of constraints,
 #' we'll try to make as few assumptions as possible, and only run objectives that are required by the user
@@ -526,7 +526,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     nargs <- NULL
   }
   
-  nargs <- set.portfolio.moments_v2(R, portfolio, momentargs=nargs)
+  nargs <- set.portfolio.moments(R, portfolio, momentargs=nargs)
   
   if(is.null(portfolio$objectives)) {
     warning("no objectives specified in portfolio")

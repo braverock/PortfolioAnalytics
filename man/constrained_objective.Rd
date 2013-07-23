@@ -1,7 +1,7 @@
 \name{constrained_objective_v2}
 \alias{constrained_objective}
 \alias{constrained_objective_v2}
-\title{constrained_objective_v2 2 function to calculate a numeric return value for a portfolio based on a set of constraints and objectives}
+\title{constrained_objective_v2 function to calculate a numeric return value for a portfolio based on a set of constraints and objectives}
 \usage{
   constrained_objective_v2(w, R, portfolio, ...,
     trace = FALSE, normalize = TRUE, storage = FALSE)
