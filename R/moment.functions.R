@@ -227,6 +227,7 @@ set.portfolio.moments_v2 <- function(R, portfolio, momentargs=NULL,...){
 }
 
 # Alias for set.portfolio.moments
+#' @export
 set.portfolio.moments <- set.portfolio.moments_v2
 
 garch.mm <- function(R,mu_ts, covlist,momentargs=list(),...) {

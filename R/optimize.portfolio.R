@@ -895,7 +895,8 @@ optimize.portfolio_v2 <- function(
   return(out)
 }
 
-# Alias for optimize.portfolio_v2
+# Alias for optimize.portfolio_
+#' @export
 optimize.portfolio <- optimize.portfolio_v2
 
 #' portfolio optimization with support for rebalancing or rolling periods

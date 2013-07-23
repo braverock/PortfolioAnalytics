@@ -718,4 +718,6 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   }
 }
 
-constrained_objective <- constrained_objective_v1
+# Alias constrained_objective_v2 to constrained_objective
+#' @export
+constrained_objective <- constrained_objective_v2

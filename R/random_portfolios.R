@@ -352,9 +352,11 @@ random_portfolios_v2 <- function( portfolio, permutations=100, ...)
 }
 
 # Alias randomize_portfolio_v2 to randomize_portfolio
+#' @export
 randomize_portfolio <- randomize_portfolio_v2
 
 # Alias random_portfolios_v2 to random_portfolios
+#' @export
 random_portfolios <- random_portfolios_v2
 
 # EXAMPLE: start_t<- Sys.time(); x=random_walk_portfolios(rep(1/5,5), generatesequence(min=0.01, max=0.30, by=0.01), max_permutations=500, permutations=5000, min_sum=.99, max_sum=1.01); end_t<-Sys.time(); end_t-start_t;

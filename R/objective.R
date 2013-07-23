@@ -216,6 +216,7 @@ add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=TRUE
 }
 
 # Alias add.objective_v2 to add.objective
+#' @export
 add.objective <- add.objective_v2
 
 # update.objective <- function(object, ...) {
