@@ -1,6 +1,6 @@
 \name{summary.portfolio}
 \alias{summary.portfolio}
-\title{Summary method for objects of class 'portfolio'}
+\title{Summarizing Portfolio Specification Objects}
 \usage{
   summary.portfolio(portfolio)
 }
@@ -8,7 +8,7 @@
   \item{portfolio}{object of class portfolio}
 }
 \description{
-  Summary method for objects of class 'portfolio'
+  summary method for class "portfolio"
 }
 \author{
   Ross Bennett

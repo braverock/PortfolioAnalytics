@@ -40,12 +40,14 @@ summary.optimize.portfolio.rebalancing <- function(object, ...) {
     }    
 }
 
-#' Summary method for objects of class 'portfolio'
+#' Printing Portfolio Specification Objects
+#' 
+#' Print method for class "portfolio"
 #' 
 #' @param portfolio object of class portfolio
 #' @author Ross Bennett
 #' @export
-summary.portfolio <- function(portfolio){
+print.portfolio <- function(portfolio){
   if(!is.portfolio(portfolio)) stop("object passed in is not of class 'portfolio'")
   
   cat(rep("*", 50) ,"\n", sep="")
@@ -68,6 +70,7 @@ summary.portfolio <- function(portfolio){
     enabled.constraints <- which(sapply(portfolio$constraints, function(x) x$enabled))
     n.enabled.constraints <- ifelse(length(enabled.constraints) > 0, length(enabled.constraints), 0)
   } else {
+    enabled.constraints <- NULL
     n.enabled.constraints <- 0
   }
   # character vector of constraint types
@@ -96,6 +99,7 @@ summary.portfolio <- function(portfolio){
     enabled.objectives <- which(sapply(portfolio$objectives, function(x) x$enabled))
     n.enabled.objectives <- ifelse(length(enabled.objectives) > 0, length(enabled.objectives), 0)
   } else {
+    enabled.objectives <- NULL
     n.enabled.objectives <- 0
   }
   # character vector of objective names
@@ -116,6 +120,57 @@ summary.portfolio <- function(portfolio){
     }
   }
   cat("\n")
+}
+
+#' Summarizing Portfolio Specification Objects
+#' 
+#' summary method for class "portfolio"
+#' 
+#' @param portfolio object of class portfolio
+#' @author Ross Bennett
+#' @export
+summary.portfolio <- function(portfolio){
+  if(!is.portfolio(portfolio)) stop("object passed in is not of class 'portfolio'")
+  
+  cat(rep("*", 50) ,"\n", sep="")
+  cat("PortfolioAnalytics Portfolio Specification Summary", "\n")
+  cat(rep("*", 50) ,"\n", sep="")
+  
+  cat("Assets and Seed Weights:\n")
+  print(portfolio$assets)
+  cat("\n")
+  
+  if(!is.null(portfolio$category_labels)) {
+    cat("Category Labels:\n")
+    print(portfolio$category_labels)
+  }
+  
+  if(!is.null(portfolio$weight_seq)) {
+    cat("weight_seq:\n")
+    print(summary(portfolio$weight_seq))
+  }
+  
+  cat("Constraints:\n\n")
+  for(constraint in portfolio$constraints){
+    if(constraint$enabled) {
+      cat(rep("*", 40), "\n", sep="")
+      cat(constraint$type, "constraint\n")
+      cat(rep("*", 40), "\n", sep="")
+      print(constraint)
+      cat("\n\n")
+    }
+  }
+  
+  cat("Objectives:\n\n")
+  for(objective in portfolio$objectives){
+    if(objective$enabled) {
+      cat(rep("*", 40), "\n", sep="")
+      cat(class(objective)[1], "\n")
+      cat(rep("*", 40), "\n", sep="")
+      print(objective)
+      cat("\n\n")
+    }
+  }
 }
 
 #' print method for objects of class 'constraint'
@@ -331,8 +386,8 @@ summary.optimize.portfolio <- function(object, ...){
   print.default(object$portfolio$assets)
   cat("\n")
   
-  # summary of the portfolio object
-  summary(object$portfolio)
+  # print the portfolio object
+  print(object$portfolio)
   
   # Constraints
   cat(rep("*", 40), "\n", sep="")
