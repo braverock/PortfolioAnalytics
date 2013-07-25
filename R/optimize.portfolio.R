@@ -641,9 +641,10 @@ optimize.portfolio_v2 <- function(
         if(!hasArg(parallelType) ) DEcformals$parallelType='auto' #use all cores
         if(!hasArg(packages) ) DEcformals$packages <- names(sessionInfo()$otherPkgs) #use all packages
       }
-      
       #TODO FIXME also check for a passed in controlDE list, including checking its class, and match formals
     }
+    if(hasArg(traceDE)) traceDE=match.call(expand.dots=TRUE)$traceDE else traceDE=TRUE
+    DEcformals$trace <- traceDE
     
     if(isTRUE(trace)) { 
       #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
