@@ -686,7 +686,7 @@ optimize.portfolio_v2 <- function(
     weights <- as.vector(minw$optim$bestmem)
     print(weights)
     # is it necessary to normalize the weights here?
-    weights <- normalize_weights(weights)
+    # weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
     
     out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=minw$optim$bestval, call=call)
@@ -899,7 +899,7 @@ optimize.portfolio_v2 <- function(
 #' @export
 optimize.portfolio <- optimize.portfolio_v2
 
-#' portfolio optimization with support for rebalancing or rolling periods
+#' version 1 portfolio optimization with support for rebalancing or rolling periods
 #' 
 #' This function may eventually be wrapped into optimize.portfolio
 #' 
@@ -920,7 +920,7 @@ optimize.portfolio <- optimize.portfolio_v2
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
-optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
+optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
 {
     stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
     start_t<-Sys.time()
@@ -957,6 +957,66 @@ optimize.portfolio.rebalancing <- function(R,constraints,optimize_method=c("DEop
     message(c("overall elapsed time:",end_t-start_t))
     class(out_list)<-c("optimize.portfolio.rebalancing")
     return(out_list)
+}
+
+#' portfolio optimization with support for rebalancing or rolling periods
+#' 
+#' This function may eventually be wrapped into optimize.portfolio
+#' 
+#' For now, we'll set the rebalancing periods here, though I think they should eventually be part of the constraints object
+#' 
+#' This function is massively parallel, and will require 'foreach' and we suggest that you register a parallel backend.
+#' 
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
+#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
+#' @param optimize_method one of "DEoptim", "random", or "ROI"
+#' @param search_size integer, how many portfolios to test, default 20,000
+#' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
+#' @param \dots any other passthru parameters
+#' @param rp a set of random portfolios passed into the function, to prevent recalculation
+#' @param rebalance_on a periodicity as returned by xts function periodicity and usable by endpoints
+#' @param training_period period to use as training in the front of the data
+#' @param trailing_periods if set, an integer with the number of periods to roll over, default NULL will run from inception 
+#' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
+#' @author Kris Boudt, Peter Carl, Brian G. Peterson
+#' @export
+optimize.portfolio.rebalancing <- function(R, portfolio, optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
+{
+  stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
+  start_t<-Sys.time()
+  
+  #store the call for later
+  call <- match.call()
+  if(optimize_method=="random"){
+    #' call random_portfolios() with constraints and search_size to create matrix of portfolios
+    if(is.null(rp))
+      rp<-random_portfolios(portfolio=portfolio, permutations=search_size)
+  } else {
+    rp=NULL
+  }    
+  
+  if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
+  if (is.null(trailing_periods)){
+    # define the index endpoints of our periods
+    ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
+    # now apply optimize.portfolio to the periods, in parallel if available
+    out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+      optimize.portfolio(R[1:ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
+    }
+  } else {
+    # define the index endpoints of our periods
+    ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
+    # now apply optimize.portfolio to the periods, in parallel if available
+    out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+      optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
+    }
+  }
+  names(out_list)<-index(R[ep.i])
+  
+  end_t<-Sys.time()
+  message(c("overall elapsed time:",end_t-start_t))
+  class(out_list)<-c("optimize.portfolio.rebalancing")
+  return(out_list)
 }
 
 #'execute multiple optimize.portfolio calls, presumably in parallel

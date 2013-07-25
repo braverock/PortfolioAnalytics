@@ -34,7 +34,6 @@
 #' @author Ross Bennett
 #' @export
 fn_map <- function(weights, portfolio, relax=FALSE, ...){
-  
   if(!is.portfolio(portfolio)) stop("portfolio passed in is not of class 'portfolio'")
   
   nassets <- length(portfolio$assets)
