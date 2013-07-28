@@ -93,7 +93,7 @@ chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3,
 #' 
 #' @param DE set of portfolios created by \code{\link{optimize.portfolio}}
 #' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns, used to recalulate the objective function where required
-#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
+#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
 #' @param neighbors set of 'neighbor' portfolios to overplot, see Details in \code{\link{charts.DE}}
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
@@ -102,7 +102,7 @@ chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3,
 #' @param element.color color for the default plot scatter points
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
-chart.Scatter.DE <- function(DE, R=NULL, constraints=NULL, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
+chart.Scatter.DE <- function(DE, R=NULL, portfolio=NULL, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
     # more or less specific to the output of the random portfolio code with constraints
     # will work to a point with other functions, such as optimize.porfolio.parallel
     # there's still a lot to do to improve this.
@@ -161,7 +161,7 @@ chart.Scatter.DE <- function(DE, R=NULL, constraints=NULL, neighbors = NULL, ret
 #     }
 
     ## Draw solution trajectory
-    if(!is.null(R) & !is.null(constraints)){
+    if(!is.null(R) & !is.null(portfolio)){
         w.traj = unique(DE$DEoutput$member$bestmemit)
         rows = nrow(w.traj)
         rr = matrix(nrow=rows, ncol=2)
@@ -172,7 +172,7 @@ chart.Scatter.DE <- function(DE, R=NULL, constraints=NULL, neighbors = NULL, ret
         for(i in 1:rows){
             
             w = w.traj[i,]
-            x = unlist(constrained_objective(w=w, R=R, constraints=constraints, trace=TRUE))
+            x = unlist(constrained_objective(w=w, R=R, portfolio=portfolio, trace=TRUE))
             names(x)<-name.replace(names(x))
             if(is.null(trajnames)) trajnames<-names(x)
             if(is.null(rsc)){
@@ -210,7 +210,7 @@ chart.Scatter.DE <- function(DE, R=NULL, constraints=NULL, neighbors = NULL, ret
     }
     objcols<-unlist(DE[[result.slot]])
     names(objcols)<-name.replace(names(objcols))
-    return.column = pmatch(return.column,names(objcols))
+    return.column = pmatch(return.col,names(objcols))
     if(is.na(return.column)) {
         return.col = paste(return.col,return.col,sep='.')
         return.column = pmatch(return.col,names(objcols))
