@@ -29,60 +29,64 @@
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
 chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
-# Specific to the output of the random portfolio code with constraints
-    # @TODO: check that DE is of the correct class
-    columnnames = names(DE$weights)
-    numassets = length(columnnames)
-
-    if(is.null(xlab))
-        minmargin = 3
-    else
-        minmargin = 5
-    if(main=="") topmargin=1 else topmargin=4
-    if(las > 1) {# set the bottom border to accommodate labels
-        bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
-        if(bottommargin > 10 ) {
-            bottommargin<-10
-            columnnames<-substr(columnnames,1,19)
-            # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
-        }
+  # Specific to the output of the random portfolio code with constraints
+  # @TODO: check that DE is of the correct class
+  if(!inherits(DE, "optimize.portfolio.DEoptim")) stop("DE must be of class 'optimize.portfolio.DEoptim'")
+  
+  columnnames = names(DE$weights)
+  numassets = length(columnnames)
+  
+  constraints <- get_constraints(DE$portfolio)
+  
+  if(is.null(xlab))
+    minmargin = 3
+  else
+    minmargin = 5
+  if(main=="") topmargin=1 else topmargin=4
+  if(las > 1) {# set the bottom border to accommodate labels
+    bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
+    if(bottommargin > 10 ) {
+      bottommargin<-10
+      columnnames<-substr(columnnames,1,19)
+      # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
     }
-    else {
-        bottommargin = minmargin
-    }
-    par(mar = c(bottommargin, 4, topmargin, 2) +.1)
-    plot(DE$weights, type="b", col="blue", axes=FALSE, xlab='', ylim=c(0,max(DE$constraints$max)), ylab="Weights", main=main, pch=16, ...)
-    points(DE$constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
-    points(DE$constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
-#     if(!is.null(neighbors)){ 
-#         if(is.vector(neighbors)){
-#             xtract=extractStats(DE)
-#             weightcols<-grep('w\\.',colnames(xtract)) #need \\. to get the dot 
-#             if(length(neighbors)==1){
-#                 # overplot nearby portfolios defined by 'out'
-#                 orderx = order(xtract[,"out"])
-#                 subsetx = head(xtract[orderx,], n=neighbors)
-#                 for(i in 1:neighbors) points(subsetx[i,weightcols], type="b", col="lightblue")
-#             } else{
-#                 # assume we have a vector of portfolio numbers
-#                 subsetx = xtract[neighbors,weightcols]
-#                 for(i in 1:length(neighbors)) points(subsetx[i,], type="b", col="lightblue")
-#             }      
-#         }
-#         if(is.matrix(neighbors) | is.data.frame(neighbors)){
-#             # the user has likely passed in a matrix containing calculated values for risk.col and return.col
-#             nbweights<-grep('w\\.',colnames(neighbors)) #need \\. to get the dot
-#             for(i in 1:nrow(neighbors)) points(as.numeric(neighbors[i,nbweights]), type="b", col="lightblue")
-#             # note that here we need to get weight cols separately from the matrix, not from xtract
-#             # also note the need for as.numeric.  points() doesn't like matrix inputs
-#         }
-#     }
-    
-#     points(DE$weights, type="b", col="blue", pch=16)
-    axis(2, cex.axis = cex.axis, col = element.color)
-    axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
-    box(col = element.color)
-
+  }
+  else {
+    bottommargin = minmargin
+  }
+  par(mar = c(bottommargin, 4, topmargin, 2) +.1)
+  plot(DE$weights, type="b", col="blue", axes=FALSE, xlab='', ylim=c(0,max(constraints$max)), ylab="Weights", main=main, pch=16, ...)
+  points(constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
+  points(constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
+  #     if(!is.null(neighbors)){ 
+  #         if(is.vector(neighbors)){
+  #             xtract=extractStats(DE)
+  #             weightcols<-grep('w\\.',colnames(xtract)) #need \\. to get the dot 
+  #             if(length(neighbors)==1){
+  #                 # overplot nearby portfolios defined by 'out'
+  #                 orderx = order(xtract[,"out"])
+  #                 subsetx = head(xtract[orderx,], n=neighbors)
+  #                 for(i in 1:neighbors) points(subsetx[i,weightcols], type="b", col="lightblue")
+  #             } else{
+  #                 # assume we have a vector of portfolio numbers
+  #                 subsetx = xtract[neighbors,weightcols]
+  #                 for(i in 1:length(neighbors)) points(subsetx[i,], type="b", col="lightblue")
+  #             }      
+  #         }
+  #         if(is.matrix(neighbors) | is.data.frame(neighbors)){
+  #             # the user has likely passed in a matrix containing calculated values for risk.col and return.col
+  #             nbweights<-grep('w\\.',colnames(neighbors)) #need \\. to get the dot
+  #             for(i in 1:nrow(neighbors)) points(as.numeric(neighbors[i,nbweights]), type="b", col="lightblue")
+  #             # note that here we need to get weight cols separately from the matrix, not from xtract
+  #             # also note the need for as.numeric.  points() doesn't like matrix inputs
+  #         }
+  #     }
+  
+  #     points(DE$weights, type="b", col="blue", pch=16)
+  axis(2, cex.axis = cex.axis, col = element.color)
+  axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
+  box(col = element.color)
+  
 }
 
 #' classic risk return scatter of DEoptim results
