@@ -3,7 +3,8 @@
 \alias{optimize.portfolio_v2}
 \title{version 2 wrapper for constrained optimization of portfolios}
 \usage{
-  optimize.portfolio_v2(R, portfolio,
+  optimize.portfolio_v2(R, portfolio, constraints = NULL,
+    objectives = NULL,
     optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
     momentFUN = "set.portfolio.moments", message = FALSE)
@@ -13,9 +14,13 @@
   or zoo object of asset returns}
 
   \item{portfolio}{an object of type "portfolio" specifying
-  the constraints and objectives for the optimization, see
-  \code{\link{constraint}}, if using closed for solver,
-  need to pass a \code{\link{constraint_ROI}} object.}
+  the constraints and objectives for the optimization}
+
+  \item{constraints}{default=NULL, a list of constraint
+  objects}
+
+  \item{objectives}{default=NULL, a list of objective
+  objects}
 
   \item{optimize_method}{one of "DEoptim", "random",
   "ROI","ROI_old", "pso", "GenSA".  For using

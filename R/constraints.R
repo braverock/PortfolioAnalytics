@@ -568,7 +568,7 @@ is.constraint <- function( x ) {
 get_constraints <- function(portfolio){
   if(!is.portfolio(portfolio)) stop("portfolio passed in is not of class portfolio")
   
-  if(length(pspec$constraints) == 0) stop("No constraints passed in")
+  if(length(portfolio$constraints) == 0) stop("No constraints passed in")
   
   out <- list()
   out$min_sum <- NA

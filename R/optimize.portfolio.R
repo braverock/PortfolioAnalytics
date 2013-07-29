@@ -510,7 +510,9 @@ optimize.portfolio_v1 <- function(
 #' If you would like to interface with \code{optimize.portfolio} using matrix formulations, then use \code{ROI_old}. 
 #'  
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization, see \code{\link{constraint}}, if using closed for solver, need to pass a \code{\link{constraint_ROI}} object.
+#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
+#' @param constraints default=NULL, a list of constraint objects
+#' @param objectives default=NULL, a list of objective objects
 #' @param optimize_method one of "DEoptim", "random", "ROI","ROI_old", "pso", "GenSA".  For using \code{ROI_old}, need to use a constraint_ROI object in constraints. For using \code{ROI}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} and \code{Rglpk}.
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
@@ -527,6 +529,8 @@ optimize.portfolio_v1 <- function(
 optimize.portfolio_v2 <- function(
   R,
   portfolio,
+  constraints=NULL,
+  objectives=NULL,
   optimize_method=c("DEoptim","random","ROI","ROI_old","pso","GenSA"),
   search_size=20000,
   trace=FALSE, ...,
@@ -552,6 +556,16 @@ optimize.portfolio_v2 <- function(
     R <- R[,names(portfolio$assets)]
   }
   T <- nrow(R)
+  
+  # Check for constraints and objectives passed in separately outside of the portfolio object
+  if(!is.null(constraints)){
+    # Insert the constraints into the portfolio object
+    portfolio <- insert_constraints(portfolio=portfolio, constraints=constraints)
+  }
+  if(!is.null(objectives)){
+    # Insert the objectives into the portfolio object
+    portfolio <- insert_objectives(portfolio=portfolio, objectives=objectives)
+  }
   
   out <- list()
   
