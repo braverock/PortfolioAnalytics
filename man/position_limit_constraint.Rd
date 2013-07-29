@@ -2,9 +2,10 @@
 \alias{position_limit_constraint}
 \title{constructor for position_limit_constraint}
 \usage{
-  position_limit_constraint(type, assets, max_pos = NULL,
-    max_pos_long = NULL, max_pos_short = NULL,
-    enabled = TRUE, message = FALSE, ...)
+  position_limit_constraint(type = "position_limit",
+    assets, max_pos = NULL, max_pos_long = NULL,
+    max_pos_short = NULL, enabled = TRUE, message = FALSE,
+    ...)
 }
 \arguments{
   \item{type}{character type of the constraint}

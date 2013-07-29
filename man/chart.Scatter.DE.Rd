@@ -2,7 +2,7 @@
 \alias{chart.Scatter.DE}
 \title{classic risk return scatter of DEoptim results}
 \usage{
-  chart.Scatter.DE(DE, R = NULL, constraints = NULL,
+  chart.Scatter.DE(DE, R = NULL, portfolio = NULL,
     neighbors = NULL, return.col = "mean", risk.col = "ES",
     ..., element.color = "darkgray", cex.axis = 0.8)
 }
@@ -14,9 +14,8 @@
   timeSeries or zoo object of asset returns, used to
   recalulate the objective function where required}
 
-  \item{constraints}{an object of type "constraints"
-  specifying the constraints for the optimization, see
-  \code{\link{constraint}}}
+  \item{portfolio}{an object of type "portfolio" specifying
+  the constraints and objectives for the optimization}
 
   \item{neighbors}{set of 'neighbor' portfolios to
   overplot, see Details in \code{\link{charts.DE}}}

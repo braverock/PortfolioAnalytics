@@ -2,8 +2,8 @@
 \alias{weight_sum_constraint}
 \title{constructor for weight_sum_constraint}
 \usage{
-  weight_sum_constraint(type, min_sum = 0.99,
-    max_sum = 1.01, enabled = TRUE, ...)
+  weight_sum_constraint(type = "weight_sum",
+    min_sum = 0.99, max_sum = 1.01, enabled = TRUE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}

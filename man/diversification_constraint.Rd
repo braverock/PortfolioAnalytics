@@ -2,8 +2,8 @@
 \alias{diversification_constraint}
 \title{constructor for diversification_constraint}
 \usage{
-  diversification_constraint(type, div_target,
-    enabled = TRUE, message = FALSE, ...)
+  diversification_constraint(type = "diversification",
+    div_target, enabled = TRUE, message = FALSE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}

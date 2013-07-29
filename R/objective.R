@@ -387,6 +387,7 @@ minmax_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, en
 } # end minmax_objective constructor
 
 #' Insert a list of objectives into the objectives slot of a portfolio object
+#' 
 #' @param portfolio object of class 'portfolio'
 #' @param objectives list of objective objects
 #' @author Ross Bennett

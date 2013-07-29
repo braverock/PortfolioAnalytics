@@ -2,7 +2,7 @@
 \alias{turnover_constraint}
 \title{constructor for turnover_constraint}
 \usage{
-  turnover_constraint(type, turnover_target,
+  turnover_constraint(type = "turnover", turnover_target,
     enabled = TRUE, message = FALSE, ...)
 }
 \arguments{

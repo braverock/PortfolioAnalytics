@@ -2,7 +2,7 @@
 \alias{group_constraint}
 \title{constructor for group_constraint}
 \usage{
-  group_constraint(type, assets, groups,
+  group_constraint(type = "group", assets, groups,
     group_labels = NULL, group_min, group_max,
     group_pos = NULL, enabled = TRUE, message = FALSE, ...)
 }

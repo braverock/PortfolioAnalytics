@@ -2,7 +2,7 @@
 \alias{box_constraint}
 \title{constructor for box_constraint.}
 \usage{
-  box_constraint(type, assets, min, max, min_mult,
+  box_constraint(type = "box", assets, min, max, min_mult,
     max_mult, enabled = TRUE, message = FALSE, ...)
 }
 \arguments{
