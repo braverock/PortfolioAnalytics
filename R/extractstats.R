@@ -151,7 +151,34 @@ extractStats.optimize.portfolio.random <- function(object, prefix=NULL, ...){
   return(result)
 }
 
-#' extract time series of weights from output of optimize.portfolio
+#' extract weights from a portfolio run via \code{optimize.portfolio} or \code{optimize.portfolio.rebalancing}
+#' 
+#' This function will dispatch to the appropriate class handler based on the
+#' input class of the optimize.portfolio or optimize.portfolio.rebalancing output object
+#'  
+#' @param object list returned by optimize.portfolio
+#' @param ... any other passthru parameters
+#' @seealso \code{\link{optimize.portfolio}}, \code{\link{optimize.portfolio.rebalancing}}
+#' @export
+extractWeights <- function (object, ...){
+  UseMethod('extractWeights')
+}
+
+#' extract weights from output of optimize.portfolio
+#' 
+#' @param object object of type optimize.portfolio to extract weights from
+#' @seealso 
+#' \code{\link{optimize.portfolio}}
+#' @author Ross Bennett
+#' @export
+extractWeights.optimize.portfolio <- function(object){
+  if(!inherits(object, "optimize.portfolio")){
+    stop("object must be of class 'optimize.portfolio'")
+  }
+  return(object$weights)
+}
+
+#' extract time series of weights from output of optimize.portfolio.rebalancing
 #' 
 #' \code{\link{optimize.portfolio.rebalancing}} outputs a list of
 #' \code{\link{optimize.portfolio}} objects, one for each rebalancing period
@@ -163,8 +190,13 @@ extractStats.optimize.portfolio.random <- function(object, prefix=NULL, ...){
 #' @seealso 
 #' \code{\link{optimize.portfolio.rebalancing}}
 #' @export
-extractWeights.rebal <- function(RebalResults, ...){
+extractWeights.optimize.portfolio.rebalancing <- function(RebalResults, ...){
 # @TODO: add a class check for the input object
+# FIXED
+  if(!inherits(RebalResults, "optimize.portfolio.rebalancing")){
+    stop("Object passed in must be of class 'optimize.portfolio.rebalancing'")
+  }
+  
   numColumns = length(RebalResults[[1]]$weights)
   numRows = length(RebalResults)
 
