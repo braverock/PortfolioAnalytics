@@ -3,6 +3,7 @@
 \title{portfolio optimization with support for rebalancing or rolling periods}
 \usage{
   optimize.portfolio.rebalancing(R, portfolio,
+    constraints = NULL, objectives = NULL,
     optimize_method = c("DEoptim", "random", "ROI"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
     rebalance_on = NULL, training_period = NULL,
@@ -14,6 +15,12 @@
 
   \item{portfolio}{an object of type "portfolio" specifying
   the constraints and objectives for the optimization}
+
+  \item{constraints}{default=NULL, a list of constraint
+  objects}
+
+  \item{objectives}{default=NULL, a list of objective
+  objects}
 
   \item{optimize_method}{one of "DEoptim", "random", or
   "ROI"}

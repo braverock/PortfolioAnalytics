@@ -984,6 +984,8 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' 
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
+#' @param constraints default=NULL, a list of constraint objects
+#' @param objectives default=NULL, a list of objective objects
 #' @param optimize_method one of "DEoptim", "random", or "ROI"
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
@@ -995,10 +997,20 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
-optimize.portfolio.rebalancing <- function(R, portfolio, optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
+optimize.portfolio.rebalancing <- function(R, portfolio, constraints=NULL, objectives=NULL, optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
 {
   stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
   start_t<-Sys.time()
+  
+  # Check for constraints and objectives passed in separately outside of the portfolio object
+  if(!is.null(constraints)){
+    # Insert the constraints into the portfolio object
+    portfolio <- insert_constraints(portfolio=portfolio, constraints=constraints)
+  }
+  if(!is.null(objectives)){
+    # Insert the objectives into the portfolio object
+    portfolio <- insert_objectives(portfolio=portfolio, objectives=objectives)
+  }
   
   #store the call for later
   call <- match.call()
