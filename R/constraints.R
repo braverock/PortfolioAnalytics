@@ -320,6 +320,11 @@ box_constraint <- function(type="box", assets, min, max, min_mult, max_mult, ena
   # Get the length of the assets vector
   nassets <- length(assets)
   
+  if(type=="long_only"){
+    min <- rep(0, nassets)
+    max <- rep(1, nassets)
+  }
+  
   # Check that the length of min and max are the same
   if(hasArg(min) | hasArg(max)) {
     if (length(min) > 1 & length(max) > 1){
@@ -459,7 +464,7 @@ group_constraint <- function(type="group", assets, groups, group_labels=NULL, gr
   # Construct group_pos vector
   if(!is.null(group_pos)){
     # Check the length of the group_pos vector
-    if(length(group_poss) != length(groups)) stop("length of group_pos must be equal to the length of groups")
+    if(length(group_pos) != length(groups)) stop("length of group_pos must be equal to the length of groups")
     # Check for negative values in group_pos
     if(any(group_pos < 0)) stop("all elements of group_pos must be positive")
     # Elements of group_pos cannot be greater than groups
