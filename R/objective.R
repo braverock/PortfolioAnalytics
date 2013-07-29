@@ -24,6 +24,7 @@
 objective<-function(name , target=NULL , arguments, enabled=TRUE , ..., multiplier=1, objclass='objective'){
   if(!hasArg(name)) stop("you must specify an objective name")
   if (hasArg(name)) if(is.null(name)) stop("you must specify an objective name")
+  if (!hasArg(arguments) | is.null(arguments)) arguments<-list()
   if (!is.list(arguments)) stop("arguments must be passed as a named list")
   
   ## now structure and return
@@ -384,3 +385,27 @@ minmax_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, en
   Objective$max <- max
   return(Objective)
 } # end minmax_objective constructor
+
+#' Insert a list of objectives into the objectives slot of a portfolio object
+#' @param portfolio object of class 'portfolio'
+#' @param objectives list of objective objects
+#' @author Ross Bennett
+#' @export
+insert_objectives <- function(portfolio, objectives){
+  # Check portfolio object
+  if (is.null(portfolio) | !is.portfolio(portfolio)){
+    stop("you must pass in an object of class portfolio")
+  }
+  
+  # Check that objectives is a list
+  if(!is.list(objectives)) stop("objectives must be passed in as a list")
+  
+  # Check that all objects in the list are of class objective
+  for(i in 1:length(objectives)){
+    if(!is.objective(objectives[[i]]))
+      stop("objectives must be passed in as a list and all objects in objectives must be of class 'objective'")
+  }
+  
+  portfolio$objectives <- objectives
+  return(portfolio)
+}

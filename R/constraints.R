@@ -824,3 +824,26 @@ update.constraint <- function(object, ...){
 #   ))
 # }
 
+#' Insert a list of constraints into the constraints slot of a portfolio object
+#' @param portfolio object of class 'portfolio'
+#' @param constraints list of constraint objects
+#' @author Ross Bennett
+#' @export
+insert_constraints <- function(portfolio, constraints){
+  # Check portfolio object
+  if (is.null(portfolio) | !is.portfolio(portfolio)){
+    stop("you must pass in an object of class portfolio")
+  }
+  
+  # Check that constraints is a list
+  if(!is.list(constraints)) stop("constraints must be passed in as a list")
+  
+  # Check that all objects in the list are of class constraint
+  for(i in 1:length(constraints)){
+    if(!is.constraint(constraints[[i]]))
+      stop("constraints must be passed in as a list and all objects in constraints must be of class 'constraint'")
+  }
+  
+  portfolio$constraints <- constraints
+  return(portfolio)
+}
