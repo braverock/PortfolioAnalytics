@@ -313,7 +313,7 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
 #' # specify box constraints per asset
 #' pspec <- add.constraint(pspec, type="box", min=c(0.05, 0.10, 0.08, 0.06), max=c(0.45, 0.55, 0.35, 0.65))
 #' @export
-box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=TRUE, message=FALSE, ...){
+box_constraint <- function(type="box", assets, min, max, min_mult, max_mult, enabled=TRUE, message=FALSE, ...){
   # Based on the constraint function for object of class constraint_v1 that
   # included specifying box constraints.
   
@@ -427,7 +427,7 @@ box_constraint <- function(type, assets, min, max, min_mult, max_mult, enabled=T
 #'                         group_min=c(0.15, 0.25),
 #'                         group_max=c(0.65, 0.55))
 #' @export
-group_constraint <- function(type, assets, groups, group_labels=NULL, group_min, group_max, group_pos=NULL, enabled=TRUE, message=FALSE, ...) {
+group_constraint <- function(type="group", assets, groups, group_labels=NULL, group_min, group_max, group_pos=NULL, enabled=TRUE, message=FALSE, ...) {
   nassets <- length(assets)
   ngroups <- length(groups)
   
@@ -511,7 +511,21 @@ group_constraint <- function(type, assets, groups, group_labels=NULL, group_min,
 #' pspec <- add.constraint(pspec, type="dollar_neutral")
 #' pspec <- add.constraint(pspec, type="active")
 #' @export
-weight_sum_constraint <- function(type, min_sum=0.99, max_sum=1.01, enabled=TRUE, ...){
+weight_sum_constraint <- function(type="weight_sum", min_sum=0.99, max_sum=1.01, enabled=TRUE, ...){
+  switch(type,
+         full_investment = {
+           max_sum <- 1
+           min_sum <- 1
+         },
+         dollar_neutral = {
+           max_sum <- 0
+           min_sum <- 0
+         },
+         active = {
+           max_sum <- 0
+           min_sum <- 0
+         }
+  )
   Constraint <- constraint(type, enabled=enabled, constrclass="weight_sum_constraint", ...)
   Constraint$min_sum <- min_sum
   Constraint$max_sum <- max_sum
@@ -632,7 +646,7 @@ get_constraints <- function(portfolio){
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.6)
 #' @export
-turnover_constraint <- function(type, turnover_target, enabled=TRUE, message=FALSE, ...){
+turnover_constraint <- function(type="turnover", turnover_target, enabled=TRUE, message=FALSE, ...){
   Constraint <- constraint(type, enabled=enabled, constrclass="turnover_constraint", ...)
   Constraint$turnover_target <- turnover_target
   return(Constraint)
@@ -656,7 +670,7 @@ turnover_constraint <- function(type, turnover_target, enabled=TRUE, message=FAL
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
 #' @export
-diversification_constraint <- function(type, div_target, enabled=TRUE, message=FALSE, ...){
+diversification_constraint <- function(type="diversification", div_target, enabled=TRUE, message=FALSE, ...){
   Constraint <- constraint(type, enabled=enabled, constrclass="diversification_constraint", ...)
   Constraint$div_target <- div_target
   return(Constraint)
@@ -683,7 +697,7 @@ diversification_constraint <- function(type, div_target, enabled=TRUE, message=F
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
 #' @export
-position_limit_constraint <- function(type, assets, max_pos=NULL, max_pos_long=NULL, max_pos_short=NULL, enabled=TRUE, message=FALSE, ...){
+position_limit_constraint <- function(type="position_limit", assets, max_pos=NULL, max_pos_long=NULL, max_pos_short=NULL, enabled=TRUE, message=FALSE, ...){
   # Get the length of the assets vector
   nassets <- length(assets)
   
