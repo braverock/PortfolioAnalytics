@@ -46,3 +46,4 @@ Collate:
     'constraintsFUN.R'
     'constraint_fn_map.R'
     'optFUN.R'
+    'charts.ROI.R'
