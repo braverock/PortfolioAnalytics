@@ -61,7 +61,7 @@ maxret_opt <- function(R, moments, constraints, target){
   # Applying box constraints
   bnds <- list(lower=list(ind=seq.int(1L, N), val=as.numeric(constraints$min)),
                upper=list(ind=seq.int(1L, N), val=as.numeric(constraints$max)))
-  
+  print(bnds)
   # set up initial A matrix for leverage constraints
   Amat <- rbind(rep(1, N), rep(1, N))
   dir.vec <- c(">=","<=")

@@ -5,7 +5,7 @@
   optimize.portfolio_v1(R, constraints,
     optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
-    momentFUN = "set.portfolio.moments")
+    momentFUN = "set.portfolio.moments_v1")
 }
 \arguments{
   \item{R}{an xts, vector, matrix, data frame, timeSeries

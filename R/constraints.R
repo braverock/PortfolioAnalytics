@@ -822,6 +822,47 @@ insert_constraints <- function(portfolio, constraints){
   return(portfolio)
 }
 
+#' Helper function to update v1_constraint objects to v2 specification in the portfolio object
+#' 
+#' The function takes the constraints and objectives specified in the v1_constraint
+#' object and updates the portfolio object with those constraints and objectives. This
+#' function is used inside optimize.portfolio to maintain backwards compatibility
+#' if the user passes in a v1_constraint object for the constraint arg in
+#' optimize.portfolio.
+#' 
+#' @param portfolio portfolio object passed into optimize.portfolio
+#' @param v1_constraint object of type v1_constraint passed into optimize.portfolio
+#' @return portfolio object containing constraints and objectives from v1_constraint
+#' @author Ross Bennett
+#' @seealso \code{\link{portfolio.spec}}, \code{\link{add.constraint}}
+#' @export
+update_constraint_v1tov2 <- function(portfolio, v1_constraint){
+  if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
+  if(!inherits(v1_constraint, "v1_constraint")) stop("v1_constraint object must be of class 'v1_constraint'")
+  # Put the assets and weight_seq into slots in portfolio object
+  portfolio$assets <- v1_constraint$assets
+  portfolio$weight_seq <- v1_constraint$weight_seq
+  
+  # The v1_constraint object supported 3 constraint types (weight_sum, box, and group)
+  # Add weight_sum/leverage constraints from v1_constraint to portfolio
+  if(!is.null(v1_constraint$min_sum) & !is.null(v1_constraint$max_sum)){
+    portfolio <- add.constraint(portfolio=portfolio, type='weight_sum', min_sum=v1_constraint$min_sum, max_sum=v1_constraint$max_sum)
+  }
+  # Add box constraints from v1_constraint to portfolio
+  if(!is.null(v1_constraint$min) & !is.null(v1_constraint$max)){
+    portfolio <- add.constraint(portfolio=portfolio, type='box', min=v1_constraint$min, max=v1_constraint$max)
+  }
+  # Add group constraints from v1_constraint to portfolio
+  if(!is.null(v1_constraint$groups) & !is.null(v1_constraint$cLO) & !is.null(v1_constraint$cUP)){
+    portfolio <- add.constraint(portfolio=portfolio, type='group', groups=v1_constraint$groups, group_min=v1_constraint$cLO, group_max=v1_constraint$cUP)
+  }
+  
+  # Put the objectives from v1_constraint into the objectives slot in the portfolio 
+  # object. This overwrites what might already be in portfolio$objectives assuming 
+  # the user is using the v1_constraint object to specify the objectives
+  portfolio$objectives <- v1_constraint$objectives
+  return(portfolio)
+}
 
 # #' constructor for class constraint_ROI
 # #' 

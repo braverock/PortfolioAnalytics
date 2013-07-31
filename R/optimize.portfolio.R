@@ -559,8 +559,14 @@ optimize.portfolio_v2 <- function(
   
   # Check for constraints and objectives passed in separately outside of the portfolio object
   if(!is.null(constraints)){
-    # Insert the constraints into the portfolio object
-    portfolio <- insert_constraints(portfolio=portfolio, constraints=constraints)
+    if(inherits(constraints, "v1_constraint")){
+      warning("constraint object passed in is a 'v1_constraint' object, updating to v2 specification")
+      portfolio <- update_constraint_v1tov2(portfolio=portfolio, v1_constraint=constraints)
+    }
+    if(!inherits(constraints, "v1_constraint")){
+      # Insert the constraints into the portfolio object
+      portfolio <- insert_constraints(portfolio=portfolio, constraints=constraints)
+    }
   }
   if(!is.null(objectives)){
     # Insert the objectives into the portfolio object
