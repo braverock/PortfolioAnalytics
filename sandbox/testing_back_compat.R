@@ -1,5 +1,7 @@
 library(PortfolioAnalytics)
 library(DEoptim)
+library(ROI)
+require(ROI.plugin.glpk)
 
 data(edhec)
 ret <- edhec[, 1:4]
@@ -19,6 +21,10 @@ optrpv1
 optdev1 <- optimize.portfolio_v1(R=ret, constraints=gen.constr, optimize_method="DEoptim", search_size=2000)
 optdev1
 
+# ROI
+optroiv1 <- optimize.portfolio_v1(R=ret, constraints=gen.constr, optimize_method="ROI")
+optroiv1
+
 # When using optimize.portfolio, the user will see that he needs to pass in a
 # portfolio object, so the user will likely just create a portfolio object and
 # then pass in the v1_constraint object
@@ -28,8 +34,15 @@ pspec <- portfolio.spec(assets=funds)
 # can pass a v1_constraint object in for the constraints arg, but still needs to
 # pass in a portfolio object so that it can be updated with the constraints and
 # objectives from the v1_constraint object
+
+# Random
 optrp <- optimize.portfolio(R=ret, portfolio=pspec, constraints=gen.constr, optimize_method="random", search_size=2000)
 optrp
 
+# DEoptim
 optde <- optimize.portfolio(R=ret, portfolio=pspec, constraints=gen.constr, optimize_method="DEoptim", search_size=2000, traceDE=5)
 optde
+
+# ROI
+optroi <- optimize.portfolio(R=ret, portfolio=pspec, constraints=gen.constr, optimize_method="ROI")
+optroi
