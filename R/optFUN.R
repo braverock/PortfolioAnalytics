@@ -1,6 +1,7 @@
 
 ##### GMV and QU QP Function #####
 gmv_opt <- function(R, constraints, moments, lambda, target){
+  
   N <- ncol(R)
   # Applying box constraints
   bnds <- list(lower=list(ind=seq.int(1L, N), val=as.numeric(constraints$min)),
@@ -57,11 +58,12 @@ gmv_opt <- function(R, constraints, moments, lambda, target){
 
 ##### Maximize Return LP Function #####
 maxret_opt <- function(R, moments, constraints, target){
+  
   N <- ncol(R)
   # Applying box constraints
   bnds <- list(lower=list(ind=seq.int(1L, N), val=as.numeric(constraints$min)),
                upper=list(ind=seq.int(1L, N), val=as.numeric(constraints$max)))
-  print(bnds)
+  
   # set up initial A matrix for leverage constraints
   Amat <- rbind(rep(1, N), rep(1, N))
   dir.vec <- c(">=","<=")
@@ -95,12 +97,14 @@ maxret_opt <- function(R, moments, constraints, target){
   
   # set up the linear objective
   ROI_objective <- L_objective(L=-moments$mean)
+  # objL <- -moments$mean
   
   # set up the optimization problem and solve
   opt.prob <- OP(objective=ROI_objective, 
-                       constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
-                       bounds=bnds)
+                 constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
+                 bounds=bnds)
   roi.result <- ROI_solve(x=opt.prob, solver="glpk")
+  # roi.result <- Rglpk_solve_LP(obj=objL, mat=Amat, dir=dir.vec, rhs=rhs.vec, bounds=bnds)
   
   # The Rglpk solvers status returns an an integer with status information
   # about the solution returned: 0 if the optimal solution was found, a 
@@ -121,6 +125,7 @@ maxret_opt <- function(R, moments, constraints, target){
 
 ##### Maximize Return MILP Function #####
 maxret_milp_opt <- function(R, constraints, moments, target){
+  
   N <- ncol(R)
   
   max_pos <- constraints$max_pos
@@ -205,6 +210,7 @@ maxret_milp_opt <- function(R, constraints, moments, target){
 
 ##### Minimize ETL LP Function #####
 etl_opt <- function(R, constraints, moments, target, alpha){
+  
   N <- ncol(R)
   T <- nrow(R)
   # Applying box constraints

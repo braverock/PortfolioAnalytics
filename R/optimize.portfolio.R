@@ -304,7 +304,13 @@ optimize.portfolio_v1 <- function(
       if(objective$enabled){
         if(!any(c(objective$name == "mean", objective$name == "var", objective$name == "CVaR")))
           stop("ROI only solves mean, var, or sample CVaR type business objectives, choose a different optimize_method.")
-        moments[[objective$name]] <- try(eval(as.symbol(objective$name))(R), silent=TRUE)
+        # I'm not sure what changed, but moments$mean used to be a vector of the column means
+        # now it is a scalar value of the mean of the entire R object
+        if(objective$name == "mean"){
+          moments[[objective$name]] <- try(as.vector(apply(R, 2, "mean", na.rm=TRUE)), silent=TRUE)
+        } else {
+          moments[[objective$name]] <- try(eval(as.symbol(objective$name))(R), silent=TRUE)
+        }
         target <- ifelse(!is.null(objective$target),objective$target, target)
         alpha <- ifelse(!is.null(objective$alpha), objective$alpha, alpha)
         lambda <- ifelse(!is.null(objective$risk_aversion), objective$risk_aversion, 1)
@@ -775,7 +781,13 @@ optimize.portfolio_v2 <- function(
       if(objective$enabled){
         if(!any(c(objective$name == "mean", objective$name == "var", objective$name == "CVaR", objective$name == "ES", objective$name == "ETL")))
           stop("ROI only solves mean, var, or sample ETL/ES/CVaR type business objectives, choose a different optimize_method.")
-        moments[[objective$name]] <- try(eval(as.symbol(objective$name))(R), silent=TRUE)
+        # I'm not sure what changed, but moments$mean used to be a vector of the column means
+        # now it is a scalar value of the mean of the entire R object
+        if(objective$name == "mean"){
+          moments[[objective$name]] <- try(as.vector(apply(R, 2, "mean", na.rm=TRUE)), silent=TRUE)
+        } else {
+          moments[[objective$name]] <- try(eval(as.symbol(objective$name))(R), silent=TRUE)
+        }
         target <- ifelse(!is.null(objective$target), objective$target, target)
         alpha <- ifelse(!is.null(objective$alpha), objective$alpha, alpha)
         lambda <- ifelse(!is.null(objective$risk_aversion), objective$risk_aversion, lambda)
