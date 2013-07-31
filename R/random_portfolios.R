@@ -184,7 +184,7 @@ random_portfolios_v1 <- function (rpconstraints,permutations=100,...)
 #  rownames(result)[2]<-"equal.weight"
   i <- 3
   while (i<=permutations) {
-    result[i,] <- as.matrix(randomize_portfolio(rpconstraints=rpconstraints, ...))
+    result[i,] <- as.matrix(randomize_portfolio_v1(rpconstraints=rpconstraints, ...))
     if(i==permutations) {
       result = unique(result)
       i = nrow(result)
