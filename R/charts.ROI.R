@@ -108,83 +108,12 @@ chart.Scatter.ROI <- function(ROI, R, rp=NULL, portfolio=NULL, return.col="mean"
   # Get the optimal weights from the output of optimize.portfolio
   wts <- ROI$weights
   
-  nargs <- list(...)
-  if(length(nargs)==0) nargs <- NULL
-  if (length('...')==0 | is.null('...')) {
-    # rm('...')
-    nargs <- NULL
-  }
-  
-  # Allow the user to pass in a different portfolio object used in set.portfolio.moments
-  if(is.null(portfolio)) portfolio <- ROI$portfolio
-  
-  nargs <- set.portfolio.moments(R=R, portfolio=portfolio, momentargs=nargs)
-  
-  nargs$R <- R
-  nargs$weights <- wts
-  
+  # cbind the optimal weights and random portfolio weights
   rp <- rbind(wts, rp)
   
-  # Match the return.col arg to a function
-  switch(return.col,
-         mean =,
-         median = {
-           returnFUN = match.fun(return.col)  
-           nargs$x <- ( R %*% wts ) #do the multivariate mean/median with Kroneker product
-         }
-  )
+  returnpoints <- applyFUN(R=R, weights=rp, FUN=return.col, ...=...)
+  riskpoints <- applyFUN(R=R, weights=rp, FUN=risk.col, ...=...)
   
-    if(is.function(returnFUN)){
-    returnpoints <- rep(0, nrow(rp))
-    .formals  <- formals(returnFUN)
-    onames <- names(.formals)
-    for(i in 1:nrow(rp)){
-      nargs$weights <- rp[i,]
-      nargs$x <- R %*% rp[i,]
-      dargs <- nargs
-      pm <- pmatch(names(dargs), onames, nomatch = 0L)
-      names(dargs[pm > 0L]) <- onames[pm]
-      .formals[pm] <- dargs[pm > 0L]
-      returnpoints[i] <- do.call(returnFUN, .formals)
-    }
-  }
-  
-  # match the risk.col arg to a function
-  switch(risk.col,
-         sd =,
-         StdDev = { 
-           riskFUN = match.fun(StdDev)
-         },
-         mVaR =,
-         VaR = {
-           riskFUN = match.fun(VaR) 
-           if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
-           if(is.null(nargs$invert)) nargs$invert = FALSE
-         },
-         es =,
-         mES =,
-         CVaR =,
-         cVaR =,
-         ES = {
-           riskFUN = match.fun(ES)
-           if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
-           if(is.null(nargs$invert)) nargs$invert = FALSE
-         }
-  )
-      
-  if(is.function(riskFUN)){
-    riskpoints <- rep(0, nrow(rp))
-    .formals  <- formals(riskFUN)
-    onames <- names(.formals)
-    for(i in 1:nrow(rp)){
-      nargs$weights <- rp[i,]
-      dargs <- nargs
-      pm <- pmatch(names(dargs), onames, nomatch = 0L)
-      names(dargs[pm > 0L]) <- onames[pm]
-      .formals[pm] <- dargs[pm > 0L]
-      riskpoints[i] <- do.call(riskFUN, .formals)
-    }
-  }
   plot(x=riskpoints, y=returnpoints, xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, main=main)
   points(x=riskpoints[1], y=returnpoints[1], col="blue", pch=16) # optimal
   axis(1, cex.axis = cex.axis, col = element.color)
