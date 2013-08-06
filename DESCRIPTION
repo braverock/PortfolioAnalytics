@@ -49,3 +49,4 @@ Collate:
     'charts.ROI.R'
     'applyFUN.R'
     'charts.PSO.R'
+    'charts.GenSA.R'
