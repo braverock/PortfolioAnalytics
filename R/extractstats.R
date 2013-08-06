@@ -297,3 +297,25 @@ extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
   rownames(result) <- paste(prefix, "pso.portf", index(tmp), sep=".")
   return(result)
 }
+
+#' extract some stats from a portfolio list run with GenSA via
+#' \code{\link{optimize.portfolio}}
+#' 
+#' This function will extract the optimal portfolio weights and objective measures
+#' The GenSA output does not store weights evaluated at each iteration
+#' The GenSA output for trace.mat contains nb.steps, temperature, function.value, and current.minimum
+#' 
+#' @param object list returned by optimize.portfolio
+#' @param prefix prefix to add to output row names
+#' @param ... any other passthru parameters
+#' @export 
+extractStats.optimize.portfolio.GenSA <- function(object, prefix=NULL, ...) {
+  
+  trow<-c(out=object$out, object$weights)
+  obj <- unlist(object$objective_measures)
+  result <- c(obj, trow)
+  
+  rnames<-c('out',paste('w',names(object$weights),sep='.'))
+  names(result)<-rnames
+  return(result)
+}
