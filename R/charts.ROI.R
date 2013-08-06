@@ -101,7 +101,8 @@ chart.Scatter.ROI <- function(ROI, R, rp=NULL, portfolio=NULL, return.col="mean"
   
   # If the user does not pass in rp, then we will generate random portfolios
   if(is.null(rp)){
-    if(!hasArg(permutations)) permutations <- 2000
+    permutations <- match.call(expand.dots=TRUE)$permutations
+    if(is.null(permutations)) permutations <- 2000
     rp <- random_portfolios(portfolio=ROI$portfolio, permutations=permutations)
   }
   
