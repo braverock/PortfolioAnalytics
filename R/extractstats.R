@@ -294,7 +294,7 @@ extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
   
   result <- cbind(tmpout, psoweights)
   colnames(result) <- c("out", paste('w',names(object$weights),sep='.'))
-  rownames(result) <- paste(prefix, "pso.portf", index(tmp), sep=".")
+  rownames(result) <- paste(prefix, "pso.portf", index(tmpout), sep=".")
   return(result)
 }
 
