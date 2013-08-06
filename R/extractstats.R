@@ -231,3 +231,69 @@ extractStats.optimize.portfolio.ROI <- function(object, prefix=NULL, ...) {
   names(result)<-rnames
   return(result)
 }
+
+#' extract some stats from a portfolio list run with pso via
+#' \code{\link{optimize.portfolio}}
+#' 
+#' This function will extract the weights (swarm positions) from the PSO output
+#' and the out value (swarm fitness values) for each iteration of the optimization.
+#' 
+#' @param object list returned by optimize.portfolio
+#' @param prefix prefix to add to output row names
+#' @param ... any other passthru parameters
+#' @author Ross Bennett
+#' @export 
+extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
+  if(!inherits(object, "optimize.portfolio.pso")) stop("object must be of class optimize.portfolio.pso")
+  
+  normalize_weights <- function(weights){
+    # normalize results if necessary
+    if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
+      # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
+      # we'll normalize the weights passed in to whichever boundary condition has been violated
+      # NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
+      # might violate your constraints, so you'd need to renormalize them after optimizing
+      # we'll create functions for that so the user is less likely to mess it up.
+      
+      ##' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
+      ##' In Kris' original function, this was manifested as a full investment constraint
+      if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
+        max_sum=constraints$max_sum
+        if(sum(weights)>max_sum) { weights<-(max_sum/sum(weights))*weights } # normalize to max_sum
+      }
+      
+      if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
+        min_sum=constraints$min_sum
+        if(sum(weights)<min_sum) { weights<-(min_sum/sum(weights))*weights } # normalize to min_sum
+      }
+      
+    } # end min_sum and max_sum normalization
+    return(weights)
+  }
+  
+  # get the constraints for min_sum and max_sum normalization
+  constraints <- get_constraints(object$portfolio)
+  
+  # optimal portfolio
+  # trow <- c(unlist(object$objective_measures), out=object$out, object$weights)
+  
+  # get the weights of each iteration from PSOoutput
+  psoweights <- do.call(rbind, lapply(object$PSOoutput$stats$x, t))
+  
+  # need to normalize so that psoweights are valid portfolios
+  psoweights <- t(apply(psoweights, 1, normalize_weights))
+  
+  # bind the optimal weights to psoweights
+  psoweights <- rbind(object$weights, psoweights)
+  
+  # get swarm fitness values (i.e. out value of the function evaluated with the swarm positions)
+  tmpout <- unlist(object$PSOoutput$stats$f)
+  
+  # combine the optimal out value to the vector of out values
+  tmpout <- c(object$out, tmpout)
+  
+  result <- cbind(tmpout, psoweights)
+  colnames(result) <- c("out", paste('w',names(object$weights),sep='.'))
+  rownames(result) <- paste(prefix, "pso.portf", index(tmp), sep=".")
+  return(result)
+}
