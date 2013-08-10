@@ -329,7 +329,7 @@ extractStats.optimize.portfolio.GenSA <- function(object, prefix=NULL, ...) {
   obj <- unlist(object$objective_measures)
   result <- c(obj, trow)
   
-  rnames<-c('out',paste('w',names(object$weights),sep='.'))
-  names(result)<-rnames
+  rnames <- name.replace(names(result))
+  names(result) <- rnames
   return(result)
 }
