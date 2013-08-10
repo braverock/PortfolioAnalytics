@@ -53,17 +53,31 @@ applyFUN <- function(R, weights, FUN="mean", ...){
 }
   ) # end switch block
   
-  out <- rep(0, nrow(weights))
-  .formals  <- formals(fun)
-  onames <- names(.formals)
-  for(i in 1:nrow(weights)){
-    nargs$weights <- as.numeric(weights[i,])
-    nargs$x <- R %*% as.numeric(weights[i,])
+  if(!is.null(nrow(weights))){
+    # case for matrix of weights
+    out <- rep(0, nrow(weights))
+    .formals  <- formals(fun)
+    onames <- names(.formals)
+    for(i in 1:nrow(weights)){
+      nargs$weights <- as.numeric(weights[i,])
+      nargs$x <- R %*% as.numeric(weights[i,])
+      dargs <- nargs
+      pm <- pmatch(names(dargs), onames, nomatch = 0L)
+      names(dargs[pm > 0L]) <- onames[pm]
+      .formals[pm] <- dargs[pm > 0L]
+      out[i] <- try(do.call(fun, .formals))
+    }
+  } else {
+    # case for single vector of weights
+    .formals  <- formals(fun)
+    onames <- names(.formals)
+    nargs$weights <- as.numeric(weights)
+    nargs$x <- R %*% as.numeric(weights)
     dargs <- nargs
     pm <- pmatch(names(dargs), onames, nomatch = 0L)
     names(dargs[pm > 0L]) <- onames[pm]
     .formals[pm] <- dargs[pm > 0L]
-    out[i] <- try(do.call(fun, .formals))
+    out <- try(do.call(fun, .formals))
   }
-  return(out)
+     return(out)
 }

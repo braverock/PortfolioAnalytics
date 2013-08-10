@@ -95,6 +95,9 @@ chart.Weights.RP <- function(RP, neighbors = NULL, ..., main="Weights", las = 3,
 #' classic risk return scatter of random portfolios
 #' 
 #' @param RP set of portfolios created by \code{\link{optimize.portfolio}}
+#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo 
+#' object of asset returns, used to recalulate the objective function when
+#' return.col or risk.col is not part of the extractStats output.
 #' @param neighbors set of 'neighbor' portfolios to overplot, see Details
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
@@ -103,7 +106,7 @@ chart.Weights.RP <- function(RP, neighbors = NULL, ..., main="Weights", las = 3,
 #' @param element.color color for the default plot scatter points
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
-chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
+chart.Scatter.RP <- function(RP, R=NULL, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
     # more or less specific to the output of the random portfolio code with constraints
     # will work to a point with other functions, such as optimize.porfolio.parallel
     # there's still a lot to do to improve this.
@@ -122,10 +125,45 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
         risk.column = pmatch(risk.col,columnnames)
     }
     
-    if(is.na(return.column) | is.na(risk.column)) stop(return.col,' or ',risk.col, ' do  not match extractStats output')
+    # if(is.na(return.column) | is.na(risk.column)) stop(return.col,' or ',risk.col, ' do  not match extractStats output')
+    
+    # If the user has passed in return.col or risk.col that does not match extractStats output
+    # This will give the flexibility of passing in return or risk metrics that are not
+    # objective measures in the optimization. This may cause issues with the "neighbors"
+    # functionality since that is based on the "out" column
+    if(is.na(return.column) | is.na(risk.column)){
+      return.col <- gsub("\\..*", "", return.col)
+      risk.col <- gsub("\\..*", "", risk.col)
+      warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
+      # Get the matrix of weights for applyFUN
+      wts_index <- grep("w.", columnnames)
+      wts <- xtract[, wts_index]
+      if(is.na(return.column)){
+        tmpret <- applyFUN(R=R, weights=wts, FUN=return.col)
+        xtract <- cbind(tmpret, xtract)
+        colnames(xtract)[which(colnames(xtract) == "tmpret")] <- return.col
+      }
+      if(is.na(risk.column)){
+        tmprisk <- applyFUN(R=R, weights=wts, FUN=risk.col)
+        xtract <- cbind(tmprisk, xtract)
+        colnames(xtract)[which(colnames(xtract) == "tmprisk")] <- risk.col
+      }
+      columnnames = colnames(xtract)
+      return.column = pmatch(return.col,columnnames)
+      if(is.na(return.column)) {
+        return.col = paste(return.col,return.col,sep='.')
+        return.column = pmatch(return.col,columnnames)
+      }
+      risk.column = pmatch(risk.col,columnnames)
+      if(is.na(risk.column)) {
+        risk.col = paste(risk.col,risk.col,sep='.')
+        risk.column = pmatch(risk.col,columnnames)
+      }
+    }
+    # print(colnames(head(xtract)))
     
     plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
-
+    
     if(!is.null(neighbors)){ 
         if(is.vector(neighbors)){
             if(length(neighbors)==1){
@@ -178,8 +216,19 @@ chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='
         risk.col = paste(risk.col,risk.col,sep='.')
         risk.column = pmatch(risk.col,names(objcols))
     }
-    if(is.na(return.column) | is.na(risk.column)) warning(return.col,' or ',risk.col, ' do  not match extractStats output of $objective_measures slot')
-    points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
+    # risk and return metrics for the optimal weights if the RP object does not
+    # contain the metrics specified by return.col or risk.col
+    if(is.na(return.column) | is.na(risk.column)){
+      return.col <- gsub("\\..*", "", return.col)
+      risk.col <- gsub("\\..*", "", risk.col)
+      # warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
+      opt_weights <- RP$weights
+      ret <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=return.col))
+      risk <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=risk.col))
+      points(risk, ret, col="blue", pch=16) #optimal
+    } else {
+      points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
+    }
     axis(1, cex.axis = cex.axis, col = element.color)
     axis(2, cex.axis = cex.axis, col = element.color)
     box(col = element.color)
