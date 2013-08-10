@@ -59,30 +59,34 @@ name.replace <- function(rnames){
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export 
 extractStats.optimize.portfolio.DEoptim <- function(object, prefix=NULL, ...) {
-
-    # first pull out the optimal portfolio
-    trow<-c(unlist(object$objective_measures),out=object$out,object$weights)
-    #colnames(trow)<-c(colnames(unlist(object$objective_measures)),'out',names(object$weights))
-    result<-trow
-    l = length(object$DEoptim_objective_results)
-    nobj<-length(unlist(object$DEoptim_objective_results[[1]]$objective_measures))
-    result=matrix(nrow=l,ncol=(nobj+length(object$weights))+1)
-    ncols<-ncol(result)
-    
-    for (i in 1:l) {
-        if(!is.atomic(object$DEoptim_objective_results[[i]])) {
-            result[i,1:nobj]<-unlist(object$DEoptim_objective_results[[i]]$objective_measures)
-            result[i,(nobj+1)]<-object$DEoptim_objective_results[[i]]$out
-            result[i,(nobj+2):ncols]<-object$DEoptim_objective_results[[i]]$weights
-        }
+  if(!inherits(object, "optimize.portfolio.DEoptim")) stop("object must be of class optimize.portfolio.DEoptim")
+  
+  # Check if object$DEoptim_objective_results is null, the user called optimize.portfolio with trace=FALSE
+  if(is.null(object$DEoptim_objective_results)) stop("DEoptim_objective_results is null, trace=TRUE must be specified in optimize.portfolio")
+  
+  # first pull out the optimal portfolio
+  trow<-c(unlist(object$objective_measures),out=object$out,object$weights)
+  #colnames(trow)<-c(colnames(unlist(object$objective_measures)),'out',names(object$weights))
+  result<-trow
+  l = length(object$DEoptim_objective_results)
+  nobj<-length(unlist(object$DEoptim_objective_results[[1]]$objective_measures))
+  result=matrix(nrow=l,ncol=(nobj+length(object$weights))+1)
+  ncols<-ncol(result)
+  
+  for (i in 1:l) {
+    if(!is.atomic(object$DEoptim_objective_results[[i]])) {
+      result[i,1:nobj]<-unlist(object$DEoptim_objective_results[[i]]$objective_measures)
+      result[i,(nobj+1)]<-object$DEoptim_objective_results[[i]]$out
+      result[i,(nobj+2):ncols]<-object$DEoptim_objective_results[[i]]$weights
     }
-    
-    rnames<-c(names(unlist(object$DEoptim_objective_results[[1]]$objective_measures)),'out',paste('w',names(object$weights),sep='.'))
-    rnames<-name.replace(rnames)
-    colnames(result)<-rnames
-    rownames(result) = paste(prefix,"DE.portf", index(object$DEoptim_objective_results), sep=".")
-    #rownames(result) = paste("DE.portf.", index(result), sep="")
-    return(result)
+  }
+  
+  rnames<-c(names(unlist(object$DEoptim_objective_results[[1]]$objective_measures)),'out',paste('w',names(object$weights),sep='.'))
+  rnames<-name.replace(rnames)
+  colnames(result)<-rnames
+  rownames(result) = paste(prefix,"DE.portf", index(object$DEoptim_objective_results), sep=".")
+  #rownames(result) = paste("DE.portf.", index(result), sep="")
+  return(result)
 }
 
 
@@ -125,9 +129,12 @@ extractStats.optimize.portfolio.parallel <- function(object,prefix=NULL,...) {
 #' \code{\link{extractStats}}
 #' @export
 extractStats.optimize.portfolio.random <- function(object, prefix=NULL, ...){
-# This just flattens the $random_portfolio_objective_results part of the
-# object
-# @TODO: add a class check for the input object
+# This just flattens the $random_portfolio_objective_results part of the object
+  if(!inherits(object, "optimize.portfolio.random")) stop("object must be of class optimize.portfolio.random")
+  
+  # Check if object$random_portfolio_objective_results is null, the user called optimize.portfolio with trace=FALSE
+  if(is.null(object$random_portfolio_objective_results)) stop("random_portfolio_objective_results is null, trace=TRUE must be specified in optimize.portfolio")
+  
   OptimResults<-object  
 
   l = length(OptimResults$random_portfolio_objective_results)
@@ -223,7 +230,7 @@ extractWeights.optimize.portfolio.rebalancing <- function(RebalResults, ...){
 #' @param ... any other passthru parameters
 #' @export 
 extractStats.optimize.portfolio.ROI <- function(object, prefix=NULL, ...) {
-  
+  if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class optimize.portfolio.ROI")
   trow<-c(out=object$out, object$weights)
   result<-trow
   
@@ -245,6 +252,9 @@ extractStats.optimize.portfolio.ROI <- function(object, prefix=NULL, ...) {
 #' @export 
 extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
   if(!inherits(object, "optimize.portfolio.pso")) stop("object must be of class optimize.portfolio.pso")
+  
+  # Check if object$PSOoutput is null, the user called optimize.portfolio with trace=FALSE
+  if(is.null(object$PSOoutput)) stop("PSOoutput is null, trace=TRUE must be specified in optimize.portfolio")
   
   normalize_weights <- function(weights){
     # normalize results if necessary
@@ -310,6 +320,10 @@ extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
 #' @param ... any other passthru parameters
 #' @export 
 extractStats.optimize.portfolio.GenSA <- function(object, prefix=NULL, ...) {
+  if(!inherits(object, "optimize.portfolio.GenSA")) stop("object must be of class optimize.portfolio.GenSA")
+  
+  # Check if object$GenSAoutput is null, the user called optimize.portfolio with trace=FALSE
+  if(is.null(object$GenSAoutput)) stop("GenSAoutput is null, trace=TRUE must be specified in optimize.portfolio")
   
   trow<-c(out=object$out, object$weights)
   obj <- unlist(object$objective_measures)
