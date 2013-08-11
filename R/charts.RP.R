@@ -246,7 +246,9 @@ chart.Scatter.RP <- function(RP, R=NULL, neighbors = NULL, return.col='mean', ri
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' 
 #' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
-#' @param R an optional xts, vector, matrix, data frame, timeSeries or zoo 
+#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo 
+#' object of asset returns, used to recalulate the objective function when
+#' return.col or risk.col is not part of the extractStats output.
 #' @param ... any other passthru parameters 
 #' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
@@ -286,6 +288,8 @@ charts.RP <- function(RP, R=NULL, risk.col, return.col,
 #' @param x set of portfolios created by \code{\link{optimize.portfolio}}
 #' @param ... any other passthru parameters 
 #' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo 
+#' object of asset returns, used to recalulate the objective function when
+#' return.col or risk.col is not part of the extractStats output.
 #' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
 #' @param neighbors set of 'neighbor portfolios to overplot
