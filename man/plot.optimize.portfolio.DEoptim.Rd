@@ -2,7 +2,7 @@
 \alias{plot.optimize.portfolio.DEoptim}
 \title{plot method for optimize.portfolio.DEoptim output}
 \usage{
-  plot.optimize.portfolio.DEoptim(x, ...,
+  plot.optimize.portfolio.DEoptim(x, ..., R = NULL,
     return.col = "mean", risk.col = "ES", neighbors = NULL,
     main = "optimized portfolio plot")
 }
@@ -11,6 +11,10 @@
   \code{\link{optimize.portfolio}}}
 
   \item{...}{any other passthru parameters}
+
+  \item{R}{an optional an xts, vector, matrix, data frame,
+  timeSeries or zoo object of asset returns, used to
+  recalulate the objective function where required}
 
   \item{risk.col}{string name of column to use for risk
   (horizontal axis)}

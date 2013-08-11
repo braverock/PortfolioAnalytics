@@ -121,7 +121,42 @@ chart.Scatter.DE <- function(DE, R=NULL, portfolio=NULL, neighbors = NULL, retur
         risk.column = pmatch(risk.col,columnnames)
     }
     
-    if(is.na(return.column) | is.na(risk.column)) stop(return.col,' or ',risk.col, ' do not match extractStats output')
+    # if(is.na(return.column) | is.na(risk.column)) stop(return.col,' or ',risk.col, ' do not match extractStats output')
+    
+    # If the user has passed in return.col or risk.col that does not match extractStats output
+    # This will give the flexibility of passing in return or risk metrics that are not
+    # objective measures in the optimization. This may cause issues with the "neighbors"
+    # functionality since that is based on the "out" column
+    if(is.na(return.column) | is.na(risk.column)){
+      return.col <- gsub("\\..*", "", return.col)
+      risk.col <- gsub("\\..*", "", risk.col)
+      warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
+      # Get the matrix of weights for applyFUN
+      wts_index <- grep("w.", columnnames)
+      wts <- xtract[, wts_index]
+      if(is.na(return.column)){
+        tmpret <- applyFUN(R=R, weights=wts, FUN=return.col)
+        xtract <- cbind(tmpret, xtract)
+        colnames(xtract)[which(colnames(xtract) == "tmpret")] <- return.col
+      }
+      if(is.na(risk.column)){
+        tmprisk <- applyFUN(R=R, weights=wts, FUN=risk.col)
+        xtract <- cbind(tmprisk, xtract)
+        colnames(xtract)[which(colnames(xtract) == "tmprisk")] <- risk.col
+      }
+      columnnames = colnames(xtract)
+      return.column = pmatch(return.col,columnnames)
+      if(is.na(return.column)) {
+        return.col = paste(return.col,return.col,sep='.')
+        return.column = pmatch(return.col,columnnames)
+      }
+      risk.column = pmatch(risk.col,columnnames)
+      if(is.na(risk.column)) {
+        risk.col = paste(risk.col,risk.col,sep='.')
+        risk.column = pmatch(risk.col,columnnames)
+      }
+    }
+    # print(colnames(head(xtract)))
     
     plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
 
@@ -220,8 +255,19 @@ chart.Scatter.DE <- function(DE, R=NULL, portfolio=NULL, neighbors = NULL, retur
         risk.col = paste(risk.col,risk.col,sep='.')
         risk.column = pmatch(risk.col,names(objcols))
     }
-    if(is.na(return.column) | is.na(risk.column)) warning(return.col,' or ',risk.col, ' do  not match extractStats output of $objective_measures slot')
-    points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
+    # risk and return metrics for the optimal weights if the RP object does not
+    # contain the metrics specified by return.col or risk.col
+    if(is.na(return.column) | is.na(risk.column)){
+      return.col <- gsub("\\..*", "", return.col)
+      risk.col <- gsub("\\..*", "", risk.col)
+      # warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
+      opt_weights <- DE$weights
+      ret <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=return.col))
+      risk <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=risk.col))
+      points(risk, ret, col="blue", pch=16) #optimal
+    } else {
+      points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
+    }
     axis(1, cex.axis = cex.axis, col = element.color)
     axis(2, cex.axis = cex.axis, col = element.color)
     box(col = element.color)
@@ -239,6 +285,7 @@ chart.Scatter.DE <- function(DE, R=NULL, portfolio=NULL, neighbors = NULL, retur
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' 
 #' @param DE set of random portfolios created by \code{\link{optimize.portfolio}}
+#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns, used to recalulate the objective function where required
 #' @param ... any other passthru parameters 
 #' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
@@ -248,13 +295,13 @@ chart.Scatter.DE <- function(DE, R=NULL, portfolio=NULL, neighbors = NULL, retur
 #' \code{\link{optimize.portfolio}}
 #' \code{\link{extractStats}}
 #' @export
-charts.DE <- function(DE, risk.col, return.col, neighbors=NULL, main="DEoptim.Portfolios", ...){
+charts.DE <- function(DE, R=NULL, risk.col, return.col, neighbors=NULL, main="DEoptim.Portfolios", ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that DE is of the correct class
     op <- par(no.readonly=TRUE)
     layout(matrix(c(1,2)),height=c(2,1.5),width=1)
     par(mar=c(4,4,4,2))
-    chart.Scatter.DE(DE, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+    chart.Scatter.DE(DE, R=R, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
     par(mar=c(2,4,0,2))
     chart.Weights.DE(DE, main="", neighbors=neighbors, ...)
     par(op)
@@ -276,11 +323,12 @@ charts.DE <- function(DE, risk.col, return.col, neighbors=NULL, main="DEoptim.Po
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' @param x set of portfolios created by \code{\link{optimize.portfolio}}
 #' @param ... any other passthru parameters 
+#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns, used to recalulate the objective function where required
 #' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param main an overall title for the plot: see \code{\link{title}}
 #' @export
-plot.optimize.portfolio.DEoptim <- function(x, ...,  return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
-    charts.DE(DE=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+plot.optimize.portfolio.DEoptim <- function(x, ...,  R=NULL, return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
+    charts.DE(DE=x, R=R, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
 }
