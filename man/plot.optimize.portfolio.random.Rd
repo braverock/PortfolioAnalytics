@@ -2,7 +2,7 @@
 \alias{plot.optimize.portfolio.random}
 \title{plot method for optimize.portfolio.random output}
 \usage{
-  plot.optimize.portfolio.random(x, ...,
+  plot.optimize.portfolio.random(x, ..., R = NULL,
     return.col = "mean", risk.col = "ES", neighbors = NULL,
     main = "optimized portfolio plot")
 }
@@ -11,6 +11,9 @@
   \code{\link{optimize.portfolio}}}
 
   \item{...}{any other passthru parameters}
+
+  \item{R}{an optional an xts, vector, matrix, data frame,
+  timeSeries or zoo}
 
   \item{risk.col}{string name of column to use for risk
   (horizontal axis)}

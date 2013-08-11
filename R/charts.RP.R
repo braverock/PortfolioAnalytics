@@ -246,6 +246,7 @@ chart.Scatter.RP <- function(RP, R=NULL, neighbors = NULL, return.col='mean', ri
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' 
 #' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
+#' @param R an optional xts, vector, matrix, data frame, timeSeries or zoo 
 #' @param ... any other passthru parameters 
 #' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
@@ -255,14 +256,14 @@ chart.Scatter.RP <- function(RP, R=NULL, neighbors = NULL, return.col='mean', ri
 #' \code{\link{optimize.portfolio}}
 #' \code{\link{extractStats}}
 #' @export
-charts.RP <- function(RP, risk.col, return.col, 
+charts.RP <- function(RP, R=NULL, risk.col, return.col, 
 						neighbors=NULL, main="Random.Portfolios", ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that RP is of the correct class
     op <- par(no.readonly=TRUE)
     layout(matrix(c(1,2)),height=c(2,1.5),width=1)
     par(mar=c(4,4,4,2))
-    chart.Scatter.RP(RP, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+    chart.Scatter.RP(RP, R=R, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
     par(mar=c(2,4,0,2))
     chart.Weights.RP(RP, main="", neighbors=neighbors, ...)
     par(op)
@@ -284,13 +285,14 @@ charts.RP <- function(RP, risk.col, return.col,
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' @param x set of portfolios created by \code{\link{optimize.portfolio}}
 #' @param ... any other passthru parameters 
+#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo 
 #' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param main an overall title for the plot: see \code{\link{title}}
 #' @export
-plot.optimize.portfolio.random <- function(x, ...,  return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
-    charts.RP(RP=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+plot.optimize.portfolio.random <- function(x, ...,  R=NULL, return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
+    charts.RP(RP=x, R=R, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
 }
 
 #' plot method for optimize.portfolio output

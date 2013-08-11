@@ -2,12 +2,15 @@
 \alias{charts.RP}
 \title{scatter and weights chart  for random portfolios}
 \usage{
-  charts.RP(RP, risk.col, return.col, neighbors = NULL,
-    main = "Random.Portfolios", ...)
+  charts.RP(RP, R = NULL, risk.col, return.col,
+    neighbors = NULL, main = "Random.Portfolios", ...)
 }
 \arguments{
   \item{RP}{set of random portfolios created by
   \code{\link{optimize.portfolio}}}
+
+  \item{R}{an optional xts, vector, matrix, data frame,
+  timeSeries or zoo}
 
   \item{...}{any other passthru parameters}
 
