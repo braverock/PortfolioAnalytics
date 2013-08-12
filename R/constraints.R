@@ -272,6 +272,12 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
                                                                        message=message,
                                                                        ...=...)
          },
+         # Return constraint
+         return = {tmp_constraint <- return_constraint(type=type,
+                                                       enabled=enabled,
+                                                       message=message,
+                                                       ...=...)
+         },
          # Do nothing and return the portfolio object if type is NULL
          null = {return(portfolio)}
   )
@@ -604,6 +610,9 @@ get_constraints <- function(portfolio){
         out$max_pos_long <- constraint$max_pos_long
         out$max_pos_short <- constraint$max_pos_short
       }
+      if(inherits(constraint, "return_constraint")){
+        out$return_target <- constraint$return_target
+      }
     }
   }
   
@@ -678,6 +687,30 @@ turnover_constraint <- function(type="turnover", turnover_target, enabled=TRUE, 
 diversification_constraint <- function(type="diversification", div_target, enabled=TRUE, message=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="diversification_constraint", ...)
   Constraint$div_target <- div_target
+  return(Constraint)
+}
+
+#' constructor for return_constraint
+#' 
+#' This function is called by add.constraint when type="return" is specified, \code{\link{add.constraint}}
+#' 
+#' @param type character type of the constraint
+#' @param return_target return target value
+#' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
+#' @param \dots any other passthru parameters
+#' @author Ross Bennett
+#' @examples
+#' data(edhec)
+#' ret <- edhec[, 1:4]
+#' 
+#' pspec <- portfolio.spec(assets=colnames(ret))
+#' 
+#' pspec <- add.constraint(portfolio=pspec, type="return", div_target=mean(colMeans(ret)))
+#' @export
+return_constraint <- function(type="return", return_target, enabled=TRUE, message=FALSE, ...){
+  Constraint <- constraint_v2(type, enabled=enabled, constrclass="return_constraint", ...)
+  Constraint$return_target <- return_target
   return(Constraint)
 }
 

@@ -775,7 +775,11 @@ optimize.portfolio_v2 <- function(
     # we can either miniminze variance or maximize quiadratic utility (we will be minimizing the neg. quad. utility)
     moments <- list(mean=rep(0, N))
     alpha <- 0.05
-    target <- NA
+    if(!is.null(constraints$return_target)){
+      target <- constraints$return_target
+    } else {
+      target <- NA
+    }
     lambda <- 1
     for(objective in portfolio$objectives){
       if(objective$enabled){

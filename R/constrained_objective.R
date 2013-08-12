@@ -518,6 +518,14 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
         out = out + penalty * mult * abs(to - turnover_target)
       }
     } # End turnover constraint penalty
+  
+  # penalize weights that violate return target constraint
+  if(!is.null(constraints$return_target)){
+    return_target <- constraints$return_target
+    mean_return <- mean(R %*% w)
+    mult <- 1
+    out = out + penalty * mult * abs(mean_return - return_target)
+  } # End return constraint penalty
     
   nargs <- list(...)
   if(length(nargs)==0) nargs <- NULL
