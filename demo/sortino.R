@@ -32,11 +32,11 @@ MAR =.005 #~6%/year
 
 #'# Example 1 maximize Sortino Ratio
 SortinoConstr <- constraint(assets = colnames(indexes[,1:4]), min = 0.05, max = 1, min_sum=.99, max_sum=1.01, weight_seq = generatesequence(by=.001))
-SortinoConstr <- add.objective(SortinoConstr, type="return", name="SortinoRatio",  enabled=TRUE, arguments = list(MAR=MAR))
-SortinoConstr <- add.objective(SortinoConstr, type="return", name="mean",  enabled=TRUE, multiplier=0) # multiplier 0 makes it availble for plotting, but not affect optimization
+SortinoConstr <- add.objective_v1(SortinoConstr, type="return", name="SortinoRatio",  enabled=TRUE, arguments = list(MAR=MAR))
+SortinoConstr <- add.objective_v1(SortinoConstr, type="return", name="mean",  enabled=TRUE, multiplier=0) # multiplier 0 makes it availble for plotting, but not affect optimization
 
 ### Use random portfolio engine
-SortinoResult<-optimize.portfolio(R=indexes[,1:4], constraints=SortinoConstr, optimize_method='random', search_size=2000, trace=TRUE, verbose=TRUE)
+SortinoResult<-optimize.portfolio_v1(R=indexes[,1:4], constraints=SortinoConstr, optimize_method='random', search_size=2000, trace=TRUE, verbose=TRUE)
 plot(SortinoResult, risk.col='SortinoRatio')
 
 ### alternately, Use DEoptim engine
@@ -44,7 +44,7 @@ plot(SortinoResult, risk.col='SortinoRatio')
 #plot(SortinoResultDE, risk.col='SortinoRatio')
 
 ### now rebalance quarterly
-SortinoRebalance <- optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=SortinoConstr, optimize_method="random", trace=TRUE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, search_size=2000)
+SortinoRebalance <- optimize.portfolio.rebalancing_v1(R=indexes[,1:4], constraints=SortinoConstr, optimize_method="random", trace=TRUE, rebalance_on='quarters', trailing_periods=NULL, training_period=36, search_size=2000)
 
 ###############################################################################
 # R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
