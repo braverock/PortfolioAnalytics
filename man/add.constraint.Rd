@@ -11,8 +11,9 @@
   optimization, see \code{\link{portfolio.spec}}}
 
   \item{type}{character type of the constraint to add or
-  update, currently 'weight_sum', 'box', 'group',
-  'turnover', 'diversification', or 'position_limit'}
+  update, currently 'weight_sum' (also 'leverage' or
+  'weight'), 'box', 'group', 'turnover', 'diversification',
+  'position_limit', 'return', or 'factor_exposure'}
 
   \item{enabled}{TRUE/FALSE}
 
@@ -31,10 +32,6 @@
   constraints in an object of type \code{\link{portfolio}}.
 }
 \details{
-  In general, you will define your constraints as:
-  'weight_sum', 'box', 'group', 'turnover',
-  'diversification', or 'position_limit'.
-
   Special cases for the weight_sum constraint are
   "full_investment" and "dollar_nuetral" or "active" with
   appropriate values set for min_sum and max_sum. see

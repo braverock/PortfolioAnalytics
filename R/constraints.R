@@ -183,12 +183,10 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' 
 #' This is the main function for adding and/or updating constraints in an object of type \code{\link{portfolio}}.
 #' 
-#' In general, you will define your constraints as: 'weight_sum', 'box', 'group', 'turnover', 'diversification', or 'position_limit'.
-#' 
 #' Special cases for the weight_sum constraint are "full_investment" and "dollar_nuetral" or "active" with appropriate values set for min_sum and max_sum. see \code{\link{weight_sum_constraint}}
 #' 
 #' @param portfolio an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
-#' @param type character type of the constraint to add or update, currently 'weight_sum', 'box', 'group', 'turnover', 'diversification', or 'position_limit'
+#' @param type character type of the constraint to add or update, currently 'weight_sum' (also 'leverage' or 'weight'), 'box', 'group', 'turnover', 'diversification', 'position_limit', 'return', or 'factor_exposure'
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify constraints
@@ -277,6 +275,13 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
                                                        enabled=enabled,
                                                        message=message,
                                                        ...=...)
+         },
+         # factor exposure constraint
+         factor_exposure=, factor_exposures = {tmp_constraint <- factor_exposure_constraint(assets=assets, 
+                                                                         type=type, 
+                                                                         enabled=enabled, 
+                                                                         message=message, 
+                                                                         ...=...)
          },
          # Do nothing and return the portfolio object if type is NULL
          null = {return(portfolio)}
@@ -613,6 +618,11 @@ get_constraints <- function(portfolio){
       if(inherits(constraint, "return_constraint")){
         out$return_target <- constraint$return_target
       }
+      if(inherits(constraint, "factor_exposure_constraint")){
+        out$B <- constraint$B
+        out$lower <- constraint$lower
+        out$upper <- constraint$upper
+      }
     }
   }
   
@@ -778,6 +788,54 @@ position_limit_constraint <- function(type="position_limit", assets, max_pos=NUL
   Constraint$max_pos <- max_pos
   Constraint$max_pos_long <- max_pos_long
   Constraint$max_pos_short <- max_pos_short
+  return(Constraint)
+}
+
+#' Constructor for factor exposure constraint
+#' 
+#' This function is called by add.constraint when type="factor_exposure" is specified. see \code{\link{add.constraint}}
+#' \code{B} can be either a vector or matrix of risk factor exposures (i.e. betas).
+#' If \code{B} is a vector, the length of \code{B} must be equal to the number of 
+#' assets and lower and upper must be scalars.
+#' If \code{B} is a matrix, the number of rows must be equal to the number 
+#' of assets and the number of columns represent the number of  factors. The length
+#' of lower and upper must be equal to the number of factors.
+#' 
+#' @param type character type of the constraint
+#' @param assets named vector of assets specifying seed weights
+#' @param B vector or matrix of risk factor exposures
+#' @param lower vector of lower bounds of constraints for risk factor exposures
+#' @param upper vector of upper bounds of constraints for risk factor exposures
+#' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
+#' @param \dots any other passthru parameters to specify risk factor exposure constraints
+#' @author Ross Bennett
+#' @export
+factor_exposure_constraint <- function(type="factor_exposure", assets, B, lower, upper, enabled=TRUE, message=FALSE, ...){
+  # Number of assets
+  nassets <- length(assets)
+  
+  # Assume the user has passed in a vector of betas
+  if(is.vector(B)){
+    # The number of betas must be equal to the number of assets
+    if(length(B) != nassets) stop("length of B must be equal to number of assets")
+    # The user passed in a vector of betas, lower and upper must be scalars
+    if(length(lower) != 1) stop("lower must be a scalar")
+    if(length(upper) != 1) stop("upper must be a scalar")
+  }
+  # The user has passed in a matrix for B
+  if(is.matrix(B)){
+    # The number of rows in B must be equal to the number of assets
+    if(nrow(B) != nassets) stop("number of rows of B must be equal to number of assets")
+    # The user passed in a matrix for B --> lower and upper must be equal to the number of columns in the beta matrix
+    if(length(lower) != ncol(B)) stop("length of lower must be equal to the number of columns in the B matrix")
+    if(length(upper) != ncol(B)) stop("length of upper must be equal to the number of columns in the B matrix")
+  }
+  
+  Constraint <- constraint_v2(type=type, enabled=enabled, constrclass="factor_exposure_constraint", ...)
+  Constraint$B <- B
+  Constraint$lower <- lower
+  Constraint$upper <- upper
   return(Constraint)
 }
 
