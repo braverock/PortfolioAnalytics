@@ -74,7 +74,7 @@ pspec <- add.constraint(portfolio=pspec,
 # pspec <- add.constraint(portfolio=pspec, type="active")
 @
 
-Here we add box constraints for the asset weights. The minimum weight of any asset must be greater than or equal to 0.05 and the maximum weight of any asset must be less than or equal to 0.4. The values for min and max can be passed in as scalars or vectors. If min and max are scalars, the values for min and max will be replicated as vectors to the length of assets. If min and max are not specified, a minimum weight of 0 and maximum weight of 1 are assumed. Note that min and max can be specified as vectors with different weights for linear inequality constraints.
+Here we add box constraints for the asset weights so that the minimum weight of any asset must be greater than or equal to 0.05 and the maximum weight of any asset must be less than or equal to 0.4. The values for min and max can be passed in as scalars or vectors. If min and max are scalars, the values for min and max will be replicated as vectors to the length of assets. If min and max are not specified, a minimum weight of 0 and maximum weight of 1 are assumed. Note that min and max can be specified as vectors with different weights for linear inequality constraints.
 <<>>=
 # Add box constraints
 pspec <- add.constraint(portfolio=pspec,
@@ -105,7 +105,7 @@ summary(pspec)
 @
 
 
-Another common constraint that can be added is a group constraint. Group constraints are currently supported by the ROI, DEoptim, and random portfolio solvers. The following code groups the assets such that the first 3 assets are grouped together labeled GroupA and the fourth asset is in its own group labeled GroupB. The \code{group_min} argument specifies that the sum of the weights in GroupA must be greater than or equal to 0.1 and the sum of the weights in GroupB must be greater than or equal to 0.15. The \code{group_max} argument specifies that the sum of the weights in GroupA must be less than or equal to 0.85 and the sum of the weights in GroupB must be less than or equal to 0.55.The \code{group_labels} argument is optional and is useful for labeling groups in terms of market capitalization, sector, etc.
+Another common constraint that can be added is a group constraint. Group constraints are currently supported by the ROI, DEoptim, and random portfolio solvers. The following code groups the assets such that the first 3 assets are grouped together labeled GroupA and the fourth asset is in its own group labeled GroupB. The \code{group\_min} argument specifies that the sum of the weights in GroupA must be greater than or equal to 0.1 and the sum of the weights in GroupB must be greater than or equal to 0.15. The \code{group\_max} argument specifies that the sum of the weights in GroupA must be less than or equal to 0.85 and the sum of the weights in GroupB must be less than or equal to 0.55.The \code{group\_labels} argument is optional and is useful for labeling groups in terms of market capitalization, sector, etc.
 <<>>=
 # Add group constraints
 pspec <- add.constraint(portfolio=pspec, type="group",
@@ -115,22 +115,71 @@ pspec <- add.constraint(portfolio=pspec, type="group",
                         group_labels=c("GroupA", "GroupB"))
 @
 
-TODO
-position limit
-diversification
-turnover
-return target
-specify constraints as their own objects
+A position limit constraint can be added to limit the number of assets with non-zero, long, or short positions. The ROI solver used for maximizing return and ETL/ES/cVaR objectives support position limit constraints for \code{max\_pos} (i.e. using the glpk plugin). \code{max\_pos} is not supported for the ROI solver using the quadprog plugin. Note that \code{max\_pos\_long} and \code{max\_pos\_short} are not supported for either ROI solver. Position limit constraints are fully supported for DEoptim and random solvers.
+
+<<>>=
+# Add position limit constraint such that we have a maximum number of three assets with non-zero weights.
+pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
+
+# Can also specify maximum number of long positions and short positions
+# pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos_long=3, max_pos_short=3)
+@
+
+A target diversification can be specified as a constraint. Diversification is defined as $diversification = \sum_{i=1}^N w_i$ for $N$ assets. The optimizers work by applying a penalty if the diversification value is more than 5\% away from \code{div\_target}.
+<<>>=
+pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
+@
+
+A target turnover can be specified as a constraint. The turnover is calculated from a set of initial weights. The initial weights can be specified, by default they are the seed weights in the portfolio object. The optimizers work by applying a penalty if the turnover value is more than 5\% away from \code{turnover\_target}. Note that the turnover constraint is not currently supported for the ROI solvers.
+<<>>=
+pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.2)
+@
+
+A target mean return can be specified as a constraint.
+<<>>=
+pspec <- add.constraint(portfolio=pspec, type="return", return_target=0.007)
+@
+
+This demonstrates adding constraints to the portfolio object. As an alternative to adding constraints directly to the portfolio object, constraints can be specified as separate objects.
+
+\subsection{specifying Constraints as Separate Objects}
+The following examples will demonstrate how to specify constraints as separate objects for all constraints types.
+
+<<>>=
+# full investment constraint
+weight_constr <- weight_sum_constraint(min_sum=1, max_sum=1)
+
+# box constraint
+box_constr <- box_constraint(assets=pspec$assets, min=0, max=1)
+
+# group constraint
+group_constr <- group_constraint(assets=pspec$assets, groups=c(3, 1),
+                                 group_min=c(0.1, 0.15), 
+                                 group_max=c(0.85, 0.55),
+                                 group_labels=c("GroupA", "GroupB"))
+
+# position limit constraint
+poslimit_constr <- position_limit_constraint(assets=pspec$assets, max_pos=3)
+
+# diversification constraint
+div_constr <- diversification_constraint(div_target=0.7)
+
+# turnover constraint
+to_constr <- turnover_constraint(turnover_target=0.2)
+
+# target return constraint
+ret_constr <- return_constraint(return_target=0.007)
+@
 
 \section{Adding Objectives}
 Business objectives can be added to the portfolio object with \code{add.objective}. The \code{add.objective} function is the main function for adding and/or updating business objectives to the portfolio object. This function allows the user to specify the portfolio to add the objectives to, the type (currently 'return', 'risk', or 'risk\_budget'), name of the objective function, arguments to the objective function, and whether or not to enable the objective. If updating an existing constraint, the indexnum argument can be specified.
 
 Here we add a risk objective to minimize portfolio variance. Note that the name of the function must correspond to a function in R. Many functions are available in the PerformanceAnalytics package.
 <<>>=
-pspec <- add.objective_v2(portfolio=pspec,
-                          type='risk',
-                          name='var',
-                          enabled=TRUE)
+pspec <- add.objective(portfolio=pspec,
+                       type='risk',
+                       name='var',
+                       enabled=TRUE)
 @
 
 The portfolio object now has 1 object in the objectives list for the risk objective we just added.
