@@ -24,7 +24,6 @@ Load the necessary packages.
 
 <<>>=
 library(PortfolioAnalytics)
-library(PerformanceAnalytics) # just for edhec data set
 @
 
 \subsection{Data}
@@ -32,7 +31,7 @@ The edhec data set from the PerformanceAnalytics package will be used as example
 <<>>=
 data(edhec)
 
-# Use the first 4 indices in edhec for a returns object
+# Use the first 4 columns in edhec for a returns object
 returns <- edhec[, 1:4]
 print(head(returns, 5))
 
@@ -43,17 +42,17 @@ fund.names <- colnames(returns)
 \section{Creating the "portfolio" object}
 The portfolio object is instantiated with the \code{portfolio.spec} function. The main argument to \code{portfolio.spec} is assets, this is a required argument. The assets argument can be a scalar value for the number of assets, a character vector of fund names, or a named vector of seed weights. If seed weights are not specified, an equal weight portfolio will be assumed.
 
-The \code{pspec} object is an S3 object of class "portfolio". When first created, the portfolio object has an element named assets with the seed weights, an element named weight\_seq with a seed sequence of weights if specified, an empty constraints list and an empty objectives list.
+The \code{pspec} object is an S3 object of class "portfolio". When first created, the portfolio object has an element named \code{assets} with the seed weights, an element named \code{category\_labels}, an element named \code{weight\_seq} with a seed sequence of weights if specified, an empty constraints list and an empty objectives list.
 
 <<>>=
 # Specify a portfolio object by passing a character vector for the 
 # assets argument.
 pspec <- portfolio.spec(assets=fund.names)
-print(pspec)
+print.default(pspec)
 @
 
-\section{Adding Constraints}
-Adding constraints to the portfolio object is done with \code{add.constraint}. The \code{add.constraint} function is the main interface for adding and/or updating constraints to the portfolio object. This function allows the user to specify the portfolio to add the constraints to, the type of constraints (currently 'weight\_sum', 'box', or 'group'), arguments for the constraint, and whether or not to enable the constraint. If updating an existing constraint, the indexnum argument can be specified.
+\section{Adding Constraints to the Portfolio Object}
+Adding constraints to the portfolio object is done with \code{add.constraint}. The \code{add.constraint} function is the main interface for adding and/or updating constraints to the portfolio object. This function allows the user to specify the portfolio to add the constraints to, the type of constraints, arguments for the constraint, and whether or not to enable the constraint (\code{enabled=TRUE} is the default). If updating an existing constraint, the indexnum argument can be specified.
 
 Here we add a constraint that the weights must sum to 1, or the full investment constraint.
 <<>>=
@@ -61,28 +60,70 @@ Here we add a constraint that the weights must sum to 1, or the full investment 
 pspec <- add.constraint(portfolio=pspec, 
                         type="weight_sum", 
                         min_sum=1, 
-                        max_sum=1, 
-                        enabled=TRUE)
+                        max_sum=1)
+
+# The full investment constraint can also be specified with type="full_investment"
+# pspec <- add.constraint(portfolio=pspec, type="full_investment")
+
+# Another common constraint is that portfolio weights sum to 0.
+# This can be specified any of the following ways
+# pspec <- add.constraint(portfolio=pspec, type="weight_sum", 
+#                         min_sum=0,
+#                         max_sum=0)
+# pspec <- add.constraint(portfolio=pspec, type="dollar_neutral")
+# pspec <- add.constraint(portfolio=pspec, type="active")
 @
 
 Here we add box constraints for the asset weights. The minimum weight of any asset must be greater than or equal to 0.05 and the maximum weight of any asset must be less than or equal to 0.4. The values for min and max can be passed in as scalars or vectors. If min and max are scalars, the values for min and max will be replicated as vectors to the length of assets. If min and max are not specified, a minimum weight of 0 and maximum weight of 1 are assumed. Note that min and max can be specified as vectors with different weights for linear inequality constraints.
 <<>>=
+# Add box constraints
 pspec <- add.constraint(portfolio=pspec,
                         type="box",
                         min=0.05,
-                        max=0.4,
-                        enabled=TRUE)
+                        max=0.4)
+
+# min and max can also be specified per asset
+# pspec <- add.constraint(portfolio=pspec,
+#                         type="box",
+#                         min=c(0.05, 0, 0.08, 0.1),
+#                         max=c(0.4, 0.3, 0.7, 0.55))
+
+# A special case of box constraints is long only where min=0 and max=1
+# The default action is long only if min and max are not specified
+# pspec <- add.constraint(portfolio=pspec, type="box")
+# pspec <- add.constraint(portfolio=pspec, type="long_only")
 @
 
 The portfolio object now has 2 objects in the constraints list. One object for the sum of weights constraint and another for the box constraint.
 <<>>=
-print(pspec$constraints)
+print(pspec)
 @
 
-Another common constraint that can be added is a group constraint. Group constraints are currently only supported by the ROI solvers, see the ROI vignette [still need to make this] for examples using group constraints. Box constraints and weight\_sum constraints are required by \code{optimize.portfolio}. Other constraint types will be added.
+The \code{summary} function gives a more detailed view of the constraints.
+<<>>=
+summary(pspec)
+@
+
+
+Another common constraint that can be added is a group constraint. Group constraints are currently supported by the ROI, DEoptim, and random portfolio solvers. The following code groups the assets such that the first 3 assets are grouped together labeled GroupA and the fourth asset is in its own group labeled GroupB. The \code{group_min} argument specifies that the sum of the weights in GroupA must be greater than or equal to 0.1 and the sum of the weights in GroupB must be greater than or equal to 0.15. The \code{group_max} argument specifies that the sum of the weights in GroupA must be less than or equal to 0.85 and the sum of the weights in GroupB must be less than or equal to 0.55.The \code{group_labels} argument is optional and is useful for labeling groups in terms of market capitalization, sector, etc.
+<<>>=
+# Add group constraints
+pspec <- add.constraint(portfolio=pspec, type="group",
+                        groups=c(3, 1),
+                        group_min=c(0.1, 0.15), 
+                        group_max=c(0.85, 0.55),
+                        group_labels=c("GroupA", "GroupB"))
+@
+
+TODO
+position limit
+diversification
+turnover
+return target
+specify constraints as their own objects
 
 \section{Adding Objectives}
-Business objectives can be added to the portfolio object with \code{add.objective\_v2}. The \code{add.objective\_v2} function is the main function for adding and/or updating business objectives to the portfolio object. This function allows the user to specify the portfolio to add the objectives to, the type (currently 'return', 'risk', or 'risk\_budget'), name of the objective function, arguments to the objective function, and whether or not to enable the objective. If updating an existing constraint, the indexnum argument can be specified.
+Business objectives can be added to the portfolio object with \code{add.objective}. The \code{add.objective} function is the main function for adding and/or updating business objectives to the portfolio object. This function allows the user to specify the portfolio to add the objectives to, the type (currently 'return', 'risk', or 'risk\_budget'), name of the objective function, arguments to the objective function, and whether or not to enable the objective. If updating an existing constraint, the indexnum argument can be specified.
 
 Here we add a risk objective to minimize portfolio variance. Note that the name of the function must correspond to a function in R. Many functions are available in the PerformanceAnalytics package.
 <<>>=
