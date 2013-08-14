@@ -38,6 +38,13 @@ gmv_opt <- function(R, constraints, moments, lambda, target){
     rhs.vec <- c(rhs.vec, constraints$cLO, -constraints$cUP)
   }
   
+  # Add the factor exposures to Amat, dir.vec, and rhs.vec
+  if(!is.null(constraints$B)){
+    Amat <- rbind(Amat, t(B), -t(B))
+    dir.vec <- c(dir.vec, rep(">=", 2 * ncol(B)))
+    rhs.vec <- c(rhs.vec, constraints$lower, -constraints$upper)
+  }
+  
   # set up the quadratic objective
   ROI_objective <- Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
   
@@ -93,6 +100,13 @@ maxret_opt <- function(R, moments, constraints, target){
     Amat <- rbind(Amat, Amat.group, -Amat.group)
     dir.vec <- c(dir.vec, rep(">=", (n.groups + n.groups)))
     rhs.vec <- c(rhs.vec, constraints$cLO, -constraints$cUP)
+  }
+  
+  # Add the factor exposures to Amat, dir.vec, and rhs.vec
+  if(!is.null(constraints$B)){
+    Amat <- rbind(Amat, t(B), -t(B))
+    dir.vec <- c(dir.vec, rep(">=", 2 * ncol(B)))
+    rhs.vec <- c(rhs.vec, constraints$lower, -constraints$upper)
   }
   
   # set up the linear objective
