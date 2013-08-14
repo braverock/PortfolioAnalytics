@@ -3,6 +3,7 @@ library(ROI)
 require(ROI.plugin.quadprog)
 require(ROI.plugin.glpk)
 library(Rglpk)
+library(DEoptim)
 
 data(edhec)
 ret <- edhec[, 1:4]
@@ -87,3 +88,43 @@ optf <- optimize.portfolio(R=ret, portfolio=pspec,
 optf
 
 all.equal(opte$weights, optf$weights)
+
+##### maximize return objective with DEoptim #####
+set.seed(123)
+optde1 <- optimize.portfolio(R=ret, portfolio=pspec, 
+                           constraints=list(lev_constr, lo_constr, grp_constr), 
+                           objectives=list(ret_obj), 
+                           optimize_method="DEoptim", 
+                           search_size=2000, 
+                           trace=TRUE)
+optde1
+
+set.seed(123)
+optde2 <- optimize.portfolio(R=ret, portfolio=pspec, 
+                           constraints=list(lev_constr, lo_constr, exp_constr), 
+                           objectives=list(ret_obj), 
+                           optimize_method="DEoptim", 
+                           search_size=2000, 
+                           trace=TRUE)
+optde2
+
+all.equal(optde1$weights, optde2$weights)
+
+##### maximize return objective with random #####
+optrp1 <- optimize.portfolio(R=ret, portfolio=pspec, 
+                           constraints=list(lev_constr, lo_constr, grp_constr), 
+                           objectives=list(ret_obj), 
+                           optimize_method="random", 
+                           search_size=2000, 
+                           trace=TRUE)
+optrp1
+
+optrp2 <- optimize.portfolio(R=ret, portfolio=pspec, 
+                           constraints=list(lev_constr, lo_constr, exp_constr), 
+                           objectives=list(ret_obj), 
+                           optimize_method="random", 
+                           search_size=2000, 
+                           trace=TRUE)
+optrp2
+
+all.equal(optrp1$weights, optrp2$weights)
