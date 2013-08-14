@@ -344,12 +344,40 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
   
   # Add row for max_pos cardinality constraints
   tmpAmat <- rbind(tmpAmat, cbind(matrix(0, ncol=m + n + 2, nrow=1), matrix(1, ncol=m, nrow=1))) 
-  
+
   # Set up the rhs vector
   rhs <- c( rep(0, n), min_sum, max_sum, targetrhs, rep(0, 2*m), max_pos)
   
   # Set up the dir vector
   dir <- c( rep("<=", n), ">=", "<=", targetdir, rep("<=", 2*m), "==")
+  
+  if(try(!is.null(constraints$groups), silent=TRUE)){
+    n.groups <- length(constraints$groups)
+    Amat.group <- matrix(0, nrow=n.groups, ncol=m)
+    k <- 1
+    l <- 0
+    for(i in 1:n.groups){
+      j <- constraints$groups[i] 
+      Amat.group[i, k:(l+j)] <- 1
+      k <- l + j + 1
+      l <- k - 1
+    }
+    if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
+    if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
+    zeros <- matrix(0, nrow=n.groups, ncol=(m + n + 2))
+    tmpAmat <- rbind(tmpAmat, cbind(Amat.group, zeros), cbind(-Amat.group, zeros))
+    dir <- c(dir, rep(">=", (n.groups + n.groups)))
+    rhs <- c(rhs, constraints$cLO, -constraints$cUP)
+  }
+  
+  # Add the factor exposures to Amat, dir, and rhs
+  if(!is.null(constraints$B)){
+    t.B <- t(B)
+    zeros <- matrix(data=0, nrow=nrow(t.B), ncol=(m + n + 2))
+    tmpAmat <- rbind(tmpAmat, cbind(t.B, zeros), cbind(-t.B, zeros))
+    dir <- c(dir, rep(">=", 2 * nrow(t.B)))
+    rhs <- c(rhs, constraints$lower, -constraints$upper)
+  }
   
   # Linear objective vector
   objL <- c( rep(0, m), 1, rep(1/n, n) / alpha, 0, rep(0, m))
