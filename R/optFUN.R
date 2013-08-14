@@ -40,8 +40,9 @@ gmv_opt <- function(R, constraints, moments, lambda, target){
   
   # Add the factor exposures to Amat, dir.vec, and rhs.vec
   if(!is.null(constraints$B)){
-    Amat <- rbind(Amat, t(B), -t(B))
-    dir.vec <- c(dir.vec, rep(">=", 2 * ncol(B)))
+    t.B <- t(constraints$B)
+    Amat <- rbind(Amat, t.B, -t.B)
+    dir.vec <- c(dir.vec, rep(">=", 2 * nrow(t.B)))
     rhs.vec <- c(rhs.vec, constraints$lower, -constraints$upper)
   }
   
@@ -104,8 +105,9 @@ maxret_opt <- function(R, moments, constraints, target){
   
   # Add the factor exposures to Amat, dir.vec, and rhs.vec
   if(!is.null(constraints$B)){
-    Amat <- rbind(Amat, t(B), -t(B))
-    dir.vec <- c(dir.vec, rep(">=", 2 * ncol(B)))
+    t.B <- t(constraints$B)
+    Amat <- rbind(Amat, t.B, -t.B)
+    dir.vec <- c(dir.vec, rep(">=", 2 * nrow(t.B)))
     rhs.vec <- c(rhs.vec, constraints$lower, -constraints$upper)
   }
   
@@ -194,7 +196,7 @@ maxret_milp_opt <- function(R, constraints, moments, target){
   
   # Add the factor exposures to Amat, dir, and rhs
   if(!is.null(constraints$B)){
-    t.B <- t(B)
+    t.B <- t(constraints$B)
     zeros <- matrix(data=0, nrow=nrow(t.B), ncol=ncol(t.B))
     Amat <- rbind(Amat, cbind(t.B, zeros), cbind(-t.B, zeros))
     dir <- c(dir, rep(">=", 2 * nrow(t.B)))
@@ -266,7 +268,7 @@ etl_opt <- function(R, constraints, moments, target, alpha){
   }
   # Add the factor exposures to Amat, dir, and rhs
   if(!is.null(constraints$B)){
-    t.B <- t(B)
+    t.B <- t(constraints$B)
     zeros <- matrix(data=0, nrow=nrow(t.B), ncol=(T+1))
     Amat <- rbind(Amat, cbind(t.B, zeros), cbind(-t.B, zeros))
     dir.vec <- c(dir.vec, rep(">=", 2 * nrow(t.B)))
@@ -372,7 +374,7 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
   
   # Add the factor exposures to Amat, dir, and rhs
   if(!is.null(constraints$B)){
-    t.B <- t(B)
+    t.B <- t(constraints$B)
     zeros <- matrix(data=0, nrow=nrow(t.B), ncol=(m + n + 2))
     tmpAmat <- rbind(tmpAmat, cbind(t.B, zeros), cbind(-t.B, zeros))
     dir <- c(dir, rep(">=", 2 * nrow(t.B)))

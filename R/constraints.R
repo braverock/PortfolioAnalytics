@@ -822,6 +822,7 @@ factor_exposure_constraint <- function(type="factor_exposure", assets, B, lower,
     # The user passed in a vector of betas, lower and upper must be scalars
     if(length(lower) != 1) stop("lower must be a scalar")
     if(length(upper) != 1) stop("upper must be a scalar")
+    B <- matrix(B, ncol=1)
   }
   # The user has passed in a matrix for B
   if(is.matrix(B)){
