@@ -31,14 +31,25 @@
 \description{
   This function is called by add.constraint when
   type="factor_exposure" is specified. see
-  \code{\link{add.constraint}} \code{B} can be either a
-  vector or matrix of risk factor exposures (i.e. betas).
-  If \code{B} is a vector, the length of \code{B} must be
-  equal to the number of assets and lower and upper must be
-  scalars. If \code{B} is a matrix, the number of rows must
-  be equal to the number of assets and the number of
-  columns represent the number of factors. The length of
-  lower and upper must be equal to the number of factors.
+  \code{\link{add.constraint}}
+}
+\details{
+  \code{B} can be either a vector or matrix of risk factor
+  exposures (i.e. betas). If \code{B} is a vector, the
+  length of \code{B} must be equal to the number of assets
+  and lower and upper must be scalars. If \code{B} is
+  passed in as a vector, it will be converted to a matrix
+  with one column.
+
+  If \code{B} is a matrix, the number of rows must be equal
+  to the number of assets and the number of columns
+  represent the number of factors. The length of lower and
+  upper must be equal to the number of factors. The
+  \code{B} matrix should have column names specifying the
+  factors and row names specifying the assets. Default
+  column names and row names will be assigned if the user
+  passes in a \code{B} matrix without column names or row
+  names.
 }
 \author{
   Ross Bennett

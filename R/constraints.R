@@ -794,12 +794,18 @@ position_limit_constraint <- function(type="position_limit", assets, max_pos=NUL
 #' Constructor for factor exposure constraint
 #' 
 #' This function is called by add.constraint when type="factor_exposure" is specified. see \code{\link{add.constraint}}
+#' 
 #' \code{B} can be either a vector or matrix of risk factor exposures (i.e. betas).
 #' If \code{B} is a vector, the length of \code{B} must be equal to the number of 
-#' assets and lower and upper must be scalars.
+#' assets and lower and upper must be scalars. If \code{B} is passed in as a vector,
+#' it will be converted to a matrix with one column.
+#' 
 #' If \code{B} is a matrix, the number of rows must be equal to the number 
 #' of assets and the number of columns represent the number of  factors. The length
-#' of lower and upper must be equal to the number of factors.
+#' of lower and upper must be equal to the number of factors. The \code{B} matrix should
+#' have column names specifying the factors and row names specifying the assets.
+#' Default column names and row names will be assigned if the user passes in a 
+#' \code{B} matrix without column names or row names.
 #' 
 #' @param type character type of the constraint
 #' @param assets named vector of assets specifying seed weights
@@ -822,7 +828,8 @@ factor_exposure_constraint <- function(type="factor_exposure", assets, B, lower,
     # The user passed in a vector of betas, lower and upper must be scalars
     if(length(lower) != 1) stop("lower must be a scalar")
     if(length(upper) != 1) stop("upper must be a scalar")
-    B <- matrix(B, ncol=1)
+    bnames <- names(B)
+    B <- matrix(B, ncol=1, dimnames=list(bnames))
   }
   # The user has passed in a matrix for B
   if(is.matrix(B)){
@@ -831,6 +838,14 @@ factor_exposure_constraint <- function(type="factor_exposure", assets, B, lower,
     # The user passed in a matrix for B --> lower and upper must be equal to the number of columns in the beta matrix
     if(length(lower) != ncol(B)) stop("length of lower must be equal to the number of columns in the B matrix")
     if(length(upper) != ncol(B)) stop("length of upper must be equal to the number of columns in the B matrix")
+    if(is.null(colnames(B))){
+      # The user has passed in a B matrix without column names specifying factors
+      colnames(B) <- paste("factor", 1:ncol(B), sep="")
+    }
+    if(is.null(rownames(B))){
+      # The user has passed in a B matrix without row names specifying assets
+      rownames(B) <- names(assets)
+    }
   }
   
   Constraint <- constraint_v2(type=type, enabled=enabled, constrclass="factor_exposure_constraint", ...)
