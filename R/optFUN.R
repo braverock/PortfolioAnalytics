@@ -192,6 +192,15 @@ maxret_milp_opt <- function(R, constraints, moments, target){
     rhs <- c(rhs, constraints$cLO, -constraints$cUP)
   }
   
+  # Add the factor exposures to Amat, dir, and rhs
+  if(!is.null(constraints$B)){
+    t.B <- t(B)
+    zeros <- matrix(data=0, nrow=nrow(t.B), ncol=ncol(t.B))
+    Amat <- rbind(Amat, cbind(t.B, zeros), cbind(-t.B, zeros))
+    dir <- c(dir, rep(">=", 2 * nrow(t.B)))
+    rhs <- c(rhs, constraints$lower, -constraints$upper)
+  }
+  
   objL <- c(-moments$mean, rep(0, N))
   
   # Only seems to work if I do not specify bounds
