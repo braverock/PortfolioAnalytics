@@ -489,9 +489,36 @@ summary.optimize.portfolio <- function(object, ...){
   cat("Turnover Target Constraint:\n")
   print(constraints$turnover_target)
   cat("\n")
-  cat("Realized turnover:\n")
+  cat("Realized turnover from seed weights:\n")
   print(turnover(object$weights, wts.init=object$portfolio$assets))
   cat("\n")
+  
+  # Factor exposure constraint
+  cat("Factor Exposure Constraints:\n")
+  if(!is.null(constraints$B) & !is.null(constraints$lower) & !is.null(constraints$upper)){
+    t.B <- t(constraints$B)
+    cat("Factor Exposure B Matrix:\n")
+    print(constraints$B)
+    cat("\n")
+    cat("Lower bound on factor exposures, lower:\n")
+    lower <- constraints$lower
+    names(lower) <- colnames(constraints$B)
+    print(lower)
+    cat("\n")
+    cat("Upper bound on group weights, group_max:\n")
+    upper <- constraints$upper
+    names(upper) <- colnames(constraints$B)
+    print(upper)
+    cat("\n")
+    cat("Realized Factor Exposures:\n")
+    tmpexp <- vector(mode="numeric", length=nrow(t.B))
+    for(i in 1:nrow(t.B)){
+      tmpexp[i] <- t(object$weights) %*% t.B[i, ]
+    }
+    names(tmpexp) <- rownames(t.B)
+    print(tmpexp)
+    cat("\n\n")
+  }
   
   # Objectives
   cat(rep("*", 40), "\n", sep="")
