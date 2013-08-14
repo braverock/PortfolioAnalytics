@@ -526,6 +526,23 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     mult <- 1
     out = out + penalty * mult * abs(mean_return - return_target)
   } # End return constraint penalty
+  
+  # penalize weights that violate factor exposure constraints
+  if(!is.null(constraints$B)){
+    t.B <- t(constraints$B)
+    lower <- constraints$lower
+    upper <- constraints$upper
+    mult <- 1
+    for(i in 1:nrow(t.B)){
+      tmpexp <- as.numeric(t(w) %*% t.B[i, ])
+      if(tmpexp < lower[i]){
+        out <- out + penalty * mult * (lower[i] - tmpexp)
+      }
+      if(tmpexp > upper[i]){
+        out <- out + penalty * mult * (tmpexp - upper[i])
+      }
+    }
+  } # End factor exposure constraint penalty
     
   nargs <- list(...)
   if(length(nargs)==0) nargs <- NULL
