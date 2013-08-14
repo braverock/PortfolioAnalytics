@@ -264,6 +264,14 @@ etl_opt <- function(R, constraints, moments, target, alpha){
     dir.vec <- c(dir.vec, rep(">=", (n.groups + n.groups)))
     rhs.vec <- c(rhs.vec, constraints$cLO, -constraints$cUP)
   }
+  # Add the factor exposures to Amat, dir, and rhs
+  if(!is.null(constraints$B)){
+    t.B <- t(B)
+    zeros <- matrix(data=0, nrow=nrow(t.B), ncol=(T+1))
+    Amat <- rbind(Amat, cbind(t.B, zeros), cbind(-t.B, zeros))
+    dir.vec <- c(dir.vec, rep(">=", 2 * nrow(t.B)))
+    rhs.vec <- c(rhs.vec, constraints$lower, -constraints$upper)
+  }
   
   ROI_objective <- L_objective(c(rep(0,N), rep(1/(alpha*T),T), 1))
   opt.prob <- OP(objective=ROI_objective, 
