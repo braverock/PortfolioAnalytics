@@ -14,7 +14,9 @@ gmv_opt <- function(R, constraints, moments, lambda, target){
   
   # check for a target return
   if(!is.na(target)) {
-    Amat <- rbind(Amat, moments$mean)
+    # If var is the only objective specified, then moments$mean won't be calculated
+    if(all(moments$mean==0)) col_means <- colMeans(R)
+    Amat <- rbind(Amat, col_means)
     dir.vec <- c(dir.vec, "==")
     rhs.vec <- c(rhs.vec, target)
   }
