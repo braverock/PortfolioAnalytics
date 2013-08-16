@@ -154,13 +154,13 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
 
 #' constructor for class v2_constraint
 #' 
-#' @param type character type of the constraint to add or update, currently 'weight_sum', 'box', or 'group'
+#' This function is called by the constructor for the specific constraint.
+#' 
+#' @param type character type of the constraint to add or update
 #' @param assets number of assets, or optionally a named vector of assets specifying seed weights
 #' @param ... any other passthru parameters
 #' @param constrclass character to name the constraint class
 #' @author Ross Bennett
-#' @aliases constraint
-#' @rdname constraint
 #' @export
 constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
   if(!hasArg(type)) stop("you must specify a constraint type")
@@ -181,18 +181,70 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 
 #' General interface for adding and/or updating optimization constraints.
 #' 
-#' This is the main function for adding and/or updating constraints in an object of type \code{\link{portfolio}}.
+#' This is the main function for adding and/or updating constraints to the \code{{portfolio}} object.
 #' 
-#' Special cases for the weight_sum constraint are "full_investment" and "dollar_nuetral" or "active" with appropriate values set for min_sum and max_sum. see \code{\link{weight_sum_constraint}}
+#' The following constraint types are supported:
+#' \itemize{
+#' \item{\code{weight_sum}, \code{weight}, \code{leverage}}{ Specify constraint on the sum of the weights, see \code{\link{weight_sum_constraint}}}
+#' \item{\code{full_investment}}{ Special case to set \code{min_sum=1} and \code{max_sum=1} of weight sum constraints}
+#' \item{\code{dollar_neutral}, \code{active}}{ Special case to set \code{min_sum=0} and \code{max_sum=0} of weight sum constraints}
+#' \item{\code{box}}{ Specify constraints for the individual asset weights, see \code{\link{box_constraint}}}
+#' \item{\code{long_only}}{ Special case to set \code{min=0} and \code{max=1} of box constraints}
+#' \item{\code{group}}{ Specify a constraint on the sum of weights within groups and the number of assets with non-zero weights in groups, see \code{\link{group_constraint}}}
+#' \item{\code{turnover}}{ Specify a constraint for target turnover. Turnover is calculated from a set of initial weights, see \code{\link{turnover_constraint}}}
+#' \item{\code{diversification}}{ Specify a constraint for target diversification of a set of weights, see \code{\link{diversification_constraint}}}
+#' \item{\code{position_limit}}{ Specify a constraint on the number of positions (i.e. assets with non-zero weights as well as the number of long and short positions, see \code{\link{position_limit_constraint}}}
+#' \item{\code{return}}{ Specify a constraint for target mean return, see \code{\link{return_constraint}}}
+#' \item{\code{factor_exposure}}{ Specify a constraint for risk factor exposures, see \code{\link{factor_exposure_constraint}}}
+#' }
 #' 
 #' @param portfolio an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
 #' @param type character type of the constraint to add or update, currently 'weight_sum' (also 'leverage' or 'weight'), 'box', 'group', 'turnover', 'diversification', 'position_limit', 'return', or 'factor_exposure'
-#' @param enabled TRUE/FALSE
+#' @param enabled TRUE/FALSE. The default is enabled=TRUE.
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify constraints
-#' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
+#' @param indexnum if you are updating a specific constraint, the index number in the $constraints list to update
 #' @author Ross Bennett
-#' @seealso \code{\link{constraint_v2}}, \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{position_limit_constraint}}
+#' @seealso \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{position_limit_constraint}, \code{\link{return_constraint}, \code{\link{factor_exposure_constraint}}
+#' @examples
+#' data(edhec)
+#' returns <- edhec[, 1:4]
+#' fund.names <- colnames(returns)
+#' pspec <- portfolio.spec(assets=fund.names)
+#' # Add the full investment constraint that specifies the weights must sum to 1.
+#' pspec <- add.constraint(portfolio=pspec, type="weight_sum", min_sum=1, max_sum=1)
+#' # The full investment constraint can also be specified with type="full_investment"
+#' pspec <- add.constraint(portfolio=pspec, type="full_investment")
+#' 
+#' # Another common constraint is that portfolio weights sum to 0.
+#' pspec <- add.constraint(portfolio=pspec, type="weight_sum", min_sum=0, max_sum=0)
+#' pspec <- add.constraint(portfolio=pspec, type="dollar_neutral")
+#' pspec <- add.constraint(portfolio=pspec, type="active")
+#' 
+#' # Add box constraints
+#' pspec <- add.constraint(portfolio=pspec, type="box", min=0.05, max=0.4)
+#' 
+#' min and max can also be specified per asset
+#' pspec <- add.constraint(portfolio=pspec, type="box", min=c(0.05, 0, 0.08, 0.1), max=c(0.4, 0.3, 0.7, 0.55))
+#' # A special case of box constraints is long only where min=0 and max=1
+#' # The default action is long only if min and max are not specified
+#' pspec <- add.constraint(portfolio=pspec, type="box")
+#' pspec <- add.constraint(portfolio=pspec, type="long_only")
+#' 
+#' # Add group constraints
+#' pspec <- add.constraint(portfolio=pspec, type="group", groups=c(3, 1), group_min=c(0.1, 0.15), group_max=c(0.85, 0.55), group_labels=c("GroupA", "GroupB"), group_pos=c(2, 1))
+#' 
+#' # Add position limit constraint such that we have a maximum number of three assets with non-zero weights.
+#' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
+#' 
+#' # Add diversification constraint
+#' pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
+#' 
+#' # Add turnover constraint
+#' pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.2)
+#' 
+#' # Add target mean return constraint
+#' pspec <- add.constraint(portfolio=pspec, type="return", return_target=0.007)
 #' @export
 add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., indexnum=NULL){
   # Check to make sure that the portfolio passed in is a portfolio object
@@ -296,6 +348,7 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
 
 #' constructor for box_constraint.
 #' 
+#' Box constraints specify the upper and lower bounds on the weights of the assets.
 #' This function is called by add.constraint when type="box" is specified. see \code{\link{add.constraint}}
 #'
 #' @param type character type of the constraint
@@ -416,6 +469,7 @@ box_constraint <- function(type="box", assets, min, max, min_mult, max_mult, ena
 
 #' constructor for group_constraint
 #' 
+#' Group constraints specify the grouping of the assets, weights of the groups, and number of postions (i.e. non-zero weights) iof the groups.
 #' This function is called by add.constraint when type="group" is specified. see \code{\link{add.constraint}}
 #'
 #' @param type character type of the constraint
@@ -495,14 +549,14 @@ group_constraint <- function(type="group", assets, groups, group_labels=NULL, gr
 
 #' constructor for weight_sum_constraint
 #' 
+#' THe constraint specifies the upper and lower bound that the weights sum to.
 #' This function is called by add.constraint when "weight_sum", "leverage", "full_investment", "dollar_neutral", or "active" is specified as the type. see \code{\link{add.constraint}}
-#' This function allows the user to specify the minimum and maximum that the weights sum to
 #' 
 #' Special cases for the weight_sum constraint are "full_investment" and "dollar_nuetral" or "active"
 #' 
-#' If type="full_investment", min_sum=1 and max_sum=1
+#' If \code{type="full_investment"}, \code{min_sum=1} and \code{max_sum=1}
 #' 
-#' If type="dollar_neutral" or type="active", min_sum=0, and max_sum=0
+#' If \code{type="dollar_neutral"} or \code{type="active"}, \code{min_sum=0}, and \code{max_sum=0}
 #' 
 #' @param type character type of the constraint
 #' @param min_sum minimum sum of all asset weights, default 0.99
@@ -511,6 +565,7 @@ group_constraint <- function(type="group", assets, groups, group_labels=NULL, gr
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify weight_sum constraints
 #' @author Ross Bennett
+#' @seealso \code{\link{add.constraint}}
 #' @examples
 #' data(edhec)
 #' ret <- edhec[, 1:4]
@@ -650,11 +705,13 @@ get_constraints <- function(portfolio){
 
 #' constructor for turnover_constraint
 #' 
-#' This function is called by add.constraint when type="turnover" is specified. see \code{\link{add.constraint}}
-#' This function allows the user to specify a target turnover value
+#' The turnover constraint specifies a target turnover value. 
+#' This function is called by add.constraint when type="turnover" is specified, see \code{\link{add.constraint}}.
+#' Turnover is calculated from a set of initial weights.
 #' 
-#' Note that turnover constraint is currently only supported for global minimum 
-#' variance problem with ROI quadprog plugin
+#' Note that with the RO solvers, turnover constraint is currently only 
+#' supported for the global minimum variance and quadratic utility problems 
+#' with ROI quadprog plugin.
 #' 
 #' @param type character type of the constraint
 #' @param turnover_target target turnover value
@@ -662,6 +719,7 @@ get_constraints <- function(portfolio){
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
+#' @seealso \code{\link{add.constraint}}
 #' @examples
 #' data(edhec)
 #' ret <- edhec[, 1:4]
@@ -678,7 +736,8 @@ turnover_constraint <- function(type="turnover", turnover_target, enabled=TRUE, 
 
 #' constructor for diversification_constraint
 #' 
-#' This function is called by add.constraint when type="diversification" is specified, \code{\link{add.constraint}}
+#' The diversification constraint specifies a target diversification value. 
+#' This function is called by add.constraint when type="diversification" is specified, see \code{\link{add.constraint}}.
 #' 
 #' @param type character type of the constraint
 #' @param div_target diversification target value
@@ -686,6 +745,7 @@ turnover_constraint <- function(type="turnover", turnover_target, enabled=TRUE, 
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box and/or group constraints
 #' @author Ross Bennett
+#' @seealso \code{\link{add.constraint}}
 #' @examples
 #' data(edhec)
 #' ret <- edhec[, 1:4]
@@ -702,6 +762,7 @@ diversification_constraint <- function(type="diversification", div_target, enabl
 
 #' constructor for return_constraint
 #' 
+#' The return constraint specifes a target mean return value.
 #' This function is called by add.constraint when type="return" is specified, \code{\link{add.constraint}}
 #' 
 #' @param type character type of the constraint
@@ -710,6 +771,7 @@ diversification_constraint <- function(type="diversification", div_target, enabl
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters
 #' @author Ross Bennett
+#' @seealso \code{\link{add.constraint}}
 #' @examples
 #' data(edhec)
 #' ret <- edhec[, 1:4]
@@ -728,6 +790,7 @@ return_constraint <- function(type="return", return_target, enabled=TRUE, messag
 #' 
 #' This function is called by add.constraint when type="position_limit" is specified, \code{\link{add.constraint}}
 #' Allows the user to specify the maximum number of positions (i.e. number of assets with non-zero weights)
+#' as well as the maximum number of long and short positions.
 #' 
 #' @param type character type of the constraint
 #' @param max_pos maximum number of assets with non-zero weights
@@ -737,13 +800,15 @@ return_constraint <- function(type="return", return_target, enabled=TRUE, messag
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify position limit constraints
 #' @author Ross Bennett
-#' #' @examples
+#' @seealso \code{\link{add.constraint}}
+#' @examples
 #' data(edhec)
 #' ret <- edhec[, 1:4]
 #' 
 #' pspec <- portfolio.spec(assets=colnames(ret))
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
+#' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos_long=3, max_pos_short=1)
 #' @export
 position_limit_constraint <- function(type="position_limit", assets, max_pos=NULL, max_pos_long=NULL, max_pos_short=NULL, enabled=TRUE, message=FALSE, ...){
   # Get the length of the assets vector
@@ -793,6 +858,7 @@ position_limit_constraint <- function(type="position_limit", assets, max_pos=NUL
 
 #' Constructor for factor exposure constraint
 #' 
+#' The factor exposure constraint sets upper and lower bounds on exposures to risk factors.
 #' This function is called by add.constraint when type="factor_exposure" is specified. see \code{\link{add.constraint}}
 #' 
 #' \code{B} can be either a vector or matrix of risk factor exposures (i.e. betas).
@@ -816,6 +882,7 @@ position_limit_constraint <- function(type="position_limit", assets, max_pos=NUL
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify risk factor exposure constraints
 #' @author Ross Bennett
+#' @seealso \code{\link{add.constraint}}
 #' @export
 factor_exposure_constraint <- function(type="factor_exposure", assets, B, lower, upper, enabled=TRUE, message=FALSE, ...){
   # Number of assets

@@ -35,8 +35,10 @@
   group constraints}
 }
 \description{
-  This function is called by add.constraint when
-  type="group" is specified. see
+  Group constraints specify the grouping of the assets,
+  weights of the groups, and number of postions (i.e.
+  non-zero weights) iof the groups. This function is called
+  by add.constraint when type="group" is specified. see
   \code{\link{add.constraint}}
 }
 \examples{

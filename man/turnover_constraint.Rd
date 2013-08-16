@@ -19,15 +19,16 @@
   and/or group constraints}
 }
 \description{
-  This function is called by add.constraint when
-  type="turnover" is specified. see
-  \code{\link{add.constraint}} This function allows the
-  user to specify a target turnover value
+  The turnover constraint specifies a target turnover
+  value. This function is called by add.constraint when
+  type="turnover" is specified, see
+  \code{\link{add.constraint}}. Turnover is calculated from
+  a set of initial weights.
 }
 \details{
-  Note that turnover constraint is currently only supported
-  for global minimum variance problem with ROI quadprog
-  plugin
+  Note that with the RO solvers, turnover constraint is
+  currently only supported for the global minimum variance
+  and quadratic utility problems with ROI quadprog plugin.
 }
 \examples{
 data(edhec)
@@ -39,5 +40,8 @@ pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.6)
 }
 \author{
   Ross Bennett
+}
+\seealso{
+  \code{\link{add.constraint}}
 }
 

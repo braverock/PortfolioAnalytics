@@ -18,7 +18,8 @@
   \item{\dots}{any other passthru parameters}
 }
 \description{
-  This function is called by add.constraint when
+  The return constraint specifes a target mean return
+  value. This function is called by add.constraint when
   type="return" is specified, \code{\link{add.constraint}}
 }
 \examples{
@@ -31,5 +32,8 @@ pspec <- add.constraint(portfolio=pspec, type="return", div_target=mean(colMeans
 }
 \author{
   Ross Bennett
+}
+\seealso{
+  \code{\link{add.constraint}}
 }
 

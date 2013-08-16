@@ -34,8 +34,10 @@
   constraints}
 }
 \description{
-  This function is called by add.constraint when type="box"
-  is specified. see \code{\link{add.constraint}}
+  Box constraints specify the upper and lower bounds on the
+  weights of the assets. This function is called by
+  add.constraint when type="box" is specified. see
+  \code{\link{add.constraint}}
 }
 \examples{
 data(edhec)

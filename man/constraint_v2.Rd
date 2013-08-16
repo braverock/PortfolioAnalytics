@@ -7,7 +7,7 @@
 }
 \arguments{
   \item{type}{character type of the constraint to add or
-  update, currently 'weight_sum', 'box', or 'group'}
+  update}
 
   \item{assets}{number of assets, or optionally a named
   vector of assets specifying seed weights}
@@ -18,7 +18,8 @@
   class}
 }
 \description{
-  constructor for class v2_constraint
+  This function is called by the constructor for the
+  specific constraint.
 }
 \author{
   Ross Bennett

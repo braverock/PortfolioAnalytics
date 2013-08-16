@@ -23,21 +23,21 @@
   weight_sum constraints}
 }
 \description{
-  This function is called by add.constraint when
-  "weight_sum", "leverage", "full_investment",
-  "dollar_neutral", or "active" is specified as the type.
-  see \code{\link{add.constraint}} This function allows the
-  user to specify the minimum and maximum that the weights
-  sum to
+  THe constraint specifies the upper and lower bound that
+  the weights sum to. This function is called by
+  add.constraint when "weight_sum", "leverage",
+  "full_investment", "dollar_neutral", or "active" is
+  specified as the type. see \code{\link{add.constraint}}
 }
 \details{
   Special cases for the weight_sum constraint are
   "full_investment" and "dollar_nuetral" or "active"
 
-  If type="full_investment", min_sum=1 and max_sum=1
+  If \code{type="full_investment"}, \code{min_sum=1} and
+  \code{max_sum=1}
 
-  If type="dollar_neutral" or type="active", min_sum=0, and
-  max_sum=0
+  If \code{type="dollar_neutral"} or \code{type="active"},
+  \code{min_sum=0}, and \code{max_sum=0}
 }
 \examples{
 data(edhec)
@@ -57,5 +57,8 @@ pspec <- add.constraint(pspec, type="active")
 }
 \author{
   Ross Bennett
+}
+\seealso{
+  \code{\link{add.constraint}}
 }
 

@@ -29,9 +29,10 @@
   risk factor exposure constraints}
 }
 \description{
-  This function is called by add.constraint when
-  type="factor_exposure" is specified. see
-  \code{\link{add.constraint}}
+  The factor exposure constraint sets upper and lower
+  bounds on exposures to risk factors. This function is
+  called by add.constraint when type="factor_exposure" is
+  specified. see \code{\link{add.constraint}}
 }
 \details{
   \code{B} can be either a vector or matrix of risk factor
@@ -53,5 +54,8 @@
 }
 \author{
   Ross Bennett
+}
+\seealso{
+  \code{\link{add.constraint}}
 }
 

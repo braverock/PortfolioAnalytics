@@ -32,7 +32,8 @@
   type="position_limit" is specified,
   \code{\link{add.constraint}} Allows the user to specify
   the maximum number of positions (i.e. number of assets
-  with non-zero weights)
+  with non-zero weights) as well as the maximum number of
+  long and short positions.
 }
 \examples{
 data(edhec)
@@ -41,8 +42,12 @@ ret <- edhec[, 1:4]
 pspec <- portfolio.spec(assets=colnames(ret))
 
 pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
+pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos_long=3, max_pos_short=1)
 }
 \author{
-  Ross Bennett #'
+  Ross Bennett
+}
+\seealso{
+  \code{\link{add.constraint}}
 }
 

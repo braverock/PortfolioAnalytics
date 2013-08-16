@@ -19,9 +19,10 @@
   and/or group constraints}
 }
 \description{
-  This function is called by add.constraint when
-  type="diversification" is specified,
-  \code{\link{add.constraint}}
+  The diversification constraint specifies a target
+  diversification value. This function is called by
+  add.constraint when type="diversification" is specified,
+  see \code{\link{add.constraint}}.
 }
 \examples{
 data(edhec)
@@ -33,5 +34,8 @@ pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
 }
 \author{
   Ross Bennett
+}
+\seealso{
+  \code{\link{add.constraint}}
 }
 
