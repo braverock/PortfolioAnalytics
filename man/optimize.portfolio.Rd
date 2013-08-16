@@ -17,7 +17,8 @@
   the constraints and objectives for the optimization}
 
   \item{constraints}{default=NULL, a list of constraint
-  objects}
+  objects. An object of class ]v1_constraint' can be passed
+  in here.}
 
   \item{objectives}{default=NULL, a list of objective
   objects}
@@ -88,27 +89,43 @@
   instead use \code{trace}.
 
   The extension to ROI solves a limited type of convex
-  optimization problems: 1) Maxmimize portfolio return
-  subject leverage, box, and/or constraints on weights 2)
-  Minimize portfolio variance subject to leverage, box,
-  and/or group constraints (otherwise known as global
-  minimum variance portfolio) 3) Minimize portfolio
-  variance subject to leverage, box, and/or group
-  constraints and a desired portfolio return 4) Maximize
-  quadratic utility subject to leverage, box, and/or group
-  constraints and risk aversion parameter (this is passed
-  into \code{optimize.portfolio} as as added argument to
-  the \code{constraints} object) 5) Mean CVaR optimization
-  subject to leverage, box, and/or group constraints and
-  target portfolio return Lastly, because these convex
-  optimization problem are standardized, there is no need
-  for a penalty term. Therefore, the \code{multiplier}
-  argument in \code{\link{add.objective}} passed into the
-  complete constraint object are ingnored by the solver.
+  optimization problems: \itemize{ \item{Maxmimize
+  portfolio return subject leverage, box, group, position
+  limit, target mean return, and/or factor exposure
+  constraints on weights} \item{Minimize portfolio variance
+  subject to leverage, box, group, and/or factor exposure
+  constraints (otherwise known as global minimum variance
+  portfolio)} \item{Minimize portfolio variance subject to
+  leverage, box, group, and/or factor exposure constraints
+  and a desired portfolio return} \item{Maximize quadratic
+  utility subject to leverage, box, group, target mean
+  return, and/or factor exposure constraints and risk
+  aversion parameter. (The risk aversion parameter is
+  passed into \code{optimize.portfolio} as an added
+  argument to the \code{portfolio} object)} \item{Mean CVaR
+  optimization subject to leverage, box, group, position
+  limit, target mean return, and/or factor exposure
+  constraints and target portfolio return} } Lastly,
+  because these convex optimization problem are
+  standardized, there is no need for a penalty term.
+  Therefore, the \code{multiplier} argument in
+  \code{\link{add.objective}} passed into the complete
+  constraint object are ingnored by the solver.
 
   If you would like to interface with
   \code{optimize.portfolio} using matrix formulations, then
   use \code{ROI_old}.
+
+  An object of class \code{v1_constraint} can be passed in
+  for the \code{constraints} argument. The
+  \code{v1_constraint} object was used in the previous 'v1'
+  specification to specify the constraints and objectives
+  for the optimization problem, see
+  \code{\link{constraint}}. We will attempt to detect if
+  the object passed into the constraints argument is a
+  \code{v1_constraint} object and update to the 'v2'
+  specification by adding the constraints and objectives to
+  the \code{portfolio} object.
 }
 \author{
   Kris Boudt, Peter Carl, Brian G. Peterson
