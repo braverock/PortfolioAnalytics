@@ -1,0 +1,141 @@
+\documentclass[12pt,letterpaper,english]{article}
+\usepackage[OT1]{fontenc}
+\usepackage{Sweave}
+\usepackage{verbatim}
+\usepackage{Rd}
+\usepackage{amsmath}
+
+\begin{document}
+
+\title{Using the ROI solvers with PortfolioAnalytics}
+\author{Ross Bennett}
+
+\maketitle
+
+\begin{abstract}
+The purpose of this vignette is to demonstrate a sample of the optimzation problems that can be solved in PortfolioAnalytics with the ROI solvers. See \code{demo(demo\_ROI)} for a more complete set of examples.
+\end{abstract}
+
+\tableofcontents
+
+\section{Getting Started}
+\subsection{Load Packages}
+Load the necessary packages.
+<<>>=
+suppressMessages(library(PortfolioAnalytics))
+suppressMessages(library(Rglpk))
+suppressMessages(library(foreach))
+suppressMessages(library(iterators))
+suppressMessages(library(ROI))
+suppressMessages(require(ROI.plugin.glpk))
+suppressMessages(require(ROI.plugin.quadprog))
+@
+
+\subsection{Data}
+The edhec data set from the PerformanceAnalytics package will be used as example data.
+<<>>=
+data(edhec)
+
+# Use the first 4 columns in edhec for a returns object
+returns <- edhec[, 1:4]
+print(head(returns, 5))
+
+# Get a character vector of the fund names
+funds <- colnames(returns)
+@
+
+
+\section{Maximizing Mean Return}
+The objective to maximize mean return is a linear problem of the form:
+\begin{equation*}
+ \begin{aligned}
+ & \underset{\boldsymbol{w}}{\text{maximize}}
+ & & \hat{\boldsymbol{\mu}}' \boldsymbol{w} \\
+ \end{aligned}
+\end{equation*}
+
+Where $\hat{\boldsymbol{\mu}}$ is the estimated mean asset returns and $\boldsymbol{w}$ is the set of weights. Because this is a linear problem, it is well suited to be solved using a linear programming solver. For these types of problems, PortfolioAnalytics uses the ROI package with the glpk plugin.
+
+\subsection{Portfolio Object}
+
+The first step is to create the portfolio object. Then add constraints and a return objective.
+<<>>=
+# Create portfolio object
+portf_maxret <- portfolio.spec(assets=funds)
+
+# Add constraints to the portfolio object
+portf_maxret <- add.constraint(portfolio=portf_maxret, type="full_investment")
+portf_maxret <- add.constraint(portfolio=portf_maxret, type="box",
+                               min=c(0.02, 0.05, 0.03, 0.02),
+                               max=c(0.55, 0.6, 0.65, 0.5))
+
+# Add objective to the portfolio object
+portf_maxret <- add.objective(portfolio=portf_maxret, type="return", name="mean")
+@
+
+The print method for the portfolio object shows a high level overview while the summary method shows much more detail of the assets, constraints, and objectives that are specified in the portfolio object.
+<<>>=
+print(portf_maxret)
+summary(portf_maxret)
+@
+
+\subsection{Optimization}
+The next step is to run the optimization. Note that \code{optimize\_method="ROI"} is specified in the call to \code{optimize.portfolio} to select the solver used for the optimization.
+<<>>=
+# Run the optimization
+opt_maxret <- optimize.portfolio(R=returns, portfolio=portf_maxret, optimize_method="ROI")
+@
+
+The print method for the \code{opt\_maxret} object shows the call, optimal weights, and the objective measure
+<<>>=
+print(opt_maxret)
+@
+
+The sumary method for the \code{opt\_maxret} object shows details of the object with constraints, objectives, and other portfolio statistics.
+<<>>=
+summary(opt_maxret)
+@
+
+
+The \code{opt\_maxret} object is of class \code{optimize.portfolio.ROI} and contains the following elements.  Objects of class \code{optimize.portfolio.ROI} are S3 objects and elements can be accessed with the \code{\$} operator.
+<<>>=
+names(opt_maxret)
+@
+
+The optimal weights and value of the objective function at the optimum can be accessed with the \code{extractStats} function.
+<<>>=
+extractStats(opt_maxret)
+@
+
+The optimal weights can be accessed with the \code{extractWeights} function.
+<<>>=
+extractWeights(opt_maxret)
+@
+
+\subsection{Visualization}
+The chart of the optimal weights as well as the box constraints can be created with \code{chart.Weights.ROI}. The blue dots are the optimal weights and the gray triangles are the \code{min} and \code{max} of the box constraints.
+<<fig.align='center',fig.height=5, fig.width=5>>=
+chart.Weights.ROI(opt_maxret)
+@
+
+The optimal portfolio can be plotted in risk-return space along with other feasible portfolios. The return metric is defined in the \code{return.col} argument and the risk metric is defined in the \code{risk.col} argument. The scatter chart includes the optimal portfolio (blue dot) and other feasible portfolios (gray circles) to show the overall feasible space given the constraints. By default, if \code{rp} is not passed in, the feasible portfolios are generated with \code{random\_portfolios} to satisfy the constraints of the portfolio object.
+
+Volatility as the risk metric
+<<fig.align='center',fig.height=5, fig.width=5>>=
+chart.Scatter.ROI(opt_maxret, R=returns,return.col="mean", risk.col="sd", main="Maximum Return")
+@
+
+Expected tail loss as the risk metric
+<<fig.align='center',fig.height=5, fig.width=5>>=
+chart.Scatter.ROI(opt_maxret, R=returns, return.col="mean", risk.col="ETL", main="Maximum Return", invert=FALSE, p=0.9)
+@
+
+\subsection{Backtesting}
+An out of sample backtest is run with \code{optimize.portfolio.rebalancing}. In this example, an initial training period of 36 months is used and the portfolio is rebalanced quarterly. 
+<<>>=
+bt_maxret <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_maxret, optimize_method="ROI", rebalance_on="quarters", training_period=36, trace=TRUE)
+@
+
+The \code{bt\_maxret} object is a list containing the optimal weights and objective measure at each rebalance period.
+
+\end{document}

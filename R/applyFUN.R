@@ -23,6 +23,7 @@ applyFUN <- function(R, weights, FUN="mean", ...){
   
   nargs <- c(nargs, moments(R))
   nargs$R <- R
+  #nargs$invert=FALSE
   
   # match the FUN arg to a risk or return function
   switch(FUN,

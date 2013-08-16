@@ -152,7 +152,7 @@ charts.ROI <- function(ROI, R, rp=NULL, portfolio=NULL, risk.col="StdDev", retur
   par(mar=c(4,4,4,2))
   chart.Scatter.ROI(ROI, R, rp=rp, portfolio=portfolio, return.col=return.col, risk.col=risk.col, ..., element.color=element.color, cex.axis=cex.axis, main=main)
   par(mar=c(2,4,0,2))
-  chart.Weights.ROI(ROI, neighbors=neighbors, ..., main="", las=3, xlab=NULL, cex.lab=1, element.color=element.color, cex.axis=ce.axis)
+  chart.Weights.ROI(ROI, neighbors=neighbors, ..., main="", las=3, xlab=NULL, cex.lab=1, element.color=element.color, cex.axis=cex.axis)
   par(op)
 }
 
