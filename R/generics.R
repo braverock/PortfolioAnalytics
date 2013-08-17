@@ -230,13 +230,25 @@ print.optimize.portfolio.random <- function(object, digits=max(3, getOption("dig
   print.default(object$weights, digits=digits)
   cat("\n")
   
-  # get objective measure
+  # get objective measures
   objective_measures <- object$objective_measures
   tmp_obj <- as.numeric(unlist(objective_measures))
   names(tmp_obj) <- names(objective_measures)
   cat("Objective Measures:\n")
-  for(i in 1:length(tmp_obj)){
-    print(tmp_obj[i], digits=digits)
+  for(i in 1:length(objective_measures)){
+    print(tmp_obj[i], digits=4)
+    cat("\n")
+    if(length(objective_measures[[i]]) > 1){
+      # This will be the case for any objective measures with risk budgets
+      for(j in 2:length(objective_measures[[i]])){
+        tmpl <- objective_measures[[i]][j]
+        cat(names(tmpl), ":\n")
+        tmpv <- unlist(tmpl)
+        names(tmpv) <- names(object$weights)
+        print(tmpv)
+        cat("\n")
+      }
+    }
     cat("\n")
   }
   cat("\n")
@@ -263,13 +275,25 @@ print.optimize.portfolio.DEoptim <- function(object, digits=max(3, getOption("di
   print.default(object$weights, digits=digits)
   cat("\n")
   
-  # get objective measure
+  # get objective measures
   objective_measures <- object$objective_measures
   tmp_obj <- as.numeric(unlist(objective_measures))
   names(tmp_obj) <- names(objective_measures)
   cat("Objective Measures:\n")
-  for(i in 1:length(tmp_obj)){
-    print(tmp_obj[i], digits=digits)
+  for(i in 1:length(objective_measures)){
+    print(tmp_obj[i], digits=4)
+    cat("\n")
+    if(length(objective_measures[[i]]) > 1){
+      # This will be the case for any objective measures with risk budgets
+      for(j in 2:length(objective_measures[[i]])){
+        tmpl <- objective_measures[[i]][j]
+        cat(names(tmpl), ":\n")
+        tmpv <- unlist(tmpl)
+        names(tmpv) <- names(object$weights)
+        print(tmpv)
+        cat("\n")
+      }
+    }
     cat("\n")
   }
   cat("\n")
@@ -296,13 +320,25 @@ print.optimize.portfolio.GenSA <- function(object, digits=max(3, getOption("digi
   print.default(object$weights, digits=digits)
   cat("\n")
   
-  # get objective measure
+  # get objective measures
   objective_measures <- object$objective_measures
   tmp_obj <- as.numeric(unlist(objective_measures))
   names(tmp_obj) <- names(objective_measures)
   cat("Objective Measures:\n")
-  for(i in 1:length(tmp_obj)){
-    print(tmp_obj[i], digits=digits)
+  for(i in 1:length(objective_measures)){
+    print(tmp_obj[i], digits=4)
+    cat("\n")
+    if(length(objective_measures[[i]]) > 1){
+      # This will be the case for any objective measures with risk budgets
+      for(j in 2:length(objective_measures[[i]])){
+        tmpl <- objective_measures[[i]][j]
+        cat(names(tmpl), ":\n")
+        tmpv <- unlist(tmpl)
+        names(tmpv) <- names(object$weights)
+        print(tmpv)
+        cat("\n")
+      }
+    }
     cat("\n")
   }
   cat("\n")
@@ -329,14 +365,25 @@ print.optimize.portfolio.pso <- function(object, digits=max(3, getOption("digits
   print.default(object$weights, digits=digits)
   cat("\n")
   
-  # get objective measure
-  # get objective measure
+  # get objective measures
   objective_measures <- object$objective_measures
   tmp_obj <- as.numeric(unlist(objective_measures))
   names(tmp_obj) <- names(objective_measures)
   cat("Objective Measures:\n")
-  for(i in 1:length(tmp_obj)){
-    print(tmp_obj[i], digits=digits)
+  for(i in 1:length(objective_measures)){
+    print(tmp_obj[i], digits=4)
+    cat("\n")
+    if(length(objective_measures[[i]]) > 1){
+      # This will be the case for any objective measures with risk budgets
+      for(j in 2:length(objective_measures[[i]])){
+        tmpl <- objective_measures[[i]][j]
+        cat(names(tmpl), ":\n")
+        tmpv <- unlist(tmpl)
+        names(tmpv) <- names(object$weights)
+        print(tmpv)
+        cat("\n")
+      }
+    }
     cat("\n")
   }
   cat("\n")
@@ -368,12 +415,24 @@ summary.optimize.portfolio <- function(object, ...){
   # The objective measure is object$out for ROI
   cat("Objective Measures:\n")
   if(!is.null(object$objective_measures)){
-    # get objective measure
+    # get objective measures
     objective_measures <- object$objective_measures
     tmp_obj <- as.numeric(unlist(objective_measures))
     names(tmp_obj) <- names(objective_measures)
-    for(i in 1:length(tmp_obj)){
-      print(tmp_obj[i])
+    for(i in 1:length(objective_measures)){
+      print(tmp_obj[i], digits=4)
+      cat("\n")
+      if(length(objective_measures[[i]]) > 1){
+        # This will be the case for any objective measures with risk budgets
+        for(j in 2:length(objective_measures[[i]])){
+          tmpl <- objective_measures[[i]][j]
+          cat(names(tmpl), ":\n")
+          tmpv <- unlist(tmpl)
+          names(tmpv) <- names(object$weights)
+          print(tmpv)
+          cat("\n")
+        }
+      }
       cat("\n")
     }
   } else {
