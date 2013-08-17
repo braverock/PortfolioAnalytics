@@ -333,3 +333,26 @@ extractStats.optimize.portfolio.GenSA <- function(object, prefix=NULL, ...) {
   names(result) <- rnames
   return(result)
 }
+
+#' Extract the objective measures
+#' 
+#' This function will extract the objective measures from the optimal portfolio
+#' run via \code{optimize.portfolio}
+#'  
+#' @param object list returned by optimize.portfolio
+#' @return list of objective measures
+#' @seealso \code{\link{optimize.portfolio}}
+#' @author Ross Bennett
+#' @export
+extractObjectiveMeasures <- function(object){
+  if(!inherits(object, "optimize.portfolio")) stop("object must be of class 'optimize.portfolio'")
+  if(inherits(object, "optimize.portfolio.ROI")){
+    # objective measures returned as $out for ROI solvers
+    out <- object$out
+  } else {
+    # objective measures returned as $objective_measures for all other solvers
+    out <- object$objective_measures
+  }
+  return(out)
+}
+
