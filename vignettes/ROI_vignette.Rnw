@@ -138,4 +138,132 @@ bt_maxret <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_maxret, o
 
 The \code{bt\_maxret} object is a list containing the optimal weights and objective measure at each rebalance period.
 
+\section{Minimizing Portfolio Variance}
+The objective to minimize portfolio variance is a quadratic problem of the form:
+\begin{equation*}
+ \begin{aligned}
+ & \underset{\boldsymbol{w}}{\text{minimize}}
+ & & \boldsymbol{w}' \boldsymbol{\Sigma} \boldsymbol{w} \\
+ \end{aligned}
+\end{equation*}
+
+Where $\boldsymbol{\Sigma}$ is the estimated covariance matrix of asset returns and $\boldsymbol{w}$ is the set of weights. Because this is a quadratic problem, it is well suited to be solved using a quadratic programming solver. For these types of problems, PortfolioAnalytics uses the ROI package with the quadprog plugin.
+
+\subsection{Global Minimum Variance Portfolio}
+\subsubsection{Portfolio Object}
+<<>>=
+# Create portfolio object
+portf_minvar <- portfolio.spec(assets=funds)
+
+# Add full investment constraint to the portfolio object
+portf_minvar <- add.constraint(portfolio=portf_minvar, type="full_investment")
+
+# Add objective to minimize variance
+portf_minvar <- add.objective(portfolio=portf_minvar, type="risk", name="var")
+@
+
+The only constraint specified is the full investment constraint, therefore the optimization problem is solving for the global minimum variance portfolio.
+
+\subsubsection{Optimization}
+<<>>=
+# Run the optimization
+opt_gmv <- optimize.portfolio(R=returns, portfolio=portf_minvar, 
+                              optimize_method="ROI")
+print(opt_gmv)
+@
+
+\subsubsection{Backtesting}
+<<>>=
+bt_gmv <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_minvar, optimize_method="ROI", rebalance_on="quarters", training_period=36)
+@
+
+
+\subsection{Constrained Minimum Variance Portfolio}
+
+\subsubsection{Portfolio Object}
+Constraints can be added to the \code{portf\_minvar} portfolio object previously created.
+<<>>=
+# Add long only constraints
+portf_minvar <- add.constraint(portfolio=portf_minvar, type="box", min=0, max=1)
+
+# Add group constraints
+portf_minvar <- add.constraint(portfolio=portf_minvar, 
+                               type="group", 
+                               groups=c(1, 2, 1), 
+                               group_min=c(0, 0.25, 0.10), 
+                               group_max=c(0.45, 0.6, 0.5))
+@
+
+\subsubsection{Optimization}
+<<>>=
+# Run the optimization
+opt_minvar <- optimize.portfolio(R=returns, portfolio=portf_minvar, optimize_method="ROI")
+print(opt_minvar)
+@
+
+\subsubsection{Backtesting}
+<<>>=
+bt_minvar <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_minvar, optimize_method="ROI", rebalance_on="quarters", training_period=36)
+@
+
+\section{Maximizing Quadratic Utility}
+The objective to maximize quadratic utility is a quadratic problem of the form:
+\begin{equation*}
+ \begin{aligned}
+ & \underset{\boldsymbol{w}}{\text{maximize}}
+ & & \boldsymbol{w}' \boldsymbol{\mu} - \frac{\lambda}{2}\boldsymbol{w}' \boldsymbol{\Sigma} \boldsymbol{w} \\
+ \end{aligned}
+\end{equation*}
+
+Where $\mu$ is the estimated mean asset returns, $\lambda$ is the risk aversion parameter, $\boldsymbol{\Sigma}$ is the estimated covariance matrix of asset returns and $\boldsymbol{w}$ is the set of weights. Quadratic utility maximizes return while penalizing variance. The $\lambda$ risk aversion parameter controls how much portfolio variance is penalized. Because this is a quadratic problem, it is well suited to be solved using a quadratic programming solver. For these types of problems, PortfolioAnalytics uses the ROI package with the quadprog plugin.
+
+\subsection{Portfolio Object}
+The portfolio object is specified, and constraints and objectives are created separately. The constraints and objectives are created separately as an alternative example and could also have been added directly to the portfolio object as in the previous sections.
+<<>>=
+# Create initial portfolio object
+init_portf <- portfolio.spec(assets=funds)
+
+# Create full investment constraint
+fi_constr <- weight_sum_constraint(type="full_investment")
+
+# Create long only constraint
+lo_constr <- box_constraint(type="long_only", assets=init_portf$assets)
+
+# Combine the constraints in a list
+qu_constr <- list(fi_constr, lo_constr)
+
+# Create return objective
+ret_obj <- return_objective(name="mean")
+
+# Create variance objective specifying a risk_aversion parameter which controls
+# how much the variance is penalized
+var_obj <- portfolio_risk_objective(name="var", risk_aversion=0.25)
+
+# Combine the objectives into a list
+qu_obj <- list(ret_obj, var_obj)
+@
+
+\subsection{Optimization}
+Note how the constraints and objectives are passed to optimize.portfolio.
+<<>>=
+# Run the optimization
+opt_qu <- optimize.portfolio(R=returns, portfolio=init_portf, 
+                             constraints=qu_constr, 
+                             objectives=qu_obj, 
+                             optimize_method="ROI")
+@
+
+\subsection{Backtesting}
+<<>>=
+bt_qu <- optimize.portfolio.rebalancing(R=returns, portfolio=init_portf,
+                                        constraints=qu_constr, 
+                                        objectives=qu_obj, 
+                                        optimize_method="ROI", 
+                                        rebalance_on="quarters", 
+                                        training_period=36)
+@
+
+\section{Minimizing Expected Tail Loss}
+TODO
+
 \end{document}
