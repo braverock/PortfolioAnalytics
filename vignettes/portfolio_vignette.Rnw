@@ -33,16 +33,17 @@ data(edhec)
 
 # Use the first 4 columns in edhec for a returns object
 returns <- edhec[, 1:4]
+colnames(returns) <- c("CA", "CTAG", "DS", "EM")
 print(head(returns, 5))
 
 # Get a character vector of the fund names
 fund.names <- colnames(returns)
 @
 
-\section{Creating the "portfolio" object}
-The portfolio object is instantiated with the \code{portfolio.spec} function. The main argument to \code{portfolio.spec} is assets, this is a required argument. The assets argument can be a scalar value for the number of assets, a character vector of fund names, or a named vector of seed weights. If seed weights are not specified, an equal weight portfolio will be assumed.
+\section{Creating the Portfolio Object}
+The portfolio object is instantiated with the \code{portfolio.spec} function. The main argument to \code{portfolio.spec} is assets, this is a required argument. The assets argument can be a scalar value for the number of assets, a character vector of fund names, or a named vector of initial weights. If initial weights are not specified, an equal weight portfolio will be assumed.
 
-The \code{pspec} object is an S3 object of class "portfolio". When first created, the portfolio object has an element named \code{assets} with the seed weights, an element named \code{category\_labels}, an element named \code{weight\_seq} with a seed sequence of weights if specified, an empty constraints list and an empty objectives list.
+The \code{pspec} object is an S3 object of class "portfolio". When first created, the portfolio object has an element named \code{assets} with the initial weights, an element named \code{category\_labels}, an element named \code{weight\_seq} with sequence of weights if specified, an empty constraints list and an empty objectives list.
 
 <<>>=
 # Specify a portfolio object by passing a character vector for the 
@@ -115,7 +116,7 @@ pspec <- add.constraint(portfolio=pspec, type="group",
                         group_labels=c("GroupA", "GroupB"))
 @
 
-A position limit constraint can be added to limit the number of assets with non-zero, long, or short positions. The ROI solver used for maximizing return and ETL/ES/cVaR objectives support position limit constraints for \code{max\_pos} (i.e. using the glpk plugin). \code{max\_pos} is not supported for the ROI solver using the quadprog plugin. Note that \code{max\_pos\_long} and \code{max\_pos\_short} are not supported for either ROI solver. Position limit constraints are fully supported for DEoptim and random solvers.
+A position limit constraint can be added to limit the number of assets with non-zero, long, or short positions. The ROI solver interfaces to the Rglpk package (i.e. using the glpk plugin) for solving maximizing return and ETL/ES/cVaR objectives. The Rglpk package supports integer programming and thus supports position limit constraints for the \code{max\_pos} argument. The quadprog package does not support integer programming, and therefore \code{max\_pos} is not supported for the ROI solver using the quadprog plugin. Note that \code{max\_pos\_long} and \code{max\_pos\_short} are not supported for either ROI solver. All position limit constraints are fully supported for DEoptim and random solvers.
 
 <<>>=
 # Add position limit constraint such that we have a maximum number of three assets with non-zero weights.
@@ -125,12 +126,13 @@ pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
 # pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos_long=3, max_pos_short=3)
 @
 
-A target diversification can be specified as a constraint. Diversification is defined as $diversification = \sum_{i=1}^N w_i$ for $N$ assets. The optimizers work by applying a penalty if the diversification value is more than 5\% away from \code{div\_target}.
+A target diversification can be specified as a constraint. Diversification is defined as $diversification = \sum_{i=1}^N w_i^2$ for $N$ assets. The diversification constraint is implemented for the global optimizers by applying a penalty if the diversification value is more than 5\% away from \code{div\_target}.
+TODO add support for diversification as a constraint for ROI solvers. Can't do this with Rglpk, but can add as a penalty term for quadratic utility and minimum variance problems
 <<>>=
 pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
 @
 
-A target turnover can be specified as a constraint. The turnover is calculated from a set of initial weights. The initial weights can be specified, by default they are the seed weights in the portfolio object. The optimizers work by applying a penalty if the turnover value is more than 5\% away from \code{turnover\_target}. Note that the turnover constraint is not currently supported for the ROI solvers.
+A target turnover can be specified as a constraint. The turnover is calculated from a set of initial weights. The initial weights can be specified, by default they are the initial weights in the portfolio object. The turnover constraint is implemented for the global optimizers by applying a penalty if the turnover value is more than 5\% away from \code{turnover\_target}. Note that the turnover constraint is not currently supported for the ROI solvers.
 <<>>=
 pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.2)
 @
@@ -142,7 +144,7 @@ pspec <- add.constraint(portfolio=pspec, type="return", return_target=0.007)
 
 This demonstrates adding constraints to the portfolio object. As an alternative to adding constraints directly to the portfolio object, constraints can be specified as separate objects.
 
-\subsection{specifying Constraints as Separate Objects}
+\subsection{Specifying Constraints as Separate Objects}
 The following examples will demonstrate how to specify constraints as separate objects for all constraints types.
 
 <<>>=
@@ -182,30 +184,10 @@ pspec <- add.objective(portfolio=pspec,
                        enabled=TRUE)
 @
 
-The portfolio object now has 1 object in the objectives list for the risk objective we just added.
-<<>>=
-print(pspec$objectives)
-@
-
-We now have a portfolio object with the following constraints and objectives to pass to \code{optimize.portfolio}.
-\begin{itemize}
-  \item Constraints
-  \begin{itemize}
-  \item weight\_sum: The weights sum to 1 (i.e. full investment constraint)
-  \item box: minimum weight of any asset must be greater than or equal to 0.05 and the maximum weight of any asset must be less than or equal to 0.4.
-\end{itemize}
-  \item Objectives
-  \begin{itemize}
-  \item risk objective: minimize portfolio var(iance).
-\end{itemize}
-
-\end{itemize}
+TODO Add more objectives
 
 \section{Optimization}
-Note that this currently does not work, but is how I envision the portfolio object replacing the current constraint object.
-<<>>=
-#out <- optimize.portfolio(R=returns, portfolio=pspec, optimize_method="ROI")
-@
+TODO
 
 
 \end{document}
