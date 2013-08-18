@@ -249,8 +249,14 @@ print.optimize.portfolio.ROI <- function(object, digits = max(3, getOption("digi
   cat("\n")
   
   # get objective measure
+  objective_measures <- object$objective_measures
+  tmp_obj <- as.numeric(unlist(objective_measures))
+  names(tmp_obj) <- names(objective_measures)
   cat("Objective Measure:\n")
-  print(as.numeric(object$out), digits=digits)
+  for(i in 1:length(objective_measures)){
+    print(tmp_obj[i], digits=4)
+    cat("\n")
+  }
   cat("\n")
 }
 

@@ -346,13 +346,8 @@ extractStats.optimize.portfolio.GenSA <- function(object, prefix=NULL, ...) {
 #' @export
 extractObjectiveMeasures <- function(object){
   if(!inherits(object, "optimize.portfolio")) stop("object must be of class 'optimize.portfolio'")
-  if(inherits(object, "optimize.portfolio.ROI")){
-    # objective measures returned as $out for ROI solvers
-    out <- object$out
-  } else {
-    # objective measures returned as $objective_measures for all other solvers
-    out <- object$objective_measures
-  }
+  # objective measures returned as $objective_measures for all other solvers
+  out <- object$objective_measures
   return(out)
 }
 

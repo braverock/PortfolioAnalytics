@@ -696,31 +696,36 @@ optimize.portfolio_v2 <- function(
     if("var" %in% names(moments)){
       # Minimize variance if the only objective specified is variance
       # Maximize Quadratic Utility if var and mean are specified as objectives
-      out <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target)
-      out$call <- call
+      roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target)
+      weights <- roi_result$weights
+      out <- list(weights=weights, objective_measures=suppressWarnings(constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures), out=roi_result$out, call=call)
     }
     if(length(names(moments)) == 1 & "mean" %in% names(moments)) {
       # Maximize return if the only objective specified is mean
       if(!is.null(constraints$max_pos)) {
         # This is an MILP problem if max_pos is specified as a constraint
-        out <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=target)
-        out$call <- call
+        roi_result <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=target)
+        weights <- roi_result$weights
+        out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=roi_result$out, call=call)
       } else {
         # Maximize return LP problem
-        out <- maxret_opt(R=R, constraints=constraints, moments=moments, target=target)
-        out$call <- call
+        roi_result <- maxret_opt(R=R, constraints=constraints, moments=moments, target=target)
+        weights <- roi_result$weights
+        out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=roi_result$out, call=call)
       }
     }
     if( any(c("CVaR", "ES", "ETL") %in% names(moments)) ) {
       # Minimize sample ETL/ES/CVaR if CVaR, ETL, or ES is specified as an objective
       if(!is.null(constraints$max_pos)) {
         # This is an MILP problem if max_pos is specified as a constraint
-        out <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
-        out$call <- call
+        roi_result <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
+        weights <- roi_result$weights
+        out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=roi_result$out, call=call)
       } else {
         # Minimize sample ETL/ES/CVaR LP Problem
-        out <- etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
-        out$call <- call
+        roi_result <- etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
+        weights <- roi_result$weights
+        out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=roi_result$out, call=call)
       }
     }
   } ## end case for ROI
@@ -821,6 +826,7 @@ optimize.portfolio_v2 <- function(
   # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
   if(message) message(c("elapsed time:", end_t-start_t))
   out$portfolio <- portfolio
+  out$R <- R
   out$data_summary <- list(first=first(R), last=last(R))
   out$elapsed_time <- end_t - start_t
   out$end_t <- as.character(Sys.time())
