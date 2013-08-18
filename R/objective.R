@@ -12,6 +12,9 @@
 
 #' constructor for class 'objective'
 #' 
+#' Typically called as a sub-function by the user function \code{\link{add.objective}}.
+#' See main documentation there.
+#' 
 #' @param name name of the objective which will be used to call a function, like 'ES', 'VaR', 'mean'
 #' @param target univariate target for the objective, default NULL
 #' @param arguments default arguments to be passed to an objective function when executed
@@ -19,6 +22,8 @@
 #' @param \dots any other passthrough parameters
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param objclass string class to apply, default 'objective'
+#' @param x an object potentially of type 'objective' to test
+#' @seealso \code{\link{add.objective}}, \code{\link{portfolio.spec}}
 #' @author Brian G. Peterson
 #' @export
 objective<-function(name , target=NULL , arguments, enabled=TRUE , ..., multiplier=1, objclass='objective'){
@@ -43,32 +48,14 @@ objective<-function(name , target=NULL , arguments, enabled=TRUE , ..., multipli
 
 
 #' check class of an objective object
-#' @param x an object potentially of type 'objective' to test
 #' @author Brian G. Peterson
 #' @export
 is.objective <- function( x ) {
   inherits( x, "objective" )
 }
 
-#' General interface for adding optimization objectives, including risk, return, and risk budget
-#' 
-#' This function is the main function for adding and updating business objectives in an object of type \code{\link{constraint}}.
-#' 
-#' In general, you will define your objective as one of three types: 'return', 'risk', or 'risk_budget'.  
-#' These have special handling and intelligent defaults for dealing with the function most likely to be 
-#' used as objectives, including mean, median, VaR, ES, etc.
-#' 
-#' @param constraints an object of type "constraints" to add the objective to, specifying the constraints for the optimization, see \code{\link{constraint}}
-#' @param type character type of the objective to add or update, currently 'return','risk', or 'risk_budget'
-#' @param name name of the objective, should correspond to a function, though we will try to make allowances
-#' @param arguments default arguments to be passed to an objective function when executed
-#' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters 
-#' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
-#' @author Brian G. Peterson
-#' 
-#' @seealso \code{\link{constraint}}
-#' 
+#' @rdname add.objective
+#' @name add.objective
 #' @export
 add.objective_v1 <- function(constraints, type, name, arguments=NULL, enabled=TRUE, ..., indexnum=NULL)
 {
@@ -131,26 +118,8 @@ add.objective_v1 <- function(constraints, type, name, arguments=NULL, enabled=TR
     return(constraints)
 }
 
-#' General interface for adding optimization objectives, including risk, return, and risk budget
-#' 
-#' This function is the main function for adding and updating business objectives in an object of type \code{\link{portfolio}}.
-#' 
-#' In general, you will define your objective as one of three types: 'return', 'risk', or 'risk_budget'.  
-#' These have special handling and intelligent defaults for dealing with the function most likely to be 
-#' used as objectives, including mean, median, VaR, ES, etc.
-#' 
-#' @param portfolio an object of type 'portfolio' to add the objective to, specifying the portfolio for the optimization, see \code{\link{portfolio}}
-#' @param type character type of the objective to add or update, currently 'return','risk', or 'risk_budget'
-#' @param name name of the objective, should correspond to a function, though we will try to make allowances
-#' @param arguments default arguments to be passed to an objective function when executed
-#' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters 
-#' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
-#' @author Brian G. Peterson and Ross Bennett
-#' @aliases add.objective
 #' @rdname add.objective
-#' @seealso \code{\link{objective}}
-#' 
+#' @name add.objective
 #' @export
 add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=TRUE, ..., indexnum=NULL){
   # This function is based on the original add.objective function, but modified
@@ -216,7 +185,30 @@ add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=TRUE
   return(portfolio)
 }
 
-# Alias add.objective_v2 to add.objective
+#' General interface for adding optimization objectives, including risk, return, and risk budget
+#' 
+#' This function is the main function for adding and updating business objectives in an object of type \code{\link{portfolio.spec}}.
+#' 
+#' In general, you will define your objective as one of three types: 'return', 'risk', or 'risk_budget'.  
+#' These have special handling and intelligent defaults for dealing with the function most likely to be 
+#' used as objectives, including mean, median, VaR, ES, etc.
+#' 
+#' Objectives of type 'turnove' and 'minmax' are also supported.
+#' 
+#' @param portfolio an object of type 'portfolio' to add the objective to, specifying the portfolio for the optimization, see \code{\link{portfolio}}
+#' @param type character type of the objective to add or update, currently 'return','risk', or 'risk_budget'
+#' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param arguments default arguments to be passed to an objective function when executed
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters 
+#' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
+#' @param constraints an object of type "constraints" to add the objective to, specifying the constraints for the optimization, see \code{\link{constraint}} (for _v1 objectives only)
+#' @author Brian G. Peterson and Ross Bennett
+#' @aliases 
+#' add.objective_v2, add.objective_v1
+#' @seealso \code{\link{objective}}, \code{\link{portfolio.spec}}
+#' @rdname add.objective
+#' @name add.objective
 #' @export
 add.objective <- add.objective_v2
 
@@ -352,7 +344,7 @@ turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, 
 
 #' constructor for class tmp_minmax_objective
 #'
-#' I am add this as a temporary objective allowing for a min and max to be specified. Testing
+#' I am adding this as a temporary objective allowing for a min and max to be specified. Testing
 #' to understand how the objective function responds to a range of allowable values. I will
 #' likely add this to the turnover, diversification, and volatility constraints 
 #' allowing the user to specify a range of values.

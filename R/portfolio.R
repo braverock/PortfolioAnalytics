@@ -32,7 +32,12 @@
 #' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}} Default NULL
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @return an object of class \code{portfolio}
-#' @author Ross Bennett
+#' @author Ross Bennett, Brian G. Peterson
+#' @aliases portfolio
+#' @seealso 
+#'  \code{\link{add.constraint}},
+#'  \code{\link{add.objective}},
+#'  \code{\link{optimize.portfolio}}
 #' @examples 
 #' data(edhec)
 #' pspec <- portfolio.spec(assets=colnames(edhec))

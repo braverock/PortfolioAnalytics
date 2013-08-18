@@ -1,9 +1,16 @@
-\name{add.objective_v2}
+\name{add.objective}
 \alias{add.objective}
-\alias{add.objective_v2}
+\alias{add.objective_v1}
+\alias{add.objective_v2,}
 \title{General interface for adding optimization objectives, including risk, return, and risk budget}
 \usage{
+  add.objective_v1(constraints, type, name,
+    arguments = NULL, enabled = TRUE, ..., indexnum = NULL)
+
   add.objective_v2(portfolio, type, name, arguments = NULL,
+    enabled = TRUE, ..., indexnum = NULL)
+
+  add.objective(portfolio, type, name, arguments = NULL,
     enabled = TRUE, ..., indexnum = NULL)
 }
 \arguments{
@@ -27,11 +34,16 @@
   \item{indexnum}{if you are updating a specific
   constraint, the index number in the $objectives list to
   update}
+
+  \item{constraints}{an object of type "constraints" to add
+  the objective to, specifying the constraints for the
+  optimization, see \code{\link{constraint}} (for _v1
+  objectives only)}
 }
 \description{
   This function is the main function for adding and
   updating business objectives in an object of type
-  \code{\link{portfolio}}.
+  \code{\link{portfolio.spec}}.
 }
 \details{
   In general, you will define your objective as one of
@@ -39,11 +51,14 @@
   have special handling and intelligent defaults for
   dealing with the function most likely to be used as
   objectives, including mean, median, VaR, ES, etc.
+
+  Objectives of type 'turnove' and 'minmax' are also
+  supported.
 }
 \author{
   Brian G. Peterson and Ross Bennett
 }
 \seealso{
-  \code{\link{objective}}
+  \code{\link{objective}}, \code{\link{portfolio.spec}}
 }
 

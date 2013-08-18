@@ -1,9 +1,22 @@
-\name{optimize.portfolio_v2}
+\name{optimize.portfolio}
 \alias{optimize.portfolio}
+\alias{optimize_portfolio_v1}
 \alias{optimize.portfolio_v2}
-\title{version 2 wrapper for constrained optimization of portfolios}
+\alias{optimize.portfolio_v2,}
+\title{constrained optimization of portfolios}
 \usage{
+  optimize.portfolio_v1(R, constraints,
+    optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
+    search_size = 20000, trace = FALSE, ..., rp = NULL,
+    momentFUN = "set.portfolio.moments_v1")
+
   optimize.portfolio_v2(R, portfolio, constraints = NULL,
+    objectives = NULL,
+    optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
+    search_size = 20000, trace = FALSE, ..., rp = NULL,
+    momentFUN = "set.portfolio.moments", message = FALSE)
+
+  optimize.portfolio(R, portfolio, constraints = NULL,
     objectives = NULL,
     optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
@@ -59,13 +72,14 @@
 \description{
   This function aims to provide a wrapper for constrained
   optimization of portfolios that allows the user to
-  specify constraints and business objectives.
+  specify box constraints and business objectives. It will
+  be the objective function\code{FUN} passed to any
+  supported \R optimization solver.
 }
 \details{
-  This function currently supports DEoptim, random
-  portfolios, ROI, pso, and GenSA as back ends. Additional
-  back end contributions for Rmetrics, ghyp, etc. would be
-  welcome.
+  This function currently supports DEoptim and random
+  portfolios as back ends. Additional back end
+  contributions for Rmetrics, ghyp, etc. would be welcome.
 
   When using random portfolios, search_size is precisely
   that, how many portfolios to test.  You need to make sure
@@ -105,17 +119,42 @@
   argument to the \code{portfolio} object)} \item{Mean CVaR
   optimization subject to leverage, box, group, position
   limit, target mean return, and/or factor exposure
-  constraints and target portfolio return} } Lastly,
-  because these convex optimization problem are
-  standardized, there is no need for a penalty term.
-  Therefore, the \code{multiplier} argument in
-  \code{\link{add.objective}} passed into the complete
-  constraint object are ingnored by the solver.
+  constraints and target portfolio return} } Because these
+  convex optimization problem are standardized, there is no
+  need for a penalty term. The \code{multiplier} argument
+  in \code{\link{add.objective}} passed into the complete
+  constraint object are ingnored by the ROI solver.
+
+  ROI also can solve quadratic and linear problems with
+  group constraints by added a \code{groups} argument into
+  the constraints object. This argument is a vector with
+  each of its elements the number of assets per group. The
+  group constraints, \code{cLO} and \code{cUP}, are also
+  added to the constraints object.
+
+  For example, if you have 9 assets, and would like to
+  require that the the first 3 assets are in one group, the
+  second 3 are in another, and the third are in another,
+  then you add the grouping by \code{constraints$groups <-
+  c(3,3,3)}.
+
+  To apply the constraints that the first group must
+  compose of at least 20% of the weight, the second group
+  15%, and the third group 10%, and that now signle group
+  should compose of more that 50% of the weight, then you
+  would add the lower group constraint as
+  \code{constraints$cLO <- c(0.20, 0.15, 0.10)} and the
+  upper constraints as \code{constraints$cUP <-
+  rep(0.5,3)}. These group constraint can be set for all
+  five convex optimization problems listed above, as well
+  as for the global stochastic solvers DEoptim, random,
+  pso, and GenSA.
 
   If you would like to interface with
   \code{optimize.portfolio} using matrix formulations, then
   use \code{ROI_old}.
-
+}
+\note{
   An object of class \code{v1_constraint} can be passed in
   for the \code{constraints} argument. The
   \code{v1_constraint} object was used in the previous 'v1'
@@ -128,6 +167,9 @@
   the \code{portfolio} object.
 }
 \author{
-  Kris Boudt, Peter Carl, Brian G. Peterson
+  Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
+}
+\seealso{
+  \code{\link{portfolio.spec}}
 }
 

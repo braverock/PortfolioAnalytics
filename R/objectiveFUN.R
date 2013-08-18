@@ -4,6 +4,7 @@
 #' @param weights vector of weights from optimization
 #' @param wts.init vector of initial weights used to calculate turnover from
 #' @author Ross Bennett
+#' @export
 turnover <- function(weights, wts.init=NULL) {
   # turnover function from https://r-forge.r-project.org/scm/viewvc.php/pkg/PortfolioAnalytics/sandbox/script.workshop2012.R?view=markup&root=returnanalytics
   

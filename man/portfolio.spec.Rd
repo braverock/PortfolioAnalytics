@@ -1,4 +1,5 @@
 \name{portfolio.spec}
+\alias{portfolio}
 \alias{portfolio.spec}
 \title{constructor for class portfolio}
 \usage{
@@ -53,6 +54,11 @@ pspec <- portfolio.spec(assets=colnames(edhec))
 pspec <- portfolio.spec(assets=10, weight_seq=generatesequence())
 }
 \author{
-  Ross Bennett
+  Ross Bennett, Brian G. Peterson
+}
+\seealso{
+  \code{\link{add.constraint}},
+  \code{\link{add.objective}},
+  \code{\link{optimize.portfolio}}
 }
 

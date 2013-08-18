@@ -24,11 +24,19 @@
 
   \item{objclass}{string class to apply, default
   'objective'}
+
+  \item{x}{an object potentially of type 'objective' to
+  test}
 }
 \description{
-  constructor for class 'objective'
+  Typically called as a sub-function by the user function
+  \code{\link{add.objective}}. See main documentation
+  there.
 }
 \author{
   Brian G. Peterson
+}
+\seealso{
+  \code{\link{add.objective}}, \code{\link{portfolio.spec}}
 }
 

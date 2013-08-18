@@ -2,6 +2,12 @@
 \alias{optimize.portfolio.rebalancing}
 \title{portfolio optimization with support for rebalancing or rolling periods}
 \usage{
+  optimize.portfolio.rebalancing_v1(R, constraints,
+    optimize_method = c("DEoptim", "random", "ROI"),
+    search_size = 20000, trace = FALSE, ..., rp = NULL,
+    rebalance_on = NULL, training_period = NULL,
+    trailing_periods = NULL)
+
   optimize.portfolio.rebalancing(R, portfolio,
     constraints = NULL, objectives = NULL,
     optimize_method = c("DEoptim", "random", "ROI"),

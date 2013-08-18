@@ -1,9 +1,15 @@
-\name{constrained_objective_v2}
+\name{constrained_objective}
 \alias{constrained_objective}
 \alias{constrained_objective_v2}
-\title{constrained_objective_v2 function to calculate a numeric return value for a portfolio based on a set of constraints and objectives}
+\title{calculate a numeric return value for a portfolio based on a set of constraints and objectives}
 \usage{
+  constrained_objective_v1(w, R, constraints, ...,
+    trace = FALSE, normalize = TRUE, storage = FALSE)
+
   constrained_objective_v2(w, R, portfolio, ...,
+    trace = FALSE, normalize = TRUE, storage = FALSE)
+
+  constrained_objective(w, R, portfolio, ...,
     trace = FALSE, normalize = TRUE, storage = FALSE)
 }
 \arguments{
@@ -80,9 +86,9 @@
   return times the multiplier (e.g. -1 or -10). Adding a
   return objective defaults the multiplier to -1.
 
-  Additional parameters for random portfolios or
-  \code{\link[DEoptim]{DEoptim.control}} may be passed in
-  via \dots
+  Additional parameters for other solvers (e.g. random
+  portfolios or \code{\link[DEoptim]{DEoptim.control}} or
+  pso or GenSA may be passed in via \dots
 }
 \author{
   Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett

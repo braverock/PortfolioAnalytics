@@ -4,10 +4,6 @@
 \usage{
   is.objective(x)
 }
-\arguments{
-  \item{x}{an object potentially of type 'objective' to
-  test}
-}
 \description{
   check class of an objective object
 }

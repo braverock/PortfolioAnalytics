@@ -29,40 +29,39 @@
 }
 \description{
   This is the main function for adding and/or updating
-  constraints to the \code{{portfolio}} object.
+  constraints to the \code{\link{portfolio.spec}} object.
 }
 \details{
-  The following constraint types are supported: \itemize{
-  \item{\code{weight_sum}, \code{weight}, \code{leverage}}{
-  Specify constraint on the sum of the weights, see
-  \code{\link{weight_sum_constraint}}}
+  The following constraint types may be specified:
+  \itemize{ \item{\code{weight_sum}, \code{weight},
+  \code{leverage}}{ Specify constraint on the sum of the
+  weights, see \code{\link{weight_sum_constraint}} }
   \item{\code{full_investment}}{ Special case to set
   \code{min_sum=1} and \code{max_sum=1} of weight sum
-  constraints} \item{\code{dollar_neutral}, \code{active}}{
-  Special case to set \code{min_sum=0} and \code{max_sum=0}
-  of weight sum constraints} \item{\code{box}}{ Specify
-  constraints for the individual asset weights, see
-  \code{\link{box_constraint}}} \item{\code{long_only}}{
-  Special case to set \code{min=0} and \code{max=1} of box
-  constraints} \item{\code{group}}{ Specify a constraint on
-  the sum of weights within groups and the number of assets
-  with non-zero weights in groups, see
-  \code{\link{group_constraint}}} \item{\code{turnover}}{
-  Specify a constraint for target turnover. Turnover is
-  calculated from a set of initial weights, see
-  \code{\link{turnover_constraint}}}
-  \item{\code{diversification}}{ Specify a constraint for
-  target diversification of a set of weights, see
-  \code{\link{diversification_constraint}}}
-  \item{\code{position_limit}}{ Specify a constraint on the
-  number of positions (i.e. assets with non-zero weights as
-  well as the number of long and short positions, see
-  \code{\link{position_limit_constraint}}}
-  \item{\code{return}}{ Specify a constraint for target
-  mean return, see \code{\link{return_constraint}}}
-  \item{\code{factor_exposure}}{ Specify a constraint for
-  risk factor exposures, see
-  \code{\link{factor_exposure_constraint}}} }
+  constraints } \item{\code{dollar_neutral},
+  \code{active}}{ Special case to set \code{min_sum=0} and
+  \code{max_sum=0} of weight sum constraints }
+  \item{\code{box}}{ box constraints for the individual
+  asset weights, see \code{\link{box_constraint}} }
+  \item{\code{long_only}}{ Special case to set \code{min=0}
+  and \code{max=1} of box constraints }
+  \item{\code{group}}{ specify the sum of weights within
+  groups and the number of assets with non-zero weights in
+  groups, see \code{\link{group_constraint}} }
+  \item{\code{turnover}}{ Specify a constraint for target
+  turnover. Turnover is calculated from a set of initial
+  weights, see \code{\link{turnover_constraint}} }
+  \item{\code{diversification}}{ target diversification of
+  a set of weights, see
+  \code{\link{diversification_constraint}} }
+  \item{\code{position_limit}}{ Specify the number of
+  non-zero positions, see
+  \code{\link{position_limit_constraint}} }
+  \item{\code{return}}{ Specify the target mean return, see
+  \code{\link{return_constraint}}}
+  \item{\code{factor_exposure}}{ Specify risk factor
+  exposures, see \code{\link{factor_exposure_constraint}}}
+  }
 }
 \examples{
 data(edhec)
@@ -108,13 +107,14 @@ pspec <- add.constraint(portfolio=pspec, type="return", return_target=0.007)
   Ross Bennett
 }
 \seealso{
+  \code{\link{portfolio.spec}}
   \code{\link{weight_sum_constraint}},
   \code{\link{box_constraint}},
   \code{\link{group_constraint}},
   \code{\link{turnover_constraint}},
   \code{\link{diversification_constraint}},
-  \code{\link{position_limit_constraint},
-  \code{\link{return_constraint},
+  \code{\link{position_limit_constraint}},
+  \code{\link{return_constraint}},
   \code{\link{factor_exposure_constraint}}
 }
 

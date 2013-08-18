@@ -26,9 +26,9 @@
   \item{\dots}{any other passthru parameters}
 }
 \description{
-  I am add this as a temporary objective allowing for a min
-  and max to be specified. Testing to understand how the
-  objective function responds to a range of allowable
+  I am adding this as a temporary objective allowing for a
+  min and max to be specified. Testing to understand how
+  the objective function responds to a range of allowable
   values. I will likely add this to the turnover,
   diversification, and volatility constraints allowing the
   user to specify a range of values.

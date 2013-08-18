@@ -10,61 +10,9 @@
 #
 ###############################################################################
 
-#' wrapper for constrained optimization of portfolios
-#' 
-#' This function aims to provide a wrapper for constrained optimization of 
-#' portfolios that allows the user to specify box constraints and business 
-#' objectives.
-#' 
-#' This function currently supports DEoptim and random portfolios as back ends.
-#' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
-#'
-#' When using random portfolios, search_size is precisely that, how many 
-#' portfolios to test.  You need to make sure to set your feasible weights 
-#' in generatesequence to make sure you have search_size unique 
-#' portfolios to test, typically by manipulating the 'by' parameter 
-#' to select something smaller than .01 
-#' (I often use .002, as .001 seems like overkill)
-#' 
-#' When using DE, search_size is decomposed into two other parameters 
-#' which it interacts with, NP and itermax.
-#' 
-#' NP, the number of members in each population, is set to cap at 2000 in 
-#' DEoptim, and by default is the number of parameters (assets/weights) *10.
-#' 
-#' itermax, if not passed in dots, defaults to the number of parameters (assets/weights) *50.
-#' 
-#' When using GenSA and want to set \code{verbose=TRUE}, instead use \code{trace}. 
-#' 
-#' The extension to ROI solves a limit type of convex optimization problems:
-#' 1)  Maxmimize portfolio return subject box constraints on weights
-#' 2)  Minimize portfolio variance subject to box constraints (otherwise known as global minimum variance portfolio)
-#' 3)  Minimize portfolio variance subject to box constraints and a desired portfolio return
-#' 4)  Maximize quadratic utility subject to box constraints and risk aversion parameter (this is passed into \code{optimize.portfolio} as as added argument to the \code{constraints} object)
-#' 5)  Mean CVaR optiimization subject to box constraints and target portfolio return
-#' Lastly, because these convex optimization problem are standardized, there is no need for a penalty term. 
-#' Therefore, the \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the solver. 
-#' ROI also can solve quadratic and linear problems with group constraints by added a \code{groups} argument into the constraints object. 
-#' This argument is a vector with each of its elements the number of assets per group.  
-#' The group constraints, \code{cLO} and \code{cUP}, are also added to the constraints object.
-#' 
-#' For example, if you have 9 assets, and would like to require that the the first 3 assets are in one group, the second 3 are in another, and the third are in another, then you add the grouping by \code{constraints$groups <- c(3,3,3)}.
-#' To apply the constraints that the first group must compose of at least 20% of the weight, the second group 15%, and the third group 10%, and that now signle group should compose of more that 50% of the weight, then you would add the lower group constraint as \code{constraints$cLO <- c(0.20, 0.15, 0.10)} and the upper constraints as \code{constraints$cUP <- rep(0.5,3)}. 
-#' These group constraint can be set for all five optimization problems listed above. 
-#'   
-#' If you would like to interface with \code{optimize.portfolio} using matrix formulations, then use \code{ROI_old}. 
-#'  
-#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}, if using closed for solver, need to pass a \code{\link{constraint_ROI}} object.
-#' @param optimize_method one of "DEoptim", "random", "ROI","ROI_old", "pso", "GenSA".  For using \code{ROI_old}, need to use a constraint_ROI object in constraints. For using \code{ROI}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} and \code{Rglpk}.
-#' @param search_size integer, how many portfolios to test, default 20,000
-#' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
-#' @param \dots any other passthru parameters
-#' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
-#' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments}}
-#' 
-#' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
-#' @author Kris Boudt, Peter Carl, Brian G. Peterson
+
+#' @rdname optimize.portfolio
+#' @name optimize.portfolio
 #' @export
 optimize.portfolio_v1 <- function(
 		R,
@@ -478,68 +426,6 @@ optimize.portfolio_v1 <- function(
 }
 
 ##### version 2 of optimize.portfolio #####
-#' version 2 wrapper for constrained optimization of portfolios
-#' 
-#' This function aims to provide a wrapper for constrained optimization of 
-#' portfolios that allows the user to specify constraints and business 
-#' objectives.
-#' 
-#' This function currently supports DEoptim, random portfolios, ROI, pso, and GenSA as back ends.
-#' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
-#'
-#' When using random portfolios, search_size is precisely that, how many 
-#' portfolios to test.  You need to make sure to set your feasible weights 
-#' in generatesequence to make sure you have search_size unique 
-#' portfolios to test, typically by manipulating the 'by' parameter 
-#' to select something smaller than .01 
-#' (I often use .002, as .001 seems like overkill)
-#' 
-#' When using DE, search_size is decomposed into two other parameters 
-#' which it interacts with, NP and itermax.
-#' 
-#' NP, the number of members in each population, is set to cap at 2000 in 
-#' DEoptim, and by default is the number of parameters (assets/weights) *10.
-#' 
-#' itermax, if not passed in dots, defaults to the number of parameters (assets/weights) *50.
-#' 
-#' When using GenSA and want to set \code{verbose=TRUE}, instead use \code{trace}. 
-#' 
-#' The extension to ROI solves a limited type of convex optimization problems:
-#' \itemize{
-#' \item{Maxmimize portfolio return subject leverage, box, group, position limit, target mean return, and/or factor exposure constraints on weights}
-#' \item{Minimize portfolio variance subject to leverage, box, group, and/or factor exposure constraints (otherwise known as global minimum variance portfolio)}
-#' \item{Minimize portfolio variance subject to leverage, box, group, and/or factor exposure constraints and a desired portfolio return}
-#' \item{Maximize quadratic utility subject to leverage, box, group, target mean return, and/or factor exposure constraints and risk aversion parameter.
-#' (The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object)}
-#' \item{Mean CVaR optimization subject to leverage, box, group, position limit, target mean return, and/or factor exposure constraints and target portfolio return}
-#' }
-#' Lastly, because these convex optimization problem are standardized, there is no need for a penalty term. 
-#' Therefore, the \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the solver.  
-#'   
-#' If you would like to interface with \code{optimize.portfolio} using matrix formulations, then use \code{ROI_old}. 
-#'  
-#' An object of class \code{v1_constraint} can be passed in for the \code{constraints} argument.
-#' The \code{v1_constraint} object was used in the previous 'v1' specification to specify the 
-#' constraints and objectives for the optimization problem, see \code{\link{constraint}}. 
-#' We will attempt to detect if the object passed into the constraints argument 
-#' is a \code{v1_constraint} object and update to the 'v2' specification by adding the 
-#' constraints and objectives to the \code{portfolio} object.
-#'  
-#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
-#' @param constraints default=NULL, a list of constraint objects. An object of class ]v1_constraint' can be passed in here.
-#' @param objectives default=NULL, a list of objective objects
-#' @param optimize_method one of "DEoptim", "random", "ROI","ROI_old", "pso", "GenSA".  For using \code{ROI_old}, need to use a constraint_ROI object in constraints. For using \code{ROI}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} and \code{Rglpk}.
-#' @param search_size integer, how many portfolios to test, default 20,000
-#' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
-#' @param \dots any other passthru parameters
-#' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
-#' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments_v2}}
-#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
-#' 
-#' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
-#' @author Kris Boudt, Peter Carl, Brian G. Peterson
-#' @aliases optimize.portfolio
 #' @rdname optimize.portfolio
 #' @export
 optimize.portfolio_v2 <- function(
@@ -942,30 +828,100 @@ optimize.portfolio_v2 <- function(
   return(out)
 }
 
-# Alias for optimize.portfolio_
-#' @export
-optimize.portfolio <- optimize.portfolio_v2
-
-#' version 1 portfolio optimization with support for rebalancing or rolling periods
+#' constrained optimization of portfolios
 #' 
-#' This function may eventually be wrapped into optimize.portfolio
+#' This function aims to provide a wrapper for constrained optimization of 
+#' portfolios that allows the user to specify box constraints and business 
+#' objectives.  
+#' It will be the objective function\code{FUN} passed to any supported \R 
+#' optimization solver.
 #' 
-#' For now, we'll set the rebalancing periods here, though I think they should eventually be part of the constraints object
+#' @details
+#' This function currently supports DEoptim and random portfolios as back ends.
+#' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
+#'
+#' When using random portfolios, search_size is precisely that, how many 
+#' portfolios to test.  You need to make sure to set your feasible weights 
+#' in generatesequence to make sure you have search_size unique 
+#' portfolios to test, typically by manipulating the 'by' parameter 
+#' to select something smaller than .01 
+#' (I often use .002, as .001 seems like overkill)
 #' 
-#' This function is massively parallel, and will require 'foreach' and we suggest that you register a parallel backend.
+#' When using DE, search_size is decomposed into two other parameters 
+#' which it interacts with, NP and itermax.
 #' 
+#' NP, the number of members in each population, is set to cap at 2000 in 
+#' DEoptim, and by default is the number of parameters (assets/weights) *10.
+#' 
+#' itermax, if not passed in dots, defaults to the number of parameters (assets/weights) *50.
+#' 
+#' When using GenSA and want to set \code{verbose=TRUE}, instead use \code{trace}. 
+#' 
+#' The extension to ROI solves a limited type of convex optimization problems:
+#' \itemize{
+#' \item{Maxmimize portfolio return subject leverage, box, group, position limit, target mean return, and/or factor exposure constraints on weights}
+#' \item{Minimize portfolio variance subject to leverage, box, group, and/or factor exposure constraints (otherwise known as global minimum variance portfolio)}
+#' \item{Minimize portfolio variance subject to leverage, box, group, and/or factor exposure constraints and a desired portfolio return}
+#' \item{Maximize quadratic utility subject to leverage, box, group, target mean return, and/or factor exposure constraints and risk aversion parameter.
+#' (The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object)}
+#' \item{Mean CVaR optimization subject to leverage, box, group, position limit, target mean return, and/or factor exposure constraints and target portfolio return}
+#' }
+#' Because these convex optimization problem are standardized, there is no need for a penalty term. 
+#' The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the ROI solver.  
+#' 
+#' ROI also can solve quadratic and linear problems with group constraints 
+#' by added a \code{groups} argument into the constraints object. 
+#' This argument is a vector with each of its elements the number of assets per group.  
+#' The group constraints, \code{cLO} and \code{cUP}, are also added to the constraints object.
+#' 
+#' For example, if you have 9 assets, and would like to require that the 
+#' the first 3 assets are in one group, the second 3 are in another, and 
+#' the third are in another, then you add the grouping 
+#' by \code{constraints$groups <- c(3,3,3)}.
+#' 
+#' To apply the constraints that the first group must compose of at 
+#' least 20% of the weight, the second group 15%, and the third group 10%, 
+#' and that now signle group should compose of more that 50% of the weight, 
+#' then you would add the lower group constraint as 
+#' \code{constraints$cLO <- c(0.20, 0.15, 0.10)} and 
+#' the upper constraints as \code{constraints$cUP <- rep(0.5,3)}. 
+#' These group constraint can be set for all five convex optimization problems listed above,
+#' as well as for the global stochastic solvers DEoptim, random, pso, and GenSA. 
+#'   
+#' If you would like to interface with \code{optimize.portfolio} using matrix formulations, then use \code{ROI_old}. 
+#
+#' @note
+#' An object of class \code{v1_constraint} can be passed in for the \code{constraints} argument.
+#' The \code{v1_constraint} object was used in the previous 'v1' specification to specify the 
+#' constraints and objectives for the optimization problem, see \code{\link{constraint}}. 
+#' We will attempt to detect if the object passed into the constraints argument 
+#' is a \code{v1_constraint} object and update to the 'v2' specification by adding the 
+#' constraints and objectives to the \code{portfolio} object.
+#'
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
-#' @param optimize_method one of "DEoptim" or "random"
+#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
+#' @param constraints default=NULL, a list of constraint objects. An object of class ]v1_constraint' can be passed in here.
+#' @param objectives default=NULL, a list of objective objects
+#' @param optimize_method one of "DEoptim", "random", "ROI","ROI_old", "pso", "GenSA".  For using \code{ROI_old}, need to use a constraint_ROI object in constraints. For using \code{ROI}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} and \code{Rglpk}.
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
-#' @param rp a set of random portfolios passed into the function, to prevent recalculation
-#' @param rebalance_on a periodicity as returned by xts function periodicity and usable by endpoints
-#' @param training_period period to use as training in the front of the data
-#' @param trailing_periods if set, an integer with the number of periods to roll over, default NULL will run from inception 
+#' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
+#' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments_v2}}
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
+#' 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
-#' @author Kris Boudt, Peter Carl, Brian G. Peterson
+#' 
+#' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
+#' @aliases optimize.portfolio_v2, optimize_portfolio_v1
+#' @seealso \code{\link{portfolio.spec}}
+#' @name optimize.portfolio
+#' @export
+optimize.portfolio <- optimize.portfolio_v2
+
+
+#' @rdname optimize.portfolio.rebalancing
+#' @name optimize.portfolio.rebalancing
 #' @export
 optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
 {
@@ -1028,6 +984,7 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' @param trailing_periods if set, an integer with the number of periods to roll over, default NULL will run from inception 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
+#' @name optimize.portfolio.rebalancing
 #' @export
 optimize.portfolio.rebalancing <- function(R, portfolio, constraints=NULL, objectives=NULL, optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
 {

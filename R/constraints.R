@@ -12,6 +12,11 @@
 
 #' constructor for class constraint
 #' 
+#' This function is the constructior for the constraint object stored in the 
+#' \code{\link{portfolio.spec}} object.
+#' 
+#' See main documentation in \code{\link{add.constraint}}
+#' 
 #' @param assets number of assets, or optionally a named vector of assets specifying seed weights
 #' @param ... any other passthru parameters
 #' @param min numeric or named vector specifying minimum weight box constraints
@@ -21,7 +26,13 @@
 #' @param min_sum minimum sum of all asset weights, default .99
 #' @param max_sum maximum sum of all asset weights, default 1.01
 #' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
-#' @author Peter Carl and Brian G. Peterson
+#' @param type character type of the constraint to add or update
+#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
+#' @param ... any other passthru parameters
+#' @param constrclass character to name the constraint class
+#' @author Peter Carl, Brian G. Peterson, Ross Bennett
+#' @aliases contraint_v1, constraint_v2
+#' @seealso \code{\link{add.constraint}}
 #' @examples 
 #' exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, weight_seq=generatesequence())
 #' @export
@@ -152,15 +163,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
 }
 
 
-#' constructor for class v2_constraint
-#' 
-#' This function is called by the constructor for the specific constraint.
-#' 
-#' @param type character type of the constraint to add or update
-#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
-#' @param ... any other passthru parameters
-#' @param constrclass character to name the constraint class
-#' @author Ross Bennett
+#' @rdname constraint 
 #' @export
 constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
   if(!hasArg(type)) stop("you must specify a constraint type")
@@ -181,21 +184,21 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 
 #' General interface for adding and/or updating optimization constraints.
 #' 
-#' This is the main function for adding and/or updating constraints to the \code{{portfolio}} object.
+#' This is the main function for adding and/or updating constraints to the \code{\link{portfolio.spec}} object.
 #' 
-#' The following constraint types are supported:
+#' The following constraint types may be specified:
 #' \itemize{
-#' \item{\code{weight_sum}, \code{weight}, \code{leverage}}{ Specify constraint on the sum of the weights, see \code{\link{weight_sum_constraint}}}
-#' \item{\code{full_investment}}{ Special case to set \code{min_sum=1} and \code{max_sum=1} of weight sum constraints}
-#' \item{\code{dollar_neutral}, \code{active}}{ Special case to set \code{min_sum=0} and \code{max_sum=0} of weight sum constraints}
-#' \item{\code{box}}{ Specify constraints for the individual asset weights, see \code{\link{box_constraint}}}
-#' \item{\code{long_only}}{ Special case to set \code{min=0} and \code{max=1} of box constraints}
-#' \item{\code{group}}{ Specify a constraint on the sum of weights within groups and the number of assets with non-zero weights in groups, see \code{\link{group_constraint}}}
-#' \item{\code{turnover}}{ Specify a constraint for target turnover. Turnover is calculated from a set of initial weights, see \code{\link{turnover_constraint}}}
-#' \item{\code{diversification}}{ Specify a constraint for target diversification of a set of weights, see \code{\link{diversification_constraint}}}
-#' \item{\code{position_limit}}{ Specify a constraint on the number of positions (i.e. assets with non-zero weights as well as the number of long and short positions, see \code{\link{position_limit_constraint}}}
-#' \item{\code{return}}{ Specify a constraint for target mean return, see \code{\link{return_constraint}}}
-#' \item{\code{factor_exposure}}{ Specify a constraint for risk factor exposures, see \code{\link{factor_exposure_constraint}}}
+#' \item{\code{weight_sum}, \code{weight}, \code{leverage}}{ Specify constraint on the sum of the weights, see \code{\link{weight_sum_constraint}} }
+#' \item{\code{full_investment}}{ Special case to set \code{min_sum=1} and \code{max_sum=1} of weight sum constraints }
+#' \item{\code{dollar_neutral}, \code{active}}{ Special case to set \code{min_sum=0} and \code{max_sum=0} of weight sum constraints }
+#' \item{\code{box}}{ box constraints for the individual asset weights, see \code{\link{box_constraint}} }
+#' \item{\code{long_only}}{ Special case to set \code{min=0} and \code{max=1} of box constraints }
+#' \item{\code{group}}{ specify the sum of weights within groups and the number of assets with non-zero weights in groups, see \code{\link{group_constraint}} }
+#' \item{\code{turnover}}{ Specify a constraint for target turnover. Turnover is calculated from a set of initial weights, see \code{\link{turnover_constraint}} }
+#' \item{\code{diversification}}{ target diversification of a set of weights, see \code{\link{diversification_constraint}} }
+#' \item{\code{position_limit}}{ Specify the number of non-zero positions, see \code{\link{position_limit_constraint}} }
+#' \item{\code{return}}{ Specify the target mean return, see \code{\link{return_constraint}}}
+#' \item{\code{factor_exposure}}{ Specify risk factor exposures, see \code{\link{factor_exposure_constraint}}}
 #' }
 #' 
 #' @param portfolio an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
@@ -205,7 +208,16 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' @param \dots any other passthru parameters to specify constraints
 #' @param indexnum if you are updating a specific constraint, the index number in the $constraints list to update
 #' @author Ross Bennett
-#' @seealso \code{\link{weight_sum_constraint}}, \code{\link{box_constraint}}, \code{\link{group_constraint}}, \code{\link{turnover_constraint}}, \code{\link{diversification_constraint}}, \code{\link{position_limit_constraint}, \code{\link{return_constraint}, \code{\link{factor_exposure_constraint}}
+#' @seealso 
+#' \code{\link{portfolio.spec}}
+#' \code{\link{weight_sum_constraint}}, 
+#' \code{\link{box_constraint}}, 
+#' \code{\link{group_constraint}}, 
+#' \code{\link{turnover_constraint}}, 
+#' \code{\link{diversification_constraint}}, 
+#' \code{\link{position_limit_constraint}}, 
+#' \code{\link{return_constraint}}, 
+#' \code{\link{factor_exposure_constraint}}
 #' @examples
 #' data(edhec)
 #' returns <- edhec[, 1:4]
