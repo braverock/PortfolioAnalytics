@@ -60,7 +60,12 @@ print.portfolio <- function(portfolio){
   # Assets
   cat("\nAssets\n")
   nassets <- length(portfolio$assets)
-  cat("Number of assets:", nassets, "\n")
+  cat("Number of assets:", nassets, "\n\n")
+  cat("Asset Names\n")
+  print(head(names(portfolio$assets), 10))
+  if(nassets > 10){
+    cat("More than 10 assets, only printing the first 10\n")
+  }
   
   # Constraints
   cat("\nConstraints\n")
@@ -79,15 +84,55 @@ print.portfolio <- function(portfolio){
   cat("Number of enabled constraints:", n.enabled.constraints, "\n")
   if(length(enabled.constraints) > 0){
     cat("Enabled constraint types\n")
-    for(type in names.constraints[enabled.constraints]) {
-      cat("\t\t-", type, "\n")
+    constraints <- portfolio$constraints
+    nconstraints <- length(constraints)
+    for(i in 1:nconstraints){
+      if(constraints[[i]]$enabled){
+        type <- constraints[[i]]$type
+        if(type == "box"){
+          # long only
+          if(all(constraints[[i]]$min == 0) & all(constraints[[i]]$max == 1)){
+            cat("\t\t-", "box (long only)", "\n")
+          } else if(all(constraints[[i]]$min == -Inf) & all(constraints[[i]]$max == Inf)){
+            # unconstrained
+            cat("\t\t-", "box (unconstrained)", "\n")
+          } else if(any(constraints[[i]]$min < 0)){
+            # with shorting
+            cat("\t\t-", "box (with shorting)", "\n")
+          } else {
+            cat("\t\t-", type, "\n")
+          }
+        } else {
+          cat("\t\t-", type, "\n")
+        }
+      }
     }
   }
   cat("Number of disabled constraints:", nconstraints - n.enabled.constraints, "\n")
   if((nconstraints - n.enabled.constraints) > 0){
     cat("Disabled constraint types\n")
-    for(type in setdiff(names.constraints, names.constraints[enabled.constraints])) {
-      cat("\t\t-", type, "\n")
+    constraints <- portfolio$constraints
+    nconstraints <- length(constraints)
+    for(i in 1:nconstraints){
+      if(!constraints[[i]]$enabled){
+        type <- constraints[[i]]$type
+        if(type == "box"){
+          # long only
+          if(all(constraints[[i]]$min == 0) & all(constraints[[i]]$max == 1)){
+            cat("\t\t-", "box (long only)", "\n")
+          } else if(all(constraints[[i]]$min == -Inf) & all(constraints[[i]]$max == Inf)){
+            # unconstrained
+            cat("\t\t-", "box (unconstrained)", "\n")
+          } else if(any(constraints[[i]]$min < 0)){
+            # with shorting
+            cat("\t\t-", "box (with shorting)", "\n")
+          } else {
+            cat("\t\t-", type, "\n")
+          }
+        } else {
+          cat("\t\t-", type, "\n")
+        }
+      }
     }
   }
   
