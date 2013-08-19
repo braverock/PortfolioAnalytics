@@ -121,7 +121,11 @@ add.objective_v1 <- function(constraints, type, name, arguments=NULL, enabled=TR
 #' @rdname add.objective
 #' @name add.objective
 #' @export
-add.objective_v2 <- function(portfolio, type, name, arguments=NULL, enabled=TRUE, ..., indexnum=NULL){
+add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=NULL, enabled=TRUE, ..., indexnum=NULL){
+  if(!is.null(constraints) & inherits(constraints, "v1_constraint")){
+    return(add.objective_v1(constraints=constraints, type=type, name=name, arguments=arguments, enabled=enabled, ...=..., indexnum=indexnum))
+  }
+  
   # This function is based on the original add.objective function, but modified
   # to add objectives to a portfolio object instead of a constraint object.
   if (!is.portfolio(portfolio)) {stop("portfolio passed in is not of class portfolio")}

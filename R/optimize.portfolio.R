@@ -430,7 +430,7 @@ optimize.portfolio_v1 <- function(
 #' @export
 optimize.portfolio_v2 <- function(
   R,
-  portfolio,
+  portfolio=NULL,
   constraints=NULL,
   objectives=NULL,
   optimize_method=c("DEoptim","random","ROI","ROI_old","pso","GenSA"),
@@ -448,22 +448,20 @@ optimize.portfolio_v2 <- function(
   #store the call for later
   call <- match.call()
   
-  if (is.null(portfolio) | !is.portfolio(portfolio)){
-    stop("you must pass in an object of class portfolio to control the optimization")
+  if (!is.null(portfolio) & !is.portfolio(portfolio)){
+    stop("you must pass in an object of class 'portfolio' to control the optimization")
   }
-  
-  R <- checkData(R)
-  N <- length(portfolio$assets)
-  if (ncol(R) > N) {
-    R <- R[,names(portfolio$assets)]
-  }
-  T <- nrow(R)
   
   # Check for constraints and objectives passed in separately outside of the portfolio object
   if(!is.null(constraints)){
     if(inherits(constraints, "v1_constraint")){
-      warning("constraint object passed in is a 'v1_constraint' object, updating to v2 specification")
-      portfolio <- update_constraint_v1tov2(portfolio=portfolio, v1_constraint=constraints)
+      if(is.null(portfolio)){
+        # If the user has not passed in a portfolio, we will create one for them
+        tmp_portf <- portfolio.spec(assets=constraints$assets)
+      }
+      message("constraint object passed in is a 'v1_constraint' object, updating to v2 specification")
+      portfolio <- update_constraint_v1tov2(portfolio=tmp_portf, v1_constraint=constraints)
+      # print.default(portfolio)
     }
     if(!inherits(constraints, "v1_constraint")){
       # Insert the constraints into the portfolio object
@@ -474,6 +472,13 @@ optimize.portfolio_v2 <- function(
     # Insert the objectives into the portfolio object
     portfolio <- insert_objectives(portfolio=portfolio, objectives=objectives)
   }
+  
+  R <- checkData(R)
+  N <- length(portfolio$assets)
+  if (ncol(R) > N) {
+    R <- R[,names(portfolio$assets)]
+  }
+  T <- nrow(R)
   
   out <- list()
   
