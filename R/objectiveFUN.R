@@ -20,3 +20,19 @@ turnover <- function(weights, wts.init=NULL) {
   
   return(sum(abs(wts.init - weights)) / N)
 }
+
+#' Calculate portfolio variance
+#' 
+#' This function is used to calculate the portfolio variance via a call to 
+#' constrained_objective when var is an object for mean variance or quadratic 
+#' utility optimization.
+#' 
+#' @param R xts object of asset returns
+#' @param weights vector of asset weights
+#' @return numeric value of the portfolio variance
+#' @author Ross Bennett
+#' @export
+var.portfolio <- function(R, weights){
+  weights <- matrix(weights, ncol=1)
+  return(as.numeric(t(weights) %*% var(R) %*% weights))
+}

@@ -12,11 +12,6 @@ library(ROI.plugin.quadprog)
 library(Ecdat)
 library(PortfolioAnalytics)
 
-var.portfolio <- function(R, weights){
-  weights <- matrix(weights, ncol=1)
-  return(as.numeric(t(weights) %*% var(R) %*% weights))
-}
-
 # General Parameters for sample code
 data(edhec)
 funds <- names(edhec)
@@ -57,7 +52,7 @@ target.port$objectives[[1]]$enabled <- TRUE
 target.port$objectives[[2]]$enabled <- TRUE
 target.solution <- optimize.portfolio(R=edhec, constraints=target.port, optimize_method="ROI")
 
-target.solution$weights %*% var(edhec) %*% target.solution$weights
+
 # ========================
 # Mean-variance:  Maximize quadratic utility, dollar-neutral, target portfolio return
 #

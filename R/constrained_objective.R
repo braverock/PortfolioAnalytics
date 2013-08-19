@@ -532,6 +532,9 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
                StdDev = { 
                  fun = match.fun(StdDev)
                },
+               var = { 
+                 fun = match.fun(var.portfolio)
+               },
                mVaR =,
                VaR = {
                  fun = match.fun(VaR) 
