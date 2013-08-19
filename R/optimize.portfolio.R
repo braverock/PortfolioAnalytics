@@ -997,15 +997,30 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @name optimize.portfolio.rebalancing
 #' @export
-optimize.portfolio.rebalancing <- function(R, portfolio, constraints=NULL, objectives=NULL, optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
+optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, objectives=NULL, optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
 {
   stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
   start_t<-Sys.time()
   
+  if (!is.null(portfolio) & !is.portfolio(portfolio)){
+    stop("you must pass in an object of class 'portfolio' to control the optimization")
+  }
+  
   # Check for constraints and objectives passed in separately outside of the portfolio object
   if(!is.null(constraints)){
-    # Insert the constraints into the portfolio object
-    portfolio <- insert_constraints(portfolio=portfolio, constraints=constraints)
+    if(inherits(constraints, "v1_constraint")){
+      if(is.null(portfolio)){
+        # If the user has not passed in a portfolio, we will create one for them
+        tmp_portf <- portfolio.spec(assets=constraints$assets)
+      }
+      message("constraint object passed in is a 'v1_constraint' object, updating to v2 specification")
+      portfolio <- update_constraint_v1tov2(portfolio=tmp_portf, v1_constraint=constraints)
+      # print.default(portfolio)
+    }
+    if(!inherits(constraints, "v1_constraint")){
+      # Insert the constraints into the portfolio object
+      portfolio <- insert_constraints(portfolio=portfolio, constraints=constraints)
+    }
   }
   if(!is.null(objectives)){
     # Insert the objectives into the portfolio object
