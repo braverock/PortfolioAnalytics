@@ -200,6 +200,7 @@ add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=
 #' Objectives of type 'turnove' and 'minmax' are also supported.
 #' 
 #' @param portfolio an object of type 'portfolio' to add the objective to, specifying the portfolio for the optimization, see \code{\link{portfolio}}
+#' @param constraints a 'v1_constraint' object for backwards compatibility, see \code{\link{constraint}}
 #' @param type character type of the objective to add or update, currently 'return','risk', or 'risk_budget'
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
 #' @param arguments default arguments to be passed to an objective function when executed

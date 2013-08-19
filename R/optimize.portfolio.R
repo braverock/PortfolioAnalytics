@@ -911,8 +911,8 @@ optimize.portfolio_v2 <- function(
 #'
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
-#' @param constraints default=NULL, a list of constraint objects. An object of class ]v1_constraint' can be passed in here.
-#' @param objectives default=NULL, a list of objective objects
+#' @param constraints default=NULL, a list of constraint objects. An object of class v1_constraint' can be passed in here.
+#' @param objectives default=NULL, a list of objective objects.
 #' @param optimize_method one of "DEoptim", "random", "ROI","ROI_old", "pso", "GenSA".  For using \code{ROI_old}, need to use a constraint_ROI object in constraints. For using \code{ROI}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} and \code{Rglpk}.
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
@@ -921,10 +921,76 @@ optimize.portfolio_v2 <- function(
 #' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments_v2}}
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' 
-#' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
+#' @return a list containing the following elements
+#' \itemize{
+#'   \item{\code{weights}:}{ The optimal set weights.}
+#'   \item{\code{objective_measures}:}{ A list containing the value of each objective corresponding to the optimal weights.}
+#'   \item{\code{out}:}{ The output of the solver.}
+#'   \item{\code{call}:}{ The function call.}
+#'   \item{\code{portfolio}:}{ The portfolio object.}
+#'   \item{\code{R}:}{ The asset returns.}
+#'   \item{\code{data summary:}}{ The first row and last row of \code{R}.}
+#'   \item{\code{elapsed_time:}}{ The amount of time that elapses while the optimization is run.}
+#'   \item{\code{end_t:}}{ The date and time the optimization completed.}
+#' }
+#' When Trace=TRUE is specified, the following elements will be returned in 
+#' addition to the elements above. The output depends on the optimization 
+#' method and is specific to each solver. Refer to the documentation of the
+#' desired solver for more information.
+#' 
+#' \code{optimize_method="random"}
+#' \itemize{
+#'   \item{\code{random_portfolios}:}{ A matrix of the random portfolios.}
+#'   \item{\code{random_portfolio_objective_results}:}{ A list of the following elements for each random portfolio.}
+#'   \itemize{
+#'     \item{\code{out}:}{ The output value of the solver corresponding to the random portfolio weights.}
+#'     \item{\code{weights}:}{ The weights of the random portfolio.}
+#'     \item{\code{objective_measures}:}{ A list of each objective measure corresponding to the random portfolio weights.}
+#'   }
+#' }
+#' 
+#' \code{optimize_method="DEoptim"}
+#' \itemize{
+#'   \item{\code{DEoutput:}}{ A list (of length 2) containing the following elements, see \code{\link{DEoptim}}.}
+#'   \itemize{
+#'     \item{\code{optim}}
+#'     \item{\code{member}}
+#'   }
+#'   \item{\code{DEoptim_objective_results}:}{ A list containing the following elements for each intermediate population.}
+#'   \itemize{
+#'     \item{\code{out}:}{ The output of the solver.}
+#'     \item{\code{weights}:}{ Population weights.}
+#'     \item{\code{init_weights}:}{ Initial population weights.}
+#'     \item{\code{objective_measures}:}{ A list of each objective measure corresponding to the weights}
+#'   }
+#' }
+#' 
+#' \code{optimize_method="pso"}
+#' \itemize{
+#'   \item{\code{PSOoutput}:}{ A list containing the following elements, see \code{\link{psoptim}}:}
+#'   \itemize{
+#'     \item{par}
+#'     \item{value}
+#'     \item{counts}
+#'     \item{convergence}
+#'     \item{message}
+#'     \item{stats}
+#'   }
+#' }
+#' 
+#' \code{optimize_method="GenSA"}
+#' \itemize{
+#'   \item{\code{GenSAoutput:}}{ A list containing the following elements, see \code{\link{GenSA}}:}
+#'   \itemize{
+#'     \item{value}
+#'     \item{par}
+#'     \item{trace.mat}
+#'     \item{counts}
+#'   }
+#' }
 #' 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
-#' @aliases optimize.portfolio_v2, optimize_portfolio_v1
+#' @aliases optimize.portfolio_v2 optimize_portfolio_v1
 #' @seealso \code{\link{portfolio.spec}}
 #' @name optimize.portfolio
 #' @export

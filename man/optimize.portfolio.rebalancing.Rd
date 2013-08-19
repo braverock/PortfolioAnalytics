@@ -8,7 +8,7 @@
     rebalance_on = NULL, training_period = NULL,
     trailing_periods = NULL)
 
-  optimize.portfolio.rebalancing(R, portfolio,
+  optimize.portfolio.rebalancing(R, portfolio = NULL,
     constraints = NULL, objectives = NULL,
     optimize_method = c("DEoptim", "random", "ROI"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,

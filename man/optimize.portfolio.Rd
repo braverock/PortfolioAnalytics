@@ -1,8 +1,7 @@
 \name{optimize.portfolio}
-\alias{optimize.portfolio}
 \alias{optimize_portfolio_v1}
+\alias{optimize.portfolio}
 \alias{optimize.portfolio_v2}
-\alias{optimize.portfolio_v2,}
 \title{constrained optimization of portfolios}
 \usage{
   optimize.portfolio_v1(R, constraints,
@@ -10,14 +9,14 @@
     search_size = 20000, trace = FALSE, ..., rp = NULL,
     momentFUN = "set.portfolio.moments_v1")
 
-  optimize.portfolio_v2(R, portfolio, constraints = NULL,
-    objectives = NULL,
+  optimize.portfolio_v2(R, portfolio = NULL,
+    constraints = NULL, objectives = NULL,
     optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
     momentFUN = "set.portfolio.moments", message = FALSE)
 
-  optimize.portfolio(R, portfolio, constraints = NULL,
-    objectives = NULL,
+  optimize.portfolio(R, portfolio = NULL,
+    constraints = NULL, objectives = NULL,
     optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
     momentFUN = "set.portfolio.moments", message = FALSE)
@@ -30,11 +29,11 @@
   the constraints and objectives for the optimization}
 
   \item{constraints}{default=NULL, a list of constraint
-  objects. An object of class ]v1_constraint' can be passed
+  objects. An object of class v1_constraint' can be passed
   in here.}
 
   \item{objectives}{default=NULL, a list of objective
-  objects}
+  objects.}
 
   \item{optimize_method}{one of "DEoptim", "random",
   "ROI","ROI_old", "pso", "GenSA".  For using
@@ -65,9 +64,59 @@
   Display messages if TRUE.}
 }
 \value{
-  a list containing the optimal weights, some summary
-  statistics, the function call, and optionally trace
-  information
+  a list containing the following elements \itemize{
+  \item{\code{weights}:}{ The optimal set weights.}
+  \item{\code{objective_measures}:}{ A list containing the
+  value of each objective corresponding to the optimal
+  weights.} \item{\code{out}:}{ The output of the solver.}
+  \item{\code{call}:}{ The function call.}
+  \item{\code{portfolio}:}{ The portfolio object.}
+  \item{\code{R}:}{ The asset returns.} \item{\code{data
+  summary:}}{ The first row and last row of \code{R}.}
+  \item{\code{elapsed_time:}}{ The amount of time that
+  elapses while the optimization is run.}
+  \item{\code{end_t:}}{ The date and time the optimization
+  completed.} } When Trace=TRUE is specified, the following
+  elements will be returned in addition to the elements
+  above. The output depends on the optimization method and
+  is specific to each solver. Refer to the documentation of
+  the desired solver for more information.
+
+  \code{optimize_method="random"} \itemize{
+  \item{\code{random_portfolios}:}{ A matrix of the random
+  portfolios.}
+  \item{\code{random_portfolio_objective_results}:}{ A list
+  of the following elements for each random portfolio.}
+  \itemize{ \item{\code{out}:}{ The output value of the
+  solver corresponding to the random portfolio weights.}
+  \item{\code{weights}:}{ The weights of the random
+  portfolio.} \item{\code{objective_measures}:}{ A list of
+  each objective measure corresponding to the random
+  portfolio weights.} } }
+
+  \code{optimize_method="DEoptim"} \itemize{
+  \item{\code{DEoutput:}}{ A list (of length 2) containing
+  the following elements, see \code{\link{DEoptim}}.}
+  \itemize{ \item{\code{optim}} \item{\code{member}} }
+  \item{\code{DEoptim_objective_results}:}{ A list
+  containing the following elements for each intermediate
+  population.} \itemize{ \item{\code{out}:}{ The output of
+  the solver.} \item{\code{weights}:}{ Population weights.}
+  \item{\code{init_weights}:}{ Initial population weights.}
+  \item{\code{objective_measures}:}{ A list of each
+  objective measure corresponding to the weights} } }
+
+  \code{optimize_method="pso"} \itemize{
+  \item{\code{PSOoutput}:}{ A list containing the following
+  elements, see \code{\link{psoptim}}:} \itemize{
+  \item{par} \item{value} \item{counts} \item{convergence}
+  \item{message} \item{stats} } }
+
+  \code{optimize_method="GenSA"} \itemize{
+  \item{\code{GenSAoutput:}}{ A list containing the
+  following elements, see \code{\link{GenSA}}:} \itemize{
+  \item{value} \item{par} \item{trace.mat} \item{counts} }
+  }
 }
 \description{
   This function aims to provide a wrapper for constrained

@@ -7,16 +7,20 @@
   add.objective_v1(constraints, type, name,
     arguments = NULL, enabled = TRUE, ..., indexnum = NULL)
 
-  add.objective_v2(portfolio, type, name, arguments = NULL,
-    enabled = TRUE, ..., indexnum = NULL)
+  add.objective_v2(portfolio, constraints = NULL, type,
+    name, arguments = NULL, enabled = TRUE, ...,
+    indexnum = NULL)
 
-  add.objective(portfolio, type, name, arguments = NULL,
-    enabled = TRUE, ..., indexnum = NULL)
+  add.objective(portfolio, constraints = NULL, type, name,
+    arguments = NULL, enabled = TRUE, ..., indexnum = NULL)
 }
 \arguments{
   \item{portfolio}{an object of type 'portfolio' to add the
   objective to, specifying the portfolio for the
   optimization, see \code{\link{portfolio}}}
+
+  \item{constraints}{a 'v1_constraint' object for backwards
+  compatibility, see \code{\link{constraint}}}
 
   \item{type}{character type of the objective to add or
   update, currently 'return','risk', or 'risk_budget'}
