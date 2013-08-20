@@ -89,15 +89,11 @@ chart.Weights.RP <- function(RP, neighbors = NULL, ..., main="Weights", las = 3,
   axis(2, cex.axis = cex.axis, col = element.color)
   axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
-  
 }
 
 #' classic risk return scatter of random portfolios
 #' 
 #' @param RP set of portfolios created by \code{\link{optimize.portfolio}}
-#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo 
-#' object of asset returns, used to recalulate the objective function when
-#' return.col or risk.col is not part of the extractStats output.
 #' @param neighbors set of 'neighbor' portfolios to overplot, see Details
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
@@ -106,132 +102,136 @@ chart.Weights.RP <- function(RP, neighbors = NULL, ..., main="Weights", las = 3,
 #' @param element.color color for the default plot scatter points
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
-chart.Scatter.RP <- function(RP, R=NULL, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
-    # more or less specific to the output of the random portfolio code with constraints
-    # will work to a point with other functions, such as optimize.porfolio.parallel
-    # there's still a lot to do to improve this.
-    xtract = extractStats(RP)
+chart.Scatter.RP <- function(RP, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
+  # more or less specific to the output of the random portfolio code with constraints
+  # will work to a point with other functions, such as optimize.porfolio.parallel
+  # there's still a lot to do to improve this.
+  if(!inherits(RP, "optimize.portfolio.random")){
+    stop("RP must be of class 'optimize.portfolio.random'")
+  }
+  R <- RP$R  
+  xtract = extractStats(RP)
+  columnnames = colnames(xtract)
+  #return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
+  return.column = pmatch(return.col,columnnames)
+  if(is.na(return.column)) {
+    return.col = paste(return.col,return.col,sep='.')
+    return.column = pmatch(return.col,columnnames)
+  }
+  #risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
+  risk.column = pmatch(risk.col,columnnames)
+  if(is.na(risk.column)) {
+    risk.col = paste(risk.col,risk.col,sep='.')
+    risk.column = pmatch(risk.col,columnnames)
+  }
+  
+  # if(is.na(return.column) | is.na(risk.column)) stop(return.col,' or ',risk.col, ' do  not match extractStats output')
+  
+  # If the user has passed in return.col or risk.col that does not match extractStats output
+  # This will give the flexibility of passing in return or risk metrics that are not
+  # objective measures in the optimization. This may cause issues with the "neighbors"
+  # functionality since that is based on the "out" column
+  if(is.na(return.column) | is.na(risk.column)){
+    return.col <- gsub("\\..*", "", return.col)
+    risk.col <- gsub("\\..*", "", risk.col)
+    warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
+    # Get the matrix of weights for applyFUN
+    wts_index <- grep("w.", columnnames)
+    wts <- xtract[, wts_index]
+    if(is.na(return.column)){
+      tmpret <- applyFUN(R=R, weights=wts, FUN=return.col)
+      xtract <- cbind(tmpret, xtract)
+      colnames(xtract)[which(colnames(xtract) == "tmpret")] <- return.col
+    }
+    if(is.na(risk.column)){
+      tmprisk <- applyFUN(R=R, weights=wts, FUN=risk.col)
+      xtract <- cbind(tmprisk, xtract)
+      colnames(xtract)[which(colnames(xtract) == "tmprisk")] <- risk.col
+    }
     columnnames = colnames(xtract)
-    #return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
     return.column = pmatch(return.col,columnnames)
     if(is.na(return.column)) {
-        return.col = paste(return.col,return.col,sep='.')
-        return.column = pmatch(return.col,columnnames)
+      return.col = paste(return.col,return.col,sep='.')
+      return.column = pmatch(return.col,columnnames)
     }
-    #risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
     risk.column = pmatch(risk.col,columnnames)
     if(is.na(risk.column)) {
-        risk.col = paste(risk.col,risk.col,sep='.')
-        risk.column = pmatch(risk.col,columnnames)
-    }
-    
-    # if(is.na(return.column) | is.na(risk.column)) stop(return.col,' or ',risk.col, ' do  not match extractStats output')
-    
-    # If the user has passed in return.col or risk.col that does not match extractStats output
-    # This will give the flexibility of passing in return or risk metrics that are not
-    # objective measures in the optimization. This may cause issues with the "neighbors"
-    # functionality since that is based on the "out" column
-    if(is.na(return.column) | is.na(risk.column)){
-      return.col <- gsub("\\..*", "", return.col)
-      risk.col <- gsub("\\..*", "", risk.col)
-      warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
-      # Get the matrix of weights for applyFUN
-      wts_index <- grep("w.", columnnames)
-      wts <- xtract[, wts_index]
-      if(is.na(return.column)){
-        tmpret <- applyFUN(R=R, weights=wts, FUN=return.col)
-        xtract <- cbind(tmpret, xtract)
-        colnames(xtract)[which(colnames(xtract) == "tmpret")] <- return.col
-      }
-      if(is.na(risk.column)){
-        tmprisk <- applyFUN(R=R, weights=wts, FUN=risk.col)
-        xtract <- cbind(tmprisk, xtract)
-        colnames(xtract)[which(colnames(xtract) == "tmprisk")] <- risk.col
-      }
-      columnnames = colnames(xtract)
-      return.column = pmatch(return.col,columnnames)
-      if(is.na(return.column)) {
-        return.col = paste(return.col,return.col,sep='.')
-        return.column = pmatch(return.col,columnnames)
-      }
+      risk.col = paste(risk.col,risk.col,sep='.')
       risk.column = pmatch(risk.col,columnnames)
-      if(is.na(risk.column)) {
-        risk.col = paste(risk.col,risk.col,sep='.')
-        risk.column = pmatch(risk.col,columnnames)
+    }
+  }
+  # print(colnames(head(xtract)))
+  
+  plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
+  
+  if(!is.null(neighbors)){ 
+    if(is.vector(neighbors)){
+      if(length(neighbors)==1){
+        # overplot nearby portfolios defined by 'out'
+        orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything othchart.Scatter.er than mean
+        subsetx = head(xtract[orderx,], n=neighbors)
+      } else{
+        # assume we have a vector of portfolio numbers
+        subsetx = xtract[neighbors,]
       }
+      points(subsetx[,risk.column], subsetx[,return.column], col="lightblue", pch=1)
     }
-    # print(colnames(head(xtract)))
-    
-    plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
-    
-    if(!is.null(neighbors)){ 
-        if(is.vector(neighbors)){
-            if(length(neighbors)==1){
-                # overplot nearby portfolios defined by 'out'
-                orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything othchart.Scatter.er than mean
-                subsetx = head(xtract[orderx,], n=neighbors)
-            } else{
-                # assume we have a vector of portfolio numbers
-                subsetx = xtract[neighbors,]
-            }
-            points(subsetx[,risk.column], subsetx[,return.column], col="lightblue", pch=1)
-        }
-        if(is.matrix(neighbors) | is.data.frame(neighbors)){
-            # the user has likely passed in a matrix containing calculated values for risk.col and return.col      
-            rtc = pmatch(return.col,columnnames)
-            if(is.na(rtc)) {
-                rtc = pmatch(paste(return.col,return.col,sep='.'),columnnames)
-            }
-            rsc = pmatch(risk.col,columnnames)
-            if(is.na(rsc)) {
-                rsc = pmatch(paste(risk.col,risk.col,sep='.'),columnnames)
-            }
-            for(i in 1:nrow(neighbors)) points(neighbors[i,rsc], neighbors[i,rtc], col="lightblue", pch=1)
-        }
+    if(is.matrix(neighbors) | is.data.frame(neighbors)){
+      # the user has likely passed in a matrix containing calculated values for risk.col and return.col      
+      rtc = pmatch(return.col,columnnames)
+      if(is.na(rtc)) {
+        rtc = pmatch(paste(return.col,return.col,sep='.'),columnnames)
+      }
+      rsc = pmatch(risk.col,columnnames)
+      if(is.na(rsc)) {
+        rsc = pmatch(paste(risk.col,risk.col,sep='.'),columnnames)
+      }
+      for(i in 1:nrow(neighbors)) points(neighbors[i,rsc], neighbors[i,rtc], col="lightblue", pch=1)
     }
-    
-    points(xtract[1,risk.column],xtract[1,return.column], col="orange", pch=16) # overplot the equal weighted (or seed)
-    #check to see if portfolio 1 is EW  RP$random_portoflios[1,] all weights should be the same
-    if(!isTRUE(all.equal(RP$random_portfolios[1,][1],1/length(RP$random_portfolios[1,]),check.attributes=FALSE))){
-        #show both the seed and EW if they are different 
-        #NOTE the all.equal comparison could fail above if the first element of the first portfolio is the same as the EW weight, 
-        #but the rest is not, shouldn't happen often with real portfolios, only toy examples
-        points(xtract[2,risk.column],xtract[2,return.column], col="green", pch=16) # overplot the equal weighted (or seed)
-    }
-    ## @TODO: Generalize this to find column containing the "risk" metric
-    if(length(names(RP)[which(names(RP)=='constrained_objective')])) {
-        result.slot<-'constrained_objective'
-    } else {
-        result.slot<-'objective_measures'
-    }
-    objcols<-unlist(RP[[result.slot]])
-    names(objcols)<-PortfolioAnalytics:::name.replace(names(objcols))
+  }
+  
+  points(xtract[1,risk.column],xtract[1,return.column], col="orange", pch=16) # overplot the equal weighted (or seed)
+  #check to see if portfolio 1 is EW  RP$random_portoflios[1,] all weights should be the same
+  if(!isTRUE(all.equal(RP$random_portfolios[1,][1],1/length(RP$random_portfolios[1,]),check.attributes=FALSE))){
+    #show both the seed and EW if they are different 
+    #NOTE the all.equal comparison could fail above if the first element of the first portfolio is the same as the EW weight, 
+    #but the rest is not, shouldn't happen often with real portfolios, only toy examples
+    points(xtract[2,risk.column],xtract[2,return.column], col="green", pch=16) # overplot the equal weighted (or seed)
+  }
+  ## @TODO: Generalize this to find column containing the "risk" metric
+  if(length(names(RP)[which(names(RP)=='constrained_objective')])) {
+    result.slot<-'constrained_objective'
+  } else {
+    result.slot<-'objective_measures'
+  }
+  objcols<-unlist(RP[[result.slot]])
+  names(objcols)<-PortfolioAnalytics:::name.replace(names(objcols))
+  return.column = pmatch(return.col,names(objcols))
+  if(is.na(return.column)) {
+    return.col = paste(return.col,return.col,sep='.')
     return.column = pmatch(return.col,names(objcols))
-    if(is.na(return.column)) {
-        return.col = paste(return.col,return.col,sep='.')
-        return.column = pmatch(return.col,names(objcols))
-    }
+  }
+  risk.column = pmatch(risk.col,names(objcols))
+  if(is.na(risk.column)) {
+    risk.col = paste(risk.col,risk.col,sep='.')
     risk.column = pmatch(risk.col,names(objcols))
-    if(is.na(risk.column)) {
-        risk.col = paste(risk.col,risk.col,sep='.')
-        risk.column = pmatch(risk.col,names(objcols))
-    }
-    # risk and return metrics for the optimal weights if the RP object does not
-    # contain the metrics specified by return.col or risk.col
-    if(is.na(return.column) | is.na(risk.column)){
-      return.col <- gsub("\\..*", "", return.col)
-      risk.col <- gsub("\\..*", "", risk.col)
-      # warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
-      opt_weights <- RP$weights
-      ret <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=return.col))
-      risk <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=risk.col))
-      points(risk, ret, col="blue", pch=16) #optimal
-    } else {
-      points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
-    }
-    axis(1, cex.axis = cex.axis, col = element.color)
-    axis(2, cex.axis = cex.axis, col = element.color)
-    box(col = element.color)
+  }
+  # risk and return metrics for the optimal weights if the RP object does not
+  # contain the metrics specified by return.col or risk.col
+  if(is.na(return.column) | is.na(risk.column)){
+    return.col <- gsub("\\..*", "", return.col)
+    risk.col <- gsub("\\..*", "", risk.col)
+    # warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
+    opt_weights <- RP$weights
+    ret <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=return.col))
+    risk <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=risk.col))
+    points(risk, ret, col="blue", pch=16) #optimal
+  } else {
+    points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
+  }
+  axis(1, cex.axis = cex.axis, col = element.color)
+  axis(2, cex.axis = cex.axis, col = element.color)
+  box(col = element.color)
 }
 
 #' scatter and weights chart  for random portfolios
@@ -246,9 +246,6 @@ chart.Scatter.RP <- function(RP, R=NULL, neighbors = NULL, return.col='mean', ri
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' 
 #' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
-#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo 
-#' object of asset returns, used to recalulate the objective function when
-#' return.col or risk.col is not part of the extractStats output.
 #' @param ... any other passthru parameters 
 #' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
@@ -259,16 +256,16 @@ chart.Scatter.RP <- function(RP, R=NULL, neighbors = NULL, return.col='mean', ri
 #' \code{\link{extractStats}}
 #' @export
 charts.RP <- function(RP, R=NULL, risk.col, return.col, 
-						neighbors=NULL, main="Random.Portfolios", ...){
-# Specific to the output of the random portfolio code with constraints
-    # @TODO: check that RP is of the correct class
-    op <- par(no.readonly=TRUE)
-    layout(matrix(c(1,2)),height=c(2,1.5),width=1)
-    par(mar=c(4,4,4,2))
-    chart.Scatter.RP(RP, R=R, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
-    par(mar=c(2,4,0,2))
-    chart.Weights.RP(RP, main="", neighbors=neighbors, ...)
-    par(op)
+                      neighbors=NULL, main="Random.Portfolios", ...){
+  # Specific to the output of the random portfolio code with constraints
+  # @TODO: check that RP is of the correct class
+  op <- par(no.readonly=TRUE)
+  layout(matrix(c(1,2)),height=c(2,1.5),width=1)
+  par(mar=c(4,4,4,2))
+  chart.Scatter.RP(RP, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+  par(mar=c(2,4,0,2))
+  chart.Weights.RP(RP, main="", neighbors=neighbors, ...)
+  par(op)
 }
 
 #TODO make chart.RP into a plot() method or methods
@@ -287,16 +284,13 @@ charts.RP <- function(RP, R=NULL, risk.col, return.col,
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' @param x set of portfolios created by \code{\link{optimize.portfolio}}
 #' @param ... any other passthru parameters 
-#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo 
-#' object of asset returns, used to recalulate the objective function when
-#' return.col or risk.col is not part of the extractStats output.
 #' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param main an overall title for the plot: see \code{\link{title}}
 #' @export
 plot.optimize.portfolio.random <- function(x, ...,  R=NULL, return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
-    charts.RP(RP=x, R=R, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+    charts.RP(RP=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
 }
 
 #' plot method for optimize.portfolio output

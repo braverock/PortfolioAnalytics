@@ -2,17 +2,13 @@
 \alias{chart.Scatter.pso}
 \title{classic risk return scatter of random portfolios}
 \usage{
-  chart.Scatter.pso(pso, R, return.col = "mean",
+  chart.Scatter.pso(pso, return.col = "mean",
     risk.col = "StdDev", ..., element.color = "darkgray",
     cex.axis = 0.8, main = "")
 }
 \arguments{
   \item{pso}{object created by
   \code{\link{optimize.portfolio}}}
-
-  \item{R}{an xts, vector, matrix, data frame, timeSeries
-  or zoo object of asset returns, used to recalulate the
-  risk and return metric}
 
   \item{return.col}{string matching the objective of a
   'return' objective, on vertical axis}

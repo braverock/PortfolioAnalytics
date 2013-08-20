@@ -84,7 +84,6 @@ chart.Weights.pso <- function(pso, neighbors = NULL, ..., main="Weights", las = 
 #' \code{risk.col} must be the name of a function used to compute the risk metric on the portfolio weights
 #' 
 #' @param pso object created by \code{\link{optimize.portfolio}}
-#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns, used to recalulate the risk and return metric
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
 #' @param ... any other passthru parameters 
@@ -93,9 +92,9 @@ chart.Weights.pso <- function(pso, neighbors = NULL, ..., main="Weights", las = 
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-chart.Scatter.pso <- function(pso, R, return.col="mean", risk.col="StdDev", ..., element.color = "darkgray", cex.axis=0.8, main=""){
+chart.Scatter.pso <- function(pso, return.col="mean", risk.col="StdDev", ..., element.color = "darkgray", cex.axis=0.8, main=""){
   if(!inherits(pso, "optimize.portfolio.pso")) stop("pso must be of class 'optimize.portfolio.pso'")
-  
+  R <- pso$R
   # Object with the "out" value in the first column and the normalized weights
   # The first row is the optimal "out" value and the optimal weights
   tmp <- extractStats(pso)
@@ -119,7 +118,6 @@ chart.Scatter.pso <- function(pso, R, return.col="mean", risk.col="StdDev", ...,
 #' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights
 #' 
 #' @param pso object created by \code{\link{optimize.portfolio}}
-#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns, used to recalulate the risk and return metric
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
 #' @param ... any other passthru parameters 
@@ -130,13 +128,13 @@ chart.Scatter.pso <- function(pso, R, return.col="mean", risk.col="StdDev", ...,
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-charts.pso <- function(pso, R, return.col="mean", risk.col="StdDev",
+charts.pso <- function(pso, return.col="mean", risk.col="StdDev",
                        cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="PSO.Portfolios", ...){
   # Specific to the output of the optimize_method=pso
   op <- par(no.readonly=TRUE)
   layout(matrix(c(1,2)),height=c(2,2),width=1)
   par(mar=c(4,4,4,2))
-  chart.Scatter.pso(pso=pso, R=R, return.col=return.col, risk.col=risk.col, element.color=element.color, cex.axis=cex.axis, main=main, ...=...)
+  chart.Scatter.pso(pso=pso, return.col=return.col, risk.col=risk.col, element.color=element.color, cex.axis=cex.axis, main=main, ...=...)
   par(mar=c(2,4,0,2))
   chart.Weights.pso(pso=pso, neighbors=neighbors, las=3, xlab=NULL, cex.lab=1, element.color=element.color, cex.axis=cex.axis, ...=..., main="")
   par(op)
@@ -148,7 +146,6 @@ charts.pso <- function(pso, R, return.col="mean", risk.col="StdDev",
 #' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights
 #' 
 #' @param pso object created by \code{\link{optimize.portfolio}}
-#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns, used to recalulate the risk and return metric
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
 #' @param ... any other passthru parameters 
@@ -159,7 +156,7 @@ charts.pso <- function(pso, R, return.col="mean", risk.col="StdDev",
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-plot.optimize.portfolio.pso <- function(pso, R, return.col="mean", risk.col="StdDev",
+plot.optimize.portfolio.pso <- function(pso, return.col="mean", risk.col="StdDev",
                        cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="PSO.Portfolios", ...){
-  charts.pso(pso=pso, R=R, return.col=return.col, risk.col=risk.col, cex.axis=cex.axis, element.color=element.color, neighbors=neighbors, main=main, ...=...)
+  charts.pso(pso=pso, return.col=return.col, risk.col=risk.col, cex.axis=cex.axis, element.color=element.color, neighbors=neighbors, main=main, ...=...)
 }

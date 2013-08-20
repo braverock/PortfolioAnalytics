@@ -1,13 +1,13 @@
 \name{chart.Weights.DE}
 \alias{chart.Weights.DE}
-\title{boxplot of the weight distributions in the random portfolios}
+\title{boxplot of the weights of the optimal portfolios}
 \usage{
   chart.Weights.DE(DE, neighbors = NULL, ...,
     main = "Weights", las = 3, xlab = NULL, cex.lab = 1,
     element.color = "darkgray", cex.axis = 0.8)
 }
 \arguments{
-  \item{DE}{set of random portfolios created by
+  \item{DE}{optimal portfolio object created by
   \code{\link{optimize.portfolio}}}
 
   \item{neighbors}{set of 'neighbor' portfolios to
@@ -36,8 +36,9 @@
   \code{\link{title}}}
 }
 \description{
-  boxplot of the weight distributions in the random
-  portfolios
+  Chart the optimal weights and upper and lower bounds on
+  weights of a portfolio run via
+  \code{\link{optimize.portfolio}}
 }
 \seealso{
   \code{\link{optimize.portfolio}}

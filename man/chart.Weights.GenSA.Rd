@@ -1,13 +1,13 @@
 \name{chart.Weights.GenSA}
 \alias{chart.Weights.GenSA}
-\title{boxplot of the weights in the portfolio}
+\title{boxplot of the weights of the optimal portfolios}
 \usage{
   chart.Weights.GenSA(GenSA, neighbors = NULL, ...,
     main = "Weights", las = 3, xlab = NULL, cex.lab = 1,
     element.color = "darkgray", cex.axis = 0.8)
 }
 \arguments{
-  \item{GenSA}{object created by
+  \item{GenSA}{optimal portfolio object created by
   \code{\link{optimize.portfolio}}}
 
   \item{neighbors}{set of 'neighbor' portfolios to
@@ -36,7 +36,9 @@
   \code{\link{title}}}
 }
 \description{
-  boxplot of the weights in the portfolio
+  Chart the optimal weights and upper and lower bounds on
+  weights of a portfolio run via
+  \code{\link{optimize.portfolio}}
 }
 \author{
   Ross Bennett

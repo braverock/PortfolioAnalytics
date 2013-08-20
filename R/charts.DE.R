@@ -10,8 +10,11 @@
 #
 ###############################################################################
 
-#' boxplot of the weight distributions in the random portfolios 
-#' @param DE set of random portfolios created by \code{\link{optimize.portfolio}}
+#' boxplot of the weights of the optimal portfolios
+#' 
+#' Chart the optimal weights and upper and lower bounds on weights of a portfolio run via \code{\link{optimize.portfolio}}
+#' 
+#' @param DE optimal portfolio object created by \code{\link{optimize.portfolio}}
 #' @param neighbors set of 'neighbor' portfolios to overplot
 #' @param las numeric in \{0,1,2,3\}; the style of axis labels
 #'       \describe{
@@ -29,8 +32,7 @@
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
 chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
-  # Specific to the output of the random portfolio code with constraints
-  # @TODO: check that DE is of the correct class
+  # Specific to the output of optimize.portfolio with optimize_method="DEoptim"
   if(!inherits(DE, "optimize.portfolio.DEoptim")) stop("DE must be of class 'optimize.portfolio.DEoptim'")
   
   columnnames = names(DE$weights)
@@ -86,14 +88,11 @@ chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3,
   axis(2, cex.axis = cex.axis, col = element.color)
   axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
-  
 }
 
 #' classic risk return scatter of DEoptim results
 #' 
 #' @param DE set of portfolios created by \code{\link{optimize.portfolio}}
-#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns, used to recalulate the objective function where required
-#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
 #' @param neighbors set of 'neighbor' portfolios to overplot, see Details in \code{\link{charts.DE}}
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
@@ -102,176 +101,182 @@ chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3,
 #' @param element.color color for the default plot scatter points
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
-chart.Scatter.DE <- function(DE, R=NULL, portfolio=NULL, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
-    # more or less specific to the output of the random portfolio code with constraints
-    # will work to a point with other functions, such as optimize.porfolio.parallel
-    # there's still a lot to do to improve this.
-    xtract = extractStats(DE)
+chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
+  # more or less specific to the output of the DEoptim portfolio code with constraints
+  # will work to a point with other functions, such as optimize.porfolio.parallel
+  # there's still a lot to do to improve this.
+  
+  if(!inherits(DE, "optimize.portfolio.DEoptim")) stop("DE must be of class 'optimize.portfolio.DEoptim'")
+  
+  R <- DE$R
+  portfolio <- DE$portfolio
+  xtract = extractStats(DE)
+  columnnames = colnames(xtract)
+  #return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
+  return.column = pmatch(return.col,columnnames)
+  if(is.na(return.column)) {
+    return.col = paste(return.col,return.col,sep='.')
+    return.column = pmatch(return.col,columnnames)
+  }
+  #risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
+  risk.column = pmatch(risk.col,columnnames)
+  if(is.na(risk.column)) {
+    risk.col = paste(risk.col,risk.col,sep='.')
+    risk.column = pmatch(risk.col,columnnames)
+  }
+  
+  # if(is.na(return.column) | is.na(risk.column)) stop(return.col,' or ',risk.col, ' do not match extractStats output')
+  
+  # If the user has passed in return.col or risk.col that does not match extractStats output
+  # This will give the flexibility of passing in return or risk metrics that are not
+  # objective measures in the optimization. This may cause issues with the "neighbors"
+  # functionality since that is based on the "out" column
+  if(is.na(return.column) | is.na(risk.column)){
+    return.col <- gsub("\\..*", "", return.col)
+    risk.col <- gsub("\\..*", "", risk.col)
+    warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
+    # Get the matrix of weights for applyFUN
+    wts_index <- grep("w.", columnnames)
+    wts <- xtract[, wts_index]
+    if(is.na(return.column)){
+      tmpret <- applyFUN(R=R, weights=wts, FUN=return.col)
+      xtract <- cbind(tmpret, xtract)
+      colnames(xtract)[which(colnames(xtract) == "tmpret")] <- return.col
+    }
+    if(is.na(risk.column)){
+      tmprisk <- applyFUN(R=R, weights=wts, FUN=risk.col)
+      xtract <- cbind(tmprisk, xtract)
+      colnames(xtract)[which(colnames(xtract) == "tmprisk")] <- risk.col
+    }
     columnnames = colnames(xtract)
-    #return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
     return.column = pmatch(return.col,columnnames)
     if(is.na(return.column)) {
-        return.col = paste(return.col,return.col,sep='.')
-        return.column = pmatch(return.col,columnnames)
+      return.col = paste(return.col,return.col,sep='.')
+      return.column = pmatch(return.col,columnnames)
     }
-    #risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
     risk.column = pmatch(risk.col,columnnames)
     if(is.na(risk.column)) {
-        risk.col = paste(risk.col,risk.col,sep='.')
-        risk.column = pmatch(risk.col,columnnames)
-    }
-    
-    # if(is.na(return.column) | is.na(risk.column)) stop(return.col,' or ',risk.col, ' do not match extractStats output')
-    
-    # If the user has passed in return.col or risk.col that does not match extractStats output
-    # This will give the flexibility of passing in return or risk metrics that are not
-    # objective measures in the optimization. This may cause issues with the "neighbors"
-    # functionality since that is based on the "out" column
-    if(is.na(return.column) | is.na(risk.column)){
-      return.col <- gsub("\\..*", "", return.col)
-      risk.col <- gsub("\\..*", "", risk.col)
-      warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
-      # Get the matrix of weights for applyFUN
-      wts_index <- grep("w.", columnnames)
-      wts <- xtract[, wts_index]
-      if(is.na(return.column)){
-        tmpret <- applyFUN(R=R, weights=wts, FUN=return.col)
-        xtract <- cbind(tmpret, xtract)
-        colnames(xtract)[which(colnames(xtract) == "tmpret")] <- return.col
-      }
-      if(is.na(risk.column)){
-        tmprisk <- applyFUN(R=R, weights=wts, FUN=risk.col)
-        xtract <- cbind(tmprisk, xtract)
-        colnames(xtract)[which(colnames(xtract) == "tmprisk")] <- risk.col
-      }
-      columnnames = colnames(xtract)
-      return.column = pmatch(return.col,columnnames)
-      if(is.na(return.column)) {
-        return.col = paste(return.col,return.col,sep='.')
-        return.column = pmatch(return.col,columnnames)
-      }
+      risk.col = paste(risk.col,risk.col,sep='.')
       risk.column = pmatch(risk.col,columnnames)
-      if(is.na(risk.column)) {
-        risk.col = paste(risk.col,risk.col,sep='.')
-        risk.column = pmatch(risk.col,columnnames)
+    }
+  }
+  # print(colnames(head(xtract)))
+  
+  plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
+  
+  if(!is.null(neighbors)){ 
+    if(is.vector(neighbors)){
+      if(length(neighbors)==1){
+        # overplot nearby portfolios defined by 'out'
+        orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything other than mean
+        subsetx = head(xtract[orderx,], n=neighbors)
+      } else{
+        # assume we have a vector of portfolio numbers
+        subsetx = xtract[neighbors,]
       }
+      points(subsetx[,risk.column], subsetx[,return.column], col="lightblue", pch=1)
     }
-    # print(colnames(head(xtract)))
+    if(is.matrix(neighbors) | is.data.frame(neighbors)){
+      # the user has likely passed in a matrix containing calculated values for risk.col and return.col      
+      rtc = pmatch(return.col,columnnames)
+      if(is.na(rtc)) {
+        rtc = pmatch(paste(return.col,return.col,sep='.'),columnnames)
+      }
+      rsc = pmatch(risk.col,columnnames)
+      if(is.na(rsc)) {
+        risk.column = pmatch(paste(risk.col,risk.col,sep='.'),columnnames)
+      }
+      for(i in 1:nrow(neighbors)) points(neighbors[i,rsc], neighbors[i,rtc], col="lightblue", pch=1)
+    }
+  }
+  
+  #     points(xtract[1,risk.column],xtract[1,return.column], col="orange", pch=16) # overplot the equal weighted (or seed)
+  #check to see if portfolio 1 is EW  DE$random_portoflios[1,] all weights should be the same
+  #     if(!isTRUE(all.equal(DE$random_portfolios[1,][1],1/length(DE$random_portfolios[1,]),check.attributes=FALSE))){
+  #show both the seed and EW if they are different 
+  #NOTE the all.equal comparison could fail above if the first element of the first portfolio is the same as the EW weight, 
+  #but the rest is not, shouldn't happen often with real portfolios, only toy examples
+  #         points(xtract[2,risk.column],xtract[2,return.column], col="green", pch=16) # overplot the equal weighted (or seed)
+  #     }
+  
+  ## Draw solution trajectory
+  if(!is.null(R) & !is.null(portfolio)){
+    w.traj = unique(DE$DEoutput$member$bestmemit)
+    rows = nrow(w.traj)
+    rr = matrix(nrow=rows, ncol=2)
+    ## maybe rewrite as an apply statement by row on w.traj
+    rtc = NULL
+    rsc = NULL
+    trajnames = NULL
+    for(i in 1:rows){
+      
+      w = w.traj[i,]
+      x = unlist(constrained_objective(w=w, R=R, portfolio=portfolio, trace=TRUE))
+      names(x)<-name.replace(names(x))
+      if(is.null(trajnames)) trajnames<-names(x)
+      if(is.null(rsc)){
+        rtc = pmatch(return.col,trajnames)
+        if(is.na(rtc)) {
+          rtc = pmatch(paste(return.col,return.col,sep='.'),trajnames)
+        }
+        rsc = pmatch(risk.col,trajnames)
+        if(is.na(rsc)) {
+          rsc = pmatch(paste(risk.col,risk.col,sep='.'),trajnames)
+        }
+      }
+      rr[i,1] = x[rsc] #'FIXME
+      rr[i,2] = x[rtc]  #'FIXME      
+    }
+    colors2 = colorRamp(c("blue","lightblue"))
+    colortrail = rgb(colors2((0:rows)/rows),max=255)
+    for(i in 1:rows){
+      points(rr[i,1], rr[i,2], pch=1, col = colortrail[rows-i+1])
+    }
     
-    plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
-
-    if(!is.null(neighbors)){ 
-        if(is.vector(neighbors)){
-            if(length(neighbors)==1){
-                # overplot nearby portfolios defined by 'out'
-                orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything other than mean
-                subsetx = head(xtract[orderx,], n=neighbors)
-            } else{
-                # assume we have a vector of portfolio numbers
-                subsetx = xtract[neighbors,]
-            }
-            points(subsetx[,risk.column], subsetx[,return.column], col="lightblue", pch=1)
-        }
-        if(is.matrix(neighbors) | is.data.frame(neighbors)){
-            # the user has likely passed in a matrix containing calculated values for risk.col and return.col      
-            rtc = pmatch(return.col,columnnames)
-            if(is.na(rtc)) {
-                rtc = pmatch(paste(return.col,return.col,sep='.'),columnnames)
-            }
-            rsc = pmatch(risk.col,columnnames)
-            if(is.na(rsc)) {
-                risk.column = pmatch(paste(risk.col,risk.col,sep='.'),columnnames)
-            }
-            for(i in 1:nrow(neighbors)) points(neighbors[i,rsc], neighbors[i,rtc], col="lightblue", pch=1)
-        }
+    for(i in 2:rows){
+      segments(rr[i,1], rr[i,2], rr[i-1,1], rr[i-1,2],col = colortrail[rows-i+1], lty = 1, lwd = 2)
     }
-    
-#     points(xtract[1,risk.column],xtract[1,return.column], col="orange", pch=16) # overplot the equal weighted (or seed)
-    #check to see if portfolio 1 is EW  DE$random_portoflios[1,] all weights should be the same
-#     if(!isTRUE(all.equal(DE$random_portfolios[1,][1],1/length(DE$random_portfolios[1,]),check.attributes=FALSE))){
-        #show both the seed and EW if they are different 
-        #NOTE the all.equal comparison could fail above if the first element of the first portfolio is the same as the EW weight, 
-        #but the rest is not, shouldn't happen often with real portfolios, only toy examples
-#         points(xtract[2,risk.column],xtract[2,return.column], col="green", pch=16) # overplot the equal weighted (or seed)
-#     }
-
-    ## Draw solution trajectory
-    if(!is.null(R) & !is.null(portfolio)){
-        w.traj = unique(DE$DEoutput$member$bestmemit)
-        rows = nrow(w.traj)
-        rr = matrix(nrow=rows, ncol=2)
-        ## maybe rewrite as an apply statement by row on w.traj
-        rtc = NULL
-        rsc = NULL
-        trajnames = NULL
-        for(i in 1:rows){
-            
-            w = w.traj[i,]
-            x = unlist(constrained_objective(w=w, R=R, portfolio=portfolio, trace=TRUE))
-            names(x)<-name.replace(names(x))
-            if(is.null(trajnames)) trajnames<-names(x)
-            if(is.null(rsc)){
-                rtc = pmatch(return.col,trajnames)
-                if(is.na(rtc)) {
-                    rtc = pmatch(paste(return.col,return.col,sep='.'),trajnames)
-                }
-                rsc = pmatch(risk.col,trajnames)
-                if(is.na(rsc)) {
-                    rsc = pmatch(paste(risk.col,risk.col,sep='.'),trajnames)
-                }
-            }
-            rr[i,1] = x[rsc] #'FIXME
-            rr[i,2] = x[rtc]  #'FIXME      
-        }
-        colors2 = colorRamp(c("blue","lightblue"))
-        colortrail = rgb(colors2((0:rows)/rows),max=255)
-        for(i in 1:rows){
-            points(rr[i,1], rr[i,2], pch=1, col = colortrail[rows-i+1])
-        }
-        
-        for(i in 2:rows){
-            segments(rr[i,1], rr[i,2], rr[i-1,1], rr[i-1,2],col = colortrail[rows-i+1], lty = 1, lwd = 2)
-        }
-    } else{
-        message("Trajectory cannot be drawn because return object or constraints were not passed.")
-    }
-
-
-    ## @TODO: Generalize this to find column containing the "risk" metric
-    if(length(names(DE)[which(names(DE)=='constrained_objective')])) {
-        result.slot<-'constrained_objective'
-    } else {
-        result.slot<-'objective_measures'
-    }
-    objcols<-unlist(DE[[result.slot]])
-    names(objcols)<-name.replace(names(objcols))
+  } else{
+    message("Trajectory cannot be drawn because return object or constraints were not passed.")
+  }
+  
+  
+  ## @TODO: Generalize this to find column containing the "risk" metric
+  if(length(names(DE)[which(names(DE)=='constrained_objective')])) {
+    result.slot<-'constrained_objective'
+  } else {
+    result.slot<-'objective_measures'
+  }
+  objcols<-unlist(DE[[result.slot]])
+  names(objcols)<-name.replace(names(objcols))
+  return.column = pmatch(return.col,names(objcols))
+  if(is.na(return.column)) {
+    return.col = paste(return.col,return.col,sep='.')
     return.column = pmatch(return.col,names(objcols))
-    if(is.na(return.column)) {
-        return.col = paste(return.col,return.col,sep='.')
-        return.column = pmatch(return.col,names(objcols))
-    }
+  }
+  risk.column = pmatch(risk.col,names(objcols))
+  if(is.na(risk.column)) {
+    risk.col = paste(risk.col,risk.col,sep='.')
     risk.column = pmatch(risk.col,names(objcols))
-    if(is.na(risk.column)) {
-        risk.col = paste(risk.col,risk.col,sep='.')
-        risk.column = pmatch(risk.col,names(objcols))
-    }
-    # risk and return metrics for the optimal weights if the RP object does not
-    # contain the metrics specified by return.col or risk.col
-    if(is.na(return.column) | is.na(risk.column)){
-      return.col <- gsub("\\..*", "", return.col)
-      risk.col <- gsub("\\..*", "", risk.col)
-      # warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
-      opt_weights <- DE$weights
-      ret <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=return.col))
-      risk <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=risk.col))
-      points(risk, ret, col="blue", pch=16) #optimal
-    } else {
-      points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
-    }
-    axis(1, cex.axis = cex.axis, col = element.color)
-    axis(2, cex.axis = cex.axis, col = element.color)
-    box(col = element.color)
+  }
+  # risk and return metrics for the optimal weights if the RP object does not
+  # contain the metrics specified by return.col or risk.col
+  if(is.na(return.column) | is.na(risk.column)){
+    return.col <- gsub("\\..*", "", return.col)
+    risk.col <- gsub("\\..*", "", risk.col)
+    # warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
+    opt_weights <- DE$weights
+    ret <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=return.col))
+    risk <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=risk.col))
+    points(risk, ret, col="blue", pch=16) #optimal
+  } else {
+    points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
+  }
+  axis(1, cex.axis = cex.axis, col = element.color)
+  axis(2, cex.axis = cex.axis, col = element.color)
+  box(col = element.color)
 }
+
 
 #' scatter and weights chart  for random portfolios
 #' 
@@ -285,7 +290,6 @@ chart.Scatter.DE <- function(DE, R=NULL, portfolio=NULL, neighbors = NULL, retur
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' 
 #' @param DE set of random portfolios created by \code{\link{optimize.portfolio}}
-#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns, used to recalulate the objective function where required
 #' @param ... any other passthru parameters 
 #' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
@@ -295,13 +299,13 @@ chart.Scatter.DE <- function(DE, R=NULL, portfolio=NULL, neighbors = NULL, retur
 #' \code{\link{optimize.portfolio}}
 #' \code{\link{extractStats}}
 #' @export
-charts.DE <- function(DE, R=NULL, risk.col, return.col, neighbors=NULL, main="DEoptim.Portfolios", ...){
+charts.DE <- function(DE, risk.col, return.col, neighbors=NULL, main="DEoptim.Portfolios", ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that DE is of the correct class
     op <- par(no.readonly=TRUE)
     layout(matrix(c(1,2)),height=c(2,1.5),width=1)
     par(mar=c(4,4,4,2))
-    chart.Scatter.DE(DE, R=R, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+    chart.Scatter.DE(DE, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
     par(mar=c(2,4,0,2))
     chart.Weights.DE(DE, main="", neighbors=neighbors, ...)
     par(op)
@@ -323,12 +327,11 @@ charts.DE <- function(DE, R=NULL, risk.col, return.col, neighbors=NULL, main="DE
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' @param x set of portfolios created by \code{\link{optimize.portfolio}}
 #' @param ... any other passthru parameters 
-#' @param R an optional an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns, used to recalulate the objective function where required
 #' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param main an overall title for the plot: see \code{\link{title}}
 #' @export
-plot.optimize.portfolio.DEoptim <- function(x, ...,  R=NULL, return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
-    charts.DE(DE=x, R=R, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+plot.optimize.portfolio.DEoptim <- function(x, ..., return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
+    charts.DE(DE=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
 }

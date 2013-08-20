@@ -2,7 +2,7 @@
 \alias{plot.optimize.portfolio.pso}
 \title{scatter and weights chart for portfolios}
 \usage{
-  plot.optimize.portfolio.pso(pso, R, return.col = "mean",
+  plot.optimize.portfolio.pso(pso, return.col = "mean",
     risk.col = "StdDev", cex.axis = 0.8,
     element.color = "darkgray", neighbors = NULL,
     main = "PSO.Portfolios", ...)
@@ -10,10 +10,6 @@
 \arguments{
   \item{pso}{object created by
   \code{\link{optimize.portfolio}}}
-
-  \item{R}{an xts, vector, matrix, data frame, timeSeries
-  or zoo object of asset returns, used to recalulate the
-  risk and return metric}
 
   \item{return.col}{string matching the objective of a
   'return' objective, on vertical axis}

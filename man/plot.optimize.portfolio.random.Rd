@@ -12,11 +12,6 @@
 
   \item{...}{any other passthru parameters}
 
-  \item{R}{an optional an xts, vector, matrix, data frame,
-  timeSeries or zoo object of asset returns, used to
-  recalulate the objective function when return.col or
-  risk.col is not part of the extractStats output.}
-
   \item{risk.col}{string name of column to use for risk
   (horizontal axis)}
 
