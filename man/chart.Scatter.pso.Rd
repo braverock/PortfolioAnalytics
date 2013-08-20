@@ -2,9 +2,9 @@
 \alias{chart.Scatter.pso}
 \title{classic risk return scatter of random portfolios}
 \usage{
-  chart.Scatter.pso(pso, return.col = "mean",
-    risk.col = "StdDev", ..., element.color = "darkgray",
-    cex.axis = 0.8, main = "")
+  chart.Scatter.pso(pso, neighbors = NULL, ...,
+    return.col = "mean", risk.col = "ES",
+    element.color = "darkgray", cex.axis = 0.8)
 }
 \arguments{
   \item{pso}{object created by

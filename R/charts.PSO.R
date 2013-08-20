@@ -63,27 +63,14 @@ chart.Weights.pso <- function(object, neighbors = NULL, ..., main="Weights", las
 #' @export
 chart.Weights.optimize.portfolio.pso <- chart.Weights.pso
 
-#' classic risk return scatter of random portfolios
-#' 
-#' 
-#' \code{return.col} must be the name of a function used to compute the return metric on the portfolio weights
-#' \code{risk.col} must be the name of a function used to compute the risk metric on the portfolio weights
-#' 
-#' @param pso object created by \code{\link{optimize.portfolio}}
-#' @param return.col string matching the objective of a 'return' objective, on vertical axis
-#' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
-#' @param ... any other passthru parameters 
-#' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
-#' @param element.color color for the default plot scatter points
-#' @seealso \code{\link{optimize.portfolio}}
-#' @author Ross Bennett
+#' @rdname chart.RiskReward
 #' @export
-chart.Scatter.pso <- function(pso, return.col="mean", risk.col="StdDev", ..., element.color = "darkgray", cex.axis=0.8, main=""){
-  if(!inherits(pso, "optimize.portfolio.pso")) stop("pso must be of class 'optimize.portfolio.pso'")
-  R <- pso$R
+chart.Scatter.pso <- function(object, neighbors=NULL, ..., return.col="mean", risk.col="ES", element.color = "darkgray", cex.axis=0.8){
+  if(!inherits(object, "optimize.portfolio.pso")) stop("object must be of class 'optimize.portfolio.pso'")
+  R <- object$R
   # Object with the "out" value in the first column and the normalized weights
   # The first row is the optimal "out" value and the optimal weights
-  tmp <- extractStats(pso)
+  tmp <- extractStats(object)
   
   # Get the weights
   wts <- tmp[,-1]
@@ -91,12 +78,16 @@ chart.Scatter.pso <- function(pso, return.col="mean", risk.col="StdDev", ..., el
   returnpoints <- applyFUN(R=R, weights=wts, FUN=return.col, ...=...)
   riskpoints <- applyFUN(R=R, weights=wts, FUN=risk.col, ...=...)
   
-  plot(x=riskpoints, y=returnpoints, xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, main=main)
+  plot(x=riskpoints, y=returnpoints, xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
   points(x=riskpoints[1], y=returnpoints[1], col="blue", pch=16) # optimal
   axis(1, cex.axis = cex.axis, col = element.color)
   axis(2, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
 }
+
+#' @rdname chart.RiskReward
+#' @export
+chart.RiskReward.optimize.portfolio.pso <- chart.Scatter.pso
 
 #' scatter and weights chart for portfolios
 #' 
@@ -120,9 +111,9 @@ charts.pso <- function(pso, return.col="mean", risk.col="StdDev",
   op <- par(no.readonly=TRUE)
   layout(matrix(c(1,2)),height=c(2,2),width=1)
   par(mar=c(4,4,4,2))
-  chart.Scatter.pso(pso=pso, return.col=return.col, risk.col=risk.col, element.color=element.color, cex.axis=cex.axis, main=main, ...=...)
+  chart.Scatter.pso(object=pso, return.col=return.col, risk.col=risk.col, element.color=element.color, cex.axis=cex.axis, main=main, ...=...)
   par(mar=c(2,4,0,2))
-  chart.Weights.pso(pso=pso, neighbors=neighbors, las=3, xlab=NULL, cex.lab=1, element.color=element.color, cex.axis=cex.axis, ...=..., main="")
+  chart.Weights.pso(object=pso, neighbors=neighbors, las=3, xlab=NULL, cex.lab=1, element.color=element.color, cex.axis=cex.axis, ...=..., main="")
   par(op)
 }
 

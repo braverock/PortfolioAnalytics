@@ -51,3 +51,4 @@ Collate:
     'charts.PSO.R'
     'charts.GenSA.R'
     'chart.Weights.R'
+    'chart.RiskReward.R'

@@ -75,27 +75,18 @@ chart.Weights.DE <- function(object, neighbors = NULL, ..., main="Weights", las 
 #' @export
 chart.Weights.optimize.portfolio.DEoptim <- chart.Weights.DE
 
-#' classic risk return scatter of DEoptim results
-#' 
-#' @param DE set of portfolios created by \code{\link{optimize.portfolio}}
-#' @param neighbors set of 'neighbor' portfolios to overplot, see Details in \code{\link{charts.DE}}
-#' @param return.col string matching the objective of a 'return' objective, on vertical axis
-#' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
-#' @param ... any other passthru parameters 
-#' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
-#' @param element.color color for the default plot scatter points
-#' @seealso \code{\link{optimize.portfolio}}
+#' @rdname chart.RiskReward
 #' @export
-chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='ES', ..., element.color = "darkgray", cex.axis=0.8){
+chart.Scatter.DE <- function(object, neighbors = NULL, ..., return.col='mean', risk.col='ES', element.color = "darkgray", cex.axis=0.8){
   # more or less specific to the output of the DEoptim portfolio code with constraints
   # will work to a point with other functions, such as optimize.porfolio.parallel
   # there's still a lot to do to improve this.
   
-  if(!inherits(DE, "optimize.portfolio.DEoptim")) stop("DE must be of class 'optimize.portfolio.DEoptim'")
+  if(!inherits(object, "optimize.portfolio.DEoptim")) stop("object must be of class 'optimize.portfolio.DEoptim'")
   
-  R <- DE$R
-  portfolio <- DE$portfolio
-  xtract = extractStats(DE)
+  R <- object$R
+  portfolio <- object$portfolio
+  xtract = extractStats(object)
   columnnames = colnames(xtract)
   #return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
   return.column = pmatch(return.col,columnnames)
@@ -176,8 +167,8 @@ chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='
   }
   
   #     points(xtract[1,risk.column],xtract[1,return.column], col="orange", pch=16) # overplot the equal weighted (or seed)
-  #check to see if portfolio 1 is EW  DE$random_portoflios[1,] all weights should be the same
-  #     if(!isTRUE(all.equal(DE$random_portfolios[1,][1],1/length(DE$random_portfolios[1,]),check.attributes=FALSE))){
+  #check to see if portfolio 1 is EW  object$random_portoflios[1,] all weights should be the same
+  #     if(!isTRUE(all.equal(object$random_portfolios[1,][1],1/length(object$random_portfolios[1,]),check.attributes=FALSE))){
   #show both the seed and EW if they are different 
   #NOTE the all.equal comparison could fail above if the first element of the first portfolio is the same as the EW weight, 
   #but the rest is not, shouldn't happen often with real portfolios, only toy examples
@@ -186,7 +177,7 @@ chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='
   
   ## Draw solution trajectory
   if(!is.null(R) & !is.null(portfolio)){
-    w.traj = unique(DE$DEoutput$member$bestmemit)
+    w.traj = unique(object$DEoutput$member$bestmemit)
     rows = nrow(w.traj)
     rr = matrix(nrow=rows, ncol=2)
     ## maybe rewrite as an apply statement by row on w.traj
@@ -227,12 +218,12 @@ chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='
   
   
   ## @TODO: Generalize this to find column containing the "risk" metric
-  if(length(names(DE)[which(names(DE)=='constrained_objective')])) {
+  if(length(names(object)[which(names(object)=='constrained_objective')])) {
     result.slot<-'constrained_objective'
   } else {
     result.slot<-'objective_measures'
   }
-  objcols<-unlist(DE[[result.slot]])
+  objcols<-unlist(object[[result.slot]])
   names(objcols)<-name.replace(names(objcols))
   return.column = pmatch(return.col,names(objcols))
   if(is.na(return.column)) {
@@ -250,7 +241,7 @@ chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='
     return.col <- gsub("\\..*", "", return.col)
     risk.col <- gsub("\\..*", "", risk.col)
     # warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
-    opt_weights <- DE$weights
+    opt_weights <- object$weights
     ret <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=return.col))
     risk <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=risk.col))
     points(risk, ret, col="blue", pch=16) #optimal
@@ -262,6 +253,9 @@ chart.Scatter.DE <- function(DE, neighbors = NULL, return.col='mean', risk.col='
   box(col = element.color)
 }
 
+#' @rdname chart.RiskReward
+#' @export
+chart.RiskReward.optimize.portfolio.DEoptim <- chart.Scatter.DE
 
 #' scatter and weights chart  for random portfolios
 #' 
@@ -290,9 +284,9 @@ charts.DE <- function(DE, risk.col, return.col, neighbors=NULL, main="DEoptim.Po
     op <- par(no.readonly=TRUE)
     layout(matrix(c(1,2)),height=c(2,1.5),width=1)
     par(mar=c(4,4,4,2))
-    chart.Scatter.DE(DE, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+    chart.Scatter.DE(object=DE, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
     par(mar=c(2,4,0,2))
-    chart.Weights.DE(DE, main="", neighbors=neighbors, ...)
+    chart.Weights.DE(object=DE, main="", neighbors=neighbors, ...)
     par(op)
 }
 

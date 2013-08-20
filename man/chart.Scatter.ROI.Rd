@@ -2,9 +2,9 @@
 \alias{chart.Scatter.ROI}
 \title{classic risk return scatter of random portfolios}
 \usage{
-  chart.Scatter.ROI(ROI, rp = NULL, return.col = "mean",
-    risk.col = "StdDev", ..., element.color = "darkgray",
-    cex.axis = 0.8, main = "")
+  chart.Scatter.ROI(ROI, neighbors = NULL, ..., rp = FALSE,
+    return.col = "mean", risk.col = "ES",
+    element.color = "darkgray", cex.axis = 0.8)
 }
 \arguments{
   \item{ROI}{object created by

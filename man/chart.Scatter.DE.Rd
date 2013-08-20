@@ -2,8 +2,8 @@
 \alias{chart.Scatter.DE}
 \title{classic risk return scatter of DEoptim results}
 \usage{
-  chart.Scatter.DE(DE, neighbors = NULL,
-    return.col = "mean", risk.col = "ES", ...,
+  chart.Scatter.DE(DE, neighbors = NULL, ...,
+    return.col = "mean", risk.col = "ES",
     element.color = "darkgray", cex.axis = 0.8)
 }
 \arguments{

@@ -2,8 +2,8 @@
 \alias{chart.Scatter.RP}
 \title{classic risk return scatter of random portfolios}
 \usage{
-  chart.Scatter.RP(RP, neighbors = NULL,
-    return.col = "mean", risk.col = "ES", ...,
+  chart.Scatter.RP(RP, neighbors = NULL, ...,
+    return.col = "mean", risk.col = "ES",
     element.color = "darkgray", cex.axis = 0.8)
 }
 \arguments{
