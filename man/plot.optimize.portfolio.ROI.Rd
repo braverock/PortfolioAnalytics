@@ -2,8 +2,9 @@
 \alias{plot.optimize.portfolio.ROI}
 \title{scatter and weights chart for portfolios}
 \usage{
-  plot.optimize.portfolio.ROI(ROI, rp = NULL,
-    risk.col = "StdDev", return.col = "mean",
+  plot.optimize.portfolio.ROI(ROI, rp = FALSE,
+    risk.col = "ES", return.col = "mean",
+    chart.assets = chart.assets,
     element.color = "darkgray", neighbors = NULL,
     main = "ROI.Portfolios", ...)
 }

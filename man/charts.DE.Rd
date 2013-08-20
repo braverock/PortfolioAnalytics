@@ -2,8 +2,8 @@
 \alias{charts.DE}
 \title{scatter and weights chart  for random portfolios}
 \usage{
-  charts.DE(DE, risk.col, return.col, neighbors = NULL,
-    main = "DEoptim.Portfolios", ...)
+  charts.DE(DE, risk.col, return.col, chart.assets,
+    neighbors = NULL, main = "DEoptim.Portfolios", ...)
 }
 \arguments{
   \item{DE}{set of random portfolios created by

@@ -3,7 +3,7 @@
 \title{scatter and weights chart for portfolios}
 \usage{
   plot.optimize.portfolio.pso(pso, return.col = "mean",
-    risk.col = "StdDev", cex.axis = 0.8,
+    risk.col = "ES", chart.assets = FALSE, cex.axis = 0.8,
     element.color = "darkgray", neighbors = NULL,
     main = "PSO.Portfolios", ...)
 }

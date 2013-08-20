@@ -65,7 +65,7 @@ chart.Weights.optimize.portfolio.ROI <- chart.Weights.ROI
 
 #' @rdname chart.RiskReward
 #' @export
-chart.Scatter.ROI <- function(object, neighbors=NULL, ..., rp=FALSE, return.col="mean", risk.col="ES", element.color = "darkgray", cex.axis=0.8){
+chart.Scatter.ROI <- function(object, neighbors=NULL, ..., rp=FALSE, return.col="mean", risk.col="ES", chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8){
   
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class 'optimize.portfolio.ROI'")
   
@@ -75,6 +75,8 @@ chart.Scatter.ROI <- function(object, neighbors=NULL, ..., rp=FALSE, return.col=
     permutations <- match.call(expand.dots=TRUE)$permutations
     if(is.null(permutations)) permutations <- 2000
     rp <- random_portfolios(portfolio=object$portfolio, permutations=permutations)
+  } else {
+    rp = NULL
   }
   
   # Get the optimal weights from the output of optimize.portfolio
@@ -86,8 +88,32 @@ chart.Scatter.ROI <- function(object, neighbors=NULL, ..., rp=FALSE, return.col=
   returnpoints <- applyFUN(R=R, weights=rp, FUN=return.col, ...=...)
   riskpoints <- applyFUN(R=R, weights=rp, FUN=risk.col, ...=...)
   
-  plot(x=riskpoints, y=returnpoints, xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
+  if(chart.assets){
+  # Include risk reward scatter of asset returns
+  asset_ret <- scatterFUN(R=R, FUN=return.col, ...=...)
+  asset_risk <- scatterFUN(R=R, FUN=risk.col, ...=...)
+  rnames <- colnames(R)
+  } else {
+    asset_ret <- NULL
+    asset_risk <- NULL
+  }
+  
+  # get limits for x and y axis
+  ylim <- range(returnpoints, asset_ret)
+  xlim <- range(riskpoints, asset_risk)
+  
+  # Plot the portfolios
+  plot(x=riskpoints, y=returnpoints, xlab=risk.col, ylab=return.col, col="darkgray", ylim=ylim, xlim=xlim, axes=FALSE, ...)
+  # Plot the optimal portfolio
   points(x=riskpoints[1], y=returnpoints[1], col="blue", pch=16) # optimal
+  text(x=riskpoints[1], y=returnpoints[1], labels="Optimal",col="blue", pos=4, cex=0.8)
+  
+  # plot the risk-reward scatter of the assets
+  if(chart.assets){
+  points(x=asset_risk, y=asset_ret)
+  text(x=asset_risk, y=asset_ret, labels=colnames(R), pos=4, cex=0.8)
+  }
+  
   axis(1, cex.axis = cex.axis, col = element.color)
   axis(2, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
@@ -117,14 +143,13 @@ chart.RiskReward.optimize.portfolio.ROI <- chart.Scatter.ROI
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-charts.ROI <- function(ROI, rp=FALSE, risk.col="StdDev", return.col="mean", 
-                      cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="ROI.Portfolios", ...){
+charts.ROI <- function(ROI, rp=FALSE, risk.col="StdDev", return.col="mean", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="ROI.Portfolios", ...){
   # Specific to the output of the optimize_method=ROI
   R <- ROI$R
   op <- par(no.readonly=TRUE)
   layout(matrix(c(1,2)),height=c(2,1.5),width=1)
   par(mar=c(4,4,4,2))
-  chart.Scatter.ROI(ROI, rp=rp, return.col=return.col, risk.col=risk.col, ..., element.color=element.color, cex.axis=cex.axis, main=main)
+  chart.Scatter.ROI(ROI, rp=rp, return.col=return.col, risk.col=risk.col, chart.assets=chart.assets, ..., element.color=element.color, cex.axis=cex.axis, main=main)
   par(mar=c(2,4,0,2))
   chart.Weights.ROI(ROI, neighbors=neighbors, ..., main="", las=3, xlab=NULL, cex.lab=1, element.color=element.color, cex.axis=cex.axis)
   par(op)
@@ -150,6 +175,6 @@ charts.ROI <- function(ROI, rp=FALSE, risk.col="StdDev", return.col="mean",
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-plot.optimize.portfolio.ROI <- function(ROI, rp=FALSE, risk.col="StdDev", return.col="mean", element.color="darkgray", neighbors=NULL, main="ROI.Portfolios", ...){
-  charts.ROI(ROI=ROI, rp=rp, risk.col=risk.col, return.col=return.col, main=main, ...)
+plot.optimize.portfolio.ROI <- function(ROI, rp=FALSE, risk.col="ES", return.col="mean", chart.assets=chart.assets, element.color="darkgray", neighbors=NULL, main="ROI.Portfolios", ...){
+  charts.ROI(ROI=ROI, rp=rp, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, main=main, ...)
 }

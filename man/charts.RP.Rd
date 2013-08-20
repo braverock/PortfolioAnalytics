@@ -2,7 +2,7 @@
 \alias{charts.RP}
 \title{scatter and weights chart  for random portfolios}
 \usage{
-  charts.RP(RP, R = NULL, risk.col, return.col,
+  charts.RP(RP, risk.col, return.col, chart.assets = FALSE,
     neighbors = NULL, main = "Random.Portfolios", ...)
 }
 \arguments{

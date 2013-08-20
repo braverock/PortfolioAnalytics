@@ -14,48 +14,53 @@
 \usage{
   chart.Scatter.DE(object, neighbors = NULL, ...,
     return.col = "mean", risk.col = "ES",
-    element.color = "darkgray", cex.axis = 0.8)
+    chart.assets = FALSE, element.color = "darkgray",
+    cex.axis = 0.8)
 
   chart.RiskReward.optimize.portfolio.DEoptim(object,
     neighbors = NULL, ..., return.col = "mean",
-    risk.col = "ES", element.color = "darkgray",
-    cex.axis = 0.8)
+    risk.col = "ES", chart.assets = FALSE,
+    element.color = "darkgray", cex.axis = 0.8)
 
   chart.Scatter.RP(object, neighbors = NULL, ...,
     return.col = "mean", risk.col = "ES",
-    element.color = "darkgray", cex.axis = 0.8)
+    chart.assets = FALSE, element.color = "darkgray",
+    cex.axis = 0.8)
 
   chart.RiskReward.optimize.portfolio.random(object,
     neighbors = NULL, ..., return.col = "mean",
-    risk.col = "ES", element.color = "darkgray",
-    cex.axis = 0.8)
+    risk.col = "ES", chart.assets = FALSE,
+    element.color = "darkgray", cex.axis = 0.8)
 
   chart.Scatter.ROI(object, neighbors = NULL, ...,
     rp = FALSE, return.col = "mean", risk.col = "ES",
-    element.color = "darkgray", cex.axis = 0.8)
+    chart.assets = FALSE, element.color = "darkgray",
+    cex.axis = 0.8)
 
   chart.RiskReward.optimize.portfolio.ROI(object,
     neighbors = NULL, ..., rp = FALSE, return.col = "mean",
-    risk.col = "ES", element.color = "darkgray",
-    cex.axis = 0.8)
+    risk.col = "ES", chart.assets = FALSE,
+    element.color = "darkgray", cex.axis = 0.8)
 
   chart.Scatter.pso(object, neighbors = NULL, ...,
     return.col = "mean", risk.col = "ES",
-    element.color = "darkgray", cex.axis = 0.8)
+    chart.assets = FALSE, element.color = "darkgray",
+    cex.axis = 0.8)
 
   chart.RiskReward.optimize.portfolio.pso(object,
     neighbors = NULL, ..., return.col = "mean",
-    risk.col = "ES", element.color = "darkgray",
-    cex.axis = 0.8)
+    risk.col = "ES", chart.assets = FALSE,
+    element.color = "darkgray", cex.axis = 0.8)
 
   chart.Scatter.GenSA(object, neighbors = NULL, ...,
     rp = FALSE, return.col = "mean", risk.col = "ES",
-    element.color = "darkgray", cex.axis = 0.8)
+    chart.assets = FALSE, element.color = "darkgray",
+    cex.axis = 0.8)
 
   chart.RiskReward.optimize.portfolio.GenSA(object,
     neighbors = NULL, ..., rp = FALSE, return.col = "mean",
-    risk.col = "ES", element.color = "darkgray",
-    cex.axis = 0.8)
+    risk.col = "ES", chart.assets = FALSE,
+    element.color = "darkgray", cex.axis = 0.8)
 
   chart.RiskReward(object, neighbors, ..., rp = FALSE,
     return.col = "mean", risk.col = "ES",
@@ -79,6 +84,9 @@
 
   \item{risk.col}{string matching the objective of a 'risk'
   objective, on horizontal axis}
+
+  \item{chart.assets}{TRUE/FALSE. Includes a risk reward
+  scatter of the assets in the chart}
 
   \item{cex.axis}{The magnification to be used for axis
   annotation relative to the current setting of \code{cex}}

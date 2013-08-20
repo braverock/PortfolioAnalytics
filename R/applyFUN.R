@@ -82,3 +82,64 @@ applyFUN <- function(R, weights, FUN="mean", ...){
   }
      return(out)
 }
+
+#' Apply a risk or return function to asset returns
+#' 
+#' This function is used to calculate risk or return metrics given a matrix of
+#' asset returns and will be used for a risk-reward scatter plot of the assets
+#' 
+#' @param R 
+#' @param FUN
+#' @param ... any passthrough arguments to FUN
+#' @author Ross Bennett
+#' @export
+scatterFUN <- function(R, FUN, ...){
+  nargs <- list(...)
+  
+  # match the FUN arg to a risk or return function
+  switch(FUN,
+         mean = {
+           return(as.numeric(apply(R, 2, mean)))
+           #fun = match.fun(mean)
+           #nargs$x = R
+         },
+         sd =,
+         StdDev = { 
+           fun = match.fun(StdDev)
+         },
+         mVaR =,
+         VaR = {
+           fun = match.fun(VaR) 
+           if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+           if(is.null(nargs$invert)) nargs$invert = FALSE
+         },
+         es =,
+         mES =,
+         CVaR =,
+         cVaR =,
+         ETL =,
+         mETL =,
+         ES = {
+           fun = match.fun(ES)
+           if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+           if(is.null(nargs$invert)) nargs$invert = FALSE
+         },
+{   # see 'S Programming p. 67 for this matching
+  fun <- try(match.fun(FUN))
+}
+  ) # end switch block
+  
+  # calculate FUN on R
+  out <- rep(0, ncol(R))
+  .formals  <- formals(fun)
+  onames <- names(.formals)
+  for(i in 1:ncol(R)){
+    nargs$R <- R[, i]
+    dargs <- nargs
+    pm <- pmatch(names(dargs), onames, nomatch = 0L)
+    names(dargs[pm > 0L]) <- onames[pm]
+    .formals[pm] <- dargs[pm > 0L]
+    out[i] <- try(do.call(fun, .formals))
+  }
+  return(out)
+}

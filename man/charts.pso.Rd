@@ -2,9 +2,10 @@
 \alias{charts.pso}
 \title{scatter and weights chart for portfolios}
 \usage{
-  charts.pso(pso, return.col = "mean", risk.col = "StdDev",
-    cex.axis = 0.8, element.color = "darkgray",
-    neighbors = NULL, main = "PSO.Portfolios", ...)
+  charts.pso(pso, return.col = "mean", risk.col = "ES",
+    chart.assets = FALSE, cex.axis = 0.8,
+    element.color = "darkgray", neighbors = NULL,
+    main = "PSO.Portfolios", ...)
 }
 \arguments{
   \item{pso}{object created by

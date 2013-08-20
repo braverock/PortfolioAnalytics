@@ -3,7 +3,8 @@
 \title{plot method for optimize.portfolio.random output}
 \usage{
   plot.optimize.portfolio.random(x, ..., R = NULL,
-    return.col = "mean", risk.col = "ES", neighbors = NULL,
+    return.col = "mean", risk.col = "ES",
+    chart.assets = FALSE, neighbors = NULL,
     main = "optimized portfolio plot")
 }
 \arguments{

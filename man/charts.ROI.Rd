@@ -2,10 +2,10 @@
 \alias{charts.ROI}
 \title{scatter and weights chart for portfolios}
 \usage{
-  charts.ROI(ROI, rp = NULL, risk.col = "StdDev",
-    return.col = "mean", cex.axis = 0.8,
-    element.color = "darkgray", neighbors = NULL,
-    main = "ROI.Portfolios", ...)
+  charts.ROI(ROI, rp = FALSE, risk.col = "StdDev",
+    return.col = "mean", chart.assets = FALSE,
+    cex.axis = 0.8, element.color = "darkgray",
+    neighbors = NULL, main = "ROI.Portfolios", ...)
 }
 \arguments{
   \item{ROI}{object created by

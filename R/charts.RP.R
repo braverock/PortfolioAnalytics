@@ -81,7 +81,7 @@ chart.Weights.optimize.portfolio.random <- chart.Weights.RP
 
 #' @rdname chart.RiskReward
 #' @export
-chart.Scatter.RP <- function(object, neighbors = NULL, ..., return.col='mean', risk.col='ES', element.color = "darkgray", cex.axis=0.8){
+chart.Scatter.RP <- function(object, neighbors = NULL, ..., return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8){
   # more or less specific to the output of the random portfolio code with constraints
   # will work to a point with other functions, such as optimize.porfolio.parallel
   # there's still a lot to do to improve this.
@@ -141,13 +141,30 @@ chart.Scatter.RP <- function(object, neighbors = NULL, ..., return.col='mean', r
   }
   # print(colnames(head(xtract)))
   
+  if(chart.assets){
+    # Include risk reward scatter of asset returns
+    asset_ret <- scatterFUN(R=R, FUN=return.col, ...=...)
+    asset_risk <- scatterFUN(R=R, FUN=risk.col, ...=...)
+    rnames <- colnames(R)
+  } else {
+    asset_ret <- NULL
+    asset_risk <- NULL
+  }
+  
+  # plot the random portfolios
   plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
+  
+  # plot the risk-reward scatter of the assets
+  if(chart.assets){
+    points(x=asset_risk, y=asset_ret)
+    text(x=asset_risk, y=asset_ret, labels=colnames(R), pos=4, cex=0.8)
+  }
   
   if(!is.null(neighbors)){ 
     if(is.vector(neighbors)){
       if(length(neighbors)==1){
         # overplot nearby portfolios defined by 'out'
-        orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything othchart.Scatter.er than mean
+        orderx = order(xtract[,"out"]) #TODO this won't work if the objective is anything other than mean
         subsetx = head(xtract[orderx,], n=neighbors)
       } else{
         # assume we have a vector of portfolio numbers
@@ -205,8 +222,10 @@ chart.Scatter.RP <- function(object, neighbors = NULL, ..., return.col='mean', r
     ret <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=return.col))
     risk <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=risk.col))
     points(risk, ret, col="blue", pch=16) #optimal
+    text(x=risk, y=ret, labels="Optimal",col="blue", pos=4, cex=0.8)
   } else {
     points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
+    text(x=objcols[risk.column], y=objcols[return.column], labels="Optimal",col="blue", pos=4, cex=0.8)
   }
   axis(1, cex.axis = cex.axis, col = element.color)
   axis(2, cex.axis = cex.axis, col = element.color)
@@ -238,13 +257,13 @@ chart.RiskReward.optimize.portfolio.random <- chart.Scatter.RP
 #' \code{\link{optimize.portfolio}}
 #' \code{\link{extractStats}}
 #' @export
-charts.RP <- function(RP, risk.col, return.col, neighbors=NULL, main="Random.Portfolios", ...){
+charts.RP <- function(RP, risk.col, return.col, chart.assets=FALSE, neighbors=NULL, main="Random.Portfolios", ...){
   # Specific to the output of the random portfolio code with constraints
   # @TODO: check that RP is of the correct class
   op <- par(no.readonly=TRUE)
   layout(matrix(c(1,2)),height=c(2,1.5),width=1)
   par(mar=c(4,4,4,2))
-  chart.Scatter.RP(object=RP, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+  chart.Scatter.RP(object=RP, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, ...)
   par(mar=c(2,4,0,2))
   chart.Weights.RP(object=RP, main="", neighbors=neighbors, ...)
   par(op)
@@ -271,8 +290,8 @@ charts.RP <- function(RP, risk.col, return.col, neighbors=NULL, main="Random.Por
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param main an overall title for the plot: see \code{\link{title}}
 #' @export
-plot.optimize.portfolio.random <- function(x, ...,  R=NULL, return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
-    charts.RP(RP=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+plot.optimize.portfolio.random <- function(x, ...,  R=NULL, return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, main='optimized portfolio plot') {
+    charts.RP(RP=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, ...)
 }
 
 #' plot method for optimize.portfolio output
@@ -296,6 +315,6 @@ plot.optimize.portfolio.random <- function(x, ...,  R=NULL, return.col='mean', r
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param main an overall title for the plot: see \code{\link{title}}
 #' @export
-plot.optimize.portfolio <- function(x, ...,  return.col='mean', risk.col='ES',  neighbors=NULL, main='optimized portfolio plot') {
-    charts.RP(RP=x, risk.col=risk.col, return.col=return.col, neighbors=neighbors, main=main, ...)
+plot.optimize.portfolio <- function(x, ...,  return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, main='optimized portfolio plot') {
+    charts.RP(RP=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, ...)
 }

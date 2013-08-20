@@ -3,7 +3,8 @@
 \title{plot method for optimize.portfolio.DEoptim output}
 \usage{
   plot.optimize.portfolio.DEoptim(x, ...,
-    return.col = "mean", risk.col = "ES", neighbors = NULL,
+    return.col = "mean", risk.col = "ES",
+    chart.assets = FALSE, neighbors = NULL,
     main = "optimized portfolio plot")
 }
 \arguments{
