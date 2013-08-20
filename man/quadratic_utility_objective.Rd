@@ -1,0 +1,29 @@
+\name{quadratic_utility_objective}
+\alias{quadratic_utility_objective}
+\title{constructor for quadratic utility objective}
+\usage{
+  quadratic_utility_objective(risk_aversion = 1,
+    target = NULL, enabled = TRUE)
+}
+\arguments{
+  \item{risk_aversion}{risk_aversion (i.e. lambda)
+  parameter to penalize variance}
+
+  \item{target}{target mean return value}
+
+  \item{enabled}{TRUE/FALSE, default enabled=TRUE}
+}
+\value{
+  a list of two elements \itemize{
+  \item{\code{return_objective}}
+  \item{\code{portfolio_risk_objective}} }
+}
+\description{
+  This function calls \code{\link{return_objective}} and
+  \code{\link{portfolio_risk_objective}} to create a list
+  of the objectives to be added to the portfolio.
+}
+\author{
+  Ross Bennett
+}
+

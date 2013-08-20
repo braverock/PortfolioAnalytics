@@ -23,7 +23,8 @@
   compatibility, see \code{\link{constraint}}}
 
   \item{type}{character type of the objective to add or
-  update, currently 'return','risk', or 'risk_budget'}
+  update, currently 'return','risk', 'risk_budget', or
+  'quadratic_utility'}
 
   \item{name}{name of the objective, should correspond to a
   function, though we will try to make allowances}

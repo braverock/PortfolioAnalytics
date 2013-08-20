@@ -130,7 +130,7 @@ add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=
   # to add objectives to a portfolio object instead of a constraint object.
   if (!is.portfolio(portfolio)) {stop("portfolio passed in is not of class portfolio")}
   
-  if (!hasArg(name)) stop("you must supply a name for the objective")
+  if (type != "quadratic_utility" & !hasArg(name)) stop("you must supply a name for the objective")
   if (!hasArg(type)) stop("you must supply a type of objective to create")
   if (!hasArg(enabled)) enabled=TRUE
   if (!hasArg(arguments) | is.null(arguments)) arguments<-list()
@@ -176,7 +176,12 @@ add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=
                                                         arguments=arguments,
                                                         ...=...)
          },
-         
+         qu=, quadratic_utility = {tmp_objective = quadratic_utility_objective(enabled=enabled, ...=...)
+                              # quadratic_utility_objective returns a list of a return_objective and a portfolio_risk_objective
+                              # we just need to combine it to the portfolio$objectives slot and return the portfolio
+                              portfolio$objectives <- c(portfolio$objectives, tmp_objective)
+                              return(portfolio)
+         },
          null = 
            {return(portfolio)} # got nothing, default to simply returning
          ) # end objective type switch
@@ -201,7 +206,7 @@ add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=
 #' 
 #' @param portfolio an object of type 'portfolio' to add the objective to, specifying the portfolio for the optimization, see \code{\link{portfolio}}
 #' @param constraints a 'v1_constraint' object for backwards compatibility, see \code{\link{constraint}}
-#' @param type character type of the objective to add or update, currently 'return','risk', or 'risk_budget'
+#' @param type character type of the objective to add or update, currently 'return','risk', 'risk_budget', or 'quadratic_utility'
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
 #' @param arguments default arguments to be passed to an objective function when executed
 #' @param enabled TRUE/FALSE
@@ -382,6 +387,28 @@ minmax_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, en
   Objective$max <- max
   return(Objective)
 } # end minmax_objective constructor
+
+#' constructor for quadratic utility objective
+#' 
+#' This function calls \code{\link{return_objective}} and \code{\link{portfolio_risk_objective}}
+#' to create a list of the objectives to be added to the portfolio.
+#' 
+#' @param risk_aversion risk_aversion (i.e. lambda) parameter to penalize variance
+#' @param target target mean return value
+#' @param enabled TRUE/FALSE, default enabled=TRUE
+#' @return a list of two elements
+#' \itemize{
+#'   \item{\code{return_objective}}
+#'   \item{\code{portfolio_risk_objective}}
+#' }
+#' @author Ross Bennett
+#' @export
+quadratic_utility_objective <- function(risk_aversion=1, target=NULL, enabled=TRUE){
+  qu <- list()
+  qu[[1]] <- return_objective(name="mean", target=target, enabled=enabled)
+  qu[[2]] <- portfolio_risk_objective(name="var", risk_aversion=risk_aversion, enabled=enabled)
+  return(qu)
+} # end quadratic utility objective constructor
 
 #' Insert a list of objectives into the objectives slot of a portfolio object
 #' 
