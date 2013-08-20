@@ -831,7 +831,7 @@ optimize.portfolio_v2 <- function(
   # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
   if(message) message(c("elapsed time:", end_t-start_t))
   out$portfolio <- portfolio
-  out$R <- R
+  if(trace) out$R <- R
   out$data_summary <- list(first=first(R), last=last(R))
   out$elapsed_time <- end_t - start_t
   out$end_t <- as.character(Sys.time())
