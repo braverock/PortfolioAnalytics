@@ -10,35 +10,16 @@
 #
 ###############################################################################
 
-#' boxplot of the weights of the optimal portfolios
-#' 
-#' Chart the optimal weights and upper and lower bounds on weights of a portfolio run via \code{\link{optimize.portfolio}}
-#' 
-#' @param DE optimal portfolio object created by \code{\link{optimize.portfolio}}
-#' @param neighbors set of 'neighbor' portfolios to overplot
-#' @param las numeric in \{0,1,2,3\}; the style of axis labels
-#'       \describe{
-#'         \item{0:}{always parallel to the axis [\emph{default}],}
-#'         \item{1:}{always horizontal,}
-#'         \item{2:}{always perpendicular to the axis,}
-#'         \item{3:}{always vertical.}
-#'       }
-#' @param xlab a title for the x axis: see \code{\link{title}}
-#' @param cex.lab The magnification to be used for x and y labels relative to the current setting of \code{cex}
-#' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
-#' @param element.color color for the default plot lines
-#' @param ... any other passthru parameters 
-#' @param main an overall title for the plot: see \code{\link{title}}
-#' @seealso \code{\link{optimize.portfolio}}
+#' @rdname chart.Weights
 #' @export
-chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
+chart.Weights.DE <- function(object, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
   # Specific to the output of optimize.portfolio with optimize_method="DEoptim"
-  if(!inherits(DE, "optimize.portfolio.DEoptim")) stop("DE must be of class 'optimize.portfolio.DEoptim'")
+  if(!inherits(object, "optimize.portfolio.DEoptim")) stop("object must be of class 'optimize.portfolio.DEoptim'")
   
-  columnnames = names(DE$weights)
+  columnnames = names(object$weights)
   numassets = length(columnnames)
   
-  constraints <- get_constraints(DE$portfolio)
+  constraints <- get_constraints(object$portfolio)
   
   if(is.null(xlab))
     minmargin = 3
@@ -57,12 +38,12 @@ chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3,
     bottommargin = minmargin
   }
   par(mar = c(bottommargin, 4, topmargin, 2) +.1)
-  plot(DE$weights, type="b", col="blue", axes=FALSE, xlab='', ylim=c(0,max(constraints$max)), ylab="Weights", main=main, pch=16, ...)
+  plot(object$weights, type="b", col="blue", axes=FALSE, xlab='', ylim=c(0,max(constraints$max)), ylab="Weights", main=main, pch=16, ...)
   points(constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
   points(constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
   #     if(!is.null(neighbors)){ 
   #         if(is.vector(neighbors)){
-  #             xtract=extractStats(DE)
+  #             xtract=extractStats(object)
   #             weightcols<-grep('w\\.',colnames(xtract)) #need \\. to get the dot 
   #             if(length(neighbors)==1){
   #                 # overplot nearby portfolios defined by 'out'
@@ -84,11 +65,15 @@ chart.Weights.DE <- function(DE, neighbors = NULL, ..., main="Weights", las = 3,
   #         }
   #     }
   
-  #     points(DE$weights, type="b", col="blue", pch=16)
+  #     points(object$weights, type="b", col="blue", pch=16)
   axis(2, cex.axis = cex.axis, col = element.color)
   axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
 }
+
+#' @rdname chart.Weights
+#' @export
+chart.Weights.optimize.portfolio.DEoptim <- chart.Weights.DE
 
 #' classic risk return scatter of DEoptim results
 #' 

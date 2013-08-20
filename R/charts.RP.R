@@ -10,35 +10,19 @@
 #
 ###############################################################################
 
-#' boxplot of the weight distributions in the random portfolios 
-#' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
-#' @param neighbors set of 'neighbor' portfolios to overplot
-#' @param las numeric in \{0,1,2,3\}; the style of axis labels
-#'       \describe{
-#'         \item{0:}{always parallel to the axis [\emph{default}],}
-#'         \item{1:}{always horizontal,}
-#'         \item{2:}{always perpendicular to the axis,}
-#'         \item{3:}{always vertical.}
-#'       }
-#' @param xlab a title for the x axis: see \code{\link{title}}
-#' @param cex.lab The magnification to be used for x and y labels relative to the current setting of \code{cex}
-#' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
-#' @param element.color color for the default plot lines
-#' @param ... any other passthru parameters 
-#' @param main an overall title for the plot: see \code{\link{title}}
-#' @seealso \code{\link{optimize.portfolio}}
+#' @rdname chart.Weights
 #' @export
-chart.Weights.RP <- function(RP, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
+chart.Weights.RP <- function(object, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
   # Specific to the output of the random portfolio code with constraints
-  # @TODO: check that RP is of the correct class
+  # @TODO: check that object is of the correct class
   # FIXED
-  if(!inherits(RP, "optimize.portfolio.random")){
-    stop("RP must be of class 'optimize.portfolio.random'")
+  if(!inherits(object, "optimize.portfolio.random")){
+    stop("object must be of class 'optimize.portfolio.random'")
   }
-  columnnames = names(RP$weights)
+  columnnames = names(object$weights)
   numassets = length(columnnames)
   
-  constraints <- get_constraints(RP$portfolio)
+  constraints <- get_constraints(object$portfolio)
   
   if(is.null(xlab))
     minmargin = 3
@@ -57,12 +41,12 @@ chart.Weights.RP <- function(RP, neighbors = NULL, ..., main="Weights", las = 3,
     bottommargin = minmargin
   }
   par(mar = c(bottommargin, 4, topmargin, 2) +.1)
-  plot(RP$random_portfolios[1,], type="b", col="orange", axes=FALSE, xlab='', ylim=c(0,max(constraints$max)), ylab="Weights", main=main, ...)
+  plot(object$random_portfolios[1,], type="b", col="orange", axes=FALSE, xlab='', ylim=c(0,max(constraints$max)), ylab="Weights", main=main, ...)
   points(constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
   points(constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
   if(!is.null(neighbors)){ 
     if(is.vector(neighbors)){
-      xtract=extractStats(RP)
+      xtract=extractStats(object)
       weightcols<-grep('w\\.',colnames(xtract)) #need \\. to get the dot 
       if(length(neighbors)==1){
         # overplot nearby portfolios defined by 'out'
@@ -84,12 +68,16 @@ chart.Weights.RP <- function(RP, neighbors = NULL, ..., main="Weights", las = 3,
     }
   }
   
-  points(RP$random_portfolios[1,], type="b", col="orange", pch=16) # to overprint neighbors
-  points(RP$weights, type="b", col="blue", pch=16)
+  points(object$random_portfolios[1,], type="b", col="orange", pch=16) # to overprint neighbors
+  points(object$weights, type="b", col="blue", pch=16)
   axis(2, cex.axis = cex.axis, col = element.color)
   axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
 }
+
+#' @rdname chart.Weights
+#' @export
+chart.Weights.optimize.portfolio.random <- chart.Weights.RP
 
 #' classic risk return scatter of random portfolios
 #' 
