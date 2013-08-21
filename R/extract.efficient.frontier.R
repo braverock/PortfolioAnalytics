@@ -94,12 +94,33 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   # step 3: 'step' along the returns and run the optimization to calculate
   # the weights and objective measures along the efficient frontier
   
-  # for a mean-var efficient frontier, there must be two objectives 1) "mean" and 2) "var"
   # get the names of the objectives
   objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
+  
+  if(length(objnames) == 1){
+    if(objnames == "mean"){
+      # The user has only passed in a mean objective, add a var objective to the portfolio
+      portfolio <- add.objective(portfolio=portfolio, type="risk", name="var")
+    } else if(objnames == "var"){
+      # The user has only passed in a var objective, add a mean objective
+      portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
+    }
+    # get the objective names again after we add an objective to the portfolio
+    objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
+  }
+  
+  # for a mean-var efficient frontier, there must be two objectives 1) "mean" and 2) "var"
   if(!((length(objnames) == 2) & ("var" %in% objnames) & ("mean" %in% objnames))){
     stop("The portfolio object must have both 'mean' and 'var' specified as objectives")
   }
+  
+  # If the user has passed in a portfolio object with return_constraint, we need to disable it
+  for(i in 1:length(portfolio$constraints)){
+    if(inherits(portfolio$constraints[[i]], "return_constraint")){
+      portfolio$constraints[[i]]$enabled <- FALSE
+    }
+  }
+  
   # get the index number of the var objective 
   var_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "var")
   # get the index number of the mean objective
@@ -154,10 +175,14 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   
   objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
   
-  # The user might pass in a portfolio with only ES/ETL/CVaR as an objective
-  if(length(objnames) == 1 & objnames %in% c("ETL", "ES", "CVaR")){
-    # Add the mean objective to the portfolio
-    portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
+  if(length(objnames) == 1){
+    if(objnames == "mean"){
+      # The user has only passed in a mean objective, add ES objective to the portfolio
+      portfolio <- add.objective(portfolio=portfolio, type="risk", name="ES")
+    } else if(objnames %in% c("ETL", "ES", "CVaR")){
+      # The user has only passed in ETL/ES/CVaR objective, add a mean objective
+      portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
+    }
     # get the objective names again after we add an objective to the portfolio
     objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
   }
@@ -167,6 +192,14 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   if(!((length(objnames) == 2) & any(objnames %in% c("ETL", "ES", "CVaR")) & ("mean" %in% objnames))){
     stop("The portfolio object must have both 'mean' and 'var' specified as objectives")
   }
+  
+  # If the user has passed in a portfolio object with return_constraint, we need to disable it
+  for(i in 1:length(portfolio$constraints)){
+    if(inherits(portfolio$constraints[[i]], "return_constraint")){
+      portfolio$constraints[[i]]$enabled <- FALSE
+    }
+  }
+  
   # get the index number of the etl objective
   etl_idx <- which(objnames %in% c("ETL", "ES", "CVaR"))
   # get the index number of the mean objective
