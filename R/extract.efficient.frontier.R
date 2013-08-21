@@ -109,12 +109,12 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   portfolio$objectives[[var_idx]]$risk_aversion <- 1e-6
   
   # run the optimization to get the maximum return
-  tmp <- optimize.portfolio(R=ret, portfolio=portfolio, optimize_method="ROI")
+  tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI")
   maxret <- extractObjectiveMeasures(tmp)$mean
   
   # set the risk_aversion to a very large number equivalent to a minvar portfolio
   portfolio$objectives[[var_idx]]$risk_aversion <- 1e6
-  tmp <- optimize.portfolio(R=ret, portfolio=portfolio, optimize_method="ROI")
+  tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI")
   stats <- extractStats(tmp)
   minret <- stats["mean"]
   
@@ -130,3 +130,71 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   colnames(out) <- names(stats)
   return(out)
 }
+
+#' Generate the efficient frontier for a mean-etl portfolio
+#' 
+#' This function generates the mean-etl efficient frontier of a portfolio
+#' specifying constraints and objectives. To generate the mean-var efficient 
+#' frontier, the portfolio must have two objectives 1) "mean" and 2) "ETL/ES/CVaR". If
+#' the only objective in the \code{portfolio} object is ETL/ES/CVaR, the we will
+#' add a mean objective.
+#' 
+#' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
+#' @param R an xts or matrix of asset returns
+#' @param n.portfolios number of portfolios to plot along the efficient frontier
+#' @return a matrix of objective measure values and weights along the efficient frontier
+#' @author Ross Bennett
+#' @export
+meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
+  if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
+  # step 1: find the minimum return given the constraints
+  # step 2: find the maximum return given the constraints
+  # step 3: 'step' along the returns and run the optimization to calculate
+  # the weights and objective measures along the efficient frontier
+  
+  objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
+  
+  # The user might pass in a portfolio with only ES/ETL/CVaR as an objective
+  if(length(objnames) == 1 & objnames %in% c("ETL", "ES", "CVaR")){
+    # Add the mean objective to the portfolio
+    portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
+    # get the objective names again after we add an objective to the portfolio
+    objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
+  }
+  
+  # for a mean-etl efficient frontier, there must be two objectives 1) "mean" and 2) "ETL/ES/CVaR"
+  # get the names of the objectives
+  if(!((length(objnames) == 2) & any(objnames %in% c("ETL", "ES", "CVaR")) & ("mean" %in% objnames))){
+    stop("The portfolio object must have both 'mean' and 'var' specified as objectives")
+  }
+  # get the index number of the etl objective
+  etl_idx <- which(objnames %in% c("ETL", "ES", "CVaR"))
+  # get the index number of the mean objective
+  mean_idx <- which(objnames == "mean")
+  
+  # create a temporary portfolio to find the max mean return
+  ret_obj <- return_objective(name="mean")
+  tportf <- insert_objectives(portfolio, list(ret_obj))
+  
+  # run the optimization to get the maximum return
+  tmp <- optimize.portfolio(R=R, portfolio=tportf, optimize_method="ROI")
+  maxret <- extractObjectiveMeasures(tmp)$mean
+  
+  # run the optimization to get the return at the min ETL portfolio
+  tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI")
+  stats <- extractStats(tmp)
+  minret <- stats["mean"]
+  
+  # length.out is the number of portfolios to create
+  ret_seq <- seq(from=minret, to=maxret, length.out=n.portfolios)
+  
+  out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))
+  
+  for(i in 1:length(ret_seq)){
+    portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
+    out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+  }
+  colnames(out) <- names(stats)
+  return(out)
+}
+
