@@ -74,3 +74,59 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=0, to=
     }
     return(result)
 }
+
+#' Generate the efficient frontier for a mean-variance portfolio
+#' 
+#' This function generates the mean-variance efficient frontier of a portfolio
+#' specifying constraints and objectives. To generate the mean-var efficient 
+#' frontier, the portfolio must have two objectives 1) "mean" and 2) "var".
+#' 
+#' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
+#' @param R an xts or matrix of asset returns
+#' @param n.portfolios number of portfolios to plot along the efficient frontier
+#' @return a matrix of objective measure values and weights along the efficient frontier
+#' @author Ross Bennett
+#' @export
+meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25){
+  if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
+  # step 1: find the minimum return given the constraints
+  # step 2: find the maximum return given the constraints
+  # step 3: 'step' along the returns and run the optimization to calculate
+  # the weights and objective measures along the efficient frontier
+  
+  # for a mean-var efficient frontier, there must be two objectives 1) "mean" and 2) "var"
+  # get the names of the objectives
+  objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
+  if(!((length(objnames) == 2) & ("var" %in% objnames) & ("mean" %in% objnames))){
+    stop("The portfolio object must have both 'mean' and 'var' specified as objectives")
+  }
+  # get the index number of the var objective 
+  var_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "var")
+  # get the index number of the mean objective
+  mean_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "mean")
+  
+  # set the risk_aversion to a very small number for equivalent to max return portfolio
+  portfolio$objectives[[var_idx]]$risk_aversion <- 1e-6
+  
+  # run the optimization to get the maximum return
+  tmp <- optimize.portfolio(R=ret, portfolio=portfolio, optimize_method="ROI")
+  maxret <- extractObjectiveMeasures(tmp)$mean
+  
+  # set the risk_aversion to a very large number equivalent to a minvar portfolio
+  portfolio$objectives[[var_idx]]$risk_aversion <- 1e6
+  tmp <- optimize.portfolio(R=ret, portfolio=portfolio, optimize_method="ROI")
+  stats <- extractStats(tmp)
+  minret <- stats["mean"]
+  
+  # length.out is the number of portfolios to create
+  ret_seq <- seq(from=minret, to=maxret, length.out=n.portfolios)
+  
+  out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))
+  
+  for(i in 1:length(ret_seq)){
+    portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
+    out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+  }
+  colnames(out) <- names(stats)
+  return(out)
+}
