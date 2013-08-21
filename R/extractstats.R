@@ -232,9 +232,12 @@ extractWeights.optimize.portfolio.rebalancing <- function(RebalResults, ...){
 extractStats.optimize.portfolio.ROI <- function(object, prefix=NULL, ...) {
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class optimize.portfolio.ROI")
   trow<-c(out=object$out, object$weights)
-  result<-trow
   
-  rnames<-c('out',paste('w',names(object$weights),sep='.'))
+  objmeas <- extractObjectiveMeasures(object)
+  objnames <- names(objmeas)
+  obj <- unlist(objmeas)
+  result <- c(obj, trow)
+  rnames<-c(objnames, 'out',paste('w',names(object$weights),sep='.'))
   names(result)<-rnames
   return(result)
 }

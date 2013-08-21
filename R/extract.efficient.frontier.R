@@ -68,7 +68,8 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=0, to=
     
     result <- foreach(i=1:nrow(set),.inorder=TRUE, .combine=rbind, .errorhandling='remove') %do% {
         tmp<-xtract[which(xtract[,mtc]>=set[i,1] & xtract[,mtc]<set[i,2]),]
-        tmp<-tmp[which.min(tmp[,'out']),]
+        #tmp<-tmp[which.min(tmp[,'out']),]
+        tmp<-tmp[which.max(tmp[,'mean']),]
         #tmp
     }
     return(result)
