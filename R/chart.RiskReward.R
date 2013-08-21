@@ -11,9 +11,11 @@
 #' @param chart.assets TRUE/FALSE. Includes a risk reward scatter of the assets in the chart
 #' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
 #' @param element.color color for the default plot scatter points
+#' @param xlim set the x-axis limit, same as in \code{\link{plot}}
+#' @param ylim set the y-axis limit, same as in \code{\link{plot}}
 #' @seealso \code{\link{optimize.portfolio}}
 #' @export
-chart.RiskReward <- function(object, neighbors, ..., rp=FALSE, return.col="mean", risk.col="ES", element.color = "darkgray", cex.axis=0.8){
+chart.RiskReward <- function(object, neighbors, ..., rp=FALSE, return.col="mean", risk.col="ES", element.color = "darkgray", cex.axis=0.8, ylim=NULL, xlim=NULL){
   UseMethod("chart.RiskReward")
 }
 

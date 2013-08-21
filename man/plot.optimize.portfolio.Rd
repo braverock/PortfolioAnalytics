@@ -4,7 +4,8 @@
 \usage{
   plot.optimize.portfolio(x, ..., return.col = "mean",
     risk.col = "ES", chart.assets = FALSE,
-    neighbors = NULL, main = "optimized portfolio plot")
+    neighbors = NULL, xlim = NULL, ylim = NULL,
+    main = "optimized portfolio plot")
 }
 \arguments{
   \item{x}{set of portfolios created by

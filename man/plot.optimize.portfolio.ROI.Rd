@@ -6,7 +6,7 @@
     risk.col = "ES", return.col = "mean",
     chart.assets = chart.assets,
     element.color = "darkgray", neighbors = NULL,
-    main = "ROI.Portfolios", ...)
+    main = "ROI.Portfolios", xlim = NULL, ylim = NULL, ...)
 }
 \arguments{
   \item{ROI}{object created by

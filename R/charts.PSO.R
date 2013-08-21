@@ -65,7 +65,7 @@ chart.Weights.optimize.portfolio.pso <- chart.Weights.pso
 
 #' @rdname chart.RiskReward
 #' @export
-chart.Scatter.pso <- function(object, neighbors=NULL, ..., return.col="mean", risk.col="ES", chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8){
+chart.Scatter.pso <- function(object, neighbors=NULL, ..., return.col="mean", risk.col="ES", chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
   if(!inherits(object, "optimize.portfolio.pso")) stop("object must be of class 'optimize.portfolio.pso'")
   R <- object$R
   # Object with the "out" value in the first column and the normalized weights
@@ -89,8 +89,12 @@ chart.Scatter.pso <- function(object, neighbors=NULL, ..., return.col="mean", ri
   }
   
   # get limits for x and y axis
-  ylim <- range(returnpoints, asset_ret)
-  xlim <- range(riskpoints, asset_risk)
+  if(is.null(ylim)){
+    ylim <- range(returnpoints, asset_ret)
+  }
+  if(is.null(xlim)){
+    xlim <- range(riskpoints, asset_risk)
+  }
   
   # plot the portfolios
   plot(x=riskpoints, y=returnpoints, xlab=risk.col, ylab=return.col, xlim=xlim, ylim=ylim, col="darkgray", axes=FALSE, ...)
@@ -128,12 +132,12 @@ chart.RiskReward.optimize.portfolio.pso <- chart.Scatter.pso
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-charts.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="PSO.Portfolios", ...){
+charts.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="PSO.Portfolios", xlim=NULL, ylim=NULL, ...){
   # Specific to the output of the optimize_method=pso
   op <- par(no.readonly=TRUE)
   layout(matrix(c(1,2)),height=c(2,2),width=1)
   par(mar=c(4,4,4,2))
-  chart.Scatter.pso(object=pso, return.col=return.col, risk.col=risk.col, chart.assets=chart.assets, element.color=element.color, cex.axis=cex.axis, main=main, ...=...)
+  chart.Scatter.pso(object=pso, return.col=return.col, risk.col=risk.col, chart.assets=chart.assets, element.color=element.color, cex.axis=cex.axis, main=main, xlim=xlim, ylim=ylim, ...=...)
   par(mar=c(2,4,0,2))
   chart.Weights.pso(object=pso, neighbors=neighbors, las=3, xlab=NULL, cex.lab=1, element.color=element.color, cex.axis=cex.axis, ...=..., main="")
   par(op)
@@ -155,6 +159,6 @@ charts.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-plot.optimize.portfolio.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="PSO.Portfolios", ...){
-  charts.pso(pso=pso, return.col=return.col, risk.col=risk.col, chart.assets=FALSE, cex.axis=cex.axis, element.color=element.color, neighbors=neighbors, main=main, ...=...)
+plot.optimize.portfolio.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="PSO.Portfolios", xlim=NULL, ylim=NULL, ...){
+  charts.pso(pso=pso, return.col=return.col, risk.col=risk.col, chart.assets=FALSE, cex.axis=cex.axis, element.color=element.color, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...=...)
 }

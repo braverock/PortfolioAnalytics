@@ -65,7 +65,7 @@ chart.Weights.optimize.portfolio.GenSA <- chart.Weights.GenSA
 
 #' @rdname chart.RiskReward
 #' @export
-chart.Scatter.GenSA <- function(object, neighbors=NULL, ..., rp=FALSE, return.col="mean", risk.col="ES", chart.assets=FALSE, element.color="darkgray", cex.axis=0.8){
+chart.Scatter.GenSA <- function(object, neighbors=NULL, ..., rp=FALSE, return.col="mean", risk.col="ES", chart.assets=FALSE, element.color="darkgray", cex.axis=0.8, ylim=NULL, xlim=NULL){
   
   if(!inherits(object, "optimize.portfolio.GenSA")) stop("object must be of class 'optimize.portfolio.GenSA'")
   
@@ -99,8 +99,12 @@ chart.Scatter.GenSA <- function(object, neighbors=NULL, ..., rp=FALSE, return.co
   }
   
   # get limits for x and y axis
-  ylim <- range(returnpoints, asset_ret)
-  xlim <- range(riskpoints, asset_risk)
+  if(is.null(ylim)){
+    ylim <- range(returnpoints, asset_ret)
+  }
+  if(is.null(xlim)){
+    xlim <- range(riskpoints, asset_risk)
+  }
   
   # Plot the portfolios
   plot(x=riskpoints, y=returnpoints, xlab=risk.col, ylab=return.col, col="darkgray", ylim=ylim, xlim=xlim, axes=FALSE, ...)
@@ -139,12 +143,12 @@ chart.RiskReward.optimize.portfolio.GenSA <- chart.Scatter.GenSA
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-charts.GenSA <- function(GenSA, rp=FALSE, return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="GenSA.Portfolios", ...){
+charts.GenSA <- function(GenSA, rp=FALSE, return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="GenSA.Portfolios", xlim=NULL, ylim=NULL, ...){
   # Specific to the output of the optimize_method=GenSA
   op <- par(no.readonly=TRUE)
   layout(matrix(c(1,2)),height=c(2,2),width=1)
   par(mar=c(4,4,4,2))
-  chart.Scatter.GenSA(object=GenSA, rp=rp, return.col=return.col, risk.col=risk.col, chart.assets=chart.assets, element.color=element.color, cex.axis=cex.axis, main=main, ...=...)
+  chart.Scatter.GenSA(object=GenSA, rp=rp, return.col=return.col, risk.col=risk.col, chart.assets=chart.assets, element.color=element.color, cex.axis=cex.axis, main=main, xlim=xlim, ylim=ylim, ...=...)
   par(mar=c(2,4,0,2))
   chart.Weights.GenSA(object=GenSA, neighbors=neighbors, las=3, xlab=NULL, cex.lab=1, element.color=element.color, cex.axis=cex.axis, ...=..., main="")
   par(op)
@@ -167,6 +171,6 @@ charts.GenSA <- function(GenSA, rp=FALSE, return.col="mean", risk.col="ES", char
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-plot.optimize.portfolio.GenSA <- function(GenSA, rp=FALSE, return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="GenSA.Portfolios", ...){
-  charts.GenSA(GenSA=GenSA, rp=rp, return.col=return.col, risk.col=risk.col, chart.assets=chart.assets, cex.axis=cex.axis, element.color=element.color, neighbors=neighbors, main=main, ...=...)
+plot.optimize.portfolio.GenSA <- function(GenSA, rp=FALSE, return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="GenSA.Portfolios", xlim=NULL, ylim=NULL, ...){
+  charts.GenSA(GenSA=GenSA, rp=rp, return.col=return.col, risk.col=risk.col, chart.assets=chart.assets, cex.axis=cex.axis, element.color=element.color, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...=...)
 }

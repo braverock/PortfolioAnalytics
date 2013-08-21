@@ -5,7 +5,7 @@
   charts.pso(pso, return.col = "mean", risk.col = "ES",
     chart.assets = FALSE, cex.axis = 0.8,
     element.color = "darkgray", neighbors = NULL,
-    main = "PSO.Portfolios", ...)
+    main = "PSO.Portfolios", xlim = NULL, ylim = NULL, ...)
 }
 \arguments{
   \item{pso}{object created by

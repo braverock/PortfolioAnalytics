@@ -15,56 +15,62 @@
   chart.Scatter.DE(object, neighbors = NULL, ...,
     return.col = "mean", risk.col = "ES",
     chart.assets = FALSE, element.color = "darkgray",
-    cex.axis = 0.8)
+    cex.axis = 0.8, xlim = NULL, ylim = NULL)
 
   chart.RiskReward.optimize.portfolio.DEoptim(object,
     neighbors = NULL, ..., return.col = "mean",
     risk.col = "ES", chart.assets = FALSE,
-    element.color = "darkgray", cex.axis = 0.8)
+    element.color = "darkgray", cex.axis = 0.8,
+    xlim = NULL, ylim = NULL)
 
   chart.Scatter.RP(object, neighbors = NULL, ...,
     return.col = "mean", risk.col = "ES",
     chart.assets = FALSE, element.color = "darkgray",
-    cex.axis = 0.8)
+    cex.axis = 0.8, xlim = NULL, ylim = NULL)
 
   chart.RiskReward.optimize.portfolio.random(object,
     neighbors = NULL, ..., return.col = "mean",
     risk.col = "ES", chart.assets = FALSE,
-    element.color = "darkgray", cex.axis = 0.8)
+    element.color = "darkgray", cex.axis = 0.8,
+    xlim = NULL, ylim = NULL)
 
   chart.Scatter.ROI(object, neighbors = NULL, ...,
     rp = FALSE, return.col = "mean", risk.col = "ES",
     chart.assets = FALSE, element.color = "darkgray",
-    cex.axis = 0.8)
+    cex.axis = 0.8, xlim = NULL, ylim = NULL)
 
   chart.RiskReward.optimize.portfolio.ROI(object,
     neighbors = NULL, ..., rp = FALSE, return.col = "mean",
     risk.col = "ES", chart.assets = FALSE,
-    element.color = "darkgray", cex.axis = 0.8)
+    element.color = "darkgray", cex.axis = 0.8,
+    xlim = NULL, ylim = NULL)
 
   chart.Scatter.pso(object, neighbors = NULL, ...,
     return.col = "mean", risk.col = "ES",
     chart.assets = FALSE, element.color = "darkgray",
-    cex.axis = 0.8)
+    cex.axis = 0.8, xlim = NULL, ylim = NULL)
 
   chart.RiskReward.optimize.portfolio.pso(object,
     neighbors = NULL, ..., return.col = "mean",
     risk.col = "ES", chart.assets = FALSE,
-    element.color = "darkgray", cex.axis = 0.8)
+    element.color = "darkgray", cex.axis = 0.8,
+    xlim = NULL, ylim = NULL)
 
   chart.Scatter.GenSA(object, neighbors = NULL, ...,
     rp = FALSE, return.col = "mean", risk.col = "ES",
     chart.assets = FALSE, element.color = "darkgray",
-    cex.axis = 0.8)
+    cex.axis = 0.8, ylim = NULL, xlim = NULL)
 
   chart.RiskReward.optimize.portfolio.GenSA(object,
     neighbors = NULL, ..., rp = FALSE, return.col = "mean",
     risk.col = "ES", chart.assets = FALSE,
-    element.color = "darkgray", cex.axis = 0.8)
+    element.color = "darkgray", cex.axis = 0.8,
+    ylim = NULL, xlim = NULL)
 
   chart.RiskReward(object, neighbors, ..., rp = FALSE,
     return.col = "mean", risk.col = "ES",
-    element.color = "darkgray", cex.axis = 0.8)
+    element.color = "darkgray", cex.axis = 0.8,
+    ylim = NULL, xlim = NULL)
 }
 \arguments{
   \item{object}{optimal portfolio created by
@@ -93,6 +99,12 @@
 
   \item{element.color}{color for the default plot scatter
   points}
+
+  \item{xlim}{set the x-axis limit, same as in
+  \code{\link{plot}}}
+
+  \item{ylim}{set the y-axis limit, same as in
+  \code{\link{plot}}}
 }
 \description{
   classic risk reward scatter

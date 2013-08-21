@@ -77,7 +77,7 @@ chart.Weights.optimize.portfolio.DEoptim <- chart.Weights.DE
 
 #' @rdname chart.RiskReward
 #' @export
-chart.Scatter.DE <- function(object, neighbors = NULL, ..., return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8){
+chart.Scatter.DE <- function(object, neighbors = NULL, ..., return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
   # more or less specific to the output of the DEoptim portfolio code with constraints
   # will work to a point with other functions, such as optimize.porfolio.parallel
   # there's still a lot to do to improve this.
@@ -143,13 +143,15 @@ chart.Scatter.DE <- function(object, neighbors = NULL, ..., return.col='mean', r
     asset_ret <- scatterFUN(R=R, FUN=return.col, ...=...)
     asset_risk <- scatterFUN(R=R, FUN=risk.col, ...=...)
     rnames <- colnames(R)
+    xlim <- range(c(xtract[,risk.column], asset_risk))
+    ylim <- range(c(xtract[,return.column], asset_ret))
   } else {
     asset_ret <- NULL
     asset_risk <- NULL
   }
   
   # plot the portfolios from DEoptim_objective_results
-  plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, ...)
+  plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, xlim=xlim, ylim=ylim, ...)
   
   # plot the risk-reward scatter of the assets
   if(chart.assets){
@@ -297,13 +299,13 @@ chart.RiskReward.optimize.portfolio.DEoptim <- chart.Scatter.DE
 #' \code{\link{optimize.portfolio}}
 #' \code{\link{extractStats}}
 #' @export
-charts.DE <- function(DE, risk.col, return.col, chart.assets, neighbors=NULL, main="DEoptim.Portfolios", ...){
+charts.DE <- function(DE, risk.col, return.col, chart.assets, neighbors=NULL, main="DEoptim.Portfolios", xlim=NULL, ylim=NULL, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that DE is of the correct class
     op <- par(no.readonly=TRUE)
     layout(matrix(c(1,2)),height=c(2,1.5),width=1)
     par(mar=c(4,4,4,2))
-    chart.Scatter.DE(object=DE, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, ...)
+    chart.Scatter.DE(object=DE, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
     par(mar=c(2,4,0,2))
     chart.Weights.DE(object=DE, main="", neighbors=neighbors, ...)
     par(op)
@@ -330,6 +332,6 @@ charts.DE <- function(DE, risk.col, return.col, chart.assets, neighbors=NULL, ma
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param main an overall title for the plot: see \code{\link{title}}
 #' @export
-plot.optimize.portfolio.DEoptim <- function(x, ..., return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, main='optimized portfolio plot') {
-    charts.DE(DE=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, ...)
+plot.optimize.portfolio.DEoptim <- function(x, ..., return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, xlim=NULL, ylim=NULL, main='optimized portfolio plot') {
+    charts.DE(DE=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
 }

@@ -5,7 +5,8 @@
   charts.GenSA(GenSA, rp = FALSE, return.col = "mean",
     risk.col = "ES", chart.assets = FALSE, cex.axis = 0.8,
     element.color = "darkgray", neighbors = NULL,
-    main = "GenSA.Portfolios", ...)
+    main = "GenSA.Portfolios", xlim = NULL, ylim = NULL,
+    ...)
 }
 \arguments{
   \item{GenSA}{object created by

@@ -3,7 +3,8 @@
 \title{scatter and weights chart  for random portfolios}
 \usage{
   charts.RP(RP, risk.col, return.col, chart.assets = FALSE,
-    neighbors = NULL, main = "Random.Portfolios", ...)
+    neighbors = NULL, main = "Random.Portfolios",
+    xlim = NULL, ylim = NULL, ...)
 }
 \arguments{
   \item{RP}{set of random portfolios created by
