@@ -214,6 +214,8 @@ set.portfolio.moments_v2 <- function(R, portfolio, momentargs=NULL,...){
              mES =,
              CVaR =,
              cVaR =,
+             ETL=,
+             mETL=,
              ES = {
                if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
                if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
