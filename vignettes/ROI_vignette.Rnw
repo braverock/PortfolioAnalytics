@@ -83,7 +83,7 @@ summary(portf_maxret)
 The next step is to run the optimization. Note that \code{optimize\_method="ROI"} is specified in the call to \code{optimize.portfolio} to select the solver used for the optimization.
 <<>>=
 # Run the optimization
-opt_maxret <- optimize.portfolio(R=returns, portfolio=portf_maxret, optimize_method="ROI")
+opt_maxret <- optimize.portfolio(R=returns, portfolio=portf_maxret, optimize_method="ROI", trace=TRUE)
 @
 
 The print method for the \code{opt\_maxret} object shows the call, optimal weights, and the objective measure
@@ -122,18 +122,23 @@ The optimal portfolio can be plotted in risk-return space along with other feasi
 
 Volatility as the risk metric
 <<fig.align='center',fig.height=5, fig.width=5>>=
-chart.Scatter.ROI(opt_maxret, R=returns,return.col="mean", risk.col="sd", main="Maximum Return")
+chart.RiskReward(opt_maxret,return.col="mean", risk.col="sd", 
+                 chart.assets=TRUE, xlim=c(0.01, 0.05), main="Maximum Return")
 @
 
 Expected tail loss as the risk metric
 <<fig.align='center',fig.height=5, fig.width=5>>=
-chart.Scatter.ROI(opt_maxret, R=returns, return.col="mean", risk.col="ETL", main="Maximum Return", invert=FALSE, p=0.9)
+chart.RiskReward(opt_maxret, return.col="mean", risk.col="ES", 
+                 chart.assets=TRUE, xlim=c(0.02, 0.18), main="Maximum Return")
 @
 
 \subsection{Backtesting}
 An out of sample backtest is run with \code{optimize.portfolio.rebalancing}. In this example, an initial training period of 36 months is used and the portfolio is rebalanced quarterly. 
 <<>>=
-bt_maxret <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_maxret, optimize_method="ROI", rebalance_on="quarters", training_period=36, trace=TRUE)
+bt_maxret <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_maxret,
+                                            optimize_method="ROI", 
+                                            rebalance_on="quarters", 
+                                            training_period=36)
 @
 
 The \code{bt\_maxret} object is a list containing the optimal weights and objective measure at each rebalance period.
@@ -168,13 +173,16 @@ The only constraint specified is the full investment constraint, therefore the o
 <<>>=
 # Run the optimization
 opt_gmv <- optimize.portfolio(R=returns, portfolio=portf_minvar, 
-                              optimize_method="ROI")
+                              optimize_method="ROI", trace=TRUE)
 print(opt_gmv)
 @
 
 \subsubsection{Backtesting}
 <<>>=
-bt_gmv <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_minvar, optimize_method="ROI", rebalance_on="quarters", training_period=36)
+bt_gmv <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_minvar,
+                                         optimize_method="ROI", 
+                                         rebalance_on="quarters", 
+                                         training_period=36)
 @
 
 
@@ -184,7 +192,8 @@ bt_gmv <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_minvar, opti
 Constraints can be added to the \code{portf\_minvar} portfolio object previously created.
 <<>>=
 # Add long only constraints
-portf_minvar <- add.constraint(portfolio=portf_minvar, type="box", min=0, max=1)
+portf_minvar <- add.constraint(portfolio=portf_minvar, type="box", 
+                               min=0, max=1)
 
 # Add group constraints
 portf_minvar <- add.constraint(portfolio=portf_minvar, 
@@ -197,13 +206,17 @@ portf_minvar <- add.constraint(portfolio=portf_minvar,
 \subsubsection{Optimization}
 <<>>=
 # Run the optimization
-opt_minvar <- optimize.portfolio(R=returns, portfolio=portf_minvar, optimize_method="ROI")
+opt_minvar <- optimize.portfolio(R=returns, portfolio=portf_minvar, 
+                                 optimize_method="ROI", trace=TRUE)
 print(opt_minvar)
 @
 
 \subsubsection{Backtesting}
 <<>>=
-bt_minvar <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_minvar, optimize_method="ROI", rebalance_on="quarters", training_period=36)
+bt_minvar <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_minvar,
+                                            optimize_method="ROI", 
+                                            rebalance_on="quarters", 
+                                            training_period=36)
 @
 
 \section{Maximizing Quadratic Utility}
@@ -250,7 +263,8 @@ Note how the constraints and objectives are passed to optimize.portfolio.
 opt_qu <- optimize.portfolio(R=returns, portfolio=init_portf, 
                              constraints=qu_constr, 
                              objectives=qu_obj, 
-                             optimize_method="ROI")
+                             optimize_method="ROI",
+                             trace=TRUE)
 @
 
 \subsection{Backtesting}
