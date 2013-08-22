@@ -16,7 +16,10 @@
 \description{
   This function will extract the weights (swarm positions)
   from the PSO output and the out value (swarm fitness
-  values) for each iteration of the optimization.
+  values) for each iteration of the optimization. This
+  function can be slow because we need to run
+  \code{constrained_objective} to calculate the objective
+  measures on the weights.
 }
 \author{
   Ross Bennett
