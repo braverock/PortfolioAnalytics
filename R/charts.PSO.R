@@ -67,40 +67,108 @@ chart.Weights.optimize.portfolio.pso <- chart.Weights.pso
 #' @export
 chart.Scatter.pso <- function(object, neighbors=NULL, ..., return.col="mean", risk.col="ES", chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
   if(!inherits(object, "optimize.portfolio.pso")) stop("object must be of class 'optimize.portfolio.pso'")
+  
   R <- object$R
-  # Object with the "out" value in the first column and the normalized weights
-  # The first row is the optimal "out" value and the optimal weights
-  tmp <- extractStats(object)
+  # portfolio <- object$portfolio
+  xtract = extractStats(object)
+  columnnames = colnames(xtract)
+  #return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)
+  return.column = pmatch(return.col,columnnames)
+  if(is.na(return.column)) {
+    return.col = paste(return.col,return.col,sep='.')
+    return.column = pmatch(return.col,columnnames)
+  }
+  #risk.column = grep(paste("objective_measures",risk.col,sep='.'),columnnames)
+  risk.column = pmatch(risk.col,columnnames)
+  if(is.na(risk.column)) {
+    risk.col = paste(risk.col,risk.col,sep='.')
+    risk.column = pmatch(risk.col,columnnames)
+  }
   
-  # Get the weights
-  wts <- tmp[,-1]
+  # if(is.na(return.column) | is.na(risk.column)) stop(return.col,' or ',risk.col, ' do not match extractStats output')
   
-  returnpoints <- applyFUN(R=R, weights=wts, FUN=return.col, ...=...)
-  riskpoints <- applyFUN(R=R, weights=wts, FUN=risk.col, ...=...)
-  
+  # If the user has passed in return.col or risk.col that does not match extractStats output
+  # This will give the flexibility of passing in return or risk metrics that are not
+  # objective measures in the optimization. This may cause issues with the "neighbors"
+  # functionality since that is based on the "out" column
+  if(is.na(return.column) | is.na(risk.column)){
+    return.col <- gsub("\\..*", "", return.col)
+    risk.col <- gsub("\\..*", "", risk.col)
+    warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
+    # Get the matrix of weights for applyFUN
+    wts_index <- grep("w.", columnnames)
+    wts <- xtract[, wts_index]
+    if(is.na(return.column)){
+      tmpret <- applyFUN(R=R, weights=wts, FUN=return.col)
+      xtract <- cbind(tmpret, xtract)
+      colnames(xtract)[which(colnames(xtract) == "tmpret")] <- return.col
+    }
+    if(is.na(risk.column)){
+      tmprisk <- applyFUN(R=R, weights=wts, FUN=risk.col)
+      xtract <- cbind(tmprisk, xtract)
+      colnames(xtract)[which(colnames(xtract) == "tmprisk")] <- risk.col
+    }
+    columnnames = colnames(xtract)
+    return.column = pmatch(return.col,columnnames)
+    if(is.na(return.column)) {
+      return.col = paste(return.col,return.col,sep='.')
+      return.column = pmatch(return.col,columnnames)
+    }
+    risk.column = pmatch(risk.col,columnnames)
+    if(is.na(risk.column)) {
+      risk.col = paste(risk.col,risk.col,sep='.')
+      risk.column = pmatch(risk.col,columnnames)
+    }
+  }
   if(chart.assets){
     # Include risk reward scatter of asset returns
     asset_ret <- scatterFUN(R=R, FUN=return.col, ...=...)
     asset_risk <- scatterFUN(R=R, FUN=risk.col, ...=...)
     rnames <- colnames(R)
+    xlim <- range(c(xtract[,risk.column], asset_risk))
+    ylim <- range(c(xtract[,return.column], asset_ret))
   } else {
     asset_ret <- NULL
     asset_risk <- NULL
   }
   
-  # get limits for x and y axis
-  if(is.null(ylim)){
-    ylim <- range(returnpoints, asset_ret)
-  }
-  if(is.null(xlim)){
-    xlim <- range(riskpoints, asset_risk)
-  }
+  # plot the portfolios from PSOoutput
+  plot(xtract[,risk.column],xtract[,return.column], xlab=risk.col, ylab=return.col, col="darkgray", axes=FALSE, xlim=xlim, ylim=ylim, ...)
   
-  # plot the portfolios
-  plot(x=riskpoints, y=returnpoints, xlab=risk.col, ylab=return.col, xlim=xlim, ylim=ylim, col="darkgray", axes=FALSE, ...)
-  points(x=riskpoints[1], y=returnpoints[1], col="blue", pch=16) # optimal
-  text(x=riskpoints[1], y=returnpoints[1], labels="Optimal",col="blue", pos=4, cex=0.8)
-  
+  ## @TODO: Generalize this to find column containing the "risk" metric
+  if(length(names(object)[which(names(object)=='constrained_objective')])) {
+    result.slot<-'constrained_objective'
+  } else {
+    result.slot<-'objective_measures'
+  }
+  objcols<-unlist(object[[result.slot]])
+  names(objcols)<-PortfolioAnalytics:::name.replace(names(objcols))
+  return.column = pmatch(return.col,names(objcols))
+  if(is.na(return.column)) {
+    return.col = paste(return.col,return.col,sep='.')
+    return.column = pmatch(return.col,names(objcols))
+  }
+  risk.column = pmatch(risk.col,names(objcols))
+  if(is.na(risk.column)) {
+    risk.col = paste(risk.col,risk.col,sep='.')
+    risk.column = pmatch(risk.col,names(objcols))
+  }
+  # risk and return metrics for the optimal weights if the RP object does not
+  # contain the metrics specified by return.col or risk.col
+  if(is.na(return.column) | is.na(risk.column)){
+    return.col <- gsub("\\..*", "", return.col)
+    risk.col <- gsub("\\..*", "", risk.col)
+    # warning(return.col,' or ', risk.col, ' do  not match extractStats output of $objective_measures slot')
+    opt_weights <- object$weights
+    ret <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=return.col))
+    risk <- as.numeric(applyFUN(R=R, weights=opt_weights, FUN=risk.col))
+    points(risk, ret, col="blue", pch=16) #optimal
+    text(x=risk, y=ret, labels="Optimal",col="blue", pos=4, cex=0.8)
+  } else {
+    points(objcols[risk.column], objcols[return.column], col="blue", pch=16) # optimal
+    text(x=objcols[risk.column], y=objcols[return.column], labels="Optimal",col="blue", pos=4, cex=0.8)
+  }
+
   # plot the risk-reward scatter of the assets
   if(chart.assets){
     points(x=asset_risk, y=asset_ret)

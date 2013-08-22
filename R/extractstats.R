@@ -247,6 +247,8 @@ extractStats.optimize.portfolio.ROI <- function(object, prefix=NULL, ...) {
 #' 
 #' This function will extract the weights (swarm positions) from the PSO output
 #' and the out value (swarm fitness values) for each iteration of the optimization.
+#' This function can be slow because we need to run \code{constrained_objective}
+#' to calculate the objective measures on the weights.
 #' 
 #' @param object list returned by optimize.portfolio
 #' @param prefix prefix to add to output row names
@@ -258,6 +260,9 @@ extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
   
   # Check if object$PSOoutput is null, the user called optimize.portfolio with trace=FALSE
   if(is.null(object$PSOoutput)) stop("PSOoutput is null, trace=TRUE must be specified in optimize.portfolio")
+  
+  R <- object$R
+  portfolio <- object$portfolio
   
   normalize_weights <- function(weights){
     # normalize results if necessary
@@ -305,8 +310,14 @@ extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
   # combine the optimal out value to the vector of out values
   tmpout <- c(object$out, tmpout)
   
-  result <- cbind(tmpout, psoweights)
-  colnames(result) <- c("out", paste('w',names(object$weights),sep='.'))
+  # run constrained_objective on the weights to get the objective measures in a matrix
+  stopifnot("package:foreach" %in% search() || suppressMessages(require("foreach",quietly = TRUE)))
+  obj <- foreach(i=1:nrow(psoweights), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
+    unlist(constrained_objective(w=psoweights[i,], R=R, portfolio=portfolio, trace=TRUE)$objective_measures)
+  }
+  objnames <- name.replace(colnames(obj))
+  result <- cbind(obj, tmpout, psoweights)
+  colnames(result) <- c(objnames, "out", paste('w',names(object$weights),sep='.'))
   rownames(result) <- paste(prefix, "pso.portf", index(tmpout), sep=".")
   return(result)
 }
