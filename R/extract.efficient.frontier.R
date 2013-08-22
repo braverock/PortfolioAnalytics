@@ -53,6 +53,8 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=0, to=
     
     xtract<-extractStats(object)
     columnnames=colnames(xtract)
+    # optimal portfolio stats from xtract
+    opt <- xtract[which.min(xtract[, "out"]),]
     #if("package:multicore" %in% search() || require("multicore",quietly = TRUE)){
     #    mclapply
     #}
@@ -72,6 +74,8 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=0, to=
         tmp<-tmp[which.max(tmp[,'mean']),]
         #tmp
     }
+    # combine the stats from the optimal portfolio to result matrix
+    result <- rbind(opt, result)
     return(result)
 }
 
