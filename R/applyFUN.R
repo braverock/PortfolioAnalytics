@@ -103,6 +103,11 @@ scatterFUN <- function(R, FUN, ...){
            #fun = match.fun(mean)
            #nargs$x = R
          },
+         var = {
+           return(as.numeric(apply(R, 2, var)))
+           #fun = match.fun(mean)
+           #nargs$x = R
+         },
          sd =,
          StdDev = { 
            fun = match.fun(StdDev)

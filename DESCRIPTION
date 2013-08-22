@@ -52,3 +52,4 @@ Collate:
     'charts.GenSA.R'
     'chart.Weights.R'
     'chart.RiskReward.R'
+    'charts.efficient.frontier.R'
