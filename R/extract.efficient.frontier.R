@@ -35,14 +35,14 @@
 #' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization, see \code{\link{portfolio.spec}}
 #' @param optimize_method one of "DEoptim", "random", "ROI", "pso", or "GenSA"
 #' @export
-extract.efficient.frontier <- function (object=NULL, match.col='ES', from=0, to=1, by=0.005, ..., R=NULL, portfolio=NULL, optimize_method='random')
+extract.efficient.frontier <- function (object=NULL, match.col='ES', from=NULL, to=NULL, by=0.005, n.portfolios=NULL, ..., R=NULL, portfolio=NULL, optimize_method='random')
 {
     #TODO add a threshold argument for how close it has to be to count
     # do we need to recalc the constrained_objective too?  I don't think so.
     if(!inherits(object, "optimize.portfolio")) stop("object passed in must of of class 'portfolio'")
     
-    set<-seq(from=from,to=to,by=by)
-    set<-cbind(quantmod::Lag(set,1),as.matrix(set))[-1,]
+    #set<-seq(from=from,to=to,by=by)
+    #set<-cbind(quantmod::Lag(set,1),as.matrix(set))[-1,]
     if(is.null(object)){
         if(!is.null(R) & !is.null(portfolio)){
             portfolios<-optimize.portfolio(portfolio=portfolio, R=R, optimize_method=optimize_method[1], trace=TRUE, ...)
@@ -67,7 +67,21 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=0, to=
     if(is.na(mtc)) {
         mtc = pmatch(paste(match.col,match.col,sep='.'),columnnames)
     }
+    if(is.null(from)){
+      from <- min(xtract[, mtc])
+    }
+    if(is.null(to)){
+      to <- max(xtract[, mtc])
+    }
+    if(!is.null(n.portfolios)){
+      # create the sequence using length.out if the user has specified a value for the n.portfolios arg
+      set<-seq(from=from, to=to, length.out=n.portfolios)
+    } else {
+      # fall back to using by to create the sequence
+      set<-seq(from=from, to=to, by=by)
+    }
     
+    set<-cbind(quantmod::Lag(set,1),as.matrix(set))[-1,]
     result <- foreach(i=1:nrow(set),.inorder=TRUE, .combine=rbind, .errorhandling='remove') %do% {
         tmp<-xtract[which(xtract[,mtc]>=set[i,1] & xtract[,mtc]<set[i,2]),]
         #tmp<-tmp[which.min(tmp[,'out']),]

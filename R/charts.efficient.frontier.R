@@ -150,7 +150,7 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
   rnames <- colnames(R)
   
   # get the data of the efficient frontier
-  frontier <- extract.efficient.frontier(object=object, match.col=match.col)
+  frontier <- extract.efficient.frontier(object=object, match.col=match.col, n.portfolios=n.portfolios)
   
   # data points to plot the frontier
   x.f <- frontier[, match.col]
