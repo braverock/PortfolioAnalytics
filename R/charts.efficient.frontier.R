@@ -198,11 +198,11 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
 #' @export
 chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="EF Weights", las=1, cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.loc="under", legend.labels=NULL, element.color="darkgray"){
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
-  
+  frontier <- object$frontier
   # get the columns with weights
-  cnames <- colnames(object)
+  cnames <- colnames(frontier)
   wts_idx <- grep(pattern="^w\\.", cnames)
-  wts <- object[, wts_idx]
+  wts <- frontier[, wts_idx]
   
   if(!is.null(legend.labels)){
     # use legend.labels passed in by user
@@ -227,11 +227,64 @@ chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="E
   if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
   
   # plot the 'match.col' (risk) as the x-axis labels 
-  xlabels <- round(object[, mtc], 4)
+  xlabels <- round(frontier[, mtc], 4)
   
   chart.StackedBar(w=wts, colorset=colorset, ..., main=main, las=las, space=0, 
                    cex.lab=cex.lab, cex.axis=cex.axis, cex.legend=cex.legend, 
                    legend.loc=legend.loc, element.color=element.color, 
                    xaxis.labels=xlabels, xlab=match.col, ylab="Weights")
+}
+
+#' @rdname chart.EfficientFrontier
+#' @export
+chart.EfficientFrontier.efficient.frontier <- function(object, chart.assets=TRUE, match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ...){
+  if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
+  
+  # get the returns and efficient frontier object
+  R <- object$R
+  frontier <- object$frontier
+  
+  # get the column names from the frontier object
+  cnames <- colnames(frontier)
+  
+  # get the "mean" column
+  mean.mtc <- pmatch("mean", cnames)
+  if(is.na(mean.mtc)) {
+    mean.mtc <- pmatch("mean.mean", cnames)
+  }
+  if(is.na(mean.mtc)) stop("could not match 'mean' with column name of extractStats output")
+  
+  # get the match.col column
+  mtc <- pmatch(match.col, cnames)
+  if(is.na(mtc)) {
+    mtc <- pmatch(paste(match.col,match.col,sep='.'),cnames)
+  }
+  if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
+  
+  if(chart.assets){
+    # get the data to plot scatter of asset returns
+    asset_ret <- scatterFUN(R=R, FUN="mean")
+    asset_risk <- scatterFUN(R=R, FUN=match.col)
+    rnames <- colnames(R)
+    
+    # set the x and y limits
+    if(is.null(xlim)){
+      xlim <- range(c(frontier[, mtc], asset_risk))
+    }
+    if(is.null(ylim)){
+      ylim <- range(c(frontier[, mean.mtc], asset_ret))
+    }
+  }
+  
+  # plot the efficient frontier line
+  plot(x=frontier[, mtc], y=frontier[, mean.mtc], ylab="mean", xlab=match.col, main=main, xlim=xlim, ylim=ylim, pch=5, axes=FALSE, ...)
+  if(chart.assets){
+    # risk-return scatter of the assets
+    points(x=asset_risk, y=asset_ret)
+    text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
+  }
+  axis(1, cex.axis = cex.axis, col = element.color)
+  axis(2, cex.axis = cex.axis, col = element.color)
+  box(col = element.color)
 }
 

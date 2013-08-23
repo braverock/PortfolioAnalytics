@@ -1,5 +1,6 @@
 \name{chart.EfficientFrontier}
 \alias{chart.EfficientFrontier}
+\alias{chart.EfficientFrontier.efficient.frontier}
 \alias{chart.EfficientFrontier.optimize.portfolio}
 \alias{chart.EfficientFrontier.optimize.portfolio.ROI}
 \title{chart the efficient frontier and risk-return scatter plot of the assets}
@@ -19,6 +20,12 @@
     match.col = "ES", n.portfolios = 25, xlim = NULL,
     ylim = NULL, cex.axis = 0.8,
     element.color = "darkgray",
+    main = "Efficient Frontier", ...)
+
+  chart.EfficientFrontier.efficient.frontier(object,
+    chart.assets = TRUE, match.col = "ES",
+    n.portfolios = NULL, xlim = NULL, ylim = NULL,
+    cex.axis = 0.8, element.color = "darkgray",
     main = "Efficient Frontier", ...)
 }
 \arguments{

@@ -327,6 +327,7 @@ create.EfficientFrontier <- function(R, portfolio, type=c("mean-var", "mean-etl"
                                                              n.portfolios=n.portfolios)
          }
   )
-  return(frontier)
+  return(structure(list(frontier=frontier,
+                        R=R), class="efficient.frontier"))
 }
 
