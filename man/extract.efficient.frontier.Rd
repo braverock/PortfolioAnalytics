@@ -3,8 +3,9 @@
 \title{Extract the efficient frontier of portfolios that meet your objectives over a range of risks}
 \usage{
   extract.efficient.frontier(object = NULL,
-    match.col = "ES", from = 0, to = 1, by = 0.005, ...,
-    R = NULL, portfolio = NULL, optimize_method = "random")
+    match.col = "ES", from = NULL, to = NULL, by = 0.005,
+    n.portfolios = NULL, ..., R = NULL, portfolio = NULL,
+    optimize_method = "random")
 }
 \arguments{
   \item{object}{optimial portfolio object as created by
