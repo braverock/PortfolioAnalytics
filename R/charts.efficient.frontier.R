@@ -176,3 +176,62 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
   axis(2, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
 }
+
+#' chart the weights along the efficient frontier
+#' 
+#' This creates a stacked column chart of the weights of portfolios along the efficient frontier.
+#' 
+#' @param object object of class 'efficient.frontier' created by \code{\link{create.EfficientFrontier}}.
+#' @param colorset color palette to use.
+#' @param ... passthrough parameters to \code{chart.StackedBar}.
+#' @param match.col match.col string name of column to use for risk (horizontal axis).
+#' Must match the name of an objective.
+#' @param main main title used in the plot.
+#' @param las sets the orientation of the axis labels, as described in \code{\link{par}}.
+#' @param cex.lab The magnification to be used for x- and y-axis labels relative to the current setting of 'cex'.
+#' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
+#' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}.
+#' @param legend.loc places a legend into a location on the chart similar to \code{\link{chart.TimeSeries}}. The default, "under," is the only location currently implemented for this chart. Use 'NULL' to remove the legend.
+#' @param legend.labels character vector to use for the legend labels
+#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
+#' @author Ross Bennett
+#' @export
+chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="EF Weights", las=1, cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.loc="under", legend.labels=NULL, element.color="darkgray"){
+  if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
+  
+  # get the columns with weights
+  cnames <- colnames(object)
+  wts_idx <- grep(pattern="^w\\.", cnames)
+  wts <- object[, wts_idx]
+  
+  if(!is.null(legend.labels)){
+    # use legend.labels passed in by user
+    colnames(wts) <- legend.labels
+  } else {
+    # remove w. from the column names
+    colnames(wts) <- gsub(pattern="^w\\.", replacement="", cnames[wts_idx])
+  }
+  
+  # get the "mean" column
+  mean.mtc <- pmatch("mean", cnames)
+  if(is.na(mean.mtc)) {
+    mean.mtc <- pmatch("mean.mean", cnames)
+  }
+  if(is.na(mean.mtc)) stop("could not match 'mean' with column name of extractStats output")
+  
+  # get the match.col column
+  mtc <- pmatch(match.col, cnames)
+  if(is.na(mtc)) {
+    mtc <- pmatch(paste(match.col,match.col,sep='.'),cnames)
+  }
+  if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
+  
+  # plot the 'match.col' (risk) as the x-axis labels 
+  xlabels <- round(object[, mtc], 4)
+  
+  chart.StackedBar(w=wts, colorset=colorset, ..., main=main, las=las, space=0, 
+                   cex.lab=cex.lab, cex.axis=cex.axis, cex.legend=cex.legend, 
+                   legend.loc=legend.loc, element.color=element.color, 
+                   xaxis.labels=xlabels, xlab=match.col, ylab="Weights")
+}
+

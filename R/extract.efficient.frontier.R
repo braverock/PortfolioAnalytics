@@ -67,6 +67,8 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=NULL, 
     if(is.na(mtc)) {
         mtc = pmatch(paste(match.col,match.col,sep='.'),columnnames)
     }
+    if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
+    
     if(is.null(from)){
       from <- min(xtract[, mtc])
     }
