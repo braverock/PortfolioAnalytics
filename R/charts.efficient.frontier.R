@@ -183,35 +183,62 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
 #' 
 #' @param object object of class 'efficient.frontier' created by \code{\link{create.EfficientFrontier}}.
 #' @param colorset color palette to use.
-#' @param ... passthrough parameters to \code{chart.StackedBar}.
+#' @param ... passthrough parameters to \code{barplot}.
 #' @param match.col match.col string name of column to use for risk (horizontal axis).
 #' Must match the name of an objective.
 #' @param main main title used in the plot.
-#' @param las sets the orientation of the axis labels, as described in \code{\link{par}}.
 #' @param cex.lab The magnification to be used for x- and y-axis labels relative to the current setting of 'cex'.
 #' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
 #' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}.
-#' @param legend.loc places a legend into a location on the chart similar to \code{\link{chart.TimeSeries}}. The default, "under," is the only location currently implemented for this chart. Use 'NULL' to remove the legend.
 #' @param legend.labels character vector to use for the legend labels
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
 #' @author Ross Bennett
 #' @export
-chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="EF Weights", las=1, cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.loc="under", legend.labels=NULL, element.color="darkgray"){
+chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="EF Weights", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray"){
+  # using ideas from weightsPlot.R in fPortfolio package
+  
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
   frontier <- object$frontier
+  
   # get the columns with weights
   cnames <- colnames(frontier)
   wts_idx <- grep(pattern="^w\\.", cnames)
   wts <- frontier[, wts_idx]
   
-  if(!is.null(legend.labels)){
-    # use legend.labels passed in by user
-    colnames(wts) <- legend.labels
-  } else {
-    # remove w. from the column names
-    colnames(wts) <- gsub(pattern="^w\\.", replacement="", cnames[wts_idx])
-  }
+  # compute the weights for the barplot
+  pos.weights <- +0.5 * (abs(wts) + wts)
+  neg.weights <- -0.5 * (abs(wts) - wts)
   
+  # Define Plot Range:
+  ymax <- max(rowSums(pos.weights))
+  ymin <- min(rowSums(neg.weights))
+  range <- ymax - ymin
+  ymax <- ymax + 0.005 * range
+  ymin <- ymin - 0.005 * range
+  dim <- dim(wts)
+  range <- dim[1]
+  xmin <- 0
+  xmax <- range + 0.2 * range
+  
+  # set the colorset if no colorset is passed in
+  if(is.null(colorset))
+    colorset <- 1:dim[2]
+  
+  # plot the positive weights
+  barplot(t(pos.weights), col = colorset, space = 0, ylab = "",
+          xlim = c(xmin, xmax), ylim = c(ymin, ymax),
+          border = element.color, cex.axis=cex.axis, ...)
+  
+  # set the legend information
+  if(is.null(legend.labels)){
+    legend.labels <- gsub(pattern="^w\\.", replacement="", cnames[wts_idx])
+  }
+  legend("topright", legend = legend.labels, bty = "n", cex = cex.legend, fill = colorset)
+  
+  # plot the negative weights
+  barplot(t(neg.weights), col = colorset, space = 0, add = TRUE, border = element.color, cex.axis=cex.axis, axes=FALSE, ...)
+  
+  # return along the efficient frontier
   # get the "mean" column
   mean.mtc <- pmatch("mean", cnames)
   if(is.na(mean.mtc)) {
@@ -219,6 +246,7 @@ chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="E
   }
   if(is.na(mean.mtc)) stop("could not match 'mean' with column name of extractStats output")
   
+  # risk along the efficient frontier
   # get the match.col column
   mtc <- pmatch(match.col, cnames)
   if(is.na(mtc)) {
@@ -226,13 +254,23 @@ chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="E
   }
   if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
   
-  # plot the 'match.col' (risk) as the x-axis labels 
-  xlabels <- round(frontier[, mtc], 4)
+  # Add labels
+  ef.return <- frontier[, mean.mtc]
+  ef.risk <- frontier[, mtc]
+  n.risk <- length(ef.risk)
+  n.labels <- 6
+  M <- c(0, ( 1:(n.risk %/% n.labels) ) ) * n.labels + 1
+  # use 3 significant digits
+  axis(3, at = M, labels = signif(ef.risk[M], 3), cex.axis=cex.axis)
+  axis(1, at = M, labels = signif(ef.return[M], 3), cex.axis=cex.axis)
   
-  chart.StackedBar(w=wts, colorset=colorset, ..., main=main, las=las, space=0, 
-                   cex.lab=cex.lab, cex.axis=cex.axis, cex.legend=cex.legend, 
-                   legend.loc=legend.loc, element.color=element.color, 
-                   xaxis.labels=xlabels, xlab=match.col, ylab="Weights")
+  # axis labels and titles
+  mtext("Risk", side = 3, line = 2, adj = 1, cex = cex.lab)
+  mtext("Return", side = 1, line = 2, adj = 1, cex = cex.lab)
+  mtext("Weight", side = 2, line = 2, adj = 1, cex = cex.lab)
+  # add title
+  mtext(main, adj = 0, line = 2.5, font = 2, cex = 0.8)
+  box(col=element.color)
 }
 
 #' @rdname chart.EfficientFrontier
