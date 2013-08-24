@@ -181,7 +181,7 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
 #' 
 #' This creates a stacked column chart of the weights of portfolios along the efficient frontier.
 #' 
-#' @param object object of class 'efficient.frontier' created by \code{\link{create.EfficientFrontier}}.
+#' @param object object of class \code{efficient.frontier} or \code{optimize.portfolio}.
 #' @param colorset color palette to use.
 #' @param ... passthrough parameters to \code{barplot}.
 #' @param n.portfolios number of portfolios to extract along the efficient frontier.
@@ -189,7 +189,7 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
 #' @param match.col match.col string name of column to use for risk (horizontal axis).
 #' Must match the name of an objective.
 #' @param main main title used in the plot.
-#' @param cex.lab The magnification to be used for x- and y-axis labels relative to the current setting of 'cex'.
+#' @param cex.lab The magnification to be used for x-axis and y-axis labels relative to the current setting of 'cex'.
 #' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
 #' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}.
 #' @param legend.labels character vector to use for the legend labels
