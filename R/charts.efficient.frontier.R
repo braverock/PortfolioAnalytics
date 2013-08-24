@@ -198,7 +198,15 @@ chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="E
   # using ideas from weightsPlot.R in fPortfolio package
   
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
-  frontier <- object$frontier
+  
+  if(is.list(object)){
+    # Objects created with create.EfficientFrontier will be a list of 2 elements
+    frontier <- object$frontier
+  } else {
+    # Objects created with extractEfficientFrontier will only be an efficient.frontier object
+    frontier <- object
+  }
+  
   
   # get the columns with weights
   cnames <- colnames(frontier)
@@ -227,7 +235,8 @@ chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="E
   # plot the positive weights
   barplot(t(pos.weights), col = colorset, space = 0, ylab = "",
           xlim = c(xmin, xmax), ylim = c(ymin, ymax),
-          border = element.color, cex.axis=cex.axis, ...)
+          border = element.color, cex.axis=cex.axis, 
+          axisnames=FALSE,...)
   
   # set the legend information
   if(is.null(legend.labels)){
@@ -236,7 +245,8 @@ chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="E
   legend("topright", legend = legend.labels, bty = "n", cex = cex.legend, fill = colorset)
   
   # plot the negative weights
-  barplot(t(neg.weights), col = colorset, space = 0, add = TRUE, border = element.color, cex.axis=cex.axis, axes=FALSE, ...)
+  barplot(t(neg.weights), col = colorset, space = 0, add = TRUE, border = element.color, 
+          cex.axis=cex.axis, axes=FALSE, axisnames=FALSE, ...)
   
   # return along the efficient frontier
   # get the "mean" column

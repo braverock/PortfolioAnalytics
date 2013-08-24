@@ -331,3 +331,66 @@ create.EfficientFrontier <- function(R, portfolio, type=c("mean-var", "mean-etl"
                         R=R), class="efficient.frontier"))
 }
 
+#' Extract the efficient frontier data points
+#' 
+#' This function extracts the efficient frontier from an object created by
+#' \code{\link{optimize.portfolio}}.
+#' 
+#' If the object is an \code{optimize.portfolio.ROI} object and \code{match.col}
+#'  is "ES", "ETL", or "CVaR", then the mean-ETL efficient frontier will be 
+#'  created via \code{meanetl.efficient.frontier}. 
+#' 
+#' If the object is an \code{optimize.portfolio.ROI} object and \code{match.col}
+#'  is "var", then the mean-var efficient frontier will be created via 
+#' \code{meanvar.efficient.frontier}.
+#' 
+#' For objects created by \code{optimize.portfolo} with the DEoptim, random, or
+#' pso solvers, the efficient frontier will be extracted from the object via
+#' \code{extract.efficient.frontier}. This means that \code{optimize.portfolio} must
+#' be run with \code{trace=TRUE}
+#' 
+#' @param object an optimal portfolio object created by \code{optimize.portfolio}
+#' @param match.col string name of column to use for risk (horizontal axis).
+#' \code{match.col} must match the name of an objective in the \code{portfolio}
+#' object.
+#' @param n.portfolios number of portfolios to use to plot the efficient frontier
+#' @return an \code{efficient.frontier} object with weights and other metrics along the efficient frontier
+#' @author Ross Bennett
+#' @export
+extractEfficientFrontier <- function(object, match.col="ES", n.portfolios=25){
+  # extract the efficient frontier from an optimize.portfolio output object
+  
+  if(!inherits(object, "optimize.portfolio")) stop("object must be of class 'optimize.portfolio'")
+  
+  if(inherits(object, "optimize.portfolio.GenSA")){
+    stop("GenSA does not return any useable trace information for portfolios tested, thus we cannot extract an efficient frontier.")
+  }
+  
+  # get the portfolio and returns 
+  portf <- object$portfolio
+  R <- object$R
+  if(is.null(R)) stop(paste("Not able to get asset returns from", object, "run optimize.portfolio with trace=TRUE"))
+  
+  # get the objective names and check if match.col is an objective name
+  objnames <- unlist(lapply(portf$objectives, function(x) x$name))
+  if(!(match.col %in% objnames)){
+    stop("match.col must match an objective name")
+  }
+  
+  # We need to create the efficient frontier if object is of class optimize.portfolio.ROI
+  if(inherits(object, "optimize.portfolio.ROI")){
+    if(match.col %in% c("ETL", "ES", "CVaR")){
+      frontier <- meanetl.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
+    }
+    if(match.col == "var"){
+      frontier <- meanvar.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
+    }
+  } # end optimize.portfolio.ROI
+  
+  # use extract.efficient.frontier for otpimize.portfolio output objects with global solvers
+  if(inherits(object, c("optimize.portfolio.random", "optimize.portfolio.DEoptim", "optimize.portfolio.pso"))){
+    frontier <- extract.efficient.frontier(object=object, match.col=match.col, n.portfolios=n.portfolios)
+  }
+  return(frontier)
+}
+
