@@ -184,6 +184,8 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
 #' @param object object of class 'efficient.frontier' created by \code{\link{create.EfficientFrontier}}.
 #' @param colorset color palette to use.
 #' @param ... passthrough parameters to \code{barplot}.
+#' @param n.portfolios number of portfolios to extract along the efficient frontier.
+#' This is only used for objects of class \code{optimize.portfolio}
 #' @param match.col match.col string name of column to use for risk (horizontal axis).
 #' Must match the name of an objective.
 #' @param main main title used in the plot.
@@ -194,7 +196,13 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
 #' @author Ross Bennett
 #' @export
-chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="EF Weights", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray"){
+chart.Weights.EF <- function(object, colorset=NULL, ..., n.portfolios=25, match.col="ES", main="EF Weights", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray"){
+UseMethod("chart.Weights.EF")
+}
+
+#' @rdname chart.Weights.EF
+#' @export
+chart.Weights.EF.efficient.frontier <- function(object, colorset=NULL, ..., n.portfolios=25, match.col="ES", main="EF Weights", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray"){
   # using ideas from weightsPlot.R in fPortfolio package
   
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
@@ -281,6 +289,20 @@ chart.Weights.EF <- function(object, colorset=NULL, ..., match.col="ES", main="E
   # add title
   mtext(main, adj = 0, line = 2.5, font = 2, cex = 0.8)
   box(col=element.color)
+}
+
+#' @rdname chart.Weights.EF
+#' @export
+chart.Weights.EF.optimize.portfolio <- function(object, colorset=NULL, ..., n.portfolios=25, match.col="ES", main="EF Weights", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray"){
+  # chart the weights along the efficient frontier of an objected created by optimize.portfolio
+  
+  if(!inherits(object, "optimize.portfolio")) stop("object must be of class optimize.portfolio")
+  
+  frontier <- extractEfficientFrontier(object=object, match.col=match.col, n.portfolios=n.portfolios)
+  PortfolioAnalytics:::chart.Weights.EF(object=frontier, colorset=colorset, ..., 
+                                        match.col=match.col, main=main, cex.lab=cex.lab, 
+                                        cex.axis=cex.axis, cex.legend=cex.legend, 
+                                        legend.labels=legend.labels, element.color=element.color)
 }
 
 #' @rdname chart.EfficientFrontier
