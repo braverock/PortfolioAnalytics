@@ -14,6 +14,8 @@ rm(list=ls())
 
 data(edhec)
 R <- edhec[, 1:5]
+# change the column names for better legends in plotting
+colnames(R) <- c("CA", "CTAG", "DS", "EM", "EQM")
 funds <- colnames(R)
 
 # initial portfolio object
@@ -41,10 +43,16 @@ chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="var")
 # run optimize.portfolio and chart the efficient frontier for that object
 opt_meanvar <- optimize.portfolio(R=R, portfolio=meanvar.portf, optimize_method="ROI", trace=TRUE)
 chart.EfficientFrontier(opt_meanvar, match.col="var", n.portfolios=50)
+# The weights along the efficient frontier can be plotted by passing in the
+# optimize.portfolio output object
+chart.Weights.EF(opt_meanvar, match.col="var")
+# or we can extract the efficient frontier and then plot it
+ef <- extractEfficientFrontier(object=opt_meanvar, match.col="var", n.portfolios=15)
+chart.Weights.EF(ef, match.col="var", colorset=bluemono)
 
 # mean-etl efficient frontier
 meanetl.ef <- create.EfficientFrontier(R=R, portfolio=meanetl.portf, type="mean-etl")
-chart.EfficientFrontier(meanetl.ef, match.col="ES", main="mean-ETL Efficient Frontier", type="b", col="blue")
+chart.EfficientFrontier(meanetl.ef, match.col="ES", main="mean-ETL Efficient Frontier", type="l", col="blue")
 chart.Weights.EF(meanetl.ef, colorset=bluemono, match.col="ES")
 
 # mean-etl efficient frontier using random portfolios
