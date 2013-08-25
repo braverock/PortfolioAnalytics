@@ -38,9 +38,20 @@ chart.Weights.DE <- function(object, neighbors = NULL, ..., main="Weights", las 
     bottommargin = minmargin
   }
   par(mar = c(bottommargin, 4, topmargin, 2) +.1)
-  plot(object$weights, type="b", col="blue", axes=FALSE, xlab='', ylim=c(0,max(constraints$max)), ylab="Weights", main=main, pch=16, ...)
-  points(constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
-  points(constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
+  if(any(is.infinite(constraints$max)) | any(is.infinite(constraints$min))){
+    # set ylim based on weights if box constraints contain Inf or -Inf
+    ylim <- range(object$weights)
+  } else {
+    # set ylim based on the range of box constraints min and max
+    ylim <- range(c(constraints$min, constraints$max))
+  }
+  plot(object$weights, type="b", col="blue", axes=FALSE, xlab='', ylim=ylim, ylab="Weights", main=main, pch=16, ...)
+  if(!any(is.infinite(constraints$min))){
+    points(constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
+  }
+  if(!any(is.infinite(constraints$max))){
+    points(constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
+  }
   #     if(!is.null(neighbors)){ 
   #         if(is.vector(neighbors)){
   #             xtract=extractStats(object)
