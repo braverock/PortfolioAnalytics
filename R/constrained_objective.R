@@ -529,11 +529,9 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
                  nargs$x <- ( R %*% w ) #do the multivariate mean/median with Kroneker product
                },
                sd =,
+               var =,
                StdDev = { 
                  fun = match.fun(StdDev)
-               },
-               var = { 
-                 fun = match.fun(var.portfolio)
                },
                mVaR =,
                VaR = {
