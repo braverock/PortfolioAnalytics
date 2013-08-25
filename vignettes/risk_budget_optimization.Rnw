@@ -87,7 +87,6 @@ options(width=80)
 
 <<echo=TRUE>>=| 
 library(PortfolioAnalytics)
-#source("constrained_objective.R")
 data(indexes)
 class(indexes)
 indexes <- indexes[,1:4]
@@ -102,14 +101,19 @@ In what follows, we first illustrate the construction of the penalty augmented o
 \subsection{Weight constraints}
   
 <<echo=TRUE>>=| 
-Wcons <- constraint( assets = colnames(indexes[,1:4]) ,min = rep(0,4), max=rep(1,4), min_sum=1,max_sum=1 ) 
+# create the portfolio specification object
+Wcons <- portfolio.spec( assets = colnames(indexes[,1:4]) )
+# Add box constraints
+Wcons <- add.constraint( portfolio=Wcons, type='box', min = 0, max=1 )
+# Add the full investment constraint that specifies the weights must sum to 1.
+Wcons <- add.constraint( portfolio=Wcons, type="full_investment")
 @
 
 Given the weight constraints, we can call the value of the function to be minimized. We consider the case of no violation and a case of violation. By default, \verb"normalize=TRUE" which means that if the sum of weights exceeds \verb"max_sum", the weight vector is normalized by multiplying it with \verb"sum(weights)/max_sum" such that the weights evaluated in the objective function satisfy the \verb"max_sum" constraint.    
 <<echo=TRUE>>=| 
-constrained_objective_v1( w = rep(1/4,4) , R = indexes[,1:4] , constraints = Wcons) 
-constrained_objective_v1( w = rep(1/3,4) , R = indexes[,1:4] , constraints = Wcons) 
-constrained_objective_v1( w = rep(1/3,4) , R = indexes[,1:4] , constraints = Wcons, normalize=FALSE) 
+constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , portfolio = Wcons) 
+constrained_objective( w = rep(1/3,4) , R = indexes[,1:4] , portfolio = Wcons) 
+constrained_objective( w = rep(1/3,4) , R = indexes[,1:4] , portfolio = Wcons, normalize=FALSE) 
 @
 
 The latter value can be recalculated as penalty times the weight violation, that is: $10000 \times 1/3.$
@@ -119,13 +123,13 @@ The latter value can be recalculated as penalty times the weight violation, that
 Suppose now we want to find the portfolio that minimizes the 95\% portfolio CVaR subject to the weight constraints listed above.  
 
 <<echo=TRUE>>=| 
-ObjSpec = add.objective_v1( constraints = Wcons , type="risk",name="CVaR",
+ObjSpec = add.objective( portfolio = Wcons , type="risk",name="CVaR",
 arguments=list(p=0.95), enabled=TRUE)   
 @
 
 The value of the objective function is: 
 <<echo=TRUE>>=| 
-constrained_objective_v1( w = rep(1/4,4) , R = indexes[,1:4] , constraints = ObjSpec) 
+constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , portfolio = ObjSpec) 
 @
 This is the CVaR of the equal-weight portfolio as computed by the function \verb"ES" in the \verb"PerformanceAnalytics" package of \citet{ Carl2007}
 <<echo=TRUE>>=| 
@@ -144,9 +148,9 @@ out$MES
 
 For the formulation of the objective function, this implies setting: 
 <<echo=TRUE>>=| 
-ObjSpec = add.objective_v1( constraints = Wcons , type="risk",name="CVaR",
+ObjSpec = add.objective( portfolio = Wcons , type="risk",name="CVaR",
 arguments=list(p=0.95,clean="boudt"), enabled=TRUE)   
-constrained_objective_v1( w = rep(1/4,4) , R = indexes[,1:4] , constraints = ObjSpec)
+constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , portfolio = ObjSpec)
 @
 
 An additional argument that is not available for the moment in \verb"ES" is to estimate the conditional covariance matrix trough
@@ -154,21 +158,21 @@ the constant conditional correlation model of \citet{Bollerslev90}.
 
 For the formulation of the objective function, this implies setting: 
 <<echo=TRUE>>=| 
-ObjSpec = add.objective_v1( constraints = Wcons , type="risk",name="CVaR",
+ObjSpec = add.objective( portfolio = Wcons , type="risk",name="CVaR",
 arguments=list(p=0.95,clean="boudt"), enabled=TRUE, garch=TRUE)   
-constrained_objective_v1( w = rep(1/4,4) , R = indexes[,1:4] , constraints = ObjSpec)
+constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , portfolio = ObjSpec)
 @
 
 \subsection{Minimum CVaR concentration objective function}
 
 Add the minimum 95\% CVaR concentration objective to the objective function: 
 <<echo=TRUE>>=| 
-ObjSpec = add.objective_v1( constraints = Wcons , type="risk_budget_objective",name="CVaR",
+ObjSpec = add.objective( portfolio = Wcons , type="risk_budget_objective",name="CVaR",
 arguments=list(p=0.95,clean="boudt"), min_concentration=TRUE, enabled=TRUE)   
 @
 The value of the objective function is: 
 <<echo=TRUE>>=| 
-constrained_objective_v1( w = rep(1/4,4) , R = indexes[,1:4] , constraints = ObjSpec) 
+constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , portfolio = ObjSpec) 
 @
 We can verify that this is effectively the largest CVaR contribution of that portfolio as follows:
 <<echo=TRUE>>=| 
@@ -182,9 +186,9 @@ cause more than 30\% of total risk. We could specify as a constraint that no ass
 more than 30\% to total portfolio risk. This involves the construction of the following objective function:
 
 <<echo=TRUE>>=| 
-ObjSpec = add.objective_v1( constraints = Wcons , type="risk_budget_objective",name="CVaR", max_prisk = 0.3,
+ObjSpec = add.objective( portfolio = Wcons , type="risk_budget_objective",name="CVaR", max_prisk = 0.3,
 arguments=list(p=0.95,clean="boudt"), enabled=TRUE) 
-constrained_objective_v1( w = rep(1/4,4) , R = indexes[,1:4] , constraints = ObjSpec) 
+constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , portfolio = ObjSpec) 
 @
 
 This value corresponds to the penalty parameter which has by default the value of 10000 times the exceedances: $ 10000*(0.045775103+0.054685023)\approx 1004.601.$
