@@ -31,6 +31,7 @@
 % does not look nice, try deleting the line with the fontenc.
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 \title{Vignette: Portfolio Optimization with CVaR budgets\\
 in PortfolioAnalytics}
