@@ -502,20 +502,45 @@ box_constraint <- function(type="box", assets, min, max, min_mult, max_mult, ena
 #' 
 #' pspec <- portfolio.spec(assets=colnames(ret))
 #' 
+#' # Assets 1 and 3 are groupA
+#' # Assets 2 and 4 are groupB
 #' pspec <- add.constraint(portfolio=pspec, 
 #'                         type="group", 
-#'                         groups=c(2, 2),
-#'                         group_labels=c("Style A", "Style B"),
+#'                         groups=list(groupA=c(1, 3),
+#'                                     groupB=c(2, 4)),
 #'                         group_min=c(0.15, 0.25),
 #'                         group_max=c(0.65, 0.55))
+#' 
+#' # 2 levels of grouping (e.g. by sector and geography)
+#' pspec <- portfolio.spec(assets=5)
+#' # Assets 1, 3, and 5 are Tech
+#' # Assets 2 and 4 are Oil
+#' # Assets 2, 4, and 5 are UK
+#' # Assets 1 and are are US
+#' group_list <- list(group1=c(1, 3, 5),
+#'                    group2=c(2, 4),
+#'                    groupA=c(2, 4, 5),
+#'                    groupB=c(1, 3))
+#' 
+#' pspec <- add.constraint(portfolio=pspec, 
+#'                         type="group", 
+#'                         groups=group_list,
+#'                         group_min=c(0.15, 0.25, 0.2, 0.1),
+#'                         group_max=c(0.65, 0.55, 0.5, 0.4))
+#'                         
 #' @export
 group_constraint <- function(type="group", assets, groups, group_labels=NULL, group_min, group_max, group_pos=NULL, enabled=TRUE, message=FALSE, ...) {
+  if(!is.list(groups)) stop("groups must be passed in as a list")
   nassets <- length(assets)
   ngroups <- length(groups)
+  groupnames <- names(groups)
   
-  if(sum(groups) != nassets) {
-    stop("sum of groups must be equal to the number of assets")
-  }
+  # comment out so the user can pass in multiple levels of groups
+  # may want a warning message
+  # count <- sum(sapply(groups, length))
+  # if(count != nassets) {
+  #   message("count of assets in groups must be equal to the number of assets")
+  # }
   
   # Checks for group_min
   if (length(group_min) == 1) {
@@ -531,8 +556,13 @@ group_constraint <- function(type="group", assets, groups, group_labels=NULL, gr
   }
   if (length(group_max) != ngroups) stop(paste("length of group_max must be equal to 1 or the length of groups:", ngroups))
   
+  # construct the group_label vector if groups is a named list
+  if(!is.null(groupnames)){
+    group_labels <- groupnames
+  }
+  
   # Construct the group_label vector if it is not passed in
-  if(is.null(group_labels)){
+  if(is.null(group_labels) & is.null(groupnames)){
     group_labels <- paste(rep("group", ngroups), 1:ngroups, sep="")
   }
   
@@ -544,9 +574,9 @@ group_constraint <- function(type="group", assets, groups, group_labels=NULL, gr
     if(length(group_pos) != length(groups)) stop("length of group_pos must be equal to the length of groups")
     # Check for negative values in group_pos
     if(any(group_pos < 0)) stop("all elements of group_pos must be positive")
-    # Elements of group_pos cannot be greater than groups
-    if(any(group_pos > groups)){
-      group_pos <- pmin(group_pos, groups)
+    # Elements of group_pos cannot be greater than count of assets in groups
+    if(any(group_pos > sapply(groups, length))){
+      group_pos <- pmin(group_pos, sapply(groups, length))
     }
   }
   
