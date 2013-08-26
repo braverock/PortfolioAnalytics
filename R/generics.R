@@ -554,7 +554,7 @@ summary.optimize.portfolio <- function(object, ...){
     n.groups <- length(groups)
     group_weights <- rep(0, n.groups)
     for(i in 1:n.groups){
-      group_weights[i] <- sum(weights[groups[[i]]])
+      group_weights[i] <- sum(object$weights[groups[[i]]])
     }
     names(group_weights) <- group_labels
     print(group_weights)

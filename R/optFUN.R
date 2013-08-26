@@ -30,7 +30,7 @@ gmv_opt <- function(R, constraints, moments, lambda, target){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
     for(i in 1:n.groups){
-      Amat.group[i, groups[[i]]] <- 1
+      Amat.group[i, constraints$groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
@@ -90,7 +90,7 @@ maxret_opt <- function(R, moments, constraints, target){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
     for(i in 1:n.groups){
-      Amat.group[i, groups[[i]]] <- 1
+      Amat.group[i, constraints$groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
@@ -175,7 +175,7 @@ maxret_milp_opt <- function(R, constraints, moments, target){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
     for(i in 1:n.groups){
-      Amat.group[i, groups[[i]]] <- 1
+      Amat.group[i, constraints$groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
@@ -243,7 +243,7 @@ etl_opt <- function(R, constraints, moments, target, alpha){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
     for(i in 1:n.groups){
-      Amat.group[i, groups[[i]]] <- 1
+      Amat.group[i, constraints$groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
@@ -343,7 +343,7 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=m)
     for(i in 1:n.groups){
-      Amat.group[i, groups[[i]]] <- 1
+      Amat.group[i, constraints$groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
