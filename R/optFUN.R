@@ -123,6 +123,7 @@ maxret_opt <- function(R, moments, constraints, target){
   #non-zero value otherwise.
   if(roi.result$status$code != 0) {
     message(roi.result$status$msg$message)
+    stop("No solution")
     return(NULL)
   }
   
