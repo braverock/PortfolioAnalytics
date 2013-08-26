@@ -582,26 +582,19 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
 group_fail <- function(weights, groups, cLO, cUP, group_pos=NULL){
   # return FALSE if groups, cLO, or cUP is NULL
   if(is.null(groups) | is.null(cLO) | is.null(cUP)) return(FALSE)
-  
+  group_count <- sapply(groups, length)
   # group_pos sets a limit on the number of non-zero weights by group
   # Set equal to groups if NULL
-  if(is.null(group_pos)) group_pos <- groups
+  if(is.null(group_pos)) group_pos <- group_count
   tolerance <- .Machine$double.eps^0.5
   
   n.groups <- length(groups)
   group_fail <- vector(mode="logical", length=n.groups)
-  k <- 1
-  l <- 0
+  
   for(i in 1:n.groups){
-    j <- groups[i]
-    tmp.w <- weights[k:(l+j)]
-    grp.min <- cLO[i]
-    grp.max <- cUP[i]
-    grp.pos <- group_pos[i]
-    # return TRUE if grp.min or grp.max is violated
-    group_fail[i] <- ( sum(tmp.w) < grp.min | sum(tmp.w) > grp.max | (sum(abs(tmp.w) > tolerance) > grp.pos))
-    k <- k + j
-    l <- k - 1
+    # sum of the weights for a given group
+    tmp.w <- weights[groups[[i]]]
+    group_fail[i] <- ( (sum(tmp.w) < cLO[i]) | (sum(tmp.w) > cUP[i]) | (sum(abs(tmp.w) > tolerance) > group_pos[i]) )
   }
   # returns logical vector of groups. TRUE if either cLO or cUP is violated
   return(group_fail)
