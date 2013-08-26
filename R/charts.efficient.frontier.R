@@ -15,10 +15,10 @@
 #' For objects created by optimize.portfolio with 'ROI' specified as the 
 #' optimize_method:
 #' \itemize{
-#'   \item The mean-var or mean-etl efficient frontier can be plotted for optimal
+#'   \item The mean-StdDev or mean-etl efficient frontier can be plotted for optimal
 #'   portfolio objects created by \code{optimize.portfolio}.
 #' 
-#'   \item If \code{match.col="var"}, the mean-variance efficient frontier is plotted.
+#'   \item If \code{match.col="StdDev"}, the mean-StdDev efficient frontier is plotted.
 #' 
 #'   \item If \code{match.col="ETL"} (also "ES" or "CVaR"), the mean-etl efficient frontier is plotted.
 #' }
@@ -29,9 +29,10 @@
 #' each iteration, therfore we cannot extract and chart an efficient frontier.
 #' 
 #' @param object optimal portfolio created by \code{\link{optimize.portfolio}}
-#' @param match.col string name of column to use for risk (horizontal axis). 
-#' \code{match.col} must match the name of an objective in the \code{portfolio}
-#' object.
+#' @param string name of column to use for risk (horizontal axis).
+#' \code{match.col} must match the name of an objective measure in the 
+#' \code{objective_measures} or \code{opt_values} slot in the object created 
+#' by \code{\link{optimize.portfolio}}.
 #' @param n.portfolios number of portfolios to use to plot the efficient frontier
 #' @param xlim set the x-axis limit, same as in \code{\link{plot}}
 #' @param ylim set the y-axis limit, same as in \code{\link{plot}}
@@ -56,21 +57,27 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
   wts <- object$weights
   objectclass <- class(object)[1]
   
-  objnames <- unlist(lapply(portf$objectives, function(x) x$name))
-  if(!(match.col %in% objnames)){
-    stop("match.col must match an objective name")
-  }
+  # objnames <- unlist(lapply(portf$objectives, function(x) x$name))
+  # if(!(match.col %in% objnames)){
+  #   stop("match.col must match an objective name")
+  # }
   
   # get the optimal return and risk metrics
   xtract <- extractStats(object=object)
-  columnames <- colnames(xtract)
+  columnames <- names(xtract)
   if(!(("mean") %in% columnames)){
     # we need to calculate the mean given the optimal weights
     opt_ret <- applyFUN(R=R, weights=wts, FUN="mean")
   } else {
     opt_ret <- xtract["mean"]
   }
-  opt_risk <- xtract[match.col]
+  # get the match.col column
+  mtc <- pmatch(match.col, columnames)
+  if(is.na(mtc)) {
+    mtc <- pmatch(paste(match.col,match.col,sep='.'), columnames)
+  }
+  if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
+  opt_risk <- xtract[mtc]
   
   # get the data to plot scatter of asset returns
   asset_ret <- scatterFUN(R=R, FUN="mean")
@@ -80,7 +87,7 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
   if(match.col %in% c("ETL", "ES", "CVaR")){
     frontier <- meanetl.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
   }
-  if(match.col %in% objnames){
+  if(match.col == "StdDev"){
     frontier <- meanvar.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
   }
   # data points to plot the frontier
@@ -221,6 +228,22 @@ chart.Weights.EF.efficient.frontier <- function(object, colorset=NULL, ..., n.po
   wts_idx <- grep(pattern="^w\\.", cnames)
   wts <- frontier[, wts_idx]
   
+  # return along the efficient frontier
+  # get the "mean" column
+  mean.mtc <- pmatch("mean", cnames)
+  if(is.na(mean.mtc)) {
+    mean.mtc <- pmatch("mean.mean", cnames)
+  }
+  if(is.na(mean.mtc)) stop("could not match 'mean' with column name of extractStats output")
+  
+  # risk along the efficient frontier
+  # get the match.col column
+  mtc <- pmatch(match.col, cnames)
+  if(is.na(mtc)) {
+    mtc <- pmatch(paste(match.col,match.col,sep='.'),cnames)
+  }
+  if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
+  
   # compute the weights for the barplot
   pos.weights <- +0.5 * (abs(wts) + wts)
   neg.weights <- -0.5 * (abs(wts) - wts)
@@ -256,21 +279,6 @@ chart.Weights.EF.efficient.frontier <- function(object, colorset=NULL, ..., n.po
   barplot(t(neg.weights), col = colorset, space = 0, add = TRUE, border = element.color, 
           cex.axis=cex.axis, axes=FALSE, axisnames=FALSE, ...)
   
-  # return along the efficient frontier
-  # get the "mean" column
-  mean.mtc <- pmatch("mean", cnames)
-  if(is.na(mean.mtc)) {
-    mean.mtc <- pmatch("mean.mean", cnames)
-  }
-  if(is.na(mean.mtc)) stop("could not match 'mean' with column name of extractStats output")
-  
-  # risk along the efficient frontier
-  # get the match.col column
-  mtc <- pmatch(match.col, cnames)
-  if(is.na(mtc)) {
-    mtc <- pmatch(paste(match.col,match.col,sep='.'),cnames)
-  }
-  if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
   
   # Add labels
   ef.return <- frontier[, mean.mtc]
@@ -322,14 +330,14 @@ chart.EfficientFrontier.efficient.frontier <- function(object, chart.assets=TRUE
   if(is.na(mean.mtc)) {
     mean.mtc <- pmatch("mean.mean", cnames)
   }
-  if(is.na(mean.mtc)) stop("could not match 'mean' with column name of extractStats output")
+  if(is.na(mean.mtc)) stop("could not match 'mean' with column name of efficient frontier")
   
   # get the match.col column
   mtc <- pmatch(match.col, cnames)
   if(is.na(mtc)) {
     mtc <- pmatch(paste(match.col,match.col,sep='.'),cnames)
   }
-  if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
+  if(is.na(mtc)) stop("could not match match.col with column name of efficient frontier")
   
   if(chart.assets){
     # get the data to plot scatter of asset returns
@@ -356,5 +364,80 @@ chart.EfficientFrontier.efficient.frontier <- function(object, chart.assets=TRUE
   axis(1, cex.axis = cex.axis, col = element.color)
   axis(2, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
+}
+
+#' Plot multiple efficient frontiers
+#' 
+#' Overlay the efficient frontiers of multiple portfolio objects on a single plot
+#' 
+#' @param R an xts object of asset returns
+#' @param portfolio_list list of portfolio objects created by \code{\link{portfolio.spec}}
+#' @param type type of efficient frontier, see \code{\link{create.EfficientFrontier}}
+#' @param n.portfolios number of portfolios to extract along the efficient frontier.
+#' This is only used for objects of class \code{optimize.portfolio}
+#' @param match.col match.col string name of column to use for risk (horizontal axis).
+#' Must match the name of an objective.
+#' @param seach_size passed to optimize.portfolio for type="DEoptim" or type="random"
+#' @param main main title used in the plot.
+#' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
+#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
+#' @param legend.loc location of the legend; NULL, "bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright", "right" and "center"
+#' @param legend.labels character vector to use for the legend labels
+#' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}.
+#' @param xlim set the x-axis limit, same as in \code{\link{plot}}
+#' @param ylim set the y-axis limit, same as in \code{\link{plot}}
+#' @param ... passthrough parameters to \code{\link{plot}}
+#' @author Ross Bennett
+#' @export
+chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios=25, match.col="ES", search_size=2000, main="Efficient Frontiers", cex.axis=0.8, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ...){
+  # create multiple efficient frontier objects (one per portfolio in portfolio_list)
+  if(!is.list(portfolio_list)) stop("portfolio_list must be passed in as a list")
+  if(length(portfolio_list) == 1) warning("Only one portfolio object in portfolio_list")
+  # store in out
+  out <- list()
+  for(i in 1:length(portfolio_list)){
+    if(!is.portfolio(portfolio_list[[i]])) stop("portfolio in portfolio_list must be of class 'portfolio'")
+    out[[i]] <- create.EfficientFrontier(R=R, portfolio=portfolio_list[[i]], type=type, n.portfolios=n.portfolios, match.col=match.col, search_size=search_size)
+  }
+  # get the data to plot scatter of asset returns
+  asset_ret <- scatterFUN(R=R, FUN="mean")
+  asset_risk <- scatterFUN(R=R, FUN=match.col)
+  rnames <- colnames(R)
+  # plot the assets
+  plot(x=asset_risk, y=asset_ret, xlab=match.col, ylab="mean", main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
+  axis(1, cex.axis = cex.axis, col = element.color)
+  axis(2, cex.axis = cex.axis, col = element.color)
+  box(col = element.color)
+  # risk-return scatter of the assets
+  points(x=asset_risk, y=asset_ret)
+  text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
+  
+  for(i in 1:length(out)){
+    tmp <- out[[i]]
+    tmpfrontier <- tmp$frontier
+    cnames <- colnames(tmpfrontier)
+    
+    # get the "mean" column
+    mean.mtc <- pmatch("mean", cnames)
+    if(is.na(mean.mtc)) {
+      mean.mtc <- pmatch("mean.mean", cnames)
+    }
+    if(is.na(mean.mtc)) stop("could not match 'mean' with column name of extractStats output")
+    
+    # get the match.col column
+    mtc <- pmatch(match.col, cnames)
+    if(is.na(mtc)) {
+      mtc <- pmatch(paste(match.col, match.col, sep='.'),cnames)
+    }
+    if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
+    lines(x=tmpfrontier[, mtc], y=tmpfrontier[, mean.mtc], col=i, lty=i, lwd=2)
+  }
+  if(!is.null(legend.loc)){
+    if(is.null(legend.labels)){
+      legend.labels <- paste("Portfolio", 1:length(out), sep=".")
+    }
+    legend(legend.loc, legend=legend.labels, col=1:length(out), lty=1:length(out), lwd=2, cex=cex.legend, bty="n") 
+  }
+  return(invisible(out))
 }
 

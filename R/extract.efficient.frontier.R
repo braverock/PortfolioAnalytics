@@ -255,21 +255,23 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
 #' 
 #' @details currently there are 4 'types' supported to create an efficient frontier
 #' \itemize{
-#'   \item{"mean-var":}{ This is a special case for an efficient frontier that
-#'   can be created by a QP solver. The \code{portfolio} object should have two
+#'   \item{"mean-var", "mean-sd", or "mean-StdDev":}{ This is a special case for 
+#'   an efficient frontier that can be created by a QP solver.
+#'   The \code{portfolio} object should have two
 #'   objectives: 1) mean and 2) var. The efficient frontier will be created via
 #'   \code{\link{meanvar.efficient.frontier}}.}
-#'   \item{"mean-etl"}{ This is a special case for an efficient frontier that
-#'   can be created by an LP solver. The \code{portfolio} object should have two
-#'   objectives: 1) mean and 2) etl The efficient frontier will be created via
+#'   \item{"mean-ETL", "mean-ES", "mean-CVaR", "mean-etl"}{ This is a special 
+#'   case for an efficient frontier that can be created by an LP solver.
+#'   The \code{portfolio} object should have two objectives: 1) mean
+#'   and 2) ETL/ES/CVaR. The efficient frontier will be created via
 #'   \code{\link{meanetl.efficient.frontier}}.}
 #'   \item{"DEoptim"}{ This can handle more complex constraints and objectives
-#'   than the simple mean-var and mean-etl cases. For this type, we actually 
+#'   than the simple mean-var and mean-ETL cases. For this type, we actually 
 #'   call \code{\link{optimize.portfolio}} with \code{optimize_method="DEoptim"}
 #'   and then extract the efficient frontier with 
 #'   \code{\link{extract.efficient.frontier}}.}
 #'   \item{"random"}{ This can handle more complex constraints and objectives
-#'   than the simple mean-var and mean-etl cases. For this type, we actually 
+#'   than the simple mean-var and mean-ETL cases. For this type, we actually 
 #'   call \code{\link{optimize.portfolio}} with \code{optimize_method="random"}
 #'   and then extract the efficient frontier with 
 #'   \code{\link{extract.efficient.frontier}}.}
@@ -291,17 +293,22 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
 #' \code{\link{meanetl.efficient.frontier}}, 
 #' \code{\link{extract.efficient.frontier}}
 #' @export
-create.EfficientFrontier <- function(R, portfolio, type=c("mean-var", "mean-etl", "random", "DEoptim"), n.portfolios=25, match.col="ES", search_size=2000, ...){
+create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, match.col="ES", search_size=2000, ...){
   # This is just a wrapper around a few functions to easily create efficient frontiers
   # given a portfolio object and other parameters
   
   if(!is.portfolio(portfolio)) stop("portfolio must be of class 'portfolio'")
   type <- type[1]
   switch(type,
+         "mean-sd"=,
+         "mean-StdDev"=,
          "mean-var" = {frontier <- meanvar.efficient.frontier(portfolio=portfolio,
                                                               R=R, 
                                                               n.portfolios=n.portfolios)
          },
+         "mean-ETL"=,
+         "mean-CVaR"=,
+         "mean-ES"=,
          "mean-etl" = {frontier <- meanetl.efficient.frontier(portfolio=portfolio, 
                                                               R=R, 
                                                               n.portfolios=n.portfolios)
@@ -341,8 +348,9 @@ create.EfficientFrontier <- function(R, portfolio, type=c("mean-var", "mean-etl"
 #'  created via \code{meanetl.efficient.frontier}. 
 #' 
 #' If the object is an \code{optimize.portfolio.ROI} object and \code{match.col}
-#'  is "var", then the mean-var efficient frontier will be created via 
-#' \code{meanvar.efficient.frontier}.
+#'  is "StdDev", then the mean-StdDev efficient frontier will be created via 
+#' \code{meanvar.efficient.frontier}. Note that if 'var' is specified as the
+#' name of an objective, the value returned will be 'StdDev'.
 #' 
 #' For objects created by \code{optimize.portfolo} with the DEoptim, random, or
 #' pso solvers, the efficient frontier will be extracted from the object via
@@ -351,8 +359,9 @@ create.EfficientFrontier <- function(R, portfolio, type=c("mean-var", "mean-etl"
 #' 
 #' @param object an optimal portfolio object created by \code{optimize.portfolio}
 #' @param match.col string name of column to use for risk (horizontal axis).
-#' \code{match.col} must match the name of an objective in the \code{portfolio}
-#' object.
+#' \code{match.col} must match the name of an objective measure in the 
+#' \code{objective_measures} or \code{opt_values} slot in the object created 
+#' by \code{\link{optimize.portfolio}}.
 #' @param n.portfolios number of portfolios to use to plot the efficient frontier
 #' @return an \code{efficient.frontier} object with weights and other metrics along the efficient frontier
 #' @author Ross Bennett
@@ -372,17 +381,17 @@ extractEfficientFrontier <- function(object, match.col="ES", n.portfolios=25){
   if(is.null(R)) stop(paste("Not able to get asset returns from", object, "run optimize.portfolio with trace=TRUE"))
   
   # get the objective names and check if match.col is an objective name
-  objnames <- unlist(lapply(portf$objectives, function(x) x$name))
-  if(!(match.col %in% objnames)){
-    stop("match.col must match an objective name")
-  }
+  # objnames <- unlist(lapply(portf$objectives, function(x) x$name))
+  # if(!(match.col %in% objnames)){
+  #   stop("match.col must match an objective name")
+  # }
   
   # We need to create the efficient frontier if object is of class optimize.portfolio.ROI
   if(inherits(object, "optimize.portfolio.ROI")){
     if(match.col %in% c("ETL", "ES", "CVaR")){
       frontier <- meanetl.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
     }
-    if(match.col == "var"){
+    if(match.col == "StdDev"){
       frontier <- meanvar.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
     }
   } # end optimize.portfolio.ROI

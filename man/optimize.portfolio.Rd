@@ -68,6 +68,8 @@
   \item{\code{weights}:}{ The optimal set weights.}
   \item{\code{objective_measures}:}{ A list containing the
   value of each objective corresponding to the optimal
+  weights.} \item{\code{opt_values}:}{ A list containing
+  the value of each objective corresponding to the optimal
   weights.} \item{\code{out}:}{ The output of the solver.}
   \item{\code{call}:}{ The function call.}
   \item{\code{portfolio}:}{ The portfolio object.}

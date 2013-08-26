@@ -2,8 +2,7 @@
 \alias{create.EfficientFrontier}
 \title{create an efficient frontier}
 \usage{
-  create.EfficientFrontier(R, portfolio,
-    type = c("mean-var", "mean-etl", "random", "DEoptim"),
+  create.EfficientFrontier(R, portfolio, type,
     n.portfolios = 25, match.col = "ES",
     search_size = 2000, ...)
 }
@@ -39,26 +38,27 @@
 }
 \details{
   currently there are 4 'types' supported to create an
-  efficient frontier \itemize{ \item{"mean-var":}{ This is
-  a special case for an efficient frontier that can be
-  created by a QP solver. The \code{portfolio} object
-  should have two objectives: 1) mean and 2) var. The
-  efficient frontier will be created via
-  \code{\link{meanvar.efficient.frontier}}.}
-  \item{"mean-etl"}{ This is a special case for an
-  efficient frontier that can be created by an LP solver.
+  efficient frontier \itemize{ \item{"mean-var", "mean-sd",
+  or "mean-StdDev":}{ This is a special case for an
+  efficient frontier that can be created by a QP solver.
   The \code{portfolio} object should have two objectives:
-  1) mean and 2) etl The efficient frontier will be created
-  via \code{\link{meanetl.efficient.frontier}}.}
+  1) mean and 2) var. The efficient frontier will be
+  created via \code{\link{meanvar.efficient.frontier}}.}
+  \item{"mean-ETL", "mean-ES", "mean-CVaR", "mean-etl"}{
+  This is a special case for an efficient frontier that can
+  be created by an LP solver.  The \code{portfolio} object
+  should have two objectives: 1) mean and 2) ETL/ES/CVaR.
+  The efficient frontier will be created via
+  \code{\link{meanetl.efficient.frontier}}.}
   \item{"DEoptim"}{ This can handle more complex
   constraints and objectives than the simple mean-var and
-  mean-etl cases. For this type, we actually call
+  mean-ETL cases. For this type, we actually call
   \code{\link{optimize.portfolio}} with
   \code{optimize_method="DEoptim"} and then extract the
   efficient frontier with
   \code{\link{extract.efficient.frontier}}.}
   \item{"random"}{ This can handle more complex constraints
-  and objectives than the simple mean-var and mean-etl
+  and objectives than the simple mean-var and mean-ETL
   cases. For this type, we actually call
   \code{\link{optimize.portfolio}} with
   \code{optimize_method="random"} and then extract the

@@ -11,7 +11,9 @@
 
   \item{match.col}{string name of column to use for risk
   (horizontal axis). \code{match.col} must match the name
-  of an objective in the \code{portfolio} object.}
+  of an objective measure in the \code{objective_measures}
+  or \code{opt_values} slot in the object created by
+  \code{\link{optimize.portfolio}}.}
 
   \item{n.portfolios}{number of portfolios to use to plot
   the efficient frontier}
@@ -31,9 +33,11 @@
   \code{meanetl.efficient.frontier}.
 
   If the object is an \code{optimize.portfolio.ROI} object
-  and \code{match.col} is "var", then the mean-var
+  and \code{match.col} is "StdDev", then the mean-StdDev
   efficient frontier will be created via
-  \code{meanvar.efficient.frontier}.
+  \code{meanvar.efficient.frontier}. Note that if 'var' is
+  specified as the name of an objective, the value returned
+  will be 'StdDev'.
 
   For objects created by \code{optimize.portfolo} with the
   DEoptim, random, or pso solvers, the efficient frontier

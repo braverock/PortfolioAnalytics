@@ -32,9 +32,11 @@
   \item{object}{optimal portfolio created by
   \code{\link{optimize.portfolio}}}
 
-  \item{match.col}{string name of column to use for risk
-  (horizontal axis). \code{match.col} must match the name
-  of an objective in the \code{portfolio} object.}
+  \item{string}{name of column to use for risk (horizontal
+  axis). \code{match.col} must match the name of an
+  objective measure in the \code{objective_measures} or
+  \code{opt_values} slot in the object created by
+  \code{\link{optimize.portfolio}}.}
 
   \item{n.portfolios}{number of portfolios to use to plot
   the efficient frontier}
@@ -68,11 +70,11 @@
 
   For objects created by optimize.portfolio with 'ROI'
   specified as the optimize_method: \itemize{ \item The
-  mean-var or mean-etl efficient frontier can be plotted
+  mean-StdDev or mean-etl efficient frontier can be plotted
   for optimal portfolio objects created by
   \code{optimize.portfolio}.
 
-  \item If \code{match.col="var"}, the mean-variance
+  \item If \code{match.col="StdDev"}, the mean-StdDev
   efficient frontier is plotted.
 
   \item If \code{match.col="ETL"} (also "ES" or "CVaR"),
