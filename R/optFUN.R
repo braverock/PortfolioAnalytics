@@ -29,13 +29,8 @@ gmv_opt <- function(R, constraints, moments, lambda, target){
   if(try(!is.null(constraints$groups), silent=TRUE)){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
-    k <- 1
-    l <- 0
     for(i in 1:n.groups){
-      j <- constraints$groups[i] 
-      Amat.group[i, k:(l+j)] <- 1
-      k <- l + j + 1
-      l <- k - 1
+      Amat.group[i, groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
@@ -94,13 +89,8 @@ maxret_opt <- function(R, moments, constraints, target){
   if(try(!is.null(constraints$groups), silent=TRUE)){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
-    k <- 1
-    l <- 0
     for(i in 1:n.groups){
-      j <- constraints$groups[i] 
-      Amat.group[i, k:(l+j)] <- 1
-      k <- l + j + 1
-      l <- k - 1
+      Amat.group[i, groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
@@ -184,13 +174,8 @@ maxret_milp_opt <- function(R, constraints, moments, target){
   if(try(!is.null(constraints$groups), silent=TRUE)){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
-    k <- 1
-    l <- 0
     for(i in 1:n.groups){
-      j <- constraints$groups[i] 
-      Amat.group[i, k:(l+j)] <- 1
-      k <- l + j + 1
-      l <- k - 1
+      Amat.group[i, groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
@@ -257,13 +242,8 @@ etl_opt <- function(R, constraints, moments, target, alpha){
   if(try(!is.null(constraints$groups), silent=TRUE)){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
-    k <- 1
-    l <- 0
     for(i in 1:n.groups){
-      j <- constraints$groups[i] 
-      Amat.group[i, k:(l+j)] <- 1
-      k <- l + j + 1
-      l <- k - 1
+      Amat.group[i, groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
@@ -362,13 +342,8 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
   if(try(!is.null(constraints$groups), silent=TRUE)){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=m)
-    k <- 1
-    l <- 0
     for(i in 1:n.groups){
-      j <- constraints$groups[i] 
-      Amat.group[i, k:(l+j)] <- 1
-      k <- l + j + 1
-      l <- k - 1
+      Amat.group[i, groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
