@@ -420,23 +420,15 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     # Only go to penalty term if group constraint is violated
     if(any(group_fail(w, groups, cLO, cUP))){
       ngroups <- length(groups)
-      k <- 1
-      l <- 0
       for(i in 1:ngroups){
-        j <- groups[i]
-        tmp_w <- w[k:(l+j)]
-        # penalize weights for a given group that sum to less than specified group min
-        grp_min <- cLO[i]
-        if(sum(tmp_w) < grp_min) {
-          out <- out + penalty * (grp_min - sum(tmp_w))
+        tmp_w <- w[groups[[i]]]
+        # penalize for weights that are below cLO
+        if(sum(tmp_w) < cLO[i]){
+          out <- out + penalty * (cLO[i] - sum(tmp_w))
         }
-        # penalize weights for a given group that sum to greater than specified group max
-        grp_max <- cUP[i]
-        if(sum(tmp_w) > grp_max) {
-          out <- out + penalty * (sum(tmp_w) - grp_max)
+        if(sum(tmp_w) > cUP[i]){
+          out <- out + penalty * (sum(tmp_w) - cUP[i])
         }
-        k <- k + j
-        l <- k - 1
       }
     }
   } # End group constraint penalty
