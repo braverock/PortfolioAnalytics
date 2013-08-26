@@ -616,8 +616,8 @@ optimize.portfolio_v2 <- function(
     # is it necessary to normalize the weights here?
     # weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
-    
-    out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=minw$optim$bestval, call=call)
+    obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+    out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=minw$optim$bestval, call=call)
     if (isTRUE(trace)){
       out$DEoutput <- minw
       out$DEoptim_objective_results <- try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
@@ -663,7 +663,9 @@ optimize.portfolio_v2 <- function(
     }
     #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
     out$weights <- min_objective_weights
-    out$objective_measures <- try(constrained_objective(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE)$objective_measures)
+    obj_vals <- try(constrained_objective(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE)$objective_measures)
+    out$objective_measures <- obj_vals
+    out$opt_values <- obj_vals
     out$call <- call
     #' construct out list to be as similar as possible to DEoptim list, within reason
     
@@ -703,7 +705,8 @@ optimize.portfolio_v2 <- function(
       # Maximize Quadratic Utility if var and mean are specified as objectives
       roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target)
       weights <- roi_result$weights
-      out <- list(weights=weights, objective_measures=suppressWarnings(constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures), out=roi_result$out, call=call)
+      obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+      out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
     }
     if(length(names(moments)) == 1 & "mean" %in% names(moments)) {
       # Maximize return if the only objective specified is mean
@@ -711,12 +714,14 @@ optimize.portfolio_v2 <- function(
         # This is an MILP problem if max_pos is specified as a constraint
         roi_result <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=target)
         weights <- roi_result$weights
-        out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=roi_result$out, call=call)
+        obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+        out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       } else {
         # Maximize return LP problem
         roi_result <- maxret_opt(R=R, constraints=constraints, moments=moments, target=target)
         weights <- roi_result$weights
-        out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=roi_result$out, call=call)
+        obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+        out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       }
     }
     if( any(c("CVaR", "ES", "ETL") %in% names(moments)) ) {
@@ -725,12 +730,14 @@ optimize.portfolio_v2 <- function(
         # This is an MILP problem if max_pos is specified as a constraint
         roi_result <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
         weights <- roi_result$weights
-        out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=roi_result$out, call=call)
+        obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+        out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       } else {
         # Minimize sample ETL/ES/CVaR LP Problem
         roi_result <- etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
         weights <- roi_result$weights
-        out <- list(weights=weights, objective_measures=constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures, out=roi_result$out, call=call)
+        obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+        out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       }
     }
   } ## end case for ROI
@@ -771,9 +778,10 @@ optimize.portfolio_v2 <- function(
     weights <- as.vector( minw$par)
     weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
-    
+    obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE)$objective_measures
     out <- list(weights=weights, 
-                objective_measures=constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE)$objective_measures,
+                objective_measures=obj_vals,
+                opt_values=obj_vals,
                 out=minw$value, 
                 call=call)
     if (isTRUE(trace)){
@@ -815,9 +823,10 @@ optimize.portfolio_v2 <- function(
     weights <- as.vector(minw$par)
     weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
-    
+    obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE)$objective_measures
     out = list(weights=weights, 
-               objective_measures=constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE)$objective_measures,
+               objective_measures=obj_vals,
+               opt_values=obj_vals,
                out=minw$value, 
                call=call)
     if (isTRUE(trace)){
@@ -925,6 +934,7 @@ optimize.portfolio_v2 <- function(
 #' \itemize{
 #'   \item{\code{weights}:}{ The optimal set weights.}
 #'   \item{\code{objective_measures}:}{ A list containing the value of each objective corresponding to the optimal weights.}
+#'   \item{\code{opt_values}:}{ A list containing the value of each objective corresponding to the optimal weights.}
 #'   \item{\code{out}:}{ The output of the solver.}
 #'   \item{\code{call}:}{ The function call.}
 #'   \item{\code{portfolio}:}{ The portfolio object.}
