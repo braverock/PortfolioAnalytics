@@ -587,8 +587,13 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
         tmp_measure <- try((do.call(fun,.formals)), silent=TRUE)
         
         if(isTRUE(trace) | isTRUE(storage)) {
-          if(is.null(names(tmp_measure))) names(tmp_measure) <- objective$name
-          tmp_return[[objective$name]] <- tmp_measure
+          # Subsitute 'StdDev' if the objective name is 'var'
+          # if the user passes in var as an objective name, we are actually
+          # calculating StdDev, so we need to change the name here.
+          tmp_objname <- objective$name
+          if(tmp_objname == "var") tmp_objname <- "StdDev"
+          if(is.null(names(tmp_measure))) names(tmp_measure) <- tmp_objname
+          tmp_return[[tmp_objname]] <- tmp_measure
         }
         
         if(inherits(tmp_measure, "try-error")) { 
