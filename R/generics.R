@@ -642,3 +642,70 @@ summary.optimize.portfolio <- function(object, ...){
   print(object$elapsed_time)
   cat("\n")
 }
+
+#' Print an efficient frontier object
+#' 
+#' Print method for efficient frontier objects. Display the call to create or
+#' extract the efficient frontier object and the portfolio from which the 
+#' efficient frontier was created or extracted.
+#' 
+#' @param x objective of class \code{efficient.frontier}
+#' @param ... passthrough parameters
+#' @author Ross Bennett
+#' @export
+print.efficient.frontier <- function(x, ...){
+  if(!inherits(x, "efficient.frontier")) stop("object passed in is not of class 'efficient.frontier'")
+  
+  cat(rep("*", 50) ,"\n", sep="")
+  cat("PortfolioAnalytics Efficient Frontier", "\n")
+  cat(rep("*", 50) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  cat("Efficient Frontier Points:", nrow(x$frontier), "\n\n")
+  
+  print(x$portfolio)
+}
+
+#' Summarize an efficient frontier object
+#' 
+#' Summary method for efficient frontier objects. Display the call to create or
+#' extract the efficient frontier object as well as the weights and risk and
+#' return metrics along the efficient frontier.
+#' 
+#' @param x objective of class \code{efficient.frontier}
+#' @param ... passthrough parameters
+#' @author Ross Bennett
+#' @export
+summary.efficient.frontier <- function(object, ..., digits=3){
+  if(!inherits(object, "efficient.frontier")) stop("object passed in is not of class 'efficient.frontier'")
+  
+  cat(rep("*", 50) ,"\n", sep="")
+  cat("PortfolioAnalytics Efficient Frontier", "\n")
+  cat(rep("*", 50) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  cat("Efficient Frontier Points:", nrow(object$frontier), "\n\n")
+  
+  # Weights
+  cnames <- colnames(object$frontier)
+  wts_idx <- grep(pattern="^w\\.", cnames)
+  wts <- round(object$frontier[, wts_idx], digits=digits)
+  colnames(wts) <- gsub("w.", "", colnames(wts))
+  rownames(wts) <- 1:nrow(object$frontier)
+  cat("Weights along the efficient frontier:\n")
+  print(wts)
+  cat("\n")
+  
+  # Risk and return
+  cat("Risk and return metrics along the efficient frontier:\n")
+  riskret <- object$frontier[, -wts_idx]
+  rownames(riskret) <- 1:nrow(object$frontier)
+  print(round(riskret, digits=digits))
+  cat("\n")
+  invisible(list(weights=wts, metrics=riskret))
+}
+

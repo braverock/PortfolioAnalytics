@@ -296,7 +296,7 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
 create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, match.col="ES", search_size=2000, ...){
   # This is just a wrapper around a few functions to easily create efficient frontiers
   # given a portfolio object and other parameters
-  
+  call <- match.call()
   if(!is.portfolio(portfolio)) stop("portfolio must be of class 'portfolio'")
   type <- type[1]
   switch(type,
@@ -334,8 +334,10 @@ create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, match.
                                                              n.portfolios=n.portfolios)
          }
   )
-  return(structure(list(frontier=frontier,
-                        R=R), class="efficient.frontier"))
+  return(structure(list(call=call,
+                        frontier=frontier,
+                        R=R,
+                        portfolio=portfolio), class="efficient.frontier"))
 }
 
 #' Extract the efficient frontier data points
@@ -368,7 +370,7 @@ create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, match.
 #' @export
 extractEfficientFrontier <- function(object, match.col="ES", n.portfolios=25){
   # extract the efficient frontier from an optimize.portfolio output object
-  
+  call <- match.call()
   if(!inherits(object, "optimize.portfolio")) stop("object must be of class 'optimize.portfolio'")
   
   if(inherits(object, "optimize.portfolio.GenSA")){
@@ -400,6 +402,9 @@ extractEfficientFrontier <- function(object, match.col="ES", n.portfolios=25){
   if(inherits(object, c("optimize.portfolio.random", "optimize.portfolio.DEoptim", "optimize.portfolio.pso"))){
     frontier <- extract.efficient.frontier(object=object, match.col=match.col, n.portfolios=n.portfolios)
   }
-  return(frontier)
+  return(structure(list(call=call,
+                        frontier=frontier,
+                        R=R,
+                        portfolio=portfolio), class="efficient.frontier"))
 }
 
