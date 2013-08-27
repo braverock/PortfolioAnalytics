@@ -198,7 +198,9 @@ portf_minvar <- add.constraint(portfolio=portf_minvar, type="box",
 # Add group constraints
 portf_minvar <- add.constraint(portfolio=portf_minvar, 
                                type="group", 
-                               groups=c(1, 2, 1), 
+                               groups=list(groupA=1,
+                                           groupB=c(2, 3),
+                                           groupC=4), 
                                group_min=c(0, 0.25, 0.10), 
                                group_max=c(0.45, 0.6, 0.5))
 @
