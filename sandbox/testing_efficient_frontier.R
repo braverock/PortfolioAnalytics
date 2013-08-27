@@ -38,6 +38,7 @@ meanvar.portf <- add.objective(portfolio=init, type="risk", name="var", risk_ave
 # mean-var efficient frontier
 meanvar.ef <- create.EfficientFrontier(R=R, portfolio=meanvar.portf, type="mean-StdDev")
 chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="b")
+chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", rf=0)
 chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="StdDev")
 
 # run optimize.portfolio and chart the efficient frontier for that object
@@ -48,7 +49,7 @@ chart.EfficientFrontier(opt_meanvar, match.col="StdDev", n.portfolios=50)
 chart.Weights.EF(opt_meanvar, match.col="StdDev")
 # or we can extract the efficient frontier and then plot it
 ef <- extractEfficientFrontier(object=opt_meanvar, match.col="StdDev", n.portfolios=15)
-chart.Weights.EF(ef, match.col="var", colorset=bluemono)
+chart.Weights.EF(ef, match.col="StdDev", colorset=bluemono)
 
 # mean-etl efficient frontier
 meanetl.ef <- create.EfficientFrontier(R=R, portfolio=meanetl.portf, type="mean-ES")
@@ -57,9 +58,12 @@ chart.Weights.EF(meanetl.ef, colorset=bluemono, match.col="ES")
 
 # mean-etl efficient frontier using random portfolios
 meanetl.rp.ef <- create.EfficientFrontier(R=R, portfolio=meanetl.portf, type="random", match.col="ES")
-chart.EfficientFrontier(meanetl.rp.ef, match.col="ES", main="mean-ETL RP Efficient Frontier", type="l", col="blue")
+chart.EfficientFrontier(meanetl.rp.ef, match.col="ES", main="mean-ETL RP Efficient Frontier", type="l", col="blue", rf=0)
 chart.Weights.EF(meanetl.rp.ef, colorset=bluemono, match.col="ES")
 
+# mean-etl efficient frontier with optimize.portfolio output
+opt_meanetl <- optimize.portfolio(R=R, portfolio=meanetl.portf, optimize_method="random", search_size=2000, trace=TRUE)
+chart.EfficientFrontier(meanetl.rp.ef, match.col="ES", main="mean-ETL RP Efficient Frontier", type="l", col="blue", rf=0, RAR.text="STARR")
 
 ##### overlay efficient frontiers of multiple portfolios #####
 # Create a mean-var efficient frontier for multiple portfolios and overlay the efficient frontier lines

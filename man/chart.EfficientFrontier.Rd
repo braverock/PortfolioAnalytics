@@ -14,19 +14,22 @@
     match.col = "ES", n.portfolios = 25, xlim = NULL,
     ylim = NULL, cex.axis = 0.8,
     element.color = "darkgray",
-    main = "Efficient Frontier", ...)
+    main = "Efficient Frontier", ..., rf = 0,
+    cex.legend = 0.8)
 
   chart.EfficientFrontier.optimize.portfolio(object,
     match.col = "ES", n.portfolios = 25, xlim = NULL,
     ylim = NULL, cex.axis = 0.8,
     element.color = "darkgray",
-    main = "Efficient Frontier", ...)
+    main = "Efficient Frontier", ...,
+    RAR.text = "Modified Sharpe", rf = 0, cex.legend = 0.8)
 
   chart.EfficientFrontier.efficient.frontier(object,
     chart.assets = TRUE, match.col = "ES",
     n.portfolios = NULL, xlim = NULL, ylim = NULL,
     cex.axis = 0.8, element.color = "darkgray",
-    main = "Efficient Frontier", ...)
+    main = "Efficient Frontier", ...,
+    RAR.text = "Modified Sharpe", rf = 0, cex.legend = 0.8)
 }
 \arguments{
   \item{object}{optimal portfolio created by
@@ -47,13 +50,28 @@
   \item{ylim}{set the y-axis limit, same as in
   \code{\link{plot}}}
 
-  \item{cex.axis}{}
+  \item{cex.axis}{A numerical value giving the amount by
+  which the axis should be magnified relative to the
+  default.}
 
-  \item{element.color}{}
+  \item{element.color}{provides the color for drawing
+  less-important chart elements, such as the box lines,
+  axis lines, etc.}
 
   \item{main}{a main title for the plot}
 
   \item{...}{passthrough parameters to \code{\link{plot}}}
+
+  \item{rf}{risk free rate. If \code{rf} is not null, the
+  maximum Sharpe Ratio or modified Sharpe Ratio tangency
+  portfolio will be plotted}
+
+  \item{cex.legend}{A numerical value giving the amount by
+  which the legend should be magnified relative to the
+  default.}
+
+  \item{RAR.text}{Risk Adjusted Return ratio text to plot
+  in the legend}
 }
 \description{
   This function charts the efficient frontier and
@@ -86,6 +104,11 @@
   GenSA does not return any useable trace information for
   portfolios tested at each iteration, therfore we cannot
   extract and chart an efficient frontier.
+
+  By default, the tangency portfolio (maximum Sharpe Ratio
+  or modified Sharpe Ratio) will be plotted using a risk
+  free rate of 0. Set \code{rf=NULL} to omit this from the
+  plot.
 }
 \author{
   Ross Bennett

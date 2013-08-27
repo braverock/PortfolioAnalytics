@@ -28,6 +28,10 @@
 #' GenSA does not return any useable trace information for portfolios tested at 
 #' each iteration, therfore we cannot extract and chart an efficient frontier.
 #' 
+#' By default, the tangency portfolio (maximum Sharpe Ratio or modified Sharpe Ratio)
+#' will be plotted using a risk free rate of 0. Set \code{rf=NULL} to omit 
+#' this from the plot. 
+#' 
 #' @param object optimal portfolio created by \code{\link{optimize.portfolio}}
 #' @param string name of column to use for risk (horizontal axis).
 #' \code{match.col} must match the name of an objective measure in the 
@@ -36,10 +40,13 @@
 #' @param n.portfolios number of portfolios to use to plot the efficient frontier
 #' @param xlim set the x-axis limit, same as in \code{\link{plot}}
 #' @param ylim set the y-axis limit, same as in \code{\link{plot}}
-#' @param cex.axis
-#' @param element.color 
+#' @param cex.axis A numerical value giving the amount by which the axis should be magnified relative to the default.
+#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
 #' @param main a main title for the plot
 #' @param ... passthrough parameters to \code{\link{plot}}
+#' @param rf risk free rate. If \code{rf} is not null, the maximum Sharpe Ratio or modified Sharpe Ratio tangency portfolio will be plotted
+#' @param cex.legend A numerical value giving the amount by which the legend should be magnified relative to the default.
+#' @param RAR.text Risk Adjusted Return ratio text to plot in the legend
 #' @author Ross Bennett
 #' @export
 chart.EfficientFrontier <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ...){
@@ -48,7 +55,7 @@ chart.EfficientFrontier <- function(object, match.col="ES", n.portfolios=25, xli
 
 #' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ...){
+chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., rf=0, cex.legend=0.8){
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class optimize.portfolio.ROI")
   
   portf <- object$portfolio
@@ -86,13 +93,22 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
   
   if(match.col %in% c("ETL", "ES", "CVaR")){
     frontier <- meanetl.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
+    rar <- "STARR"
   }
   if(match.col == "StdDev"){
     frontier <- meanvar.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
+    rar <- "Sharpe Ratio"
   }
   # data points to plot the frontier
   x.f <- frontier[, match.col]
   y.f <- frontier[, "mean"]
+  
+  # Points for the Sharpe Ratio ((mu - rf) / StdDev) or STARR ((mu - rf) / ETL)
+  if(!is.null(rf)){
+    sr <- (y.f - rf) / (x.f)
+    idx.maxsr <- which.max(sr)
+    srmax <- sr[idx.maxsr]
+  }
   
   # set the x and y limits
   if(is.null(xlim)){
@@ -110,6 +126,15 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
   # plot the optimal portfolio
   points(opt_risk, opt_ret, col="blue", pch=16) # optimal
   text(x=opt_risk, y=opt_ret, labels="Optimal",col="blue", pos=4, cex=0.8)
+  if(!is.null(rf)){
+    # Plot tangency line and points at risk-free rate and tangency portfolio
+    abline(rf, srmax, lty=2)
+    points(0, rf, pch=16)
+    points(x.f[idx.maxsr], y.f[idx.maxsr], pch=16)
+    # Add lengend with max Sharpe Ratio and risk-free rate
+    legend("topleft", paste("Max ", rar, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
+    legend("topleft", inset = c(0,0.05), paste("rf = ", signif(rf,3), sep = ""), bty = "n", cex=cex.legend)
+  }
   axis(1, cex.axis = cex.axis, col = element.color)
   axis(2, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
@@ -117,7 +142,7 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
 
 #' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ...){
+chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="Modified Sharpe", rf=0, cex.legend=0.8){
   # This function will work with objects of class optimize.portfolio.DEoptim,
   # optimize.portfolio.random, and optimize.portfolio.pso
   
@@ -163,6 +188,13 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
   x.f <- frontier[, match.col]
   y.f <- frontier[, "mean"]
   
+  # Points for the Sharpe or Modified Sharpe Ratio
+  if(!is.null(rf)){
+    sr <- (y.f - rf) / (x.f)
+    idx.maxsr <- which.max(sr)
+    srmax <- sr[idx.maxsr]
+  }
+  
   # set the x and y limits
   if(is.null(xlim)){
     xlim <- range(c(x.f, asset_risk))
@@ -179,6 +211,15 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
   # plot the optimal portfolio
   points(opt_risk, opt_ret, col="blue", pch=16) # optimal
   text(x=opt_risk, y=opt_ret, labels="Optimal",col="blue", pos=4, cex=0.8)
+  if(!is.null(rf)){
+    # Plot tangency line and points at risk-free rate and tangency portfolio
+    abline(rf, srmax, lty=2)
+    points(0, rf, pch=16)
+    points(x.f[idx.maxsr], y.f[idx.maxsr], pch=16)
+    # Add lengend with max Sharpe Ratio and risk-free rate
+    legend("topleft", paste("Max ", RAR.text, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
+    legend("topleft", inset = c(0,0.05), paste("rf = ", signif(rf,3), sep = ""), bty = "n", cex=cex.legend)
+  }
   axis(1, cex.axis = cex.axis, col = element.color)
   axis(2, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
@@ -315,7 +356,7 @@ chart.Weights.EF.optimize.portfolio <- function(object, colorset=NULL, ..., n.po
 
 #' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier.efficient.frontier <- function(object, chart.assets=TRUE, match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ...){
+chart.EfficientFrontier.efficient.frontier <- function(object, chart.assets=TRUE, match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="Modified Sharpe", rf=0, cex.legend=0.8){
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
   
   # get the returns and efficient frontier object
@@ -354,12 +395,27 @@ chart.EfficientFrontier.efficient.frontier <- function(object, chart.assets=TRUE
     }
   }
   
+  if(!is.null(rf)){
+    sr <- (frontier[, mean.mtc] - rf) / (frontier[, mtc])
+    idx.maxsr <- which.max(sr)
+    srmax <- sr[idx.maxsr]
+  }
+  
   # plot the efficient frontier line
   plot(x=frontier[, mtc], y=frontier[, mean.mtc], ylab="mean", xlab=match.col, main=main, xlim=xlim, ylim=ylim, pch=5, axes=FALSE, ...)
   if(chart.assets){
     # risk-return scatter of the assets
     points(x=asset_risk, y=asset_ret)
     text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
+  }
+  if(!is.null(rf)){
+    # Plot tangency line and points at risk-free rate and tangency portfolio
+    abline(rf, srmax, lty=2)
+    points(0, rf, pch=16)
+    points(frontier[idx.maxsr, mtc], frontier[idx.maxsr, mean.mtc], pch=16)
+    # Add legend with max Risk adjusted Return ratio and risk-free rate
+    legend("topleft", paste("Max ", RAR.text, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
+    legend("topleft", inset = c(0,0.05), paste("rf = ", signif(rf,3), sep = ""), bty = "n", cex=cex.legend)
   }
   axis(1, cex.axis = cex.axis, col = element.color)
   axis(2, cex.axis = cex.axis, col = element.color)
