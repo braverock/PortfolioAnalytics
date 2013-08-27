@@ -42,49 +42,49 @@ summary.optimize.portfolio.rebalancing <- function(object, ...) {
 
 #' Printing Portfolio Specification Objects
 #' 
-#' Print method for class "portfolio"
+#' Print method for objects of class \code{portfolio} created with \code{\link{portfolio.spec}}
 #' 
-#' @param portfolio object of class portfolio
+#' @param x object of class \code{portfolio}
 #' @author Ross Bennett
 #' @export
-print.portfolio <- function(portfolio){
-  if(!is.portfolio(portfolio)) stop("object passed in is not of class 'portfolio'")
+print.portfolio <- function(x, ...){
+  if(!is.portfolio(x)) stop("object passed in is not of class 'portfolio'")
   
   cat(rep("*", 50) ,"\n", sep="")
   cat("PortfolioAnalytics Portfolio Specification", "\n")
   cat(rep("*", 50) ,"\n", sep="")
   
-  cat("\nCall:\n", paste(deparse(portfolio$call), sep = "\n", collapse = "\n"), 
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
       "\n", sep = "")
   
   # Assets
   cat("\nAssets\n")
-  nassets <- length(portfolio$assets)
+  nassets <- length(x$assets)
   cat("Number of assets:", nassets, "\n\n")
   cat("Asset Names\n")
-  print(head(names(portfolio$assets), 10))
+  print(head(names(x$assets), 10))
   if(nassets > 10){
     cat("More than 10 assets, only printing the first 10\n")
   }
   
   # Constraints
   cat("\nConstraints\n")
-  nconstraints <- length(portfolio$constraints)
+  nconstraints <- length(x$constraints)
   if(nconstraints > 0){
     # logical vector of enabled constraints
-    enabled.constraints <- which(sapply(portfolio$constraints, function(x) x$enabled))
+    enabled.constraints <- which(sapply(x$constraints, function(x) x$enabled))
     n.enabled.constraints <- ifelse(length(enabled.constraints) > 0, length(enabled.constraints), 0)
   } else {
     enabled.constraints <- NULL
     n.enabled.constraints <- 0
   }
   # character vector of constraint types
-  names.constraints <- sapply(portfolio$constraints, function(x) x$type)
+  names.constraints <- sapply(x$constraints, function(x) x$type)
   cat("Number of constraints:", nconstraints, "\n")
   cat("Number of enabled constraints:", n.enabled.constraints, "\n")
   if(length(enabled.constraints) > 0){
     cat("Enabled constraint types\n")
-    constraints <- portfolio$constraints
+    constraints <- x$constraints
     nconstraints <- length(constraints)
     for(i in 1:nconstraints){
       if(constraints[[i]]$enabled){
@@ -111,7 +111,7 @@ print.portfolio <- function(portfolio){
   cat("Number of disabled constraints:", nconstraints - n.enabled.constraints, "\n")
   if((nconstraints - n.enabled.constraints) > 0){
     cat("Disabled constraint types\n")
-    constraints <- portfolio$constraints
+    constraints <- x$constraints
     nconstraints <- length(constraints)
     for(i in 1:nconstraints){
       if(!constraints[[i]]$enabled){
@@ -138,17 +138,17 @@ print.portfolio <- function(portfolio){
   
   # Objectives
   cat("\nObjectives\n")
-  nobjectives <- length(portfolio$objectives)
+  nobjectives <- length(x$objectives)
   if(nobjectives > 0){
     # logical vector of enabled objectives
-    enabled.objectives <- which(sapply(portfolio$objectives, function(x) x$enabled))
+    enabled.objectives <- which(sapply(x$objectives, function(x) x$enabled))
     n.enabled.objectives <- ifelse(length(enabled.objectives) > 0, length(enabled.objectives), 0)
   } else {
     enabled.objectives <- NULL
     n.enabled.objectives <- 0
   }
   # character vector of objective names
-  names.objectives <- sapply(portfolio$objectives, function(x) x$name)
+  names.objectives <- sapply(x$objectives, function(x) x$name)
   cat("Number of objectives:", nobjectives, "\n")
   cat("Number of enabled objectives:", n.enabled.objectives, "\n")
   if(n.enabled.objectives > 0){
@@ -167,36 +167,36 @@ print.portfolio <- function(portfolio){
   cat("\n")
 }
 
-#' Summarizing Portfolio Specification Objects
+#' Summarize Portfolio Specification Objects
 #' 
-#' summary method for class "portfolio"
+#' summary method for class \code{portfolio} created with \code{\link{portfolio.spec}}
 #' 
-#' @param portfolio object of class portfolio
+#' @param object object of class portfolio
 #' @author Ross Bennett
 #' @export
-summary.portfolio <- function(portfolio){
-  if(!is.portfolio(portfolio)) stop("object passed in is not of class 'portfolio'")
+summary.portfolio <- function(object, ...){
+  if(!is.portfolio(object)) stop("object passed in is not of class 'portfolio'")
   
   cat(rep("*", 50) ,"\n", sep="")
   cat("PortfolioAnalytics Portfolio Specification Summary", "\n")
   cat(rep("*", 50) ,"\n", sep="")
   
   cat("Assets and Seed Weights:\n")
-  print(portfolio$assets)
+  print(object$assets)
   cat("\n")
   
-  if(!is.null(portfolio$category_labels)) {
+  if(!is.null(object$category_labels)) {
     cat("Category Labels:\n")
-    print(portfolio$category_labels)
+    print(object$category_labels)
   }
   
-  if(!is.null(portfolio$weight_seq)) {
+  if(!is.null(object$weight_seq)) {
     cat("weight_seq:\n")
-    print(summary(portfolio$weight_seq))
+    print(summary(object$weight_seq))
   }
   
   cat("Constraints:\n\n")
-  for(constraint in portfolio$constraints){
+  for(constraint in object$constraints){
     if(constraint$enabled) {
       cat(rep("*", 40), "\n", sep="")
       cat(constraint$type, "constraint\n")
@@ -207,7 +207,7 @@ summary.portfolio <- function(portfolio){
   }
   
   cat("Objectives:\n\n")
-  for(objective in portfolio$objectives){
+  for(objective in object$objectives){
     if(objective$enabled) {
       cat(rep("*", 40), "\n", sep="")
       cat(class(objective)[1], "\n")
@@ -223,33 +223,33 @@ summary.portfolio <- function(portfolio){
 #' @param portfolio object of class constraint
 #' @author Ross Bennett
 #' @export
-print.constraint <- function(obj){
-  print.default(obj)
+print.constraint <- function(x, ...){
+  print.default(x)
 }
 
 #' Printing Output of optimize.portfolio
 #' 
 #' print method for optimize.portfolio.ROI
 #' 
-#' @param object an object of class "optimize.portfolio.ROI" resulting from a call to optimize.portfolio
+#' @param x an object of class \code{optimize.portfolio.ROI} resulting from a call to \code{\link{optimize.portfolio}}
 #' @param digits the number of significant digits to use when printing.
 #' @param ... any other passthru parameters
 #' @export
-print.optimize.portfolio.ROI <- function(object, digits = max(3, getOption("digits") - 3), ...){
+print.optimize.portfolio.ROI <- function(x, ..., digits = max(3, getOption("digits") - 3)){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
   cat(rep("*", 35) ,"\n", sep="")
   
-  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(object$weights, digits=digits)
+  print.default(x$weights, digits=digits)
   cat("\n")
   
   # get objective measure
-  objective_measures <- object$objective_measures
+  objective_measures <- x$objective_measures
   tmp_obj <- as.numeric(unlist(objective_measures))
   names(tmp_obj) <- names(objective_measures)
   cat("Objective Measure:\n")
@@ -264,25 +264,25 @@ print.optimize.portfolio.ROI <- function(object, digits = max(3, getOption("digi
 #' 
 #' print method for optimize.portfolio.random
 #' 
-#' @param object an object of class "optimize.portfolio.random" resulting from a call to optimize.portfolio
+#' @param x an object of class \code{optimize.portfolio.random} resulting from a call to \code{\link{optimize.portfolio}}
 #' @param digits the number of significant digits to use when printing.
 #' @param ... any other passthru parameters
 #' @export
-print.optimize.portfolio.random <- function(object, digits=max(3, getOption("digits")-3), ...){
+print.optimize.portfolio.random <- function(x, ..., digits=max(3, getOption("digits")-3)){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
   cat(rep("*", 35) ,"\n", sep="")
   
-  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(object$weights, digits=digits)
+  print.default(x$weights, digits=digits)
   cat("\n")
   
   # get objective measures
-  objective_measures <- object$objective_measures
+  objective_measures <- x$objective_measures
   tmp_obj <- as.numeric(unlist(objective_measures))
   names(tmp_obj) <- names(objective_measures)
   cat("Objective Measures:\n")
@@ -295,7 +295,7 @@ print.optimize.portfolio.random <- function(object, digits=max(3, getOption("dig
         tmpl <- objective_measures[[i]][j]
         cat(names(tmpl), ":\n")
         tmpv <- unlist(tmpl)
-        names(tmpv) <- names(object$weights)
+        names(tmpv) <- names(x$weights)
         print(tmpv)
         cat("\n")
       }
@@ -309,25 +309,25 @@ print.optimize.portfolio.random <- function(object, digits=max(3, getOption("dig
 #' 
 #' print method for optimize.portfolio.DEoptim
 #' 
-#' @param object an object of class "optimize.portfolio.DEoptim" resulting from a call to optimize.portfolio
+#' @param x an object of class \code{optimize.portfolio.DEoptim} resulting from a call to \code{\link{optimize.portfolio}}
 #' @param digits the number of significant digits to use when printing.
 #' @param ... any other passthru parameters
 #' @export
-print.optimize.portfolio.DEoptim <- function(object, digits=max(3, getOption("digits")-3), ...){
+print.optimize.portfolio.DEoptim <- function(x, ..., digits=max(3, getOption("digits")-3)){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
   cat(rep("*", 35) ,"\n", sep="")
   
-  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(object$weights, digits=digits)
+  print.default(x$weights, digits=digits)
   cat("\n")
   
   # get objective measures
-  objective_measures <- object$objective_measures
+  objective_measures <- x$objective_measures
   tmp_obj <- as.numeric(unlist(objective_measures))
   names(tmp_obj) <- names(objective_measures)
   cat("Objective Measures:\n")
@@ -340,7 +340,7 @@ print.optimize.portfolio.DEoptim <- function(object, digits=max(3, getOption("di
         tmpl <- objective_measures[[i]][j]
         cat(names(tmpl), ":\n")
         tmpv <- unlist(tmpl)
-        names(tmpv) <- names(object$weights)
+        names(tmpv) <- names(x$weights)
         print(tmpv)
         cat("\n")
       }
@@ -354,25 +354,25 @@ print.optimize.portfolio.DEoptim <- function(object, digits=max(3, getOption("di
 #' 
 #' print method for optimize.portfolio.GenSA
 #' 
-#' @param object an object of class "optimize.portfolio.GenSA" resulting from a call to optimize.portfolio
+#' @param x an object of class \code{optimize.portfolio.GenSA} resulting from a call to \code{\link{optimize.portfolio}}
 #' @param digits the number of significant digits to use when printing
 #' @param ... any other passthru parameters
 #' @export
-print.optimize.portfolio.GenSA <- function(object, digits=max(3, getOption("digits")-3), ...){
+print.optimize.portfolio.GenSA <- function(x, ..., digits=max(3, getOption("digits")-3)){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
   cat(rep("*", 35) ,"\n", sep="")
   
-  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(object$weights, digits=digits)
+  print.default(x$weights, digits=digits)
   cat("\n")
   
   # get objective measures
-  objective_measures <- object$objective_measures
+  objective_measures <- x$objective_measures
   tmp_obj <- as.numeric(unlist(objective_measures))
   names(tmp_obj) <- names(objective_measures)
   cat("Objective Measures:\n")
@@ -385,7 +385,7 @@ print.optimize.portfolio.GenSA <- function(object, digits=max(3, getOption("digi
         tmpl <- objective_measures[[i]][j]
         cat(names(tmpl), ":\n")
         tmpv <- unlist(tmpl)
-        names(tmpv) <- names(object$weights)
+        names(tmpv) <- names(x$weights)
         print(tmpv)
         cat("\n")
       }
@@ -399,25 +399,25 @@ print.optimize.portfolio.GenSA <- function(object, digits=max(3, getOption("digi
 #' 
 #' print method for optimize.portfolio.pso
 #' 
-#' @param object an object of class "optimize.portfolio.pso" resulting from a call to optimize.portfolio
+#' @param x an object of class \code{optimize.portfolio.pso} resulting from a call to \code{\link{optimize.portfolio}}
 #' @param digits the number of significant digits to use when printing.
 #' @param ... any other passthru parameters
 #' @export
-print.optimize.portfolio.pso <- function(object, digits=max(3, getOption("digits")-3), ...){
+print.optimize.portfolio.pso <- function(x, ..., digits=max(3, getOption("digits")-3)){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
   cat(rep("*", 35) ,"\n", sep="")
   
-  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(object$weights, digits=digits)
+  print.default(x$weights, digits=digits)
   cat("\n")
   
   # get objective measures
-  objective_measures <- object$objective_measures
+  objective_measures <- x$objective_measures
   tmp_obj <- as.numeric(unlist(objective_measures))
   names(tmp_obj) <- names(objective_measures)
   cat("Objective Measures:\n")
@@ -430,7 +430,7 @@ print.optimize.portfolio.pso <- function(object, digits=max(3, getOption("digits
         tmpl <- objective_measures[[i]][j]
         cat(names(tmpl), ":\n")
         tmpv <- unlist(tmpl)
-        names(tmpv) <- names(object$weights)
+        names(tmpv) <- names(x$weights)
         print(tmpv)
         cat("\n")
       }
