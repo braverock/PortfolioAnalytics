@@ -14,4 +14,7 @@
 \description{
   summary method for class "optimize.portfolio"
 }
+\author{
+  Ross Bennett
+}
 

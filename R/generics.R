@@ -446,6 +446,7 @@ print.optimize.portfolio.pso <- function(object, digits=max(3, getOption("digits
 #' 
 #' @param object an object of class "optimize.portfolio.pso" resulting from a call to optimize.portfolio
 #' @param ... any other passthru parameters. Currently not used.
+#' @author Ross Bennett
 #' @export
 summary.optimize.portfolio <- function(object, ...){
   
@@ -526,8 +527,9 @@ summary.optimize.portfolio <- function(object, ...){
   }
   
   # group constraints
-  cat("Group Constraints:\n")
+  group_weights <- NULL
   if(!is.null(constraints$groups) & !is.null(constraints$cLO) & !is.null(constraints$cUP)){
+    cat("Group Constraints:\n")
     cat("Groups:\n")
     groups <- constraints$groups
     group_labels <- constraints$group_labels
@@ -599,8 +601,9 @@ summary.optimize.portfolio <- function(object, ...){
   cat("\n")
   
   # Factor exposure constraint
-  cat("Factor Exposure Constraints:\n")
+  tmpexp <- NULL
   if(!is.null(constraints$B) & !is.null(constraints$lower) & !is.null(constraints$upper)){
+    cat("Factor Exposure Constraints:\n")
     t.B <- t(constraints$B)
     cat("Factor Exposure B Matrix:\n")
     print(constraints$B)
@@ -641,6 +644,15 @@ summary.optimize.portfolio <- function(object, ...){
   cat("Elapsed Time:\n")
   print(object$elapsed_time)
   cat("\n")
+  invisible(list(weights=object$weights,
+                 opt_values=object$objective_measures,
+                 group_weights=group_weights,
+                 factor_exposures=tmpexp,
+                 diversification=diversification(object$weights),
+                 turnover=turnover(object$weights, wts.init=object$portfolio$assets),
+                 positions=sum(abs(object$weights) > tolerance),
+                 long_positions=sum(object$weights > tolerance),
+                 short_positions=sum(object$weights < -tolerance)))
 }
 
 #' Print an efficient frontier object
