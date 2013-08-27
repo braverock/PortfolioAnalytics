@@ -2,7 +2,7 @@
 \alias{print.constraint}
 \title{print method for objects of class 'constraint'}
 \usage{
-  print.constraint(obj)
+  print.constraint(x, ...)
 }
 \arguments{
   \item{portfolio}{object of class constraint}

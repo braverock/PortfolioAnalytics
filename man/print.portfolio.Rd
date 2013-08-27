@@ -2,13 +2,14 @@
 \alias{print.portfolio}
 \title{Printing Portfolio Specification Objects}
 \usage{
-  print.portfolio(portfolio)
+  print.portfolio(x, ...)
 }
 \arguments{
-  \item{portfolio}{object of class portfolio}
+  \item{x}{object of class \code{portfolio}}
 }
 \description{
-  Print method for class "portfolio"
+  Print method for objects of class \code{portfolio}
+  created with \code{\link{portfolio.spec}}
 }
 \author{
   Ross Bennett

@@ -1,14 +1,15 @@
 \name{summary.portfolio}
 \alias{summary.portfolio}
-\title{Summarizing Portfolio Specification Objects}
+\title{Summarize Portfolio Specification Objects}
 \usage{
-  summary.portfolio(portfolio)
+  summary.portfolio(object, ...)
 }
 \arguments{
-  \item{portfolio}{object of class portfolio}
+  \item{object}{object of class portfolio}
 }
 \description{
-  summary method for class "portfolio"
+  summary method for class \code{portfolio} created with
+  \code{\link{portfolio.spec}}
 }
 \author{
   Ross Bennett
