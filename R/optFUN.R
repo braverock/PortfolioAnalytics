@@ -1,5 +1,15 @@
 
 ##### GMV and QU QP Function #####
+#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' 
+#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' 
+#' @param R xts object of asset returns
+#' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
+#' @param moments object of moments computed based on objective functions
+#' @param lambda risk_aversion parameter
+#' @param target target return value
+#' @author Ross Bennett
 gmv_opt <- function(R, constraints, moments, lambda, target){
   
   N <- ncol(R)
@@ -66,6 +76,15 @@ gmv_opt <- function(R, constraints, moments, lambda, target){
 }
 
 ##### Maximize Return LP Function #####
+#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' 
+#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' 
+#' @param R xts object of asset returns
+#' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
+#' @param moments object of moments computed based on objective functions
+#' @param target target return value
+#' @author Ross Bennett
 maxret_opt <- function(R, moments, constraints, target){
   
   N <- ncol(R)
@@ -137,6 +156,15 @@ maxret_opt <- function(R, moments, constraints, target){
 }
 
 ##### Maximize Return MILP Function #####
+#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' 
+#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' 
+#' @param R xts object of asset returns
+#' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
+#' @param moments object of moments computed based on objective functions
+#' @param target target return value
+#' @author Ross Bennett
 maxret_milp_opt <- function(R, constraints, moments, target){
   
   N <- ncol(R)
@@ -226,6 +254,16 @@ maxret_milp_opt <- function(R, constraints, moments, target){
 }
 
 ##### Minimize ETL LP Function #####
+#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' 
+#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' 
+#' @param R xts object of asset returns
+#' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
+#' @param moments object of moments computed based on objective functions
+#' @param target target return value
+#' @param alpha alpha value for ETL/ES/CVaR
+#' @author Ross Bennett
 etl_opt <- function(R, constraints, moments, target, alpha){
   
   N <- ncol(R)
@@ -277,6 +315,16 @@ etl_opt <- function(R, constraints, moments, target, alpha){
 }
 
 ##### Minimize ETL MILP Function #####
+#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' 
+#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' 
+#' @param R xts object of asset returns
+#' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
+#' @param moments object of moments computed based on objective functions
+#' @param target target return value
+#' @param alpha alpha value for ETL/ES/CVaR
+#' @author Ross Bennett
 etl_milp_opt <- function(R, constraints, moments, target, alpha){
   
   # Number of rows
@@ -389,3 +437,132 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
   #out$call <- call # add this outside of here, this function doesn't have the call
   return(out)
 }
+
+##### minimize variance or maximize quadratic utility with turnover constraints #####
+#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' 
+#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' 
+#' @param R xts object of asset returns
+#' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
+#' @param moments object of moments computed based on objective functions
+#' @param lambda risk_aversion parameter
+#' @param target target return value
+#' @param init_weights initial weights to compute turnover
+#' @author Ross Bennett
+gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
+  # function for minimum variance or max quadratic utility problems
+  
+  # Modify the returns matrix. This is done because there are 3 sets of
+  # variables 1) w.initial, 2) w.buy, and 3) w.sell
+  returns <- cbind(R, R, R)
+  V <- cov(returns)
+  
+  # number of assets
+  N <- ncol(R)
+  
+  # initial weights for solver
+  if(is.null(init_weights)) init_weights <- rep(1/ N, N)
+  
+  # Amat for initial weights
+  Amat <- cbind(diag(N), matrix(0, nrow=N, ncol=N*2))
+  rhs <- init_weights
+  dir <- rep("==", N)
+  meq <- 4
+  
+  # check for a target return constraint
+  if(!is.na(target)) {
+    # If var is the only objective specified, then moments$mean won't be calculated
+    if(all(moments$mean==0)){
+      tmp_means <- colMeans(R)
+    } else {
+      tmp_means <- moments$mean
+    }
+    Amat <- rbind(Amat, rep(tmp_means, 3))
+    dir <- c(dir, "==")
+    rhs <- c(rhs, target)
+    meq <- 5
+  }
+  
+  # Amat for full investment constraint
+  Amat <- rbind(Amat, rbind(rep(1, N*3), rep(-1, N*3)))
+  rhs <- c(rhs, constraints$min_sum, -constraints$max_sum)
+  dir <- c(dir, ">=", ">=")
+  
+  # Amat for lower box constraints
+  Amat <- rbind(Amat, cbind(diag(N), diag(N), diag(N)))
+  rhs <- c(rhs, constraints$min)
+  dir <- c(dir, rep(">=", N))
+  
+  # Amat for upper box constraints
+  Amat <- rbind(Amat, cbind(-diag(N), -diag(N), -diag(N)))
+  rhs <- c(rhs, -constraints$max)
+  dir <- c(dir, rep(">=", N))
+  
+  # Amat for turnover constraints
+  Amat <- rbind(Amat, c(rep(0, N), rep(-1, N), rep(1, N)))
+  rhs <- c(rhs, -constraints$toc)
+  dir <- c(dir, ">=")
+  
+  # Amat for positive weights
+  Amat <- rbind(Amat, cbind(matrix(0, nrow=N, ncol=N), diag(N), matrix(0, nrow=N, ncol=N)))
+  rhs <- c(rhs, rep(0, N))
+  dir <- c(dir, rep(">=", N))
+  
+  # Amat for negative weights
+  Amat <- rbind(Amat, cbind(matrix(0, nrow=N, ncol=2*N), -diag(N)))
+  rhs <- c(rhs, rep(0, N))
+  dir <- c(dir, rep(">=", N))
+  
+  # include group constraints
+  if(try(!is.null(constraints$groups), silent=TRUE)){
+    n.groups <- length(constraints$groups)
+    Amat.group <- matrix(0, nrow=n.groups, ncol=N)
+    for(i in 1:n.groups){
+      Amat.group[i, constraints$groups[[i]]] <- 1
+    }
+    if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
+    if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
+    Amat <- rbind(Amat, cbind(Amat.group, Amat.group, Amat.group))
+    Amat <- rbind(Amat, cbind(-Amat.group, -Amat.group, -Amat.group))
+    dir <- c(dir, rep(">=", (n.groups + n.groups)))
+    rhs <- c(rhs, constraints$cLO, -constraints$cUP)
+  }
+  
+  # Add the factor exposures to Amat, dir, and rhs
+  if(!is.null(constraints$B)){
+    t.B <- t(constraints$B)
+    Amat <- rbind(Amat, cbind(t.B, t.B, t.B))
+    Amat <- rbind(Amat, cbind(-t.B, -t.B, -t.B))
+    dir <- c(dir, rep(">=", 2 * nrow(t.B)))
+    rhs <- c(rhs, constraints$lower, -constraints$upper)
+  }
+  
+  d <- rep(-moments$mean, 3)
+  
+  qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
+                            dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
+  if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
+  
+  wts <- qp.result$solution
+  wts.final <- wts[(1:N)] + wts[(1+N):(2*N)] + wts[(2*N+1):(3*N)]
+  
+  weights <- wts.final
+  names(weights) <- colnames(R)
+  out <- list()
+  out$weights <- weights
+  out$out <- qp.result$val
+  return(out)
+  
+  # TODO
+  # Get this working with ROI
+  
+  # Not getting solution using ROI
+  # set up the quadratic objective
+  # ROI_objective <- Q_objective(Q=make.positive.definite(2*lambda*V), L=rep(-moments$mean, 3))
+  
+  # opt.prob <- OP(objective=ROI_objective, 
+  #                constraints=L_constraint(L=Amat, dir=dir, rhs=rhs))
+  # roi.result <- ROI_solve(x=opt.prob, solver="quadprog")
+}
+

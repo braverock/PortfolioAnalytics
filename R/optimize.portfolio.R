@@ -703,10 +703,17 @@ optimize.portfolio_v2 <- function(
     if("var" %in% names(moments)){
       # Minimize variance if the only objective specified is variance
       # Maximize Quadratic Utility if var and mean are specified as objectives
-      roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target)
-      weights <- roi_result$weights
-      obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
-      out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
+      if(!is.null(constraints$turnover_target)){
+        qp_result <- gmv_opt_toc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets)
+        weights <- qp_result$weights
+        obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+        out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
+      } else {
+        roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target)
+        weights <- roi_result$weights
+        obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+        out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
+      }
     }
     if(length(names(moments)) == 1 & "mean" %in% names(moments)) {
       # Maximize return if the only objective specified is mean
