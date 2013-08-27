@@ -4,8 +4,9 @@
 \usage{
   plot.optimize.portfolio.DEoptim(x, ...,
     return.col = "mean", risk.col = "ES",
-    chart.assets = FALSE, neighbors = NULL, xlim = NULL,
-    ylim = NULL, main = "optimized portfolio plot")
+    chart.assets = FALSE, neighbors = NULL,
+    main = "optimized portfolio plot", xlim = NULL,
+    ylim = NULL)
 }
 \arguments{
   \item{x}{set of portfolios created by
@@ -13,16 +14,23 @@
 
   \item{...}{any other passthru parameters}
 
+  \item{return.col}{string name of column to use for
+  returns (vertical axis)}
+
   \item{risk.col}{string name of column to use for risk
   (horizontal axis)}
 
-  \item{return.col}{string name of column to use for
-  returns (vertical axis)}
+  \item{chart.assets}{TRUE/FALSE to include risk-return
+  scatter of assets}
 
   \item{neighbors}{set of 'neighbor portfolios to overplot}
 
   \item{main}{an overall title for the plot: see
   \code{\link{title}}}
+
+  \item{xlim}{set the limit on coordinates for the x-axis}
+
+  \item{ylim}{set the limit on coordinates for the y-axis}
 }
 \description{
   scatter and weights chart for DEoptim portfolio

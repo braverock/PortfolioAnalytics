@@ -338,11 +338,14 @@ charts.DE <- function(DE, risk.col, return.col, chart.assets, neighbors=NULL, ma
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' @param x set of portfolios created by \code{\link{optimize.portfolio}}
 #' @param ... any other passthru parameters 
-#' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
+#' @param risk.col string name of column to use for risk (horizontal axis)
+#' @param chart.assets TRUE/FALSE to include risk-return scatter of assets
 #' @param neighbors set of 'neighbor portfolios to overplot
 #' @param main an overall title for the plot: see \code{\link{title}}
+#' @param xlim set the limit on coordinates for the x-axis
+#' @param ylim set the limit on coordinates for the y-axis
 #' @export
-plot.optimize.portfolio.DEoptim <- function(x, ..., return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, xlim=NULL, ylim=NULL, main='optimized portfolio plot') {
+plot.optimize.portfolio.DEoptim <- function(x, ..., return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, main='optimized portfolio plot', xlim=NULL, ylim=NULL) {
     charts.DE(DE=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
 }

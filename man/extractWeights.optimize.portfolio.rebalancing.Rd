@@ -2,12 +2,13 @@
 \alias{extractWeights.optimize.portfolio.rebalancing}
 \title{extract time series of weights from output of optimize.portfolio.rebalancing}
 \usage{
-  extractWeights.optimize.portfolio.rebalancing(RebalResults,
+  extractWeights.optimize.portfolio.rebalancing(object,
     ...)
 }
 \arguments{
-  \item{RebalResults}{object of type
-  optimize.portfolio.rebalancing to extract weights from}
+  \item{object}{object of class
+  \code{optimize.portfolio.rebalancing} to extract weights
+  from}
 
   \item{...}{any other passthru parameters}
 }

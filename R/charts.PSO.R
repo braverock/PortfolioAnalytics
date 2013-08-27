@@ -228,16 +228,19 @@ charts.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE
 #' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights
 #' 
 #' @param pso object created by \code{\link{optimize.portfolio}}
+#' @param ... any other passthru parameters 
 #' @param return.col string matching the objective of a 'return' objective, on vertical axis
 #' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
-#' @param ... any other passthru parameters 
+#' @param chart.assets TRUE/FALSE to include risk-return scatter of assets
 #' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
 #' @param element.color color for the default plot scatter points
-#'  @param neighbors set of 'neighbor' portfolios to overplot
+#' @param neighbors set of 'neighbor' portfolios to overplot
 #' @param main an overall title for the plot: see \code{\link{title}}
+#' @param xlim set the limit on coordinates for the x-axis
+#' @param ylim set the limit on coordinates for the y-axis
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-plot.optimize.portfolio.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="PSO.Portfolios", xlim=NULL, ylim=NULL, ...){
-  charts.pso(pso=pso, return.col=return.col, risk.col=risk.col, chart.assets=FALSE, cex.axis=cex.axis, element.color=element.color, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...=...)
+plot.optimize.portfolio.pso <- function(x, ..., return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="PSO.Portfolios", xlim=NULL, ylim=NULL){
+  charts.pso(pso=x, return.col=return.col, risk.col=risk.col, chart.assets=FALSE, cex.axis=cex.axis, element.color=element.color, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...=...)
 }

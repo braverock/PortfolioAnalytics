@@ -25,11 +25,12 @@
     RAR.text = "Modified Sharpe", rf = 0, cex.legend = 0.8)
 
   chart.EfficientFrontier.efficient.frontier(object,
-    chart.assets = TRUE, match.col = "ES",
-    n.portfolios = NULL, xlim = NULL, ylim = NULL,
-    cex.axis = 0.8, element.color = "darkgray",
+    match.col = "ES", n.portfolios = NULL, xlim = NULL,
+    ylim = NULL, cex.axis = 0.8,
+    element.color = "darkgray",
     main = "Efficient Frontier", ...,
-    RAR.text = "Modified Sharpe", rf = 0, cex.legend = 0.8)
+    RAR.text = "Modified Sharpe", rf = 0,
+    chart.assets = TRUE, cex.legend = 0.8)
 }
 \arguments{
   \item{object}{optimal portfolio created by
@@ -72,6 +73,9 @@
 
   \item{RAR.text}{Risk Adjusted Return ratio text to plot
   in the legend}
+
+  \item{chart.assets}{TRUE/FALSE to include risk-return
+  scatter of assets}
 }
 \description{
   This function charts the efficient frontier and

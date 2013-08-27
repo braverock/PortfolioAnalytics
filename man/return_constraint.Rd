@@ -28,7 +28,7 @@ ret <- edhec[, 1:4]
 
 pspec <- portfolio.spec(assets=colnames(ret))
 
-pspec <- add.constraint(portfolio=pspec, type="return", div_target=mean(colMeans(ret)))
+pspec <- add.constraint(portfolio=pspec, type="return", return_target=mean(colMeans(ret)))
 }
 \author{
   Ross Bennett

@@ -47,6 +47,7 @@
 #' @param rf risk free rate. If \code{rf} is not null, the maximum Sharpe Ratio or modified Sharpe Ratio tangency portfolio will be plotted
 #' @param cex.legend A numerical value giving the amount by which the legend should be magnified relative to the default.
 #' @param RAR.text Risk Adjusted Return ratio text to plot in the legend
+#' @param chart.assets TRUE/FALSE to include risk-return scatter of assets
 #' @author Ross Bennett
 #' @export
 chart.EfficientFrontier <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ...){
@@ -356,7 +357,7 @@ chart.Weights.EF.optimize.portfolio <- function(object, colorset=NULL, ..., n.po
 
 #' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier.efficient.frontier <- function(object, chart.assets=TRUE, match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="Modified Sharpe", rf=0, cex.legend=0.8){
+chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="Modified Sharpe", rf=0, chart.assets=TRUE, cex.legend=0.8){
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
   
   # get the returns and efficient frontier object

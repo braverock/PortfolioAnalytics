@@ -236,7 +236,7 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' # Add box constraints
 #' pspec <- add.constraint(portfolio=pspec, type="box", min=0.05, max=0.4)
 #' 
-#' min and max can also be specified per asset
+#' # min and max can also be specified per asset
 #' pspec <- add.constraint(portfolio=pspec, type="box", min=c(0.05, 0, 0.08, 0.1), max=c(0.4, 0.3, 0.7, 0.55))
 #' # A special case of box constraints is long only where min=0 and max=1
 #' # The default action is long only if min and max are not specified
@@ -244,7 +244,7 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' pspec <- add.constraint(portfolio=pspec, type="long_only")
 #' 
 #' # Add group constraints
-#' pspec <- add.constraint(portfolio=pspec, type="group", groups=c(3, 1), group_min=c(0.1, 0.15), group_max=c(0.85, 0.55), group_labels=c("GroupA", "GroupB"), group_pos=c(2, 1))
+#' pspec <- add.constraint(portfolio=pspec, type="group", groups=list(c(1, 2, 1), 4), group_min=c(0.1, 0.15), group_max=c(0.85, 0.55), group_labels=c("GroupA", "GroupB"), group_pos=c(2, 1))
 #' 
 #' # Add position limit constraint such that we have a maximum number of three assets with non-zero weights.
 #' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
@@ -820,7 +820,7 @@ diversification_constraint <- function(type="diversification", div_target, enabl
 #' 
 #' pspec <- portfolio.spec(assets=colnames(ret))
 #' 
-#' pspec <- add.constraint(portfolio=pspec, type="return", div_target=mean(colMeans(ret)))
+#' pspec <- add.constraint(portfolio=pspec, type="return", return_target=mean(colMeans(ret)))
 #' @export
 return_constraint <- function(type="return", return_target, enabled=TRUE, message=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="return_constraint", ...)

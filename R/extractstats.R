@@ -173,12 +173,13 @@ extractWeights <- function (object, ...){
 
 #' extract weights from output of optimize.portfolio
 #' 
-#' @param object object of type optimize.portfolio to extract weights from
+#' @param object object of class \code{optimize.portfolio} to extract weights from
+#' @param ... passthrough parameters. Not currently used
 #' @seealso 
 #' \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @export
-extractWeights.optimize.portfolio <- function(object){
+extractWeights.optimize.portfolio <- function(object, ...){
   if(!inherits(object, "optimize.portfolio")){
     stop("object must be of class 'optimize.portfolio'")
   }
@@ -192,28 +193,28 @@ extractWeights.optimize.portfolio <- function(object){
 #' 
 #' The output list is indexed by the dates of the rebalancing periods, as determined by \code{endpoints}
 #' 
-#' @param RebalResults object of type optimize.portfolio.rebalancing to extract weights from
+#' @param object object of class \code{optimize.portfolio.rebalancing} to extract weights from
 #' @param ... any other passthru parameters
 #' @seealso 
 #' \code{\link{optimize.portfolio.rebalancing}}
 #' @export
-extractWeights.optimize.portfolio.rebalancing <- function(RebalResults, ...){
+extractWeights.optimize.portfolio.rebalancing <- function(object, ...){
 # @TODO: add a class check for the input object
 # FIXED
-  if(!inherits(RebalResults, "optimize.portfolio.rebalancing")){
+  if(!inherits(object, "optimize.portfolio.rebalancing")){
     stop("Object passed in must be of class 'optimize.portfolio.rebalancing'")
   }
   
-  numColumns = length(RebalResults[[1]]$weights)
-  numRows = length(RebalResults)
+  numColumns = length(object[[1]]$weights)
+  numRows = length(object)
 
   result <- matrix(nrow=numRows, ncol=numColumns)
 
   for(i in 1:numRows)
-    result[i,] = unlist(RebalResults[[i]]$weights)
+    result[i,] = unlist(object[[i]]$weights)
 
-  colnames(result) = names(unlist(RebalResults[[1]]$weights))
-  rownames(result) = names(RebalResults)
+  colnames(result) = names(unlist(object[[1]]$weights))
+  rownames(result) = names(object)
   result = as.xts(result)
   return(result)
 }

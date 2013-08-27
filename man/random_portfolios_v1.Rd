@@ -25,7 +25,7 @@
 }
 \examples{
 rpconstraint<-constraint(assets=10, min_mult=-Inf, max_mult=Inf, min_sum=.99, max_sum=1.01, min=.01, max=.4, weight_seq=generatesequence())
-rp<- random_portfolios(rpconstraints=rpconstraint,permutations=1000)
+rp<- random_portfolios_v1(rpconstraints=rpconstraint,permutations=1000)
 head(rp)
 }
 \author{
