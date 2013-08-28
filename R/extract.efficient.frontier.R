@@ -164,9 +164,14 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   
   out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))
   
-  for(i in 1:length(ret_seq)){
+#   for(i in 1:length(ret_seq)){
+#     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
+#     out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+#   }
+  stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+  out <- foreach(i=1:length(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
-    out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+    extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
   }
   colnames(out) <- names(stats)
   return(structure(out, class="efficient.frontier"))
@@ -243,9 +248,14 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   
   out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))
   
-  for(i in 1:length(ret_seq)){
+#   for(i in 1:length(ret_seq)){
+#     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
+#     out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+#   }
+  stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+  out <- foreach(i=1:length(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
-    out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+    extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
   }
   colnames(out) <- names(stats)
   return(structure(out, class="efficient.frontier"))
