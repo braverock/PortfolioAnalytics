@@ -1,0 +1,390 @@
+\documentclass[a4paper]{article}
+\usepackage[round]{natbib}
+\usepackage{bm}
+\usepackage{verbatim}
+\usepackage[latin1]{inputenc}
+% \VignetteIndexEntry{Portfolio Optimization with CVaR budgets in PortfolioAnalytics}
+\bibliographystyle{abbrvnat}
+
+\usepackage{url}
+
+\let\proglang=\textsf
+\newcommand{\pkg}[1]{{\fontseries{b}\selectfont #1}}
+\newcommand{\R}[1]{{\fontseries{b}\selectfont #1}}
+\newcommand{\email}[1]{\href{mailto:#1}{\normalfont\texttt{#1}}}
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\VAR}{\mathsf{VAR}}
+\newcommand{\COV}{\mathsf{COV}}
+\newcommand{\Prob}{\mathsf{P}}
+
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\baselinestretch}{1.5}
+\setlength{\textwidth}{15cm} \setlength{\textheight}{22cm} \topmargin-1cm \evensidemargin0.5cm \oddsidemargin0.5cm
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+
+\begin{document}
+
+\title{Vignette: Portfolio Optimization with CVaR budgets\\
+in PortfolioAnalytics}
+\author{Kris Boudt, Peter Carl and Brian Peterson }
+\date{June 1, 2010}
+
+\maketitle
+\tableofcontents
+
+
+\bigskip
+
+\section{General information}
+
+Risk budgets are a central tool to estimate and manage the portfolio risk allocation. They decompose total portfolio risk into the risk contribution of each position.  \citet{ BoudtCarlPeterson2010}  propose several portfolio allocation strategies that use an appropriate transformation of the portfolio Conditional Value at Risk (CVaR) budget as an objective or constraint in the portfolio optimization problem.  This document explains how risk allocation optimized portfolios can be obtained under general constraints in the \verb"PortfolioAnalytics" package of \citet{PortAnalytics}. 
+
+\verb"PortfolioAnalytics"  is designed to provide numerical solutions for portfolio problems with complex constraints and objective sets comprised of any R function. It can e.g.~construct portfolios that minimize a risk objective with (possibly non-linear) per-asset constraints on returns and drawdowns \citep{CarlPetersonBoudt2010}. The generality of possible constraints and objectives is a distinctive characteristic of the package with respect to RMetrics \verb"fPortfolio" of \citet{fPortfolioBook}. For standard Markowitz optimization problems, use of \verb"fPortfolio" rather than \verb"PortfolioAnalytics" is recommended.
+
+\verb"PortfolioAnalytics"  solves the following type of problem
+\begin{equation}  \min_w g(w) \ \  s.t. \ \ 
+\left\{ \begin{array}{l} h_1(w)\leq 0 \\ \vdots \\  h_q(w)\leq 0. \end{array} \right. \label{optimproblem}\end{equation} \verb"PortfolioAnalytics"   first merges the objective function and constraints into a penalty augmented objective function  
+\begin{equation} L(w) = g(w) + \mbox{penalty}\sum_{i=1}^q \lambda_i \max(h_i(w),0), \label{eq:constrainedobj} \end{equation}
+where $\lambda_i$ is a multiplier to tune the relative importance of the constraints.  The default values of penalty and $\lambda_i$ (called \verb"multiplier" in \verb"PortfolioAnalytics") are 10000 and 1, respectively. 
+
+The minimum of this function is found through the \emph{Differential Evolution} (DE) algorithm of \citet{StornPrice1997} and ported to R by \citet{MullenArdiaGilWindoverCline2009}. DE is known for remarkable performance regarding continuous numerical problems \citep{PriceStornLampinen2006}. It has recently been advocated for optimizing portfolios under non-convex settings by \citet{Ardia2010} and \citet{Yollin2009}, among others. We use the R implementation of DE in the \verb"DEoptim" package of \citet{DEoptim}. 
+
+The latest version of the \verb"PortfolioAnalytics" package can be downloaded from R-forge through the following command:
+\begin{verbatim}
+install.packages("PortfolioAnalytics", repos="http://R-Forge.R-project.org")
+\end{verbatim}
+
+Its principal functions are:
+\begin{itemize}
+\item \verb"constraint(assets,min,max,min_sum,max_sum)": the portfolio optimization specification starts with specifying the shape of the weight vector through the function \verb"constraint". The weights have to be between \verb"min} and \verb"max" and their sum between \verb"min_sum"  and \verb"max_sum". The first argument \verb"assets" is either a number indicating the number of portfolio assets or a vector holding the names of the assets. 
+
+\item \verb"add.objective(constraints, type, name)": \verb"constraints" is a list holding the objective to be minimized and the constraints. New elements to this list are added by the function \verb"add.objective". Many common risk budget objectives and constraints are prespecified and can be identified by specifying the \verb"type" and \verb"name".
+
+
+\item \verb"constrained_objective(w, R, constraints)": given the portfolio weight and return data, it evaluates the penalty augmented objective function in (\ref{eq:constrainedobj}).
+
+\item \verb"optimize.portfolio(R,constraints)": this function returns the portfolio weight that solves the problem in (\ref{optimproblem}). {\it R} is the multivariate return series of the portfolio components. 
+
+\item \verb"optimize.portfolio.rebalancing(R,constraints,rebalance_on,trailing_periods": this function solves the multiperiod optimization problem. It returns for each rebalancing period the optimal weights and allows the estimation sample to be either from inception or a moving window.
+
+\end{itemize}
+
+Next we illustrate these functions on monthly return data for bond, US equity, international equity and commodity indices, which are the first 4 series
+in the dataset \verb"indexes". The first step is to load the package \verb"PortfolioAnalytics"  and the dataset. An important first note is that some of the functions (especially \verb" optimize.portfolio.rebalancing") requires the dataset to be a \verb"xts" object \citep{xts}.
+
+
+<<echo=FALSE>>=
+options(width=80)
+@
+
+<<echo=TRUE>>=| 
+library(PortfolioAnalytics)
+#source("constrained_objective.R")
+data(indexes)
+class(indexes)
+indexes <- indexes[,1:4]
+head(indexes,2)
+tail(indexes,2)
+@
+
+In what follows, we first illustrate the construction of the penalty augmented objective function. Then we present the code for solving the optimization problem. 
+
+\section{Setting of the objective function}
+
+\subsection{Weight constraints}
+  
+<<echo=TRUE>>=| 
+# Wcons <- constraint( assets = colnames(indexes[,1:4]) ,min = rep(0,4), 
+#                      max=rep(1,4), min_sum=1,max_sum=1 ) 
+pspec <- portfolio.spec(assets=colnames(indexes[,1:4]))
+pspec <- add.constraint(portfolio=pspec, type="leverage", min_sum=1, max_sum=1)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0, max=1)
+@
+
+Given the weight constraints, we can call the value of the function to be minimized. We consider the case of no violation and a case of violation. By default, \verb"normalize=TRUE" which means that if the sum of weights exceeds \verb"max_sum", the weight vector is normalized by multiplying it with \verb"sum(weights)/max_sum" such that the weights evaluated in the objective function satisfy the \verb"max_sum" constraint.    
+<<echo=TRUE>>=| 
+# constrained_objective_v1( w = rep(1/4,4) , R = indexes[,1:4] , constraints = Wcons) 
+# constrained_objective_v1( w = rep(1/3,4) , R = indexes[,1:4] , constraints = Wcons) 
+# constrained_objective_v1( w = rep(1/3,4) , R = indexes[,1:4] , constraints = Wcons, normalize=FALSE) 
+constrained_objective(w = rep(1/4, 4), R = indexes[, 1:4], portfolio = pspec)
+constrained_objective(w = rep(1/3, 4), R = indexes[, 1:4], portfolio = pspec)
+constrained_objective(w = rep(1/3, 4), R = indexes[, 1:4], portfolio = pspec, 
+                      normalize=FALSE)
+@
+
+The latter value can be recalculated as penalty times the weight violation, that is: $10000 \times 1/3.$
+
+\subsection{Minimum CVaR objective function}
+
+Suppose now we want to find the portfolio that minimizes the 95\% portfolio CVaR subject to the weight constraints listed above.  
+
+<<echo=TRUE>>=| 
+# ObjSpec = add.objective_v1( constraints = Wcons , type="risk",name="CVaR",
+# arguments=list(p=0.95), enabled=TRUE)
+pspec <- add.objective(portfolio = pspec, type = "risk", name = "CVaR",
+                       arguments = list(p=0.95))
+@
+
+The value of the objective function is: 
+<<echo=TRUE>>=| 
+# constrained_objective_v1( w = rep(1/4,4) , R = indexes[,1:4] , constraints = ObjSpec)
+constrained_objective( w = rep(1/4,4) , R = indexes[,1:4], portfolio = pspec)
+@
+This is the CVaR of the equal-weight portfolio as computed by the function \verb"ES" in the \verb"PerformanceAnalytics" package of \citet{ Carl2007}
+<<echo=TRUE>>=| 
+library(PerformanceAnalytics)
+out<-ES(indexes[,1:4],weights = rep(1/4,4),p=0.95, portfolio_method="component")
+out$MES
+@
+All arguments in the function \verb"ES" can be passed on through \verb"arguments". E.g. to reduce the impact of extremes on the portfolio results, it is recommended to winsorize the data using the option clean="boudt".
+
+<<echo=TRUE>>=| 
+out<-ES(indexes[,1:4],weights = rep(1/4,4),p=0.95,clean="boudt",
+        portfolio_method="component")
+out$MES
+@
+
+
+For the formulation of the objective function, this implies setting: 
+<<echo=TRUE>>=| 
+# ObjSpec = add.objective_v1( constraints = Wcons , type="risk",name="CVaR",
+#                             arguments=list(p=0.95,clean="boudt"), enabled=TRUE)   
+pspec <- add.objective(portfolio = pspec, type = "risk", name = "CVaR",
+                       arguments = list(p=0.95, clean="boudt"), indexnum=1)
+constrained_objective( w = rep(1/4,4) , R = indexes[,1:4], portfolio=pspec)
+@
+
+An additional argument that is not available for the moment in \verb"ES" is to estimate the conditional covariance matrix through
+the constant conditional correlation model of \citet{Bollerslev90}. 
+
+For the formulation of the objective function, this implies setting: 
+<<echo=TRUE>>=| 
+# ObjSpec = add.objective_v1( constraints = Wcons , type="risk",name="CVaR",
+#                             arguments=list(p=0.95,clean="boudt"), 
+#                             enabled=TRUE, garch=TRUE)
+pspec <- add.objective(portfolio = pspec, type = "risk", name = "CVaR",
+                       arguments = list(p=0.95, clean="boudt"), 
+                       indexnum=1, garch=TRUE)
+constrained_objective( w = rep(1/4,4) , R = indexes[,1:4], portfolio = pspec)
+@
+
+\subsection{Minimum CVaR concentration objective function}
+
+Add the minimum 95\% CVaR concentration objective to the objective function: 
+<<echo=TRUE>>=| 
+# ObjSpec = add.objective_v1( constraints = Wcons , type="risk_budget_objective",
+#                             name="CVaR", arguments=list(p=0.95,clean="boudt"),
+#                             min_concentration=TRUE, enabled=TRUE) 
+pspec <- add.objective(portfolio=pspec, type="risk_budget_objective",
+                       name="CVaR", arguments=list(p=0.95,clean="boudt"), 
+                       min_concentration=TRUE)
+@
+The value of the objective function is: 
+<<echo=TRUE>>=| 
+# constrained_objective_v1( w = rep(1/4,4) , R = indexes[,1:4] , 
+#                           constraints = ObjSpec) 
+constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , portfolio = pspec) 
+@
+We can verify that this is effectively the largest CVaR contribution of that portfolio as follows:
+<<echo=TRUE>>=| 
+ES(indexes[,1:4],weights = rep(1/4,4),p=0.95,clean="boudt", 
+   portfolio_method="component")
+@
+
+\subsection{Risk allocation constraints}
+
+We see that in the equal-weight portfolio, the international equities and commodities investment
+cause more than 30\% of total risk. We could specify as a constraint that no asset can contribute
+more than 30\% to total portfolio risk. This involves the construction of the following objective function:
+
+<<echo=TRUE>>=| 
+# ObjSpec = add.objective_v1( constraints = Wcons , type="risk_budget_objective",
+#                             name="CVaR", max_prisk = 0.3, 
+#                             arguments=list(p=0.95,clean="boudt"), enabled=TRUE)
+# constrained_objective_v1( w = rep(1/4,4) , R = indexes[,1:4] , 
+#                           constraints = ObjSpec)
+pspec = add.objective( portfolio = pspec , type="risk_budget_objective",name="CVaR",
+                       max_prisk = 0.3, arguments=list(p=0.95,clean="boudt"))
+constrained_objective( w = rep(1/4,4), R = indexes[,1:4], portfolio = pspec)
+@
+
+This value corresponds to the penalty parameter which has by default the value of 10000 times the exceedances: $ 10000*(0.045775103+0.054685023)\approx 1004.601.$
+
+\section{Optimization}
+
+The penalty augmented objective function is minimized through Differential Evolution. Two parameters are crucial in tuning the optimization: \verb"search_size" and \verb"itermax". The optimization routine 
+\begin{enumerate}
+\item First creates the initial generation of \verb"NP= search_size/itermax" guesses for the optimal value of the parameter vector, using the \verb"random_portfolios" function generating random weights satisfying the weight constraints. 
+\item Then DE evolves over this population of candidate solutions using alteration and selection operators in order to minimize the objective function. It restarts \verb"itermax" times.
+\end{enumerate} It is important that \verb"search_size/itermax" is high enough. It is generally recommended that this ratio is at least ten times the length of the weight vector. For more details on the use of DE strategy in portfolio allocation, we refer the
+reader to \citet{Ardia2010}. 
+
+\subsection{Minimum CVaR portfolio under an upper 40\% CVaR allocation constraint} 
+
+The functions needed to obtain the minimum CVaR portfolio under an upper 40\% CVaR allocation constraint are the following:
+\begin{verbatim}
+> ObjSpec <- constraint(assets = colnames(indexes[,1:4]),min = rep(0,4), 
++  max=rep(1,4), min_sum=1,max_sum=1 ) 
+> ObjSpec <- add.objective_v1( constraints = ObjSpec, type="risk",
++   name="CVaR", arguments=list(p=0.95,clean="boudt"),enabled=TRUE)       
+> ObjSpec <- add.objective_v1( constraints = ObjSpec,
++    type="risk_budget_objective", name="CVaR", max_prisk = 0.4, 
++    arguments=list(p=0.95,clean="boudt"), enabled=TRUE) 
+> set.seed(1234)
+> out = optimize.portfolio_v1(R= indexes[,1:4],constraints=ObjSpec,
++    optimize_method="DEoptim",itermax=10, search_size=2000)
+\end{verbatim}
+After the call to these functions it starts to explore the feasible space iteratively:
+\begin{verbatim}
+Iteration: 1 bestvalit: 0.029506 bestmemit:    0.810000    0.126000    0.010000    0.140000
+Iteration: 2 bestvalit: 0.029506 bestmemit:    0.810000    0.126000    0.010000    0.140000
+Iteration: 3 bestvalit: 0.029272 bestmemit:    0.758560    0.079560    0.052800    0.112240
+Iteration: 4 bestvalit: 0.029272 bestmemit:    0.758560    0.079560    0.052800    0.112240
+Iteration: 5 bestvalit: 0.029019 bestmemit:    0.810000    0.108170    0.010000    0.140000
+Iteration: 6 bestvalit: 0.029019 bestmemit:    0.810000    0.108170    0.010000    0.140000
+Iteration: 7 bestvalit: 0.029019 bestmemit:    0.810000    0.108170    0.010000    0.140000
+Iteration: 8 bestvalit: 0.028874 bestmemit:    0.692069    0.028575    0.100400    0.071600
+Iteration: 9 bestvalit: 0.028874 bestmemit:    0.692069    0.028575    0.100400    0.071600
+Iteration: 10 bestvalit: 0.028874 bestmemit:    0.692069    0.028575    0.100400    0.071600
+elapsed time:1.85782111114926 
+\end{verbatim}
+
+If \verb"TRACE=FALSE" the only output in \verb"out" is the weight vector that optimizes the objective function.
+
+\begin{verbatim}
+> out[[1]]
+      US Bonds    US Equities Int'l Equities    Commodities 
+    0.77530240     0.03201150     0.11247491     0.08021119 \end{verbatim}
+
+If \verb"TRACE=TRUE" additional information is given such as the value of the objective function and the different constraints.
+
+\subsection{Minimum CVaR concentration portfolio} 
+
+The functions needed to obtain the minimum CVaR concentration portfolio are the following:
+
+\begin{verbatim}
+> ObjSpec <- constraint(assets = colnames(indexes[,1:4]) ,min = rep(0,4), 
++  max=rep(1,4), min_sum=1,max_sum=1 ) 
+> ObjSpec <- add.objective_v1( constraints = ObjSpec, 
++   type="risk_budget_objective", name="CVaR", 
++   arguments=list(p=0.95,clean="boudt"),
++   min_concentration=TRUE,enabled=TRUE)       
+> set.seed(1234)
+> out = optimize.portfolio_v1(R= indexes[,1:4],constraints=ObjSpec,
++  optimize_method="DEoptim",itermax=50, search_size=5000)
+\end{verbatim}
+The iterations are as follows:
+\begin{verbatim}
+Iteration: 1 bestvalit: 0.010598 bestmemit:    0.800000    0.100000    0.118000    0.030000
+Iteration: 2 bestvalit: 0.010598 bestmemit:    0.800000    0.100000    0.118000    0.030000
+Iteration: 3 bestvalit: 0.010598 bestmemit:    0.800000    0.100000    0.118000    0.030000
+Iteration: 4 bestvalit: 0.010598 bestmemit:    0.800000    0.100000    0.118000    0.030000
+Iteration: 5 bestvalit: 0.010598 bestmemit:    0.800000    0.100000    0.118000    0.030000
+Iteration: 45 bestvalit: 0.008209 bestmemit:    0.976061    0.151151    0.120500    0.133916
+Iteration: 46 bestvalit: 0.008170 bestmemit:    0.897703    0.141514    0.109601    0.124004
+Iteration: 47 bestvalit: 0.008170 bestmemit:    0.897703    0.141514    0.109601    0.124004
+Iteration: 48 bestvalit: 0.008170 bestmemit:    0.897703    0.141514    0.109601    0.124004
+Iteration: 49 bestvalit: 0.008170 bestmemit:    0.897703    0.141514    0.109601    0.124004
+Iteration: 50 bestvalit: 0.008170 bestmemit:    0.897703    0.141514    0.109601    0.124004
+elapsed time:4.1324522222413
+\end{verbatim}
+This portfolio has the equal risk contribution characteristic: 
+\begin{verbatim}
+> out[[1]]
+      US Bonds    US Equities Int'l Equities    Commodities 
+    0.70528537     0.11118139     0.08610905     0.09742419 
+> ES(indexes[,1:4],weights = out[[1]],p=0.95,clean="boudt",  
++  portfolio_method="component")
+$MES
+           [,1]
+[1,] 0.03246264
+
+$contribution
+      US Bonds    US Equities Int'l Equities    Commodities 
+   0.008169565    0.008121930    0.008003228    0.008167917 
+
+$pct_contrib_MES
+      US Bonds    US Equities Int'l Equities    Commodities 
+     0.2516605      0.2501931      0.2465366      0.2516098 \end{verbatim}
+
+
+
+
+\subsection{Dynamic optimization}
+
+Dynamic rebalancing of the risk budget optimized portfolio is possible through the function \verb"optimize.portfolio.rebalancing". Additional arguments are \verb"rebalance\_on} which indicates the rebalancing frequency (years, quarters, months). The estimation is either done from inception (\verb"trailing\_periods=0") or through moving window estimation, where each window has \verb"trailing_periods" observations. The minimum number of observations in the estimation sample is specified by \verb"training_period". Its default value is 36, which corresponds to three years for monthly data.  
+
+As an example, consider the minimum CVaR concentration portfolio, with estimation from in inception and monthly rebalancing. Since we require a minimum estimation length of total number of observations -1, we can optimize the portfolio only for the last two months.   
+
+\begin{verbatim}
+> set.seed(1234)
+> out = optimize.portfolio.rebalancing_v1(R= indexes,constraints=ObjSpec, rebalance_on ="months",
++     optimize_method="DEoptim",itermax=50, search_size=5000, training_period = nrow(indexes)-1 )
+\end{verbatim}
+
+For each of the optimization, the iterations are given as intermediate output:
+\begin{verbatim}
+Iteration: 1 bestvalit: 0.010655 bestmemit:    0.800000    0.100000    0.118000    0.030000
+Iteration: 2 bestvalit: 0.010655 bestmemit:    0.800000    0.100000    0.118000    0.030000
+Iteration: 49 bestvalit: 0.008207 bestmemit:    0.787525    0.124897    0.098001    0.108258
+Iteration: 50 bestvalit: 0.008195 bestmemit:    0.774088    0.122219    0.095973    0.104338
+elapsed time:4.20546416666773
+Iteration: 1 bestvalit: 0.011006 bestmemit:    0.770000    0.050000    0.090000    0.090000
+Iteration: 2 bestvalit: 0.010559 bestmemit:    0.498333    0.010000    0.070000    0.080000
+Iteration: 49 bestvalit: 0.008267 bestmemit:    0.828663    0.126173    0.100836    0.114794
+Iteration: 50 bestvalit: 0.008267 bestmemit:    0.828663    0.126173    0.100836    0.114794
+elapsed time:4.1060591666566
+overall elapsed time:8.31152777777778
+\end{verbatim}
+The output is a list holding for each rebalancing period the output of the optimization, such as portfolio weights.
+\begin{verbatim}
+> out[[1]]$weights
+      US Bonds    US Equities Int'l Equities    Commodities 
+    0.70588695     0.11145087     0.08751686     0.09514531 
+> out[[2]]$weights
+      US Bonds    US Equities Int'l Equities    Commodities 
+    0.70797640     0.10779728     0.08615059     0.09807574
+\end{verbatim}
+But also the value of the objective function:
+\begin{verbatim}
+> out[[1]]$out
+[1] 0.008195072
+> out[[2]]$out
+[1] 0.008266844
+\end{verbatim}
+The first and last observation from the estimation sample:
+\begin{verbatim}
+> out[[1]]$data_summary
+$first
+           US Bonds US Equities Int'l Equities Commodities
+1980-01-31  -0.0272       0.061         0.0462      0.0568
+
+$last
+           US Bonds US Equities Int'l Equities Commodities
+2009-11-30   0.0134      0.0566         0.0199       0.015
+
+> out[[2]]$data_summary
+$first
+           US Bonds US Equities Int'l Equities Commodities
+1980-01-31  -0.0272       0.061         0.0462      0.0568
+
+$last
+           US Bonds US Equities Int'l Equities Commodities
+2009-12-31  -0.0175      0.0189         0.0143      0.0086
+\end{verbatim}
+
+Of course, DE is a stochastic optimizaer and typically will only find a near-optimal solution that depends on the seed. The function \verb"optimize.portfolio.parallel" in \verb"PortfolioAnalytics" allows to run an arbitrary number of portfolio sets in parallel in order to develop "confidence bands" around your solution. It is based on Revolution's    \verb"foreach" package \citep{foreach}.  
+
+\bibliography{PA}
+
+
+\end{document}
+
