@@ -37,6 +37,8 @@ meanvar.portf <- add.objective(portfolio=init, type="risk", name="var", risk_ave
 
 # mean-var efficient frontier
 meanvar.ef <- create.EfficientFrontier(R=R, portfolio=meanvar.portf, type="mean-StdDev")
+print(meanvar.ef)
+summary(meanvar.ef)
 chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="b")
 chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", rf=0)
 chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="StdDev")
@@ -49,10 +51,13 @@ chart.EfficientFrontier(opt_meanvar, match.col="StdDev", n.portfolios=50)
 chart.Weights.EF(opt_meanvar, match.col="StdDev")
 # or we can extract the efficient frontier and then plot it
 ef <- extractEfficientFrontier(object=opt_meanvar, match.col="StdDev", n.portfolios=15)
+print(ef)
 chart.Weights.EF(ef, match.col="StdDev", colorset=bluemono)
 
 # mean-etl efficient frontier
 meanetl.ef <- create.EfficientFrontier(R=R, portfolio=meanetl.portf, type="mean-ES")
+print(meanetl.ef)
+summary(meanetl.ef)
 chart.EfficientFrontier(meanetl.ef, match.col="ES", main="mean-ETL Efficient Frontier", type="l", col="blue")
 chart.Weights.EF(meanetl.ef, colorset=bluemono, match.col="ES")
 
@@ -92,6 +97,3 @@ legend.labels <- c("Long Only", "Box", "Group + Long Only")
 chart.EfficientFrontierOverlay(R=R, portfolio_list=portf.list, type="mean-StdDev", match.col="StdDev", 
                                legend.loc="right", legend.labels=legend.labels)
 
-# TODO add the following methods for objects of class efficient.frontier
-# - print
-# - summary
