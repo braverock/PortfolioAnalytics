@@ -12,13 +12,13 @@
 
   chart.Weights.EF.efficient.frontier(object,
     colorset = NULL, ..., n.portfolios = 25,
-    match.col = "ES", main = "EF Weights", cex.lab = 0.8,
+    match.col = "ES", main = "", cex.lab = 0.8,
     cex.axis = 0.8, cex.legend = 0.8, legend.labels = NULL,
     element.color = "darkgray", legend.loc = "topright")
 
   chart.Weights.EF.optimize.portfolio(object,
     colorset = NULL, ..., n.portfolios = 25,
-    match.col = "ES", main = "EF Weights", cex.lab = 0.8,
+    match.col = "ES", main = "", cex.lab = 0.8,
     cex.axis = 0.8, cex.legend = 0.8, legend.labels = NULL,
     element.color = "darkgray", legend.loc = "topright")
 }

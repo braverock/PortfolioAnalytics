@@ -15,14 +15,17 @@
     ylim = NULL, cex.axis = 0.8,
     element.color = "darkgray",
     main = "Efficient Frontier", ..., rf = 0,
-    cex.legend = 0.8, asset.names = TRUE, pch.assets = 21)
+    tangent.line = TRUE, cex.legend = 0.8,
+    chart.assets = TRUE, labels.assets = TRUE,
+    pch.assets = 21)
 
   chart.EfficientFrontier.optimize.portfolio(object,
     match.col = "ES", n.portfolios = 25, xlim = NULL,
     ylim = NULL, cex.axis = 0.8,
     element.color = "darkgray",
     main = "Efficient Frontier", ..., RAR.text = "SR",
-    rf = 0, cex.legend = 0.8, asset.names = TRUE,
+    rf = 0, tangent.line = TRUE, cex.legend = 0.8,
+    chart.assets = TRUE, labels.assets = TRUE,
     pch.assets = 21)
 
   chart.EfficientFrontier.efficient.frontier(object,
@@ -30,7 +33,8 @@
     ylim = NULL, cex.axis = 0.8,
     element.color = "darkgray",
     main = "Efficient Frontier", ..., RAR.text = "SR",
-    rf = 0, cex.legend = 0.8, asset.names = TRUE,
+    rf = 0, tangent.line = TRUE, cex.legend = 0.8,
+    chart.assets = TRUE, labels.assets = TRUE,
     pch.assets = 21)
 }
 \arguments{
@@ -68,6 +72,8 @@
   maximum Sharpe Ratio or modified Sharpe Ratio tangency
   portfolio will be plotted}
 
+  \item{tangent.line}{TRUE/FALSE to plot the tangent line}
+
   \item{cex.legend}{A numerical value giving the amount by
   which the legend should be magnified relative to the
   default.}
@@ -75,8 +81,11 @@
   \item{RAR.text}{Risk Adjusted Return ratio text to plot
   in the legend}
 
-  \item{asset.names}{TRUE/FALSE to include the asset names
-  in the plot}
+  \item{chart.assets}{TRUE/FALSE to include the assets}
+
+  \item{labels.assets}{TRUE/FALSE to include the asset
+  names in the plot. \code{chart.assets} must be
+  \code{TRUE} to plot asset names}
 
   \item{pch.assets}{plotting character of the assets, same
   as in \code{\link{plot}}}
