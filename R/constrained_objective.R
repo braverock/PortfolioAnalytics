@@ -662,11 +662,19 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
           # Combined min_con and min_dif to take advantage of a better concentration obj measure
           if(!is.null(objective$min_difference) || !is.null(objective$min_concentration)){
             if(isTRUE(objective$min_difference)){
-              #                     max_diff<-max(tmp_measure[[2]]-(sum(tmp_measure[[2]])/length(tmp_measure[[2]]))) #second element is the contribution in absolute terms
+              # max_diff<-max(tmp_measure[[2]]-(sum(tmp_measure[[2]])/length(tmp_measure[[2]]))) #second element is the contribution in absolute terms
               # Uses Herfindahl index to calculate concentration; added scaling perc diffs back to univariate numbers
               max_diff <- sqrt(sum(tmp_measure[[3]]^2))/100  #third element is the contribution in percentage terms
               # out = out + penalty * objective$multiplier * max_diff
               out = out + penalty*objective$multiplier * max_diff
+            }
+            if(isTRUE(objective$min_concentration)){
+              # use HHI to calculate concentration
+              # actual HHI
+              act_hhi <- sum(tmp_measure[[3]]^2)
+              # minimum possible HHI
+              min_hhi <- sum(rep(1/length(tmp_measure[[3]]), length(tmp_measure[[3]]))^2)/100
+              out <- out + penalty * objective$multiplier * abs(act_hhi - min_hhi)
             }
           }
         } # end handling of risk_budget objective
