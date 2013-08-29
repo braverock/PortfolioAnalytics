@@ -14,13 +14,13 @@
     colorset = NULL, ..., n.portfolios = 25,
     match.col = "ES", main = "EF Weights", cex.lab = 0.8,
     cex.axis = 0.8, cex.legend = 0.8, legend.labels = NULL,
-    element.color = "darkgray")
+    element.color = "darkgray", legend.loc = "topright")
 
   chart.Weights.EF.optimize.portfolio(object,
     colorset = NULL, ..., n.portfolios = 25,
     match.col = "ES", main = "EF Weights", cex.lab = 0.8,
     cex.axis = 0.8, cex.legend = 0.8, legend.labels = NULL,
-    element.color = "darkgray")
+    element.color = "darkgray", legend.loc = "topright")
 }
 \arguments{
   \item{object}{object of class \code{efficient.frontier}
@@ -58,6 +58,10 @@
   \item{element.color}{provides the color for drawing
   less-important chart elements, such as the box lines,
   axis lines, etc.}
+
+  \item{legend.loc}{NULL, "topright", "right", or
+  "bottomright". If legend.loc is NULL, the legend will not
+  be plotted.}
 }
 \description{
   This creates a stacked column chart of the weights of

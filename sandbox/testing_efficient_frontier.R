@@ -42,11 +42,18 @@ summary(meanvar.ef, digits=2)
 meanvar.ef$frontier
 # The RAR.text argument can be used for the risk-adjusted-return name on the legend,
 # by default it is 'Modified Sharpe Ratio'
-chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="b", RAR.text="Sharpe Ratio")
+chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", RAR.text="Sharpe Ratio", pch=4)
 # The tangency portfolio and line are plotted by default, these can be ommitted
 # by setting rf=NULL
 chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", rf=NULL)
 chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="StdDev")
+
+# If you have a lot of assets and they don't fit with the default legend, you
+# can set legend.loc=NULL and customize the plot.
+par(mar=c(8, 4, 4, 2)+0.1, xpd=TRUE)
+chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="StdDev", legend.loc=NULL)
+legend("bottom", legend=colnames(R), inset=-1, fill=bluemono, bty="n", ncol=3, cex=0.8)
+par(mar=c(5, 4, 4, 2)+0.1, xpd=FALSE)
 
 # run optimize.portfolio and chart the efficient frontier for that object
 opt_meanvar <- optimize.portfolio(R=R, portfolio=meanvar.portf, optimize_method="ROI", trace=TRUE)
@@ -116,6 +123,7 @@ group.portf <- add.constraint(portfolio=group.portf, type="long_only")
 
 portf.list <- list(lo.portf, box.portf, group.portf)
 legend.labels <- c("Long Only", "Box", "Group + Long Only")
-chart.EfficientFrontierOverlay(R=R, portfolio_list=portf.list, type="mean-StdDev", match.col="StdDev", 
-                               legend.loc="right", legend.labels=legend.labels)
+chart.EfficientFrontierOverlay(R=R, portfolio_list=portf.list, type="mean-StdDev", 
+                               match.col="StdDev", legend.loc="topleft", 
+                               legend.labels=legend.labels, cex.legend=0.6)
 

@@ -7,7 +7,8 @@
     search_size = 2000, main = "Efficient Frontiers",
     cex.axis = 0.8, element.color = "darkgray",
     legend.loc = NULL, legend.labels = NULL,
-    cex.legend = 0.8, xlim = NULL, ylim = NULL, ...)
+    cex.legend = 0.8, xlim = NULL, ylim = NULL, ...,
+    asset.names = TRUE)
 }
 \arguments{
   \item{R}{an xts object of asset returns}
@@ -57,6 +58,9 @@
   \code{\link{plot}}}
 
   \item{...}{passthrough parameters to \code{\link{plot}}}
+
+  \item{asset.names}{TRUE/FALSE to include the asset names
+  in the plot}
 }
 \description{
   Overlay the efficient frontiers of multiple portfolio
