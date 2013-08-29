@@ -92,7 +92,7 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=NULL, 
     }
     # combine the stats from the optimal portfolio to result matrix
     result <- rbind(opt, result)
-    return(structure(result, class="efficient.frontier"))
+    return(structure(result, class="frontier"))
 }
 
 #' Generate the efficient frontier for a mean-variance portfolio
@@ -174,7 +174,7 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25){
     extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
   }
   colnames(out) <- names(stats)
-  return(structure(out, class="efficient.frontier"))
+  return(structure(out, class="frontier"))
 }
 
 #' Generate the efficient frontier for a mean-etl portfolio
@@ -258,7 +258,7 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
     extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
   }
   colnames(out) <- names(stats)
-  return(structure(out, class="efficient.frontier"))
+  return(structure(out, class="frontier"))
 }
 
 #' create an efficient frontier
@@ -415,6 +415,6 @@ extractEfficientFrontier <- function(object, match.col="ES", n.portfolios=25){
   return(structure(list(call=call,
                         frontier=frontier,
                         R=R,
-                        portfolio=portfolio), class="efficient.frontier"))
+                        portfolio=portf), class="efficient.frontier"))
 }
 

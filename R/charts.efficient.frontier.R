@@ -120,7 +120,7 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
   }
   
   # plot a scatter of the assets
-  plot(x=asset_risk, y=asset_ret, xlab=match.col, ylab="mean", main=main, xlim=xlim, ylim=ylim, pch=5, axes=FALSE, ...)
+  plot(x=asset_risk, y=asset_ret, xlab=match.col, ylab="mean", main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
   text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
   # plot the efficient line
   lines(x=x.f, y=y.f, col="darkgray", lwd=2)
@@ -205,7 +205,7 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
   }
   
   # plot a scatter of the assets
-  plot(x=asset_risk, y=asset_ret, xlab=match.col, ylab="mean", main=main, xlim=xlim, ylim=ylim, pch=5, axes=FALSE, ...)
+  plot(x=asset_risk, y=asset_ret, xlab=match.col, ylab="mean", main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
   text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
   # plot the efficient line
   lines(x=x.f, y=y.f, col="darkgray", lwd=2)
@@ -403,7 +403,7 @@ chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n
   }
   
   # plot the efficient frontier line
-  plot(x=frontier[, mtc], y=frontier[, mean.mtc], ylab="mean", xlab=match.col, main=main, xlim=xlim, ylim=ylim, pch=5, axes=FALSE, ...)
+  plot(x=frontier[, mtc], y=frontier[, mean.mtc], ylab="mean", xlab=match.col, main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
   if(chart.assets){
     # risk-return scatter of the assets
     points(x=asset_risk, y=asset_ret)

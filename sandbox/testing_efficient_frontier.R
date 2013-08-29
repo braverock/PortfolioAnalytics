@@ -38,27 +38,48 @@ meanvar.portf <- add.objective(portfolio=init, type="risk", name="var", risk_ave
 # mean-var efficient frontier
 meanvar.ef <- create.EfficientFrontier(R=R, portfolio=meanvar.portf, type="mean-StdDev")
 print(meanvar.ef)
-summary(meanvar.ef)
-chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="b")
-chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", rf=0)
+summary(meanvar.ef, digits=2)
+meanvar.ef$frontier
+# The RAR.text argument can be used for the risk-adjusted-return name on the legend,
+# by default it is 'Modified Sharpe Ratio'
+chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="b", RAR.text="Sharpe Ratio")
+# The tangency portfolio and line are plotted by default, these can be ommitted
+# by setting rf=NULL
+chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", rf=NULL)
 chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="StdDev")
 
 # run optimize.portfolio and chart the efficient frontier for that object
 opt_meanvar <- optimize.portfolio(R=R, portfolio=meanvar.portf, optimize_method="ROI", trace=TRUE)
-chart.EfficientFrontier(opt_meanvar, match.col="StdDev", n.portfolios=50)
+
+# The efficient frontier is created from the 'opt_meanvar' object by getting
+# The portfolio and returns objects and then passing those to create.EfficientFrontier
+chart.EfficientFrontier(opt_meanvar, match.col="StdDev", n.portfolios=25)
+
+# Rerun the optimization with a new risk aversion parameter to change where the
+# portfolio is along the efficient frontier. The 'optimal' portfolio plotted on
+# the efficient frontier is the optimal portfolio returned by optimize.portfolio.
+meanvar.portf$objectives[[2]]$risk_aversion=0.25
+opt_meanvar <- optimize.portfolio(R=R, portfolio=meanvar.portf, optimize_method="ROI", trace=TRUE)
+chart.EfficientFrontier(opt_meanvar, match.col="StdDev", n.portfolios=25)
+
 # The weights along the efficient frontier can be plotted by passing in the
 # optimize.portfolio output object
 chart.Weights.EF(opt_meanvar, match.col="StdDev")
-# or we can extract the efficient frontier and then plot it
+
+# Extract the efficient frontier and then plot it
+# Note that if you want to do multiple charts of the efficient frontier from
+# the optimize.portfolio object, it is best to extractEfficientFrontier as shown
+# below
 ef <- extractEfficientFrontier(object=opt_meanvar, match.col="StdDev", n.portfolios=15)
 print(ef)
+summary(ef, digits=5)
 chart.Weights.EF(ef, match.col="StdDev", colorset=bluemono)
 
 # mean-etl efficient frontier
 meanetl.ef <- create.EfficientFrontier(R=R, portfolio=meanetl.portf, type="mean-ES")
 print(meanetl.ef)
 summary(meanetl.ef)
-chart.EfficientFrontier(meanetl.ef, match.col="ES", main="mean-ETL Efficient Frontier", type="l", col="blue")
+chart.EfficientFrontier(meanetl.ef, match.col="ES", main="mean-ETL Efficient Frontier", type="l", col="blue", RAR.text="STARR")
 chart.Weights.EF(meanetl.ef, colorset=bluemono, match.col="ES")
 
 # mean-etl efficient frontier using random portfolios
@@ -86,7 +107,8 @@ box.portf <- add.constraint(portfolio=init.portf, type="box", min=0.05, max=0.65
 
 # group constraints (also add long only constraints to the group portfolio)
 group.portf <- add.constraint(portfolio=init.portf, type="group", 
-                              groups=c(2, 3), 
+                              groups=list(groupA=c(1, 3),
+                                          groupB=c(2, 4, 5)),
                               group_min=c(0.25, 0.15), 
                               group_max=c(0.75, 0.55))
 group.portf <- add.constraint(portfolio=group.portf, type="long_only")
