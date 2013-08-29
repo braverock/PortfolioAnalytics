@@ -15,21 +15,23 @@
     ylim = NULL, cex.axis = 0.8,
     element.color = "darkgray",
     main = "Efficient Frontier", ..., rf = 0,
-    cex.legend = 0.8, asset.names = TRUE)
+    cex.legend = 0.8, asset.names = TRUE, pch.assets = 21)
 
   chart.EfficientFrontier.optimize.portfolio(object,
     match.col = "ES", n.portfolios = 25, xlim = NULL,
     ylim = NULL, cex.axis = 0.8,
     element.color = "darkgray",
     main = "Efficient Frontier", ..., RAR.text = "SR",
-    rf = 0, cex.legend = 0.8, asset.names = TRUE)
+    rf = 0, cex.legend = 0.8, asset.names = TRUE,
+    pch.assets = 21)
 
   chart.EfficientFrontier.efficient.frontier(object,
     match.col = "ES", n.portfolios = NULL, xlim = NULL,
     ylim = NULL, cex.axis = 0.8,
     element.color = "darkgray",
     main = "Efficient Frontier", ..., RAR.text = "SR",
-    rf = 0, cex.legend = 0.8, asset.names = TRUE)
+    rf = 0, cex.legend = 0.8, asset.names = TRUE,
+    pch.assets = 21)
 }
 \arguments{
   \item{object}{optimal portfolio created by
@@ -75,6 +77,9 @@
 
   \item{asset.names}{TRUE/FALSE to include the asset names
   in the plot}
+
+  \item{pch.assets}{plotting character of the assets, same
+  as in \code{\link{plot}}}
 }
 \description{
   This function charts the efficient frontier and

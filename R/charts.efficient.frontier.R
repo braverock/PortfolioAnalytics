@@ -48,6 +48,7 @@
 #' @param cex.legend A numerical value giving the amount by which the legend should be magnified relative to the default.
 #' @param RAR.text Risk Adjusted Return ratio text to plot in the legend
 #' @param asset.names TRUE/FALSE to include the asset names in the plot
+#' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}
 #' @author Ross Bennett
 #' @export
 chart.EfficientFrontier <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ...){
@@ -56,7 +57,7 @@ chart.EfficientFrontier <- function(object, match.col="ES", n.portfolios=25, xli
 
 #' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., rf=0, cex.legend=0.8, asset.names=TRUE){
+chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., rf=0, cex.legend=0.8, asset.names=TRUE, pch.assets=21){
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class optimize.portfolio.ROI")
   
   portf <- object$portfolio
@@ -123,11 +124,13 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
     ylim[2] <- ylim[2] * 1.1
   }
   
-  # plot a scatter of the assets
-  plot(x=asset_risk, y=asset_ret, xlab=match.col, ylab="Mean", main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
+  # plot the efficient frontier line
+  plot(x=x.f, y=y.f, ylab="Mean", xlab=match.col, main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
+  
+  # risk-return scatter of the assets
+  points(x=asset_risk, y=asset_ret, pch=pch.assets)
   if(asset.names) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
-  # plot the efficient line
-  lines(x=x.f, y=y.f, col="darkgray", lwd=2)
+  
   # plot the optimal portfolio
   points(opt_risk, opt_ret, col="blue", pch=16) # optimal
   text(x=opt_risk, y=opt_ret, labels="Optimal",col="blue", pos=4, cex=0.8)
@@ -147,7 +150,7 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
 
 #' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="SR", rf=0, cex.legend=0.8, asset.names=TRUE){
+chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="SR", rf=0, cex.legend=0.8, asset.names=TRUE, pch.assets=21){
   # This function will work with objects of class optimize.portfolio.DEoptim,
   # optimize.portfolio.random, and optimize.portfolio.pso
   
@@ -212,11 +215,13 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
     ylim[2] <- ylim[2] * 1.1
   }
   
-  # plot a scatter of the assets
-  plot(x=asset_risk, y=asset_ret, xlab=match.col, ylab="Mean", main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
+  # plot the efficient frontier line
+  plot(x=x.f, y=y.f, ylab="Mean", xlab=match.col, main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
+  
+  # risk-return scatter of the assets
+  points(x=asset_risk, y=asset_ret, pch=pch.assets)
   if(asset.names) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
-  # plot the efficient line
-  lines(x=x.f, y=y.f, col="darkgray", lwd=2)
+
   # plot the optimal portfolio
   points(opt_risk, opt_ret, col="blue", pch=16) # optimal
   text(x=opt_risk, y=opt_ret, labels="Optimal",col="blue", pos=4, cex=0.8)
@@ -375,7 +380,7 @@ chart.Weights.EF.optimize.portfolio <- function(object, colorset=NULL, ..., n.po
 
 #' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="SR", rf=0, cex.legend=0.8, asset.names=TRUE){
+chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="SR", rf=0, cex.legend=0.8, asset.names=TRUE, pch.assets=21){
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
   
   # get the returns and efficient frontier object
@@ -426,7 +431,7 @@ chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n
   plot(x=frontier[, mtc], y=frontier[, mean.mtc], ylab="Mean", xlab=match.col, main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
   
   # risk-return scatter of the assets
-  points(x=asset_risk, y=asset_ret)
+  points(x=asset_risk, y=asset_ret, pch=pch.assets)
   if(asset.names) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
   
   if(!is.null(rf)){
@@ -465,9 +470,10 @@ chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n
 #' @param ylim set the y-axis limit, same as in \code{\link{plot}}
 #' @param ... passthrough parameters to \code{\link{plot}}
 #' @param asset.names TRUE/FALSE to include the asset names in the plot
+#' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}
 #' @author Ross Bennett
 #' @export
-chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios=25, match.col="ES", search_size=2000, main="Efficient Frontiers", cex.axis=0.8, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., asset.names=TRUE){
+chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios=25, match.col="ES", search_size=2000, main="Efficient Frontiers", cex.axis=0.8, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., asset.names=TRUE, pch.assets=21){
   # create multiple efficient frontier objects (one per portfolio in portfolio_list)
   if(!is.list(portfolio_list)) stop("portfolio_list must be passed in as a list")
   if(length(portfolio_list) == 1) warning("Only one portfolio object in portfolio_list")
@@ -495,7 +501,7 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
   }
   
   # plot the assets
-  plot(x=asset_risk, y=asset_ret, xlab=match.col, ylab="Mean", main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
+  plot(x=asset_risk, y=asset_ret, xlab=match.col, ylab="Mean", main=main, xlim=xlim, ylim=ylim, axes=FALSE, pch=pch.assets, ...)
   axis(1, cex.axis = cex.axis, col = element.color)
   axis(2, cex.axis = cex.axis, col = element.color)
   box(col = element.color)

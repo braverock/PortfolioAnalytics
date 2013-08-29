@@ -8,7 +8,7 @@
     cex.axis = 0.8, element.color = "darkgray",
     legend.loc = NULL, legend.labels = NULL,
     cex.legend = 0.8, xlim = NULL, ylim = NULL, ...,
-    asset.names = TRUE)
+    asset.names = TRUE, pch.assets = 21)
 }
 \arguments{
   \item{R}{an xts object of asset returns}
@@ -61,6 +61,9 @@
 
   \item{asset.names}{TRUE/FALSE to include the asset names
   in the plot}
+
+  \item{pch.assets}{plotting character of the assets, same
+  as in \code{\link{plot}}}
 }
 \description{
   Overlay the efficient frontiers of multiple portfolio
