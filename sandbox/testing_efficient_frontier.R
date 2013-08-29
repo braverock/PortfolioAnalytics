@@ -40,13 +40,33 @@ meanvar.ef <- create.EfficientFrontier(R=R, portfolio=meanvar.portf, type="mean-
 print(meanvar.ef)
 summary(meanvar.ef, digits=2)
 meanvar.ef$frontier
+
 # The RAR.text argument can be used for the risk-adjusted-return name on the legend,
 # by default it is 'Modified Sharpe Ratio'
 chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", RAR.text="Sharpe Ratio", pch=4)
+
 # The tangency portfolio and line are plotted by default, these can be ommitted
 # by setting rf=NULL
-chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", rf=NULL)
+chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="b", rf=NULL)
+
+# The tangency line can be omitted with tangent.line=FALSE. The tangent portfolio,
+# risk-free rate and Sharpe Ratio are still included in the plot
+chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", tangent.line=FALSE)
+
+# The assets can be omitted with chart.assets=FALSE
+chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", 
+                        tangent.line=FALSE, chart.assets=FALSE)
+
+# Just the names of the assets can be omitted with labels.assets=FALSE and the 
+# plotting character can be changed with pch.assets
+chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l", 
+                        tangent.line=FALSE, labels.assets=FALSE, pch.assets=1)
+
 chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="StdDev")
+
+# The labels for Mean, Weight, and StdDev can be increased or decreased with
+# the cex.lab argument. The default is cex.lab=0.8
+chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="StdDev", main="", cex.lab=1)
 
 # If you have a lot of assets and they don't fit with the default legend, you
 # can set legend.loc=NULL and customize the plot.
@@ -60,14 +80,14 @@ opt_meanvar <- optimize.portfolio(R=R, portfolio=meanvar.portf, optimize_method=
 
 # The efficient frontier is created from the 'opt_meanvar' object by getting
 # The portfolio and returns objects and then passing those to create.EfficientFrontier
-chart.EfficientFrontier(opt_meanvar, match.col="StdDev", n.portfolios=25)
+chart.EfficientFrontier(opt_meanvar, match.col="StdDev", n.portfolios=25, type="l")
 
 # Rerun the optimization with a new risk aversion parameter to change where the
 # portfolio is along the efficient frontier. The 'optimal' portfolio plotted on
 # the efficient frontier is the optimal portfolio returned by optimize.portfolio.
 meanvar.portf$objectives[[2]]$risk_aversion=0.25
 opt_meanvar <- optimize.portfolio(R=R, portfolio=meanvar.portf, optimize_method="ROI", trace=TRUE)
-chart.EfficientFrontier(opt_meanvar, match.col="StdDev", n.portfolios=25)
+chart.EfficientFrontier(opt_meanvar, match.col="StdDev", n.portfolios=25, type="l")
 
 # The weights along the efficient frontier can be plotted by passing in the
 # optimize.portfolio output object
@@ -125,5 +145,6 @@ portf.list <- list(lo.portf, box.portf, group.portf)
 legend.labels <- c("Long Only", "Box", "Group + Long Only")
 chart.EfficientFrontierOverlay(R=R, portfolio_list=portf.list, type="mean-StdDev", 
                                match.col="StdDev", legend.loc="topleft", 
-                               legend.labels=legend.labels, cex.legend=0.6)
+                               legend.labels=legend.labels, cex.legend=0.6,
+                               labels.assets=FALSE, pch.assets=18)
 
