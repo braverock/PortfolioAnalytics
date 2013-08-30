@@ -9,7 +9,8 @@
     legend.loc = NULL, legend.labels = NULL,
     cex.legend = 0.8, xlim = NULL, ylim = NULL, ...,
     chart.assets = TRUE, labels.assets = TRUE,
-    pch.assets = 21)
+    pch.assets = 21, cex.assets = 0.8, col = NULL,
+    lty = NULL, lwd = NULL)
 }
 \arguments{
   \item{R}{an xts object of asset returns}
@@ -67,6 +68,19 @@
 
   \item{pch.assets}{plotting character of the assets, same
   as in \code{\link{plot}}}
+
+  \item{cex.assets}{A numerical value giving the amount by
+  which the asset points and labels should be magnified
+  relative to the default.}
+
+  \item{col}{vector of colors with length equal to the
+  number of portfolios in \code{portfolio_list}}
+
+  \item{lty}{vector of line types with length equal to the
+  number of portfolios in \code{portfolio_list}}
+
+  \item{lwd}{vector of line widths with length equal to the
+  number of portfolios in \code{portfolio_list}}
 }
 \description{
   Overlay the efficient frontiers of multiple portfolio

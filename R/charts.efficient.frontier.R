@@ -504,9 +504,13 @@ chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n
 #' @param chart.assets TRUE/FALSE to include the assets
 #' @param labels.assets TRUE/FALSE to include the asset names in the plot
 #' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}
+#' @param cex.assets A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
+#' @param col vector of colors with length equal to the number of portfolios in \code{portfolio_list}
+#' @param lty vector of line types with length equal to the number of portfolios in \code{portfolio_list}
+#' @param lwd vector of line widths with length equal to the number of portfolios in \code{portfolio_list}
 #' @author Ross Bennett
 #' @export
-chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios=25, match.col="ES", search_size=2000, main="Efficient Frontiers", cex.axis=0.8, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21){
+chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios=25, match.col="ES", search_size=2000, main="Efficient Frontiers", cex.axis=0.8, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
   # create multiple efficient frontier objects (one per portfolio in portfolio_list)
   if(!is.list(portfolio_list)) stop("portfolio_list must be passed in as a list")
   if(length(portfolio_list) == 1) warning("Only one portfolio object in portfolio_list")
@@ -547,6 +551,11 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
     if(labels.assets) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=cex.assets)
   }
   
+  # set some basic plot parameters
+  if(is.null(col)) col <- 1:length(out)
+  if(is.null(lty)) lty <- 1:length(out)
+  if(is.null(lwd)) lwd <- rep(1, length(out))
+  
   for(i in 1:length(out)){
     tmp <- out[[i]]
     tmpfrontier <- tmp$frontier
@@ -566,13 +575,13 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
     }
     if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
     # Add the efficient frontier lines to the plot
-    lines(x=tmpfrontier[, mtc], y=tmpfrontier[, mean.mtc], col=i, lty=i, lwd=2)
+    lines(x=tmpfrontier[, mtc], y=tmpfrontier[, mean.mtc], col=col[i], lty=lty[i], lwd=lwd[i])
   }
   if(!is.null(legend.loc)){
     if(is.null(legend.labels)){
       legend.labels <- paste("Portfolio", 1:length(out), sep=".")
     }
-    legend(legend.loc, legend=legend.labels, col=1:length(out), lty=1:length(out), lwd=2, cex=cex.legend, bty="n") 
+    legend(legend.loc, legend=legend.labels, col=col, lty=lty, lwd=lwd, cex=cex.legend, bty="n") 
   }
   return(invisible(out))
 }
