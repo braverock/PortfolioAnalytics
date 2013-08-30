@@ -17,7 +17,7 @@
     main = "Efficient Frontier", ..., rf = 0,
     tangent.line = TRUE, cex.legend = 0.8,
     chart.assets = TRUE, labels.assets = TRUE,
-    pch.assets = 21)
+    pch.assets = 21, cex.assets = 0.8)
 
   chart.EfficientFrontier.optimize.portfolio(object,
     match.col = "ES", n.portfolios = 25, xlim = NULL,
@@ -26,7 +26,7 @@
     main = "Efficient Frontier", ..., RAR.text = "SR",
     rf = 0, tangent.line = TRUE, cex.legend = 0.8,
     chart.assets = TRUE, labels.assets = TRUE,
-    pch.assets = 21)
+    pch.assets = 21, cex.assets = 0.8)
 
   chart.EfficientFrontier.efficient.frontier(object,
     match.col = "ES", n.portfolios = NULL, xlim = NULL,
@@ -35,7 +35,7 @@
     main = "Efficient Frontier", ..., RAR.text = "SR",
     rf = 0, tangent.line = TRUE, cex.legend = 0.8,
     chart.assets = TRUE, labels.assets = TRUE,
-    pch.assets = 21)
+    pch.assets = 21, cex.assets = 0.8)
 }
 \arguments{
   \item{object}{optimal portfolio created by
@@ -89,6 +89,10 @@
 
   \item{pch.assets}{plotting character of the assets, same
   as in \code{\link{plot}}}
+
+  \item{cex.assets}{A numerical value giving the amount by
+  which the asset points and labels should be magnified
+  relative to the default.}
 }
 \description{
   This function charts the efficient frontier and

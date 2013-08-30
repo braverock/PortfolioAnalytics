@@ -52,6 +52,7 @@
 #' @param labels.assets TRUE/FALSE to include the asset names in the plot. 
 #' \code{chart.assets} must be \code{TRUE} to plot asset names
 #' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}
+#' @param cex.assets A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
 #' @author Ross Bennett
 #' @export
 chart.EfficientFrontier <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ...){
@@ -60,7 +61,7 @@ chart.EfficientFrontier <- function(object, match.col="ES", n.portfolios=25, xli
 
 #' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21){
+chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class optimize.portfolio.ROI")
   
   portf <- object$portfolio
@@ -132,10 +133,13 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
   # plot the efficient frontier line
   plot(x=x.f, y=y.f, ylab="Mean", xlab=match.col, main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
   
+  # Add the global minimum variance or global minimum ETL portfolio
+  points(x=x.f[1], y=y.f[1], pch=16)
+  
   if(chart.assets){
     # risk-return scatter of the assets
-    points(x=asset_risk, y=asset_ret, pch=pch.assets)
-    if(labels.assets) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
+    points(x=asset_risk, y=asset_ret, pch=pch.assets, cex=cex.assets)
+    if(labels.assets) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=cex.assets)
   }
   
   # plot the optimal portfolio
@@ -146,9 +150,9 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
     if(tangent.line) abline(rf, srmax, lty=2)
     points(0, rf, pch=16)
     points(x.f[idx.maxsr], y.f[idx.maxsr], pch=16)
-    text(x=x.f[idx.maxsr], y=y.f[idx.maxsr], labels="T", pos=4, cex=0.8)
+    # text(x=x.f[idx.maxsr], y=y.f[idx.maxsr], labels="T", pos=4, cex=0.8)
     # Add lengend with max Sharpe Ratio and risk-free rate
-    legend("topleft", paste("Max ", rar, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
+    legend("topleft", paste(rar, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
     legend("topleft", inset = c(0,0.05), paste("rf = ", signif(rf,3), sep = ""), bty = "n", cex=cex.legend)
   }
   axis(1, cex.axis = cex.axis, col = element.color)
@@ -158,7 +162,7 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
 
 #' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21){
+chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   # This function will work with objects of class optimize.portfolio.DEoptim,
   # optimize.portfolio.random, and optimize.portfolio.pso
   
@@ -228,10 +232,13 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
   # plot the efficient frontier line
   plot(x=x.f, y=y.f, ylab="Mean", xlab=match.col, main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
   
+  # Add the global minimum variance or global minimum ETL portfolio
+  points(x=x.f[1], y=y.f[1], pch=16)
+  
   if(chart.assets){
     # risk-return scatter of the assets
-    points(x=asset_risk, y=asset_ret, pch=pch.assets)
-    if(labels.assets) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
+    points(x=asset_risk, y=asset_ret, pch=pch.assets, cex=cex.assets)
+    if(labels.assets) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=cex.assets)
   }
   
   # plot the optimal portfolio
@@ -242,9 +249,9 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
     if(tangent.line) abline(rf, srmax, lty=2)
     points(0, rf, pch=16)
     points(x.f[idx.maxsr], y.f[idx.maxsr], pch=16)
-    text(x=x.f[idx.maxsr], y=y.f[idx.maxsr], labels="T", pos=4, cex=0.8)
+    # text(x=x.f[idx.maxsr], y=y.f[idx.maxsr], labels="T", pos=4, cex=0.8)
     # Add lengend with max Sharpe Ratio and risk-free rate
-    legend("topleft", paste("Max ", RAR.text, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
+    legend("topleft", paste(RAR.text, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
     legend("topleft", inset = c(0,0.05), paste("rf = ", signif(rf,3), sep = ""), bty = "n", cex=cex.legend)
   }
   axis(1, cex.axis = cex.axis, col = element.color)
@@ -393,7 +400,7 @@ chart.Weights.EF.optimize.portfolio <- function(object, colorset=NULL, ..., n.po
 
 #' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21){
+chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
   
   # get the returns and efficient frontier object
@@ -445,10 +452,13 @@ chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n
   # plot the efficient frontier line
   plot(x=frontier[, mtc], y=frontier[, mean.mtc], ylab="Mean", xlab=match.col, main=main, xlim=xlim, ylim=ylim, axes=FALSE, ...)
   
+  # Add the global minimum variance or global minimum ETL portfolio
+  points(x=frontier[1, mtc], y=frontier[1, mean.mtc], pch=16)
+  
   if(chart.assets){
     # risk-return scatter of the assets
-    points(x=asset_risk, y=asset_ret, pch=pch.assets)
-    if(labels.assets) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
+    points(x=asset_risk, y=asset_ret, pch=pch.assets, cex=cex.assets)
+    if(labels.assets) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=cex.assets)
   }
   
   if(!is.null(rf)){
@@ -456,9 +466,9 @@ chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n
     if(tangent.line) abline(rf, srmax, lty=2)
     points(0, rf, pch=16)
     points(frontier[idx.maxsr, mtc], frontier[idx.maxsr, mean.mtc], pch=16)
-    text(x=frontier[idx.maxsr], y=frontier[idx.maxsr], labels="T", pos=4, cex=0.8)
+    # text(x=frontier[idx.maxsr], y=frontier[idx.maxsr], labels="T", pos=4, cex=0.8)
     # Add legend with max Risk adjusted Return ratio and risk-free rate
-    legend("topleft", paste("Max ", RAR.text, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
+    legend("topleft", paste(RAR.text, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
     legend("topleft", inset = c(0,0.05), paste("rf = ", signif(rf,3), sep = ""), bty = "n", cex=cex.legend)
   }
   axis(1, cex.axis = cex.axis, col = element.color)
@@ -529,8 +539,8 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
   
   if(chart.assets){
     # risk-return scatter of the assets
-    points(x=asset_risk, y=asset_ret, pch=pch.assets)
-    if(labels.assets) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=0.8)
+    points(x=asset_risk, y=asset_ret, pch=pch.assets, cex=cex.assets)
+    if(labels.assets) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=cex.assets)
   }
   
   for(i in 1:length(out)){
