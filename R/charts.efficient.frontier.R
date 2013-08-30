@@ -89,8 +89,12 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
   if(is.na(mtc)) {
     mtc <- pmatch(paste(match.col,match.col,sep='.'), columnames)
   }
-  if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
-  opt_risk <- xtract[mtc]
+  if(is.na(mtc)){
+    # if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
+    opt_risk <- applyFUN(R=R, weights=wts, FUN=match.col)
+  } else {
+    opt_risk <- xtract[mtc]
+  }
   
   # get the data to plot scatter of asset returns
   asset_ret <- scatterFUN(R=R, FUN="mean")

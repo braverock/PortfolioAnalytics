@@ -1,0 +1,51 @@
+\name{chart.RiskBudget}
+\alias{chart.RiskBudget}
+\title{Chart risk contribution or percent contribution}
+\usage{
+  chart.RiskBudget(object, ..., risk.type = "absolute",
+    main = "Risk Contribution", ylab = "", xlab = NULL,
+    cex.axis = 0.8, cex.lab = 0.8,
+    element.color = "darkgray", las = 3, ylim = NULL)
+}
+\arguments{
+  \item{object}{optimal portfolio object created by
+  \code{\link{optimize.portfolio}}}
+
+  \item{...}{passthrough parameters to \code{\link{plot}}}
+
+  \item{risk.type}{plot risk contribution in absolute terms
+  or percentage contribution}
+
+  \item{main}{main title for the chart}
+
+  \item{ylab}{label for the y-axis}
+
+  \item{xlab}{a title for the x axis: see
+  \code{\link{title}}}
+
+  \item{cex.lab}{The magnification to be used for x and y
+  labels relative to the current setting of \code{cex}}
+
+  \item{cex.axis}{The magnification to be used for axis
+  annotation relative to the current setting of \code{cex}}
+
+  \item{element.color}{color for the default plot lines}
+
+  \item{las}{numeric in \{0,1,2,3\}; the style of axis
+  labels \describe{ \item{0:}{always parallel to the axis
+  [\emph{default}],} \item{1:}{always horizontal,}
+  \item{2:}{always perpendicular to the axis,}
+  \item{3:}{always vertical.} }}
+
+  \item{ylim}{set the y-axis limit, same as in
+  \code{\link{plot}}}
+}
+\description{
+  This function charts the contribution or percent
+  contribution of the resulting objective measures in
+  \code{risk_budget_objectives}.
+}
+\author{
+  Ross Bennett
+}
+
