@@ -4,7 +4,17 @@
 #' This function charts the contribution or percent contribution of the resulting
 #' objective measures in \code{risk_budget_objectives}.
 #' 
+#' \code{neighbors} may be specified in three ways.  
+#' The first is as a single number of neighbors. This will extract the \code{neighbors} closest 
+#' portfolios in terms of the \code{out} numerical statistic.
+#' The second method consists of a numeric vector for \code{neighbors}.
+#' This will extract the \code{neighbors} with portfolio index numbers that correspond to the vector contents.
+#' The third method for specifying \code{neighbors} is to pass in a matrix.  
+#' This matrix should look like the output of \code{\link{extractStats}}, and should contain
+#' properly named contribution and pct_contrib columns. 
+#' 
 #' @param object optimal portfolio object created by \code{\link{optimize.portfolio}}
+#' @param neighbors risk contribution or pct_contrib of neighbor portfolios to be plotted
 #' @param ... passthrough parameters to \code{\link{plot}}
 #' @param risk.type plot risk contribution in absolute terms or percentage contribution
 #' @param main main title for the chart
@@ -23,7 +33,7 @@
 #' @param ylim set the y-axis limit, same as in \code{\link{plot}}
 #' @author Ross Bennett
 #' @export
-chart.RiskBudget <- function(object, ..., risk.type="absolute", main="Risk Contribution", ylab="", xlab=NULL, cex.axis=0.8, cex.lab=0.8, element.color="darkgray", las=3, ylim=NULL){
+chart.RiskBudget <- function(object, neighbors=NULL, ..., risk.type="absolute", main="Risk Contribution", ylab="", xlab=NULL, cex.axis=0.8, cex.lab=0.8, element.color="darkgray", las=3, ylim=NULL){
   if(!inherits(object, "optimize.portfolio")) stop("object must be of class optimize.portfolio")
   portfolio <- object$portfolio
   # class of each objective
@@ -72,33 +82,63 @@ chart.RiskBudget <- function(object, ..., risk.type="absolute", main="Risk Contr
   par(mar = c(bottommargin, 4, topmargin, 2) +.1)
   
   if(risk.type == "absolute"){
-    for(i in 1:length(rb_idx)){
+    for(ii in 1:length(rb_idx)){
       if(is.null(ylim)){
-        ylim <- range(contrib[[i]][[1]])
+        ylim <- range(contrib[[ii]][[1]])
         ylim[1] <- min(0, ylim[1])
         ylim[2] <- ylim[2] * 1.15
       }
-      
+      objname <- portfolio$objectives[[rb_idx[i]]]$name
       # Plot values of contribution
-      plot(contrib[[i]][[1]], type="b", axes=FALSE, xlab='', ylim=ylim, ylab=ylab, main=main, cex.lab=cex.lab, ...)
+      plot(contrib[[ii]][[1]], type="n", axes=FALSE, xlab="", ylim=ylim, ylab=paste(objname, "Contribution", sep=" "), main=main, cex.lab=cex.lab, ...)
+      
+      # neighbors needs to be in the loop if there is more than one risk_budget_objective
+      if(!is.null(neighbors)){
+        if(is.vector(neighbors)){
+          xtract <- extractStats(object)
+          riskcols <- grep(paste(objname, "contribution", sep="."), colnames(xtract))
+          if(length(riskcols) == 0) stop("Could not extract risk column")
+          if(length(neighbors) == 1){
+            # overplot nearby portfolios defined by 'out'
+            orderx <- order(xtract[,"out"])
+            subsetx <- head(xtract[orderx,], n=neighbors)
+            for(i in 1:neighbors) points(subsetx[i, riskcols], type="b", col="lightblue")
+          } else {
+            # assume we have a vector of portfolio numbers
+            subsetx <- xtract[neighbors, riskcols]
+            for(i in 1:length(neighbors)) points(subsetx[i,], type="b", col="lightblue")
+          }
+        } # end if neighbors is a vector
+        if(is.matrix(neighbors) | is.data.frame(neighbors)){
+          # the user has likely passed in a matrix containing calculated values for contrib or pct_contrib
+          nbriskcol <- grep(paste(objname, "contribution", sep="."), colnames(neighbors))
+          if(length(nbriskcol) == 0) stop(paste("must have '", objname,".contribution' as column name in neighbors",sep=""))
+          if(length(nbriskcol) != numassets) stop("number of 'contribution' columns must equal number of assets")
+          for(i in 1:nrow(neighbors)) points(as.numeric(neighbors[i, nbriskcol]), type="b", col="lightblue")
+          # note that here we need to get risk cols separately from the matrix, not from xtract
+          # also note the need for as.numeric.  points() doesn't like matrix inputs
+        } # end neighbors plot for matrix or data.frame
+      } # end if neighbors is not null
+      points(contrib[[ii]][[1]], type="b", ...)
       axis(2, cex.axis = cex.axis, col = element.color)
       axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
       box(col = element.color)
-    }
-  }
+    } # end for loop of risk_budget_objective
+  } # end plot for absolute risk.type
   
   if(risk.type %in% c("percent", "percentage", "pct_contrib")){
-    for(i in 1:length(rb_idx)){
-      min_prisk <- portfolio$objectives[[rb_idx[i]]]$min_prisk
-      max_prisk <- portfolio$objectives[[rb_idx[i]]]$max_prisk
+    for(ii in 1:length(rb_idx)){
+      min_prisk <- portfolio$objectives[[rb_idx[ii]]]$min_prisk
+      max_prisk <- portfolio$objectives[[rb_idx[ii]]]$max_prisk
       if(is.null(ylim)){
-        ylim <- range(c(max_prisk, pct_contrib[[i]][[1]]))
-        ylim[1] <- min(0, ylim[1])
-        ylim[2] <- ylim[2] * 1.15
+        #ylim <- range(c(max_prisk, pct_contrib[[i]][[1]]))
+        #ylim[1] <- min(0, ylim[1])
+        #ylim[2] <- ylim[2] * 1.15
+        ylim <- c(0, 1)
       }
-      
+      objname <- portfolio$objectives[[rb_idx[i]]]$name
       # plot percentage contribution
-      plot(pct_contrib[[i]][[1]], type="b", axes=FALSE, xlab='', ylim=ylim, ylab=ylab, main=main, cex.lab=cex.lab, ...)
+      plot(pct_contrib[[ii]][[1]], type="n", axes=FALSE, xlab='', ylim=ylim, ylab=paste(objname, " % Contribution", sep=" "), main=main, cex.lab=cex.lab, ...)
       # Check for minimum percentage risk (min_prisk) argument
       if(!is.null(min_prisk)){
         points(min_prisk, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
@@ -106,9 +146,44 @@ chart.RiskBudget <- function(object, ..., risk.type="absolute", main="Risk Contr
       if(!is.null(max_prisk)){
         points(max_prisk, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
       }
+      
+      # neighbors needs to be in the loop if there is more than one risk_budget_objective
+      if(!is.null(neighbors)){
+        if(is.vector(neighbors)){
+          xtract <- extractStats(object)
+          if(risk.type == "absolute"){
+            riskcols <- grep(paste(objname, "contribution", sep="."), colnames(xtract))
+          } else if(risk.type %in% c("percent", "percentage", "pct_contrib")){
+            riskcols <- grep(paste(objname, "pct_contrib", sep="."), colnames(xtract))
+          }
+          if(length(riskcols) == 0) stop("Could not extract risk column")
+          if(length(neighbors) == 1){
+            # overplot nearby portfolios defined by 'out'
+            orderx <- order(xtract[,"out"])
+            subsetx <- head(xtract[orderx,], n=neighbors)
+            for(i in 1:neighbors) points(subsetx[i, riskcols], type="b", col="lightblue")
+          } else {
+            # assume we have a vector of portfolio numbers
+            subsetx <- xtract[neighbors, riskcols]
+            for(i in 1:length(neighbors)) points(subsetx[i,], type="b", col="lightblue")
+          }
+        } # end if neighbors is a vector
+        if(is.matrix(neighbors) | is.data.frame(neighbors)){
+          # the user has likely passed in a matrix containing calculated values for contrib or pct_contrib
+          nbriskcol <- grep(paste(objname, "pct_contrib", sep="."), colnames(neighbors))
+          if(length(nbriskcol) == 0) stop(paste("must have '", objname,".pct_contrib' as column name in neighbors",sep=""))
+          if(length(nbriskcol) != numassets) stop("number of 'pct_contrib' columns must equal number of assets")
+          for(i in 1:nrow(neighbors)) points(as.numeric(neighbors[i, nbriskcol]), type="b", col="lightblue")
+          # note that here we need to get risk cols separately from the matrix, not from xtract
+          # also note the need for as.numeric.  points() doesn't like matrix inputs
+        } # end neighbors plot for matrix or data.frame
+      } # end if neighbors is not null
+      points(pct_contrib[[ii]][[1]], type="b", ...)
       axis(2, cex.axis = cex.axis, col = element.color)
       axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
       box(col = element.color)
-    }
-  }
+    } # end for loop of risk_budget_objective
+  } # end plot for pct_contrib risk.type
+  
+  
 }
