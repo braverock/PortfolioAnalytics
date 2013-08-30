@@ -17,17 +17,17 @@
 #' 
 #' See main documentation in \code{\link{add.constraint}}
 #' 
-#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
+#' @param assets number of assets, or optionally a named vector of assets specifying initial weights
 #' @param ... any other passthru parameters
 #' @param min numeric or named vector specifying minimum weight box constraints
 #' @param max numeric or named vector specifying minimum weight box constraints
-#' @param min_mult numeric or named vector specifying minimum multiplier box constraint from seed weight in \code{assets}
-#' @param max_mult numeric or named vector specifying maximum multiplier box constraint from seed weight in \code{assets}
+#' @param min_mult numeric or named vector specifying minimum multiplier box constraint from initial weight in \code{assets}
+#' @param max_mult numeric or named vector specifying maximum multiplier box constraint from initial weight in \code{assets}
 #' @param min_sum minimum sum of all asset weights, default .99
 #' @param max_sum maximum sum of all asset weights, default 1.01
 #' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
 #' @param type character type of the constraint to add or update
-#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
+#' @param assets number of assets, or optionally a named vector of assets specifying initial weights
 #' @param ... any other passthru parameters
 #' @param constrclass character to name the constraint class
 #' @author Peter Carl, Brian G. Peterson, Ross Bennett
@@ -50,7 +50,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
       if (length(assets) == 1) {
         nassets=assets
         #we passed in a number of assets, so we need to create the vector
-        message("assuming equal weighted seed portfolio")
+        message("assuming equal weighted initial portfolio")
         assets<-rep(1/nassets,nassets)
       } else {
         nassets = length(assets)
@@ -65,7 +65,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
     if(is.character(assets)){
       nassets=length(assets)
       assetnames=assets
-      message("assuming equal weighted seed portfolio")
+      message("assuming equal weighted initial portfolio")
       assets<-rep(1/nassets,nassets)
       names(assets)<-assetnames  # set names, so that other code can access it,
       # and doesn't have to know about the character vector
@@ -132,7 +132,7 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
       max_mult = NULL
     }
   }
-  ##now adjust min and max to account for min_mult and max_mult from seed
+  ##now adjust min and max to account for min_mult and max_mult from initial
   if(!is.null(min_mult) & !is.null(min)) {
     tmp_min <- assets*min_mult
     #TODO FIXME this creates a list, and it should create a named vector or matrix
@@ -364,11 +364,11 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
 #' This function is called by add.constraint when type="box" is specified. see \code{\link{add.constraint}}
 #'
 #' @param type character type of the constraint
-#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
+#' @param assets number of assets, or optionally a named vector of assets specifying initial weights
 #' @param min numeric or named vector specifying minimum weight box constraints
 #' @param max numeric or named vector specifying minimum weight box constraints
-#' @param min_mult numeric or named vector specifying minimum multiplier box constraint from seed weight in \code{assets}
-#' @param max_mult numeric or named vector specifying maximum multiplier box constraint from seed weight in \code{assets}
+#' @param min_mult numeric or named vector specifying minimum multiplier box constraint from initial weight in \code{assets}
+#' @param max_mult numeric or named vector specifying maximum multiplier box constraint from initial weight in \code{assets}
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box constraints
@@ -461,7 +461,7 @@ box_constraint <- function(type="box", assets, min, max, min_mult, max_mult, ena
     }
   }
   
-  # now adjust min and max to account for min_mult and max_mult from seed
+  # now adjust min and max to account for min_mult and max_mult from initial
   if(!is.null(min_mult) & !is.null(min)) {
     tmp_min <- assets * min_mult
     #TODO FIXME this creates a list, and it should create a named vector or matrix
@@ -485,7 +485,7 @@ box_constraint <- function(type="box", assets, min, max, min_mult, max_mult, ena
 #' This function is called by add.constraint when type="group" is specified. see \code{\link{add.constraint}}
 #'
 #' @param type character type of the constraint
-#' @param assets number of assets, or optionally a named vector of assets specifying seed weights
+#' @param assets number of assets, or optionally a named vector of assets specifying initial weights
 #' @param groups vector specifying the groups of the assets
 #' @param group_labels character vector to label the groups (e.g. size, asset class, style, etc.)
 #' @param group_min numeric or vector specifying minimum weight group constraints
@@ -916,7 +916,7 @@ position_limit_constraint <- function(type="position_limit", assets, max_pos=NUL
 #' \code{B} matrix without column names or row names.
 #' 
 #' @param type character type of the constraint
-#' @param assets named vector of assets specifying seed weights
+#' @param assets named vector of assets specifying initial weights
 #' @param B vector or matrix of risk factor exposures
 #' @param lower vector of lower bounds of constraints for risk factor exposures
 #' @param upper vector of upper bounds of constraints for risk factor exposures

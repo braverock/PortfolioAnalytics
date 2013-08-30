@@ -9,7 +9,7 @@
 \arguments{
   \item{type}{character type of the constraint}
 
-  \item{assets}{named vector of assets specifying seed
+  \item{assets}{named vector of assets specifying initial
   weights}
 
   \item{B}{vector or matrix of risk factor exposures}

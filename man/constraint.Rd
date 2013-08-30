@@ -13,7 +13,7 @@
 }
 \arguments{
   \item{assets}{number of assets, or optionally a named
-  vector of assets specifying seed weights}
+  vector of assets specifying initial weights}
 
   \item{...}{any other passthru parameters}
 
@@ -24,11 +24,11 @@
   weight box constraints}
 
   \item{min_mult}{numeric or named vector specifying
-  minimum multiplier box constraint from seed weight in
+  minimum multiplier box constraint from initial weight in
   \code{assets}}
 
   \item{max_mult}{numeric or named vector specifying
-  maximum multiplier box constraint from seed weight in
+  maximum multiplier box constraint from initial weight in
   \code{assets}}
 
   \item{min_sum}{minimum sum of all asset weights, default
@@ -44,7 +44,7 @@
   update}
 
   \item{assets}{number of assets, or optionally a named
-  vector of assets specifying seed weights}
+  vector of assets specifying initial weights}
 
   \item{...}{any other passthru parameters}
 

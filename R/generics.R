@@ -181,7 +181,7 @@ summary.portfolio <- function(object, ...){
   cat("PortfolioAnalytics Portfolio Specification Summary", "\n")
   cat(rep("*", 50) ,"\n", sep="")
   
-  cat("Assets and Seed Weights:\n")
+  cat("Assets and Initial Weights:\n")
   print(object$assets)
   cat("\n")
   
@@ -492,8 +492,8 @@ summary.optimize.portfolio <- function(object, ...){
   }
   cat("\n")
   
-  # get seed portfolio
-  cat("Portfolio Assets and Seed Weights:\n")
+  # get initial portfolio
+  cat("Portfolio Assets and Initial Weights:\n")
   print.default(object$portfolio$assets)
   cat("\n")
   
@@ -596,7 +596,7 @@ summary.optimize.portfolio <- function(object, ...){
   cat("Turnover Target Constraint:\n")
   print(constraints$turnover_target)
   cat("\n")
-  cat("Realized turnover from seed weights:\n")
+  cat("Realized turnover from initial weights:\n")
   print(turnover(object$weights, wts.init=object$portfolio$assets))
   cat("\n")
   

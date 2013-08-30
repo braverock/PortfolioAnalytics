@@ -10,7 +10,7 @@
   \item{type}{character type of the constraint}
 
   \item{assets}{number of assets, or optionally a named
-  vector of assets specifying seed weights}
+  vector of assets specifying initial weights}
 
   \item{groups}{vector specifying the groups of the assets}
 
