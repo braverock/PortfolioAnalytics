@@ -9,8 +9,9 @@
 #' @param moments object of moments computed based on objective functions
 #' @param lambda risk_aversion parameter
 #' @param target target return value
+#' @param lambda_hhi concentration aversion parameter
 #' @author Ross Bennett
-gmv_opt <- function(R, constraints, moments, lambda, target){
+gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi){
   
   N <- ncol(R)
   # Applying box constraints
@@ -57,9 +58,14 @@ gmv_opt <- function(R, constraints, moments, lambda, target){
     rhs.vec <- c(rhs.vec, constraints$lower, -constraints$upper)
   }
   
+  print(constraints$conc_aversion)
+  print(lambda_hhi)
   # set up the quadratic objective
-  ROI_objective <- Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
-  
+  if(!is.null(constraints$conc_aversion)){
+    ROI_objective <- Q_objective(Q=2*lambda*moments$var + lambda_hhi * diag(N), L=-moments$mean)
+  } else {
+    ROI_objective <- Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
+  }
   # set up the optimization problem and solve
   opt.prob <- OP(objective=ROI_objective, 
                        constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),

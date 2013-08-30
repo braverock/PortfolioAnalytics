@@ -3,12 +3,17 @@
 \title{constructor for diversification_constraint}
 \usage{
   diversification_constraint(type = "diversification",
-    div_target, enabled = TRUE, message = FALSE, ...)
+    div_target = NULL, conc_aversion = NULL,
+    enabled = TRUE, message = FALSE, ...)
 }
 \arguments{
   \item{type}{character type of the constraint}
 
   \item{div_target}{diversification target value}
+
+  \item{conc_aversion}{concentration aversion parameter.
+  Penalizes over concentration for quadratic utility and
+  minimum variance problems.}
 
   \item{enabled}{TRUE/FALSE}
 

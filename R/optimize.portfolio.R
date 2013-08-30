@@ -683,6 +683,11 @@ optimize.portfolio_v2 <- function(
     } else {
       target <- NA
     }
+    if(!is.null(constraints$conc_aversion)){
+      lambda_hhi <- constraints$conc_aversion
+    } else {
+      lambda_hhi <- 0
+    }
     lambda <- 1
     for(objective in portfolio$objectives){
       if(objective$enabled){
@@ -709,7 +714,7 @@ optimize.portfolio_v2 <- function(
         obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       } else {
-        roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target)
+        roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi)
         weights <- roi_result$weights
         obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
