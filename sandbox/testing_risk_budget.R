@@ -54,11 +54,13 @@ min_conc_clean <- add.objective(portfolio=init.portf, type="risk_budget_objectiv
 # clean.boudt.
 # Error in clean.boudt(na.omit(R[, column, drop = FALSE]), alpha = alpha,  : 
 #                       unused argument(s) (itermax = 50)
+
+# The error appears to have been fixed
 set.seed(1234)
 opt <- optimize.portfolio(R=R.clean, portfolio=min_conc_clean, 
                           optimize_method="DEoptim", search_size=5000,
                           itermax=50)
-traceback()
+
 
 # Upon insepecting traceback(), it looks like the error is due to
 # Return.clean(R, method = objective$arguments.clean, ...) where the dots

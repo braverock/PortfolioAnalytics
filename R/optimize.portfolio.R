@@ -490,15 +490,33 @@ optimize.portfolio_v2 <- function(
   constraints <- get_constraints(portfolio)
   
   # set portfolio moments only once
+  # For set.portfolio.moments, we are passing the returns,
+  # portfolio object, and dotargs. dotargs is a list of arguments
+  # that are passed in as dots in optimize.portfolio. This was
+  # causing errors if clean="boudt" was specified in an objective
+  # and an argument such as itermax was passed in as dots to 
+  # optimize.portfolio. See r2931
   if(!is.function(momentFUN)){
     momentFUN <- match.fun(momentFUN)
   }	
   # TODO FIXME should match formals later
   #dotargs <- set.portfolio.moments(R, constraints, momentargs=dotargs)
   .mformals <- dotargs
-  .mformals$R <- R
-  .mformals$portfolio <- portfolio
-  mout <- try((do.call(momentFUN,.mformals)) ,silent=TRUE)	
+  #.mformals$R <- R
+  #.mformals$portfolio <- portfolio
+  .formals <- formals(momentFUN)
+  onames <- names(.formals)
+  if (length(.mformals)) {
+    dargs <- .mformals
+    pm <- pmatch(names(dargs), onames, nomatch = 0L)
+    names(dargs[pm > 0L]) <- onames[pm]
+    .formals[pm] <- dargs[pm > 0L]
+  }
+  .formals$R <- R
+  .formals$portfolio <- portfolio
+  .formals$... <- NULL
+
+  mout <- try((do.call(momentFUN, .formals)) ,silent=TRUE)
   if(inherits(mout,"try-error")) { 
     message(paste("portfolio moment function failed with message",mout))
   } else {
