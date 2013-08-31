@@ -58,8 +58,6 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi){
     rhs.vec <- c(rhs.vec, constraints$lower, -constraints$upper)
   }
   
-  print(constraints$conc_aversion)
-  print(lambda_hhi)
   # set up the quadratic objective
   if(!is.null(constraints$conc_aversion)){
     ROI_objective <- Q_objective(Q=2*lambda*moments$var + lambda_hhi * diag(N), L=-moments$mean)

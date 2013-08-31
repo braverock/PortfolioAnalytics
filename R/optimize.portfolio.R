@@ -515,7 +515,10 @@ optimize.portfolio_v2 <- function(
   .formals$R <- R
   .formals$portfolio <- portfolio
   .formals$... <- NULL
-
+  
+  # If no dotargs are passed in, .formals was a pairlist and do.call was failing
+  if(!inherits(.formals, "list")) .formals <- as.list(.formals)
+  
   mout <- try((do.call(momentFUN, .formals)) ,silent=TRUE)
   if(inherits(mout,"try-error")) { 
     message(paste("portfolio moment function failed with message",mout))
