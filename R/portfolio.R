@@ -88,6 +88,13 @@ portfolio.spec <- function(assets=NULL, category_labels=NULL, weight_seq=NULL, m
     if(length(category_labels) != length(assets)) {
       stop("length(category_labels) must be equal to length(assets)")
     }
+    # Turn category_labels into a list that can be used with group constraints
+    unique_labels <- unique(category_labels)
+    tmp <- list()
+    for(i in 1:length(unique_labels)){
+      tmp[[unique_labels[i]]] <- which(category_labels == unique_labels[i])
+    }
+    category_labels <- tmp
   }
   
   ## now structure and return

@@ -366,3 +366,56 @@ extractObjectiveMeasures <- function(object){
   return(out)
 }
 
+#' Extract the group and/or category weights
+#' 
+#' This function extracts the weights by group and/or category from an object
+#' of class \code{optimize.portfolio}
+#' 
+#' @param object object of class \code{optimize.portfolio}
+#' @param ... passthrough parameters. Not currently used
+#' @return a list with two elements
+#' \itemize{
+#'   \item{weights: }{Optimal set of weights from the \code{optimize.portfolio} object}
+#'   \item{category_weights: }{Weights by category if category_labels are supplied in the \code{portfolio} object}
+#'   \item{group_weights: }{Weights by group if group is a constraint type}
+#' }
+#' @author Ross Bennett
+#' @export
+extractGroups <- function(object, ...){
+  if(!inherits(object, "optimize.portfolio")) stop("object must be of class 'optimize.portfolio'")
+  
+  # Check category_labels in portfolio object
+  category_labels <- object$portfolio$category_labels
+  
+  # Get the constraints to check for group constraints
+  constraints <- get_constraints(object$portfolio)
+  
+  groups <- constraints$groups
+  
+  cat_weights <- NULL
+  group_weights <- NULL
+  
+  if(!is.null(category_labels)){
+    cat_names <- names(category_labels)
+    ncats <- length(category_labels)
+    cat_weights <- rep(0, ncats)
+    for(i in 1:ncats){
+      cat_weights[i] <- sum(object$weights[category_labels[[i]]])
+    }
+    names(cat_weights) <- cat_names
+  }
+  
+  if(!is.null(groups)){
+    n.groups <- length(groups)
+    group_weights <- rep(0, n.groups)
+    for(i in 1:n.groups){
+      group_weights[i] <- sum(object$weights[groups[[i]]])
+    }
+    names(group_weights) <- constraints$group_labels
+  }
+  return(list(weights=object$weights, 
+              category_weights=cat_weights, 
+              group_weights=group_weights)
+  )
+}
+

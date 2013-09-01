@@ -54,3 +54,4 @@ Collate:
     'chart.RiskReward.R'
     'charts.efficient.frontier.R'
     'charts.risk.R'
+    'charts.groups.R'
