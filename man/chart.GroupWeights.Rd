@@ -3,9 +3,9 @@
 \title{Chart weights by group or category}
 \usage{
   chart.GroupWeights(object, ...,
-    grouping = c("groups", "category"),
+    grouping = c("groups", "category"), plot.type = "line",
     main = "Group Weights", las = 3, xlab = NULL,
-    cex.lab = 1, element.color = "darkgray",
+    cex.lab = 0.8, element.color = "darkgray",
     cex.axis = 0.8)
 }
 \arguments{
@@ -16,6 +16,8 @@
   \item{grouping}{\itemize{ \item{groups: }{group the
   weights group constraints} \item{category_labels: }{group
   the weights by category_labels in portfolio object} }}
+
+  \item{plot.type}{"line" or "barplot"}
 
   \item{main}{an overall title for the plot: see
   \code{\link{title}}}
