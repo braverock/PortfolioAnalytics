@@ -1,0 +1,44 @@
+\name{weight_concentration_objective}
+\alias{weight_concentration_objective}
+\title{Constructor for weight concentration objective}
+\usage{
+  weight_concentration_objective(name, conc_aversion,
+    conc_groups = NULL, arguments = NULL, enabled = TRUE,
+    ...)
+}
+\arguments{
+  \item{name}{name of concentration measure, currently only
+  "HHI" is supported.}
+
+  \item{conc_aversion}{concentration aversion value(s)}
+
+  \item{conc_groups}{list of vectors specifying the groups
+  of the assets. Similar to \code{groups} in
+  \code{\link{group_constraint}}}
+
+  \item{arguments}{default arguments to be passed to an
+  objective function when executed}
+
+  \item{enabled}{TRUE/FALSE}
+
+  \item{\dots}{any other passthru parameters}
+}
+\description{
+  This function penalizes weight concentration using the
+  Herfindahl-Hirschman Index as a measure of concentration.
+}
+\details{
+  The \code{conc_aversion} argument can be a scalar or
+  vector of concentration aversion values If
+  \code{conc_aversion} is a scalar and \code{conc_groups}
+  is \code{NULL}, then the concentration aversion value
+  will be applied to the overall weights.
+
+  If \code{conc_groups} is specified as an argument, then
+  the concentration aversion value(s) will be applied to
+  each group.
+}
+\author{
+  Ross Bennett
+}
+

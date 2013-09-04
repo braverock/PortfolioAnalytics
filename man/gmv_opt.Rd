@@ -3,7 +3,7 @@
 \title{Optimization function to solve minimum variance or maximum quadratic utility problems}
 \usage{
   gmv_opt(R, constraints, moments, lambda, target,
-    lambda_hhi)
+    lambda_hhi, conc_groups)
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -19,6 +19,9 @@
   \item{target}{target return value}
 
   \item{lambda_hhi}{concentration aversion parameter}
+
+  \item{conc_groups}{list of vectors specifying the groups
+  of the assets.}
 }
 \description{
   This function is called by optimize.portfolio to solve

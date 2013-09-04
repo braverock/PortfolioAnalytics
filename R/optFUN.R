@@ -10,9 +10,10 @@
 #' @param lambda risk_aversion parameter
 #' @param target target return value
 #' @param lambda_hhi concentration aversion parameter
+#' @param conc_groups list of vectors specifying the groups of the assets. 
 #' @author Ross Bennett
-gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi){
-  
+gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups){
+
   N <- ncol(R)
   # Applying box constraints
   bnds <- list(lower=list(ind=seq.int(1L, N), val=as.numeric(constraints$min)),
@@ -59,8 +60,24 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi){
   }
   
   # set up the quadratic objective
-  if(!is.null(constraints$conc_aversion)){
-    ROI_objective <- Q_objective(Q=2*lambda*moments$var + lambda_hhi * diag(N), L=-moments$mean)
+  if(!is.null(lambda_hhi)){
+    if(length(lambda_hhi) == 1 & is.null(conc_groups)){
+      ROI_objective <- Q_objective(Q=2*lambda*moments$var + lambda_hhi * diag(N), L=-moments$mean)
+    } else if(!is.null(conc_groups)){
+      # construct the matrix with concentration aversion values by group
+      hhi_mat <- matrix(0, nrow=N, ncol=N)
+      vec <- 1:N
+      for(i in 1:length(conc_groups)){
+        tmpI <- diag(N)
+        tmpvec <- conc_groups[[i]]
+        zerovec <- setdiff(vec, tmpvec)
+        for(j in 1:length(zerovec)){
+          tmpI[zerovec[j], ] <- rep(0, N)
+        }
+        hhi_mat <- hhi_mat + lambda_hhi[i] * tmpI
+      }
+      ROI_objective <- Q_objective(Q=2*lambda*moments$var + hhi_mat, L=-moments$mean)
+    }
   } else {
     ROI_objective <- Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
   }

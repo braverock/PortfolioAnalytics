@@ -106,6 +106,12 @@ add.objective_v1 <- function(constraints, type, name, arguments=NULL, enabled=TR
                                                           arguments=arguments,
                                                           ...=...)
            },
+           weight_conc=, weight_concentration = 
+             {tmp_objective = weight_concentration_objective(name=name, 
+                                                             enabled=enabled, 
+                                                             arguments=arguments, 
+                                                             ...=...)
+           },
           
         null =
           {return(constraints)} # got nothing, default to simply returning
@@ -182,6 +188,12 @@ add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=
                               portfolio$objectives <- c(portfolio$objectives, tmp_objective)
                               return(portfolio)
          },
+         weight_conc=, weight_concentration = 
+           {tmp_objective = weight_concentration_objective(name=name, 
+                                                           enabled=enabled, 
+                                                           arguments=arguments, 
+                                                           ...=...)
+            },
          null = 
            {return(portfolio)} # got nothing, default to simply returning
          ) # end objective type switch
@@ -409,6 +421,51 @@ quadratic_utility_objective <- function(risk_aversion=1, target=NULL, enabled=TR
   qu[[2]] <- portfolio_risk_objective(name="var", risk_aversion=risk_aversion, enabled=enabled)
   return(qu)
 } # end quadratic utility objective constructor
+
+#' Constructor for weight concentration objective
+#' 
+#' This function penalizes weight concentration using the Herfindahl-Hirschman Index
+#' as a measure of concentration.
+#' 
+#' The \code{conc_aversion} argument can be a scalar or vector of concentration
+#' aversion values If \code{conc_aversion} is a scalar and \code{conc_groups} is
+#' \code{NULL}, then the concentration aversion value will be applied to the overall
+#' weights.
+#' 
+#' If \code{conc_groups} is specified as an argument, then the concentration
+#' aversion value(s) will be applied to each group.
+#' 
+#' @param name name of concentration measure, currently only "HHI" is supported.
+#' @param conc_aversion concentration aversion value(s)
+#' @param conc_groups list of vectors specifying the groups of the assets. Similar
+#' to \code{groups} in \code{\link{group_constraint}}
+#' @param arguments default arguments to be passed to an objective function when executed
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters
+#' @author Ross Bennett
+#' @export
+weight_concentration_objective <- function(name, conc_aversion, conc_groups=NULL, arguments=NULL, enabled=TRUE, ...){
+  # TODO: write HHI function to be used by global solvers in constrained_objective
+  
+  # check if conc_groups is specified as an argument
+  if(!is.null(conc_groups)){
+    arguments$groups <- conc_groups
+    if(!is.list(conc_groups)) stop("conc_groups must be passed in as a list")
+    
+    if(length(conc_aversion) == 1){
+      # if conc_aversion is a scalar, replicate to the number of groups
+      conc_aversion <- rep(conc_aversion, length(conc_groups))
+    }
+    # length of conc_aversion must be equal to the length of conc_groups
+    if(length(conc_aversion) != length(conc_groups)) stop("length of conc_aversion must be equal to length of groups")
+  } else if(is.null(conc_groups)){
+    if(length(conc_aversion) != 1) stop("conc_aversion must be a scalar value when conc_groups are not specified")
+  }
+  Objective <- objective(name=name, enabled=enabled, arguments=arguments, objclass=c("weight_concentration_objective","objective"), ... )
+  Objective$conc_aversion <- conc_aversion
+  Objective$conc_groups <- conc_groups
+  return(Objective)
+}
 
 #' Insert a list of objectives into the objectives slot of a portfolio object
 #' 

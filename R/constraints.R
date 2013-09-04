@@ -784,8 +784,6 @@ turnover_constraint <- function(type="turnover", turnover_target, enabled=TRUE, 
 #' 
 #' @param type character type of the constraint
 #' @param div_target diversification target value
-#' @param conc_aversion concentration aversion parameter. Penalizes over 
-#' concentration for quadratic utility and minimum variance problems.
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box and/or group constraints
@@ -799,10 +797,9 @@ turnover_constraint <- function(type="turnover", turnover_target, enabled=TRUE, 
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
 #' @export
-diversification_constraint <- function(type="diversification", div_target=NULL, conc_aversion=NULL, enabled=TRUE, message=FALSE, ...){
+diversification_constraint <- function(type="diversification", div_target=NULL, enabled=TRUE, message=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="diversification_constraint", ...)
   Constraint$div_target <- div_target
-  Constraint$conc_aversion <- conc_aversion
   return(Constraint)
 }
 

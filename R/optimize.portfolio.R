@@ -704,15 +704,17 @@ optimize.portfolio_v2 <- function(
     } else {
       target <- NA
     }
-    if(!is.null(constraints$conc_aversion)){
-      lambda_hhi <- constraints$conc_aversion
-    } else {
-      lambda_hhi <- 0
-    }
+    # comment out so concentration aversion can only be specified as an objective
+    # because it is added to the quadratic objective term for QP problems (minvar and qu)
+    # if(!is.null(constraints$conc_aversion)){
+    #  lambda_hhi <- constraints$conc_aversion
+    #} else {
+    #  lambda_hhi <- 0
+    #}
     lambda <- 1
     for(objective in portfolio$objectives){
       if(objective$enabled){
-        if(!any(c(objective$name == "mean", objective$name == "var", objective$name == "CVaR", objective$name == "ES", objective$name == "ETL")))
+        if(!any(c(objective$name == "HHI", objective$name == "mean", objective$name == "var", objective$name == "CVaR", objective$name == "ES", objective$name == "ETL")))
           stop("ROI only solves mean, var, or sample ETL/ES/CVaR type business objectives, choose a different optimize_method.")
         # I'm not sure what changed, but moments$mean used to be a vector of the column means
         # now it is a scalar value of the mean of the entire R object
@@ -724,6 +726,8 @@ optimize.portfolio_v2 <- function(
         target <- ifelse(!is.null(objective$target), objective$target, target)
         alpha <- ifelse(!is.null(objective$alpha), objective$alpha, alpha)
         lambda <- ifelse(!is.null(objective$risk_aversion), objective$risk_aversion, lambda)
+        if(!is.null(objective$conc_aversion)) lambda_hhi <- objective$conc_aversion else lambda_hhi <- NULL
+        if(!is.null(objective$conc_groups)) conc_groups <- objective$conc_groups else conc_groups <- NULL
       }
     }
     if("var" %in% names(moments)){
@@ -735,7 +739,7 @@ optimize.portfolio_v2 <- function(
         obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       } else {
-        roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi)
+        roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
         weights <- roi_result$weights
         obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)

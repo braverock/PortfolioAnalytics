@@ -256,6 +256,18 @@ print.optimize.portfolio.ROI <- function(x, ..., digits = max(3, getOption("digi
   for(i in 1:length(objective_measures)){
     print(tmp_obj[i], digits=4)
     cat("\n")
+    if(length(objective_measures[[i]]) > 1){
+      # This will be the case for any objective measures with HHI for QP problems
+      for(j in 2:length(objective_measures[[i]])){
+        tmpl <- objective_measures[[i]][j]
+        cat(names(tmpl), ":\n")
+        tmpv <- unlist(tmpl)
+        # names(tmpv) <- names(x$weights)
+        print(tmpv)
+        cat("\n")
+      }
+    }
+    cat("\n")
   }
   cat("\n")
 }
