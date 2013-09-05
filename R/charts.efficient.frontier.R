@@ -2,7 +2,7 @@
 #' Chart the efficient frontier and risk-return scatter
 #' 
 #' Chart the efficient frontier and risk-return scatter of the assets for 
-#' optimize.portfolio and efficient.frontier objects
+#' optimize.portfolio. or efficient.frontier objects
 #' 
 #' @details
 #' For objects created by optimize.portfolio with 'DEoptim', 'random', or 'pso'
@@ -33,13 +33,13 @@
 #' will be plotted using a risk free rate of 0. Set \code{rf=NULL} to omit 
 #' this from the plot. 
 #' 
-#' @param object object to chart
+#' @param object object of class optimize.portfolio.ROI to chart
+#' @param \dots passthru parameters to \code{\link{plot}}
 #' @param match.col string name of column to use for risk (horizontal axis).
 #' \code{match.col} must match the name of an objective measure in the 
 #' \code{objective_measures} or \code{opt_values} slot in the object created 
 #' by \code{\link{optimize.portfolio}}.
 #' @param n.portfolios number of portfolios to use to plot the efficient frontier
-#' @param \dots passthru parameters to \code{\link{plot}}
 #' @param xlim set the x-axis limit, same as in \code{\link{plot}}
 #' @param ylim set the y-axis limit, same as in \code{\link{plot}}
 #' @param cex.axis A numerical value giving the amount by which the axis should be magnified relative to the default.
@@ -55,17 +55,16 @@
 #' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}
 #' @param cex.assets A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
 #' @author Ross Bennett
-#' @aliases chart.EfficientFrontier.optimize.portfolio.ROI chart.EfficientFrontier.optimize.portfolio chart.EfficientFrontier.efficient.frontier
+#' @rdname chart.EfficientFrontier
 #' @export
-chart.EfficientFrontier <- function(object, match.col, n.portfolios, ...){
+chart.EfficientFrontier <- function(object, ...){
   UseMethod("chart.EfficientFrontier")
 }
 
-
+#' @rdname chart.EfficientFrontier
 #' @method chart.EfficientFrontier optimize.portfolio.ROI
 #' @S3method chart.EfficientFrontier optimize.portfolio.ROI
-#' @export
-chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES", n.portfolios=25, ..., xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
+chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, ..., match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class optimize.portfolio.ROI")
   
   portf <- object$portfolio
@@ -160,7 +159,7 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
     points(x.f[idx.maxsr], y.f[idx.maxsr], pch=16)
     # text(x=x.f[idx.maxsr], y=y.f[idx.maxsr], labels="T", pos=4, cex=0.8)
     # Add lengend with max Sharpe Ratio and risk-free rate
-    legend("topleft", paste(rar, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
+    legend("topleft", paste(RAR.text, " = ", signif(srmax,3), sep = ""), bty = "n", cex=cex.legend)
     legend("topleft", inset = c(0,0.05), paste("rf = ", signif(rf,3), sep = ""), bty = "n", cex=cex.legend)
   }
   axis(1, cex.axis = cex.axis, col = element.color)
@@ -168,11 +167,10 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
   box(col = element.color)
 }
 
-
+#' @rdname chart.EfficientFrontier
 #' @method chart.EfficientFrontier optimize.portfolio
 #' @S3method chart.EfficientFrontier optimize.portfolio
-#' @export
-chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n.portfolios=25, ..., xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
+chart.EfficientFrontier.optimize.portfolio <- function(object, ..., match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   # This function will work with objects of class optimize.portfolio.DEoptim,
   # optimize.portfolio.random, and optimize.portfolio.pso
   
@@ -269,43 +267,12 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
   box(col = element.color)
 }
 
-# ' chart weights along an efficient frontier
-# ' 
-# ' This creates a stacked column chart of the weights of portfolios along an efficient frontier.
-# ' 
-# ' @param object object to chart.
-# ' @param \dots passthru parameters to \code{barplot}.
-# ' @param colorset color palette to use.
-# ' @param n.portfolios number of portfolios to extract along the efficient frontier.
-# ' This is only used for objects of class \code{optimize.portfolio}
-# ' @param by.groups TRUE/FALSE. If TRUE, the weights by group are charted.
-# ' @param match.col match.col string name of column to use for risk (horizontal axis).
-# ' Must match the name of an objective.
-# ' @param main main title used in the plot.
-# ' @param cex.lab The magnification to be used for x-axis and y-axis labels relative to the current setting of 'cex'.
-# ' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
-# ' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}.
-# ' @param legend.labels character vector to use for the legend labels
-# ' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
-# ' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted.
-# ' @author Ross Bennett
-# ' @aliases chart.Weights.EF.efficient.frontier chart.Weights.EF.optimize.portfolio
-# ' @export
 
 #' Chart weights along an efficient frontier
 #' 
-#' This function is a generic method to chart weights along an efficient frontier
+#' This function produces a stacked barplot of weights along the efficient frontier.
 #' 
-#' @param object object to chart
-#' @param \dots any other passthru parameters
-#' @export
-chart.Weights.EF <- function(object, ...){
-  UseMethod("chart.Weights.EF")
-}
-
-#' Chart weights along an efficient frontier for an efficient.frontier object
-#' 
-#' @param object object of class \code{efficient.frontier}
+#' @param object object of class \code{efficient.frontier} or \code{optimize.portfolio}
 #' @param \dots passthru parameters to \code{barplot}.
 #' @param colorset color palette to use
 #' @param n.portfolios number of portfolios to extract along the efficient frontier
@@ -319,6 +286,14 @@ chart.Weights.EF <- function(object, ...){
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
 #' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted
 #' @author Ross Bennett
+#' @rdname chart.Weights.EF
+#' @export
+chart.Weights.EF <- function(object, ...){
+  UseMethod("chart.Weights.EF")
+}
+
+
+#' @rdname chart.Weights.EF
 #' @method chart.Weights.EF efficient.frontier
 #' @S3method chart.Weights.EF efficient.frontier
 chart.Weights.EF.efficient.frontier <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
@@ -443,22 +418,7 @@ chart.Weights.EF.efficient.frontier <- function(object, ..., colorset=NULL, n.po
   box(col=element.color)
 }
 
-#' Chart weights along an efficient frontier for an efficient.frontier object
-#' 
-#' @param object object of class \code{efficient.frontier}
-#' @param \dots passthru parameters to \code{barplot}.
-#' @param colorset color palette to use
-#' @param n.portfolios number of portfolios to extract along the efficient frontier
-#' @param by.groups TRUE/FALSE. If TRUE, the group weights are charted
-#' @param match.col string name of column to use for risk (horizontal axis). Must match the name of an objective.
-#' @param main title used in the plot.
-#' @param cex.lab The magnification to be used for x-axis and y-axis labels relative to the current setting of 'cex'
-#' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}
-#' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}
-#' @param legend.labels character vector to use for the legend labels
-#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
-#' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted
-#' @author Ross Bennett
+#' @rdname chart.Weights.EF
 #' @method chart.Weights.EF optimize.portfolio
 #' @S3method chart.Weights.EF optimize.portfolio
 chart.Weights.EF.optimize.portfolio <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
@@ -474,10 +434,10 @@ chart.Weights.EF.optimize.portfolio <- function(object, ..., colorset=NULL, n.po
                                         legend.loc=legend.loc)
 }
 
+#' @rdname chart.EfficientFrontier
 #' @method chart.EfficientFrontier efficient.frontier
 #' @S3method chart.EfficientFrontier efficient.frontier
-#' @export
-chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n.portfolios=NULL, ..., xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
+chart.EfficientFrontier.efficient.frontier <- function(object, ..., match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
   
   # get the returns and efficient frontier object
