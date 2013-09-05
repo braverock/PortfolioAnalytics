@@ -339,6 +339,7 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
 #' @param trace TRUE/FALSE whether to include debugging and additional detail in the output list
 #' @param normalize TRUE/FALSE whether to normalize results to min/max sum (TRUE), or let the optimizer penalize portfolios that do not conform (FALSE)
 #' @param storage TRUE/FALSE default TRUE for DEoptim with trace, otherwise FALSE. not typically user-called
+#' @param constraints a v1_constraint object for \code{constrained_objective_v1}
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
 #' @aliases constrained_objective constrained_objective_v1

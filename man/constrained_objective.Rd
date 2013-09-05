@@ -34,6 +34,9 @@
 
   \item{storage}{TRUE/FALSE default TRUE for DEoptim with
   trace, otherwise FALSE. not typically user-called}
+
+  \item{constraints}{a v1_constraint object for
+  \code{constrained_objective_v1}}
 }
 \description{
   function to calculate a numeric return value for a

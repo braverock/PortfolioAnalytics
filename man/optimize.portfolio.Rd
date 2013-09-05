@@ -1,6 +1,6 @@
 \name{optimize.portfolio}
-\alias{optimize_portfolio_v1}
 \alias{optimize.portfolio}
+\alias{optimize.portfolio_v1}
 \alias{optimize.portfolio_v2}
 \title{constrained optimization of portfolios}
 \usage{

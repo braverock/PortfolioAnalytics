@@ -1,5 +1,6 @@
 \name{optimize.portfolio.rebalancing}
 \alias{optimize.portfolio.rebalancing}
+\alias{optimize.portfolio.rebalancing_v1}
 \title{portfolio optimization with support for rebalancing or rolling periods}
 \usage{
   optimize.portfolio.rebalancing_v1(R, constraints,

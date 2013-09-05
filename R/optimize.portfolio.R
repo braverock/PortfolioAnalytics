@@ -1037,7 +1037,7 @@ optimize.portfolio_v2 <- function(
 #' }
 #' 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
-#' @aliases optimize.portfolio_v2 optimize_portfolio_v1
+#' @aliases optimize.portfolio_v2 optimize.portfolio_v1
 #' @seealso \code{\link{portfolio.spec}}
 #' @name optimize.portfolio
 #' @export
@@ -1109,6 +1109,7 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @name optimize.portfolio.rebalancing
+#' @aliases optimize.portfolio.rebalancing optimize.portfolio.rebalancing_v1
 #' @export
 optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, objectives=NULL, optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
 {
