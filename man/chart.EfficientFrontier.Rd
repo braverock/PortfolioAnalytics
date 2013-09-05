@@ -1,5 +1,8 @@
 \name{chart.EfficientFrontier}
 \alias{chart.EfficientFrontier}
+\alias{chart.EfficientFrontier.efficient.frontier}
+\alias{chart.EfficientFrontier.optimize.portfolio}
+\alias{chart.EfficientFrontier.optimize.portfolio.ROI}
 \title{Chart the efficient frontier and risk-return scatter}
 \usage{
   chart.EfficientFrontier(object, match.col, n.portfolios,
@@ -99,8 +102,6 @@
   plot.
 }
 \author{
-  Ross Bennett
-
   Ross Bennett
 }
 

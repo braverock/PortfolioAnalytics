@@ -55,7 +55,7 @@
 #' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}
 #' @param cex.assets A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
 #' @author Ross Bennett
-#' @author Ross Bennett
+#' @aliases chart.EfficientFrontier.optimize.portfolio.ROI chart.EfficientFrontier.optimize.portfolio chart.EfficientFrontier.efficient.frontier
 #' @export
 chart.EfficientFrontier <- function(object, match.col, n.portfolios, ...){
   UseMethod("chart.EfficientFrontier")
@@ -269,35 +269,58 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
   box(col = element.color)
 }
 
-#' chart weights along an efficient frontier
+# ' chart weights along an efficient frontier
+# ' 
+# ' This creates a stacked column chart of the weights of portfolios along an efficient frontier.
+# ' 
+# ' @param object object to chart.
+# ' @param \dots passthru parameters to \code{barplot}.
+# ' @param colorset color palette to use.
+# ' @param n.portfolios number of portfolios to extract along the efficient frontier.
+# ' This is only used for objects of class \code{optimize.portfolio}
+# ' @param by.groups TRUE/FALSE. If TRUE, the weights by group are charted.
+# ' @param match.col match.col string name of column to use for risk (horizontal axis).
+# ' Must match the name of an objective.
+# ' @param main main title used in the plot.
+# ' @param cex.lab The magnification to be used for x-axis and y-axis labels relative to the current setting of 'cex'.
+# ' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
+# ' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}.
+# ' @param legend.labels character vector to use for the legend labels
+# ' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
+# ' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted.
+# ' @author Ross Bennett
+# ' @aliases chart.Weights.EF.efficient.frontier chart.Weights.EF.optimize.portfolio
+# ' @export
+
+#' Chart weights along an efficient frontier
 #' 
-#' This creates a stacked column chart of the weights of portfolios along an efficient frontier.
+#' This function is a generic method to chart weights along an efficient frontier
 #' 
-#' @param object object to chart.
-#' @param \dots passthru parameters to \code{barplot}.
-#' @param colorset color palette to use.
-#' @param n.portfolios number of portfolios to extract along the efficient frontier.
-#' This is only used for objects of class \code{optimize.portfolio}
-#' @param by.groups TRUE/FALSE. If TRUE, the weights by group are charted.
-#' @param match.col match.col string name of column to use for risk (horizontal axis).
-#' Must match the name of an objective.
-#' @param main main title used in the plot.
-#' @param cex.lab The magnification to be used for x-axis and y-axis labels relative to the current setting of 'cex'.
-#' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
-#' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}.
-#' @param legend.labels character vector to use for the legend labels
-#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
-#' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted.
-#' @author Ross Bennett
-#' @aliases chart.Weights.EF.efficient.frontier chart.Weights.EF.optimize.portfolio
+#' @param object object to chart
+#' @param \dots any other passthru parameters
 #' @export
 chart.Weights.EF <- function(object, ...){
   UseMethod("chart.Weights.EF")
 }
 
+#' Chart weights along an efficient frontier for an efficient.frontier object
+#' 
+#' @param object object of class \code{efficient.frontier}
+#' @param \dots passthru parameters to \code{barplot}.
+#' @param colorset color palette to use
+#' @param n.portfolios number of portfolios to extract along the efficient frontier
+#' @param by.groups TRUE/FALSE. If TRUE, the group weights are charted
+#' @param match.col string name of column to use for risk (horizontal axis). Must match the name of an objective.
+#' @param main title used in the plot.
+#' @param cex.lab The magnification to be used for x-axis and y-axis labels relative to the current setting of 'cex'
+#' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}
+#' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}
+#' @param legend.labels character vector to use for the legend labels
+#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
+#' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted
+#' @author Ross Bennett
 #' @method chart.Weights.EF efficient.frontier
 #' @S3method chart.Weights.EF efficient.frontier
-#' @export
 chart.Weights.EF.efficient.frontier <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
   # using ideas from weightsPlot.R in fPortfolio package
   
@@ -420,9 +443,24 @@ chart.Weights.EF.efficient.frontier <- function(object, ..., colorset=NULL, n.po
   box(col=element.color)
 }
 
+#' Chart weights along an efficient frontier for an efficient.frontier object
+#' 
+#' @param object object of class \code{efficient.frontier}
+#' @param \dots passthru parameters to \code{barplot}.
+#' @param colorset color palette to use
+#' @param n.portfolios number of portfolios to extract along the efficient frontier
+#' @param by.groups TRUE/FALSE. If TRUE, the group weights are charted
+#' @param match.col string name of column to use for risk (horizontal axis). Must match the name of an objective.
+#' @param main title used in the plot.
+#' @param cex.lab The magnification to be used for x-axis and y-axis labels relative to the current setting of 'cex'
+#' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}
+#' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}
+#' @param legend.labels character vector to use for the legend labels
+#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
+#' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted
+#' @author Ross Bennett
 #' @method chart.Weights.EF optimize.portfolio
 #' @S3method chart.Weights.EF optimize.portfolio
-#' @export
 chart.Weights.EF.optimize.portfolio <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
   # chart the weights along the efficient frontier of an objected created by optimize.portfolio
   
