@@ -5,9 +5,9 @@
   scatterFUN(R, FUN, ...)
 }
 \arguments{
-  \item{R}{}
+  \item{R}{xts object of asset returns}
 
-  \item{FUN}{}
+  \item{FUN}{name of function}
 
   \item{...}{any passthrough arguments to FUN}
 }

@@ -2,10 +2,12 @@
 \alias{summary.portfolio}
 \title{Summarize Portfolio Specification Objects}
 \usage{
-  summary.portfolio(object, ...)
+  \method{summary}{portfolio} (object, ...)
 }
 \arguments{
   \item{object}{object of class portfolio}
+
+  \item{\dots}{any other passthru parameters}
 }
 \description{
   summary method for class \code{portfolio} created with

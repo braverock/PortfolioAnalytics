@@ -1,0 +1,21 @@
+\name{constraint_v2}
+\alias{constraint_v2}
+\title{constructor for v2 constraint specification}
+\usage{
+  constraint_v2(type, enabled = TRUE, ...,
+    constrclass = "v2_constraint")
+}
+\arguments{
+  \item{type}{character type of the constraint to add or
+  update}
+
+  \item{enabled}{TRUE/FALSE to enabled the constraint}
+
+  \item{\dots}{any other passthru parameters}
+
+  \item{constrclass}{name of class for the constraint}
+}
+\description{
+  constructor for v2 constraint specification
+}
+

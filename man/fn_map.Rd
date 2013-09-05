@@ -11,6 +11,8 @@
 
   \item{relax}{TRUE/FALSE, default FALSE. Enable
   constraints to be relaxed.}
+
+  \item{\dots}{any other passthru parameters}
 }
 \value{
   \itemize{ \item{weights: }{vector of transformed weights

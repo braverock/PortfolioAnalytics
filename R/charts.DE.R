@@ -10,8 +10,7 @@
 #
 ###############################################################################
 
-#' @rdname chart.Weights
-#' @export
+
 chart.Weights.DE <- function(object, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
   # Specific to the output of optimize.portfolio with optimize_method="DEoptim"
   if(!inherits(object, "optimize.portfolio.DEoptim")) stop("object must be of class 'optimize.portfolio.DEoptim'")
@@ -82,12 +81,12 @@ chart.Weights.DE <- function(object, neighbors = NULL, ..., main="Weights", las 
   box(col = element.color)
 }
 
-#' @rdname chart.Weights
+#' @method chart.Weights optimize.portfolio.DEoptim
+#' @S3method chart.Weights optimize.portfolio.DEoptim
 #' @export
 chart.Weights.optimize.portfolio.DEoptim <- chart.Weights.DE
 
-#' @rdname chart.RiskReward
-#' @export
+
 chart.Scatter.DE <- function(object, neighbors = NULL, ..., return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
   # more or less specific to the output of the DEoptim portfolio code with constraints
   # will work to a point with other functions, such as optimize.porfolio.parallel
@@ -234,7 +233,7 @@ chart.Scatter.DE <- function(object, neighbors = NULL, ..., return.col='mean', r
       rr[i,2] = x[rtc]  #'FIXME      
     }
     colors2 = colorRamp(c("blue","lightblue"))
-    colortrail = rgb(colors2((0:rows)/rows),max=255)
+    colortrail = rgb(colors2((0:rows)/rows),maxColorValue=255)
     for(i in 1:rows){
       points(rr[i,1], rr[i,2], pch=1, col = colortrail[rows-i+1])
     }
@@ -285,36 +284,17 @@ chart.Scatter.DE <- function(object, neighbors = NULL, ..., return.col='mean', r
   box(col = element.color)
 }
 
-#' @rdname chart.RiskReward
+#' @method chart.RiskReward optimize.portfolio.DEoptim
+#' @S3method chart.RiskReward optimize.portfolio.DEoptim
 #' @export
 chart.RiskReward.optimize.portfolio.DEoptim <- chart.Scatter.DE
 
-#' scatter and weights chart  for random portfolios
-#' 
-#' \code{neighbors} may be specified in three ways.  
-#' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
-#' portfolios in terms of the \code{out} numerical statistic.
-#' The second method consists of a numeric vector for \code{neighbors}.
-#' This will extract the \code{neighbors} with portfolio index numbers that correspond to the vector contents.
-#' The third method for specifying \code{neighbors} is to pass in a matrix.  
-#' This matrix should look like the output of \code{\link{extractStats}}, and should contain
-#' \code{risk.col},\code{return.col}, and weights columns all properly named.  
-#' 
-#' @param DE set of random portfolios created by \code{\link{optimize.portfolio}}
-#' @param ... any other passthru parameters 
-#' @param risk.col string name of column to use for risk (horizontal axis)
-#' @param return.col string name of column to use for returns (vertical axis)
-#' @param neighbors set of 'neighbor portfolios to overplot
-#' @param main an overall title for the plot: see \code{\link{title}}
-#' @seealso 
-#' \code{\link{optimize.portfolio}}
-#' \code{\link{extractStats}}
-#' @export
+
 charts.DE <- function(DE, risk.col, return.col, chart.assets, neighbors=NULL, main="DEoptim.Portfolios", xlim=NULL, ylim=NULL, ...){
 # Specific to the output of the random portfolio code with constraints
     # @TODO: check that DE is of the correct class
     op <- par(no.readonly=TRUE)
-    layout(matrix(c(1,2)),height=c(2,1.5),width=1)
+    layout(matrix(c(1,2)),heights=c(2,1.5),widths=1)
     par(mar=c(4,4,4,2))
     chart.Scatter.DE(object=DE, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
     par(mar=c(2,4,0,2))
@@ -322,11 +302,13 @@ charts.DE <- function(DE, risk.col, return.col, chart.assets, neighbors=NULL, ma
     par(op)
 }
 
-#TODO make chart.DE into a plot() method or methods
 
 #' plot method for optimize.portfolio.DEoptim output
 #' 
-#' scatter and weights chart  for DEoptim portfolio optimizations run with trace=TRUE
+#' scatter and weights chart for DEoptim portfolio optimizations run with trace=TRUE
+#' 
+#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights
+#' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights
 #' 
 #' \code{neighbors} may be specified in three ways.  
 #' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
@@ -345,6 +327,8 @@ charts.DE <- function(DE, risk.col, return.col, chart.assets, neighbors=NULL, ma
 #' @param main an overall title for the plot: see \code{\link{title}}
 #' @param xlim set the limit on coordinates for the x-axis
 #' @param ylim set the limit on coordinates for the y-axis
+#' @method plot optimize.portfolio.DEoptim
+#' @S3method plot optimize.portfolio.DEoptim
 #' @export
 plot.optimize.portfolio.DEoptim <- function(x, ..., return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, main='optimized portfolio plot', xlim=NULL, ylim=NULL) {
     charts.DE(DE=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)

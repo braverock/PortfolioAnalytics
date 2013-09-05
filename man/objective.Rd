@@ -24,9 +24,6 @@
 
   \item{objclass}{string class to apply, default
   'objective'}
-
-  \item{x}{an object potentially of type 'objective' to
-  test}
 }
 \description{
   Typically called as a sub-function by the user function

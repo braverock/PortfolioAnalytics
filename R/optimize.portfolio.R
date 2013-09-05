@@ -927,14 +927,14 @@ optimize.portfolio_v2 <- function(
 #' The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the ROI solver.  
 #' 
 #' ROI also can solve quadratic and linear problems with group constraints 
-#' by added a \code{groups} argument into the constraints object. 
+#' by adding a \code{groups} argument into the constraints object. 
 #' This argument is a vector with each of its elements the number of assets per group.  
 #' The group constraints, \code{cLO} and \code{cUP}, are also added to the constraints object.
 #' 
 #' For example, if you have 9 assets, and would like to require that the 
 #' the first 3 assets are in one group, the second 3 are in another, and 
 #' the third are in another, then you add the grouping 
-#' by \code{constraints$groups <- c(3,3,3)}.
+#' by \code{constraints$groups <- list(c(1,2,3), c(4,5,6), c(7,8,9))}.
 #' 
 #' To apply the constraints that the first group must compose of at 
 #' least 20% of the weight, the second group 15%, and the third group 10%, 
@@ -998,7 +998,7 @@ optimize.portfolio_v2 <- function(
 #' 
 #' \code{optimize_method="DEoptim"}
 #' \itemize{
-#'   \item{\code{DEoutput:}}{ A list (of length 2) containing the following elements, see \code{\link{DEoptim}}.}
+#'   \item{\code{DEoutput:}}{ A list (of length 2) containing the following elements:}
 #'   \itemize{
 #'     \item{\code{optim}}
 #'     \item{\code{member}}
@@ -1014,7 +1014,7 @@ optimize.portfolio_v2 <- function(
 #' 
 #' \code{optimize_method="pso"}
 #' \itemize{
-#'   \item{\code{PSOoutput}:}{ A list containing the following elements, see \code{\link{psoptim}}:}
+#'   \item{\code{PSOoutput}:}{ A list containing the following elements:}
 #'   \itemize{
 #'     \item{par}
 #'     \item{value}
@@ -1027,7 +1027,7 @@ optimize.portfolio_v2 <- function(
 #' 
 #' \code{optimize_method="GenSA"}
 #' \itemize{
-#'   \item{\code{GenSAoutput:}}{ A list containing the following elements, see \code{\link{GenSA}}:}
+#'   \item{\code{GenSAoutput:}}{ A list containing the following elements:}
 #'   \itemize{
 #'     \item{value}
 #'     \item{par}

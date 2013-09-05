@@ -2,10 +2,12 @@
 \alias{print.constraint}
 \title{print method for objects of class 'constraint'}
 \usage{
-  print.constraint(x, ...)
+  \method{print}{constraint} (x, ...)
 }
 \arguments{
-  \item{portfolio}{object of class constraint}
+  \item{x}{object of class constraint}
+
+  \item{\dots}{any other passthru parameters}
 }
 \description{
   print method for objects of class 'constraint'

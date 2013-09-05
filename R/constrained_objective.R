@@ -341,7 +341,7 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
 #' @param storage TRUE/FALSE default TRUE for DEoptim with trace, otherwise FALSE. not typically user-called
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
-#' @aliases constrained_objective
+#' @aliases constrained_objective constrained_objective_v1
 #' @rdname constrained_objective
 #' @export
 constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normalize=TRUE, storage=FALSE)

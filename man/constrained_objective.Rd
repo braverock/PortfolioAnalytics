@@ -1,5 +1,6 @@
 \name{constrained_objective}
 \alias{constrained_objective}
+\alias{constrained_objective_v1}
 \alias{constrained_objective_v2}
 \title{calculate a numeric return value for a portfolio based on a set of constraints and objectives}
 \usage{

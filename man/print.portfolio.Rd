@@ -2,10 +2,12 @@
 \alias{print.portfolio}
 \title{Printing Portfolio Specification Objects}
 \usage{
-  print.portfolio(x, ...)
+  \method{print}{portfolio} (x, ...)
 }
 \arguments{
   \item{x}{object of class \code{portfolio}}
+
+  \item{\dots}{any other passthru parameters}
 }
 \description{
   Print method for objects of class \code{portfolio}

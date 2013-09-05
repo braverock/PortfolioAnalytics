@@ -23,6 +23,7 @@
 #' @param weights vector of weights
 #' @param portfolio object of class portfolio
 #' @param relax TRUE/FALSE, default FALSE. Enable constraints to be relaxed.
+#' @param \dots any other passthru parameters
 #' @return 
 #' \itemize{
 #' \item{weights: }{vector of transformed weights meeting constraints}
@@ -343,6 +344,7 @@ txfrm_weight_sum_constraint <- function(weights, min_sum, max_sum){
 #' @param weights vector of weights
 #' @param max_pos maximum position of assets with non_zero weights
 #' @param nassets number of assets
+#' @param tolerance tolerance for non-zero weights
 #' @author Ross Bennett
 #' @export
 txfrm_position_limit_constraint <- function(weights, max_pos, nassets, tolerance=.Machine$double.eps^0.5){

@@ -22,8 +22,9 @@
   efficient frontier from an objected created by
   optimize.portfolio}
 
-  \item{seach_size}{passed to optimize.portfolio for
-  type="DEoptim" or type="random"}
+  \item{search_size}{passed to
+  \code{\link{optimize.portfolio}} for type="DEoptim" or
+  type="random"}
 
   \item{...}{passthrough parameters to
   \code{\link{optimize.portfolio}}}

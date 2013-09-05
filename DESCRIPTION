@@ -15,8 +15,9 @@ Depends:
     PerformanceAnalytics (>= 1.0.0)
 Suggests:
     quantmod,
-    DEoptim(>= 2.3.1),
+    DEoptim(>= 2.2.1),
     foreach,
+    iterators,
     fGarch,
     Rglpk,
     quadprog,

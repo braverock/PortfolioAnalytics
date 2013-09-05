@@ -22,7 +22,6 @@
 #' @param \dots any other passthrough parameters
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param objclass string class to apply, default 'objective'
-#' @param x an object potentially of type 'objective' to test
 #' @seealso \code{\link{add.objective}}, \code{\link{portfolio.spec}}
 #' @author Brian G. Peterson
 #' @export
@@ -48,6 +47,7 @@ objective<-function(name , target=NULL , arguments, enabled=TRUE , ..., multipli
 
 
 #' check class of an objective object
+#' @param x an object potentially of type 'objective' to test
 #' @author Brian G. Peterson
 #' @export
 is.objective <- function( x ) {
@@ -224,10 +224,8 @@ add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters 
 #' @param indexnum if you are updating a specific constraint, the index number in the $objectives list to update
-#' @param constraints an object of type "constraints" to add the objective to, specifying the constraints for the optimization, see \code{\link{constraint}} (for _v1 objectives only)
 #' @author Brian G. Peterson and Ross Bennett
-#' @aliases 
-#' add.objective_v2, add.objective_v1
+#' @aliases add.objective_v2 add.objective_v1
 #' @seealso \code{\link{objective}}, \code{\link{portfolio.spec}}
 #' @rdname add.objective
 #' @name add.objective

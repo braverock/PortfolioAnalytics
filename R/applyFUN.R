@@ -3,9 +3,9 @@
 #' This function is used to calculate risk or return metrics given a matrix of
 #' weights and is primarily used as a convenience function used in chart.Scatter functions
 #' 
-#' @param R 
+#' @param R xts object of asset returns
 #' @param weights a matrix of weights generated from random_portfolios or \code{optimize.portfolio}
-#' @param FUN
+#' @param FUN name of a function
 #' @param ... any passthrough arguments to FUN
 #' @author Ross Bennett
 #' @export
@@ -90,8 +90,8 @@ applyFUN <- function(R, weights, FUN="mean", ...){
 #' This function is used to calculate risk or return metrics given a matrix of
 #' asset returns and will be used for a risk-reward scatter plot of the assets
 #' 
-#' @param R 
-#' @param FUN
+#' @param R xts object of asset returns
+#' @param FUN name of function
 #' @param ... any passthrough arguments to FUN
 #' @author Ross Bennett
 #' @export

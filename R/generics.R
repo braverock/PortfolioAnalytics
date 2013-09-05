@@ -13,6 +13,7 @@
 #' summary method for optimize.portfolio.rebalancing
 #' @param object object of type optimize.portfolio.rebalancing
 #' @param \dots any other passthru parameters
+#' @method summary optimize.portfolio.rebalancing
 #' @export
 summary.optimize.portfolio.rebalancing <- function(object, ...) {
     if(!inherits(object,"optimize.portfolio.rebalancing")) 
@@ -45,7 +46,9 @@ summary.optimize.portfolio.rebalancing <- function(object, ...) {
 #' Print method for objects of class \code{portfolio} created with \code{\link{portfolio.spec}}
 #' 
 #' @param x object of class \code{portfolio}
+#' @param \dots any other passthru parameters
 #' @author Ross Bennett
+#' @method print portfolio
 #' @export
 print.portfolio <- function(x, ...){
   if(!is.portfolio(x)) stop("object passed in is not of class 'portfolio'")
@@ -172,7 +175,9 @@ print.portfolio <- function(x, ...){
 #' summary method for class \code{portfolio} created with \code{\link{portfolio.spec}}
 #' 
 #' @param object object of class portfolio
+#' @param \dots any other passthru parameters
 #' @author Ross Bennett
+#' @method summary portfolio
 #' @export
 summary.portfolio <- function(object, ...){
   if(!is.portfolio(object)) stop("object passed in is not of class 'portfolio'")
@@ -220,11 +225,13 @@ summary.portfolio <- function(object, ...){
 
 #' print method for objects of class 'constraint'
 #' 
-#' @param portfolio object of class constraint
+#' @param x object of class constraint
+#' @param \dots any other passthru parameters
 #' @author Ross Bennett
+#' @method print constraint
 #' @export
 print.constraint <- function(x, ...){
-  print.default(x)
+  print.default(x, ...)
 }
 
 #' Printing Output of optimize.portfolio
@@ -232,8 +239,10 @@ print.constraint <- function(x, ...){
 #' print method for optimize.portfolio.ROI
 #' 
 #' @param x an object of class \code{optimize.portfolio.ROI} resulting from a call to \code{\link{optimize.portfolio}}
-#' @param digits the number of significant digits to use when printing.
 #' @param ... any other passthru parameters
+#' @param digits the number of significant digits to use when printing.
+#' @author Ross Bennett
+#' @method print optimize.portfolio.ROI
 #' @export
 print.optimize.portfolio.ROI <- function(x, ..., digits = max(3, getOption("digits") - 3)){
   cat(rep("*", 35) ,"\n", sep="")
@@ -277,8 +286,10 @@ print.optimize.portfolio.ROI <- function(x, ..., digits = max(3, getOption("digi
 #' print method for optimize.portfolio.random
 #' 
 #' @param x an object of class \code{optimize.portfolio.random} resulting from a call to \code{\link{optimize.portfolio}}
-#' @param digits the number of significant digits to use when printing.
 #' @param ... any other passthru parameters
+#' @param digits the number of significant digits to use when printing.
+#' @author Ross Bennett
+#' @method print optimize.portfolio.random
 #' @export
 print.optimize.portfolio.random <- function(x, ..., digits=max(3, getOption("digits")-3)){
   cat(rep("*", 35) ,"\n", sep="")
@@ -322,8 +333,10 @@ print.optimize.portfolio.random <- function(x, ..., digits=max(3, getOption("dig
 #' print method for optimize.portfolio.DEoptim
 #' 
 #' @param x an object of class \code{optimize.portfolio.DEoptim} resulting from a call to \code{\link{optimize.portfolio}}
-#' @param digits the number of significant digits to use when printing.
 #' @param ... any other passthru parameters
+#' @param digits the number of significant digits to use when printing.
+#' @author Ross Bennett
+#' @method print optimize.portfolio.DEoptim
 #' @export
 print.optimize.portfolio.DEoptim <- function(x, ..., digits=max(3, getOption("digits")-3)){
   cat(rep("*", 35) ,"\n", sep="")
@@ -367,8 +380,10 @@ print.optimize.portfolio.DEoptim <- function(x, ..., digits=max(3, getOption("di
 #' print method for optimize.portfolio.GenSA
 #' 
 #' @param x an object of class \code{optimize.portfolio.GenSA} resulting from a call to \code{\link{optimize.portfolio}}
-#' @param digits the number of significant digits to use when printing
 #' @param ... any other passthru parameters
+#' @param digits the number of significant digits to use when printing
+#' @author Ross Bennett
+#' @method print optimize.portfolio.GenSA
 #' @export
 print.optimize.portfolio.GenSA <- function(x, ..., digits=max(3, getOption("digits")-3)){
   cat(rep("*", 35) ,"\n", sep="")
@@ -412,8 +427,10 @@ print.optimize.portfolio.GenSA <- function(x, ..., digits=max(3, getOption("digi
 #' print method for optimize.portfolio.pso
 #' 
 #' @param x an object of class \code{optimize.portfolio.pso} resulting from a call to \code{\link{optimize.portfolio}}
-#' @param digits the number of significant digits to use when printing.
 #' @param ... any other passthru parameters
+#' @param digits the number of significant digits to use when printing.
+#' @author Ross Bennett
+#' @method print optimize.portfolio.pso
 #' @export
 print.optimize.portfolio.pso <- function(x, ..., digits=max(3, getOption("digits")-3)){
   cat(rep("*", 35) ,"\n", sep="")
@@ -459,6 +476,7 @@ print.optimize.portfolio.pso <- function(x, ..., digits=max(3, getOption("digits
 #' @param object an object of class "optimize.portfolio.pso" resulting from a call to optimize.portfolio
 #' @param ... any other passthru parameters. Currently not used.
 #' @author Ross Bennett
+#' @method summary optimize.portfolio
 #' @export
 summary.optimize.portfolio <- function(object, ...){
   
@@ -676,6 +694,7 @@ summary.optimize.portfolio <- function(object, ...){
 #' @param x objective of class \code{efficient.frontier}
 #' @param ... passthrough parameters
 #' @author Ross Bennett
+#' @method print efficient.frontier
 #' @export
 print.efficient.frontier <- function(x, ...){
   if(!inherits(x, "efficient.frontier")) stop("object passed in is not of class 'efficient.frontier'")
@@ -698,9 +717,11 @@ print.efficient.frontier <- function(x, ...){
 #' extract the efficient frontier object as well as the weights and risk and
 #' return metrics along the efficient frontier.
 #' 
-#' @param x objective of class \code{efficient.frontier}
+#' @param object object of class \code{efficient.frontier}
 #' @param ... passthrough parameters
+#' @param digits number of digits to round to
 #' @author Ross Bennett
+#' @method summary efficient.frontier
 #' @export
 summary.efficient.frontier <- function(object, ..., digits=3){
   if(!inherits(object, "efficient.frontier")) stop("object passed in is not of class 'efficient.frontier'")

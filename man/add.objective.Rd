@@ -1,7 +1,7 @@
 \name{add.objective}
 \alias{add.objective}
 \alias{add.objective_v1}
-\alias{add.objective_v2,}
+\alias{add.objective_v2}
 \title{General interface for adding optimization objectives, including risk, return, and risk budget}
 \usage{
   add.objective_v1(constraints, type, name,
@@ -39,11 +39,6 @@
   \item{indexnum}{if you are updating a specific
   constraint, the index number in the $objectives list to
   update}
-
-  \item{constraints}{an object of type "constraints" to add
-  the objective to, specifying the constraints for the
-  optimization, see \code{\link{constraint}} (for _v1
-  objectives only)}
 }
 \description{
   This function is the main function for adding and

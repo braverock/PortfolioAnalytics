@@ -2,7 +2,8 @@
 \alias{summary.optimize.portfolio.rebalancing}
 \title{summary method for optimize.portfolio.rebalancing}
 \usage{
-  summary.optimize.portfolio.rebalancing(object, ...)
+  \method{summary}{optimize.portfolio.rebalancing} (object,
+    ...)
 }
 \arguments{
   \item{object}{object of type

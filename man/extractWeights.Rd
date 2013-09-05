@@ -1,13 +1,13 @@
 \name{extractWeights}
 \alias{extractWeights}
-\title{extract weights from a portfolio run via \code{optimize.portfolio} or \code{optimize.portfolio.rebalancing}}
+\title{Extract weights from a portfolio run via \code{optimize.portfolio} or \code{optimize.portfolio.rebalancing}}
 \usage{
   extractWeights(object, ...)
 }
 \arguments{
   \item{object}{list returned by optimize.portfolio}
 
-  \item{...}{any other passthru parameters}
+  \item{\dots}{any other passthru parameters}
 }
 \description{
   This function will dispatch to the appropriate class

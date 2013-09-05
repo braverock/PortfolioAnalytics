@@ -26,10 +26,11 @@
 #' 
 #'  
 #' @param object optimial portfolio object as created by \code{\link{optimize.portfolio}}
+#' @param match.col string name of column to use for risk (horizontal axis)
 #' @param from minimum value of the sequence
 #' @param to maximum value of the sequence
 #' @param by number to increment the sequence by
-#' @param match.col string name of column to use for risk (horizontal axis)
+#' @param n.portfolios number of portfolios along the efficient frontier to extract
 #' @param \dots any other passthru parameters to \code{optimize.portfolio}
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization, see \code{\link{portfolio.spec}}
@@ -292,7 +293,7 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
 #' @param type type of efficient frontier, see details
 #' @param n.portfolios number of portfolios to calculate along the efficient frontier
 #' @param match.col column to match when extracting the efficient frontier from an objected created by optimize.portfolio
-#' @param seach_size passed to optimize.portfolio for type="DEoptim" or type="random"
+#' @param search_size passed to \code{\link{optimize.portfolio}} for type="DEoptim" or type="random"
 #' @param ... passthrough parameters to \code{\link{optimize.portfolio}}
 #' @return an object of class 'efficient.frontier' with the objective measures 
 #' and weights of portfolios along the efficient frontier

@@ -3,3 +3,5 @@ sortino             Maximize the Sortino Ratio of the portfolio
 testing_ROI  Demonstrate creating constraint object and solve five basic convex portfolio optimization problems with ROI using the 'edhec' dataset.
 testing_pso  Demonstrate creating constraint object and solve portfolio optimization problems with pso using the 'edhec' dataset.  These sample problems are similar to those used in testing_ROI, so that one can compare solutions easily.
 testing_GenSA  Demonstrate the creating constraint object and solve portfolio optimization problems with GenSA using the 'edhec' datset.  These sample problems are similar to those used in testing_ROI, so that one can compare solutions easily.
+demo_ROI Demonstrate constraints and objectives that can be solved with ROI
+

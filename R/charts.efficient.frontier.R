@@ -1,9 +1,10 @@
 
-#' chart the efficient frontier and risk-return scatter plot of the assets
+#' Chart the efficient frontier and risk-return scatter
 #' 
-#' This function charts the efficient frontier and risk-return scatter plot of 
-#' the assets given an object created by \code{optimize.portfolio}.
+#' Chart the efficient frontier and risk-return scatter of the assets for 
+#' optimize.portfolio and efficient.frontier objects
 #' 
+#' @details
 #' For objects created by optimize.portfolio with 'DEoptim', 'random', or 'pso'
 #' specified as the optimize_method:
 #' \itemize{
@@ -32,36 +33,39 @@
 #' will be plotted using a risk free rate of 0. Set \code{rf=NULL} to omit 
 #' this from the plot. 
 #' 
-#' @param object optimal portfolio created by \code{\link{optimize.portfolio}}
-#' @param string name of column to use for risk (horizontal axis).
+#' @param object object to chart
+#' @param match.col string name of column to use for risk (horizontal axis).
 #' \code{match.col} must match the name of an objective measure in the 
 #' \code{objective_measures} or \code{opt_values} slot in the object created 
 #' by \code{\link{optimize.portfolio}}.
 #' @param n.portfolios number of portfolios to use to plot the efficient frontier
+#' @param \dots passthru parameters to \code{\link{plot}}
 #' @param xlim set the x-axis limit, same as in \code{\link{plot}}
 #' @param ylim set the y-axis limit, same as in \code{\link{plot}}
 #' @param cex.axis A numerical value giving the amount by which the axis should be magnified relative to the default.
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
 #' @param main a main title for the plot
-#' @param ... passthrough parameters to \code{\link{plot}}
+#' @param RAR.text Risk Adjusted Return ratio text to plot in the legend
 #' @param rf risk free rate. If \code{rf} is not null, the maximum Sharpe Ratio or modified Sharpe Ratio tangency portfolio will be plotted
 #' @param tangent.line TRUE/FALSE to plot the tangent line
 #' @param cex.legend A numerical value giving the amount by which the legend should be magnified relative to the default.
-#' @param RAR.text Risk Adjusted Return ratio text to plot in the legend
 #' @param chart.assets TRUE/FALSE to include the assets
 #' @param labels.assets TRUE/FALSE to include the asset names in the plot. 
 #' \code{chart.assets} must be \code{TRUE} to plot asset names
 #' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}
 #' @param cex.assets A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
 #' @author Ross Bennett
+#' @author Ross Bennett
 #' @export
-chart.EfficientFrontier <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ...){
+chart.EfficientFrontier <- function(object, match.col, n.portfolios, ...){
   UseMethod("chart.EfficientFrontier")
 }
 
-#' @rdname chart.EfficientFrontier
+
+#' @method chart.EfficientFrontier optimize.portfolio.ROI
+#' @S3method chart.EfficientFrontier optimize.portfolio.ROI
 #' @export
-chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
+chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES", n.portfolios=25, ..., xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class optimize.portfolio.ROI")
   
   portf <- object$portfolio
@@ -164,9 +168,11 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, match.col="ES
   box(col = element.color)
 }
 
-#' @rdname chart.EfficientFrontier
+
+#' @method chart.EfficientFrontier optimize.portfolio
+#' @S3method chart.EfficientFrontier optimize.portfolio
 #' @export
-chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
+chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n.portfolios=25, ..., xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   # This function will work with objects of class optimize.portfolio.DEoptim,
   # optimize.portfolio.random, and optimize.portfolio.pso
   
@@ -263,13 +269,13 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
   box(col = element.color)
 }
 
-#' chart the weights along the efficient frontier
+#' chart weights along an efficient frontier
 #' 
-#' This creates a stacked column chart of the weights of portfolios along the efficient frontier.
+#' This creates a stacked column chart of the weights of portfolios along an efficient frontier.
 #' 
-#' @param object object of class \code{efficient.frontier} or \code{optimize.portfolio}.
+#' @param object object to chart.
+#' @param \dots passthru parameters to \code{barplot}.
 #' @param colorset color palette to use.
-#' @param ... passthrough parameters to \code{barplot}.
 #' @param n.portfolios number of portfolios to extract along the efficient frontier.
 #' This is only used for objects of class \code{optimize.portfolio}
 #' @param by.groups TRUE/FALSE. If TRUE, the weights by group are charted.
@@ -283,14 +289,16 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, match.col="ES", n
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
 #' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted.
 #' @author Ross Bennett
+#' @aliases chart.Weights.EF.efficient.frontier chart.Weights.EF.optimize.portfolio
 #' @export
-chart.Weights.EF <- function(object, colorset=NULL, ..., n.portfolios=25, by.groups=FALSE, match.col="ES", main="EF Weights", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray"){
-UseMethod("chart.Weights.EF")
+chart.Weights.EF <- function(object, ...){
+  UseMethod("chart.Weights.EF")
 }
 
-#' @rdname chart.Weights.EF
+#' @method chart.Weights.EF efficient.frontier
+#' @S3method chart.Weights.EF efficient.frontier
 #' @export
-chart.Weights.EF.efficient.frontier <- function(object, colorset=NULL, ..., n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
+chart.Weights.EF.efficient.frontier <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
   # using ideas from weightsPlot.R in fPortfolio package
   
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
@@ -412,9 +420,10 @@ chart.Weights.EF.efficient.frontier <- function(object, colorset=NULL, ..., n.po
   box(col=element.color)
 }
 
-#' @rdname chart.Weights.EF
+#' @method chart.Weights.EF optimize.portfolio
+#' @S3method chart.Weights.EF optimize.portfolio
 #' @export
-chart.Weights.EF.optimize.portfolio <- function(object, colorset=NULL, ..., n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
+chart.Weights.EF.optimize.portfolio <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
   # chart the weights along the efficient frontier of an objected created by optimize.portfolio
   
   if(!inherits(object, "optimize.portfolio")) stop("object must be of class optimize.portfolio")
@@ -427,9 +436,10 @@ chart.Weights.EF.optimize.portfolio <- function(object, colorset=NULL, ..., n.po
                                         legend.loc=legend.loc)
 }
 
-#' @rdname chart.EfficientFrontier
+#' @method chart.EfficientFrontier efficient.frontier
+#' @S3method chart.EfficientFrontier efficient.frontier
 #' @export
-chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", ..., RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
+chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n.portfolios=NULL, ..., xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
   
   # get the returns and efficient frontier object
@@ -514,10 +524,10 @@ chart.EfficientFrontier.efficient.frontier <- function(object, match.col="ES", n
 #' @param type type of efficient frontier, see \code{\link{create.EfficientFrontier}}
 #' @param n.portfolios number of portfolios to extract along the efficient frontier.
 #' This is only used for objects of class \code{optimize.portfolio}
-#' @param match.col match.col string name of column to use for risk (horizontal axis).
+#' @param match.col string name of column to use for risk (horizontal axis).
 #' Must match the name of an objective.
-#' @param seach_size passed to optimize.portfolio for type="DEoptim" or type="random"
-#' @param main main title used in the plot.
+#' @param search_size passed to optimize.portfolio for type="DEoptim" or type="random"
+#' @param main title used in the plot.
 #' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
 #' @param legend.loc location of the legend; NULL, "bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright", "right" and "center"

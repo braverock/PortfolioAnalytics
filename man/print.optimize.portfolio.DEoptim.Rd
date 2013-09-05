@@ -2,7 +2,7 @@
 \alias{print.optimize.portfolio.DEoptim}
 \title{Printing Output of optimize.portfolio}
 \usage{
-  print.optimize.portfolio.DEoptim(x, ...,
+  \method{print}{optimize.portfolio.DEoptim} (x, ...,
     digits = max(3, getOption("digits") - 3))
 }
 \arguments{
@@ -10,12 +10,15 @@
   \code{optimize.portfolio.DEoptim} resulting from a call
   to \code{\link{optimize.portfolio}}}
 
+  \item{...}{any other passthru parameters}
+
   \item{digits}{the number of significant digits to use
   when printing.}
-
-  \item{...}{any other passthru parameters}
 }
 \description{
   print method for optimize.portfolio.DEoptim
+}
+\author{
+  Ross Bennett
 }
 

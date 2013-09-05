@@ -2,7 +2,7 @@
 \alias{update.constraint}
 \title{function for updating constrints, not well tested, may be broken}
 \usage{
-  update.constraint(object, ...)
+  \method{update}{constraint} (object, ...)
 }
 \arguments{
   \item{object}{object of type \code{\link{constraint}} to

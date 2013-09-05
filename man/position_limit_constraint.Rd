@@ -10,6 +10,9 @@
 \arguments{
   \item{type}{character type of the constraint}
 
+  \item{assets}{named vector of assets specifying initial
+  weights}
+
   \item{max_pos}{maximum number of assets with non-zero
   weights}
 

@@ -12,9 +12,6 @@
 
   \item{max_permutations}{integer: maximum number of
   iterations to try for a valid portfolio, default 200}
-
-  \item{rounding}{integer how many decimals should we round
-  to}
 }
 \value{
   named weighting vector

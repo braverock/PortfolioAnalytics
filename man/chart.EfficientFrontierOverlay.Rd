@@ -25,14 +25,13 @@
   the efficient frontier. This is only used for objects of
   class \code{optimize.portfolio}}
 
-  \item{match.col}{match.col string name of column to use
-  for risk (horizontal axis). Must match the name of an
-  objective.}
+  \item{match.col}{string name of column to use for risk
+  (horizontal axis). Must match the name of an objective.}
 
-  \item{seach_size}{passed to optimize.portfolio for
+  \item{search_size}{passed to optimize.portfolio for
   type="DEoptim" or type="random"}
 
-  \item{main}{main title used in the plot.}
+  \item{main}{title used in the plot.}
 
   \item{cex.axis}{The magnification to be used for sizing
   the axis text relative to the current setting of 'cex',

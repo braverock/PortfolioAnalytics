@@ -12,6 +12,8 @@
   weights}
 
   \item{nassets}{number of assets}
+
+  \item{tolerance}{tolerance for non-zero weights}
 }
 \description{
   This is a helper function called inside constraint_fnMap

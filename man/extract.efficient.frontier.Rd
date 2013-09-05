@@ -11,14 +11,17 @@
   \item{object}{optimial portfolio object as created by
   \code{\link{optimize.portfolio}}}
 
+  \item{match.col}{string name of column to use for risk
+  (horizontal axis)}
+
   \item{from}{minimum value of the sequence}
 
   \item{to}{maximum value of the sequence}
 
   \item{by}{number to increment the sequence by}
 
-  \item{match.col}{string name of column to use for risk
-  (horizontal axis)}
+  \item{n.portfolios}{number of portfolios along the
+  efficient frontier to extract}
 
   \item{\dots}{any other passthru parameters to
   \code{optimize.portfolio}}

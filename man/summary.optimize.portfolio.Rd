@@ -2,7 +2,7 @@
 \alias{summary.optimize.portfolio}
 \title{Summarizing Output of optimize.portfolio}
 \usage{
-  summary.optimize.portfolio(object, ...)
+  \method{summary}{optimize.portfolio} (object, ...)
 }
 \arguments{
   \item{object}{an object of class "optimize.portfolio.pso"

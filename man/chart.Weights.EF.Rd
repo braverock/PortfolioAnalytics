@@ -2,35 +2,16 @@
 \alias{chart.Weights.EF}
 \alias{chart.Weights.EF.efficient.frontier}
 \alias{chart.Weights.EF.optimize.portfolio}
-\title{chart the weights along the efficient frontier}
+\title{chart weights along an efficient frontier}
 \usage{
-  chart.Weights.EF(object, colorset = NULL, ...,
-    n.portfolios = 25, by.groups = FALSE, match.col = "ES",
-    main = "EF Weights", cex.lab = 0.8, cex.axis = 0.8,
-    cex.legend = 0.8, legend.labels = NULL,
-    element.color = "darkgray")
-
-  chart.Weights.EF.efficient.frontier(object,
-    colorset = NULL, ..., n.portfolios = 25,
-    by.groups = FALSE, match.col = "ES", main = "",
-    cex.lab = 0.8, cex.axis = 0.8, cex.legend = 0.8,
-    legend.labels = NULL, element.color = "darkgray",
-    legend.loc = "topright")
-
-  chart.Weights.EF.optimize.portfolio(object,
-    colorset = NULL, ..., n.portfolios = 25,
-    by.groups = FALSE, match.col = "ES", main = "",
-    cex.lab = 0.8, cex.axis = 0.8, cex.legend = 0.8,
-    legend.labels = NULL, element.color = "darkgray",
-    legend.loc = "topright")
+  chart.Weights.EF(object, ...)
 }
 \arguments{
-  \item{object}{object of class \code{efficient.frontier}
-  or \code{optimize.portfolio}.}
+  \item{object}{object to chart.}
+
+  \item{\dots}{passthru parameters to \code{barplot}.}
 
   \item{colorset}{color palette to use.}
-
-  \item{...}{passthrough parameters to \code{barplot}.}
 
   \item{n.portfolios}{number of portfolios to extract along
   the efficient frontier. This is only used for objects of
@@ -70,7 +51,7 @@
 }
 \description{
   This creates a stacked column chart of the weights of
-  portfolios along the efficient frontier.
+  portfolios along an efficient frontier.
 }
 \author{
   Ross Bennett

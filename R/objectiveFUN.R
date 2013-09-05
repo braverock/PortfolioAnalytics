@@ -37,14 +37,14 @@ var.portfolio <- function(R, weights){
   return(as.numeric(t(weights) %*% var(R) %*% weights))
 }
 
-#' Function to calculate weight concentration
+#' Concentration of weights
 #' 
-#' This function calculates the concentration of weights using the 
-#' Herfindahl–Hirschman Index as a measure of concentration
+#' This function computes the concentration of weights using the Herfindahl Hirschman Index
 #' 
-#' @param weights
-#' @param groups
+#' @param weights set of portfolio weights
+#' @param groups list of vectors of grouping
 #' @author Ross Bennett
+#' @export
 HHI <- function(weights, groups=NULL){
   
   # calculate overall HHI

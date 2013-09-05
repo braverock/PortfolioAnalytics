@@ -13,12 +13,25 @@
 #' extract some stats and weights from a portfolio run via \code{optimize.portfolio}
 #' 
 #' This function will dispatch to the appropriate class handler based on the
-#' input class of the optimize.portfolio output object
+#' input class of the optimize.portfolio output object.
+#' 
+#' For \code{optimize.portfolio.pso} objects, this function will extract the 
+#' weights (swarm positions) from the PSO output and the out values
+#' (swarm fitness values) for each iteration of the optimization.
+#' This function can be slow because we need to run \code{constrained_objective}
+#' to calculate the objective measures on the weights.
+#' 
+#' The output from the GenSA solver does not store weights evaluated at each iteration
+#' The GenSA output for trace.mat contains nb.steps, temperature, function.value, and current.minimum
 #'  
 #' @param object list returned by optimize.portfolio
 #' @param prefix prefix to add to output row names
 #' @param ... any other passthru parameters
 #' @seealso \code{\link{optimize.portfolio}}
+#' @aliases extractStats extractStats.optimize.portfolio.DEoptim
+#' extractStats.optimize.portfolio.parallel extractStats.optimize.portfolio.random
+#' extractStats.optimize.portfolio.ROI extractStats.optimize.portfolio.pso
+#' extractStats.optimize.portfolio.GenSA
 #' @export
 extractStats <- function (object, prefix=NULL, ...){
     UseMethod('extractStats')
@@ -47,16 +60,9 @@ name.replace <- function(rnames){
     return(rnames)
 }
 
-#' extract some stats from a portfolio list run with DEoptim via
-#' \code{\link{optimize.portfolio}}
-#' 
-#' This function will take everything in the objective_measures slot and \code{unlist} it.  
-#' This may produce a very large number of columns or strange column names.
-#' 
-#' @param object list returned by optimize.portfolio
-#' @param prefix prefix to add to output row names
-#' @param ... any other passthru parameters
-#' @seealso \code{\link{optimize.portfolio}}
+
+#' @method extractStats optimize.portfolio.DEoptim
+#' @S3method extractStats optimize.portfolio.DEoptim
 #' @export 
 extractStats.optimize.portfolio.DEoptim <- function(object, prefix=NULL, ...) {
   if(!inherits(object, "optimize.portfolio.DEoptim")) stop("object must be of class optimize.portfolio.DEoptim")
@@ -90,18 +96,9 @@ extractStats.optimize.portfolio.DEoptim <- function(object, prefix=NULL, ...) {
 }
 
 
-#' extract some stats from a portfolio list run via foreach in optimize.portfolio.parallel
-#' 
-#' This function will take everything in the objective_measures slot and \code{unlist} it.  
-#' This may produce a very large number of columns or strange column names.
-#' 
-#' @param object list returned by optimize.portfolio
-#' @param prefix prefix to add to output row names
-#' @param ... any other passthru parameters
-#' @seealso 
-#' \code{\link{optimize.portfolio}}
-#' \code{\link{optimize.portfolio.parallel}}
-#' \code{\link{extractStats}}
+
+#' @method extractStats optimize.portfolio.parallel
+#' @S3method extractStats optimize.portfolio.parallel
 #' @export
 extractStats.optimize.portfolio.parallel <- function(object,prefix=NULL,...) {
     resultlist<-object
@@ -116,17 +113,8 @@ extractStats.optimize.portfolio.parallel <- function(object,prefix=NULL,...) {
     return(result)
 }
 
-#' extract stats from random portfolio results
-#' 
-#' This just flattens the $random_portfolio_objective_results part of the object
-#' 
-#' @param object list returned by optimize.portfolio
-#' @param prefix prefix to add to output row names
-#' @param ... any other passthru parameters
-#' @seealso 
-#' \code{\link{optimize.portfolio}}
-#' \code{\link{random_portfolios}}
-#' \code{\link{extractStats}}
+#' @method extractStats optimize.portfolio.random
+#' @S3method extractStats optimize.portfolio.random
 #' @export
 extractStats.optimize.portfolio.random <- function(object, prefix=NULL, ...){
 # This just flattens the $random_portfolio_objective_results part of the object
@@ -158,26 +146,21 @@ extractStats.optimize.portfolio.random <- function(object, prefix=NULL, ...){
   return(result)
 }
 
-#' extract weights from a portfolio run via \code{optimize.portfolio} or \code{optimize.portfolio.rebalancing}
+#' Extract weights from a portfolio run via \code{optimize.portfolio} or \code{optimize.portfolio.rebalancing}
 #' 
 #' This function will dispatch to the appropriate class handler based on the
 #' input class of the optimize.portfolio or optimize.portfolio.rebalancing output object
 #'  
 #' @param object list returned by optimize.portfolio
-#' @param ... any other passthru parameters
+#' @param \dots any other passthru parameters
 #' @seealso \code{\link{optimize.portfolio}}, \code{\link{optimize.portfolio.rebalancing}}
 #' @export
 extractWeights <- function (object, ...){
   UseMethod('extractWeights')
 }
 
-#' extract weights from output of optimize.portfolio
-#' 
-#' @param object object of class \code{optimize.portfolio} to extract weights from
-#' @param ... passthrough parameters. Not currently used
-#' @seealso 
-#' \code{\link{optimize.portfolio}}
-#' @author Ross Bennett
+#' @method extractWeights optimize.portfolio
+#' @S3method extractWeights optimize.portfolio
 #' @export
 extractWeights.optimize.portfolio <- function(object, ...){
   if(!inherits(object, "optimize.portfolio")){
@@ -186,21 +169,10 @@ extractWeights.optimize.portfolio <- function(object, ...){
   return(object$weights)
 }
 
-#' extract time series of weights from output of optimize.portfolio.rebalancing
-#' 
-#' \code{\link{optimize.portfolio.rebalancing}} outputs a list of
-#' \code{\link{optimize.portfolio}} objects, one for each rebalancing period
-#' 
-#' The output list is indexed by the dates of the rebalancing periods, as determined by \code{endpoints}
-#' 
-#' @param object object of class \code{optimize.portfolio.rebalancing} to extract weights from
-#' @param ... any other passthru parameters
-#' @seealso 
-#' \code{\link{optimize.portfolio.rebalancing}}
+#' @method extractWeights optimize.portfolio.rebalancing
+#' @S3method extractWeights optimize.portfolio.rebalancing
 #' @export
 extractWeights.optimize.portfolio.rebalancing <- function(object, ...){
-# @TODO: add a class check for the input object
-# FIXED
   if(!inherits(object, "optimize.portfolio.rebalancing")){
     stop("Object passed in must be of class 'optimize.portfolio.rebalancing'")
   }
@@ -220,15 +192,8 @@ extractWeights.optimize.portfolio.rebalancing <- function(object, ...){
 }
 
 
-#' extract some stats from a portfolio list run with ROI via
-#' \code{\link{optimize.portfolio}}
-#' 
-#' This function will take everything in the objective_measures slot and \code{unlist} it.  
-#' This may produce a very large number of columns or strange column names.
-#' 
-#' @param object list returned by optimize.portfolio
-#' @param prefix prefix to add to output row names
-#' @param ... any other passthru parameters
+#' @method extractStats optimize.portfolio.ROI
+#' @S3method extractStats optimize.portfolio.ROI
 #' @export 
 extractStats.optimize.portfolio.ROI <- function(object, prefix=NULL, ...) {
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class optimize.portfolio.ROI")
@@ -243,18 +208,8 @@ extractStats.optimize.portfolio.ROI <- function(object, prefix=NULL, ...) {
   return(result)
 }
 
-#' extract some stats from a portfolio list run with pso via
-#' \code{\link{optimize.portfolio}}
-#' 
-#' This function will extract the weights (swarm positions) from the PSO output
-#' and the out value (swarm fitness values) for each iteration of the optimization.
-#' This function can be slow because we need to run \code{constrained_objective}
-#' to calculate the objective measures on the weights.
-#' 
-#' @param object list returned by optimize.portfolio
-#' @param prefix prefix to add to output row names
-#' @param ... any other passthru parameters
-#' @author Ross Bennett
+#' @method extractStats optimize.portfolio.pso
+#' @S3method extractStats optimize.portfolio.pso
 #' @export 
 extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
   if(!inherits(object, "optimize.portfolio.pso")) stop("object must be of class optimize.portfolio.pso")
@@ -323,16 +278,8 @@ extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
   return(result)
 }
 
-#' extract some stats from a portfolio list run with GenSA via
-#' \code{\link{optimize.portfolio}}
-#' 
-#' This function will extract the optimal portfolio weights and objective measures
-#' The GenSA output does not store weights evaluated at each iteration
-#' The GenSA output for trace.mat contains nb.steps, temperature, function.value, and current.minimum
-#' 
-#' @param object list returned by optimize.portfolio
-#' @param prefix prefix to add to output row names
-#' @param ... any other passthru parameters
+#' @method extractStats optimize.portfolio.GenSA
+#' @S3method extractStats optimize.portfolio.GenSA
 #' @export 
 extractStats.optimize.portfolio.GenSA <- function(object, prefix=NULL, ...) {
   if(!inherits(object, "optimize.portfolio.GenSA")) stop("object must be of class optimize.portfolio.GenSA")

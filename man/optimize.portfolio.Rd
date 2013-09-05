@@ -98,8 +98,8 @@
 
   \code{optimize_method="DEoptim"} \itemize{
   \item{\code{DEoutput:}}{ A list (of length 2) containing
-  the following elements, see \code{\link{DEoptim}}.}
-  \itemize{ \item{\code{optim}} \item{\code{member}} }
+  the following elements:} \itemize{ \item{\code{optim}}
+  \item{\code{member}} }
   \item{\code{DEoptim_objective_results}:}{ A list
   containing the following elements for each intermediate
   population.} \itemize{ \item{\code{out}:}{ The output of
@@ -110,15 +110,14 @@
 
   \code{optimize_method="pso"} \itemize{
   \item{\code{PSOoutput}:}{ A list containing the following
-  elements, see \code{\link{psoptim}}:} \itemize{
-  \item{par} \item{value} \item{counts} \item{convergence}
-  \item{message} \item{stats} } }
+  elements:} \itemize{ \item{par} \item{value}
+  \item{counts} \item{convergence} \item{message}
+  \item{stats} } }
 
   \code{optimize_method="GenSA"} \itemize{
   \item{\code{GenSAoutput:}}{ A list containing the
-  following elements, see \code{\link{GenSA}}:} \itemize{
-  \item{value} \item{par} \item{trace.mat} \item{counts} }
-  }
+  following elements:} \itemize{ \item{value} \item{par}
+  \item{trace.mat} \item{counts} } }
 }
 \description{
   This function aims to provide a wrapper for constrained
@@ -177,7 +176,7 @@
   constraint object are ingnored by the ROI solver.
 
   ROI also can solve quadratic and linear problems with
-  group constraints by added a \code{groups} argument into
+  group constraints by adding a \code{groups} argument into
   the constraints object. This argument is a vector with
   each of its elements the number of assets per group. The
   group constraints, \code{cLO} and \code{cUP}, are also
@@ -187,7 +186,7 @@
   require that the the first 3 assets are in one group, the
   second 3 are in another, and the third are in another,
   then you add the grouping by \code{constraints$groups <-
-  c(3,3,3)}.
+  list(c(1,2,3), c(4,5,6), c(7,8,9))}.
 
   To apply the constraints that the first group must
   compose of at least 20% of the weight, the second group

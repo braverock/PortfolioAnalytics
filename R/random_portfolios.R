@@ -200,7 +200,6 @@ random_portfolios_v1 <- function (rpconstraints,permutations=100,...)
 #' 
 #' @param portfolio an object of type "portfolio" specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
-#' @param rounding integer how many decimals should we round to
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
 #' @aliases randomize_portfolio

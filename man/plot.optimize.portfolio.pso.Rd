@@ -1,14 +1,15 @@
 \name{plot.optimize.portfolio.pso}
 \alias{plot.optimize.portfolio.pso}
-\title{scatter and weights chart for portfolios}
+\title{plot method for optimize.portfolio.pso output}
 \usage{
-  plot.optimize.portfolio.pso(x, ..., return.col = "mean",
-    risk.col = "ES", chart.assets = FALSE, cex.axis = 0.8,
+  \method{plot}{optimize.portfolio.pso} (x, ...,
+    return.col = "mean", risk.col = "ES",
+    chart.assets = FALSE, cex.axis = 0.8,
     element.color = "darkgray", neighbors = NULL,
     main = "PSO.Portfolios", xlim = NULL, ylim = NULL)
 }
 \arguments{
-  \item{pso}{object created by
+  \item{x}{object created by
   \code{\link{optimize.portfolio}}}
 
   \item{...}{any other passthru parameters}
@@ -39,6 +40,10 @@
   \item{ylim}{set the limit on coordinates for the y-axis}
 }
 \description{
+  scatter and weights chart for pso portfolio optimizations
+  run with trace=TRUE
+}
+\details{
   \code{return.col} must be the name of a function used to
   compute the return metric on the random portfolio weights
   \code{risk.col} must be the name of a function used to

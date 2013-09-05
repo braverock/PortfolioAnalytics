@@ -2,7 +2,7 @@
 \alias{plot.optimize.portfolio.DEoptim}
 \title{plot method for optimize.portfolio.DEoptim output}
 \usage{
-  plot.optimize.portfolio.DEoptim(x, ...,
+  \method{plot}{optimize.portfolio.DEoptim} (x, ...,
     return.col = "mean", risk.col = "ES",
     chart.assets = FALSE, neighbors = NULL,
     main = "optimized portfolio plot", xlim = NULL,
@@ -37,6 +37,11 @@
   optimizations run with trace=TRUE
 }
 \details{
+  \code{return.col} must be the name of a function used to
+  compute the return metric on the random portfolio weights
+  \code{risk.col} must be the name of a function used to
+  compute the risk metric on the random portfolio weights
+
   \code{neighbors} may be specified in three ways. The
   first is as a single number of neighbors.  This will
   extract the \code{neighbors} closest portfolios in terms

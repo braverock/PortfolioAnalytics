@@ -10,12 +10,8 @@
 #
 ###############################################################################
 
-#' @rdname chart.Weights
-#' @export
 chart.Weights.RP <- function(object, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
   # Specific to the output of the random portfolio code with constraints
-  # @TODO: check that object is of the correct class
-  # FIXED
   if(!inherits(object, "optimize.portfolio.random")){
     stop("object must be of class 'optimize.portfolio.random'")
   }
@@ -86,12 +82,11 @@ chart.Weights.RP <- function(object, neighbors = NULL, ..., main="Weights", las 
   box(col = element.color)
 }
 
-#' @rdname chart.Weights
+#' @method chart.Weights optimize.portfolio.random
+#' @S3method chart.Weights optimize.portfolio.random
 #' @export
 chart.Weights.optimize.portfolio.random <- chart.Weights.RP
 
-#' @rdname chart.RiskReward
-#' @export
 chart.Scatter.RP <- function(object, neighbors = NULL, ..., return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
   # more or less specific to the output of the random portfolio code with constraints
   # will work to a point with other functions, such as optimize.porfolio.parallel
@@ -245,36 +240,17 @@ chart.Scatter.RP <- function(object, neighbors = NULL, ..., return.col='mean', r
   box(col = element.color)
 }
 
-#' @rdname chart.RiskReward
+#' @method chart.RiskReward optimize.portfolio.random
+#' @S3method chart.RiskReward optimize.portfolio.random
 #' @export
 chart.RiskReward.optimize.portfolio.random <- chart.Scatter.RP
 
-#' scatter and weights chart  for random portfolios
-#' 
-#' \code{neighbors} may be specified in three ways.  
-#' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
-#' portfolios in terms of the \code{out} numerical statistic.
-#' The second method consists of a numeric vector for \code{neighbors}.
-#' This will extract the \code{neighbors} with portfolio index numbers that correspond to the vector contents.
-#' The third method for specifying \code{neighbors} is to pass in a matrix.  
-#' This matrix should look like the output of \code{\link{extractStats}}, and should contain
-#' \code{risk.col},\code{return.col}, and weights columns all properly named.  
-#' 
-#' @param RP set of random portfolios created by \code{\link{optimize.portfolio}}
-#' @param ... any other passthru parameters 
-#' @param risk.col string name of column to use for risk (horizontal axis)
-#' @param return.col string name of column to use for returns (vertical axis)
-#' @param neighbors set of 'neighbor portfolios to overplot
-#' @param main an overall title for the plot: see \code{\link{title}}
-#' @seealso 
-#' \code{\link{optimize.portfolio}}
-#' \code{\link{extractStats}}
-#' @export
+
 charts.RP <- function(RP, risk.col, return.col, chart.assets=FALSE, neighbors=NULL, main="Random.Portfolios", xlim=NULL, ylim=NULL, ...){
   # Specific to the output of the random portfolio code with constraints
-  # @TODO: check that RP is of the correct class
+  if(!inherits(RP, "optimize.portfolio.random")) stop("RP must be of class optimize.portfolio.random")
   op <- par(no.readonly=TRUE)
-  layout(matrix(c(1,2)),height=c(2,1.5),width=1)
+  layout(matrix(c(1,2)),heights=c(2,1.5),widths=1)
   par(mar=c(4,4,4,2))
   chart.Scatter.RP(object=RP, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=NULL, ylim=NULL, ...)
   par(mar=c(2,4,0,2))
@@ -282,11 +258,13 @@ charts.RP <- function(RP, risk.col, return.col, chart.assets=FALSE, neighbors=NU
   par(op)
 }
 
-#TODO make chart.RP into a plot() method or methods
 
 #' plot method for optimize.portfolio.random output
 #' 
-#' scatter and weights chart  for random portfolios
+#' scatter and weights chart for random portfolio optimizations run with trace=TRUE
+#' 
+#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights
+#' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights
 #' 
 #' \code{neighbors} may be specified in three ways.  
 #' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
@@ -298,12 +276,17 @@ charts.RP <- function(RP, risk.col, return.col, chart.assets=FALSE, neighbors=NU
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' @param x set of portfolios created by \code{\link{optimize.portfolio}}
 #' @param ... any other passthru parameters 
-#' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
+#' @param risk.col string name of column to use for risk (horizontal axis)
+#' @param chart.assets TRUE/FALSE to include risk-return scatter of assets
 #' @param neighbors set of 'neighbor portfolios to overplot
+#' @param xlim set the limit on coordinates for the x-axis
+#' @param ylim set the limit on coordinates for the y-axis
 #' @param main an overall title for the plot: see \code{\link{title}}
+#' @method plot optimize.portfolio.random
+#' @S3method plot optimize.portfolio.random
 #' @export
-plot.optimize.portfolio.random <- function(x, ...,  R=NULL, return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, xlim=NULL, ylim=NULL, main='optimized portfolio plot') {
+plot.optimize.portfolio.random <- function(x, ..., return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, xlim=NULL, ylim=NULL, main='optimized portfolio plot') {
     charts.RP(RP=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
 }
 
@@ -323,10 +306,15 @@ plot.optimize.portfolio.random <- function(x, ...,  R=NULL, return.col='mean', r
 #' \code{risk.col},\code{return.col}, and weights columns all properly named.  
 #' @param x set of portfolios created by \code{\link{optimize.portfolio}}
 #' @param ... any other passthru parameters 
-#' @param risk.col string name of column to use for risk (horizontal axis)
 #' @param return.col string name of column to use for returns (vertical axis)
+#' @param risk.col string name of column to use for risk (horizontal axis)
+#' @param chart.assets TRUE/FALSE to include risk-return scatter of assets
 #' @param neighbors set of 'neighbor portfolios to overplot
+#' @param xlim set the limit on coordinates for the x-axis
+#' @param ylim set the limit on coordinates for the y-axis
 #' @param main an overall title for the plot: see \code{\link{title}}
+#' @method plot optimize.portfolio
+#' @S3method plot optimize.portfolio
 #' @export
 plot.optimize.portfolio <- function(x, ...,  return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, xlim=NULL, ylim=NULL, main='optimized portfolio plot') {
     charts.RP(RP=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)

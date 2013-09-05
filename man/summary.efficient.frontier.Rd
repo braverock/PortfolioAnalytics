@@ -2,12 +2,15 @@
 \alias{summary.efficient.frontier}
 \title{Summarize an efficient frontier object}
 \usage{
-  summary.efficient.frontier(object, ..., digits = 3)
+  \method{summary}{efficient.frontier} (object, ...,
+    digits = 3)
 }
 \arguments{
-  \item{x}{objective of class \code{efficient.frontier}}
+  \item{object}{object of class \code{efficient.frontier}}
 
   \item{...}{passthrough parameters}
+
+  \item{digits}{number of digits to round to}
 }
 \description{
   Summary method for efficient frontier objects. Display

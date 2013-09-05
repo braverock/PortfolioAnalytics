@@ -2,7 +2,7 @@
 \alias{print.efficient.frontier}
 \title{Print an efficient frontier object}
 \usage{
-  print.efficient.frontier(x, ...)
+  \method{print}{efficient.frontier} (x, ...)
 }
 \arguments{
   \item{x}{objective of class \code{efficient.frontier}}

@@ -26,12 +26,7 @@
 #' @param min_sum minimum sum of all asset weights, default .99
 #' @param max_sum maximum sum of all asset weights, default 1.01
 #' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
-#' @param type character type of the constraint to add or update
-#' @param assets number of assets, or optionally a named vector of assets specifying initial weights
-#' @param ... any other passthru parameters
-#' @param constrclass character to name the constraint class
-#' @author Peter Carl, Brian G. Peterson, Ross Bennett
-#' @aliases contraint_v1, constraint_v2
+#' @author Peter Carl, Brian G. Peterson
 #' @seealso \code{\link{add.constraint}}
 #' @examples 
 #' exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, weight_seq=generatesequence())
@@ -163,8 +158,11 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
 }
 
 
-#' @rdname constraint 
-#' @export
+#' constructor for v2 constraint specification
+#' @param type character type of the constraint to add or update
+#' @param enabled TRUE/FALSE to enabled the constraint
+#' @param \dots any other passthru parameters
+#' @param constrclass name of class for the constraint
 constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
   if(!hasArg(type)) stop("you must specify a constraint type")
   if (hasArg(type)) if(is.null(type)) stop("you must specify a constraint type")
@@ -604,7 +602,6 @@ group_constraint <- function(type="group", assets, groups, group_labels=NULL, gr
 #' @param min_sum minimum sum of all asset weights, default 0.99
 #' @param max_sum maximum sum of all asset weights, default 1.01
 #' @param enabled TRUE/FALSE
-#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify weight_sum constraints
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
@@ -836,6 +833,7 @@ return_constraint <- function(type="return", return_target, enabled=TRUE, messag
 #' as well as the maximum number of long and short positions.
 #' 
 #' @param type character type of the constraint
+#' @param assets named vector of assets specifying initial weights
 #' @param max_pos maximum number of assets with non-zero weights
 #' @param max_pos_long maximum number of assets with long (i.e. buy) positions
 #' @param max_pos_short maximum number of assets with short (i.e. sell) positions
@@ -971,6 +969,8 @@ factor_exposure_constraint <- function(type="factor_exposure", assets, B, lower,
 #' @param object object of type \code{\link{constraint}} to update
 #' @param ... any other passthru parameters, used to call \code{\link{constraint}}
 #' @author bpeterson
+#' @method update constraint
+#' @S3method update constraint
 #' @export
 update.constraint <- function(object, ...){
   constraints <- object

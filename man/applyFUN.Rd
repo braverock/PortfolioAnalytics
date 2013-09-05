@@ -5,12 +5,12 @@
   applyFUN(R, weights, FUN = "mean", ...)
 }
 \arguments{
-  \item{R}{}
+  \item{R}{xts object of asset returns}
 
   \item{weights}{a matrix of weights generated from
   random_portfolios or \code{optimize.portfolio}}
 
-  \item{FUN}{}
+  \item{FUN}{name of a function}
 
   \item{...}{any passthrough arguments to FUN}
 }
