@@ -39,12 +39,23 @@ opt2 <- optimize.portfolio(R=R, portfolio=conc, optimize_method="ROI", trace=TRU
 opt2
 all.equal(opt1$weights, opt2$weights)
 
-# Now change the conc_aversion values to give highest penalty to small cap stocks
-conc$objectives[[2]]$conc_aversion <- c(0.05, 1, 0.1, 0)
+# From the chart we can see that the allocation to MGF is very high.
+chart.Weights(opt2)
+
+# MGF is part of the SMALL group
+# Now change the conc_aversion values
+conc$objectives[[2]]$conc_aversion <- c(0.1, 0.05, 0.1, 0)
 opt3 <- optimize.portfolio(R=R, portfolio=conc, optimize_method="ROI", trace=TRUE)
 opt3
+
+chart.Weights(opt3)
+
+# We do not have a group constraint, but we can plot the groups based on
+# category labels in the portfolio object
+chart.GroupWeights(opt3, grouping="category", plot.type="barplot", col=bluemono)
 
 # If all the conc_aversion values are very high, this should result in an equal weight portfolio
 conc$objectives[[2]]$conc_aversion <- rep(1e6, 4)
 opt4 <- optimize.portfolio(R=R, portfolio=conc, optimize_method="ROI", trace=TRUE)
 opt4
+chart.Weights(opt4)

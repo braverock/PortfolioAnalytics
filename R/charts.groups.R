@@ -116,7 +116,6 @@ barplotGroupWeights <- function(object,  ..., grouping=c("groups", "category"), 
   
   constraints <- get_constraints(object$portfolio)
   tmp <- extractGroups(object)
-  grouping <- "groups"
   
   if(grouping == "groups"){
     weights <- tmp$group_weights
