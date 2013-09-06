@@ -680,6 +680,22 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
           }
         } # end handling of risk_budget objective
         
+        if(inherits(objective, "weight_concentration_objective")){
+          # If the user does not pass in conc_groups, the output of HHI will be a scalar
+          if((length(objective$conc_aversion) == 1) & is.null(objective$conc_groups)){
+            # treat conc_aversion as a multiplier
+            out <- out + penalty * objective$conc_aversion * tmp_measure
+          }
+          # If the user passes in conc_groups, the output of HHI will be a list
+          # The second element of the list will be the group HHI
+          if(length(objective$conc_aversion > 1) & !is.null(objective$conc_groups)){
+            if(length(objective$conc_aversion) == length(tmp_measure[[2]])){
+              # treat the conc_aversion vector as a multiplier per group hhi
+              out <- out + penalty * sum(objective$conc_aversion * tmp_measure[[2]])
+            }
+          }
+        } # weight concentration objective
+        
       } # end enabled check
     } # end loop over objectives
   } # end objectives processing
