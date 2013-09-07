@@ -254,7 +254,7 @@ print.optimize.portfolio.ROI <- function(x, ..., digits = max(3, getOption("digi
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(x$weights, digits=digits)
+  print.default(round(x$weights, digits=digits), digits=digits)
   cat("\n")
   
   # get objective measure
@@ -301,7 +301,7 @@ print.optimize.portfolio.random <- function(x, ..., digits=max(3, getOption("dig
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(x$weights, digits=digits)
+  print.default(round(x$weights, digits=digits), digits=digits)
   cat("\n")
   
   # get objective measures
@@ -348,7 +348,7 @@ print.optimize.portfolio.DEoptim <- function(x, ..., digits=max(3, getOption("di
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(x$weights, digits=digits)
+  print.default(round(x$weights, digits=digits), digits=digits)
   cat("\n")
   
   # get objective measures
@@ -395,7 +395,7 @@ print.optimize.portfolio.GenSA <- function(x, ..., digits=max(3, getOption("digi
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(x$weights, digits=digits)
+  print.default(round(x$weights, digits=digits), digits=digits)
   cat("\n")
   
   # get objective measures
@@ -442,7 +442,7 @@ print.optimize.portfolio.pso <- function(x, ..., digits=max(3, getOption("digits
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(x$weights, digits=digits)
+  print.default(round(x$weights, digits=digits), digits=digits)
   cat("\n")
   
   # get objective measures
@@ -490,7 +490,7 @@ summary.optimize.portfolio <- function(object, ...){
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(object$weights)
+  print.default(round(object$weights, digits=4))
   cat("\n")
   
   # objective measures
@@ -742,7 +742,7 @@ summary.efficient.frontier <- function(object, ..., digits=3){
   colnames(wts) <- gsub("w.", "", colnames(wts))
   rownames(wts) <- 1:nrow(object$frontier)
   cat("Weights along the efficient frontier:\n")
-  print(wts)
+  print(round(wts, digits=digits))
   cat("\n")
   
   # Risk and return
