@@ -366,3 +366,32 @@ extractGroups <- function(object, ...){
   )
 }
 
+#' @method extractWeights opt.list
+#' @S3method extractWeights opt.list
+#' @export
+extractWeights.opt.list <- function(object, ...){
+  # get the optimal weights of each optimization in a list
+  weights_list <- list()
+  for(i in 1:length(object)){
+    weights_list[[i]] <- object[[i]]$weights
+  }
+  
+  # get/set the names in the object
+  opt_names <- names(object)
+  if(is.null(opt_names)) opt_names <- paste("opt", 1:length(object))
+  
+  # get the names of each element in weights_list
+  weights_names <- unlist(lapply(weights_list, names))
+  
+  # unique names in weights_names
+  names_unique <- unique(weights_names)
+  
+  # create a matrix of zeros to fill in with weights later
+  weights_mat <- matrix(0, nrow=length(weights_list), ncol=length(names_unique), 
+                        dimnames=list(opt_names, names_unique))
+  for(i in 1:length(weights_list)){
+    pm <- pmatch(x=names(weights_list[[i]]), table=names_unique)
+    weights_mat[i, pm] <- weights_list[[i]]
+  }
+  return(weights_mat)
+}

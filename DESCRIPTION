@@ -56,3 +56,5 @@ Collate:
     'charts.efficient.frontier.R'
     'charts.risk.R'
     'charts.groups.R'
+    'charts.multiple.R'
+    'utility.combine.R'

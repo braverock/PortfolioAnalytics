@@ -1,5 +1,6 @@
 \name{chart.Weights}
 \alias{chart.Weights}
+\alias{chart.Weights.opt.list}
 \alias{chart.Weights.optimize.portfolio.DEoptim}
 \alias{chart.Weights.optimize.portfolio.GenSA}
 \alias{chart.Weights.optimize.portfolio.pso}
@@ -39,6 +40,13 @@
 
   \item{cex.axis}{The magnification to be used for axis
   annotation relative to the current setting of \code{cex}}
+
+  \item{colorset}{color palette or vector of colors to use}
+
+  \item{legend.loc}{location of the legend. If NULL, the
+  legend will not be plotted}
+
+  \item{plot.type}{"line" or "barplot"}
 }
 \description{
   Chart the optimal weights and upper and lower bounds on

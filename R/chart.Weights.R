@@ -18,11 +18,15 @@
 #' @param cex.lab The magnification to be used for x and y labels relative to the current setting of \code{cex}
 #' @param element.color color for the default plot lines
 #' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
+#' @param colorset color palette or vector of colors to use
+#' @param legend.loc location of the legend. If NULL, the legend will not be plotted
+#' @param plot.type "line" or "barplot"
 #' @seealso \code{\link{optimize.portfolio}}
 #' @rdname chart.Weights
 #' @name chart.Weights
-#' @aliases chart.Weights.optimize.portfolio.ROI chart.Weights.optimize.portfolio.DEoptim chart.Weights.optimize.portfolio.pso chart.Weights.optimize.portfolio.RP chart.Weights.optimize.portfolio.GenSA
+#' @aliases chart.Weights.optimize.portfolio.ROI chart.Weights.optimize.portfolio.DEoptim chart.Weights.optimize.portfolio.pso chart.Weights.optimize.portfolio.RP chart.Weights.optimize.portfolio.GenSA chart.Weights.opt.list
 #' @export
+#' colorset=NULL, legend.loc="topright", cex.legend=0.8, plot.type="line"
 chart.Weights <- function(object, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
   UseMethod("chart.Weights")
 }
