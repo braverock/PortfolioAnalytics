@@ -68,9 +68,9 @@ chart.Weights.GenSA <- function(object, neighbors = NULL, ..., main="Weights", l
   box(col = element.color)
 }
 
+#' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.GenSA
 #' @S3method chart.Weights optimize.portfolio.GenSA
-#' @export
 chart.Weights.optimize.portfolio.GenSA <- chart.Weights.GenSA
 
 chart.Scatter.GenSA <- function(object, neighbors=NULL, ..., return.col="mean", risk.col="ES", chart.assets=FALSE, element.color="darkgray", cex.axis=0.8, ylim=NULL, xlim=NULL, rp=FALSE){

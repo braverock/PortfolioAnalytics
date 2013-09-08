@@ -68,9 +68,9 @@ chart.Weights.pso <- function(object, neighbors = NULL, ..., main="Weights", las
   box(col = element.color)
 }
 
+#' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.pso
 #' @S3method chart.Weights optimize.portfolio.pso
-#' @export
 chart.Weights.optimize.portfolio.pso <- chart.Weights.pso
 
 chart.Scatter.pso <- function(object, neighbors=NULL, ..., return.col="mean", risk.col="ES", chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){

@@ -81,9 +81,9 @@ chart.Weights.DE <- function(object, neighbors = NULL, ..., main="Weights", las 
   box(col = element.color)
 }
 
+#' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.DEoptim
 #' @S3method chart.Weights optimize.portfolio.DEoptim
-#' @export
 chart.Weights.optimize.portfolio.DEoptim <- chart.Weights.DE
 
 

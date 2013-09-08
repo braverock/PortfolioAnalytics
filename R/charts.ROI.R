@@ -68,9 +68,9 @@ chart.Weights.ROI <- function(object, neighbors = NULL, ..., main="Weights", las
   box(col = element.color)
 }
 
+#' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.ROI
 #' @S3method chart.Weights optimize.portfolio.ROI
-#' @export
 chart.Weights.optimize.portfolio.ROI <- chart.Weights.ROI
 
 
