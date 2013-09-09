@@ -2,10 +2,12 @@
 # The following optimization problems will be run
 # mean-mETL
 # - maximize mean-to-ETL (i.e. reward-to-risk)
-# minStdDev
-# - minimize volatility
+# MinSD
+# - minimize annualized standard deviation
 # eqStdDev
 # - equal risk (volatility)
+# MeanRL
+# - maximize mean with mETL risk limits
 
 # Include optimizer and multi-core packages
 library(PortfolioAnalytics)
@@ -15,14 +17,16 @@ require(foreach)
 
 # The multicore package, and therefore registerDoMC, should not be used in a
 # GUI environment, because multiple processes then share the same GUI. Only use
-# when running from the command line
-require(doMC)
-registerDoMC(3)
+# when running from the command line.
+# require(doMC)
+# registerDoMC(3)
 
 data(edhec)
 
 # Drop some indexes and reorder
-edhec.R = edhec[,c("Convertible Arbitrage", "Equity Market Neutral","Fixed Income Arbitrage", "Event Driven", "CTA Global", "Global Macro", "Long/Short Equity")]
+edhec.R <- edhec[,c("Convertible Arbitrage", "Equity Market Neutral", 
+                    "Fixed Income Arbitrage", "Event Driven", "CTA Global", 
+                    "Global Macro", "Long/Short Equity")]
 
 # Annualized standard deviation
 pasd <- function(R, weights){
@@ -67,7 +71,7 @@ init.portf <- add.objective(portfolio=init.portf,
 
 # Add measure 3, ES with p=(1-1/12)
 # set confidence for ES
-p=1-1/12 # for monthly
+p <- 1-1/12 # for monthly
 
 init.portf <- add.objective(portfolio=init.portf,
                             type="risk", # the kind of objective this is
@@ -122,7 +126,9 @@ MeanmETL.DE <- optimize.portfolio(R=R,
                                   traceDE=5)
 print(MeanmETL.DE)
 print(MeanmETL.DE$elapsed_time)
-save(MeanmETL.DE, file=paste('MeanmETL',Sys.Date(),'rda',sep='.'))
+chart.Weights(object=MeanmETL.DE, main="Mean-mETL Weights")
+chart.RiskReward(object=MeanmETL.DE, return.col="mean", risk.col="ES")
+# save(MeanmETL.DE, file=paste('MeanmETL',Sys.Date(),'rda',sep='.'))
 
 # Evaluate the objectives with DE through time
 # MeanmETL.DE.t <- optimize.portfolio.rebalancing(R=R,
@@ -149,7 +155,9 @@ MinSD.DE <- optimize.portfolio(R=R,
                                traceDE=5)
 print(MinSD.DE)
 print(MinSD.DE$elapsed_time)
-save(MinSD.DE, file=paste('MinSD',Sys.Date(),'rda',sep='.'))
+chart.Weights(object=MinSD.DE, plot.type="barplot", legend.loc=NULL)
+chart.RiskReward(object=MinSD.DE, return.col="mean", risk.col="pasd")
+# save(MinSD.DE, file=paste('MinSD',Sys.Date(),'rda',sep='.'))
 
 print(paste('Completed MinSD optimization at',Sys.time(),'moving on to EqSD'))
 
@@ -162,10 +170,16 @@ EqSD.DE <- optimize.portfolio(R=R,
                               traceDE=5)
 print(EqSD.DE)
 print(EqSD.DE$elapsed_time)
-save(EqSD.DE, file=paste('EqSD',Sys.Date(),'rda',sep='.'))
+# save(EqSD.DE, file=paste('EqSD',Sys.Date(),'rda',sep='.'))
+
+chart.Weights(object=EqSD.DE)
+chart.RiskReward(object=EqSD.DE, return.col="mean", risk.col="StdDev")
+chart.RiskBudget(object=EqSD.DE, risk.type="absolute")
+chart.RiskBudget(object=EqSD.DE, risk.type="pct_contrib")
 
 print(paste('Completed EqSD optimization at',Sys.time(),'moving on to MeanRL'))
 
+##### MeanRL.DE #####
 MeanRL.DE <- optimize.portfolio(R=R,
                               portfolio=MeanRL.portf,
                               optimize_method="DEoptim",
@@ -174,7 +188,10 @@ MeanRL.DE <- optimize.portfolio(R=R,
                               traceDE=5)
 print(MeanRL.DE)
 print(MeanRL.DE$elapsed_time)
-save(MeanRL.DE, file=paste('MeanRL',Sys.Date(),'rda',sep='.'))
+# save(MeanRL.DE, file=paste('MeanRL',Sys.Date(),'rda',sep='.'))
+
+chart.Weights(object=MeanRL.DE)
+chart.RiskBudget(object=MeanRL.DE, risk.type="pct_contrib", neighbors=25)
 
 end_time<-Sys.time()
 print("Optimization Complete")

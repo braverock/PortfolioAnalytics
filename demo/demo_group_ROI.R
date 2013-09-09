@@ -14,6 +14,7 @@ funds <- colnames(R)
 pspec <- portfolio.spec(assets=funds)
 pspec <- add.constraint(portfolio=pspec, type="full_investment")
 pspec <- add.constraint(portfolio=pspec, type="long_only")
+# add two levels of grouping
 pspec <- add.constraint(portfolio=pspec, type="group",
                         groups=list(groupA=c(1, 3),
                                     groupB=c(2, 4),

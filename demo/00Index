@@ -2,6 +2,15 @@ constrained_optim	Demonstrate creating and using constrained portfolio optimizat
 sortino             Maximize the Sortino Ratio of the portfolio 
 testing_ROI  Demonstrate creating constraint object and solve five basic convex portfolio optimization problems with ROI using the 'edhec' dataset.
 testing_pso  Demonstrate creating constraint object and solve portfolio optimization problems with pso using the 'edhec' dataset.  These sample problems are similar to those used in testing_ROI, so that one can compare solutions easily.
-testing_GenSA  Demonstrate the creating constraint object and solve portfolio optimization problems with GenSA using the 'edhec' datset.  These sample problems are similar to those used in testing_ROI, so that one can compare solutions easily.
-demo_ROI Demonstrate constraints and objectives that can be solved with ROI
+testing_GenSA  Demonstrate creating the constraint object and solve portfolio optimization problems with GenSA using the 'edhec' datset.  These sample problems are similar to those used in testing_ROI, so that one can compare solutions easily.
+demo_ROI Demonstrate constraints and objectives that can be solved with ROI.
+demo_DEoptim Demonstrate solving portfolio optimization problems using DEoptim as the solver. The demo solvers 4 problems: 1) Maximize mean return per unit mETL 2) Minimize annualized standard deviation 3) Minimize annualized standard deviation with equal contribution to risk using standard deviation as the risk measure 4) Maximize mean return with equal contribution to risk using modified ETL as the risk measure.
+demo_efficient_frontier Demonstrate how to create and chart efficient frontiers.
+demo_factor_exposure Demonstrate how to use the factor_exposure constraint.
+demo_group_ROI Demonstrate how to use group constraints using the ROI solver.
+demo_maxret_ROI Demonstrate maximizing return using the ROI solver.
+demo_opt_combine Demonstrate how to combine and chart the optimal weights for multiple optimizations.
+demo_weight_concentration Demonstrate how to use the weight concentration objective.
+backwards_compat Demonstrate how to solve optimization problems using v1 specification with a v1_constraint object.
+demo_random_portfolios Demonstrate examples from script.workshop2012.R using random portfolios
 
