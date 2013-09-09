@@ -10,76 +10,82 @@
 #
 ###############################################################################
 
-chart.Weights.RP <- function(object, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
+chart.Weights.RP <- function(object, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, colorset=NULL, legend.loc="topright", cex.legend=0.8, plot.type="line"){
   # Specific to the output of the random portfolio code with constraints
   if(!inherits(object, "optimize.portfolio.random")){
     stop("object must be of class 'optimize.portfolio.random'")
   }
-  columnnames = names(object$weights)
-  numassets = length(columnnames)
   
-  constraints <- get_constraints(object$portfolio)
-  
-  if(is.null(xlab))
-    minmargin = 3
-  else
-    minmargin = 5
-  if(main=="") topmargin=1 else topmargin=4
-  if(las > 1) {# set the bottom border to accommodate labels
-    bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
-    if(bottommargin > 10 ) {
-      bottommargin<-10
-      columnnames<-substr(columnnames,1,19)
-      # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
+  if(plot.type %in% c("bar", "barplot")){
+    barplotWeights(object=object, ..., main=main, las=las, xlab=xlab, cex.lab=cex.lab, element.color=element.color, cex.axis=cex.axis, legend.loc=legend.loc, cex.legend=cex.legend, colorset=colorset)
+  } else if(plot.type == "line"){
+    
+    columnnames = names(object$weights)
+    numassets = length(columnnames)
+    
+    constraints <- get_constraints(object$portfolio)
+    
+    if(is.null(xlab))
+      minmargin = 3
+    else
+      minmargin = 5
+    if(main=="") topmargin=1 else topmargin=4
+    if(las > 1) {# set the bottom border to accommodate labels
+      bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
+      if(bottommargin > 10 ) {
+        bottommargin<-10
+        columnnames<-substr(columnnames,1,19)
+        # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
+      }
     }
-  }
-  else {
-    bottommargin = minmargin
-  }
-  par(mar = c(bottommargin, 4, topmargin, 2) +.1)
-  if(any(is.infinite(constraints$max)) | any(is.infinite(constraints$min))){
-    # set ylim based on weights if box constraints contain Inf or -Inf
-    ylim <- range(object$weights)
-  } else {
-    # set ylim based on the range of box constraints min and max
-    ylim <- range(c(constraints$min, constraints$max))
-  }
-  plot(object$random_portfolios[1,], type="b", col="orange", axes=FALSE, xlab='', ylim=ylim, ylab="Weights", main=main, ...)
-  if(!any(is.infinite(constraints$min))){
-    points(constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
-  }
-  if(!any(is.infinite(constraints$max))){
-    points(constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
-  }
-  if(!is.null(neighbors)){ 
-    if(is.vector(neighbors)){
-      xtract=extractStats(object)
-      weightcols<-grep('w\\.',colnames(xtract)) #need \\. to get the dot 
-      if(length(neighbors)==1){
-        # overplot nearby portfolios defined by 'out'
-        orderx = order(xtract[,"out"])
-        subsetx = head(xtract[orderx,], n=neighbors)
-        for(i in 1:neighbors) points(subsetx[i,weightcols], type="b", col="lightblue")
-      } else{
-        # assume we have a vector of portfolio numbers
-        subsetx = xtract[neighbors,weightcols]
-        for(i in 1:length(neighbors)) points(subsetx[i,], type="b", col="lightblue")
-      }      
+    else {
+      bottommargin = minmargin
     }
-    if(is.matrix(neighbors) | is.data.frame(neighbors)){
-      # the user has likely passed in a matrix containing calculated values for risk.col and return.col
-      nbweights<-grep('w\\.',colnames(neighbors)) #need \\. to get the dot
-      for(i in 1:nrow(neighbors)) points(as.numeric(neighbors[i,nbweights]), type="b", col="lightblue")
-      # note that here we need to get weight cols separately from the matrix, not from xtract
-      # also note the need for as.numeric.  points() doesn't like matrix inputs
+    par(mar = c(bottommargin, 4, topmargin, 2) +.1)
+    if(any(is.infinite(constraints$max)) | any(is.infinite(constraints$min))){
+      # set ylim based on weights if box constraints contain Inf or -Inf
+      ylim <- range(object$weights)
+    } else {
+      # set ylim based on the range of box constraints min and max
+      ylim <- range(c(constraints$min, constraints$max))
     }
+    plot(object$random_portfolios[1,], type="b", col="orange", axes=FALSE, xlab='', ylim=ylim, ylab="Weights", main=main, ...)
+    if(!any(is.infinite(constraints$min))){
+      points(constraints$min, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
+    }
+    if(!any(is.infinite(constraints$max))){
+      points(constraints$max, type="b", col="darkgray", lty="solid", lwd=2, pch=25)
+    }
+    if(!is.null(neighbors)){ 
+      if(is.vector(neighbors)){
+        xtract=extractStats(object)
+        weightcols<-grep('w\\.',colnames(xtract)) #need \\. to get the dot 
+        if(length(neighbors)==1){
+          # overplot nearby portfolios defined by 'out'
+          orderx = order(xtract[,"out"])
+          subsetx = head(xtract[orderx,], n=neighbors)
+          for(i in 1:neighbors) points(subsetx[i,weightcols], type="b", col="lightblue")
+        } else{
+          # assume we have a vector of portfolio numbers
+          subsetx = xtract[neighbors,weightcols]
+          for(i in 1:length(neighbors)) points(subsetx[i,], type="b", col="lightblue")
+        }      
+      }
+      if(is.matrix(neighbors) | is.data.frame(neighbors)){
+        # the user has likely passed in a matrix containing calculated values for risk.col and return.col
+        nbweights<-grep('w\\.',colnames(neighbors)) #need \\. to get the dot
+        for(i in 1:nrow(neighbors)) points(as.numeric(neighbors[i,nbweights]), type="b", col="lightblue")
+        # note that here we need to get weight cols separately from the matrix, not from xtract
+        # also note the need for as.numeric.  points() doesn't like matrix inputs
+      }
+    }
+    
+    points(object$random_portfolios[1,], type="b", col="orange", pch=16) # to overprint neighbors
+    points(object$weights, type="b", col="blue", pch=16)
+    axis(2, cex.axis = cex.axis, col = element.color)
+    axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
+    box(col = element.color)
   }
-  
-  points(object$random_portfolios[1,], type="b", col="orange", pch=16) # to overprint neighbors
-  points(object$weights, type="b", col="blue", pch=16)
-  axis(2, cex.axis = cex.axis, col = element.color)
-  axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
-  box(col = element.color)
 }
 
 #' @rdname chart.Weights

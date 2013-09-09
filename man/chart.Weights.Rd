@@ -11,26 +11,36 @@
 \usage{
   \method{chart.Weights}{optimize.portfolio.DEoptim} (object, neighbors = NULL, ..., main = "Weights",
     las = 3, xlab = NULL, cex.lab = 1,
-    element.color = "darkgray", cex.axis = 0.8)
+    element.color = "darkgray", cex.axis = 0.8,
+    colorset = NULL, legend.loc = "topright",
+    cex.legend = 0.8, plot.type = "line")
 
   \method{chart.Weights}{optimize.portfolio.random} (object, neighbors = NULL, ..., main = "Weights",
     las = 3, xlab = NULL, cex.lab = 1,
-    element.color = "darkgray", cex.axis = 0.8)
+    element.color = "darkgray", cex.axis = 0.8,
+    colorset = NULL, legend.loc = "topright",
+    cex.legend = 0.8, plot.type = "line")
 
   \method{chart.Weights}{optimize.portfolio.ROI} (object,
     neighbors = NULL, ..., main = "Weights", las = 3,
     xlab = NULL, cex.lab = 1, element.color = "darkgray",
-    cex.axis = 0.8)
+    cex.axis = 0.8, colorset = NULL,
+    legend.loc = "topright", cex.legend = 0.8,
+    plot.type = "line")
 
   \method{chart.Weights}{optimize.portfolio.pso} (object,
     neighbors = NULL, ..., main = "Weights", las = 3,
     xlab = NULL, cex.lab = 1, element.color = "darkgray",
-    cex.axis = 0.8)
+    cex.axis = 0.8, colorset = NULL,
+    legend.loc = "topright", cex.legend = 0.8,
+    plot.type = "line")
 
   \method{chart.Weights}{optimize.portfolio.GenSA} (object,
     neighbors = NULL, ..., main = "Weights", las = 3,
     xlab = NULL, cex.lab = 1, element.color = "darkgray",
-    cex.axis = 0.8)
+    cex.axis = 0.8, colorset = NULL,
+    legend.loc = "topright", cex.legend = 0.8,
+    plot.type = "line")
 
   chart.Weights(object, neighbors = NULL, ...,
     main = "Weights", las = 3, xlab = NULL, cex.lab = 1,

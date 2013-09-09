@@ -31,3 +31,63 @@ chart.Weights <- function(object, neighbors = NULL, ..., main="Weights", las = 3
   UseMethod("chart.Weights")
 }
 
+barplotWeights <- function(object, ..., main="Weights", las=3, xlab=NULL, cex.lab=1, element.color="darkgray", cex.axis=0.8, legend.loc="topright", cex.legend=0.8, colorset=NULL){
+  weights <- object$weights
+  columnnames <- names(weights)
+  
+  if(is.null(xlab))
+    minmargin = 3
+  else
+    minmargin = 5
+  if(main=="") topmargin=1 else topmargin=4
+  if(las > 1) {# set the bottom border to accommodate labels
+    bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
+    if(bottommargin > 10 ) {
+      bottommargin<-10
+      columnnames<-substr(columnnames,1,19)
+      # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
+    }
+  }
+  else {
+    bottommargin = minmargin
+  }
+  par(mar = c(bottommargin, 4, topmargin, 2) +.1)
+  
+  if(is.null(colorset)) colorset <- 1:length(weights)
+  barplot(height=weights, las=las, main=main, xlab=xlab, ylab="Weights", cex.axis=cex.axis, cex.names=cex.lab, col=colorset, ...)
+  if(!is.null(legend.loc)){
+    legend(legend.loc, legend=names(weights), cex=cex.legend, fill=colorset, bty="n")
+  }
+  box(col=element.color)
+}
+
+
+barplotWeights <- function(object, ..., main="Weights", las=3, xlab=NULL, cex.lab=1, element.color="darkgray", cex.axis=0.8, legend.loc="topright", cex.legend=0.8, colorset=NULL){
+  weights <- object$weights
+  columnnames <- names(weights)
+  
+  if(is.null(xlab))
+    minmargin = 3
+  else
+    minmargin = 5
+  if(main=="") topmargin=1 else topmargin=4
+  if(las > 1) {# set the bottom border to accommodate labels
+    bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
+    if(bottommargin > 10 ) {
+      bottommargin<-10
+      columnnames<-substr(columnnames,1,19)
+      # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
+    }
+  }
+  else {
+    bottommargin = minmargin
+  }
+  par(mar = c(bottommargin, 4, topmargin, 2) +.1)
+  
+  if(is.null(colorset)) colorset <- 1:length(weights)
+  barplot(height=weights, las=las, main=main, xlab=xlab, ylab="Weights", cex.axis=cex.axis, cex.names=cex.lab, col=colorset, ...)
+  if(!is.null(legend.loc)){
+    legend(legend.loc, legend=names(weights), cex=cex.legend, fill=colorset, bty="n")
+  }
+  box(col=element.color)
+}
