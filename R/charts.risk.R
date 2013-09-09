@@ -52,11 +52,13 @@ chart.RiskBudget <- function(object, neighbors=NULL, ..., risk.type="absolute", 
   # list to store $pct_contrib values
   pct_contrib <- list()
   
+  idx <- NULL
   for(i in 1:length(object$objective_measures)){
     if(length(object$objective_measures[[i]]) > 1){
       # we have an objective measure with contribution and pct_contrib
       contrib[[i]] <- object$objective_measures[[i]][2]
       pct_contrib[[i]] <- object$objective_measures[[i]][3]
+      idx <- c(idx, i)
     }
   }
   
@@ -82,15 +84,15 @@ chart.RiskBudget <- function(object, neighbors=NULL, ..., risk.type="absolute", 
   par(mar = c(bottommargin, 4, topmargin, 2) +.1)
   
   if(risk.type == "absolute"){
-    for(ii in 1:length(rb_idx)){
+    for(ii in 1:length(idx)){
       if(is.null(ylim)){
-        ylim <- range(contrib[[ii]][[1]])
+        ylim <- range(contrib[[idx[ii]]][[1]])
         ylim[1] <- min(0, ylim[1])
         ylim[2] <- ylim[2] * 1.15
       }
       objname <- portfolio$objectives[[rb_idx[i]]]$name
       # Plot values of contribution
-      plot(contrib[[ii]][[1]], type="n", axes=FALSE, xlab="", ylim=ylim, ylab=paste(objname, "Contribution", sep=" "), main=main, cex.lab=cex.lab, ...)
+      plot(contrib[[idx[ii]]][[1]], type="n", axes=FALSE, xlab="", ylim=ylim, ylab=paste(objname, "Contribution", sep=" "), main=main, cex.lab=cex.lab, ...)
       
       # neighbors needs to be in the loop if there is more than one risk_budget_objective
       if(!is.null(neighbors)){
@@ -119,7 +121,7 @@ chart.RiskBudget <- function(object, neighbors=NULL, ..., risk.type="absolute", 
           # also note the need for as.numeric.  points() doesn't like matrix inputs
         } # end neighbors plot for matrix or data.frame
       } # end if neighbors is not null
-      points(contrib[[ii]][[1]], type="b", ...)
+      points(contrib[[idx[ii]]][[1]], type="b", ...)
       axis(2, cex.axis = cex.axis, col = element.color)
       axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
       box(col = element.color)
@@ -138,7 +140,7 @@ chart.RiskBudget <- function(object, neighbors=NULL, ..., risk.type="absolute", 
       }
       objname <- portfolio$objectives[[rb_idx[i]]]$name
       # plot percentage contribution
-      plot(pct_contrib[[ii]][[1]], type="n", axes=FALSE, xlab='', ylim=ylim, ylab=paste(objname, " % Contribution", sep=" "), main=main, cex.lab=cex.lab, ...)
+      plot(pct_contrib[[idx[ii]]][[1]], type="n", axes=FALSE, xlab='', ylim=ylim, ylab=paste(objname, " % Contribution", sep=" "), main=main, cex.lab=cex.lab, ...)
       # Check for minimum percentage risk (min_prisk) argument
       if(!is.null(min_prisk)){
         points(min_prisk, type="b", col="darkgray", lty="solid", lwd=2, pch=24)
@@ -178,7 +180,7 @@ chart.RiskBudget <- function(object, neighbors=NULL, ..., risk.type="absolute", 
           # also note the need for as.numeric.  points() doesn't like matrix inputs
         } # end neighbors plot for matrix or data.frame
       } # end if neighbors is not null
-      points(pct_contrib[[ii]][[1]], type="b", ...)
+      points(pct_contrib[[idx[ii]]][[1]], type="b", ...)
       axis(2, cex.axis = cex.axis, col = element.color)
       axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis = cex.axis, col = element.color)
       box(col = element.color)
