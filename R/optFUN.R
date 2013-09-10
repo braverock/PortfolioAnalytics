@@ -679,10 +679,10 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
   wts <- qp.result$solution
   w.buy <- qp.result$solution[(N+1):(2*N)]
   w.sell <- qp.result$solution[(2*N+1):(3*N)]
-  w.total <- w.initial + w.buy + w.sell
-  # wts.final <- wts[(1:N)] + wts[(1+N):(2*N)] + wts[(2*N+1):(3*N)]
+  w.total <- init_weights + w.buy + w.sell
+  wts.final <- wts[(1:N)] + wts[(1+N):(2*N)] + wts[(2*N+1):(3*N)]
   
-  weights <- w.total
+  weights <- wts.final
   names(weights) <- colnames(R)
   out <- list()
   out$weights <- weights

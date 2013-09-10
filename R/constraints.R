@@ -345,6 +345,13 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
                                                                          message=message, 
                                                                          ...=...)
          },
+         # transaction cost  constraint
+         transaction=, transaction_cost = {tmp_constraint <- transaction_cost_constraint(assets=assets, 
+                                                                                            type=type, 
+                                                                                            enabled=enabled, 
+                                                                                            message=message, 
+                                                                                            ...=...)
+         },
          # Do nothing and return the portfolio object if type is NULL
          null = {return(portfolio)}
   )
@@ -718,6 +725,9 @@ get_constraints <- function(portfolio){
         out$lower <- constraint$lower
         out$upper <- constraint$upper
       }
+      if(inherits(constraint, "transaction_cost_constraint")){
+        out$ptc <- constraint$ptc
+      }
     }
   }
   
@@ -960,6 +970,39 @@ factor_exposure_constraint <- function(type="factor_exposure", assets, B, lower,
   Constraint$B <- B
   Constraint$lower <- lower
   Constraint$upper <- upper
+  return(Constraint)
+}
+
+#' constructor for transaction_cost_constraint
+#' 
+#' The transaction cost constraint specifies a proportional cost value. 
+#' This function is called by add.constraint when type="transaction_cost" is specified, see \code{\link{add.constraint}}.
+#' 
+#' Note that with the ROI solvers, proportional transaction cost constraint is 
+#' currently only supported for the global minimum variance and quadratic 
+#' utility problems with ROI quadprog plugin.
+#' 
+#' @param type character type of the constraint
+#' @param ptc proportional transaction cost value
+#' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
+#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @author Ross Bennett
+#' @seealso \code{\link{add.constraint}}
+#' @examples
+#' data(edhec)
+#' ret <- edhec[, 1:4]
+#' 
+#' pspec <- portfolio.spec(assets=colnames(ret))
+#' 
+#' pspec <- add.constraint(portfolio=pspec, type="transaction_cost", ptc=0.01)
+#' @export
+transaction_cost_constraint <- function(type="transaction_cost", assets, ptc, enabled=TRUE, message=FALSE, ...){
+  nassets <- length(assets)
+  if(length(ptc) == 1) ptc <- rep(ptc, nassets)
+  if(length(ptc) != nassets) stop("length of ptc must be equal to number of assets")
+  Constraint <- constraint_v2(type, enabled=enabled, constrclass="transaction_cost_constraint", ...)
+  Constraint$ptc <- ptc
   return(Constraint)
 }
 

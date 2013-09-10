@@ -13,4 +13,5 @@ demo_opt_combine Demonstrate how to combine and chart the optimal weights for mu
 demo_weight_concentration Demonstrate how to use the weight concentration objective.
 backwards_compat Demonstrate how to solve optimization problems using v1 specification with a v1_constraint object.
 demo_random_portfolios Demonstrate examples from script.workshop2012.R using random portfolios
+demo_proportional_cost_ROI Demonstrate how to use proportional transaction cost constraint with quadprog solver
 
