@@ -495,6 +495,15 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
       }
     }
   } # End factor exposure constraint penalty
+  
+  # Add penalty for transaction costs
+  if(!is.null(constraints$ptc)){
+    # calculate total transaction cost using portfolio$assets as initial set of weights
+    tc <- sum(abs(w - portfolio$assets) * constraints$ptc)
+    # for now use a multiplier of 1, may need to adjust this later
+    mult <- 1
+    out <- out + penalty * mult * tc
+  } # End transaction cost penalty
     
   nargs <- list(...)
   if(length(nargs)==0) nargs <- NULL
