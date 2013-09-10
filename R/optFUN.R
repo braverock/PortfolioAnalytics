@@ -587,3 +587,116 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   # roi.result <- ROI_solve(x=opt.prob, solver="quadprog")
 }
 
+# proportional transaction cost constraint
+gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
+  # function for minimum variance or max quadratic utility problems
+  # modifying ProportionalCostOpt function from MPO package
+  
+  # Modify the returns matrix. This is done because there are 3 sets of
+  # variables 1) w.initial, 2) w.buy, and 3) w.sell
+  returns <- cbind(R, R, R)
+  V <- cov(returns)
+  
+  # number of assets
+  N <- ncol(R)
+  
+  # initial weights for solver
+  if(is.null(init_weights)) init_weights <- rep(1/ N, N)
+  
+  # Amat for initial weights
+  Amat <- cbind(diag(N), matrix(0, nrow=N, ncol=N*2))
+  rhs <- init_weights
+  dir <- rep("==", N)
+  meq <- 4
+  
+  # check for a target return constraint
+  if(!is.na(target)) {
+    # If var is the only objective specified, then moments$mean won't be calculated
+    if(all(moments$mean==0)){
+      tmp_means <- colMeans(R)
+    } else {
+      tmp_means <- moments$mean
+    }
+    Amat <- rbind(Amat, rep((1+tmp_means), 3))
+    dir <- c(dir, "==")
+    rhs <- c(rhs, (1+target))
+    meq <- 5
+  }
+  
+  # Amat for positive weights for w.buy and w.sell
+  weights.positive <- rbind(matrix(0,ncol=2*N,nrow=N),diag(2*N))
+  temp.index <- (N*3-N+1):(N*3)
+  weights.positive[temp.index,] <- -1*weights.positive[temp.index,]
+  Amat <- rbind(Amat, t(weights.positive))
+  rhs <- c(rhs, rep(0, 2*N))
+  
+  # Amat for full investment constraint
+  ptc <- constraints$ptc
+  Amat <- rbind(Amat, rbind(c(rep(1, N), (1+ptc), (1-ptc)), -c(rep(1, N), (1+ptc), (1-ptc))))
+  rhs <- c(rhs, constraints$min_sum, -constraints$max_sum)
+  dir <- c(dir, ">=", ">=")
+  
+  # Amat for lower box constraints
+  Amat <- rbind(Amat, cbind(diag(N), diag(N), diag(N)))
+  rhs <- c(rhs, constraints$min)
+  dir <- c(dir, rep(">=", N))
+  
+  # Amat for upper box constraints
+  Amat <- rbind(Amat, cbind(-diag(N), -diag(N), -diag(N)))
+  rhs <- c(rhs, -constraints$max)
+  dir <- c(dir, rep(">=", N))
+  
+  # include group constraints
+  if(try(!is.null(constraints$groups), silent=TRUE)){
+    n.groups <- length(constraints$groups)
+    Amat.group <- matrix(0, nrow=n.groups, ncol=N)
+    for(i in 1:n.groups){
+      Amat.group[i, constraints$groups[[i]]] <- 1
+    }
+    if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
+    if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
+    Amat <- rbind(Amat, cbind(Amat.group, Amat.group, Amat.group))
+    Amat <- rbind(Amat, cbind(-Amat.group, -Amat.group, -Amat.group))
+    dir <- c(dir, rep(">=", (n.groups + n.groups)))
+    rhs <- c(rhs, constraints$cLO, -constraints$cUP)
+  }
+  
+  # Add the factor exposures to Amat, dir, and rhs
+  if(!is.null(constraints$B)){
+    t.B <- t(constraints$B)
+    Amat <- rbind(Amat, cbind(t.B, t.B, t.B))
+    Amat <- rbind(Amat, cbind(-t.B, -t.B, -t.B))
+    dir <- c(dir, rep(">=", 2 * nrow(t.B)))
+    rhs <- c(rhs, constraints$lower, -constraints$upper)
+  }
+  
+  d <- rep(-moments$mean, 3)
+  
+  qp.result <- try(solve.QP(Dmat=corpcor:::make.positive.definite(2*lambda*V), 
+                            dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
+  if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
+  
+  wts <- qp.result$solution
+  w.buy <- qp.result$solution[(N+1):(2*N)]
+  w.sell <- qp.result$solution[(2*N+1):(3*N)]
+  w.total <- w.initial + w.buy + w.sell
+  # wts.final <- wts[(1:N)] + wts[(1+N):(2*N)] + wts[(2*N+1):(3*N)]
+  
+  weights <- w.total
+  names(weights) <- colnames(R)
+  out <- list()
+  out$weights <- weights
+  out$out <- qp.result$val
+  return(out)
+  
+  # TODO
+  # Get this working with ROI
+  
+  # Not getting solution using ROI
+  # set up the quadratic objective
+  # ROI_objective <- Q_objective(Q=make.positive.definite(2*lambda*V), L=rep(-moments$mean, 3))
+  
+  # opt.prob <- OP(objective=ROI_objective, 
+  #                constraints=L_constraint(L=Amat, dir=dir, rhs=rhs))
+  # roi.result <- ROI_solve(x=opt.prob, solver="quadprog")
+}
