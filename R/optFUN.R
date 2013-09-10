@@ -62,7 +62,7 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   # set up the quadratic objective
   if(!is.null(lambda_hhi)){
     if(length(lambda_hhi) == 1 & is.null(conc_groups)){
-      ROI_objective <- Q_objective(Q=2*lambda*moments$var + lambda_hhi * diag(N), L=-moments$mean)
+      ROI_objective <- Q_objective(Q=2*lambda*(moments$var + lambda_hhi * diag(N)), L=-moments$mean)
     } else if(!is.null(conc_groups)){
       # construct the matrix with concentration aversion values by group
       hhi_mat <- matrix(0, nrow=N, ncol=N)
@@ -76,7 +76,7 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
         }
         hhi_mat <- hhi_mat + lambda_hhi[i] * tmpI
       }
-      ROI_objective <- Q_objective(Q=2*lambda*moments$var + hhi_mat, L=-moments$mean)
+      ROI_objective <- Q_objective(Q=2*lambda*(moments$var + hhi_mat), L=-moments$mean)
     }
   } else {
     ROI_objective <- Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
