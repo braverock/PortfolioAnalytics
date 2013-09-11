@@ -63,3 +63,49 @@ barplotOptWeights <- function(object, ..., main="Weights", las=3, xlab=NULL, cex
   }
   box(col=element.color)
 }
+
+#' @rdname chart.RiskReward
+#' @method chart.RiskReward opt.list
+#' @S3method chart.RiskReward opt.list
+chart.RiskReward.opt.list <- function(object, ..., risk.col="ES", return.col="mean", main="", ylim=NULL, xlim=NULL, labels.assets=TRUE, pch.assets=1, cex.assets=0.8, cex.axis=0.8, cex.lab=0.8, colorset=NULL, element.color="darkgray"){
+  if(!inherits(object, "opt.list")) stop("object must be of class 'opt.list'")
+  # Get the objective measures
+  obj <- extractObjectiveMeasures(object)
+  
+  # check if risk.col and return.col are valid objective measures
+  columnnames <- colnames(obj)
+  if(!(risk.col %in% columnnames)) stop(paste(risk.col, "not in column names"))
+  if(!(return.col %in% columnnames)) stop(paste(return.col, "not in column names"))
+  
+  # data to plot
+  dat <- na.omit(obj[, c(risk.col, return.col)])
+  if(nrow(dat) < 1) stop("No data to plot after na.omit")
+  dat_names <- rownames(dat)
+  
+  # colors to plot
+  if(is.null(colorset)){
+    colorset <- 1:nrow(dat)
+  }
+  
+  # set xlim and ylim
+  if(is.null(xlim)){
+    xlim <- range(dat[, risk.col])
+    xlim[1] <- 0
+    xlim[2] <- xlim[2] * 1.25
+  }
+  
+  if(is.null(ylim)){
+    ylim <- range(dat[, return.col])
+    ylim[1] <- 0
+    ylim[2] <- ylim[2] * 1.15
+  }
+  
+  # plot the points
+  plot(x=dat[, risk.col], y=dat[, return.col], cex.lab=cex.lab, main=main, ylab=return.col, xlab=risk.col, xlim=xlim, ylim=ylim, pch=pch.assets, col=colorset, ..., axes=FALSE)
+  if(labels.assets) text(x=dat[, risk.col], y=dat[, return.col], labels=dat_names, pos=4, cex=cex.assets, col=colorset)
+  
+  # add the axis
+  axis(2, cex.axis=cex.axis, col=element.color)
+  axis(1, cex.axis=cex.axis, col=element.color)
+  box(col=element.color)
+}
