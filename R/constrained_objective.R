@@ -502,7 +502,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     tc <- sum(abs(w - portfolio$assets) * constraints$ptc)
     # for now use a multiplier of 1, may need to adjust this later
     mult <- 1
-    out <- out + penalty * mult * tc
+    out <- out + mult * tc
   } # End transaction cost penalty
     
   nargs <- list(...)
