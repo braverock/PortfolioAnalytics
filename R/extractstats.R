@@ -307,6 +307,12 @@ extractStats.optimize.portfolio.GenSA <- function(object, prefix=NULL, ...) {
 #' @author Ross Bennett
 #' @export
 extractObjectiveMeasures <- function(object){
+  UseMethod("extractObjectiveMeasures")
+}
+
+#' @method extractObjectiveMeasures optimize.portfolio
+#' @S3method extractObjectiveMeasures optimize.portfolio
+extractObjectiveMeasures.optimize.portfolio <- function(object){
   if(!inherits(object, "optimize.portfolio")) stop("object must be of class 'optimize.portfolio'")
   # objective measures returned as $objective_measures for all other solvers
   out <- object$objective_measures
@@ -395,3 +401,32 @@ extractWeights.opt.list <- function(object, ...){
   }
   return(weights_mat)
 }
+
+#' @method extractObjectiveMeasures opt.list
+#' @S3method extractObjectiveMeasures opt.list
+extractObjectiveMeasures.opt.list <- function(object){
+  if(!inherits(object, "opt.list")) stop("object must be of class 'opt.list'")
+  # get/set the names in the object
+  opt_names <- names(object)
+  if(is.null(opt_names)) opt_names <- paste("opt", 1:length(object))
+  
+  obj_list <- list()
+  for(i in 1:length(object)){
+    tmp <- unlist(object[[i]]$objective_measures)
+    names(tmp) <- PortfolioAnalytics:::name.replace(names(tmp))
+    obj_list[[opt_names[i]]] <- tmp
+  }
+  obj_list
+  
+  obj_names <- unique(unlist(lapply(obj_list, names)))
+  
+  obj_mat <- matrix(NA, nrow=length(obj_list), ncol=length(obj_names), 
+                    dimnames=list(opt_names, obj_names))
+  
+  for(i in 1:length(obj_list)){
+    pm <- pmatch(x=names(obj_list[[i]]), table=obj_names)
+    obj_mat[i, pm] <- obj_list[[i]]
+  }
+  return(obj_mat)
+}
+
