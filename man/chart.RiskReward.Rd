@@ -1,15 +1,46 @@
-\name{chart.RiskReward}
+\name{chart.RiskReward.optimize.portfolio.DEoptim}
 \alias{chart.RiskReward}
+\alias{chart.RiskReward.opt.list}
 \alias{chart.RiskReward.optimize.portfolio.DEoptim}
 \alias{chart.RiskReward.optimize.portfolio.GenSA}
 \alias{chart.RiskReward.optimize.portfolio.pso}
+\alias{chart.RiskReward.optimize.portfolio.random}
 \alias{chart.RiskReward.optimize.portfolio.ROI}
-\alias{chart.RiskReward.optimize.portfolio.RP}
 \title{classic risk reward scatter}
 \usage{
-  chart.RiskReward(object, neighbors, ..., return.col,
-    risk.col, chart.assets, element.color, cex.axis, xlim,
-    ylim)
+  \method{chart.RiskReward}{optimize.portfolio.DEoptim} (object, ..., neighbors = NULL, return.col = "mean",
+    risk.col = "ES", chart.assets = FALSE,
+    element.color = "darkgray", cex.axis = 0.8,
+    xlim = NULL, ylim = NULL)
+
+  \method{chart.RiskReward}{optimize.portfolio.random} (object, ..., neighbors = NULL, return.col = "mean",
+    risk.col = "ES", chart.assets = FALSE,
+    element.color = "darkgray", cex.axis = 0.8,
+    xlim = NULL, ylim = NULL)
+
+  \method{chart.RiskReward}{optimize.portfolio.ROI} (object, ..., neighbors = NULL, return.col = "mean",
+    risk.col = "ES", chart.assets = FALSE,
+    element.color = "darkgray", cex.axis = 0.8,
+    xlim = NULL, ylim = NULL, rp = FALSE)
+
+  \method{chart.RiskReward}{optimize.portfolio.pso} (object, ..., neighbors = NULL, return.col = "mean",
+    risk.col = "ES", chart.assets = FALSE,
+    element.color = "darkgray", cex.axis = 0.8,
+    xlim = NULL, ylim = NULL)
+
+  \method{chart.RiskReward}{optimize.portfolio.GenSA} (object, ..., neighbors = NULL, return.col = "mean",
+    risk.col = "ES", chart.assets = FALSE,
+    element.color = "darkgray", cex.axis = 0.8,
+    ylim = NULL, xlim = NULL, rp = FALSE)
+
+  chart.RiskReward(object, ...)
+
+  \method{chart.RiskReward}{opt.list} (object, ...,
+    risk.col = "ES", return.col = "mean", main = "",
+    ylim = NULL, xlim = NULL, labels.assets = TRUE,
+    pch.assets = 1, cex.assets = 0.8, cex.axis = 0.8,
+    cex.lab = 0.8, colorset = NULL,
+    element.color = "darkgray")
 }
 \arguments{
   \item{object}{optimal portfolio created by
@@ -40,6 +71,27 @@
 
   \item{ylim}{set the y-axis limit, same as in
   \code{\link{plot}}}
+
+  \item{rp}{TRUE/FALSE to generate random portfolios to
+  plot the feasible space}
+
+  \item{main}{a main title for the plot}
+
+  \item{labels.assets}{TRUE/FALSE to include the names in
+  the plot.}
+
+  \item{pch.assets}{plotting character of the assets, same
+  as in \code{\link{plot}}}
+
+  \item{cex.assets}{A numerical value giving the amount by
+  which the asset points should be magnified relative to
+  the default.}
+
+  \item{cex.lab}{A numerical value giving the amount by
+  which the labels should be magnified relative to the
+  default.}
+
+  \item{colorset}{color palette or vector of colors to use}
 }
 \description{
   \code{neighbors} may be specified in three ways. The

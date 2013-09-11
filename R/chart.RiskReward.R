@@ -21,13 +21,17 @@
 #' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
 #' @param xlim set the x-axis limit, same as in \code{\link{plot}}
 #' @param ylim set the y-axis limit, same as in \code{\link{plot}}
+#' @param rp TRUE/FALSE to generate random portfolios to plot the feasible space
+#' @param main a main title for the plot
+#' @param labels.assets TRUE/FALSE to include the names in the plot. 
+#' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}
+#' @param cex.assets A numerical value giving the amount by which the asset points should be magnified relative to the default.
+#' @param cex.lab A numerical value giving the amount by which the labels should be magnified relative to the default.
+#' @param colorset color palette or vector of colors to use
 #' @seealso \code{\link{optimize.portfolio}}
 #' @rdname chart.RiskReward
-#' @aliases chart.RiskReward.optimize.portfolio.DEoptim chart.RiskReward.optimize.portfolio.RP 
-#' chart.RiskReward.optimize.portfolio.ROI chart.RiskReward.optimize.portfolio.pso 
-#' chart.RiskReward.optimize.portfolio.GenSA
 #' @export
-chart.RiskReward <- function(object, neighbors, ..., return.col, risk.col, chart.assets, element.color, cex.axis, xlim, ylim){
+chart.RiskReward <- function(object, ...){
   UseMethod("chart.RiskReward")
 }
 

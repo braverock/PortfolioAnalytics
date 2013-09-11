@@ -93,7 +93,7 @@ chart.Weights.RP <- function(object, neighbors = NULL, ..., main="Weights", las 
 #' @S3method chart.Weights optimize.portfolio.random
 chart.Weights.optimize.portfolio.random <- chart.Weights.RP
 
-chart.Scatter.RP <- function(object, neighbors = NULL, ..., return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
+chart.Scatter.RP <- function(object, ..., neighbors = NULL, return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
   # more or less specific to the output of the random portfolio code with constraints
   # will work to a point with other functions, such as optimize.porfolio.parallel
   # there's still a lot to do to improve this.
@@ -246,9 +246,9 @@ chart.Scatter.RP <- function(object, neighbors = NULL, ..., return.col='mean', r
   box(col = element.color)
 }
 
+#' @rdname chart.RiskReward
 #' @method chart.RiskReward optimize.portfolio.random
 #' @S3method chart.RiskReward optimize.portfolio.random
-#' @export
 chart.RiskReward.optimize.portfolio.random <- chart.Scatter.RP
 
 

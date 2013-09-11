@@ -92,7 +92,7 @@ chart.Weights.DE <- function(object, neighbors = NULL, ..., main="Weights", las 
 chart.Weights.optimize.portfolio.DEoptim <- chart.Weights.DE
 
 
-chart.Scatter.DE <- function(object, neighbors = NULL, ..., return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
+chart.Scatter.DE <- function(object, ..., neighbors = NULL, return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
   # more or less specific to the output of the DEoptim portfolio code with constraints
   # will work to a point with other functions, such as optimize.porfolio.parallel
   # there's still a lot to do to improve this.
@@ -289,9 +289,9 @@ chart.Scatter.DE <- function(object, neighbors = NULL, ..., return.col='mean', r
   box(col = element.color)
 }
 
+#' @rdname chart.RiskReward
 #' @method chart.RiskReward optimize.portfolio.DEoptim
 #' @S3method chart.RiskReward optimize.portfolio.DEoptim
-#' @export
 chart.RiskReward.optimize.portfolio.DEoptim <- chart.Scatter.DE
 
 

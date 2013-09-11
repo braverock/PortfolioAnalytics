@@ -983,6 +983,7 @@ factor_exposure_constraint <- function(type="factor_exposure", assets, B, lower,
 #' utility problems with ROI quadprog plugin.
 #' 
 #' @param type character type of the constraint
+#' @param assets number of assets, or optionally a named vector of assets specifying initial weights
 #' @param ptc proportional transaction cost value
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.

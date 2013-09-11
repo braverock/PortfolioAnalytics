@@ -78,7 +78,7 @@ chart.Weights.GenSA <- function(object, neighbors = NULL, ..., main="Weights", l
 #' @S3method chart.Weights optimize.portfolio.GenSA
 chart.Weights.optimize.portfolio.GenSA <- chart.Weights.GenSA
 
-chart.Scatter.GenSA <- function(object, neighbors=NULL, ..., return.col="mean", risk.col="ES", chart.assets=FALSE, element.color="darkgray", cex.axis=0.8, ylim=NULL, xlim=NULL, rp=FALSE){
+chart.Scatter.GenSA <- function(object, ..., neighbors=NULL, return.col="mean", risk.col="ES", chart.assets=FALSE, element.color="darkgray", cex.axis=0.8, ylim=NULL, xlim=NULL, rp=FALSE){
   
   if(!inherits(object, "optimize.portfolio.GenSA")) stop("object must be of class 'optimize.portfolio.GenSA'")
   
@@ -135,9 +135,9 @@ chart.Scatter.GenSA <- function(object, neighbors=NULL, ..., return.col="mean", 
   box(col = element.color)
 }
 
+#' @rdname chart.RiskReward
 #' @method chart.RiskReward optimize.portfolio.GenSA
 #' @S3method chart.RiskReward optimize.portfolio.GenSA
-#' @export
 chart.RiskReward.optimize.portfolio.GenSA <- chart.Scatter.GenSA
 
 
