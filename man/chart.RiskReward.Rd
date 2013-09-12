@@ -8,6 +8,8 @@
 \alias{chart.RiskReward.optimize.portfolio.ROI}
 \title{classic risk reward scatter}
 \usage{
+  chart.RiskReward(object, ...)
+  
   \method{chart.RiskReward}{optimize.portfolio.DEoptim} (object, ..., neighbors = NULL, return.col = "mean",
     risk.col = "ES", chart.assets = FALSE,
     element.color = "darkgray", cex.axis = 0.8,
@@ -32,8 +34,6 @@
     risk.col = "ES", chart.assets = FALSE,
     element.color = "darkgray", cex.axis = 0.8,
     ylim = NULL, xlim = NULL, rp = FALSE)
-
-  chart.RiskReward(object, ...)
 
   \method{chart.RiskReward}{opt.list} (object, ...,
     risk.col = "ES", return.col = "mean", main = "",

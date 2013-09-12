@@ -1,5 +1,17 @@
 
-#' Chart risk contribution or percent contribution
+#' Generic method to chart risk contribution
+#' 
+#' This function is the generic method to chart risk budget objectives for 
+#' \code{optimize.portfolio} and \code{opt.list} objects.
+#' 
+#' @param object optimal portfolio object created by \code{\link{optimize.portfolio}}
+#' @param ... passthrough parameters to \code{\link{plot}}
+#' @export
+chart.RiskBudget <- function(object, ...){
+  UseMethod("chart.RiskBudget")
+}
+
+#' Chart risk contribution of an \code{optimize.portfolio} object
 #' 
 #' This function charts the contribution or percent contribution of the resulting
 #' objective measures in \code{risk_budget_objectives}.
@@ -32,8 +44,9 @@
 #'       }
 #' @param ylim set the y-axis limit, same as in \code{\link{plot}}
 #' @author Ross Bennett
-#' @export
-chart.RiskBudget <- function(object, neighbors=NULL, ..., risk.type="absolute", main="Risk Contribution", ylab="", xlab=NULL, cex.axis=0.8, cex.lab=0.8, element.color="darkgray", las=3, ylim=NULL){
+#' @method chart.RiskBudget optimize.portfolio
+#' @S3method chart.RiskBudget optimize.portfolio
+chart.RiskBudget.optimize.portfolio <- function(object, ..., neighbors=NULL, risk.type="absolute", main="Risk Contribution", ylab="", xlab=NULL, cex.axis=0.8, cex.lab=0.8, element.color="darkgray", las=3, ylim=NULL){
   if(!inherits(object, "optimize.portfolio")) stop("object must be of class optimize.portfolio")
   portfolio <- object$portfolio
   # class of each objective
@@ -186,6 +199,136 @@ chart.RiskBudget <- function(object, neighbors=NULL, ..., risk.type="absolute", 
       box(col = element.color)
     } # end for loop of risk_budget_objective
   } # end plot for pct_contrib risk.type
+}
+
+#' Chart risk contribution of an \code{opt.list} object
+#' 
+#' This function charts the absolute contribution or percent contribution of 
+#' the resulting objective measures in the \code{opt.list} object.
+#' 
+#' @param object list of optimal portfolio objects created by \code{\link{optimizations.combine}}
+#' @param \dots any other passthru parameter
+#' @param match.col string of risk column to match. The \code{opt.list} object 
+#' may contain risk budgets for ES or StdDev and this will match the proper 
+#' column names (e.g. ES.contribution).
+#' @param risk.type "absolute" or "percentage" plot risk contribution in absolute terms or percentage contribution
+#' @param main main title for the chart
+#' @param plot.type "line" or "barplot"
+#' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
+#' @param cex.lab The magnification to be used for axis annotation relative to the current setting of \code{cex}
+#' @param element.color color for the default plot lines
+#' @param las numeric in \{0,1,2,3\}; the style of axis labels
+#'       \describe{
+#'         \item{0:}{always parallel to the axis [\emph{default}],}
+#'         \item{1:}{always horizontal,}
+#'         \item{2:}{always perpendicular to the axis,}
+#'         \item{3:}{always vertical.}
+#'       }
+#' @param ylim set the y-axis limit, same as in \code{\link{plot}}
+#' @param colorset color palette or vector of colors to use
+#' @param legend.loc legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted
+#' @param cex.legend The magnification to be used for the legend relative to the current setting of \code{cex}
+#' @author Ross Bennett
+#' @method chart.RiskBudget opt.list
+#' @S3method chart.RiskBudget opt.list
+chart.RiskBudget.opt.list <- function(object, ..., match.col="ES", risk.type="absolute", main="Risk Budget", plot.type="line", cex.axis=0.8, cex.lab=0.8, element.color="darkgray", las=3, ylim=NULL, colorset=NULL, legend.loc=NULL, cex.legend=0.8){
+  if(!inherits(object, "opt.list")) stop("object must be of class 'opt.list'")
   
+  xtract <- extractObjectiveMeasures(object)
   
+  if(risk.type == "absolute"){
+    # get the index of columns with risk budget
+    rbcols <- grep(paste(match.col, "contribution", sep="."), colnames(xtract))
+    dat <- na.omit(xtract[, rbcols])
+    opt_names <- rownames(dat)
+    # remove everything up to the last dot (.) to extract the names
+    colnames(dat) <- gsub("(.*)\\.", "", colnames(dat))
+    
+    # set the colors
+    if(is.null(colorset)) colorset <- 1:nrow(dat)
+    columnnames <- colnames(dat)
+    numassets <- length(columnnames)
+    
+    xlab <- NULL
+    if(is.null(xlab))
+      minmargin <- 3
+    else
+      minmargin <- 5
+    if(main=="") topmargin=1 else topmargin=4
+    if(las > 1) {# set the bottom border to accommodate labels
+      bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
+      if(bottommargin > 10 ) {
+        bottommargin <- 10
+        columnnames<-substr(columnnames,1,19)
+        # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
+      }
+    }
+    else {
+      bottommargin = minmargin
+    }
+    par(mar = c(bottommargin, 4, topmargin, 2) +.1)
+    
+    if(is.null(ylim)) ylim <- range(dat)
+    
+    plot(dat[1,], type="n", ylim=ylim, xlab='', ylab=paste(match.col, "Contribution", sep=" "), main=main, cex.lab=cex.lab, axes=FALSE)
+    for(i in 1:nrow(dat)){
+      points(dat[i, ], type="b", col=colorset[i], ...) # add dots here
+    }
+    
+    # set the axis
+    axis(2, cex.axis=cex.axis, col=element.color)
+    axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis=cex.axis, col=element.color)
+    box(col=element.color)
+    
+    # Add a legend
+    if(!is.null(legend.loc)) legend(legend.loc, legend=opt_names, col=colorset, lty=1, bty="n", cex=cex.legend)
+  }
+  
+  if(risk.type %in% c("percent", "percentage", "pct_contrib")){
+    # get the index of columns with risk budget
+    rbcols <- grep(paste(match.col, "pct_contrib", sep="."), colnames(xtract))
+    dat <- na.omit(xtract[, rbcols])
+    opt_names <- rownames(dat)
+    # remove everything up to the last dot (.) to extract the names
+    colnames(dat) <- gsub("(.*)\\.", "", colnames(dat))
+    
+    # set the colors
+    if(is.null(colorset)) colorset <- 1:nrow(dat)
+    
+    columnnames <- colnames(dat)
+    numassets <- length(columnnames)
+    
+    xlab <- NULL
+    if(is.null(xlab))
+      minmargin <- 3
+    else
+      minmargin <- 5
+    if(main=="") topmargin=1 else topmargin=4
+    if(las > 1) {# set the bottom border to accommodate labels
+      bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
+      if(bottommargin > 10 ) {
+        bottommargin <- 10
+        columnnames<-substr(columnnames,1,19)
+        # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
+      }
+    }
+    else {
+      bottommargin = minmargin
+    }
+    par(mar = c(bottommargin, 4, topmargin, 2) +.1)
+    
+    if(is.null(ylim)) ylim <- range(dat)
+    
+    plot(dat[1,], type="n", ylim=ylim, xlab='', ylab=paste(match.col, "% Contribution", sep=" "), main=main, cex.lab=cex.lab, axes=FALSE)
+    for(i in 1:nrow(dat)){
+      points(dat[i, ], type="b", col=colorset[i], ...) # add dots here
+    }
+    
+    axis(2, cex.axis=cex.axis, col=element.color)
+    axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis=cex.axis, col=element.color)
+    box(col=element.color)
+    
+    # Add a legend
+    if(!is.null(legend.loc)) legend(legend.loc, legend=opt_names, col=colorset, lty=1, bty="n", cex=cex.legend)
+  }
 }
