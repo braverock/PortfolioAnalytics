@@ -615,7 +615,9 @@ optimize.portfolio_v2 <- function(
     if(hasArg(rpseed) & isTRUE(rpseed)) {
       # initial seed population is generated with random_portfolios function
       # if(hasArg(eps)) eps=match.call(expand.dots=TRUE)$eps else eps = 0.01
-      rp <- random_portfolios(portfolio=portfolio, permutations=NP)
+      if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
+      if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
+      rp <- random_portfolios(portfolio=portfolio, permutations=NP, rp_method=rp_method, eliminate=eliminate, ...)
       DEcformals$initialpop <- rp
     }
     controlDE <- do.call(DEoptim.control, DEcformals)
@@ -651,7 +653,9 @@ optimize.portfolio_v2 <- function(
   if(optimize_method=="random"){
     #' call random_portfolios() with portfolio and search_size to create matrix of portfolios
     if(missing(rp) | is.null(rp)){
-      rp <- random_portfolios(portfolio=portfolio, permutations=search_size)
+      if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
+      if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
+      rp <- random_portfolios(portfolio=portfolio, permutations=search_size, rp_method=rp_method, eliminate=eliminate, ...)
     }
     #' store matrix in out if trace=TRUE
     if (isTRUE(trace)) out$random_portfolios <- rp
