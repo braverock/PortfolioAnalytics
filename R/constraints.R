@@ -1125,6 +1125,62 @@ update_constraint_v1tov2 <- function(portfolio, v1_constraint){
   return(portfolio)
 }
 
+#' check if a set of weights satisfies the constraints
+#' 
+#' This function checks if a set of weights satisfies all constraints. This is
+#' used as a helper function for random portfolios created with \code{rp_simplex}
+#' and \code{rp_grid} to eliminate portfolios that do not satisfy the constraints.
+#' 
+#' @param weights vector of weights
+#' @param portfolio object of class 'portfolio'
+#' @return TRUE if all constraints are satisfied, FALSE if any constraint is violated
+#' @author Ross Bennett
+check_constraints <- function(weights, portfolio){
+  
+  # get the constraints to check
+  # We will check leverage, box, group, and position limit constraints
+  constraints <- get_constraints(portfolio)
+  min_sum <- constraints$min_sum
+  max_sum <- constraints$max_sum
+  min <- constraints$min
+  max <- constraints$max
+  groups <- constraints$groups
+  cLO <- constraints$cLO
+  cUP <- constraints$cUP
+  group_pos <- constraints$group_pos
+  div_target <- constraints$div_target
+  turnover_target <- constraints$turnover_target
+  max_pos <- constraints$max_pos
+  max_pos_long <- constraints$max_pos_long
+  max_pos_short <- constraints$max_pos_short
+  tolerance <- .Machine$double.eps^0.5
+  
+  log_vec <- c()
+  # check leverage constraints
+  if(!is.null(min_sum) & !is.null(max_sum)){
+    # TRUE if constraints are satisfied
+    log_vec <- c(log_vec, ((sum(weights) >= min_sum) & (sum(weights) <= max_sum)))
+  }
+  
+  # check box constraints
+  if(!is.null(min) & !is.null(max)){
+    # TRUE if constraints are satisfied
+    log_vec <- c(log_vec, (all(weights >= min) & all(weights <= max)))
+  }
+  
+  # check group constraints
+  if(!is.null(groups) & !is.null(cLO) & !is.null(cUP)){
+    log_vec <- c(log_vec, all(!group_fail(weights, groups, cLO, cUP, group_pos)))
+  }
+  
+  # check position limit constraints
+  if(!is.null(max_pos) | !is.null(max_pos_long) | !is.null(max_pos_short)){
+    log_vec <- c(log_vec, !pos_limit_fail(weights, max_pos, max_pos_long, max_pos_short))
+  }
+  # return TRUE if all constraints are satisfied, FALSE if any constraint is violated
+  return(all(log_vec))
+}
+
 # #' constructor for class constraint_ROI
 # #' 
 # #' @param assets number of assets, or optionally a named vector of assets specifying seed weights

@@ -17,7 +17,7 @@
   \item{\dots}{any other passthru parameters}
 }
 \value{
-  a matrix of random portfolios
+  a matrix of random portfolio weights
 }
 \description{
   This function generates random portfolios based on the
@@ -26,9 +26,10 @@
 \details{
   The simplex method is useful to generate random
   portfolios with the full investment constraint where the
-  sum of the weights is equal to 1 and min and max box
-  constraints. All other constraints such as group and
-  position limit constraints will be handled by
+  sum of the weights is equal to 1 and min box constraints.
+  Values for min_sum and max_sum will be ignored, the sum
+  of weights will equal 1. All other constraints such as
+  group and position limit constraints will be handled by
   elimination. If the constraints are very restrictive,
   this may result in very few feasible portfolios
   remaining.

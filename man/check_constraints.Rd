@@ -1,0 +1,26 @@
+\name{check_constraints}
+\alias{check_constraints}
+\title{check if a set of weights satisfies the constraints}
+\usage{
+  check_constraints(weights, portfolio)
+}
+\arguments{
+  \item{weights}{vector of weights}
+
+  \item{portfolio}{object of class 'portfolio'}
+}
+\value{
+  TRUE if all constraints are satisfied, FALSE if any
+  constraint is violated
+}
+\description{
+  This function checks if a set of weights satisfies all
+  constraints. This is used as a helper function for random
+  portfolios created with \code{rp_simplex} and
+  \code{rp_grid} to eliminate portfolios that do not
+  satisfy the constraints.
+}
+\author{
+  Ross Bennett
+}
+

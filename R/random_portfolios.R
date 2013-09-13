@@ -328,10 +328,11 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #'   \item{simplex: }{The 'simplex' method to generate random portfolios is 
 #'   based on a paper by W. T. Shaw. The simplex method is useful to generate 
 #'   random portfolios with the full investment constraint, where the sum of the 
-#'   weights is equal to 1, and min box constraints. All other constraints such 
-#'   as group and position limit constraints will be handled by elimination. If 
-#'   the constraints are very restrictive, this may result in very few feasible 
-#'   portfolios remaining.}
+#'   weights is equal to 1, and min box constraints. Values for \code{min_sum} 
+#'   and \code{max_sum} of the leverage constraint will be ignored, the sum of 
+#'   weights will equal 1. All other constraints such as group and position 
+#'   limit constraints will be handled by elimination. If the constraints are 
+#'   very restrictive, this may result in very few feasible portfolios remaining.}
 #'   \item{grid: }{The 'grid' method to generate random portfolios is based on
 #'   the \code(gridSearch} function in package 'NMOF'. The grid search method 
 #'   only satisfies the \code{min} and \code{max} box constraints. The 
@@ -341,17 +342,21 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #'   penalized in \code{constrained_objective}.}
 #' }
 #' 
+#' The constraint types checked are leverage, box, group, and position limit. Any
+#' portfolio that does not satisfy all these constraints will be eliminated.
+#' 
 #' @param portfolio an object of type "portfolio" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
 #' @param \dots any other passthru parameters
 #' @param rp_method method to generate random portfolios
+#' @param eliminate TRUE/FALSE, eliminate portfolios that do not satisfy constraints
 #' @return matrix of random portfolio weights
 #' @seealso \code{\link{portfolio.spec}}, \code{\link{objective}}, \code{\link{randomize_portfolio_v2}}
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
 #' @aliases random_portfolios
 #' @rdname random_portfolios
 #' @export
-random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample", ...){
+random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample", eliminate=TRUE, ...){
   if(hasArg(p)) p=match.call(expand.dots=TRUE)$p else p=0:5
   if(hasArg(normalize)) normalize=match.call(expand.dots=TRUE)$normalize else normalize=TRUE
   switch(rp_method,
@@ -362,6 +367,15 @@ random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample
          grid = {rp <- rp_grid(portfolio, permutations, normalize, ...)
          }
   )
+  if(eliminate){
+    # eliminate portfolios that do not satisfy constraints
+    stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+    check <- foreach(i=1:nrow(rp), .combine=c) %dopar% {
+      # check_constraint returns TRUE if all constraints are satisfied
+      check_constraints(weights=rp[i,], portfolio=portfolio)
+    }
+    rp <- rp[which(check==TRUE),]
+  }
   return(rp)
 }
 
@@ -417,7 +431,8 @@ rp_sample <- function(portfolio, permutations, ...){
 #' @details
 #' The simplex method is useful to generate random portfolios with the full
 #' investment constraint where the sum of the weights is equal to 1 and min 
-#' box constraints. All other constraints such as group and position limit 
+#' box constraints. Values for min_sum and max_sum will be ignored, the sum 
+#' of weights will equal 1. All other constraints such as group and position limit 
 #' constraints will be handled by elimination. If the constraints are very 
 #' restrictive, this may result in very few feasible portfolios remaining. 
 #' 
@@ -449,6 +464,7 @@ rp_simplex <- function(portfolio, permutations, p=0:5, ...){
   
   # get the constraints
   # the simplex method for generating random portfolios requires that the sum of weights is equal to 1
+  # ignore the min_sum and max_sum constraints
   constraints <- get_constraints(portfolio)
   L <- constraints$min
   
@@ -570,6 +586,7 @@ rp_grid <- function(portfolio, permutations=2000, normalize=TRUE, ...){
       tmp
     }
     out <- do.call(rbind, out)
+    out <- na.omit(out)
   }
   if(normalize) return(out) else return(rp)
 }
