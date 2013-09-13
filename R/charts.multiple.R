@@ -79,7 +79,7 @@ chart.RiskReward.opt.list <- function(object, ..., risk.col="ES", return.col="me
   
   # data to plot
   dat <- na.omit(obj[, c(risk.col, return.col)])
-  if(nrow(dat) < 1) stop("No data to plot after na.omit")
+  if(ncol(dat) < 1) stop("No data to plot after na.omit")
   dat_names <- rownames(dat)
   
   # colors to plot

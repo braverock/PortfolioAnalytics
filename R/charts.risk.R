@@ -234,18 +234,127 @@ chart.RiskBudget.optimize.portfolio <- function(object, ..., neighbors=NULL, ris
 chart.RiskBudget.opt.list <- function(object, ..., match.col="ES", risk.type="absolute", main="Risk Budget", plot.type="line", cex.axis=0.8, cex.lab=0.8, element.color="darkgray", las=3, ylim=NULL, colorset=NULL, legend.loc=NULL, cex.legend=0.8){
   if(!inherits(object, "opt.list")) stop("object must be of class 'opt.list'")
   
+  if(plot.type %in% c("bar", "barplot")){
+    barplotRiskBudget(object=object, ...=..., match.col=match.col, risk.type=risk.type, main=main, ylim=ylim, cex.axis=cex.axis, cex.lab=cex.lab, element.color=element.color, las=las, colorset=colorset, legend.loc=legend.loc, cex.legend=cex.legend)
+  } else if(plot.type == "line"){
+    
+    xtract <- extractObjectiveMeasures(object)
+    
+    if(risk.type == "absolute"){
+      # get the index of columns with risk budget
+      rbcols <- grep(paste(match.col, "contribution", sep="."), colnames(xtract))
+      dat <- na.omit(xtract[, rbcols])
+      if(ncol(dat) < 1) stop("No data to plot after na.omit")
+      opt_names <- rownames(dat)
+      # remove everything up to the last dot (.) to extract the names
+      colnames(dat) <- gsub("(.*)\\.", "", colnames(dat))
+      
+      # set the colors
+      if(is.null(colorset)) colorset <- 1:nrow(dat)
+      columnnames <- colnames(dat)
+      numassets <- length(columnnames)
+      
+      xlab <- NULL
+      if(is.null(xlab))
+        minmargin <- 3
+      else
+        minmargin <- 5
+      if(main=="") topmargin=1 else topmargin=4
+      if(las > 1) {# set the bottom border to accommodate labels
+        bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
+        if(bottommargin > 10 ) {
+          bottommargin <- 10
+          columnnames<-substr(columnnames,1,19)
+          # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
+        }
+      }
+      else {
+        bottommargin = minmargin
+      }
+      par(mar = c(bottommargin, 4, topmargin, 2) +.1)
+      
+      if(is.null(ylim)) ylim <- range(dat)
+      
+      plot(dat[1,], type="n", ylim=ylim, xlab='', ylab=paste(match.col, "Contribution", sep=" "), main=main, cex.lab=cex.lab, axes=FALSE)
+      for(i in 1:nrow(dat)){
+        points(dat[i, ], type="b", col=colorset[i], ...) # add dots here
+      }
+      
+      # set the axis
+      axis(2, cex.axis=cex.axis, col=element.color)
+      axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis=cex.axis, col=element.color)
+      box(col=element.color)
+      
+      # Add a legend
+      if(!is.null(legend.loc)) legend(legend.loc, legend=opt_names, col=colorset, lty=1, bty="n", cex=cex.legend)
+    }
+    
+    if(risk.type %in% c("percent", "percentage", "pct_contrib")){
+      # get the index of columns with risk budget
+      rbcols <- grep(paste(match.col, "pct_contrib", sep="."), colnames(xtract))
+      dat <- na.omit(xtract[, rbcols])
+      if(ncol(dat) < 1) stop("No data to plot after na.omit")
+      opt_names <- rownames(dat)
+      # remove everything up to the last dot (.) to extract the names
+      colnames(dat) <- gsub("(.*)\\.", "", colnames(dat))
+      
+      # set the colors
+      if(is.null(colorset)) colorset <- 1:nrow(dat)
+      
+      columnnames <- colnames(dat)
+      numassets <- length(columnnames)
+      
+      xlab <- NULL
+      if(is.null(xlab))
+        minmargin <- 3
+      else
+        minmargin <- 5
+      if(main=="") topmargin=1 else topmargin=4
+      if(las > 1) {# set the bottom border to accommodate labels
+        bottommargin = max(c(minmargin, (strwidth(columnnames,units="in"))/par("cin")[1])) * cex.lab
+        if(bottommargin > 10 ) {
+          bottommargin <- 10
+          columnnames<-substr(columnnames,1,19)
+          # par(srt=45) #TODO figure out how to use text() and srt to rotate long labels
+        }
+      }
+      else {
+        bottommargin = minmargin
+      }
+      par(mar = c(bottommargin, 4, topmargin, 2) +.1)
+      
+      if(is.null(ylim)) ylim <- range(dat)
+      
+      plot(dat[1,], type="n", ylim=ylim, xlab='', ylab=paste(match.col, "% Contribution", sep=" "), main=main, cex.lab=cex.lab, axes=FALSE)
+      for(i in 1:nrow(dat)){
+        points(dat[i, ], type="b", col=colorset[i], ...) # add dots here
+      }
+      
+      axis(2, cex.axis=cex.axis, col=element.color)
+      axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis=cex.axis, col=element.color)
+      box(col=element.color)
+      
+      # Add a legend
+      if(!is.null(legend.loc)) legend(legend.loc, legend=opt_names, col=colorset, lty=1, bty="n", cex=cex.legend)
+    }
+  }
+}
+
+# This function is called inside chart.RiskBudget.opt.list when plot.type == "bar" or "barplot"
+barplotRiskBudget <- function(object, ..., match.col="ES", risk.type="absolute", main="Risk Budget", cex.axis=0.8, cex.lab=0.8, element.color="darkgray", las=3, colorset=NULL, legend.loc=NULL, cex.legend=0.8){
+  if(!inherits(object, "opt.list")) stop("object must be of class 'opt.list'")
+  
   xtract <- extractObjectiveMeasures(object)
   
   if(risk.type == "absolute"){
     # get the index of columns with risk budget
     rbcols <- grep(paste(match.col, "contribution", sep="."), colnames(xtract))
     dat <- na.omit(xtract[, rbcols])
+    if(ncol(dat) < 1) stop("No data to plot after na.omit")
     opt_names <- rownames(dat)
     # remove everything up to the last dot (.) to extract the names
     colnames(dat) <- gsub("(.*)\\.", "", colnames(dat))
     
-    # set the colors
-    if(is.null(colorset)) colorset <- 1:nrow(dat)
     columnnames <- colnames(dat)
     numassets <- length(columnnames)
     
@@ -268,32 +377,29 @@ chart.RiskBudget.opt.list <- function(object, ..., match.col="ES", risk.type="ab
     }
     par(mar = c(bottommargin, 4, topmargin, 2) +.1)
     
-    if(is.null(ylim)) ylim <- range(dat)
+    # set the colors
+    if(is.null(colorset)) colorset <- 1:nrow(dat)
     
-    plot(dat[1,], type="n", ylim=ylim, xlab='', ylab=paste(match.col, "Contribution", sep=" "), main=main, cex.lab=cex.lab, axes=FALSE)
-    for(i in 1:nrow(dat)){
-      points(dat[i, ], type="b", col=colorset[i], ...) # add dots here
-    }
+    # plot the data
+    barplot(dat, names.arg=columnnames, las=las, cex.names=cex.axis, xlab='', col=colorset, main=main, ylab=paste(match.col, "Contribution", sep=" "), cex.lab=cex.lab, cex.axis=cex.axis, ...)
     
     # set the axis
-    axis(2, cex.axis=cex.axis, col=element.color)
-    axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis=cex.axis, col=element.color)
+    #axis(2, cex.axis=cex.axis, col=element.color)
+    #axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis=cex.axis, col=element.color)
     box(col=element.color)
     
     # Add a legend
-    if(!is.null(legend.loc)) legend(legend.loc, legend=opt_names, col=colorset, lty=1, bty="n", cex=cex.legend)
+    if(!is.null(legend.loc)) legend(legend.loc, legend=opt_names, fill=colorset, bty="n", cex=cex.legend)
   }
   
   if(risk.type %in% c("percent", "percentage", "pct_contrib")){
     # get the index of columns with risk budget
     rbcols <- grep(paste(match.col, "pct_contrib", sep="."), colnames(xtract))
     dat <- na.omit(xtract[, rbcols])
+    if(ncol(dat) < 1) stop("No data to plot after na.omit")
     opt_names <- rownames(dat)
     # remove everything up to the last dot (.) to extract the names
     colnames(dat) <- gsub("(.*)\\.", "", colnames(dat))
-    
-    # set the colors
-    if(is.null(colorset)) colorset <- 1:nrow(dat)
     
     columnnames <- colnames(dat)
     numassets <- length(columnnames)
@@ -317,18 +423,17 @@ chart.RiskBudget.opt.list <- function(object, ..., match.col="ES", risk.type="ab
     }
     par(mar = c(bottommargin, 4, topmargin, 2) +.1)
     
-    if(is.null(ylim)) ylim <- range(dat)
+    # set the colors
+    if(is.null(colorset)) colorset <- 1:nrow(dat)
     
-    plot(dat[1,], type="n", ylim=ylim, xlab='', ylab=paste(match.col, "% Contribution", sep=" "), main=main, cex.lab=cex.lab, axes=FALSE)
-    for(i in 1:nrow(dat)){
-      points(dat[i, ], type="b", col=colorset[i], ...) # add dots here
-    }
+    # plot the data
+    barplot(dat, names.arg=columnnames, las=las, cex.names=cex.axis, col=colorset, main=main, ylab=paste(match.col, "% Contribution", sep=" "), cex.lab=cex.lab, cex.axis=cex.axis, ...)
     
-    axis(2, cex.axis=cex.axis, col=element.color)
-    axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis=cex.axis, col=element.color)
+    #axis(2, cex.axis=cex.axis, col=element.color)
+    #axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis=cex.axis, col=element.color)
     box(col=element.color)
     
     # Add a legend
-    if(!is.null(legend.loc)) legend(legend.loc, legend=opt_names, col=colorset, lty=1, bty="n", cex=cex.legend)
+    if(!is.null(legend.loc)) legend(legend.loc, legend=opt_names, fill=colorset, bty="n", cex=cex.legend)
   }
 }
