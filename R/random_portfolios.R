@@ -357,12 +357,12 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #' @rdname random_portfolios
 #' @export
 random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample", eliminate=TRUE, ...){
-  if(hasArg(p)) p=match.call(expand.dots=TRUE)$p else p=0:5
+  if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
   if(hasArg(normalize)) normalize=match.call(expand.dots=TRUE)$normalize else normalize=TRUE
   switch(rp_method,
          sample = {rp <- rp_sample(portfolio, permutations, ...)
                    },
-         simplex = {rp <- rp_simplex(portfolio, permutations, p, ...)
+         simplex = {rp <- rp_simplex(portfolio, permutations, fev, ...)
                     },
          grid = {rp <- rp_grid(portfolio, permutations, normalize, ...)
          }
@@ -431,10 +431,11 @@ rp_sample <- function(portfolio, permutations, ...){
 #' @details
 #' The simplex method is useful to generate random portfolios with the full
 #' investment constraint where the sum of the weights is equal to 1 and min 
-#' box constraints. Values for min_sum and max_sum will be ignored, the sum 
-#' of weights will equal 1. All other constraints such as group and position limit 
-#' constraints will be handled by elimination. If the constraints are very 
-#' restrictive, this may result in very few feasible portfolios remaining. 
+#' box constraints with no upper bound on max constraints. Values for min_sum 
+#' and max_sum will be ignored, the sum of weights will equal 1. All other 
+#' constraints such as group and position limit constraints will be handled by 
+#' elimination. If the constraints are very restrictive, this may result in 
+#' very few feasible portfolios remaining. 
 #' 
 #' The random portfolios are created by first generating a set of uniform 
 #' random numbers.
@@ -443,21 +444,21 @@ rp_sample <- function(portfolio, permutations, ...){
 #' box constraints.
 #' \deqn{w_{i} = min_{i} + (1 - \sum_{j=1}^{N} min_{j}) \frac{log(U_{i}^{q}}{\sum_{k=1}^{N}log(U_{k}^{q}}}
 #' 
-#' \code{p} controls the Face-Edge-Vertex (FEV) biasing where \deqn{q=2^p}. As 
+#' \code{fev} controls the Face-Edge-Vertex (FEV) biasing where \deqn{q=2^fev}. As 
 #' \code{q} approaches infinity, the set of weights will be concentrated in a 
-#' single asset. To sample the interior and exterior, \code{p} can be passed 
+#' single asset. To sample the interior and exterior, \code{fev} can be passed 
 #' in as a vector. The number of portfolios, \code{permutations}, and the 
-#' length of \code{p} affect how the random portfolios are generated. For 
-#' example if \code{permutations=10000} and \code{p=0:4}, 2000 portfolios will
-#' be generated for each value of \code{p}.
+#' length of \code{fev} affect how the random portfolios are generated. For 
+#' example, if \code{permutations=10000} and \code{fev=0:4}, 2000 portfolios will
+#' be generated for each value of \code{fev}.
 #' 
-#' @param portfolio an object of type "portfolio" specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
+#' @param portfolio an object of class 'portfolio' specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
-#' @param p scalar or vector for FEV biasing
+#' @param fev scalar or vector for FEV biasing
 #' @param \dots any other passthru parameters
 #' @return a matrix of random portfolio weights
 #' @export
-rp_simplex <- function(portfolio, permutations, p=0:5, ...){
+rp_simplex <- function(portfolio, permutations, fev=0:5, ...){
   # get the assets from the portfolio
   assets <- portfolio$assets
   nassets <- length(assets)
@@ -468,8 +469,8 @@ rp_simplex <- function(portfolio, permutations, p=0:5, ...){
   constraints <- get_constraints(portfolio)
   L <- constraints$min
   
-  # number of portfolios for each p to generate
-  k <- floor(permutations / length(p))
+  # number of portfolios for each fev to generate
+  k <- ceiling(permutations / length(fev))
   
   # generate uniform[0, 1] random numbers
   U <- runif(n=k*permutations, 0, 1)
@@ -477,8 +478,8 @@ rp_simplex <- function(portfolio, permutations, p=0:5, ...){
   
   # do the transformation to the set of weights to satisfy lower bounds
   stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
-  out <- foreach(j = 1:length(p), .combine=c) %:% foreach(i=1:nrow(Umat)) %dopar% {
-    q <- 2^p[j]
+  out <- foreach(j = 1:length(fev), .combine=c) %:% foreach(i=1:nrow(Umat)) %dopar% {
+    q <- 2^fev[j]
     tmp <- L + (1 - sum(L)) * log(Umat[i,])^q / sum(log(Umat[i,])^q)
     tmp
   }
