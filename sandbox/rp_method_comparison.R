@@ -31,4 +31,17 @@ legend("bottomright", legend=c("sample", "simplex", "grid"), col=c("gray", "red"
 # sample has pretty even coverage of feasible space
 # simplex is concentrated around the assets
 # grid is 'pushed'/concentrated to the interior due to normalization
+
+# demonstrate how different values of fev influence the random portfolios of
+# the simplex method
 # This could be a really good example with Shiny for an interactive example
+fev <- 0:5
+par(mfrow=c(2, 3))
+for(i in 1:length(fev)){
+  rp <- random_portfolios(portfolio=pspec, permutations=2000, rp_method='simplex', fev=fev[i])
+  tmp.mean <- apply(rp, 1, function(x) mean(R %*% x))
+  tmp.StdDev <- apply(rp, 1, function(x) StdDev(R=R, weights=x))
+  plot(x=tmp.StdDev, y=tmp.mean, main=paste("FEV =", fev[i]),
+       ylab="mean", xlab="StdDev", col=rgb(0, 0, 100, 50, maxColorValue=255))
+}
+par(mfrow=c(1,1))
