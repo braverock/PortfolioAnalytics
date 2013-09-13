@@ -9,10 +9,6 @@
 \alias{chart.Weights.optimize.portfolio.RP}
 \title{boxplot of the weights of the optimal portfolios}
 \usage{
-    chart.Weights(object, neighbors = NULL, ...,
-    main = "Weights", las = 3, xlab = NULL, cex.lab = 1,
-    element.color = "darkgray", cex.axis = 0.8)
-    
   \method{chart.Weights}{optimize.portfolio.DEoptim} (object, neighbors = NULL, ..., main = "Weights",
     las = 3, xlab = NULL, cex.lab = 1,
     element.color = "darkgray", cex.axis = 0.8,
@@ -45,6 +41,10 @@
     cex.axis = 0.8, colorset = NULL,
     legend.loc = "topright", cex.legend = 0.8,
     plot.type = "line")
+
+  chart.Weights(object, neighbors = NULL, ...,
+    main = "Weights", las = 3, xlab = NULL, cex.lab = 1,
+    element.color = "darkgray", cex.axis = 0.8)
 
   \method{chart.Weights}{opt.list} (object,
     neighbors = NULL, ..., main = "Weights", las = 3,

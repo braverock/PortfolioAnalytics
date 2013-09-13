@@ -318,17 +318,76 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #' repeatedly calls \code{\link{randomize_portfolio}} to generate an 
 #' arbitrary number of constrained random portfolios.
 #' 
+#' @details
+#' Random portfolios can be generate using one of three methods.
+#' \itemize{
+#'   \item{sample: }{The 'sample' method to generate random portfolios is based
+#'   on an idea pioneerd by Pat Burns. This is the most flexible method and can
+#'   generate portfolios to satisfy leverage, box, group, and position limit
+#'   constraints.}
+#'   \item{simplex: }{The 'simplex' method to generate random portfolios is 
+#'   based on a paper by W. T. Shaw. The simplex method is useful to generate 
+#'   random portfolios with the full investment constraint, where the sum of the 
+#'   weights is equal to 1, and min box constraints. All other constraints such 
+#'   as group and position limit constraints will be handled by elimination. If 
+#'   the constraints are very restrictive, this may result in very few feasible 
+#'   portfolios remaining.}
+#'   \item{grid: }{The 'grid' method to generate random portfolios is based on
+#'   the \code(gridSearch} function in package 'NMOF'. The grid search method 
+#'   only satisfies the \code{min} and \code{max} box constraints. The 
+#'   \code{min_sum} and \code{max_sum} leverage constraints will likely be 
+#'   violated and the weights in the random portfolios should be normalized. 
+#'   Normalization may cause the box constraints to be violated and will be 
+#'   penalized in \code{constrained_objective}.}
+#' }
+#' 
 #' @param portfolio an object of type "portfolio" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
-#' @param \dots any other passthru parameters 
+#' @param \dots any other passthru parameters
+#' @param rp_method method to generate random portfolios
 #' @return matrix of random portfolio weights
 #' @seealso \code{\link{portfolio.spec}}, \code{\link{objective}}, \code{\link{randomize_portfolio_v2}}
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
 #' @aliases random_portfolios
 #' @rdname random_portfolios
 #' @export
-random_portfolios_v2 <- function( portfolio, permutations=100, ...)
-{ # 
+random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample", ...){
+  if(hasArg(p)) p=match.call(expand.dots=TRUE)$p else p=0:5
+  if(hasArg(normalize)) normalize=match.call(expand.dots=TRUE)$normalize else normalize=TRUE
+  switch(rp_method,
+         sample = {rp <- rp_sample(portfolio, permutations, ...)
+                   },
+         simplex = {rp <- rp_simplex(portfolio, permutations, p, ...)
+                    },
+         grid = {rp <- rp_grid(portfolio, permutations, normalize, ...)
+         }
+  )
+  return(rp)
+}
+
+# Alias randomize_portfolio_v2 to randomize_portfolio
+#' @export
+randomize_portfolio <- randomize_portfolio_v2
+
+# Alias random_portfolios_v2 to random_portfolios
+#' @export
+random_portfolios <- random_portfolios_v2
+
+#' Generate random portfolios using the sample method
+#' 
+#' This function generates random portfolios based on an idea by Pat Burns.
+#' 
+#' @details
+#' The 'sample' method to generate random portfolios is based
+#' on an idea pioneerd by Pat Burns. This is the most flexible method and can
+#' generate portfolios to satisfy leverage, box, group, and position limit
+#' constraints.
+#' @param portfolio an object of type "portfolio" specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
+#' @param permutations integer: number of unique constrained random portfolios to generate
+#' @param \dots any other passthru parameters
+#' @return a matrix of random portfolio weights
+#' @export
+rp_sample <- function(portfolio, permutations, ...){
   # this function generates a series of portfolios that are a "random walk" from the current portfolio
   seed <- portfolio$assets
   result <- matrix(nrow=permutations, ncol=length(seed))
@@ -350,14 +409,6 @@ random_portfolios_v2 <- function( portfolio, permutations=100, ...)
   return(result)
 }
 
-# Alias randomize_portfolio_v2 to randomize_portfolio
-#' @export
-randomize_portfolio <- randomize_portfolio_v2
-
-# Alias random_portfolios_v2 to random_portfolios
-#' @export
-random_portfolios <- random_portfolios_v2
-
 #' Generate random portfolios using the simplex method
 #' 
 #' This function generates random portfolios based on the method outlined in the
@@ -365,8 +416,8 @@ random_portfolios <- random_portfolios_v2
 #' 
 #' @details
 #' The simplex method is useful to generate random portfolios with the full
-#' investment constraint where the sum of the weights is equal to 1 and min and
-#' max box constraints. All other constraints such as group and position limit 
+#' investment constraint where the sum of the weights is equal to 1 and min 
+#' box constraints. All other constraints such as group and position limit 
 #' constraints will be handled by elimination. If the constraints are very 
 #' restrictive, this may result in very few feasible portfolios remaining. 
 #' 
@@ -389,7 +440,7 @@ random_portfolios <- random_portfolios_v2
 #' @param permutations integer: number of unique constrained random portfolios to generate
 #' @param p scalar or vector for FEV biasing
 #' @param \dots any other passthru parameters
-#' @return a matrix of random portfolios
+#' @return a matrix of random portfolio weights
 #' @export
 rp_simplex <- function(portfolio, permutations, p=0:5, ...){
   # get the assets from the portfolio
@@ -441,7 +492,7 @@ rp_simplex <- function(portfolio, permutations, p=0:5, ...){
 #' @param permutations
 #' @param normalize TRUE/FALSE
 #' @param \dots any passthru parameters. Currently ignored
-#' @return matrix of random portfolios
+#' @return matrix of random portfolio weights
 #' @export
 rp_grid <- function(portfolio, permutations=2000, normalize=TRUE, ...){
   
@@ -514,7 +565,7 @@ rp_grid <- function(portfolio, permutations=2000, normalize=TRUE, ...){
     }
     
     stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
-    out <- foreach(1=1:nrow(rp)) %dopar% {
+    out <- foreach(i=1:nrow(rp)) %dopar% {
       tmp <- normalize_weights(weights=rp[i,])
       tmp
     }
