@@ -420,6 +420,109 @@ rp_simplex <- function(portfolio, permutations, p=0:5, ...){
   return(out)
 }
 
+#' Generate random portfolios based on grid search method
+#' 
+#' This function generates random portfolios based on the \code{gridSearch} 
+#' function from the 'NMOF' package.
+#' 
+#' @details
+#' The number of levels is calculated based on permutations and number of assets.
+#' The number of levels must be an integer and may not result in the exact number
+#' of permutations. We round up to the nearest integer for the levels so the
+#' number of portfolios generated will be greater than or equal to permutations.
+#' 
+#' The grid search method only satisfies the \code{min} and \code{max} box 
+#' constraints. The \code{min_sum} and \code{max_sum} leverage constraints will
+#' likely be violated and the weights in the random portfolios should be 
+#' normalized. Normalization may cause the box constraints to be violated and
+#' will be penalized in \code{constrained_objective}.
+#' 
+#' @param portfolio
+#' @param permutations
+#' @param normalize TRUE/FALSE
+#' @param \dots any passthru parameters. Currently ignored
+#' @return matrix of random portfolios
+#' @export
+rp_grid <- function(portfolio, permutations=2000, normalize=TRUE, ...){
+  
+  # get the constraints from the portfolio
+  constraints <- get_constraints(portfolio)
+  
+  # box constraints to generate the grid
+  min <- constraints$min
+  max <- constraints$max
+  
+  # number of parameters and length.out levels to generate
+  npar <- length(min)
+  n <- ceiling(exp(log(permutations) / npar))
+  
+  levels <- vector("list", length = length(min))
+  for (i in seq_len(npar)){
+    levels[[i]] <- seq(min[[i]], max[[i]], length.out = max(n, 2L))
+  }
+  np <- length(levels)
+  res <- vector("list", np)
+  rep.fac <- 1L
+  nl <- sapply(levels, length)
+  nlp <- prod(nl)
+  
+  # create the grid
+  for (i in seq_len(np)) {
+    x <- levels[[i]]
+    nx <- length(x)
+    nlp <- nlp/nx
+    res[[i]] <- x[rep.int(rep.int(seq_len(nx), rep.int(rep.fac, nx)), nlp)]
+    rep.fac <- rep.fac * nx
+  }
+  
+  # create the random portfolios from the grid
+  nlp <- prod(nl)
+  lstLevels <- vector("list", length = nlp)
+  for (r in seq_len(nlp)) {
+    lstLevels[[r]] <- sapply(res, `[[`, r)
+  }
+  # lstLevels is a list of random portfolios, rbind into a matrix
+  rp <- do.call(rbind, lstLevels)
+  
+  # min_sum and max_sum will likely be violated
+  # Normalization will likely cause min and max to be violated. This can be
+  # handled by the penalty in constrained_objective.
+  if(normalize){
+    normalize_weights <- function(weights){
+      # normalize results if necessary
+      if(!is.null(constraints$min_sum) | !is.null(constraints$max_sum)){
+        # the user has passed in either min_sum or max_sum constraints for the portfolio, or both.
+        # we'll normalize the weights passed in to whichever boundary condition has been violated
+        # NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
+        # might violate your constraints, so you'd need to renormalize them after optimizing
+        # we'll create functions for that so the user is less likely to mess it up.
+        
+        ##' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
+        ##' In Kris' original function, this was manifested as a full investment constraint
+        if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
+          max_sum=constraints$max_sum
+          if(sum(weights)>max_sum) { weights<-(max_sum/sum(weights))*weights } # normalize to max_sum
+        }
+        
+        if(!is.null(constraints$min_sum) & constraints$min_sum != -Inf ) {
+          min_sum=constraints$min_sum
+          if(sum(weights)<min_sum) { weights<-(min_sum/sum(weights))*weights } # normalize to min_sum
+        }
+        
+      } # end min_sum and max_sum normalization
+      return(weights)
+    }
+    
+    stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+    out <- foreach(1=1:nrow(rp)) %dopar% {
+      tmp <- normalize_weights(weights=rp[i,])
+      tmp
+    }
+    out <- do.call(rbind, out)
+  }
+  if(normalize) return(out) else return(rp)
+}
+
 # EXAMPLE: start_t<- Sys.time(); x=random_walk_portfolios(rep(1/5,5), generatesequence(min=0.01, max=0.30, by=0.01), max_permutations=500, permutations=5000, min_sum=.99, max_sum=1.01); end_t<-Sys.time(); end_t-start_t;
 # > nrow(unique(x))
 # [1] 4906
