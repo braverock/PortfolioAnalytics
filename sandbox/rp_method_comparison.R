@@ -45,3 +45,19 @@ for(i in 1:length(fev)){
        ylab="mean", xlab="StdDev", col=rgb(0, 0, 100, 50, maxColorValue=255))
 }
 par(mfrow=c(1,1))
+
+# charts to compare simplex and sample random portfolio generation
+par(mfrow=c(1, 2))
+# simplex
+rp_simplex <- random_portfolios(portfolio=pspec, permutations=2000, rp_method='simplex', fev=0:5)
+tmp.mean <- apply(rp_simplex, 1, function(x) mean(R %*% x))
+tmp.StdDev <- apply(rp_simplex, 1, function(x) StdDev(R=R, weights=x))
+plot(x=tmp.StdDev, y=tmp.mean, main="rp_method=simplex fev=0:5",
+     ylab="mean", xlab="StdDev", col=rgb(0, 0, 100, 50, maxColorValue=255))
+#sample
+rp_sample <- random_portfolios(portfolio=pspec, permutations=2000, rp_method='sample')
+tmp.mean <- apply(rp_sample, 1, function(x) mean(R %*% x))
+tmp.StdDev <- apply(rp_sample, 1, function(x) StdDev(R=R, weights=x))
+plot(x=tmp.StdDev, y=tmp.mean, main="rp_method=sample",
+     ylab="mean", xlab="StdDev", col=rgb(0, 0, 100, 50, maxColorValue=255))
+par(mfrow=c(1,1))
