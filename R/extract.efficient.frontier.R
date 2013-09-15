@@ -131,7 +131,7 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   }
   
   # for a mean-var efficient frontier, there must be two objectives 1) "mean" and 2) "var"
-  if(!((length(objnames) == 2) & ("var" %in% objnames) & ("mean" %in% objnames))){
+  if(!((length(objnames) >= 2) & ("var" %in% objnames) & ("mean" %in% objnames))){
     stop("The portfolio object must have both 'mean' and 'var' specified as objectives")
   }
   

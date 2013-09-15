@@ -70,6 +70,21 @@ print.portfolio <- function(x, ...){
     cat("More than 10 assets, only printing the first 10\n")
   }
   
+  # Category labels
+  if(!is.null(x$category_labels)){
+    cat("\nCategory Labels\n")
+    cat_labels <- x$category_labels
+    for(i in 1:min(10, length(cat_labels))){
+      cat(names(cat_labels)[i],": ")
+      tmp <- names(x$assets[cat_labels[[i]]])
+      cat(tmp, "\n")
+    }
+    if(length(cat_labels) > 10){
+      cat("More than 10 categories, only printing the first 10\n")
+    }
+    cat("\n")
+  }
+  
   # Constraints
   cat("\nConstraints\n")
   nconstraints <- length(x$constraints)
@@ -263,16 +278,16 @@ print.optimize.portfolio.ROI <- function(x, ..., digits = max(3, getOption("digi
   names(tmp_obj) <- names(objective_measures)
   cat("Objective Measure:\n")
   for(i in 1:length(objective_measures)){
-    print(tmp_obj[i], digits=4)
+    print(tmp_obj[i], digits=digits)
     cat("\n")
     if(length(objective_measures[[i]]) > 1){
       # This will be the case for any objective measures with HHI for QP problems
       for(j in 2:length(objective_measures[[i]])){
         tmpl <- objective_measures[[i]][j]
-        cat(names(tmpl), ":\n")
+        cat(names(tmpl), "\n")
         tmpv <- unlist(tmpl)
-        # names(tmpv) <- names(x$weights)
-        print(tmpv)
+        names(tmpv) <- gsub(paste(names(tmpl), ".", sep=""), "", names(tmpv))
+        print.default(round(tmpv, digits=digits), digits=digits)
         cat("\n")
       }
     }

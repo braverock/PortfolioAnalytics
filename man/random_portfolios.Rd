@@ -48,7 +48,7 @@
   very restrictive, this may result in very few feasible
   portfolios remaining.} \item{grid: }{The 'grid' method to
   generate random portfolios is based on the
-  \code(gridSearch} function in package 'NMOF'. The grid
+  \code{gridSearch} function in package 'NMOF'. The grid
   search method only satisfies the \code{min} and
   \code{max} box constraints. The \code{min_sum} and
   \code{max_sum} leverage constraints will likely be

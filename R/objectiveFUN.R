@@ -54,10 +54,11 @@ HHI <- function(weights, groups=NULL){
   if(!is.null(groups)){
     ngroups <- length(groups)
     group_hhi <- rep(0, ngroups)
+    if(!is.null((names(groups)))) names(group_hhi) <- names(groups)
     for(i in 1:ngroups){
       group_hhi[i] <- sum(weights[groups[[i]]]^2)
     }
-    return(list(hhi=hhi, group_hhi=group_hhi))
+    return(list(HHI=hhi, Groups_HHI=group_hhi))
   } else {
     return(hhi)
   }

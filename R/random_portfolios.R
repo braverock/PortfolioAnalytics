@@ -334,7 +334,7 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #'   limit constraints will be handled by elimination. If the constraints are 
 #'   very restrictive, this may result in very few feasible portfolios remaining.}
 #'   \item{grid: }{The 'grid' method to generate random portfolios is based on
-#'   the \code(gridSearch} function in package 'NMOF'. The grid search method 
+#'   the \code{gridSearch} function in package 'NMOF'. The grid search method 
 #'   only satisfies the \code{min} and \code{max} box constraints. The 
 #'   \code{min_sum} and \code{max_sum} leverage constraints will likely be 
 #'   violated and the weights in the random portfolios should be normalized. 
