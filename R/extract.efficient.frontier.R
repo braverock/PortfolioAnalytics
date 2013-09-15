@@ -105,10 +105,13 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=NULL, 
 #' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
 #' @param n.portfolios number of portfolios to plot along the efficient frontier
+#' @param risk_aversion vector of risk_aversion values to construct the efficient frontier.
+#' \code{n.portfolios} is ignored if \code{risk_aversion} is specified and the number
+#' of points along the efficient frontier is equal to the length of \code{risk_aversion}.
 #' @return a matrix of objective measure values and weights along the efficient frontier
 #' @author Ross Bennett
 #' @export
-meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25){
+meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_aversion=NULL){
   if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
   # step 1: find the minimum return given the constraints
   # step 2: find the maximum return given the constraints
@@ -163,18 +166,26 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   # length.out is the number of portfolios to create
   ret_seq <- seq(from=minret, to=maxret, length.out=n.portfolios)
   
-  out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))
-  
+#   out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))  
 #   for(i in 1:length(ret_seq)){
 #     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
 #     out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
 #   }
   stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
-  out <- foreach(i=1:length(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
-    portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
-    extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+  if(!is.null(risk_aversion)){
+    out <- foreach(i=1:length(risk_aversion), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
+      portfolio$objectives[[var_idx]]$risk_aversion <- risk_aversion[i]
+      extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+    }
+    out <- cbind(out, risk_aversion)
+    colnames(out) <- c(names(stats), "lambda")
+  } else {
+    out <- foreach(i=1:length(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
+      portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
+      extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+    }
+    colnames(out) <- names(stats)
   }
-  colnames(out) <- names(stats)
   return(structure(out, class="frontier"))
 }
 
@@ -292,6 +303,9 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
 #' @param portfolio object of class 'portfolio' specifying the constraints and objectives, see \code{\link{portfolio.spec}}
 #' @param type type of efficient frontier, see details
 #' @param n.portfolios number of portfolios to calculate along the efficient frontier
+#' @param risk_aversion vector of risk_aversion values to construct the efficient frontier.
+#' \code{n.portfolios} is ignored if \code{risk_aversion} is specified and the number
+#' of points along the efficient frontier is equal to the length of \code{risk_aversion}.
 #' @param match.col column to match when extracting the efficient frontier from an objected created by optimize.portfolio
 #' @param search_size passed to \code{\link{optimize.portfolio}} for type="DEoptim" or type="random"
 #' @param ... passthrough parameters to \code{\link{optimize.portfolio}}
@@ -304,7 +318,7 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
 #' \code{\link{meanetl.efficient.frontier}}, 
 #' \code{\link{extract.efficient.frontier}}
 #' @export
-create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, match.col="ES", search_size=2000, ...){
+create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_aversion=NULL, match.col="ES", search_size=2000, ...){
   # This is just a wrapper around a few functions to easily create efficient frontiers
   # given a portfolio object and other parameters
   call <- match.call()
@@ -315,7 +329,8 @@ create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, match.
          "mean-StdDev"=,
          "mean-var" = {frontier <- meanvar.efficient.frontier(portfolio=portfolio,
                                                               R=R, 
-                                                              n.portfolios=n.portfolios)
+                                                              n.portfolios=n.portfolios,
+                                                              risk_aversion=risk_aversion)
          },
          "mean-ETL"=,
          "mean-CVaR"=,
@@ -376,10 +391,13 @@ create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, match.
 #' \code{objective_measures} or \code{opt_values} slot in the object created 
 #' by \code{\link{optimize.portfolio}}.
 #' @param n.portfolios number of portfolios to use to plot the efficient frontier
+#' @param risk_aversion vector of risk_aversion values to construct the efficient frontier.
+#' \code{n.portfolios} is ignored if \code{risk_aversion} is specified and the number
+#' of points along the efficient frontier is equal to the length of \code{risk_aversion}.
 #' @return an \code{efficient.frontier} object with weights and other metrics along the efficient frontier
 #' @author Ross Bennett
 #' @export
-extractEfficientFrontier <- function(object, match.col="ES", n.portfolios=25){
+extractEfficientFrontier <- function(object, match.col="ES", n.portfolios=25, risk_aversion=NULL){
   # extract the efficient frontier from an optimize.portfolio output object
   call <- match.call()
   if(!inherits(object, "optimize.portfolio")) stop("object must be of class 'optimize.portfolio'")
@@ -405,7 +423,7 @@ extractEfficientFrontier <- function(object, match.col="ES", n.portfolios=25){
       frontier <- meanetl.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
     }
     if(match.col == "StdDev"){
-      frontier <- meanvar.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
+      frontier <- meanvar.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios, risk_aversion=risk_aversion)
     }
   } # end optimize.portfolio.ROI
   
