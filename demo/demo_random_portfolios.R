@@ -24,8 +24,8 @@ require(foreach)
 # The multicore package, and therefore registerDoMC, should not be used in a
 # GUI environment, because multiple processes then share the same GUI. Only use
 # when running from the command line
-require(doMC)
-registerDoMC(3)
+# require(doMC)
+# registerDoMC(3)
 
 data(edhec)
 

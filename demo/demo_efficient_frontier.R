@@ -10,8 +10,6 @@ library(ROI)
 require(ROI.plugin.quadprog)
 require(ROI.plugin.glpk)
 
-rm(list=ls())
-
 data(edhec)
 R <- edhec[, 1:5]
 # change the column names for better legends in plotting

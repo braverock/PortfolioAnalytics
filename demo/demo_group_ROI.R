@@ -2,7 +2,7 @@
 library(PortfolioAnalytics)
 library(ROI)
 library(ROI.plugin.quadprog)
-library(ROI.plugin.quadprog)
+library(ROI.plugin.glpk)
 
 
 data(edhec)
