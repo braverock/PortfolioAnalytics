@@ -23,13 +23,16 @@
 
   \item{\dots}{any other passthru parameters}
 }
+\value{
+  an object of class 'weight_concentration_objective'
+}
 \description{
   This function penalizes weight concentration using the
   Herfindahl-Hirschman Index as a measure of concentration.
 }
 \details{
   The \code{conc_aversion} argument can be a scalar or
-  vector of concentration aversion values If
+  vector of concentration aversion values. If
   \code{conc_aversion} is a scalar and \code{conc_groups}
   is \code{NULL}, then the concentration aversion value
   will be applied to the overall weights.

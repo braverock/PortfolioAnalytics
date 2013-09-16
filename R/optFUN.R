@@ -177,9 +177,9 @@ maxret_opt <- function(R, moments, constraints, target){
 }
 
 ##### Maximize Return MILP Function #####
-#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' Optimization function to solve maximum return problems
 #' 
-#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' This function is called by optimize.portfolio to solve maximum return problems via mixed integer linear programming.
 #' 
 #' @param R xts object of asset returns
 #' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
@@ -275,9 +275,9 @@ maxret_milp_opt <- function(R, constraints, moments, target){
 }
 
 ##### Minimize ETL LP Function #####
-#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' Optimization function to solve minimum ETL problems
 #' 
-#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' This function is called by optimize.portfolio to solve minimum ETL problems.
 #' 
 #' @param R xts object of asset returns
 #' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
@@ -336,9 +336,9 @@ etl_opt <- function(R, constraints, moments, target, alpha){
 }
 
 ##### Minimize ETL MILP Function #####
-#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' Optimization function to solve minimum ETL problems
 #' 
-#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' This function is called by optimize.portfolio to solve minimum ETL problems via mixed integer linear programming.
 #' 
 #' @param R xts object of asset returns
 #' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
@@ -460,7 +460,7 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
 }
 
 ##### minimize variance or maximize quadratic utility with turnover constraints #####
-#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' Optimization function to solve minimum variance or maximum quadratic utility problems with turnover constraint
 #' 
 #' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
 #' 

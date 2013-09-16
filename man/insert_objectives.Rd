@@ -10,8 +10,9 @@
   \item{objectives}{list of objective objects}
 }
 \description{
-  Insert a list of objectives into the objectives slot of a
-  portfolio object
+  This is a helper function primarily for backwards
+  compatibility to insert objectives from a 'v1_constraint'
+  object into the v2 'portfolio' object.
 }
 \author{
   Ross Bennett

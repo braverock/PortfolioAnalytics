@@ -1,6 +1,6 @@
 \name{gmv_opt_toc}
 \alias{gmv_opt_toc}
-\title{Optimization function to solve minimum variance or maximum quadratic utility problems}
+\title{Optimization function to solve minimum variance or maximum quadratic utility problems with turnover constraint}
 \usage{
   gmv_opt_toc(R, constraints, moments, lambda, target,
     init_weights)

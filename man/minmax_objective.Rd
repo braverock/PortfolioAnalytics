@@ -25,22 +25,23 @@
 
   \item{\dots}{any other passthru parameters}
 }
+\value{
+  object of class 'minmax_objective'
+}
 \description{
-  I am adding this as a temporary objective allowing for a
-  min and max to be specified. Testing to understand how
-  the objective function responds to a range of allowable
-  values. I will likely add this to the turnover,
-  diversification, and volatility constraints allowing the
-  user to specify a range of values.
+  This objective allows for min and max targets to be
+  specified.
 }
 \details{
-  if target is null, we'll try to minimize the metric
+  If target is set, we'll try to meet the metric
 
-  if target is set, we'll try to meet the metric
+  If target is NULL and min and max are specified, then do
+  the following:
 
-  If max is violated to the upside, penalize the metric If
-  min is violated to the downside, penalize the metric Try
-  to meet the range between min and max
+  If max is violated to the upside, penalize the metric. If
+  min is violated to the downside, penalize the metric. The
+  purpose of this objective is to try to meet the range
+  between min and max
 }
 \author{
   Ross Bennett

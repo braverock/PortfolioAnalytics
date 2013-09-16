@@ -23,8 +23,8 @@
   compatibility, see \code{\link{constraint}}}
 
   \item{type}{character type of the objective to add or
-  update, currently 'return','risk', 'risk_budget', or
-  'quadratic_utility'}
+  update, currently 'return','risk', 'risk_budget',
+  'quadratic_utility', or 'weight_concentration'}
 
   \item{name}{name of the objective, should correspond to a
   function, though we will try to make allowances}
@@ -46,13 +46,14 @@
   \code{\link{portfolio.spec}}.
 }
 \details{
-  In general, you will define your objective as one of
-  three types: 'return', 'risk', or 'risk_budget'. These
+  In general, you will define your objective as one of the
+  following types: 'return', 'risk', 'risk_budget',
+  'quadratic utility', or 'weight_concentration'. These
   have special handling and intelligent defaults for
   dealing with the function most likely to be used as
   objectives, including mean, median, VaR, ES, etc.
 
-  Objectives of type 'turnove' and 'minmax' are also
+  Objectives of type 'turnover' and 'minmax' are also
   supported.
 }
 \author{

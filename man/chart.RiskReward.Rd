@@ -44,38 +44,39 @@
 }
 \arguments{
   \item{object}{optimal portfolio created by
-  \code{\link{optimize.portfolio}}}
+  \code{\link{optimize.portfolio}}.}
 
   \item{neighbors}{set of 'neighbor' portfolios to
-  overplot, see Details}
+  overplot, see Details.}
 
-  \item{\dots}{any other passthru parameters}
+  \item{\dots}{any other passthru parameters.}
 
   \item{return.col}{string matching the objective of a
-  'return' objective, on vertical axis}
+  'return' objective, on vertical axis.}
 
   \item{risk.col}{string matching the objective of a 'risk'
-  objective, on horizontal axis}
+  objective, on horizontal axis.}
 
   \item{chart.assets}{TRUE/FALSE. Includes a risk reward
-  scatter of the assets in the chart}
+  scatter of the assets in the chart.}
 
   \item{element.color}{color for the default plot scatter
-  points}
+  points.}
 
   \item{cex.axis}{The magnification to be used for axis
-  annotation relative to the current setting of \code{cex}}
+  annotation relative to the current setting of
+  \code{cex}.}
 
   \item{xlim}{set the x-axis limit, same as in
-  \code{\link{plot}}}
+  \code{\link{plot}}.}
 
   \item{ylim}{set the y-axis limit, same as in
-  \code{\link{plot}}}
+  \code{\link{plot}}.}
 
   \item{rp}{TRUE/FALSE to generate random portfolios to
   plot the feasible space}
 
-  \item{main}{a main title for the plot}
+  \item{main}{a main title for the plot.}
 
   \item{labels.assets}{TRUE/FALSE to include the names in
   the plot.}
@@ -83,17 +84,21 @@
   \item{pch.assets}{plotting character of the assets, same
   as in \code{\link{plot}}}
 
-  \item{cex.assets}{A numerical value giving the amount by
+  \item{cex.assets}{numerical value giving the amount by
   which the asset points should be magnified relative to
   the default.}
 
-  \item{cex.lab}{A numerical value giving the amount by
-  which the labels should be magnified relative to the
-  default.}
+  \item{cex.lab}{numerical value giving the amount by which
+  the labels should be magnified relative to the default.}
 
-  \item{colorset}{color palette or vector of colors to use}
+  \item{colorset}{color palette or vector of colors to
+  use.}
 }
 \description{
+  This function charts the \code{optimize.portfolio} object
+  in risk-return space.
+}
+\details{
   \code{neighbors} may be specified in three ways. The
   first is as a single number of neighbors.  This will
   extract the \code{neighbors} closest portfolios in terms

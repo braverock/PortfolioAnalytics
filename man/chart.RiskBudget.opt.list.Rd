@@ -11,30 +11,34 @@
 }
 \arguments{
   \item{object}{list of optimal portfolio objects created
-  by \code{\link{optimizations.combine}}}
+  by \code{\link{optimizations.combine}}.}
 
-  \item{\dots}{any other passthru parameter}
+  \item{\dots}{any other passthru parameter.}
 
   \item{match.col}{string of risk column to match. The
   \code{opt.list} object may contain risk budgets for ES or
-  StdDev and this will match the proper column names (e.g.
-  ES.contribution).}
+  StdDev and this will match the proper column names of the
+  objectives list outp (e.g. ES.contribution).}
 
-  \item{risk.type}{"absolute" or "percentage" plot risk
+  \item{risk.type}{"absolute" or "percentage" to plot risk
   contribution in absolute terms or percentage
-  contribution}
+  contribution.}
 
-  \item{main}{main title for the chart}
+  \item{main}{main title for the chart.}
 
-  \item{plot.type}{"line" or "barplot"}
+  \item{plot.type}{"line" or "barplot".}
 
-  \item{cex.axis}{The magnification to be used for axis
-  annotation relative to the current setting of \code{cex}}
+  \item{cex.axis}{the magnification to be used for axis
+  annotation relative to the current setting of
+  \code{cex}.}
 
-  \item{cex.lab}{The magnification to be used for axis
-  annotation relative to the current setting of \code{cex}}
+  \item{cex.lab}{the magnification to be used for axis
+  annotation relative to the current setting of
+  \code{cex}.}
 
-  \item{element.color}{color for the default plot lines}
+  \item{element.color}{provides the color for drawing
+  less-important chart elements, such as the box lines,
+  axis lines, etc.}
 
   \item{las}{numeric in \{0,1,2,3\}; the style of axis
   labels \describe{ \item{0:}{always parallel to the axis

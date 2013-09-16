@@ -29,11 +29,11 @@
   (horizontal axis). Must match the name of an objective.}
 
   \item{search_size}{passed to optimize.portfolio for
-  type="DEoptim" or type="random"}
+  type="DEoptim" or type="random".}
 
   \item{main}{title used in the plot.}
 
-  \item{cex.axis}{The magnification to be used for sizing
+  \item{cex.axis}{the magnification to be used for sizing
   the axis text relative to the current setting of 'cex',
   similar to \code{\link{plot}}.}
 
@@ -43,47 +43,48 @@
 
   \item{legend.loc}{location of the legend; NULL,
   "bottomright", "bottom", "bottomleft", "left", "topleft",
-  "top", "topright", "right" and "center"}
+  "top", "topright", "right" and "center".}
 
   \item{legend.labels}{character vector to use for the
-  legend labels}
+  legend labels.}
 
   \item{cex.legend}{The magnification to be used for sizing
   the legend relative to the current setting of 'cex',
   similar to \code{\link{plot}}.}
 
   \item{xlim}{set the x-axis limit, same as in
-  \code{\link{plot}}}
+  \code{\link{plot}}.}
 
   \item{ylim}{set the y-axis limit, same as in
-  \code{\link{plot}}}
+  \code{\link{plot}}.}
 
-  \item{...}{passthrough parameters to \code{\link{plot}}}
+  \item{\dots}{passthrough parameters to
+  \code{\link{plot}}.}
 
-  \item{chart.assets}{TRUE/FALSE to include the assets}
+  \item{chart.assets}{TRUE/FALSE to include the assets.}
 
   \item{labels.assets}{TRUE/FALSE to include the asset
-  names in the plot}
+  names in the plot.}
 
   \item{pch.assets}{plotting character of the assets, same
-  as in \code{\link{plot}}}
+  as in \code{\link{plot}}.}
 
   \item{cex.assets}{A numerical value giving the amount by
   which the asset points and labels should be magnified
   relative to the default.}
 
   \item{col}{vector of colors with length equal to the
-  number of portfolios in \code{portfolio_list}}
+  number of portfolios in \code{portfolio_list}.}
 
   \item{lty}{vector of line types with length equal to the
-  number of portfolios in \code{portfolio_list}}
+  number of portfolios in \code{portfolio_list}.}
 
   \item{lwd}{vector of line widths with length equal to the
-  number of portfolios in \code{portfolio_list}}
+  number of portfolios in \code{portfolio_list}.}
 }
 \description{
   Overlay the efficient frontiers of multiple portfolio
-  objects on a single plot
+  objects on a single plot.
 }
 \author{
   Ross Bennett

@@ -26,21 +26,21 @@ chart.RiskBudget <- function(object, ...){
 #' properly named contribution and pct_contrib columns. 
 #' 
 #' @param object optimal portfolio object created by \code{\link{optimize.portfolio}}
-#' @param neighbors risk contribution or pct_contrib of neighbor portfolios to be plotted
-#' @param ... passthrough parameters to \code{\link{plot}}
-#' @param risk.type plot risk contribution in absolute terms or percentage contribution
-#' @param main main title for the chart
-#' @param ylab label for the y-axis
-#' @param xlab a title for the x axis: see \code{\link{title}}
-#' @param cex.lab The magnification to be used for x and y labels relative to the current setting of \code{cex}
-#' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
-#' @param element.color color for the default plot lines
+#' @param neighbors risk contribution or pct_contrib of neighbor portfolios to be plotted, see details.
+#' @param \dots passthrough parameters to \code{\link{plot}}.
+#' @param risk.type "absolute" or "percentage" to plot risk contribution in absolute terms or percentage contribution.
+#' @param main main title for the chart.
+#' @param ylab label for the y-axis.
+#' @param xlab label for the x-axis
+#' @param cex.lab the magnification to be used for x and y labels relative to the current setting of \code{cex}.
+#' @param cex.axis the magnification to be used for axis annotation relative to the current setting of \code{cex}.
+#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
 #' @param las numeric in \{0,1,2,3\}; the style of axis labels
 #'       \describe{
-#'         \item{0:}{always parallel to the axis [\emph{default}],}
+#'         \item{0:}{always parallel to the axis,}
 #'         \item{1:}{always horizontal,}
 #'         \item{2:}{always perpendicular to the axis,}
-#'         \item{3:}{always vertical.}
+#'         \item{3:}{always vertical [\emph{default}].}
 #'       }
 #' @param ylim set the y-axis limit, same as in \code{\link{plot}}
 #' @author Ross Bennett
@@ -206,17 +206,17 @@ chart.RiskBudget.optimize.portfolio <- function(object, ..., neighbors=NULL, ris
 #' This function charts the absolute contribution or percent contribution of 
 #' the resulting objective measures in the \code{opt.list} object.
 #' 
-#' @param object list of optimal portfolio objects created by \code{\link{optimizations.combine}}
-#' @param \dots any other passthru parameter
+#' @param object list of optimal portfolio objects created by \code{\link{optimizations.combine}}.
+#' @param \dots any other passthru parameter.
 #' @param match.col string of risk column to match. The \code{opt.list} object 
 #' may contain risk budgets for ES or StdDev and this will match the proper 
-#' column names (e.g. ES.contribution).
-#' @param risk.type "absolute" or "percentage" plot risk contribution in absolute terms or percentage contribution
-#' @param main main title for the chart
-#' @param plot.type "line" or "barplot"
-#' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
-#' @param cex.lab The magnification to be used for axis annotation relative to the current setting of \code{cex}
-#' @param element.color color for the default plot lines
+#' column names of the objectives list outp (e.g. ES.contribution).
+#' @param risk.type "absolute" or "percentage" to plot risk contribution in absolute terms or percentage contribution.
+#' @param main main title for the chart.
+#' @param plot.type "line" or "barplot".
+#' @param cex.axis the magnification to be used for axis annotation relative to the current setting of \code{cex}.
+#' @param cex.lab the magnification to be used for axis annotation relative to the current setting of \code{cex}.
+#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
 #' @param las numeric in \{0,1,2,3\}; the style of axis labels
 #'       \describe{
 #'         \item{0:}{always parallel to the axis [\emph{default}],}

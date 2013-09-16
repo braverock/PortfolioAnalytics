@@ -6,11 +6,11 @@
 #' does meet the constraints, if one exists, hopefully with a minimum
 #' of transformation.
 #' 
-#' I think our first step should be to test each constraint type, in
-#' some sort of hierarchy, starting with box constraints (almost all
-#' solvers support box constraints, of course), since some of the other
-#' transformations will violate the box constraints, and we'll need to
-#' transform back again.
+#' The first step is to test for violation of the constraint. If the constraint
+#' is violated, we will apply a transformation such that the weights vector
+#' satisfies the constraints. The following constraint types are tested in
+#' the mapping function: leverage, box, group, and position limit. The 
+#' transformation logic is based on code from the random portfolio sample method.
 #' 
 #' If relax=TRUE, we will attempt to relax the constraints if a feasible 
 #' portfolio could not be formed with an initial call to \code{rp_transform}. 
@@ -18,19 +18,17 @@
 #' feasible portfolio after attempting to relax the constraints, then we will 
 #' default to returning the weights vector that violates the constraints.
 #' 
-#' Leverage, box, group, and position limit constraints are transformed. Diversification and turnover constraints are penalized
-#' 
 #' @param weights vector of weights
-#' @param portfolio object of class portfolio
+#' @param portfolio object of class \code{portfolio}
 #' @param relax TRUE/FALSE, default FALSE. Enable constraints to be relaxed.
 #' @param \dots any other passthru parameters
 #' @return 
 #' \itemize{
-#' \item{weights: }{vector of transformed weights meeting constraints}
-#' \item{min: }{vector of min box constraints that may have been modified if relax=TRUE}
-#' \item{max: }{vector of max box constraints that may have been modified if relax=TRUE}
-#' \item{cLO: }{vector of lower bound group constraints that may have been modified if relax=TRUE}
-#' \item{cUP: }{vector of upper bound group constraints that may have been modified if relax=TRUE}
+#' \item{weights: }{vector of transformed weights meeting constraints.}
+#' \item{min: }{vector of min box constraints that may have been modified if relax=TRUE.}
+#' \item{max: }{vector of max box constraints that may have been modified if relax=TRUE.}
+#' \item{cLO: }{vector of lower bound group constraints that may have been modified if relax=TRUE.}
+#' \item{cUP: }{vector of upper bound group constraints that may have been modified if relax=TRUE.}
 #' }
 #' @author Ross Bennett
 #' @export
@@ -574,13 +572,12 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
 #' for the given group. This is a helper function for \code{\link{rp_transform}}.
 #' 
 #' @param weights weights vector to test
-#' @param groups vector specifying the groups of the assets
+#' @param groups list of vectors specifying the groups of the assets
 #' @param cLO numeric or vector specifying minimum weight group constraints
 #' @param cUP numeric or vector specifying minimum weight group constraints
 #' @param group_pos vector specifying the number of non-zero weights per group
 #' @return logical vector: TRUE if group constraints are violated for a given group
 #' @author Ross Bennett
-#' @export
 group_fail <- function(weights, groups, cLO, cUP, group_pos=NULL){
   # return FALSE if groups, cLO, or cUP is NULL
   if(is.null(groups) | is.null(cLO) | is.null(cUP)) return(FALSE)

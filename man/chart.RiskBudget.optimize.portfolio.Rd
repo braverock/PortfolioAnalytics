@@ -13,33 +13,37 @@
   \code{\link{optimize.portfolio}}}
 
   \item{neighbors}{risk contribution or pct_contrib of
-  neighbor portfolios to be plotted}
+  neighbor portfolios to be plotted, see details.}
 
-  \item{...}{passthrough parameters to \code{\link{plot}}}
+  \item{\dots}{passthrough parameters to
+  \code{\link{plot}}.}
 
-  \item{risk.type}{plot risk contribution in absolute terms
-  or percentage contribution}
+  \item{risk.type}{"absolute" or "percentage" to plot risk
+  contribution in absolute terms or percentage
+  contribution.}
 
-  \item{main}{main title for the chart}
+  \item{main}{main title for the chart.}
 
-  \item{ylab}{label for the y-axis}
+  \item{ylab}{label for the y-axis.}
 
-  \item{xlab}{a title for the x axis: see
-  \code{\link{title}}}
+  \item{xlab}{label for the x-axis}
 
-  \item{cex.lab}{The magnification to be used for x and y
-  labels relative to the current setting of \code{cex}}
+  \item{cex.lab}{the magnification to be used for x and y
+  labels relative to the current setting of \code{cex}.}
 
-  \item{cex.axis}{The magnification to be used for axis
-  annotation relative to the current setting of \code{cex}}
+  \item{cex.axis}{the magnification to be used for axis
+  annotation relative to the current setting of
+  \code{cex}.}
 
-  \item{element.color}{color for the default plot lines}
+  \item{element.color}{provides the color for drawing
+  less-important chart elements, such as the box lines,
+  axis lines, etc.}
 
   \item{las}{numeric in \{0,1,2,3\}; the style of axis
-  labels \describe{ \item{0:}{always parallel to the axis
-  [\emph{default}],} \item{1:}{always horizontal,}
-  \item{2:}{always perpendicular to the axis,}
-  \item{3:}{always vertical.} }}
+  labels \describe{ \item{0:}{always parallel to the axis,}
+  \item{1:}{always horizontal,} \item{2:}{always
+  perpendicular to the axis,} \item{3:}{always vertical
+  [\emph{default}].} }}
 
   \item{ylim}{set the y-axis limit, same as in
   \code{\link{plot}}}

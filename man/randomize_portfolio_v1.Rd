@@ -1,6 +1,6 @@
 \name{randomize_portfolio_v1}
 \alias{randomize_portfolio_v1}
-\title{generate random permutations of a portfolio seed meeting your constraints on the weights of each asset}
+\title{Random portfolio sample method}
 \usage{
   randomize_portfolio_v1(rpconstraints,
     max_permutations = 200, rounding = 3)
@@ -17,11 +17,16 @@
   to}
 }
 \value{
-  named weighting vector
+  named weights vector
 }
 \description{
-  generate random permutations of a portfolio seed meeting
-  your constraints on the weights of each asset
+  This function generates random permutations of a
+  portfolio seed meeting leverage and box constraints. The
+  final step is to run \code{\link{fn_map}} on the random
+  portfolio weights to transform the weights so they
+  satisfy other constraints such as group or position limit
+  constraints. This is the 'sample' method for random
+  portfolios and is based on an idea by Pat Burns.
 }
 \author{
   Peter Carl, Brian G. Peterson, (based on an idea by Pat

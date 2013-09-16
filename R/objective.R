@@ -210,15 +210,15 @@ add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=
 #' 
 #' This function is the main function for adding and updating business objectives in an object of type \code{\link{portfolio.spec}}.
 #' 
-#' In general, you will define your objective as one of three types: 'return', 'risk', or 'risk_budget'.  
+#' In general, you will define your objective as one of the following types: 'return', 'risk', 'risk_budget', 'quadratic utility', or 'weight_concentration'.  
 #' These have special handling and intelligent defaults for dealing with the function most likely to be 
 #' used as objectives, including mean, median, VaR, ES, etc.
 #' 
-#' Objectives of type 'turnove' and 'minmax' are also supported.
+#' Objectives of type 'turnover' and 'minmax' are also supported.
 #' 
 #' @param portfolio an object of type 'portfolio' to add the objective to, specifying the portfolio for the optimization, see \code{\link{portfolio}}
 #' @param constraints a 'v1_constraint' object for backwards compatibility, see \code{\link{constraint}}
-#' @param type character type of the objective to add or update, currently 'return','risk', 'risk_budget', or 'quadratic_utility'
+#' @param type character type of the objective to add or update, currently 'return','risk', 'risk_budget', 'quadratic_utility', or 'weight_concentration'
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
 #' @param arguments default arguments to be passed to an objective function when executed
 #' @param enabled TRUE/FALSE
@@ -256,7 +256,8 @@ add.objective <- add.objective_v2
 #' @param arguments default arguments to be passed to an objective function when executed
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters 
+#' @param \dots any other passthru parameters
+#' @return object of class 'return_objective'
 #' @author Brian G. Peterson
 #' @export
 return_objective <- function(name, target=NULL, arguments=NULL, multiplier=-1, enabled=TRUE, ... )
@@ -275,7 +276,8 @@ return_objective <- function(name, target=NULL, arguments=NULL, multiplier=-1, e
 #' @param arguments default arguments to be passed to an objective function when executed
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters 
+#' @param \dots any other passthru parameters
+#' @return object of class 'portfolio_risk_objective'
 #' @author Brian G. Peterson
 #' @export
 portfolio_risk_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=TRUE, ... )
@@ -297,6 +299,7 @@ portfolio_risk_objective <- function(name, target=NULL, arguments=NULL, multipli
 #' @param max_prisk maximum percentage contribution to risk
 #' @param min_concentration TRUE/FALSE whether to minimize concentration, default FALSE, always TRUE if min_prisk and max_prisk are NULL
 #' @param min_difference TRUE/FALSE whether to minimize difference between concentration, default FALSE
+#' @return object of class 'risk_budget_objective'
 #' @author Brian G. Peterson
 #' @export
 risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, multiplier=1, enabled=TRUE, ..., min_prisk, max_prisk, min_concentration=FALSE, min_difference=FALSE )
@@ -351,7 +354,8 @@ risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, mul
 #' @param arguments default arguments to be passed to an objective function when executed
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters 
+#' @param \dots any other passthru parameters
+#' @return an objective of class 'turnover_objective'
 #' @author Ross Bennett
 #' @export
 turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=TRUE, ... )
@@ -364,18 +368,15 @@ turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, 
 
 #' constructor for class tmp_minmax_objective
 #'
-#' I am adding this as a temporary objective allowing for a min and max to be specified. Testing
-#' to understand how the objective function responds to a range of allowable values. I will
-#' likely add this to the turnover, diversification, and volatility constraints 
-#' allowing the user to specify a range of values.
+#' This objective allows for min and max targets to be specified.
 #' 
-#' if target is null, we'll try to minimize the metric
+#' If target is set, we'll try to meet the metric
 #' 
-#' if target is set, we'll try to meet the metric
+#' If target is NULL and min and max are specified, then do the following:
 #' 
-#' If max is violated to the upside, penalize the metric
-#' If min is violated to the downside, penalize the metric
-#' Try to meet the range between min and max
+#' If max is violated to the upside, penalize the metric. If min is violated to 
+#' the downside, penalize the metric. The purpose of this objective is to try
+#' to meet the range between min and max
 #'  
 #' @param name name of the objective, should correspond to a function, though we will try to make allowances
 #' @param target univariate target for the objective
@@ -384,7 +385,8 @@ turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, 
 #' @param arguments default arguments to be passed to an objective function when executed
 #' @param multiplier multiplier to apply to the objective, usually 1 or -1
 #' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters 
+#' @param \dots any other passthru parameters
+#' @return object of class 'minmax_objective'
 #' @author Ross Bennett
 #' @export
 minmax_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=TRUE, ..., min, max )
@@ -426,7 +428,7 @@ quadratic_utility_objective <- function(risk_aversion=1, target=NULL, enabled=TR
 #' as a measure of concentration.
 #' 
 #' The \code{conc_aversion} argument can be a scalar or vector of concentration
-#' aversion values If \code{conc_aversion} is a scalar and \code{conc_groups} is
+#' aversion values. If \code{conc_aversion} is a scalar and \code{conc_groups} is
 #' \code{NULL}, then the concentration aversion value will be applied to the overall
 #' weights.
 #' 
@@ -440,6 +442,7 @@ quadratic_utility_objective <- function(risk_aversion=1, target=NULL, enabled=TR
 #' @param arguments default arguments to be passed to an objective function when executed
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters
+#' @return an object of class 'weight_concentration_objective'
 #' @author Ross Bennett
 #' @export
 weight_concentration_objective <- function(name, conc_aversion, conc_groups=NULL, arguments=NULL, enabled=TRUE, ...){
@@ -466,6 +469,9 @@ weight_concentration_objective <- function(name, conc_aversion, conc_groups=NULL
 }
 
 #' Insert a list of objectives into the objectives slot of a portfolio object
+#' 
+#' This is a helper function primarily for backwards compatibility to insert
+#' objectives from a 'v1_constraint' object into the v2 'portfolio' object.
 #' 
 #' @param portfolio object of class 'portfolio'
 #' @param objectives list of objective objects

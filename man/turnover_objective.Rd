@@ -21,6 +21,9 @@
 
   \item{\dots}{any other passthru parameters}
 }
+\value{
+  an objective of class 'turnover_objective'
+}
 \description{
   if target is null, we'll try to minimize the turnover
   metric

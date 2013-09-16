@@ -22,37 +22,38 @@
 }
 \arguments{
   \item{object}{object of class \code{efficient.frontier}
-  or \code{optimize.portfolio}}
+  or \code{optimize.portfolio}.}
 
   \item{\dots}{passthru parameters to \code{barplot}.}
 
-  \item{colorset}{color palette to use}
+  \item{colorset}{color palette or vector of colors to
+  use.}
 
   \item{n.portfolios}{number of portfolios to extract along
-  the efficient frontier}
+  the efficient frontier.}
 
   \item{by.groups}{TRUE/FALSE. If TRUE, the group weights
-  are charted}
+  are charted.}
 
   \item{match.col}{string name of column to use for risk
   (horizontal axis). Must match the name of an objective.}
 
   \item{main}{title used in the plot.}
 
-  \item{cex.lab}{The magnification to be used for x-axis
+  \item{cex.lab}{the magnification to be used for x-axis
   and y-axis labels relative to the current setting of
-  'cex'}
+  'cex'.}
 
-  \item{cex.axis}{The magnification to be used for sizing
+  \item{cex.axis}{the magnification to be used for sizing
   the axis text relative to the current setting of 'cex',
-  similar to \code{\link{plot}}}
+  similar to \code{\link{plot}}.}
 
-  \item{cex.legend}{The magnification to be used for sizing
+  \item{cex.legend}{the magnification to be used for sizing
   the legend relative to the current setting of 'cex',
-  similar to \code{\link{plot}}}
+  similar to \code{\link{plot}}.}
 
   \item{legend.labels}{character vector to use for the
-  legend labels}
+  legend labels.}
 
   \item{element.color}{provides the color for drawing
   less-important chart elements, such as the box lines,
@@ -60,11 +61,11 @@
 
   \item{legend.loc}{NULL, "topright", "right", or
   "bottomright". If legend.loc is NULL, the legend will not
-  be plotted}
+  be plotted.}
 }
 \description{
   This function produces a stacked barplot of weights along
-  the efficient frontier.
+  an efficient frontier.
 }
 \author{
   Ross Bennett

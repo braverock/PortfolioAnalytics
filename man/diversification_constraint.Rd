@@ -16,8 +16,9 @@
   \item{message}{TRUE/FALSE. The default is message=FALSE.
   Display messages if TRUE.}
 
-  \item{\dots}{any other passthru parameters to specify box
-  and/or group constraints}
+  \item{\dots}{any other passthru parameters to specify
+  diversification constraint an object of class
+  'diversification_constraint'}
 }
 \description{
   The diversification constraint specifies a target

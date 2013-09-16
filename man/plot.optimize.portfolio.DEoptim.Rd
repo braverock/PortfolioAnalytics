@@ -33,7 +33,7 @@
   \item{ylim}{set the limit on coordinates for the y-axis}
 }
 \description{
-  scatter and weights chart for DEoptim portfolio
+  Scatter and weights chart for DEoptim portfolio
   optimizations run with trace=TRUE
 }
 \details{

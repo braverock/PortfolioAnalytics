@@ -12,7 +12,8 @@
   \item{assets}{number of assets, or optionally a named
   vector of assets specifying initial weights}
 
-  \item{groups}{vector specifying the groups of the assets}
+  \item{groups}{list of vectors specifying the groups of
+  the assets}
 
   \item{group_labels}{character vector to label the groups
   (e.g. size, asset class, style, etc.)}
@@ -33,6 +34,9 @@
 
   \item{\dots}{any other passthru parameters to specify
   group constraints}
+}
+\value{
+  an object of class 'group_constraint'
 }
 \description{
   Group constraints specify the grouping of the assets,

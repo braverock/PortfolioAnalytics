@@ -267,10 +267,10 @@ charts.RP <- function(RP, risk.col, return.col, chart.assets=FALSE, neighbors=NU
 
 #' plot method for optimize.portfolio.random output
 #' 
-#' scatter and weights chart for random portfolio optimizations run with trace=TRUE
+#' Scatter and weights chart for random portfolio optimizations run with trace=TRUE
 #' 
-#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights
-#' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights
+#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights.
+#' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights.
 #' 
 #' \code{neighbors} may be specified in three ways.  
 #' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
@@ -298,9 +298,9 @@ plot.optimize.portfolio.random <- function(x, ..., return.col='mean', risk.col='
 
 #' plot method for optimize.portfolio output
 #' 
-#' scatter and weights chart for portfolio optimization
+#' Scatter and weights chart for portfolio optimization
 #' 
-#' this is a fallback that will be called for classes of portfolio that do not have specific pre-existing plot methods.
+#' This is a fallback that will be called for classes of portfolio that do not have specific pre-existing plot methods.
 #' 
 #' \code{neighbors} may be specified in three ways.  
 #' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 

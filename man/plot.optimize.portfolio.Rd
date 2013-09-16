@@ -32,10 +32,10 @@
   \code{\link{title}}}
 }
 \description{
-  scatter and weights chart for portfolio optimization
+  Scatter and weights chart for portfolio optimization
 }
 \details{
-  this is a fallback that will be called for classes of
+  This is a fallback that will be called for classes of
   portfolio that do not have specific pre-existing plot
   methods.
 

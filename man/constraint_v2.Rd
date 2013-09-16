@@ -16,6 +16,7 @@
   \item{constrclass}{name of class for the constraint}
 }
 \description{
-  constructor for v2 constraint specification
+  See main documentation entry in
+  \code{\link{add.constraint}}.
 }
 

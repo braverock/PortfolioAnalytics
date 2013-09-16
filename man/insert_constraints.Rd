@@ -10,8 +10,9 @@
   \item{constraints}{list of constraint objects}
 }
 \description{
-  Insert a list of constraints into the constraints slot of
-  a portfolio object
+  This is a helper function primarily for backwards
+  compatibility to insert constraints from a
+  'v1_constraint' object into the v2 'portfolio' object.
 }
 \author{
   Ross Bennett

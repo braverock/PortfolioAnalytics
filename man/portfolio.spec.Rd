@@ -28,10 +28,10 @@
 \description{
   The portfolio object is created with
   \code{portfolio.spec}. The portfolio object is an S3
-  object of class 'portfolio' used to hold the seed assets,
-  constraints, objectives, and other information about the
-  portfolio. The only required argument to
-  \code{portfolio.spec} is \code{assets}.
+  object of class 'portfolio' used to hold the initial
+  asset weights, constraints, objectives, and other
+  information about the portfolio. The only required
+  argument to \code{portfolio.spec} is \code{assets}.
 }
 \details{
   The portfolio object contains the following elements:

@@ -14,8 +14,9 @@
   \item{...}{passthrough parameters to \code{\link{plot}}}
 
   \item{grouping}{\itemize{ \item{groups: }{group the
-  weights group constraints} \item{category_labels: }{group
-  the weights by category_labels in portfolio object} }}
+  weights by group constraints} \item{category_labels:
+  }{group the weights by category_labels in portfolio
+  object} }}
 
   \item{main}{an overall title for the plot: see
   \code{\link{title}}}

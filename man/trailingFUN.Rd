@@ -21,8 +21,8 @@
 \description{
   this function is primarily designed for use with
   portfolio functions passing 'x' or 'R' and weights, but
-  may be usable for other things as well, see Exmample for
-  a vector example.
+  may be usable for other things as well, see Example for a
+  vector example.
 }
 \details{
   called with e.g.

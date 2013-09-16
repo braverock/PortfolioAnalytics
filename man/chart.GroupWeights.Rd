@@ -9,36 +9,38 @@
     cex.axis = 0.8)
 }
 \arguments{
-  \item{object}{object of class \code{optimize.portfolio}}
+  \item{object}{object of class \code{optimize.portfolio}.}
 
-  \item{...}{passthrough parameters to \code{\link{plot}}}
+  \item{\dots}{passthrough parameters to
+  \code{\link{plot}}.}
 
   \item{grouping}{\itemize{ \item{groups: }{group the
-  weights group constraints} \item{category_labels: }{group
-  the weights by category_labels in portfolio object} }}
+  weights by group constraints.} \item{category_labels:
+  }{group the weights by category_labels in the
+  \code{portfolio} object.} }}
 
-  \item{plot.type}{"line" or "barplot"}
+  \item{plot.type}{"line" or "barplot".}
 
   \item{main}{an overall title for the plot: see
-  \code{\link{title}}}
+  \code{\link{title}}.}
 
   \item{las}{numeric in \{0,1,2,3\}; the style of axis
-  labels \describe{ \item{0:}{always parallel to the axis
-  [\emph{default}],} \item{1:}{always horizontal,}
-  \item{2:}{always perpendicular to the axis,}
-  \item{3:}{always vertical.} }}
+  labels \describe{ \item{0:}{always parallel to the axis,}
+  \item{1:}{always horizontal,} \item{2:}{always
+  perpendicular to the axis,} \item{3:}{always
+  vertical[\emph{default}].} }}
 
   \item{xlab}{a title for the x axis: see
-  \code{\link{title}}}
+  \code{\link{title}}.}
 
-  \item{cex.lab}{The magnification to be used for x and y
-  labels relative to the current setting of \code{cex}}
+  \item{cex.lab}{the magnification to be used for x and y
+  labels relative to the current setting of \code{cex}.}
 
   \item{element.color}{color for the default border and
-  axis}
+  axis.}
 
-  \item{cex.axis}{The magnification to be used for x and y
-  axis relative to the current setting of \code{cex}}
+  \item{cex.axis}{the magnification to be used for x and y
+  axis relative to the current setting of \code{cex}.}
 }
 \description{
   Chart weights by group or category

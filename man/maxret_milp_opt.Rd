@@ -1,6 +1,6 @@
 \name{maxret_milp_opt}
 \alias{maxret_milp_opt}
-\title{Optimization function to solve minimum variance or maximum quadratic utility problems}
+\title{Optimization function to solve maximum return problems}
 \usage{
   maxret_milp_opt(R, constraints, moments, target)
 }
@@ -17,7 +17,8 @@
 }
 \description{
   This function is called by optimize.portfolio to solve
-  minimum variance or maximum quadratic utility problems
+  maximum return problems via mixed integer linear
+  programming.
 }
 \author{
   Ross Bennett

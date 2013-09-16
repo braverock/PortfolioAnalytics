@@ -30,6 +30,9 @@
   \item{\dots}{any other passthru parameters to specify
   position limit constraints}
 }
+\value{
+  an object of class 'position_limit_constraint'
+}
 \description{
   This function is called by add.constraint when
   type="position_limit" is specified,

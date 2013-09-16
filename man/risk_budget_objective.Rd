@@ -37,6 +37,9 @@
   \item{min_difference}{TRUE/FALSE whether to minimize
   difference between concentration, default FALSE}
 }
+\value{
+  object of class 'risk_budget_objective'
+}
 \description{
   constructor for class risk_budget_objective
 }

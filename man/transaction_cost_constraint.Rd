@@ -21,6 +21,9 @@
   \item{\dots}{any other passthru parameters to specify box
   and/or group constraints}
 }
+\value{
+  an object of class 'transaction_cost_constraint'
+}
 \description{
   The transaction cost constraint specifies a proportional
   cost value. This function is called by add.constraint

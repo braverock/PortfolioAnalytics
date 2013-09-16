@@ -191,15 +191,15 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
 
 #' Generate the efficient frontier for a mean-etl portfolio
 #' 
-#' This function generates the mean-etl efficient frontier of a portfolio
-#' specifying constraints and objectives. To generate the mean-var efficient 
+#' This function generates the mean-ETL efficient frontier of a portfolio
+#' specifying constraints and objectives. To generate the mean-ETL efficient 
 #' frontier, the portfolio must have two objectives 1) "mean" and 2) "ETL/ES/CVaR". If
 #' the only objective in the \code{portfolio} object is ETL/ES/CVaR, the we will
 #' add a mean objective.
 #' 
 #' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
-#' @param n.portfolios number of portfolios to plot along the efficient frontier
+#' @param n.portfolios number of portfolios to generate the efficient frontier
 #' @return a matrix of objective measure values and weights along the efficient frontier
 #' @author Ross Bennett
 #' @export
@@ -275,42 +275,42 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
 
 #' create an efficient frontier
 #' 
-#' @details currently there are 4 'types' supported to create an efficient frontier
+#' @details Currently there are 4 'types' supported to create an efficient frontier:
 #' \itemize{
 #'   \item{"mean-var", "mean-sd", or "mean-StdDev":}{ This is a special case for 
 #'   an efficient frontier that can be created by a QP solver.
 #'   The \code{portfolio} object should have two
 #'   objectives: 1) mean and 2) var. The efficient frontier will be created via
 #'   \code{\link{meanvar.efficient.frontier}}.}
-#'   \item{"mean-ETL", "mean-ES", "mean-CVaR", "mean-etl"}{ This is a special 
+#'   \item{"mean-ETL", "mean-ES", "mean-CVaR", "mean-etl":}{ This is a special 
 #'   case for an efficient frontier that can be created by an LP solver.
 #'   The \code{portfolio} object should have two objectives: 1) mean
 #'   and 2) ETL/ES/CVaR. The efficient frontier will be created via
 #'   \code{\link{meanetl.efficient.frontier}}.}
-#'   \item{"DEoptim"}{ This can handle more complex constraints and objectives
+#'   \item{"DEoptim":}{ This can handle more complex constraints and objectives
 #'   than the simple mean-var and mean-ETL cases. For this type, we actually 
 #'   call \code{\link{optimize.portfolio}} with \code{optimize_method="DEoptim"}
 #'   and then extract the efficient frontier with 
 #'   \code{\link{extract.efficient.frontier}}.}
-#'   \item{"random"}{ This can handle more complex constraints and objectives
+#'   \item{"random":}{ This can handle more complex constraints and objectives
 #'   than the simple mean-var and mean-ETL cases. For this type, we actually 
 #'   call \code{\link{optimize.portfolio}} with \code{optimize_method="random"}
 #'   and then extract the efficient frontier with 
 #'   \code{\link{extract.efficient.frontier}}.}
 #' }
 #' 
-#' @param R xts of asset returns
-#' @param portfolio object of class 'portfolio' specifying the constraints and objectives, see \code{\link{portfolio.spec}}
-#' @param type type of efficient frontier, see details
+#' @param R xts object of asset returns
+#' @param portfolio object of class 'portfolio' specifying the constraints and objectives, see \code{\link{portfolio.spec}}.
+#' @param type type of efficient frontier, see Details.
 #' @param n.portfolios number of portfolios to calculate along the efficient frontier
 #' @param risk_aversion vector of risk_aversion values to construct the efficient frontier.
 #' \code{n.portfolios} is ignored if \code{risk_aversion} is specified and the number
-#' of points along the efficient frontier is equal to the length of \code{risk_aversion}.
-#' @param match.col column to match when extracting the efficient frontier from an objected created by optimize.portfolio
-#' @param search_size passed to \code{\link{optimize.portfolio}} for type="DEoptim" or type="random"
-#' @param ... passthrough parameters to \code{\link{optimize.portfolio}}
+#' of points along the efficient frontier will be equal to the length of \code{risk_aversion}.
+#' @param match.col column to match when extracting the efficient frontier from an objected created by \code{\link{optimize.portfolio}}.
+#' @param search_size passed to \code{\link{optimize.portfolio}} for type="DEoptim" or type="random".
+#' @param \dots passthrough parameters to \code{\link{optimize.portfolio}}.
 #' @return an object of class 'efficient.frontier' with the objective measures 
-#' and weights of portfolios along the efficient frontier
+#' and weights of portfolios along the efficient frontier.
 #' @author Ross Bennett
 #' @seealso \code{\link{optimize.portfolio}}, 
 #' \code{\link{portfolio.spec}}, 

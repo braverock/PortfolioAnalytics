@@ -156,15 +156,12 @@ charts.ROI <- function(ROI, rp=FALSE, risk.col="ES", return.col="mean", chart.as
 
 #' plot method for optimize.portfolio.ROI output
 #' 
-#' scatter and weights chart for ROI portfolio optimizations run with trace=TRUE
-#' 
-#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights
-#' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights
+#' Scatter and weights chart for ROI portfolio optimizations run with trace=TRUE
 #' 
 #' The ROI optimizers do not store the portfolio weights like DEoptim or random
 #' portfolios random portfolios can be generated for the scatter plot. 
 #' 
-#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights
+#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights.
 #' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights
 #' 
 #' @param x object created by \code{\link{optimize.portfolio}}

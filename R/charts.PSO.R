@@ -212,10 +212,10 @@ charts.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE
 
 #' plot method for optimize.portfolio.pso output
 #' 
-#' scatter and weights chart for pso portfolio optimizations run with trace=TRUE
+#' Scatter and weights chart for pso portfolio optimizations run with trace=TRUE
 #' 
-#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights
-#' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights
+#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights.
+#' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights.
 #' 
 #' @param x object created by \code{\link{optimize.portfolio}}
 #' @param ... any other passthru parameters 

@@ -29,8 +29,8 @@
   \item{objectives}{default=NULL, a list of objective
   objects}
 
-  \item{optimize_method}{one of "DEoptim", "random", or
-  "ROI"}
+  \item{optimize_method}{one of "DEoptim", "random", "pso",
+  "GenSA", or "ROI"}
 
   \item{search_size}{integer, how many portfolios to test,
   default 20,000}

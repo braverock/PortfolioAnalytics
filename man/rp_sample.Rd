@@ -24,7 +24,8 @@
 \details{
   The 'sample' method to generate random portfolios is
   based on an idea pioneerd by Pat Burns. This is the most
-  flexible method and can generate portfolios to satisfy
-  leverage, box, group, and position limit constraints.
+  flexible method, but also the slowest, and can generate
+  portfolios to satisfy leverage, box, group, and position
+  limit constraints.
 }
 

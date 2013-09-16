@@ -43,14 +43,15 @@
   \item{ylim}{set the limit on coordinates for the y-axis}
 }
 \description{
-  scatter and weights chart for GenSA portfolio
+  Scatter and weights chart for GenSA portfolio
   optimizations run with trace=TRUE
 }
 \details{
   \code{return.col} must be the name of a function used to
-  compute the return metric on the random portfolio weights
-  \code{risk.col} must be the name of a function used to
-  compute the risk metric on the random portfolio weights
+  compute the return metric on the random portfolio
+  weights. \code{risk.col} must be the name of a function
+  used to compute the risk metric on the random portfolio
+  weights.
 }
 \author{
   Ross Bennett

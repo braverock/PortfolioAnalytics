@@ -12,10 +12,7 @@
 
 #' constructor for class constraint
 #' 
-#' This function is the constructior for the constraint object stored in the 
-#' \code{\link{portfolio.spec}} object.
-#' 
-#' See main documentation in \code{\link{add.constraint}}
+#' This function is the constructor for the \code{v1_constraint} object for backwards compatibility.
 #' 
 #' @param assets number of assets, or optionally a named vector of assets specifying initial weights
 #' @param ... any other passthru parameters
@@ -159,6 +156,9 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
 
 
 #' constructor for v2 constraint specification
+#' 
+#' See main documentation entry in \code{\link{add.constraint}}.
+#' 
 #' @param type character type of the constraint to add or update
 #' @param enabled TRUE/FALSE to enabled the constraint
 #' @param \dots any other passthru parameters
@@ -194,7 +194,7 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' \item{\code{group}}{ specify the sum of weights within groups and the number of assets with non-zero weights in groups, see \code{\link{group_constraint}} }
 #' \item{\code{turnover}}{ Specify a constraint for target turnover. Turnover is calculated from a set of initial weights, see \code{\link{turnover_constraint}} }
 #' \item{\code{diversification}}{ target diversification of a set of weights, see \code{\link{diversification_constraint}} }
-#' \item{\code{position_limit}}{ Specify the number of non-zero positions, see \code{\link{position_limit_constraint}} }
+#' \item{\code{position_limit}}{ Specify the number of non-zero, long, and/or short positions, see \code{\link{position_limit_constraint}} }
 #' \item{\code{return}}{ Specify the target mean return, see \code{\link{return_constraint}}}
 #' \item{\code{factor_exposure}}{ Specify risk factor exposures, see \code{\link{factor_exposure_constraint}}}
 #' }
@@ -366,7 +366,7 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
 #' constructor for box_constraint.
 #' 
 #' Box constraints specify the upper and lower bounds on the weights of the assets.
-#' This function is called by add.constraint when type="box" is specified. see \code{\link{add.constraint}}
+#' This function is called by add.constraint when type="box" is specified. See \code{\link{add.constraint}}.
 #'
 #' @param type character type of the constraint
 #' @param assets number of assets, or optionally a named vector of assets specifying initial weights
@@ -377,6 +377,7 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box constraints
+#' @return an object of class 'box_constraint'
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @examples
@@ -491,7 +492,7 @@ box_constraint <- function(type="box", assets, min, max, min_mult, max_mult, ena
 #'
 #' @param type character type of the constraint
 #' @param assets number of assets, or optionally a named vector of assets specifying initial weights
-#' @param groups vector specifying the groups of the assets
+#' @param groups list of vectors specifying the groups of the assets
 #' @param group_labels character vector to label the groups (e.g. size, asset class, style, etc.)
 #' @param group_min numeric or vector specifying minimum weight group constraints
 #' @param group_max numeric or vector specifying minimum weight group constraints
@@ -499,6 +500,7 @@ box_constraint <- function(type="box", assets, min, max, min_mult, max_mult, ena
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify group constraints
+#' @return an object of class 'group_constraint'
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @examples
@@ -596,7 +598,7 @@ group_constraint <- function(type="group", assets, groups, group_labels=NULL, gr
 
 #' constructor for weight_sum_constraint
 #' 
-#' THe constraint specifies the upper and lower bound that the weights sum to.
+#' The constraint specifies the upper and lower bound on the sum of the weights.
 #' This function is called by add.constraint when "weight_sum", "leverage", "full_investment", "dollar_neutral", or "active" is specified as the type. see \code{\link{add.constraint}}
 #' 
 #' Special cases for the weight_sum constraint are "full_investment" and "dollar_nuetral" or "active"
@@ -610,6 +612,7 @@ group_constraint <- function(type="group", assets, groups, group_labels=NULL, gr
 #' @param max_sum maximum sum of all asset weights, default 1.01
 #' @param enabled TRUE/FALSE
 #' @param \dots any other passthru parameters to specify weight_sum constraints
+#' @return an object of class 'weight_sum_constraint'
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @examples
@@ -663,20 +666,19 @@ is.constraint <- function( x ) {
 #'  When the v1_constraint object is instantiated via constraint, the arguments
 #'  min_sum, max_sum, min, and max are either specified by the user or default
 #'  values are assigned. These are required by other functions such as
-#'  optimize.portfolio and constrained . This function will check that these 
-#'  variables are in the portfolio object in the constraints list. We will 
-#'  default to min_sum=1 and max_sum=1 if leverage constraints are not specified.
-#'  We will default to min=-Inf and max=Inf if box constraints are not specified.
+#'  \code{optimize.portfolio} and \code{constrained_objective} . This function 
+#'  will check that these variables are in the portfolio object in the 
+#'  constraints list. We will default to \code{min_sum=1} and \code{max_sum=1}
+#'  if leverage constraints are not specified. We will default to \code{min=-Inf}
+#'  and \code{max=Inf} if box constraints are not specified.
 #'  This function is used at the beginning of optimize.portfolio and other 
-#'  functions to extract the constraints from the portfolio object. Uses the 
-#'  same naming as the v1_constraint object which may be useful when passed 
-#'  to other functions.
+#'  functions to extract the constraints from the portfolio object. We Use the 
+#'  same naming as the v1_constraint object.
 #'  
 #'  @param portfolio an object of class 'portfolio'
 #'  @return an object of class 'constraint' which is a flattened list of enabled constraints
 #'  @author Ross Bennett
 #'  @seealso \code{\link{portfolio.spec}}
-#'  @export
 get_constraints <- function(portfolio){
   if(!is.portfolio(portfolio)) stop("portfolio passed in is not of class portfolio")
   
@@ -759,7 +761,7 @@ get_constraints <- function(portfolio){
 #' This function is called by add.constraint when type="turnover" is specified, see \code{\link{add.constraint}}.
 #' Turnover is calculated from a set of initial weights.
 #' 
-#' Note that with the RO solvers, turnover constraint is currently only 
+#' Note that with the ROI solvers, turnover constraint is currently only 
 #' supported for the global minimum variance and quadratic utility problems 
 #' with ROI quadprog plugin.
 #' 
@@ -768,6 +770,7 @@ get_constraints <- function(portfolio){
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @return an object of class 'turnover_constraint'
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @examples
@@ -793,7 +796,8 @@ turnover_constraint <- function(type="turnover", turnover_target, enabled=TRUE, 
 #' @param div_target diversification target value
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
-#' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @param \dots any other passthru parameters to specify diversification constraint
+#' an object of class 'diversification_constraint'
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @examples
@@ -820,6 +824,7 @@ diversification_constraint <- function(type="diversification", div_target=NULL, 
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters
+#' @return an object of class 'return_constraint'
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @examples
@@ -850,6 +855,7 @@ return_constraint <- function(type="return", return_target, enabled=TRUE, messag
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify position limit constraints
+#' @return an object of class 'position_limit_constraint'
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @examples
@@ -910,7 +916,7 @@ position_limit_constraint <- function(type="position_limit", assets, max_pos=NUL
 #' Constructor for factor exposure constraint
 #' 
 #' The factor exposure constraint sets upper and lower bounds on exposures to risk factors.
-#' This function is called by add.constraint when type="factor_exposure" is specified. see \code{\link{add.constraint}}
+#' This function is called by add.constraint when type="factor_exposure" is specified, see \code{\link{add.constraint}}
 #' 
 #' \code{B} can be either a vector or matrix of risk factor exposures (i.e. betas).
 #' If \code{B} is a vector, the length of \code{B} must be equal to the number of 
@@ -932,6 +938,7 @@ position_limit_constraint <- function(type="position_limit", assets, max_pos=NUL
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify risk factor exposure constraints
+#' @return an object of class 'factor_exposure_constraint'
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @export
@@ -988,6 +995,7 @@ factor_exposure_constraint <- function(type="factor_exposure", assets, B, lower,
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box and/or group constraints
+#' @return an object of class 'transaction_cost_constraint'
 #' @author Ross Bennett
 #' @seealso \code{\link{add.constraint}}
 #' @examples
@@ -1060,10 +1068,12 @@ update.constraint <- function(object, ...){
 
 #' Insert a list of constraints into the constraints slot of a portfolio object
 #' 
+#' This is a helper function primarily for backwards compatibility to insert
+#' constraints from a 'v1_constraint' object into the v2 'portfolio' object.
+#' 
 #' @param portfolio object of class 'portfolio'
 #' @param constraints list of constraint objects
 #' @author Ross Bennett
-#' @export
 insert_constraints <- function(portfolio, constraints){
   # Check portfolio object
   if (is.null(portfolio) | !is.portfolio(portfolio)){

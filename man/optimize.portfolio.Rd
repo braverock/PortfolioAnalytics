@@ -127,9 +127,10 @@
   supported \R optimization solver.
 }
 \details{
-  This function currently supports DEoptim and random
-  portfolios as back ends. Additional back end
-  contributions for Rmetrics, ghyp, etc. would be welcome.
+  This function currently supports DEoptim, random
+  portfolios, pso, GenSA, and ROI as back ends. Additional
+  back end contributions for Rmetrics, ghyp, etc. would be
+  welcome.
 
   When using random portfolios, search_size is precisely
   that, how many portfolios to test.  You need to make sure
@@ -144,10 +145,10 @@
 
   NP, the number of members in each population, is set to
   cap at 2000 in DEoptim, and by default is the number of
-  parameters (assets/weights) *10.
+  parameters (assets/weights) * 10.
 
   itermax, if not passed in dots, defaults to the number of
-  parameters (assets/weights) *50.
+  parameters (assets/weights) * 50.
 
   When using GenSA and want to set \code{verbose=TRUE},
   instead use \code{trace}.
@@ -156,49 +157,31 @@
   optimization problems: \itemize{ \item{Maxmimize
   portfolio return subject leverage, box, group, position
   limit, target mean return, and/or factor exposure
-  constraints on weights} \item{Minimize portfolio variance
-  subject to leverage, box, group, and/or factor exposure
-  constraints (otherwise known as global minimum variance
-  portfolio)} \item{Minimize portfolio variance subject to
-  leverage, box, group, and/or factor exposure constraints
-  and a desired portfolio return} \item{Maximize quadratic
-  utility subject to leverage, box, group, target mean
-  return, and/or factor exposure constraints and risk
+  constraints on weights.} \item{Minimize portfolio
+  variance subject to leverage, box, group, turnover,
+  and/or factor exposure constraints (otherwise known as
+  global minimum variance portfolio).} \item{Minimize
+  portfolio variance subject to leverage, box, group,
+  and/or factor exposure constraints and a desired
+  portfolio return.} \item{Maximize quadratic utility
+  subject to leverage, box, group, target mean return,
+  turnover, and/or factor exposure constraints and risk
   aversion parameter. (The risk aversion parameter is
   passed into \code{optimize.portfolio} as an added
-  argument to the \code{portfolio} object)} \item{Mean CVaR
-  optimization subject to leverage, box, group, position
-  limit, target mean return, and/or factor exposure
-  constraints and target portfolio return} } Because these
-  convex optimization problem are standardized, there is no
-  need for a penalty term. The \code{multiplier} argument
-  in \code{\link{add.objective}} passed into the complete
-  constraint object are ingnored by the ROI solver.
+  argument to the \code{portfolio} object).} \item{Mean
+  CVaR optimization subject to leverage, box, group,
+  position limit, target mean return, and/or factor
+  exposure constraints and target portfolio return.} }
+  These problems also support a weight_concentration
+  objective where concentration of weights as measured by
+  HHI is added as a penalty term to the quadratic
+  objective.
 
-  ROI also can solve quadratic and linear problems with
-  group constraints by adding a \code{groups} argument into
-  the constraints object. This argument is a vector with
-  each of its elements the number of assets per group. The
-  group constraints, \code{cLO} and \code{cUP}, are also
-  added to the constraints object.
-
-  For example, if you have 9 assets, and would like to
-  require that the the first 3 assets are in one group, the
-  second 3 are in another, and the third are in another,
-  then you add the grouping by \code{constraints$groups <-
-  list(c(1,2,3), c(4,5,6), c(7,8,9))}.
-
-  To apply the constraints that the first group must
-  compose of at least 20% of the weight, the second group
-  15%, and the third group 10%, and that now signle group
-  should compose of more that 50% of the weight, then you
-  would add the lower group constraint as
-  \code{constraints$cLO <- c(0.20, 0.15, 0.10)} and the
-  upper constraints as \code{constraints$cUP <-
-  rep(0.5,3)}. These group constraint can be set for all
-  five convex optimization problems listed above, as well
-  as for the global stochastic solvers DEoptim, random,
-  pso, and GenSA.
+  Because these convex optimization problem are
+  standardized, there is no need for a penalty term. The
+  \code{multiplier} argument in \code{\link{add.objective}}
+  passed into the complete constraint object are ingnored
+  by the ROI solver.
 
   If you would like to interface with
   \code{optimize.portfolio} using matrix formulations, then

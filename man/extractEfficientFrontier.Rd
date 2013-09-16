@@ -3,7 +3,7 @@
 \title{Extract the efficient frontier data points}
 \usage{
   extractEfficientFrontier(object, match.col = "ES",
-    n.portfolios = 25)
+    n.portfolios = 25, risk_aversion = NULL)
 }
 \arguments{
   \item{object}{an optimal portfolio object created by
@@ -17,6 +17,12 @@
 
   \item{n.portfolios}{number of portfolios to use to plot
   the efficient frontier}
+
+  \item{risk_aversion}{vector of risk_aversion values to
+  construct the efficient frontier. \code{n.portfolios} is
+  ignored if \code{risk_aversion} is specified and the
+  number of points along the efficient frontier is equal to
+  the length of \code{risk_aversion}.}
 }
 \value{
   an \code{efficient.frontier} object with weights and

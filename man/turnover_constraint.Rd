@@ -18,6 +18,9 @@
   \item{\dots}{any other passthru parameters to specify box
   and/or group constraints}
 }
+\value{
+  an object of class 'turnover_constraint'
+}
 \description{
   The turnover constraint specifies a target turnover
   value. This function is called by add.constraint when
@@ -26,7 +29,7 @@
   a set of initial weights.
 }
 \details{
-  Note that with the RO solvers, turnover constraint is
+  Note that with the ROI solvers, turnover constraint is
   currently only supported for the global minimum variance
   and quadratic utility problems with ROI quadprog plugin.
 }

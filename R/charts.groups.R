@@ -1,25 +1,25 @@
 #' Chart weights by group or category
 #' 
-#' @param object object of class \code{optimize.portfolio}
-#' @param ... passthrough parameters to \code{\link{plot}}
+#' @param object object of class \code{optimize.portfolio}.
+#' @param \dots passthrough parameters to \code{\link{plot}}.
 #' @param grouping
 #' \itemize{
-#'   \item{groups: }{group the weights group constraints}
-#'   \item{category_labels: }{group the weights by category_labels in portfolio object}
+#'   \item{groups: }{group the weights by group constraints.}
+#'   \item{category_labels: }{group the weights by category_labels in the \code{portfolio} object.}
 #' }
-#' @param plot.type "line" or "barplot"
-#' @param main an overall title for the plot: see \code{\link{title}}
+#' @param plot.type "line" or "barplot".
+#' @param main an overall title for the plot: see \code{\link{title}}.
 #' @param las numeric in \{0,1,2,3\}; the style of axis labels
 #'       \describe{
-#'         \item{0:}{always parallel to the axis [\emph{default}],}
+#'         \item{0:}{always parallel to the axis,}
 #'         \item{1:}{always horizontal,}
 #'         \item{2:}{always perpendicular to the axis,}
-#'         \item{3:}{always vertical.}
+#'         \item{3:}{always vertical[\emph{default}].}
 #'       }
-#' @param xlab a title for the x axis: see \code{\link{title}}
-#' @param cex.lab The magnification to be used for x and y labels relative to the current setting of \code{cex}
-#' @param element.color color for the default border and axis
-#' @param cex.axis The magnification to be used for x and y axis relative to the current setting of \code{cex}
+#' @param xlab a title for the x axis: see \code{\link{title}}.
+#' @param cex.lab the magnification to be used for x and y labels relative to the current setting of \code{cex}.
+#' @param element.color color for the default border and axis.
+#' @param cex.axis the magnification to be used for x and y axis relative to the current setting of \code{cex}.
 #' @author Ross Bennett
 #' @export
 chart.GroupWeights <- function(object,  ..., grouping=c("groups", "category"), plot.type="line", main="Group Weights", las=3, xlab=NULL, cex.lab=0.8, element.color="darkgray", cex.axis=0.8){
@@ -95,7 +95,7 @@ chart.GroupWeights <- function(object,  ..., grouping=c("groups", "category"), p
 #' @param ... passthrough parameters to \code{\link{plot}}
 #' @param grouping
 #' \itemize{
-#'   \item{groups: }{group the weights group constraints}
+#'   \item{groups: }{group the weights by group constraints}
 #'   \item{category_labels: }{group the weights by category_labels in portfolio object}
 #' }
 #' @param main an overall title for the plot: see \code{\link{title}}

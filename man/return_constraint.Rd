@@ -17,6 +17,9 @@
 
   \item{\dots}{any other passthru parameters}
 }
+\value{
+  an object of class 'return_constraint'
+}
 \description{
   The return constraint specifes a target mean return
   value. This function is called by add.constraint when

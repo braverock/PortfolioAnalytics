@@ -294,15 +294,15 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
 
 #' calculate a numeric return value for a portfolio based on a set of constraints and objectives
 #' 
-#' function to calculate a numeric return value for a portfolio based on a set of constraints,
-#' we'll try to make as few assumptions as possible, and only run objectives that are required by the user
+#' Function to calculate a numeric return value for a portfolio based on a set of constraints and objectives.
+#' We'll try to make as few assumptions as possible and only run objectives that are enabled by the user.
 #' 
 #' If the user has passed in either min_sum or max_sum constraints for the portfolio, or both, 
-#' and are using a numerical optimization method like DEoptim, and normalize=TRUE, the default,
+#' and are using a numerical optimization method like DEoptim, and normalize=TRUE,
 #' we'll normalize the weights passed in to whichever boundary condition has been violated.  
 #' If using random portfolios, all the portfolios generated will meet the constraints by construction.
-#' NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim
-#' might violate your constraints, so you'd need to renormalize them after optimizing
+#' NOTE: this means that the weights produced by a numeric optimization algorithm like DEoptim, pso, or GenSA
+#' might violate constraints, and will need to be renormalized after optimizing.
 #' We apply the same normalization in \code{\link{optimize.portfolio}} so that the weights you see have been 
 #' normalized to min_sum if the generated portfolio is smaller than min_sum or max_sum if the 
 #' generated portfolio is larger than max_sum.  
@@ -321,7 +321,7 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
 #'  
 #' When you are optimizing a return objective, you must specify a negative multiplier 
 #' for the return objective so that the function will maximize return.  If you specify a target return,
-#' any return less than your target will be penalized.  If you do not specify a target return, 
+#' any return that deviates from your target will be penalized.  If you do not specify a target return, 
 #' you may need to specify a negative VTR (value to reach) , or the function will not converge.  
 #' Try the maximum expected return times the multiplier (e.g. -1 or -10).  
 #' Adding a return objective defaults the multiplier to -1.
@@ -332,14 +332,14 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
 #' may be passed in via \dots
 #' 
 #'    
-#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param w a vector of weights to test
-#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization, see \code{\link{constraint}}
-#' @param \dots any other passthru parameters 
-#' @param trace TRUE/FALSE whether to include debugging and additional detail in the output list
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns.
+#' @param w a vector of weights to test.
+#' @param portfolio an object of class \code{portfolio} specifying the constraints and objectives for the optimization, see \code{\link{portfolio}}.
+#' @param \dots any other passthru parameters.
+#' @param trace TRUE/FALSE whether to include debugging and additional detail in the output list. The default is FALSE. Several charting functions require that \code{trace=TRUE}.
 #' @param normalize TRUE/FALSE whether to normalize results to min/max sum (TRUE), or let the optimizer penalize portfolios that do not conform (FALSE)
-#' @param storage TRUE/FALSE default TRUE for DEoptim with trace, otherwise FALSE. not typically user-called
-#' @param constraints a v1_constraint object for \code{constrained_objective_v1}
+#' @param storage TRUE/FALSE default TRUE for DEoptim with trace, otherwise FALSE. not typically user-called.
+#' @param constraints a v1_constraint object for backwards compatibility with \code{constrained_objective_v1}.
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
 #' @aliases constrained_objective constrained_objective_v1

@@ -28,11 +28,14 @@
   \item{\dots}{any other passthru parameters to specify
   risk factor exposure constraints}
 }
+\value{
+  an object of class 'factor_exposure_constraint'
+}
 \description{
   The factor exposure constraint sets upper and lower
   bounds on exposures to risk factors. This function is
   called by add.constraint when type="factor_exposure" is
-  specified. see \code{\link{add.constraint}}
+  specified, see \code{\link{add.constraint}}
 }
 \details{
   \code{B} can be either a vector or matrix of risk factor

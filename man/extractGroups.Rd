@@ -20,7 +20,9 @@
 \description{
   This function extracts the weights by group and/or
   category from an object of class
-  \code{optimize.portfolio}
+  \code{optimize.portfolio}. Group constraints or
+  category_labels must be specified for this to return
+  group constraints.
 }
 \author{
   Ross Bennett

@@ -9,7 +9,7 @@
 }
 \description{
   Diversification is defined as 1 minus the sum of the
-  squared weights diversification <- 1 - sum(w^2)
+  squared weights \deqn{diversification = 1 - sum(w^2)}
 }
 \author{
   Ross Bennett

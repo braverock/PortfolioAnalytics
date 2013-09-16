@@ -43,7 +43,7 @@
   \frac{log(U_{i}^{q}}{\sum_{k=1}^{N}log(U_{k}^{q}}}
 
   \code{fev} controls the Face-Edge-Vertex (FEV) biasing
-  where \deqn{q=2^fev}. As \code{q} approaches infinity,
+  where \deqn{q=2^{fev}} As \code{q} approaches infinity,
   the set of weights will be concentrated in a single
   asset. To sample the interior and exterior, \code{fev}
   can be passed in as a vector. The number of portfolios,

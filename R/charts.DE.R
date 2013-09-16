@@ -310,7 +310,7 @@ charts.DE <- function(DE, risk.col, return.col, chart.assets, neighbors=NULL, ma
 
 #' plot method for optimize.portfolio.DEoptim output
 #' 
-#' scatter and weights chart for DEoptim portfolio optimizations run with trace=TRUE
+#' Scatter and weights chart for DEoptim portfolio optimizations run with trace=TRUE
 #' 
 #' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights
 #' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights

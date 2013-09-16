@@ -6,11 +6,15 @@
     ...)
 }
 \arguments{
-  \item{portfolio}{}
+  \item{portfolio}{an object of class 'portfolio'
+  specifying the constraints for the optimization, see
+  \code{\link{portfolio.spec}}}
 
-  \item{permutations}{}
+  \item{permutations}{integer: number of unique constrained
+  random portfolios to generate}
 
-  \item{normalize}{TRUE/FALSE}
+  \item{normalize}{TRUE/FALSE to normalize the weghts to
+  satisfy min_sum or max_sum}
 
   \item{\dots}{any passthru parameters. Currently ignored}
 }

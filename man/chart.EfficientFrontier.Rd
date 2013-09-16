@@ -32,8 +32,7 @@
     pch.assets = 21, cex.assets = 0.8)
 }
 \arguments{
-  \item{object}{object of class optimize.portfolio.ROI to
-  chart}
+  \item{object}{object to chart.}
 
   \item{\dots}{passthru parameters to \code{\link{plot}}}
 
@@ -44,15 +43,15 @@
   \code{\link{optimize.portfolio}}.}
 
   \item{n.portfolios}{number of portfolios to use to plot
-  the efficient frontier}
+  the efficient frontier.}
 
   \item{xlim}{set the x-axis limit, same as in
-  \code{\link{plot}}}
+  \code{\link{plot}}.}
 
   \item{ylim}{set the y-axis limit, same as in
-  \code{\link{plot}}}
+  \code{\link{plot}}.}
 
-  \item{cex.axis}{A numerical value giving the amount by
+  \item{cex.axis}{numerical value giving the amount by
   which the axis should be magnified relative to the
   default.}
 
@@ -60,38 +59,38 @@
   less-important chart elements, such as the box lines,
   axis lines, etc.}
 
-  \item{main}{a main title for the plot}
+  \item{main}{a main title for the plot.}
 
-  \item{RAR.text}{Risk Adjusted Return ratio text to plot
-  in the legend}
+  \item{RAR.text}{string name for risk adjusted return text
+  to plot in the legend.}
 
   \item{rf}{risk free rate. If \code{rf} is not null, the
   maximum Sharpe Ratio or modified Sharpe Ratio tangency
-  portfolio will be plotted}
+  portfolio will be plotted.}
 
-  \item{tangent.line}{TRUE/FALSE to plot the tangent line}
+  \item{tangent.line}{TRUE/FALSE to plot the tangent line.}
 
-  \item{cex.legend}{A numerical value giving the amount by
+  \item{cex.legend}{numerical value giving the amount by
   which the legend should be magnified relative to the
   default.}
 
-  \item{chart.assets}{TRUE/FALSE to include the assets}
+  \item{chart.assets}{TRUE/FALSE to include the assets.}
 
   \item{labels.assets}{TRUE/FALSE to include the asset
   names in the plot. \code{chart.assets} must be
-  \code{TRUE} to plot asset names}
+  \code{TRUE} to plot asset names.}
 
   \item{pch.assets}{plotting character of the assets, same
-  as in \code{\link{plot}}}
+  as in \code{\link{plot}}.}
 
-  \item{cex.assets}{A numerical value giving the amount by
+  \item{cex.assets}{numerical value giving the amount by
   which the asset points and labels should be magnified
   relative to the default.}
 }
 \description{
   Chart the efficient frontier and risk-return scatter of
-  the assets for optimize.portfolio. or efficient.frontier
-  objects
+  the assets for \code{optimize.portfolio} or
+  \code{efficient.frontier} objects
 }
 \details{
   For objects created by optimize.portfolio with 'DEoptim',
@@ -103,7 +102,7 @@
 
   For objects created by optimize.portfolio with 'ROI'
   specified as the optimize_method: \itemize{ \item The
-  mean-StdDev or mean-etl efficient frontier can be plotted
+  mean-StdDev or mean-ETL efficient frontier can be plotted
   for optimal portfolio objects created by
   \code{optimize.portfolio}.
 
@@ -111,7 +110,7 @@
   efficient frontier is plotted.
 
   \item If \code{match.col="ETL"} (also "ES" or "CVaR"),
-  the mean-etl efficient frontier is plotted. }
+  the mean-ETL efficient frontier is plotted. }
 
   Note that \code{trace=TRUE} must be specified in
   \code{\link{optimize.portfolio}}

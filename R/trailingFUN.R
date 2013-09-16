@@ -13,7 +13,7 @@
 #' apply a function over a configurable trailing period
 #' 
 #' this function is primarily designed for use with portfolio functions passing 
-#' 'x' or 'R' and weights, but may be usable for other things as well, see Exmample for a vector example.
+#' 'x' or 'R' and weights, but may be usable for other things as well, see Example for a vector example.
 #' 
 #' called with e.g.
 #' 

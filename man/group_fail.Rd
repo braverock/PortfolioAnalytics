@@ -7,7 +7,8 @@
 \arguments{
   \item{weights}{weights vector to test}
 
-  \item{groups}{vector specifying the groups of the assets}
+  \item{groups}{list of vectors specifying the groups of
+  the assets}
 
   \item{cLO}{numeric or vector specifying minimum weight
   group constraints}

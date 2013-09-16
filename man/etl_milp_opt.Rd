@@ -1,6 +1,6 @@
 \name{etl_milp_opt}
 \alias{etl_milp_opt}
-\title{Optimization function to solve minimum variance or maximum quadratic utility problems}
+\title{Optimization function to solve minimum ETL problems}
 \usage{
   etl_milp_opt(R, constraints, moments, target, alpha)
 }
@@ -19,7 +19,8 @@
 }
 \description{
   This function is called by optimize.portfolio to solve
-  minimum variance or maximum quadratic utility problems
+  minimum ETL problems via mixed integer linear
+  programming.
 }
 \author{
   Ross Bennett

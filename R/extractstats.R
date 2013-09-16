@@ -322,7 +322,8 @@ extractObjectiveMeasures.optimize.portfolio <- function(object){
 #' Extract the group and/or category weights
 #' 
 #' This function extracts the weights by group and/or category from an object
-#' of class \code{optimize.portfolio}
+#' of class \code{optimize.portfolio}. Group constraints or category_labels must
+#' be specified for this to return group constraints.
 #' 
 #' @param object object of class \code{optimize.portfolio}
 #' @param ... passthrough parameters. Not currently used

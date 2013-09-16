@@ -55,7 +55,7 @@
   a set of weights, see
   \code{\link{diversification_constraint}} }
   \item{\code{position_limit}}{ Specify the number of
-  non-zero positions, see
+  non-zero, long, and/or short positions, see
   \code{\link{position_limit_constraint}} }
   \item{\code{return}}{ Specify the target mean return, see
   \code{\link{return_constraint}}}

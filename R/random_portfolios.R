@@ -45,12 +45,18 @@ generatesequence <- function (min=.01, max=1, by=min/max, rounding=3 )
 }
 
 #randomize_portfolio <- function (seed, weight_seq, min_mult=-Inf,max_mult=Inf, min_sum=.99, max_sum=1.01, max_permutations=100,rounding=3)
-#' generate random permutations of a portfolio seed meeting your constraints on the weights of each asset
+#' Random portfolio sample method
+#' 
+#' This function generates random permutations of a portfolio seed meeting 
+#' leverage and box constraints. The final step is to run \code{\link{fn_map}}
+#' on the random portfolio weights to transform the weights so they satisfy
+#' other constraints such as group or position limit constraints. This is the 
+#' 'sample' method for random portfolios and is based on an idea by Pat Burns.
 #' 
 #' @param rpconstraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
 #' @param rounding integer how many decimals should we round to
-#' @return named weighting vector
+#' @return named weights vector
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
 #' @export
 randomize_portfolio_v1 <- function (rpconstraints, max_permutations=200, rounding=3)
@@ -322,9 +328,9 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #' Random portfolios can be generate using one of three methods.
 #' \itemize{
 #'   \item{sample: }{The 'sample' method to generate random portfolios is based
-#'   on an idea pioneerd by Pat Burns. This is the most flexible method and can
-#'   generate portfolios to satisfy leverage, box, group, and position limit
-#'   constraints.}
+#'   on an idea pioneerd by Pat Burns. This is the most flexible method, but 
+#'   also the slowest, and can generate portfolios to satisfy leverage, box, 
+#'   group, and position limit constraints.}
 #'   \item{simplex: }{The 'simplex' method to generate random portfolios is 
 #'   based on a paper by W. T. Shaw. The simplex method is useful to generate 
 #'   random portfolios with the full investment constraint, where the sum of the 
@@ -348,11 +354,15 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #' @param portfolio an object of type "portfolio" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
 #' @param \dots any other passthru parameters
-#' @param rp_method method to generate random portfolios
+#' @param rp_method method to generate random portfolios. Currently "sample", "simplex", or "grid". See Details.
 #' @param eliminate TRUE/FALSE, eliminate portfolios that do not satisfy constraints
 #' @return matrix of random portfolio weights
-#' @seealso \code{\link{portfolio.spec}}, \code{\link{objective}}, \code{\link{randomize_portfolio_v2}}
-#' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
+#' @seealso \code{\link{portfolio.spec}}, 
+#' \code{\link{objective}}, 
+#' \code{\link{rp_sample}},
+#' \code{\link{rp_simplex}},
+#' \code{\link{rp_grid}}
+#' @author Peter Carl, Brian G. Peterson, Ross Bennett (based on an idea by Pat Burns)
 #' @aliases random_portfolios
 #' @rdname random_portfolios
 #' @export
@@ -393,9 +403,9 @@ random_portfolios <- random_portfolios_v2
 #' 
 #' @details
 #' The 'sample' method to generate random portfolios is based
-#' on an idea pioneerd by Pat Burns. This is the most flexible method and can
-#' generate portfolios to satisfy leverage, box, group, and position limit
-#' constraints.
+#' on an idea pioneerd by Pat Burns. This is the most flexible method, but also
+#' the slowest, and can generate portfolios to satisfy leverage, box, group, 
+#' and position limit constraints.
 #' @param portfolio an object of type "portfolio" specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
 #' @param \dots any other passthru parameters
@@ -444,8 +454,8 @@ rp_sample <- function(portfolio, permutations, ...){
 #' box constraints.
 #' \deqn{w_{i} = min_{i} + (1 - \sum_{j=1}^{N} min_{j}) \frac{log(U_{i}^{q}}{\sum_{k=1}^{N}log(U_{k}^{q}}}
 #' 
-#' \code{fev} controls the Face-Edge-Vertex (FEV) biasing where \deqn{q=2^fev}. As 
-#' \code{q} approaches infinity, the set of weights will be concentrated in a 
+#' \code{fev} controls the Face-Edge-Vertex (FEV) biasing where \deqn{q=2^{fev}}
+#' As \code{q} approaches infinity, the set of weights will be concentrated in a 
 #' single asset. To sample the interior and exterior, \code{fev} can be passed 
 #' in as a vector. The number of portfolios, \code{permutations}, and the 
 #' length of \code{fev} affect how the random portfolios are generated. For 
@@ -505,9 +515,9 @@ rp_simplex <- function(portfolio, permutations, fev=0:5, ...){
 #' normalized. Normalization may cause the box constraints to be violated and
 #' will be penalized in \code{constrained_objective}.
 #' 
-#' @param portfolio
-#' @param permutations
-#' @param normalize TRUE/FALSE
+#' @param portfolio an object of class 'portfolio' specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
+#' @param permutations integer: number of unique constrained random portfolios to generate
+#' @param normalize TRUE/FALSE to normalize the weghts to satisfy min_sum or max_sum
 #' @param \dots any passthru parameters. Currently ignored
 #' @return matrix of random portfolio weights
 #' @export

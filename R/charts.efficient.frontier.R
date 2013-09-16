@@ -2,7 +2,7 @@
 #' Chart the efficient frontier and risk-return scatter
 #' 
 #' Chart the efficient frontier and risk-return scatter of the assets for 
-#' optimize.portfolio. or efficient.frontier objects
+#' \code{optimize.portfolio} or \code{efficient.frontier} objects
 #' 
 #' @details
 #' For objects created by optimize.portfolio with 'DEoptim', 'random', or 'pso'
@@ -16,12 +16,12 @@
 #' For objects created by optimize.portfolio with 'ROI' specified as the 
 #' optimize_method:
 #' \itemize{
-#'   \item The mean-StdDev or mean-etl efficient frontier can be plotted for optimal
+#'   \item The mean-StdDev or mean-ETL efficient frontier can be plotted for optimal
 #'   portfolio objects created by \code{optimize.portfolio}.
 #' 
 #'   \item If \code{match.col="StdDev"}, the mean-StdDev efficient frontier is plotted.
 #' 
-#'   \item If \code{match.col="ETL"} (also "ES" or "CVaR"), the mean-etl efficient frontier is plotted.
+#'   \item If \code{match.col="ETL"} (also "ES" or "CVaR"), the mean-ETL efficient frontier is plotted.
 #' }
 #' 
 #' Note that \code{trace=TRUE} must be specified in \code{\link{optimize.portfolio}}
@@ -33,27 +33,27 @@
 #' will be plotted using a risk free rate of 0. Set \code{rf=NULL} to omit 
 #' this from the plot. 
 #' 
-#' @param object object of class optimize.portfolio.ROI to chart
+#' @param object object to chart.
 #' @param \dots passthru parameters to \code{\link{plot}}
 #' @param match.col string name of column to use for risk (horizontal axis).
 #' \code{match.col} must match the name of an objective measure in the 
 #' \code{objective_measures} or \code{opt_values} slot in the object created 
 #' by \code{\link{optimize.portfolio}}.
-#' @param n.portfolios number of portfolios to use to plot the efficient frontier
-#' @param xlim set the x-axis limit, same as in \code{\link{plot}}
-#' @param ylim set the y-axis limit, same as in \code{\link{plot}}
-#' @param cex.axis A numerical value giving the amount by which the axis should be magnified relative to the default.
+#' @param n.portfolios number of portfolios to use to plot the efficient frontier.
+#' @param xlim set the x-axis limit, same as in \code{\link{plot}}.
+#' @param ylim set the y-axis limit, same as in \code{\link{plot}}.
+#' @param cex.axis numerical value giving the amount by which the axis should be magnified relative to the default.
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
-#' @param main a main title for the plot
-#' @param RAR.text Risk Adjusted Return ratio text to plot in the legend
-#' @param rf risk free rate. If \code{rf} is not null, the maximum Sharpe Ratio or modified Sharpe Ratio tangency portfolio will be plotted
-#' @param tangent.line TRUE/FALSE to plot the tangent line
-#' @param cex.legend A numerical value giving the amount by which the legend should be magnified relative to the default.
-#' @param chart.assets TRUE/FALSE to include the assets
+#' @param main a main title for the plot.
+#' @param RAR.text string name for risk adjusted return text to plot in the legend.
+#' @param rf risk free rate. If \code{rf} is not null, the maximum Sharpe Ratio or modified Sharpe Ratio tangency portfolio will be plotted.
+#' @param tangent.line TRUE/FALSE to plot the tangent line.
+#' @param cex.legend numerical value giving the amount by which the legend should be magnified relative to the default.
+#' @param chart.assets TRUE/FALSE to include the assets.
 #' @param labels.assets TRUE/FALSE to include the asset names in the plot. 
-#' \code{chart.assets} must be \code{TRUE} to plot asset names
-#' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}
-#' @param cex.assets A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
+#' \code{chart.assets} must be \code{TRUE} to plot asset names.
+#' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}.
+#' @param cex.assets numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
 #' @author Ross Bennett
 #' @rdname chart.EfficientFrontier
 #' @export
@@ -270,21 +270,21 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, ..., match.col="E
 
 #' Chart weights along an efficient frontier
 #' 
-#' This function produces a stacked barplot of weights along the efficient frontier.
+#' This function produces a stacked barplot of weights along an efficient frontier.
 #' 
-#' @param object object of class \code{efficient.frontier} or \code{optimize.portfolio}
+#' @param object object of class \code{efficient.frontier} or \code{optimize.portfolio}.
 #' @param \dots passthru parameters to \code{barplot}.
-#' @param colorset color palette to use
-#' @param n.portfolios number of portfolios to extract along the efficient frontier
-#' @param by.groups TRUE/FALSE. If TRUE, the group weights are charted
+#' @param colorset color palette or vector of colors to use.
+#' @param n.portfolios number of portfolios to extract along the efficient frontier.
+#' @param by.groups TRUE/FALSE. If TRUE, the group weights are charted.
 #' @param match.col string name of column to use for risk (horizontal axis). Must match the name of an objective.
 #' @param main title used in the plot.
-#' @param cex.lab The magnification to be used for x-axis and y-axis labels relative to the current setting of 'cex'
-#' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}
-#' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}
-#' @param legend.labels character vector to use for the legend labels
+#' @param cex.lab the magnification to be used for x-axis and y-axis labels relative to the current setting of 'cex'.
+#' @param cex.axis the magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
+#' @param cex.legend the magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}.
+#' @param legend.labels character vector to use for the legend labels.
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
-#' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted
+#' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted.
 #' @author Ross Bennett
 #' @rdname chart.Weights.EF
 #' @export
@@ -515,7 +515,7 @@ chart.EfficientFrontier.efficient.frontier <- function(object, ..., match.col="E
 
 #' Plot multiple efficient frontiers
 #' 
-#' Overlay the efficient frontiers of multiple portfolio objects on a single plot
+#' Overlay the efficient frontiers of multiple portfolio objects on a single plot.
 #' 
 #' @param R an xts object of asset returns
 #' @param portfolio_list list of portfolio objects created by \code{\link{portfolio.spec}}
@@ -524,23 +524,23 @@ chart.EfficientFrontier.efficient.frontier <- function(object, ..., match.col="E
 #' This is only used for objects of class \code{optimize.portfolio}
 #' @param match.col string name of column to use for risk (horizontal axis).
 #' Must match the name of an objective.
-#' @param search_size passed to optimize.portfolio for type="DEoptim" or type="random"
+#' @param search_size passed to optimize.portfolio for type="DEoptim" or type="random".
 #' @param main title used in the plot.
-#' @param cex.axis The magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
+#' @param cex.axis the magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
-#' @param legend.loc location of the legend; NULL, "bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright", "right" and "center"
-#' @param legend.labels character vector to use for the legend labels
+#' @param legend.loc location of the legend; NULL, "bottomright", "bottom", "bottomleft", "left", "topleft", "top", "topright", "right" and "center".
+#' @param legend.labels character vector to use for the legend labels.
 #' @param cex.legend The magnification to be used for sizing the legend relative to the current setting of 'cex', similar to \code{\link{plot}}.
-#' @param xlim set the x-axis limit, same as in \code{\link{plot}}
-#' @param ylim set the y-axis limit, same as in \code{\link{plot}}
-#' @param ... passthrough parameters to \code{\link{plot}}
-#' @param chart.assets TRUE/FALSE to include the assets
-#' @param labels.assets TRUE/FALSE to include the asset names in the plot
-#' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}
+#' @param xlim set the x-axis limit, same as in \code{\link{plot}}.
+#' @param ylim set the y-axis limit, same as in \code{\link{plot}}.
+#' @param \dots passthrough parameters to \code{\link{plot}}.
+#' @param chart.assets TRUE/FALSE to include the assets.
+#' @param labels.assets TRUE/FALSE to include the asset names in the plot.
+#' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}.
 #' @param cex.assets A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
-#' @param col vector of colors with length equal to the number of portfolios in \code{portfolio_list}
-#' @param lty vector of line types with length equal to the number of portfolios in \code{portfolio_list}
-#' @param lwd vector of line widths with length equal to the number of portfolios in \code{portfolio_list}
+#' @param col vector of colors with length equal to the number of portfolios in \code{portfolio_list}.
+#' @param lty vector of line types with length equal to the number of portfolios in \code{portfolio_list}.
+#' @param lwd vector of line widths with length equal to the number of portfolios in \code{portfolio_list}.
 #' @author Ross Bennett
 #' @export
 chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios=25, match.col="ES", search_size=2000, main="Efficient Frontiers", cex.axis=0.8, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){

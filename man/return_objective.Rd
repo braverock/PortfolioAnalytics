@@ -21,6 +21,9 @@
 
   \item{\dots}{any other passthru parameters}
 }
+\value{
+  object of class 'return_objective'
+}
 \description{
   if target is null, we'll try to maximize the return
   metric

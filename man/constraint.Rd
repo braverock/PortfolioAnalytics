@@ -36,11 +36,8 @@
   \code{\link{generatesequence}}}
 }
 \description{
-  This function is the constructior for the constraint
-  object stored in the \code{\link{portfolio.spec}} object.
-}
-\details{
-  See main documentation in \code{\link{add.constraint}}
+  This function is the constructor for the
+  \code{v1_constraint} object for backwards compatibility.
 }
 \examples{
 exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, weight_seq=generatesequence())

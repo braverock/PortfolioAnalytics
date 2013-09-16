@@ -19,9 +19,12 @@
   \item{\dots}{any other passthru parameters to specify
   weight_sum constraints}
 }
+\value{
+  an object of class 'weight_sum_constraint'
+}
 \description{
-  THe constraint specifies the upper and lower bound that
-  the weights sum to. This function is called by
+  The constraint specifies the upper and lower bound on the
+  sum of the weights. This function is called by
   add.constraint when "weight_sum", "leverage",
   "full_investment", "dollar_neutral", or "active" is
   specified as the type. see \code{\link{add.constraint}}

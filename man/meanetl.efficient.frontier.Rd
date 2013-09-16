@@ -11,17 +11,17 @@
 
   \item{R}{an xts or matrix of asset returns}
 
-  \item{n.portfolios}{number of portfolios to plot along
-  the efficient frontier}
+  \item{n.portfolios}{number of portfolios to generate the
+  efficient frontier}
 }
 \value{
   a matrix of objective measure values and weights along
   the efficient frontier
 }
 \description{
-  This function generates the mean-etl efficient frontier
+  This function generates the mean-ETL efficient frontier
   of a portfolio specifying constraints and objectives. To
-  generate the mean-var efficient frontier, the portfolio
+  generate the mean-ETL efficient frontier, the portfolio
   must have two objectives 1) "mean" and 2) "ETL/ES/CVaR".
   If the only objective in the \code{portfolio} object is
   ETL/ES/CVaR, the we will add a mean objective.

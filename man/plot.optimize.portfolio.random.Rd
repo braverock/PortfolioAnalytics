@@ -32,14 +32,15 @@
   \code{\link{title}}}
 }
 \description{
-  scatter and weights chart for random portfolio
+  Scatter and weights chart for random portfolio
   optimizations run with trace=TRUE
 }
 \details{
   \code{return.col} must be the name of a function used to
-  compute the return metric on the random portfolio weights
-  \code{risk.col} must be the name of a function used to
-  compute the risk metric on the random portfolio weights
+  compute the return metric on the random portfolio
+  weights. \code{risk.col} must be the name of a function
+  used to compute the risk metric on the random portfolio
+  weights.
 
   \code{neighbors} may be specified in three ways. The
   first is as a single number of neighbors.  This will
