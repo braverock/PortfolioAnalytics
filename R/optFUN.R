@@ -561,6 +561,7 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   
   d <- rep(-moments$mean, 3)
   
+  stopifnot("package:corpcor" %in% search() || require("foreach",quietly = TRUE))
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
   if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
@@ -672,7 +673,8 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
   
   d <- rep(-moments$mean, 3)
   
-  qp.result <- try(solve.QP(Dmat=corpcor:::make.positive.definite(2*lambda*V), 
+  stopifnot("package:corpcor" %in% search() || require("foreach",quietly = TRUE))
+  qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
   if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
   
