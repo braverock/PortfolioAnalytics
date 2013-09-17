@@ -113,9 +113,9 @@ extractWeights(opt_maxret)
 @
 
 \subsection{Visualization}
-The chart of the optimal weights as well as the box constraints can be created with \code{chart.Weights.ROI}. The blue dots are the optimal weights and the gray triangles are the \code{min} and \code{max} of the box constraints.
+The chart of the optimal weights as well as the box constraints can be created with \code{chart.Weights}. The blue dots are the optimal weights and the gray triangles are the \code{min} and \code{max} of the box constraints.
 <<fig.align='center',fig.height=5, fig.width=5>>=
-chart.Weights.ROI(opt_maxret)
+chart.Weights(opt_maxret)
 @
 
 The optimal portfolio can be plotted in risk-return space along with other feasible portfolios. The return metric is defined in the \code{return.col} argument and the risk metric is defined in the \code{risk.col} argument. The scatter chart includes the optimal portfolio (blue dot) and other feasible portfolios (gray circles) to show the overall feasible space given the constraints. By default, if \code{rp} is not passed in, the feasible portfolios are generated with \code{random\_portfolios} to satisfy the constraints of the portfolio object.
