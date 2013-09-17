@@ -41,7 +41,7 @@ extractStats <- function (object, prefix=NULL, ...){
 #' @param rnames character vector of names to check for cleanup
 name.replace <- function(rnames){
     rnames<-gsub("objective_measures.",'',rnames)
-    matchvec<-c('mean.mean','median.median','ES.ES','CVaR.ES','ES.MES','CVaR.MES','VaR.MVaR','maxDrawdown.maxDrawdown','sd.sd','StdDev.StdDev')
+    matchvec<-c('mean.mean','median.median','ES.ES','ETL.ETL','CVaR.ES','ES.MES','ETL.MES','CVaR.MES','VaR.MVaR','maxDrawdown.maxDrawdown','sd.sd','StdDev.StdDev')
     for(str in matchvec){
         pos<-pmatch(str,rnames)
         if(!is.na(pos)){
@@ -50,6 +50,7 @@ name.replace <- function(rnames){
                     median.median = {rnames[pos]<-'median'},
                     CVaR.MES =, CVaR.ES = {rnames[pos]<-'CVaR'}, 
                     ES.MES =, ES.ES =  {rnames[pos]<-'ES'},
+                   ETL.MES =, ETL.ETL =  {rnames[pos]<-'ETL'},
                     VaR.MVaR = {rnames[pos]<-'VaR'},
                     maxDrawdown.maxDrawdown = {rnames[pos]<-'maxDrawdown'},
                     sd.sd=, StdDev.StdDev = {rnames[pos]<-'StdDev'},
