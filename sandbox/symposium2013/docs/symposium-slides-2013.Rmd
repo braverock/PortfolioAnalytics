@@ -40,8 +40,10 @@ plot(cars)
 - Rebalancing periodically and examining out of sample performance will help refine objectives
 -->
 
+<!-- Can't think of a reason to do this:
 # Process
 Insert process diagram here? Optional
+-->
 
 # Strategic allocation
 ...broadly described as periodically reallocating the portfolio to achieve a long-term goal
@@ -50,6 +52,96 @@ Insert process diagram here? Optional
 - Manage the resulting balance of risk and return of the portfolio
 - Apply within the context of the current economic and market situation
 - Think systematically about preferences and constraints
+
+<!-- This slide is tired:
+# Portfolio issues
+Markowitz (1952) described an investor's objectives as:
+
+* maximizing some measure of gain while
+* minimizing some measure of risk
+
+Many approaches follow Markowitz by using variance of returns for "risk"
+-->
+
+# Portfolio preferences
+Construct a portfolio that:
+
+* maximizes return,
+* with per-asset position limits,
+* with a specific univariate portfolio risk limit,
+* defining risk as losses,
+* considering effects of skewness and kurtosis,
+* and limiting contribution of risk for constituents 
+* or equalizing component risk contribution.
+
+<!-- Not a quadratic (or linear, or conical) problem any more. -->
+
+# Optimization frustration
+Most investors would prefer:
+
+* to be approximately correct rather than precisely wrong
+* to define risk as potential loss rather than volatility
+* the flexibility to define any kind of objective and combine the constraints
+* a framework for considering different sets of portfolio constraints for comparison through time
+* to intuitively understand optimization through visualization
+
+# Risk budgeting
+* Used to allocate the "risk" of a portfolio 
+* Decomposes the total portfolio risk into the risk contribution of each component position
+* Literature on risk contribution has focused on volatility rather than downside risk
+* Most financial returns series seem non-normal
+
+<--! Two-column slide with a facing histogram and qqplot -->
+
+# Measuring risk, not volatility
+Measured with portfolio Conditional Value-at-Risk (CVaR)
+
+* Also called Expected Tail Loss (ETL) and Expected Shortfall (ES)
+* ETL is the mean expected loss when the loss exceeds the VaR
+* ETL has all the properties a risk measure should have to be coherent and is a convex function of the portfolio weights
+* To account for skew and/or kurtosis, use Cornish-Fisher (or "modified") estimates of ETL instead (mETL)
+
+<!--- Same histogram/qqplot as prior slide with mVaR and mETL marked -->
+
+# ETL sensitivity
+Modified ETL demonstrates a better fit for historical CVaR at lower confidence levels, and can break down at higher confidence levels
+*Insert chart or charts*
+
+<!-- discuss cleaning? -->
+
+# _Ex ante_, not _ex post_
+The use of _ex ante_ risk budgets is more recent
+
+* Qian (2005): "risk parity portfolio" allocates portfolio variance equally
+* Maillard _et al_ (2010): "equally-weighted risk contribution portfolio" or (ERC)
+* Zhu _et al_ (2010): optimal mean-variance portfolio selection under constrained contributions
+
+We want to look at the allocation of risk through _ex ante_ downside risk contribution
+
+# Contribution to downside risk, not volatility
+Use the modified CVaR contribution estimator from Boudt, _et al_ (2008)
+
+* CVaR contributions correspond to the conditional expectation of the return of the portfolio component when the portfolio loss is larger than its VaR loss.
+* %CmETL is the ratio of the expected return on the position when the portfolio experiences a beyond-VaR loss to the expected value of the portfolio loss
+* A high positive %CmETL indicates the position has a large loss when the portfolio also has a large loss
+* The higher the percentage mETL, the more the portfolio downside risk is concentrated on that asset
+* Allows us to directly optimize downside risk diversification
+* Lends itself to a simple algorithm that computes both CVaR and component CVaR in less than a second, even for large portfolios
+
+We can use CVaR contributions as an objective or constraint in portfolio optimization
+
+# Two strategies for using downside contribution in allocation
+## Equalize downside risk contribution
+
+* Define downside risk diversification as an objective
+
+## Downside risk budget
+
+* Impose bound constraints on the percentage mETL contributions
+
+
+# An example
+describe the example as a case study
 
 # Selected hedge fund strategies
 Monthly data of EDHEC hedge fund indexes from 1998
@@ -89,48 +181,6 @@ Add table of relevant statistics here
 # Ex-post Correlations
 \includegraphics[width=0.5\textwidth]{../results/EDHEC-cor-inception.png}
 \includegraphics[width=0.5\textwidth]{../results/EDHEC-cor-tr36m.png}
-
-# Portfolio issues
-Markowitz (1952) described an investor's objectives as:
-
-* maximizing some measure of gain while
-* minimizing some measure of risk
-
-Many approaches follow Markowitz by using variance of returns for "risk"
-
-# Portfolio issues
-Most investors would prefer:
-
-* to be approximately correct rather than precisely wrong
-* to define risk as potential loss rather than volatility
-* the flexibility to define any kind of objective and combine the constraints
-* a framework for considering different sets of portfolio constraints for comparison through time
-* to intuitively understand optimization through visualization
-
-# Portfolio issues
-Construct a portfolio that:
-
-* maximizes return,
-* with per-asset position limits,
-* with a specific univariate portfolio risk limit,
-* defining risk as losses,
-* considering effects of skewness and kurtosis,
-* and limiting contribution of risk for constituents 
-* or minimizing component risk contribution.
-
-Not a quadratic (or linear, or conical) problem any more.
-
-# Risk, not volatility
-
-* Expected Tail Loss (ETL) is also called Conditional Value-at-Risk (CVaR) and Expected Shortfall (ES)
-* ETL is the mean expected loss when the loss exceeds the VaR
-* ETL has all the properties a risk measure should have to be coherent and is a convex function of the portfolio weights
-* Returns are skewed and/or kurtotic, so we use Cornish-Fisher (or "modified") estimates of ETL instead
-<!--- Add a picture of distribution with mVaR and mETL -->
-
-# ETL sensitivity
-Modified ETL demonstrates a better fit for historical CVaR at lower confidence levels, and breaks down at higher confidence levels
-*Insert chart or charts*
 
 # Add general constraints
 Constraints specified for each asset in the portfolio:
@@ -178,6 +228,7 @@ Minimum:
 * variance
 * modified ETL
 
+<!-- Most of these are obvious, so just describe verbally on the prior slide
 # Equal contribution...
 ...to Weight
 
@@ -190,7 +241,7 @@ Minimum:
 ...to Risk
 
 * Use (percentage) ETL contributions to directly diversify downside risk among components
-* Actually the minimum component risk contribution concentration portfolio
+* Actually the minimum concentration component risk contribution portfolio
 
 # Reward to risk ratios...
 ...mean/variance
@@ -211,8 +262,8 @@ Minimum:
 * The portfolio with the minimum forecasted ETL
 
 Minimum risk portfolios generally suffer from the drawback of portfolio concentration.
-
-<!-- Two of these deserve more discussion -->
+-->
+<!-- Only two of these deserve more discussion -->
 
 # Equal-weight portfolio
 
@@ -223,17 +274,39 @@ Minimum risk portfolios generally suffer from the drawback of portfolio concentr
 * Is the re-weighting adding or subtracting value?
 * Do we have a useful view of return and risk?
 
+# Contribution of Risk in Equal Weight Portfolio
+insert table
+
 # Equal Contribution to Risk
+The risk parity constraint that requires all assets to contribute to risk equally is usually too restrictive.
+
+* Use the Minimum Concentration Component (MCC) risk contribution portfolio as an objective
+* Minimize the largest ETL risk contribution in the portfolio
+* Unconstrained, the MCC generates similar portfolios to the risk parity portfolio
+* The MCC can, however, be more easily be combined with other objectives and constraints
 
 <!--- Insert more on the methodology for equal contribution to ETL -->
+
+# Constrained Risk Contribution
+Risk Budget as an eighth objective?
 
 
 
 <!--- METHODS -->
 
-# Closed form optimizers
+# Optimizers
+## Closed-form
 
-# Use Random Portfolios
+* add list from PortfA
+* discuss stress testing briefly
+
+## Heuristic
+
+* Random portfolios
+* Differential evolution
+* Others
+
+# Random Portfolios
 [Burns (2009)](http://www.portfolioprobe.com/blog/) describes Random Portfolios
 
 * From a portfolio seed, generate random pemutations of weights that meet your constraints on each asset
@@ -288,10 +361,10 @@ However, many business objectives do not fall into those categories...
 <!--- RESULTS -->
 
 # Ex-ante results
-Unstacked bar chart comparing allocations across objectives
+scatter plot with multiple objectives
 
 # Ex-ante results
-scatter plot with objectives
+Unstacked bar chart comparing allocations across objectives
 
 # Ex-ante vs. ex-post results
 scatter plot with both overlaid
