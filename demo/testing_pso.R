@@ -4,14 +4,8 @@
 
 library(xts)
 library(quadprog)
-library(Rglpk)
 library(PerformanceAnalytics)
-library(ROI)
-library(ROI.plugin.glpk)
-library(ROI.plugin.quadprog)
-library(Ecdat)
 library(PortfolioAnalytics)
-library(DEoptim)
 library(pso)
 
 # General Parameters for sample code
@@ -30,6 +24,7 @@ gen.constr <- add.objective(constraints=gen.constr, type="risk", name="sd", enab
 
 # =====================
 # Max return under box constraints, fully invested
+print('Max return under box constraints, fully invested')
 max.port <- gen.constr
 max.port$min <- rep(0.01,N)
 max.port$max <- rep(0.30,N)
@@ -41,6 +36,7 @@ max.solution <- optimize.portfolio(R=R, constraints=max.port, optimize_method="p
 
 # =====================
 # Mean-variance:  Fully invested, Global Minimum Variance Portfolio
+print('Mean-variance:  Fully invested, Global Minimum Variance Portfolio')
 gmv.port <- gen.constr
 gmv.port$objectives[[4]]$enabled <- TRUE
 gmv.solution <- optimize.portfolio(R=R, constraints=gmv.port, optimize_method="pso", trace=TRUE)
@@ -48,15 +44,12 @@ gmv.solution <- optimize.portfolio(R=R, constraints=gmv.port, optimize_method="p
 
 
 # ========================
-# Minimize CVaR with target return
+# Minimize CVaR 
 #
+print('Min-CVaR')
 cvar.port <- gen.constr
 cvar.port$min <- rep(0,N)
 cvar.port$max <- rep(1,N)
 cvar.port$objectives[[3]]$enabled <- TRUE
 cvar.port$objectives[[3]]$arguments <- list(p=0.95, clean="boudt")
 cvar.solution <- optimize.portfolio(R=R, constraints=cvar.port, optimize_method="pso", trace=TRUE)
-
-
-
-
