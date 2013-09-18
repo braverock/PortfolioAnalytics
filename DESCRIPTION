@@ -23,7 +23,7 @@ Suggests:
     quadprog,
     ROI,
     ROI.plugin.glpk,
-    ROI.plugin.quadprog,
+    ROI.plugin.quadprog (>= 0.0.2),
     pso,
     GenSA,
     corpcor
