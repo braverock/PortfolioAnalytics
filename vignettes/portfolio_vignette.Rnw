@@ -1,11 +1,43 @@
-\documentclass[12pt,letterpaper,english]{article}
+\documentclass[a4paper]{article}
 \usepackage[OT1]{fontenc}
 \usepackage{Sweave}
-\usepackage{verbatim}
 \usepackage{Rd}
-\usepackage{Sweave}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\usepackage[round]{natbib}
+\usepackage{bm}
+\usepackage{verbatim}
+\usepackage[latin1]{inputenc}
+\bibliographystyle{abbrvnat}
+
+\usepackage{url}
+
+\let\proglang=\textsf
+%\newcommand{\pkg}[1]{{\fontseries{b}\selectfont #1}}
+%\newcommand{\R}[1]{{\fontseries{b}\selectfont #1}}
+%\newcommand{\email}[1]{\href{mailto:#1}{\normalfont\texttt{#1}}}
+%\newcommand{\E}{\mathsf{E}}
+%\newcommand{\VAR}{\mathsf{VAR}}
+%\newcommand{\COV}{\mathsf{COV}}
+%\newcommand{\Prob}{\mathsf{P}}
+
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\baselinestretch}{1.5}
+\setlength{\textwidth}{15cm} \setlength{\textheight}{22cm} \topmargin-1cm \evensidemargin0.5cm \oddsidemargin0.5cm
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
+
 
 \title{Creating a Portfolio Object with PortfolioAnalytics}
 \author{Ross Bennett}
@@ -13,7 +45,7 @@
 \maketitle
 
 \begin{abstract}
-The purpose of this vignette is to demonstrate the new interface in PortfolioAnalytics to specify a portfolio object and to add constraints and objectives.
+The purpose of this vignette is to demonstrate the new interface in PortfolioAnalytics to specify a portfolio object, add constraints and objectis, and run optimizations.
 \end{abstract}
 
 \tableofcontents
@@ -55,14 +87,24 @@ print.default(pspec)
 \section{Adding Constraints to the Portfolio Object}
 Adding constraints to the portfolio object is done with \code{add.constraint}. The \code{add.constraint} function is the main interface for adding and/or updating constraints to the portfolio object. This function allows the user to specify the portfolio to add the constraints to, the type of constraints, arguments for the constraint, and whether or not to enable the constraint (\code{enabled=TRUE} is the default). If updating an existing constraint, the indexnum argument can be specified.
 
-Here we add a constraint that the weights must sum to 1, or the full investment constraint.
+\subsection{Leverage Constraint}
+
+The \code{leverage} constraint specifies the constraint on the sum of the weights. Aliases for the \code{leverage} constraint type include \code{weight\_sum}, \code{weight}, and \code{leverage}. Here we add a constraint that the weights must sum to 1, or the full investment constraint.
 <<>>=
 # Add the full investment constraint that specifies the weights must sum to 1.
 pspec <- add.constraint(portfolio=pspec, 
                         type="weight_sum", 
                         min_sum=1, 
                         max_sum=1)
+@
 
+There are two special cases for the leverage constraint:
+\begin{enumerate}
+\item The sum of the weights equal 1, i.e. the full investment constraint. The full investment constraint can be specified with \code{type="full\_investment"}. This automatically sets \code{min\_sum=1} and \code{max\_sum=1.}
+\item The sum of the weights equal 0, i.e. the dollar neutral or active constraint. This constraint can be specified with \code{type="dollar\_neutral"} or \code{type="active"}.
+\end{enumerate}
+
+<<>>=
 # The full investment constraint can also be specified with type="full_investment"
 # pspec <- add.constraint(portfolio=pspec, type="full_investment")
 
@@ -75,7 +117,8 @@ pspec <- add.constraint(portfolio=pspec,
 # pspec <- add.constraint(portfolio=pspec, type="active")
 @
 
-Here we add box constraints for the asset weights so that the minimum weight of any asset must be greater than or equal to 0.05 and the maximum weight of any asset must be less than or equal to 0.4. The values for min and max can be passed in as scalars or vectors. If min and max are scalars, the values for min and max will be replicated as vectors to the length of assets. If min and max are not specified, a minimum weight of 0 and maximum weight of 1 are assumed. Note that min and max can be specified as vectors with different weights for linear inequality constraints.
+\subsection{Box Constraint}
+Box constraints allows the user to specify upper and lower bounds on the weights of the assets. Here we add box constraints for the asset weights so that the minimum weight of any asset must be greater than or equal to 0.05 and the maximum weight of any asset must be less than or equal to 0.4. The values for min and max can be passed in as scalars or vectors. If min and max are scalars, the values for min and max will be replicated as vectors to the length of assets. If min and max are not specified, a minimum weight of 0 and maximum weight of 1 are assumed. Note that min and max can be specified as vectors with different weights for linear inequality constraints.
 <<>>=
 # Add box constraints
 pspec <- add.constraint(portfolio=pspec,
@@ -95,29 +138,20 @@ pspec <- add.constraint(portfolio=pspec,
 # pspec <- add.constraint(portfolio=pspec, type="long_only")
 @
 
-The portfolio object now has 2 objects in the constraints list. One object for the sum of weights constraint and another for the box constraint.
-<<>>=
-print(pspec)
-@
 
-The \code{summary} function gives a more detailed view of the constraints.
-<<>>=
-summary(pspec)
-@
-
-
-Another common constraint that can be added is a group constraint. Group constraints are currently supported by the ROI, DEoptim, and random portfolio solvers. The following code groups the assets such that the first 3 assets are grouped together labeled GroupA and the fourth asset is in its own group labeled GroupB. The \code{group\_min} argument specifies that the sum of the weights in GroupA must be greater than or equal to 0.1 and the sum of the weights in GroupB must be greater than or equal to 0.15. The \code{group\_max} argument specifies that the sum of the weights in GroupA must be less than or equal to 0.85 and the sum of the weights in GroupB must be less than or equal to 0.55.The \code{group\_labels} argument is optional and is useful for labeling groups in terms of market capitalization, sector, etc.
+\subsection{Group Constraint}
+Group constraints allow the user to specify the the sum of weights by group. Group constraints are currently supported by the ROI, DEoptim, and random portfolio solvers. The following code groups the assets such that the first 3 assets are grouped together labeled GroupA and the fourth asset is in its own group labeled GroupB. The \code{group\_min} argument specifies that the sum of the weights in GroupA must be greater than or equal to 0.1 and the sum of the weights in GroupB must be greater than or equal to 0.15. The \code{group\_max} argument specifies that the sum of the weights in GroupA must be less than or equal to 0.85 and the sum of the weights in GroupB must be less than or equal to 0.55.The \code{group\_labels} argument is optional and is useful if groups is not a named list for labeling groups in terms of market capitalization, sector, etc.
 <<>>=
 # Add group constraints
 pspec <- add.constraint(portfolio=pspec, type="group",
                         groups=list(groupA=c(1, 2, 3),
                                     grouB=4),
                         group_min=c(0.1, 0.15), 
-                        group_max=c(0.85, 0.55),
-                        group_labels=c("GroupA", "GroupB"))
+                        group_max=c(0.85, 0.55))
 @
 
-A position limit constraint can be added to limit the number of assets with non-zero, long, or short positions. The ROI solver interfaces to the Rglpk package (i.e. using the glpk plugin) for solving maximizing return and ETL/ES/cVaR objectives. The Rglpk package supports integer programming and thus supports position limit constraints for the \code{max\_pos} argument. The quadprog package does not support integer programming, and therefore \code{max\_pos} is not supported for the ROI solver using the quadprog plugin. Note that \code{max\_pos\_long} and \code{max\_pos\_short} are not supported for either ROI solver. All position limit constraints are fully supported for DEoptim and random solvers.
+\subsection{Position Limit Constraint}
+The position limit constraint allows the user to specify limits on the number of assets with non-zero, long, or short positions. The ROI solver interfaces to the Rglpk package (i.e. using the glpk plugin) for solving maximizing return and ETL/ES/cVaR objectives. The Rglpk package supports integer programming and thus supports position limit constraints for the \code{max\_pos} argument. The quadprog package does not support integer programming, and therefore \code{max\_pos} is not supported for the ROI solver using the quadprog plugin. Note that \code{max\_pos\_long} and \code{max\_pos\_short} are not supported for either ROI solver. All position limit constraints are fully supported for DEoptim and random solvers.
 
 <<>>=
 # Add position limit constraint such that we have a maximum number of three assets with non-zero weights.
@@ -127,20 +161,46 @@ pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
 # pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos_long=3, max_pos_short=3)
 @
 
-A target diversification can be specified as a constraint. Diversification is defined as $diversification = \sum_{i=1}^N w_i^2$ for $N$ assets. The diversification constraint is implemented for the global optimizers by applying a penalty if the diversification value is more than 5\% away from \code{div\_target}.
-TODO add support for diversification as a constraint for ROI solvers. Can't do this with Rglpk, but can add as a penalty term for quadratic utility and minimum variance problems
+\subsection{Diversification Constraint}
+The diversification constraint allows the user to target diversification. Diversification is defined as $diversification = \sum_{i=1}^N w_i^2$ for $N$ assets. The diversification constraint is implemented for the global optimizers by applying a penalty if the diversification value is more than 5\% away from \code{div\_target}. Note that diversification as a constraint is not supported for the ROI solvers, it is only supported for the global numeric solvers.
 <<>>=
 pspec <- add.constraint(portfolio=pspec, type="diversification", div_target=0.7)
 @
 
-A target turnover can be specified as a constraint. The turnover is calculated from a set of initial weights. The initial weights can be specified, by default they are the initial weights in the portfolio object. The turnover constraint is implemented for the global optimizers by applying a penalty if the turnover value is more than 5\% away from \code{turnover\_target}. Note that the turnover constraint is not currently supported for the ROI solvers.
+\subsection{Turnover Constraint}
+A target turnover can be specified as a constraint. The turnover is calculated from a set of initial weights. The initial weights can be specified, by default they are the initial weights in the portfolio object. The turnover constraint is implemented for the global optimizers by applying a penalty if the turnover value is more than 5\% away from \code{turnover\_target}. Note that the turnover constraint is not currently supported for quadratic utility and minimum variance problems using the ROI solver.
 <<>>=
 pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.2)
 @
 
-A target mean return can be specified as a constraint.
+\subsection{Target Return Constraint}
+The target return constraint allows the user to specify a target mean return.
 <<>>=
 pspec <- add.constraint(portfolio=pspec, type="return", return_target=0.007)
+@
+
+\subsection{Factor Exposure Constraint}
+The factor exposure constraint allows the user to set upper and lower bounds on exposures to risk factors. The exposures can be passed in as a vector or matrix. Here we specify a vector for \code{B} with arbitrary values, e.g. betas of the assets,  with a market risk exposure range of 0.6 to 0.9.
+<<>>=
+pspec <- add.constraint(portfolio=pspec, type="factor_exposure",
+                        B=c(-0.08, 0.37, 0.79, 1.43),
+                        lower=0.6, upper=0.9)
+@
+
+\subsection{Transaction Cost Constraint}
+The transaction cost constraint allows the user to specify proportional transaction costs. Proportional transaction cost constraints can be implemented for quadratic utility and minimum variance problems using the ROI solver. Transaction costs are supported as a penalty for the global numeric solvers. Here we add the transaction cost contraint with the proportional transaction cost value of 1\%.
+<<>>=
+pspec <- add.constraint(portfolio=pspec, type="transaction_cost", ptc=0.01)
+@
+
+The print method for the portfolio object shows a concise view of the portfolio and the constraints that have been added.
+<<>>=
+print(pspec)
+@
+
+The \code{summary} function gives a more detailed view of the constraints.
+<<>>=
+summary(pspec)
 @
 
 This demonstrates adding constraints to the portfolio object. As an alternative to adding constraints directly to the portfolio object, constraints can be specified as separate objects.
@@ -174,23 +234,449 @@ to_constr <- turnover_constraint(turnover_target=0.2)
 
 # target return constraint
 ret_constr <- return_constraint(return_target=0.007)
+
+# factor exposure constraint
+exp_constr <- factor_exposure_constraint(assets=pspec$assets,
+                                         B=c(-0.08, 0.37, 0.79, 1.43),
+                                         lower=0.6, upper=0.9)
+
+# transaction cost constraint
+ptc_constr <- transaction_cost_constraint(assets=pspec$assets, ptc=0.01)
 @
 
 \section{Adding Objectives}
-Business objectives can be added to the portfolio object with \code{add.objective}. The \code{add.objective} function is the main function for adding and/or updating business objectives to the portfolio object. This function allows the user to specify the portfolio to add the objectives to, the type (currently 'return', 'risk', or 'risk\_budget'), name of the objective function, arguments to the objective function, and whether or not to enable the objective. If updating an existing constraint, the indexnum argument can be specified.
+Objectives can be added to the portfolio object with \code{add.objective}. The \code{add.objective} function is the main function for adding and/or updating business objectives to the portfolio object. This function allows the user to specify the \verb"portfolio" to add the objectives to, the \verb"type" (currently 'return', 'risk', 'risk\_budget', or 'weight\_concentration'), \verb"name" of the objective function, \verb"arguments" to the objective function, and whether or not to \verb"enable" the objective. If updating an existing constraint, the \verb"indexnum" argument can be specified.
 
-Here we add a risk objective to minimize portfolio variance. Note that the name of the function must correspond to a function in R. Many functions are available in the PerformanceAnalytics package.
+\subsection{Portfolio Risk Objective}
+The portfolio risk objective allows the user to specify a risk function to minimize
+Here we add a risk objective to minimize portfolio expected tail loss with a confidence level of 0.95. Other default arguments to the function can be passed in as a named list to arguments.  Note that the name of the function must correspond to a function in R. Many functions are available in the \verb"PerformanceAnalytics" package or a user defined function.
 <<>>=
 pspec <- add.objective(portfolio=pspec,
                        type='risk',
-                       name='var',
-                       enabled=TRUE)
+                       name='ETL',
+                       arguments=list(p=0.95))
 @
 
-TODO Add more objectives
+\subsection{Portfolio Return Objective}
+The return objective allows the user to specify a return function to maximize. Here we add a return objective to maximize the portfolio mean return.
+<<>>=
+pspec <- add.objective(portfolio=pspec,
+                       type='return',
+                       name='mean')
+@
+
+\subsection{Portfolio Risk Budget Objective}
+The portfolio risk objective allows the user to specify constraints to minimize component contribution (i.e. equal risk contribution) or specify upper and lower bounds on percentage risk contribution. Here we specify that no asset can contribute more than 30\% to total portfolio risk. See the risk budget optimization vignette for more detailed examples of portfolio optimizations with risk budgets.
+<<>>=
+pspec <- add.objective(portfolio=pspec, type="risk_budget", name="ETL", 
+                       arguments=list(p=0.95), max_prisk=0.3)
+
+# for an equal risk contribution portfolio, set min_concentration=TRUE
+# pspec <- add.objective(portfolio=pspec, type="risk_budget", name="ETL", 
+#                        arguments=list(p=0.95), min_concentration=TRUE)
+@
+
+
+\subsection{Portfolio Weight Concentration Objective}
+The weight concentration objective allows the user to specify an objective to minimize concentration as measured by the Herfindahl-Hirschman Index. For otpimization problems solved with the global numeric optimizers, the portfolio HHI value is penalized using \code{conc\_aversion} value as the multiplier.
+
+For quadratic utility problems with weight concentration as an objective using the ROI solver, this is implemented as a penalty to the objective function. The objective function is implemented as follows:
+
+\begin{eqnarray}
+\underset{\boldsymbol{w}}{\text{maximize}}
+\boldsymbol{w}' \boldsymbol{\mu} - \frac{\lambda}{2}(\boldsymbol{w}' \boldsymbol{\Sigma} \boldsymbol{w} + \lambda_{hhi} * HHI)\\
+\end{eqnarray}
+Where $\mu$ is the estimated mean asset returns, $\lambda$ is the risk aversion parameter, $lambda_{hhi}$ is the concentration aversion parameter, $HHI$ is the portfolio $HHI$, $\boldsymbol{\Sigma}$ is the estimated covariance matrix of asset returns and $\boldsymbol{w}$ is the set of weights.
+
+Here we add a weight concentration objective for the overall portfolio HHI.
+<<>>=
+pspec <- add.objective(portfolio=pspec, type="weight_concentration", 
+                       name="HHI", conc_aversion=0.1)
+@
+
+The weight concentration aversion parameter by groups can also be specified. Here we add a weight concentration objective specifying groups and concentration aversion parameters by group.
+<<>>=
+pspec <- add.objective(portfolio=pspec, type="weight_concentration", 
+                       name="HHI",
+                       conc_aversion=c(0.03, 0.06),
+                       conc_groups=list(c(1, 2),
+                                        c(3, 4)))
+@
+
+The print method for the portfolio object will now show all the constraints and objectives that have been added.
+<<>>=
+print(pspec)
+@
+
+The \code{summary} function gives a more detailed view.
+<<>>=
+summary(pspec)
+@
+
+\section{Solvers}
+The PortfolioAnalytics package currently supports random portfolios, DEoptim, pso, GenSA, and ROI as back ends. Note that some of the QP/LP problems are solved directly with Rglpk and quadprog. The solver can be specified with the \code{optimize\_method} argument in \code{optimize.portfolio} and \code{optimize.portfolio.rebalancing}.
+
+\subsection{DEoptim}
+PortfolioAnalytics uses the \code{DEoptim} function from the R package \verb"DEoptim". Differential evolution is a stochastic global optimization algorithm. See \code{?DEoptim} and the references contained therein for more information. See also \href{http://cran.r-project.org/web/packages/DEoptim/vignettes/DEoptimPortfolioOptimization.pdf}{Large scale portfolio optimization with DEoptim}.
+\subsection{Random Portfolios}
+PortfolioAnalytics has three methods to generate random portfolios.
+\begin{enumerate}
+\item The 'sample' method to generate random portfolios is based on an idea by Pat Burns. This is the most flexible method, but also the slowest, and can generate portfolios to satisfy leverage, box, group, and position limit constraints.
+\item The 'simplex' method to generate random portfolios is based on a paper by W. T. Shaw. The simplex method is useful to generate random portfolios with the full investment constraint, where the sum of the weights is equal to 1, and min box constraints. Values for \code{min\_sum} and \code{max\_sum} of the leverage constraint will be ignored, the sum of weights will equal 1. All other constraints such as the box constraint max, group and position limit constraints will be handled by elimination. If the constraints are very restrictive, this may result in very few feasible portfolios remaining.
+\item The 'grid' method to generate random portfolios is based on the \code{gridSearch} function in package \verb"NMOF". The grid search method only satisfies the \code{min} and \code{max} box constraints. The \code{min\_sum} and \code{max\_sum} leverage constraints will likely be violated and the weights in the random portfolios should be normalized. Normalization may cause the box constraints to be violated and will be penalized in \code{constrained\_objective}.
+\end{enumerate}
+
+The following plots illustrate the various methods to generate random portfolios.
+
+<<fig.cap="Random portfolio methods">>=
+R <- edhec[, 1:4]
+
+# set up simple portfolio with leverage and box constraints 
+pspec <- portfolio.spec(assets=colnames(R))
+pspec <- add.constraint(portfolio=pspec, type="leverage", 
+                        min_sum=0.99, max_sum=1.01)
+pspec <- add.constraint(portfolio=pspec, type="box", min=0, max=1)
+
+# generate random portfolios using the 3 methods
+rp1 <- random_portfolios(portfolio=pspec, permutations=5000, 
+                         rp_method='sample')
+rp2 <- random_portfolios(portfolio=pspec, permutations=5000, 
+                         rp_method='simplex') 
+rp3 <- random_portfolios(portfolio=pspec, permutations=5000, 
+                         rp_method='grid')
+
+# show feasible portfolios in mean-StdDev space
+tmp1.mean <- apply(rp1, 1, function(x) mean(R %*% x))
+tmp1.StdDev <- apply(rp1, 1, function(x) StdDev(R=R, weights=x))
+tmp2.mean <- apply(rp2, 1, function(x) mean(R %*% x))
+tmp2.StdDev <- apply(rp2, 1, function(x) StdDev(R=R, weights=x))
+tmp3.mean <- apply(rp3, 1, function(x) mean(R %*% x))
+tmp3.StdDev <- apply(rp3, 1, function(x) StdDev(R=R, weights=x))
+
+# plot feasible portfolios 
+plot(x=tmp1.StdDev, y=tmp1.mean, col="gray", main="Random Portfolio Methods")
+points(x=tmp2.StdDev, y=tmp2.mean, col="red", pch=2)
+points(x=tmp3.StdDev, y=tmp3.mean, col="lightgreen", pch=5)
+legend("bottomright", legend=c("sample", "simplex", "grid"), 
+       col=c("gray", "red", "lightgreen"),
+       pch=c(1, 2, 5), bty="n")
+@
+
+Figure 1 shows the feasible space using the different random portfolio methods. The 'sample' method has relatively even coverage of the feasible space. The 'simplex' method also has relatively even coverage of the space, but it is also more concentrated around the assets. The 'grid' method is pushed to the interior of the space due to the normalization.
+
+The \code{fev} argument controls the face-edge-vertex biasing. Higher values for \code{fev} will result in the weights vector more concentrated on a single asset. This can be seen in the following charts.
+<<fig.cap="FEV biasing values">>=
+fev <- 0:5
+par(mfrow=c(2, 3))
+for(i in 1:length(fev)){
+  rp <- random_portfolios(portfolio=pspec, permutations=2000, 
+                          rp_method='simplex', fev=fev[i])
+  tmp.mean <- apply(rp, 1, function(x) mean(R %*% x))
+  tmp.StdDev <- apply(rp, 1, function(x) StdDev(R=R, weights=x))
+  plot(x=tmp.StdDev, y=tmp.mean, main=paste("FEV =", fev[i]),
+       ylab="mean", xlab="StdDev", col=rgb(0, 0, 100, 50, maxColorValue=255))
+}
+par(mfrow=c(1,1))
+@
+
+Figure 2 shows the feasible space varying the fev values.
+
+The \code{fev} argument can be passed in as a vector for more even coverage of the feasible space. The default value is \code{fev=0:5}.
+<<fig.cap="Random portfolio 'sample' and 'simplex' comparison">>=
+par(mfrow=c(1, 2))
+# simplex
+rp_simplex <- random_portfolios(portfolio=pspec, permutations=2000, 
+                                rp_method='simplex', fev=0:5)
+tmp.mean <- apply(rp_simplex, 1, function(x) mean(R %*% x))
+tmp.StdDev <- apply(rp_simplex, 1, function(x) StdDev(R=R, weights=x))
+plot(x=tmp.StdDev, y=tmp.mean, main="rp_method=simplex fev=0:5",
+     ylab="mean", xlab="StdDev", col=rgb(0, 0, 100, 50, maxColorValue=255))
+#sample
+rp_sample <- random_portfolios(portfolio=pspec, permutations=2000, 
+                               rp_method='sample')
+tmp.mean <- apply(rp_sample, 1, function(x) mean(R %*% x))
+tmp.StdDev <- apply(rp_sample, 1, function(x) StdDev(R=R, weights=x))
+plot(x=tmp.StdDev, y=tmp.mean, main="rp_method=sample",
+     ylab="mean", xlab="StdDev", col=rgb(0, 0, 100, 50, maxColorValue=255))
+par(mfrow=c(1,1))
+@
+
+Figure 3 shows the feasible space comparing the 'sample' and 'simplex' methods to generate random portfolios.
+
+\subsection{pso}
+PortfolioAnalytics uses the \code{psoptim} function from the R package \verb"pso". Particle swarm optimization is a heuristic optimization algorithm. See \code{?psoptim} and the references contained therein for more information.
+
+\subsection{GenSA}
+PortfolioAnalytics uses the \code{GenSA} function from the R package \verb"GenSA". Generalized simmulated annealing is generic probabilistic heuristic optimization algorithm. See \code{?GenSA} and the references contained therein for more information.
+
+\subsection{ROI}
+The \verb"ROI" package serves as an interface to the \verb"Rglpk" package and the \verb"quadprog" package to solve linear and quadratic programming problems. The interface to the \verb"ROI" package solves a limited type of convex optimization problems:
+
+\begin{enumerate}
+\item Maxmimize portfolio return subject leverage, box, group, position limit, target mean return, and/or factor exposure constraints on weights.
+\item Minimize portfolio variance subject to leverage, box, group, turnover, and/or factor exposure constraints (otherwise known as global minimum variance portfolio).
+\item Minimize portfolio variance subject to leverage, box, group, and/or factor exposure constraints and a desired portfolio return.
+\item Maximize quadratic utility subject to leverage, box, group, target mean return, turnover, and/or factor exposure constraints and risk aversion parameter.
+(The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object).
+\item Minimize ETL subject to leverage, box, group, position limit, target mean return, and/or factor exposure constraints and target portfolio return.
+\end{enumerate}
+
 
 \section{Optimization}
-TODO
+The previous sections demonstrated how to specify a portfolio object, add constraints, add objectives, and the solvers available. This section will demonstrate run the optimizations via \code{optimize.portfolio}. Only a small number of examples will be shown here, see the demos for several more examples.
+
+\subsection{Initial Portfolio Object}
+<<>>=
+library(DEoptim)
+library(ROI)
+require(ROI.plugin.glpk)
+require(ROI.plugin.quadprog)
+
+data(edhec)
+R <- edhec[, 1:6]
+colnames(R) <- c("CA", "CTAG", "DS", "EM", "EQMN", "ED")
+funds <- colnames(R)
+
+# Create an initial portfolio object with leverage and box constraints
+init <- portfolio.spec(assets=funds)
+init <- add.constraint(portfolio=init, type="leverage", 
+                       min_sum=0.99, max_sum=1.01)
+init <- add.constraint(portfolio=init, type="box", min=0.05, max=0.65)
+@
+
+\subsection{Maximize mean return with ROI}
+Add an objective to maximize mean return.
+<<>>=
+maxret <- add.objective(portfolio=init, type="return", name="mean")
+@
+
+Run the optimization.
+<<>>=
+opt_maxret <- optimize.portfolio(R=R, portfolio=maxret, 
+                                 optimize_method="ROI", trace=TRUE)
+
+print(opt_maxret)
+@
+
+Chart the weights and optimal portfolio in risk-return space.
+<<fig.cap="Maximum Return Optimization, fig.align='center', fig.width=3, fig.height=3>>=
+chart.Weights(opt_maxret)
+chart.RiskReward(opt_maxret, risk.col="StdDev", return.col="mean", 
+                 main="Maximum Return Optimization", chart.assets=TRUE,
+                 xlim=c(0, 0.05))
+@
+
+\subsection{Minimize variance with ROI}
+Add an objective to minimize portfolio variance.
+<<>>=
+minvar <- add.objective(portfolio=init, type="risk", name="var")
+@
+
+Run the optimization. Note that although 'var' is the risk metric, 'StdDev' is returned as an objective measure.
+<<>>=
+opt_minvar <- optimize.portfolio(R=R, portfolio=minvar, 
+                                 optimize_method="ROI", trace=TRUE)
+print(opt_minvar)
+@
+
+Chart the weights and optimal portfolio in risk-return space.
+<<fig.cap="Minimum Variance Optimization", fig.align='center', fig.width=3, fig.height=3>>=
+chart.Weights(opt_minvar)
+chart.RiskReward(opt_minvar, risk.col="StdDev", return.col="mean", 
+                 main="Minimum Variance Optimization", chart.assets=TRUE,
+                 xlim=c(0, 0.05))
+@
+
+\subsection{Maximize quadratic utility with ROI}
+Add mean and var objectives for quadratic utility. Note that the risk aversion parameter for quadratic utility is specifed in the objective as shown below.
+<<>>=
+qu <- add.objective(portfolio=init, type="return", name="mean")
+qu <- add.objective(portfolio=qu, type="risk", name="var", risk_aversion=0.25)
+@
+
+Run the optimization.
+<<>>=
+opt_qu <- optimize.portfolio(R=R, portfolio=qu, 
+                             optimize_method="ROI", trace=TRUE)
+print(opt_qu)
+@
+
+<<fig.cap="Maximum Quadratic Utility Optimization", fig.align='center', fig.width=3, fig.height=3>>=
+chart.Weights(opt_qu)
+chart.RiskReward(opt_qu, risk.col="StdDev", return.col="mean", 
+                 main="Quadratic Utility Optimization", chart.assets=TRUE,
+                 xlim=c(0, 0.05))
+@
+
+\subsection{Minimize expected tail loss with ROI}
+Add ETL objective.
+<<>>=
+etl <- add.objective(portfolio=init, type="risk", name="ETL")
+@
+
+Run the optimization.
+<<>>=
+opt_etl <- optimize.portfolio(R=R, portfolio=etl, 
+                              optimize_method="ROI", trace=TRUE)
+print(opt_etl)
+@
+
+<<fig.cap="Minimum ETL Optimization", fig.align='center', fig.width=3, fig.height=3>>=
+chart.Weights(opt_etl)
+chart.RiskReward(opt_etl, risk.col="ES", return.col="mean", 
+                 main="ETL Optimization", chart.assets=TRUE,
+                 xlim=c(0, 0.14))
+@
+
+\subsection{Maximize mean return per unit ETL with random portfolios}
+Add mean and ETL objectives.
+<<>>=
+meanETL <- add.objective(portfolio=init, type="return", name="mean")
+meanETL <- add.objective(portfolio=meanETL, type="risk", name="ETL",
+                         arguments=list(p=0.95))
+@
+
+Run the optimization. The default random portfolio method is 'sample'.
+<<>>=
+opt_meanETL <- optimize.portfolio(R=R, portfolio=meanETL, 
+                                  optimize_method="random",
+                                  trace=TRUE, search_size=2000)
+print(opt_meanETL)
+@
+
+The optimization was run with \code{trace=TRUE} so that iterations and other output from random portfolios is stored in the \code{opt\_meanETL} object. The \code{extractStats} function can be used to get a matrix of the weights and objective measures at each iteration.
+<<>>=
+stats_meanETL <- extractStats(opt_meanETL)
+dim(stats_meanETL)
+head(stats_meanETL)
+@
+
+Chart the optimal weights and optimal portfolio in risk-return space. Because the optimization was run with \code{trace=TRUE}, the chart of the optimal portfolio also includes the trace portfolios of the optimization. This is usefule to visualize the feasible space of the portfolios. The 'neighbor' portfolios relative to the optimal portfolio weights can be included the chart of the optimal weights.
+<<fig.cap="mean-ETL Optimization", fig.align='center', fig.width=3, fig.height=3>>=
+chart.Weights(opt_meanETL, neighbors=25)
+chart.RiskReward(opt_meanETL, risk.col="ETL", return.col="mean", 
+                 main="mean-ETL Optimization")
+@
+
+Calculate and plot the portfolio component ETL contribution.
+<<fig.cap="mean-ETL risk contribution", fig.height=3, fig.width=3, fig.align='center'>>=
+pct_contrib <- ES(R=R, p=0.95, portfolio_method="component", 
+                  weights=extractWeights(opt_meanETL))
+barplot(pct_contrib$pct_contrib_MES, cex.names=0.8, las=3)
+@
+
+This figure shows that the Equity Market Nuetral strategy has greater than 50\% risk contribution. A risk budget objective can be added to limit risk contribution percentage to 40\%.
+
+\subsection{Maximize mean return per unit ETL with ETL risk budgets}
+Add objectives.
+<<>>=
+# change the box constraints to long only
+init$constraints[[2]]$min <- rep(0, 6)
+init$constraints[[2]]$max <- rep(1, 6)
+
+rb_meanETL <- add.objective(portfolio=init, type="return", name="mean")
+rb_meanETL <- add.objective(portfolio=rb_meanETL, type="risk", name="ETL",
+                            arguments=list(p=0.95))
+rb_meanETL <- add.objective(portfolio=rb_meanETL, type="risk_budget", 
+                            name="ETL", max_prisk=0.4, arguments=list(p=0.95))
+@
+
+Run the optimization. Set \code{traceDE=5} so that every fifth iteration is printed. The default is to print every iteration.
+<<>>=
+opt_rb_meanETL <- optimize.portfolio(R=R, portfolio=rb_meanETL, 
+                                     optimize_method="DEoptim", 
+                                     search_size=2000, 
+                                     trace=TRUE, traceDE=5)
+print(opt_rb_meanETL)
+@
+
+<<fig.cap="mean=ETL Optimization with Risk Budget", fig.align='center', fig.width=4, fig.height=4>>=
+chart.Weights(opt_rb_meanETL)
+chart.RiskReward(opt_rb_meanETL, risk.col="ETL", return.col="mean", 
+                 main="Risk Budget mean-ETL Optimization",
+                 xlim=c(0,0.12), ylim=c(0.005,0.009))
+@
+
+Chart the contribution to risk in percentage terms. 
+<<fig.cap="mean-ETL with Risk Budget Objective", fig.height=4, fig.width=4, fig.align='center'>>=
+chart.RiskBudget(opt_rb_meanETL, risk.type="percentage", neighbors=25)
+@
+
+
+\subsection{Maximize mean return per unit ETL with ETL equal contribution to risk}
+Add objectives.
+<<>>=
+eq_meanETL <- add.objective(portfolio=init, type="return", name="mean")
+eq_meanETL <- add.objective(portfolio=eq_meanETL, type="risk", name="ETL",
+                            arguments=list(p=0.95))
+eq_meanETL <- add.objective(portfolio=eq_meanETL, type="risk_budget", 
+                            name="ETL", min_concentration=TRUE, 
+                            arguments=list(p=0.95))
+@
+
+Run the optimization. Set \code{traceDE=5} so that every fifth iteration is printed. The default is to print every iteration.
+<<>>=
+opt_eq_meanETL <- optimize.portfolio(R=R, portfolio=eq_meanETL, 
+                                     optimize_method="DEoptim", 
+                                     search_size=2000, 
+                                     trace=TRUE, traceDE=5)
+print(opt_eq_meanETL)
+@
+
+Chart the optimal weights and optimal portfolio in risk-return space.
+<<fig.cap="mean-ETL with ETL Equal Risk Contribution", fig.align='center', fig.width=4, fig.height=4>>=
+chart.Weights(opt_eq_meanETL)
+chart.RiskReward(opt_eq_meanETL, risk.col="ETL", return.col="mean", 
+                 main="Risk Budget mean-ETL Optimization",
+                 xlim=c(0,0.12), ylim=c(0.005,0.009))
+@
+
+Chart the contribution to risk in percentage terms. It is clear in this chart that the optimization results in a near equal risk contribution portfolio.
+<<fig.cap="Percentage Contibution to Risk", fig.height=4, fig.width=4,fig.align='center'>>=
+chart.RiskBudget(opt_eq_meanETL, risk.type="percentage", neighbors=25)
+@
+
+
+The \code{opt\_meanETL}, \code{opt\_rb\_meanETL}, and \code{opt\_eq\_meanETL} optimizations are similar and can be easily compared.
+\begin{enumerate}
+\item[opt\_meanETL] Objective to maximize mean return per unit ETL. The constraints are full investment and box constraints such that the minimum weight of any asset is 0.05 and maximum weight of any asset is 0.65.
+\item[opt\_rb\_meanETL] Objective to maximize mean return per unit ETL with risk budget objective to limit maximum percent risk 40\%. The constraints are full investment and long only constraints.
+\item[opt\_eq\_meanETL] Objective to maximize mean return per unit ETL with equal contribution to risk. The constraints are full investment and long only constraints.
+\end{enumerate}
+
+Combine the optimizations for easy comparison.
+<<>>=
+opt_combine <- optimizations.combine(list(meanETL=opt_meanETL,
+                                          rbmeanETL=opt_rb_meanETL,
+                                          eqmeanETL=opt_eq_meanETL))
+
+# View the weights and objective measures of each optimization
+extractWeights(opt_combine)
+obj_combine <- extractObjectiveMeasures(opt_combine)
+@
+
+<<fig.cap="Optimal Weights of Optimizations", fig.height=4, fig.width=4, fig.align='center'>>=
+chart.Weights(opt_combine, plot.type="bar", legend.loc="topleft", ylim=c(0, 1))
+@
+
+Chart the optimal portfolios of each optimization in risk-return space.
+<<fig.cap="Optimal Portfolios in Risk-Return Space", fig.height=4, fig.width=4, fig.align='center'>>=
+chart.RiskReward(opt_combine, risk.col="ETL", return.col="mean", 
+                 main="ETL Optimization Comparison", xlim=c(0.018, 0.025),
+                 ylim=c(0.005, 0.008))
+@
+
+Calculate the STARR of each optimization
+<<fig.cap="STARR of Optimizations", fig.height=3, fig.width=3, fig.align='center'>>=
+STARR <- obj_combine[, "mean"] / obj_combine[, "ETL"]
+barplot(STARR, col="blue", cex.names=0.8, cex.axis=0.8,
+        las=3, main="STARR", ylim=c(0,1))
+@
+
+<<fig.cap="Percentage Contribution to Risk of Optimizations", fig.height=3, fig.width=3, fig.align='center'>>=
+chart.RiskBudget(opt_combine, match.col="ETL", risk.type="percent", 
+                 ylim=c(0,1), legend.loc="topright")
+@
 
 
 \end{document}
