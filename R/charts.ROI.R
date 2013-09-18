@@ -84,6 +84,7 @@ chart.Scatter.ROI <- function(object, ..., neighbors=NULL, return.col="mean", ri
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class 'optimize.portfolio.ROI'")
   
   R <- object$R
+  if(is.null(R)) stop("Returns object not detected, must run optimize.portfolio with trace=TRUE")
   # If the user does not pass in rp, then we will generate random portfolios
   if(rp){
     permutations <- match.call(expand.dots=TRUE)$permutations

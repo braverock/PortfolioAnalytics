@@ -100,6 +100,7 @@ chart.Scatter.DE <- function(object, ..., neighbors = NULL, return.col='mean', r
   if(!inherits(object, "optimize.portfolio.DEoptim")) stop("object must be of class 'optimize.portfolio.DEoptim'")
   
   R <- object$R
+  if(is.null(R)) stop("Returns object not detected, must run optimize.portfolio with trace=TRUE")
   portfolio <- object$portfolio
   xtract = extractStats(object)
   columnnames = colnames(xtract)

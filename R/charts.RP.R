@@ -100,7 +100,8 @@ chart.Scatter.RP <- function(object, ..., neighbors = NULL, return.col='mean', r
   if(!inherits(object, "optimize.portfolio.random")){
     stop("object must be of class 'optimize.portfolio.random'")
   }
-  R <- object$R  
+  R <- object$R
+  if(is.null(R)) stop("Returns object not detected, must run optimize.portfolio with trace=TRUE")
   xtract = extractStats(object)
   columnnames = colnames(xtract)
   #return.column = grep(paste("objective_measures",return.col,sep='.'),columnnames)

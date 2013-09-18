@@ -82,6 +82,7 @@ chart.Scatter.pso <- function(object, ..., neighbors=NULL, return.col="mean", ri
   if(!inherits(object, "optimize.portfolio.pso")) stop("object must be of class 'optimize.portfolio.pso'")
   
   R <- object$R
+  if(is.null(R)) stop("Returns object not detected, must run optimize.portfolio with trace=TRUE")
   # portfolio <- object$portfolio
   xtract = extractStats(object)
   columnnames = colnames(xtract)
