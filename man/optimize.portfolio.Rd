@@ -121,10 +121,8 @@
 }
 \description{
   This function aims to provide a wrapper for constrained
-  optimization of portfolios that allows the user to
-  specify box constraints and business objectives. It will
-  be the objective function\code{FUN} passed to any
-  supported \R optimization solver.
+  optimization of portfolios that specify constraints and
+  objectives.
 }
 \details{
   This function currently supports DEoptim, random
@@ -182,10 +180,6 @@
   \code{multiplier} argument in \code{\link{add.objective}}
   passed into the complete constraint object are ingnored
   by the ROI solver.
-
-  If you would like to interface with
-  \code{optimize.portfolio} using matrix formulations, then
-  use \code{ROI_old}.
 }
 \note{
   An object of class \code{v1_constraint} can be passed in
