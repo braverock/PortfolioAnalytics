@@ -4,8 +4,8 @@
 
 <!---
 # HOWTO
-To create PDF of slides:
-$ pandoc slides.Rmd -t beamer -o slides.pdf
+To create PDF of these slides:
+$ pandoc symposium-slides-2013.Rmd -t beamer -o slides.pdf
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring web pages (click the **MD** toolbar button for help on Markdown).  Or see: http://daringfireball.net/projects/markdown/syntax
 
@@ -25,15 +25,20 @@ plot(cars)
 # Introduction
 
 - Discuss the challenges of constructing hedge fund portfolios
-- Offer a framework for considering strategic allocation of dynamic strategies
+- Offer a framework for considering strategic allocation of hedge funds
+- Discuss various methods of evaluating portfolio objectives
 - Show the relative performance of multiple objectives
 - Discuss extensions to the framework
 
 # Objectives
 
-- Visualization can help you build intuition about your objectives and constraints
+- Identify several sets of objectives to establish benchmark and target portfolios 
+- Evaluate complex constraints, including some that equalize or budget risks using downside measures of risk
+- Visualize portfolio problems to build intuition about objectives and constraints
+- Use analytic solvers and parallel computation as problems get more complex
+<!-- 
 - Rebalancing periodically and examining out of sample performance will help refine objectives
-- Analytic solvers and parallel computation are valuable as problems get more complex
+-->
 
 # Process
 Insert process diagram here? Optional
@@ -41,79 +46,49 @@ Insert process diagram here? Optional
 # Strategic allocation
 ...broadly described as periodically reallocating the portfolio to achieve a long-term goal
 
-- Understanding the nature and sources of investment risk within the portfolio
+- Understand the nature and sources of investment risk within the portfolio
 - Manage the resulting balance of risk and return of the portfolio
-- Apply within the cotext of the current economic and market situation
+- Apply within the context of the current economic and market situation
 - Think systematically about preferences and constraints
 
-# Selected strategies
-Daily data from the ...
+# Selected hedge fund strategies
+Monthly data of EDHEC hedge fund indexes from 1998
 
-<!-- 
-Alternative 1: Use hedge fund styles
+## Relative Value
 
-Relative Value
 * Fixed Income Arb
 * Convertible Arb
 * Equity Market Neutral
 * Event Driven
 
-Directional
+## Directional
+
 * Equity Long/Short
-* Macro
+* Global Macro
 * CTA
 
-Alternative 2: Use existing rule-based strategies
+# Ex-post Performance
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-Cumulative-Returns.png}
 
-Basically 4 broad categories of strategy:
-- Momentum
-- Carry
-- Value
-- Volatility
+# Ex-post Performance
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-BarVaR.png}
 
-Across major asset classes:
-- Equities
-- Fixed Income
-- Commodities
-- FX
+# Ex-post Performance
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-RollPerf.png}
 
-Rules-based strategies designed to operate within a pre-defined set of rules and procedures. eliminates concerns about style drift and other issues about how various strategies perform in different states of the world. All of this data is available via Bloomberg (tickers are listed):
-Momentum - Equity - AIJPMEUU (USD)
-Momentum - FX - AIJPMF1U (USD)
-Momentum - Commodity (Energy) - AIJPMCEU (USD) - Morningstar instead?
-Momentum - Fixed Income (short dated) - AIJPMMUU
-Carry - FX (G10)- AIJPCF1U
-Carry - Fixed Income (2yr) - AIJPCB1U
-Carry - Commodity - AIJPCC1U
-Carry - All - GCSCS2UE
-Volatility - Equity (Imp vs. Realized) - AIJPSV1U
-Volatility - FX - CSVILEUS (long only)
-Volatility - Equities (CS RVIX) - CSEARVIX
-Value - Emerging Markets (bonds) - EMFXSEUS
-Value - Equities (CS HOLT RAII) - RAIIHRVU
-Value - Commodities (CS GAINS) - CSGADLSE
+# Ex-post Performance
+\includegraphics[width=0.5\textwidth]{../results/EDHEC-ScatterSinceIncept.png}
+\includegraphics[width=0.5\textwidth]{../results/EDHEC-Scatter36m.png}
 
-Alternative 3: Create rule based strategies
-Use continuous series for commodities contracts and construct trend and counter trend strategies.  More limited sources of edge than in the prior alternative, but more leveragable work.  Could add hedging pressure as a third example.  
--->
+# Ex-post Performance
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-Distributions.png}
 
-# Performance of strategies
-Cumulative returns and drawdowns chart
+# Ex-post Performance
+Add table of relevant statistics here
 
-# Performance of strategies
-BarVaR charts
-
-# Performance of strategies
-Rolling 36-month Performance
-
-# Performance of strategies
-Pair of scatterplots since inception/last 36 months
-
-# Performance of strategies
-Comparison of distributions
-
-# Correlation of strategies
-Correlation charts, from inception and trailing 36-months
+# Ex-post Correlations
+\includegraphics[width=0.5\textwidth]{../results/EDHEC-cor-inception.png}
+\includegraphics[width=0.5\textwidth]{../results/EDHEC-cor-tr36m.png}
 
 # Portfolio issues
 Markowitz (1952) described an investor's objectives as:
@@ -121,7 +96,7 @@ Markowitz (1952) described an investor's objectives as:
 * maximizing some measure of gain while
 * minimizing some measure of risk
 
-Many approaches follow Markowitz by using mean return and standard devation of returns for "risk"
+Many approaches follow Markowitz by using variance of returns for "risk"
 
 # Portfolio issues
 Most investors would prefer:
@@ -136,78 +111,54 @@ Most investors would prefer:
 Construct a portfolio that:
 
 * maximizes return,
-* with per-asset conditional constraints,
-* with a specific univariate risk limit,
-* while minimizing component risk concentration,
-* and limiting drawdowns to a threshhold value.
+* with per-asset position limits,
+* with a specific univariate portfolio risk limit,
+* defining risk as losses,
+* considering effects of skewness and kurtosis,
+* and limiting contribution of risk for constituents 
+* or minimizing component risk contribution.
 
 Not a quadratic (or linear, or conical) problem any more.
 
-# Risk rather than volatility
+# Risk, not volatility
 
 * Expected Tail Loss (ETL) is also called Conditional Value-at-Risk (CVaR) and Expected Shortfall (ES)
 * ETL is the mean expected loss when the loss exceeds the VaR
 * ETL has all the properties a risk measure should have to be coherent and is a convex function of the portfolio weights
 * Returns are skewed and/or kurtotic, so we use Cornish-Fisher (or "modified") estimates of ETL instead
+<!--- Add a picture of distribution with mVaR and mETL -->
 
-# Use Random Portfolios
-[Burns (2009)](http://www.portfolioprobe.com/blog/) describes Random Portfolios
-
-* From a portfolio seed, generate random pemutations of weights that meet your constraints on each asset
-* add more here
-
-Sampling can help provide insight into the goals and constraints of the optimization
-
-* Covers the 'edge case' (min/max) constraints well
-* Covers the 'interior' portfolios
-* Useful for finding the search space for an optimizer
-* Allows arbitrary number o fsamples
-* Allows massively parallel execution
+# ETL sensitivity
+Modified ETL demonstrates a better fit for historical CVaR at lower confidence levels, and breaks down at higher confidence levels
+*Insert chart or charts*
 
 # Add general constraints
 Constraints specified for each asset in the portfolio:
 
-* Maximum position:
-* Minimum position:
+* Maximum position: 30%
+* Minimum position: 5%
 * Weights sum to 100%
-* Weights step size of 0.5%
-
-Other settings:
-
-* Confidence for VaR/ETL set at
-* Random portfolios with X000 permutations
-* Rebalancing quarterly (or monthly?)
+* Group constraints
+* Rebalancing quarterly
 
 # Estimation
 
+<!--- Say something meaningful here -->
+
 * Optimizer chooses portfolios based on forward looking estimates of risk and return based on the portfolio moments
-* Estimates use the first four moments and co-moments
+* Usually explicitly making trade-offs between correlation and volatility among members 
+* Modified ETL extends the tradeoffs to the first four moments and co-moments
 * Historical sample moments work fine as predictors in normal market regimes, but poorly when the market regime shifts
 
-One of the largest challenges in optimization is improving the estimates of return and volatility
+One of the largest challenges in optimization is improving the estimates of the moments
 
 # Forecasting
 ## Returns
 
 ## Volatility
 
+## Correlation
 
-# Forecasting correlation
-
-# Equal-weight portfolio
-
-* Provides a benchmark to evaluate the performance of an optimized portfolio against
-* Each asset in the portfolio is purchased in the same quantity at the beginning of the period
-* The portfolio is rebalanced back to equal weight at the beginning of the next period
-* Implies no information about return or risk
-* Is the re-weighting adding or subtracting value?
-* Do we have a useful view of return and risk?
-
-# Sampled portfolios
-scatter chart with equal weight portfolio
-
-# Turnover from equal-weight
-scatter chart colored by degree of turnover
 
 # Multiple objectives
 
@@ -261,6 +212,81 @@ Minimum:
 
 Minimum risk portfolios generally suffer from the drawback of portfolio concentration.
 
+<!-- Two of these deserve more discussion -->
+
+# Equal-weight portfolio
+
+* Provides a benchmark to evaluate the performance of an optimized portfolio against
+* Each asset in the portfolio is purchased in the same quantity at the beginning of the period
+* The portfolio is rebalanced back to equal weight at the beginning of the next period
+* Implies no information about return or risk
+* Is the re-weighting adding or subtracting value?
+* Do we have a useful view of return and risk?
+
+# Equal Contribution to Risk
+
+<!--- Insert more on the methodology for equal contribution to ETL -->
+
+
+
+<!--- METHODS -->
+
+# Closed form optimizers
+
+# Use Random Portfolios
+[Burns (2009)](http://www.portfolioprobe.com/blog/) describes Random Portfolios
+
+* From a portfolio seed, generate random pemutations of weights that meet your constraints on each asset
+* add more here
+* Random portfolios with X000 permutations
+
+Sampling can help provide insight into the goals and constraints of the optimization
+
+* Covers the 'edge case' (min/max) constraints well
+* Covers the 'interior' portfolios
+* Useful for finding the search space for an optimizer
+* Allows arbitrary number of samples
+* Allows massively parallel execution
+
+# Sampled portfolios
+scatter chart with equal weight portfolio
+
+# Turnover from equal-weight
+scatter chart colored by degree of turnover
+
+# Sampled portfolios
+add assets to scatter - overconstrained?
+
+# Constrain by contribution to mETL
+Add a constraint
+
+# Differential Evolution
+All numerical optimizations are a tradeoff between speed and accuracy
+
+This space may well be non-convex in real portfolios
+
+Differential evolution will get more directed with each generation, rather than the uniform search of random portfolios
+
+Allows more logical 'space' to be searched with the same number of trial portfolios for more complex objectives
+
+doesn't test many portfolios on the interior of the portfolio space
+
+Early generations search a wider space; later generations increasingly focus on the space that is near-optimal
+
+Random jumps are performed in every generation to avoid local minima
+
+*Insert Chart*
+
+# Other Heuristic Methods
+GenSA, SOMA, 
+Such functions are very compute intensive – so linear, quadradic or conical objectives are better addressed through closed-form optimizers
+
+However, many business objectives do not fall into those categories...
+
+...and brute force solutions are often intractable
+
+<!--- RESULTS -->
+
 # Ex-ante results
 Unstacked bar chart comparing allocations across objectives
 
@@ -283,32 +309,42 @@ As a framework for strategic allocation:
 * Rebalancing periodically and examining out of sample performance can help you refine objectives
 * Differential Optimization and parallelization are valuable as objectives get more complicated
 
+
+# _PortfolioAnalytics_
+
+- Provides numerical solutions to portfolios with complex constraints and objectives comprised of any function
+- Unifies the interface across different numerical and closed-form optimizers, including ... *ADD LIST*
+- Implements a front-end to two analytical solvers: **Differential Evolution** and **Random Portfolios**
+- Preserves the flexibility to define any kind of objective and constraint
+- Work-in-progress, available on R-Forge in the _ReturnAnalytics_ project
+
+
+# Other packages
+
+## _PerformanceAnalytics_
+  * Returns-based analysis of performance and risk for financial instruments and portfolios
+
+## _ROI_
+  * Infrastructure package for optimization that facilitates use of different solvers by K. Hornik, D. Meyer, and S. Theussl
+  
+## _DEoptim_
+  * Implements Differential Evolution, a very powerful, elegant, population based stochastic function minimizer
+  
+## _xts_
+  * Time series package specifically for finance by Jeff Ryan and Josh Ulrich
+
+
+# Thanks
+* Brian Peterson
+* Kris Boudt
+* Doug Martin
+* Ross Bennett
+
 # References
 Figure out bibtex links in markup
 
 # Appendix
 Slides after this point are not likely to be included in the final presentation
-
-# _PortfolioAnalytics_
-
-- Provides numerical solutions to portfolios with complex constraints and objectives
-- Unifies the interface across different numerical and closed-form optimizers
-- Implements a front-end to two analytical solvers: **Differential Evolution** and **Random Portfolios**
-- Preserves the flexibility to define any kind of objective and constraint
-- Work-in-progress, available on R-Forge in the _ReturnAnalytics_ project
-
-# Other packages
-
-* _PerformanceAnalytics_
-  * Library of econometric functions for performance and risk analysis of financial instruments and portfolios
-
-* _rugarch_ and _rmgarch_
-  * By Alexios Ghalanos
-  * The univariate and multivariate GARCH parts of the rgarch project on R-Forge
-
-* _xts_
-  * By Jeff Ryan and Jush Ulrich
-  * Time series package specifically for finance
 
 # Scratch
 Slides likely to be deleted after this point
