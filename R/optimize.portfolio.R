@@ -61,7 +61,7 @@ optimize.portfolio_v1 <- function(
   if(inherits(mout,"try-error")) { 
 	  message(paste("portfolio moment function failed with message",mout))
   } else {
-	  dotargs <- mout
+	  dotargs <- c(dotargs,mout)
   }
 	  
   normalize_weights <- function(weights){
@@ -333,7 +333,12 @@ optimize.portfolio_v1 <- function(
       names(dotargs[pm > 0L]) <- PSOcargs[pm]
       controlPSO$maxit <- maxit
       controlPSO[pm] <- dotargs[pm > 0L]
-      if(!hasArg(reltol)) controlPSO$reltol <- .000001 # 1/1000 of 1% change in objective is significant
+      if(!hasArg(reltol)) controlPSO$reltol <- .0001 # 1/100 of 1% change in objective is insignificant enough to restart a swarm
+      #NOTE reltol has a different meaning for pso than it has for DEoptim.  for DEoptim, reltol is a stopping criteria, for pso, 
+      #     it is a restart criteria.
+        
+      if(!hasArg(s)) controlPSO$s<-N*10 #swarm size
+      if(!hasArg(maxit.stagnate)) controlPSO$maxit.stagnate <- controlPSO$s #stopping criteria      
       if(hasArg(trace) && try(trace==TRUE,silent=TRUE)) controlPSO$trace <- TRUE
       if(hasArg(trace) && isTRUE(trace)) {
           controlPSO$trace <- TRUE
