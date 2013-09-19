@@ -322,13 +322,13 @@ PortfolioAnalytics uses the \code{DEoptim} function from the R package \verb"DEo
 PortfolioAnalytics has three methods to generate random portfolios.
 \begin{enumerate}
 \item The 'sample' method to generate random portfolios is based on an idea by Pat Burns. This is the most flexible method, but also the slowest, and can generate portfolios to satisfy leverage, box, group, and position limit constraints.
-\item The 'simplex' method to generate random portfolios is based on a paper by W. T. Shaw. The simplex method is useful to generate random portfolios with the full investment constraint, where the sum of the weights is equal to 1, and min box constraints. Values for \code{min\_sum} and \code{max\_sum} of the leverage constraint will be ignored, the sum of weights will equal 1. All other constraints such as the box constraint max, group and position limit constraints will be handled by elimination. If the constraints are very restrictive, this may result in very few feasible portfolios remaining.
-\item The 'grid' method to generate random portfolios is based on the \code{gridSearch} function in package \verb"NMOF". The grid search method only satisfies the \code{min} and \code{max} box constraints. The \code{min\_sum} and \code{max\_sum} leverage constraints will likely be violated and the weights in the random portfolios should be normalized. Normalization may cause the box constraints to be violated and will be penalized in \code{constrained\_objective}.
+\item The 'simplex' method to generate random portfolios is based on a paper by W. T. Shaw. The simplex method is useful to generate random portfolios with the full investment constraint, where the sum of the weights is equal to 1, and min box constraints. Values for \code{min\_sum} and \code{max\_sum} of the leverage constraint will be ignored, the sum of weights will equal 1. All other constraints such as the box constraint max, group and position limit constraints will be handled by elimination. If the constraints are very restrictive, this may result in very few feasible portfolios remaining. Another key point to note is that the solution may not be along the vertexes depending on the objective. For example, a risk budget objective will likely place the portfolio somewhere on the interior. 
+\item The 'grid' method to generate random portfolios is based on the \code{gridSearch} function in package \verb"NMOF". The grid search method only satisfies the \code{min} and \code{max} box constraints. The \code{min\_sum} and \code{max\_sum} leverage constraint will likely be violated and the weights in the random portfolios should be normalized. Normalization may cause the box constraints to be violated and will be penalized in \code{constrained\_objective}.
 \end{enumerate}
 
 The following plots illustrate the various methods to generate random portfolios.
 
-<<fig.cap="Random portfolio methods">>=
+<<fig.cap="Random portfolio methods", fig.width=5, fig.height=5>>=
 R <- edhec[, 1:4]
 
 # set up simple portfolio with leverage and box constraints 
@@ -354,7 +354,8 @@ tmp3.mean <- apply(rp3, 1, function(x) mean(R %*% x))
 tmp3.StdDev <- apply(rp3, 1, function(x) StdDev(R=R, weights=x))
 
 # plot feasible portfolios 
-plot(x=tmp1.StdDev, y=tmp1.mean, col="gray", main="Random Portfolio Methods")
+plot(x=tmp1.StdDev, y=tmp1.mean, col="gray", main="Random Portfolio Methods",
+     ylab="mean", xlab="StdDev")
 points(x=tmp2.StdDev, y=tmp2.mean, col="red", pch=2)
 points(x=tmp3.StdDev, y=tmp3.mean, col="lightgreen", pch=5)
 legend("bottomright", legend=c("sample", "simplex", "grid"), 
@@ -381,7 +382,7 @@ par(mfrow=c(1,1))
 
 Figure 2 shows the feasible space varying the fev values.
 
-The \code{fev} argument can be passed in as a vector for more even coverage of the feasible space. The default value is \code{fev=0:5}.
+The \code{fev} argument can be passed in as a vector for more control over the coverage of the feasible space. The default value is \code{fev=0:5}.
 <<fig.cap="Random portfolio 'sample' and 'simplex' comparison">>=
 par(mfrow=c(1, 2))
 # simplex
@@ -400,8 +401,6 @@ plot(x=tmp.StdDev, y=tmp.mean, main="rp_method=sample",
      ylab="mean", xlab="StdDev", col=rgb(0, 0, 100, 50, maxColorValue=255))
 par(mfrow=c(1,1))
 @
-
-Figure 3 shows the feasible space comparing the 'sample' and 'simplex' methods to generate random portfolios.
 
 \subsection{pso}
 PortfolioAnalytics uses the \code{psoptim} function from the R package \verb"pso". Particle swarm optimization is a heuristic optimization algorithm. See \code{?psoptim} and the references contained therein for more information.
@@ -458,12 +457,11 @@ opt_maxret <- optimize.portfolio(R=R, portfolio=maxret,
 print(opt_maxret)
 @
 
-Chart the weights and optimal portfolio in risk-return space.
-<<fig.cap="Maximum Return Optimization, fig.align='center', fig.width=3, fig.height=3>>=
-chart.Weights(opt_maxret)
-chart.RiskReward(opt_maxret, risk.col="StdDev", return.col="mean", 
-                 main="Maximum Return Optimization", chart.assets=TRUE,
-                 xlim=c(0, 0.05))
+Chart the weights and optimal portfolio in risk-return space. The weights and a risk-reward scatter plot can be plotted separately as shown below with the \code{chart.Weights} and \code{chart.RiskReward} functions. The \code{plot} function will plot the weights and risk-reward scatter together.
+<<fig.cap="Maximum Return Optimization", fig.align='center', fig.width=5, fig.height=8>>=
+plot(opt_maxret, risk.col="StdDev", return.col="mean", 
+     main="Maximum Return Optimization", chart.assets=TRUE,
+     xlim=c(0, 0.05), ylim=c(0,0.0085))
 @
 
 \subsection{Minimize variance with ROI}
@@ -480,11 +478,10 @@ print(opt_minvar)
 @
 
 Chart the weights and optimal portfolio in risk-return space.
-<<fig.cap="Minimum Variance Optimization", fig.align='center', fig.width=3, fig.height=3>>=
-chart.Weights(opt_minvar)
-chart.RiskReward(opt_minvar, risk.col="StdDev", return.col="mean", 
-                 main="Minimum Variance Optimization", chart.assets=TRUE,
-                 xlim=c(0, 0.05))
+<<fig.cap="Minimum Variance Optimization", fig.align='center', fig.width=5, fig.height=8>>=
+plot(opt_minvar, risk.col="StdDev", return.col="mean", 
+     main="Minimum Variance Optimization", chart.assets=TRUE,
+     xlim=c(0, 0.05), ylim=c(0,0.0085))
 @
 
 \subsection{Maximize quadratic utility with ROI}
@@ -501,11 +498,10 @@ opt_qu <- optimize.portfolio(R=R, portfolio=qu,
 print(opt_qu)
 @
 
-<<fig.cap="Maximum Quadratic Utility Optimization", fig.align='center', fig.width=3, fig.height=3>>=
-chart.Weights(opt_qu)
-chart.RiskReward(opt_qu, risk.col="StdDev", return.col="mean", 
-                 main="Quadratic Utility Optimization", chart.assets=TRUE,
-                 xlim=c(0, 0.05))
+<<fig.cap="Maximum Quadratic Utility Optimization", fig.align='center', fig.width=5, fig.height=8>>=
+plot(opt_qu, risk.col="StdDev", return.col="mean", 
+     main="Quadratic Utility Optimization", chart.assets=TRUE,
+     xlim=c(0, 0.05), ylim=c(0, 0.0085))
 @
 
 \subsection{Minimize expected tail loss with ROI}
@@ -521,11 +517,10 @@ opt_etl <- optimize.portfolio(R=R, portfolio=etl,
 print(opt_etl)
 @
 
-<<fig.cap="Minimum ETL Optimization", fig.align='center', fig.width=3, fig.height=3>>=
-chart.Weights(opt_etl)
-chart.RiskReward(opt_etl, risk.col="ES", return.col="mean", 
-                 main="ETL Optimization", chart.assets=TRUE,
-                 xlim=c(0, 0.14))
+<<fig.cap="Minimum ETL Optimization", fig.align='center', fig.width=5, fig.height=8>>=
+plot(opt_etl, risk.col="ES", return.col="mean", 
+     main="ETL Optimization", chart.assets=TRUE,
+     xlim=c(0, 0.14), ylim=c(0,0.0085))
 @
 
 \subsection{Maximize mean return per unit ETL with random portfolios}
@@ -552,23 +547,22 @@ head(stats_meanETL)
 @
 
 Chart the optimal weights and optimal portfolio in risk-return space. Because the optimization was run with \code{trace=TRUE}, the chart of the optimal portfolio also includes the trace portfolios of the optimization. This is usefule to visualize the feasible space of the portfolios. The 'neighbor' portfolios relative to the optimal portfolio weights can be included the chart of the optimal weights.
-<<fig.cap="mean-ETL Optimization", fig.align='center', fig.width=3, fig.height=3>>=
-chart.Weights(opt_meanETL, neighbors=25)
-chart.RiskReward(opt_meanETL, risk.col="ETL", return.col="mean", 
-                 main="mean-ETL Optimization")
+<<fig.cap="mean-ETL Optimization", fig.align='center', fig.width=5, fig.height=8>>=
+plot(opt_meanETL, risk.col="ETL", return.col="mean", 
+     main="mean-ETL Optimization", neighbors=25)
 @
 
 Calculate and plot the portfolio component ETL contribution.
-<<fig.cap="mean-ETL risk contribution", fig.height=3, fig.width=3, fig.align='center'>>=
+<<fig.cap="mean-ETL risk contribution", fig.height=3.5, fig.width=3.5, fig.align='center'>>=
 pct_contrib <- ES(R=R, p=0.95, portfolio_method="component", 
                   weights=extractWeights(opt_meanETL))
-barplot(pct_contrib$pct_contrib_MES, cex.names=0.8, las=3)
+barplot(pct_contrib$pct_contrib_MES, cex.names=0.8, las=3, col="lightblue")
 @
 
 This figure shows that the Equity Market Nuetral strategy has greater than 50\% risk contribution. A risk budget objective can be added to limit risk contribution percentage to 40\%.
 
 \subsection{Maximize mean return per unit ETL with ETL risk budgets}
-Add objectives.
+Add objectives to maximize mean return per unit ETL with 40\% limit ETL risk budgets.
 <<>>=
 # change the box constraints to long only
 init$constraints[[2]]$min <- rep(0, 6)
@@ -590,21 +584,20 @@ opt_rb_meanETL <- optimize.portfolio(R=R, portfolio=rb_meanETL,
 print(opt_rb_meanETL)
 @
 
-<<fig.cap="mean=ETL Optimization with Risk Budget", fig.align='center', fig.width=4, fig.height=4>>=
-chart.Weights(opt_rb_meanETL)
-chart.RiskReward(opt_rb_meanETL, risk.col="ETL", return.col="mean", 
-                 main="Risk Budget mean-ETL Optimization",
-                 xlim=c(0,0.12), ylim=c(0.005,0.009))
+<<fig.cap="mean=ETL Optimization with Risk Budget", fig.align='center', fig.width=5, fig.height=8>>=
+plot(opt_rb_meanETL, risk.col="ETL", return.col="mean", 
+     main="Risk Budget mean-ETL Optimization",
+     xlim=c(0,0.12), ylim=c(0.005,0.009))
 @
 
 Chart the contribution to risk in percentage terms. 
-<<fig.cap="mean-ETL with Risk Budget Objective", fig.height=4, fig.width=4, fig.align='center'>>=
+<<fig.cap="mean-ETL with Risk Budget Objective", fig.height=3.5, fig.width=5, fig.align='center'>>=
 chart.RiskBudget(opt_rb_meanETL, risk.type="percentage", neighbors=25)
 @
 
 
 \subsection{Maximize mean return per unit ETL with ETL equal contribution to risk}
-Add objectives.
+Add objective to maximize mean return per unit ETL with ETL equal contribution to risk.
 <<>>=
 eq_meanETL <- add.objective(portfolio=init, type="return", name="mean")
 eq_meanETL <- add.objective(portfolio=eq_meanETL, type="risk", name="ETL",
@@ -624,15 +617,14 @@ print(opt_eq_meanETL)
 @
 
 Chart the optimal weights and optimal portfolio in risk-return space.
-<<fig.cap="mean-ETL with ETL Equal Risk Contribution", fig.align='center', fig.width=4, fig.height=4>>=
-chart.Weights(opt_eq_meanETL)
-chart.RiskReward(opt_eq_meanETL, risk.col="ETL", return.col="mean", 
-                 main="Risk Budget mean-ETL Optimization",
-                 xlim=c(0,0.12), ylim=c(0.005,0.009))
+<<fig.cap="mean-ETL with ETL Equal Risk Contribution", fig.align='center', fig.width=5, fig.height=8>>=
+plot(opt_eq_meanETL, risk.col="ETL", return.col="mean", 
+     main="Risk Budget mean-ETL Optimization",
+     xlim=c(0,0.12), ylim=c(0.005,0.009))
 @
 
 Chart the contribution to risk in percentage terms. It is clear in this chart that the optimization results in a near equal risk contribution portfolio.
-<<fig.cap="Percentage Contibution to Risk", fig.height=4, fig.width=4,fig.align='center'>>=
+<<fig.cap="Percentage Contibution to Risk", fig.height=3.5, fig.width=5,fig.align='center'>>=
 chart.RiskBudget(opt_eq_meanETL, risk.type="percentage", neighbors=25)
 @
 
@@ -655,25 +647,25 @@ extractWeights(opt_combine)
 obj_combine <- extractObjectiveMeasures(opt_combine)
 @
 
-<<fig.cap="Optimal Weights of Optimizations", fig.height=4, fig.width=4, fig.align='center'>>=
+<<fig.cap="Optimal Weights of Optimizations", fig.height=3.5, fig.width=5, fig.align='center'>>=
 chart.Weights(opt_combine, plot.type="bar", legend.loc="topleft", ylim=c(0, 1))
 @
 
 Chart the optimal portfolios of each optimization in risk-return space.
-<<fig.cap="Optimal Portfolios in Risk-Return Space", fig.height=4, fig.width=4, fig.align='center'>>=
+<<fig.cap="Optimal Portfolios in Risk-Return Space", fig.height=4, fig.width=6, fig.align='center'>>=
 chart.RiskReward(opt_combine, risk.col="ETL", return.col="mean", 
-                 main="ETL Optimization Comparison", xlim=c(0.018, 0.025),
+                 main="ETL Optimization Comparison", xlim=c(0.018, 0.024),
                  ylim=c(0.005, 0.008))
 @
 
 Calculate the STARR of each optimization
-<<fig.cap="STARR of Optimizations", fig.height=3, fig.width=3, fig.align='center'>>=
+<<fig.cap="STARR of Optimizations", fig.height=3.5, fig.width=5, fig.align='center'>>=
 STARR <- obj_combine[, "mean"] / obj_combine[, "ETL"]
 barplot(STARR, col="blue", cex.names=0.8, cex.axis=0.8,
         las=3, main="STARR", ylim=c(0,1))
 @
 
-<<fig.cap="Percentage Contribution to Risk of Optimizations", fig.height=3, fig.width=3, fig.align='center'>>=
+<<fig.cap="Percentage Contribution to Risk of Optimizations", fig.height=3.5, fig.width=5, fig.align='center'>>=
 chart.RiskBudget(opt_combine, match.col="ETL", risk.type="percent", 
                  ylim=c(0,1), legend.loc="topright")
 @
