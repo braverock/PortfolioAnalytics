@@ -483,7 +483,7 @@ rp_simplex <- function(portfolio, permutations, fev=0:5, ...){
   k <- ceiling(permutations / length(fev))
   
   # generate uniform[0, 1] random numbers
-  U <- runif(n=k*permutations, 0, 1)
+  U <- runif(n=k*length(fev)*nassets, 0, 1)
   Umat <- matrix(data=U, nrow=k, ncol=nassets)
   
   # do the transformation to the set of weights to satisfy lower bounds
