@@ -53,95 +53,7 @@ Insert process diagram here? Optional
 - Apply within the context of the current economic and market situation
 - Think systematically about preferences and constraints
 
-<!-- This slide is tired:
-# Portfolio issues
-Markowitz (1952) described an investor's objectives as:
-
-* maximizing some measure of gain while
-* minimizing some measure of risk
-
-Many approaches follow Markowitz by using variance of returns for "risk"
--->
-
-# Portfolio preferences
-Construct a portfolio that:
-
-* maximizes return,
-* with per-asset position limits,
-* with a specific univariate portfolio risk limit,
-* defining risk as losses,
-* considering effects of skewness and kurtosis,
-* and limiting contribution of risk for constituents 
-* or equalizing component risk contribution.
-
-<!-- Not a quadratic (or linear, or conical) problem any more. -->
-
-# Optimization frustration
-Most investors would prefer:
-
-* to be approximately correct rather than precisely wrong
-* to define risk as potential loss rather than volatility
-* the flexibility to define any kind of objective and combine the constraints
-* a framework for considering different sets of portfolio constraints for comparison through time
-* to intuitively understand optimization through visualization
-
-# Risk budgeting
-* Used to allocate the "risk" of a portfolio 
-* Decomposes the total portfolio risk into the risk contribution of each component position
-* Literature on risk contribution has focused on volatility rather than downside risk
-* Most financial returns series seem non-normal
-
-<--! Two-column slide with a facing histogram and qqplot -->
-
-# Measuring risk, not volatility
-Measured with portfolio Conditional Value-at-Risk (CVaR)
-
-* Also called Expected Tail Loss (ETL) and Expected Shortfall (ES)
-* ETL is the mean expected loss when the loss exceeds the VaR
-* ETL has all the properties a risk measure should have to be coherent and is a convex function of the portfolio weights
-* To account for skew and/or kurtosis, use Cornish-Fisher (or "modified") estimates of ETL instead (mETL)
-
-<!--- Same histogram/qqplot as prior slide with mVaR and mETL marked -->
-
-# ETL sensitivity
-Modified ETL demonstrates a better fit for historical CVaR at lower confidence levels, and can break down at higher confidence levels
-*Insert chart or charts*
-
-<!-- discuss cleaning? -->
-
-# _Ex ante_, not _ex post_
-The use of _ex ante_ risk budgets is more recent
-
-* Qian (2005): "risk parity portfolio" allocates portfolio variance equally
-* Maillard _et al_ (2010): "equally-weighted risk contribution portfolio" or (ERC)
-* Zhu _et al_ (2010): optimal mean-variance portfolio selection under constrained contributions
-
-We want to look at the allocation of risk through _ex ante_ downside risk contribution
-
-# Contribution to downside risk, not volatility
-Use the modified CVaR contribution estimator from Boudt, _et al_ (2008)
-
-* CVaR contributions correspond to the conditional expectation of the return of the portfolio component when the portfolio loss is larger than its VaR loss.
-* %CmETL is the ratio of the expected return on the position when the portfolio experiences a beyond-VaR loss to the expected value of the portfolio loss
-* A high positive %CmETL indicates the position has a large loss when the portfolio also has a large loss
-* The higher the percentage mETL, the more the portfolio downside risk is concentrated on that asset
-* Allows us to directly optimize downside risk diversification
-* Lends itself to a simple algorithm that computes both CVaR and component CVaR in less than a second, even for large portfolios
-
-We can use CVaR contributions as an objective or constraint in portfolio optimization
-
-# Two strategies for using downside contribution in allocation
-## Equalize downside risk contribution
-
-* Define downside risk diversification as an objective
-
-## Downside risk budget
-
-* Impose bound constraints on the percentage mETL contributions
-
-
-# An example
-describe the example as a case study
+Here we'll consider a strategic allocation to hedge funds
 
 # Selected hedge fund strategies
 Monthly data of EDHEC hedge fund indexes from 1998
@@ -159,30 +71,130 @@ Monthly data of EDHEC hedge fund indexes from 1998
 * Global Macro
 * CTA
 
-# Ex-post Performance
+# Index Performance
 \includegraphics[width=1.0\textwidth]{../results/EDHEC-Cumulative-Returns.png}
 
-# Ex-post Performance
-\includegraphics[width=1.0\textwidth]{../results/EDHEC-BarVaR.png}
-
-# Ex-post Performance
+# Index Performance
 \includegraphics[width=1.0\textwidth]{../results/EDHEC-RollPerf.png}
 
-# Ex-post Performance
-\includegraphics[width=0.5\textwidth]{../results/EDHEC-ScatterSinceIncept.png}
-\includegraphics[width=0.5\textwidth]{../results/EDHEC-Scatter36m.png}
-
-# Ex-post Performance
-\includegraphics[width=1.0\textwidth]{../results/EDHEC-Distributions.png}
-
-# Ex-post Performance
+# Index Performance
 Add table of relevant statistics here
 
 # Ex-post Correlations
 \includegraphics[width=0.5\textwidth]{../results/EDHEC-cor-inception.png}
 \includegraphics[width=0.5\textwidth]{../results/EDHEC-cor-tr36m.png}
 
-# Add general constraints
+<!-- This slide is tired:
+# Portfolio issues
+Markowitz (1952) described an investor's objectives as:
+
+* maximizing some measure of gain while
+* minimizing some measure of risk
+
+Many approaches follow Markowitz by using variance of returns for "risk"
+-->
+
+# Investor preferences...
+In constructing a portfolio, most investors would prefer:
+
+* to be approximately correct rather than precisely wrong
+* the flexibility to define any kind of objective and combine the constraints
+* to define risk as potential loss rather than volatility
+* a framework for considering different sets of portfolio constraints for comparison through time
+* to intuitively understand optimization through visualization
+
+<!-- Comments:
+Investors frequently encounter frustration with optimizers when applying them to portfolios
+
+They want to specify objectives that are difficult to solve;
+They care about losses, really and truly;
+They keep adding new constraints as they think of situations they would like to avoid;
+They want to easily (usually visually) compare alternatives to better understand how the rules they specify for limiting these trade-offs affect the choices being made.
+-->
+
+# ... Lead to portfolio preferences
+Construct a portfolio that:
+
+* maximizes return,
+* with per-asset position limits,
+* with a specific univariate portfolio risk limit,
+* defines risk as losses,
+* considers the effects of skewness and kurtosis, and
+* either limits contribution of risk for constituents or
+* equalizes component risk contribution.
+
+<!-- Not a quadratic (or linear, or conical) problem any more. -->
+
+# Risk budgeting
+* Used to allocate the "risk" of a portfolio 
+* Decomposes the total portfolio risk into the risk contribution of each component position
+* Literature on risk contribution has focused on volatility rather than downside risk
+* Most financial returns series seem non-normal, so we want to consider the effects of higher moments
+
+# Return distributions
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-Distributions.png}
+
+# Measuring risk, not volatility
+Measure risk with Conditional Value-at-Risk (CVaR)
+
+* Also called Expected Tail Loss (ETL) and Expected Shortfall (ES)
+* ETL is the mean expected loss when the loss exceeds the VaR
+* ETL has all the properties a risk measure should have to be coherent and is a convex function of the portfolio weights
+* To account for skew and/or kurtosis, use Cornish-Fisher (or "modified") estimates of ETL instead (mETL)
+
+# Measuring risk
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-BarVaR.png}
+
+# Measuring risk
+Split graphic into two pages so it's readable
+
+# ETL sensitivity
+Modified ETL demonstrates a better fit for historical CVaR at lower confidence levels, and can break down at higher confidence levels
+*Insert chart or charts*
+
+<!-- discuss cleaning? -->
+
+# _Ex ante_, not _ex post_
+_Ex post_ analysis of risk contribution has been around for a while
+
+* Litterman ()
+
+The use of _ex ante_ risk budgets is more recent
+
+* Qian (2005): "risk parity portfolio" allocates portfolio variance equally
+* Maillard _et al_ (2010): "equally-weighted risk contribution portfolio" or (ERC)
+* Zhu _et al_ (2010): optimal mean-variance portfolio selection under constrained contributions
+
+We want to look at the allocation of risk through _ex ante_ downside risk contribution
+
+# Contribution to downside risk
+Use the modified CVaR contribution estimator from Boudt, _et al_ (2008)
+
+* CVaR contributions correspond to the conditional expectation of the return of the portfolio component when the portfolio loss is larger than its VaR loss.
+* %CmETL is the ratio of the expected return on the position when the portfolio experiences a beyond-VaR loss to the expected value of the portfolio loss
+* A high positive %CmETL indicates the position has a large loss when the portfolio also has a large loss
+
+<!-- Comments:
+Enabled through the Euler decomposition 
+-->
+
+# Contribution to downside risk
+* The higher the percentage mETL, the more the portfolio downside risk is concentrated on that asset
+* Allows us to directly optimize downside risk diversification
+* Lends itself to a simple algorithm that computes both CVaR and component CVaR in less than a second, even for large portfolios
+
+We can use CVaR contributions as an objective or constraint in portfolio optimization
+
+# Two strategies for using downside contribution in allocation
+## Equalize downside risk contribution
+
+* Define downside risk diversification as an objective
+
+## Downside risk budget
+
+* Impose bound constraints on the percentage mETL contributions
+
+# Start with some general constraints
 Constraints specified for each asset in the portfolio:
 
 * Maximum position: 30%
@@ -191,26 +203,21 @@ Constraints specified for each asset in the portfolio:
 * Group constraints
 * Rebalancing quarterly
 
-# Estimation
-
-<!--- Say something meaningful here -->
-
-* Optimizer chooses portfolios based on forward looking estimates of risk and return based on the portfolio moments
-* Usually explicitly making trade-offs between correlation and volatility among members 
-* Modified ETL extends the tradeoffs to the first four moments and co-moments
-* Historical sample moments work fine as predictors in normal market regimes, but poorly when the market regime shifts
-
+# Estimate
 One of the largest challenges in optimization is improving the estimates of the moments
 
-# Forecasting
-## Returns
+* Optimizer chooses portfolios based on forward looking estimates of risk and return based on the constituent moments
+* Usually explicitly making trade-offs between correlation and volatility among members 
+* Modified ETL extends the tradeoffs to the first four moments and co-moments
+* Historical sample moments are used here as predictors 
 
-## Volatility
+<!-- Comments:
+Historical sample moments work fine in in normal market regimes, but poorly when the market regime shifts
+For the purposes of this presentation, we're going to ignore this very important topic.
+*** We should discuss using some form of improved but standard method here as to not be completely stupid ***
+-->
 
-## Correlation
-
-
-# Multiple objectives
+# Define multiple objectives
 
 Equal contribution to:
 
@@ -228,7 +235,7 @@ Minimum:
 * variance
 * modified ETL
 
-<!-- Most of these are obvious, so just describe verbally on the prior slide
+<!--Comments:
 # Equal contribution...
 ...to Weight
 
@@ -288,30 +295,42 @@ The risk parity constraint that requires all assets to contribute to risk equall
 <!--- Insert more on the methodology for equal contribution to ETL -->
 
 # Constrained Risk Contribution
-Risk Budget as an eighth objective?
+Risk Budget as an eighth objective set
 
+* Drop the position constraints altogether
+* No non-directional constituent may contribute more than 40% to portfolio risk
+* No directional constituent may contribute more than 30% to portfolio risk, except for...
+* ... Distressed, which cannot contribute more than 15% 
+* Directional, as a group, may not contribute more than 60% of the risk to the portfolio
 
+<!-- Comments:
+Starts to sound more like a policy 
+-->
 
 <!--- METHODS -->
 
 # Optimizers
 ## Closed-form
 
-* add list from PortfA
-* discuss stress testing briefly
+* Linear programming (LP) and mixed integer linear programming (MILP)
+* Quadratic programming
 
-## Heuristic
+## General Purpose Continuous Solvers
 
 * Random portfolios
 * Differential evolution
-* Others
+* Partical swarm 
+* Simulated annealing
+
+<!-- Comments:
+Such functions are very compute intensive - so linear, quadradic or conical objectives are better addressed through closed-form optimizers.  However, many business objectives do not fall into those categories, and brute force solutions are often intractable
+-->
 
 # Random Portfolios
-[Burns (2009)](http://www.portfolioprobe.com/blog/) describes Random Portfolios
+It is what it sounds like
 
-* From a portfolio seed, generate random pemutations of weights that meet your constraints on each asset
-* add more here
-* Random portfolios with X000 permutations
+* From a portfolio seed, generate random permutations of weights that meet your constraints 
+* Several methods: [Burns (2009)](http://www.portfolioprobe.com/blog/), Shaw (2010), and Gilli, _et al_ (2011)
 
 Sampling can help provide insight into the goals and constraints of the optimization
 
@@ -320,6 +339,17 @@ Sampling can help provide insight into the goals and constraints of the optimiza
 * Useful for finding the search space for an optimizer
 * Allows arbitrary number of samples
 * Allows massively parallel execution
+
+<!-- Comments:
+The 'sample' method to generate random portfolios is based on an idea by Pat Burns. This is the most flexible method, but also the slowest, and can generate portfolios to satisfy leverage, box, group, and position limit constraints.  *** What about Portfolio attribute constraints? Should ***
+
+The 'simplex' method to generate random portfolios is based on a paper by W. T. Shaw. The simplex method is useful to generate random portfolios with the full investment constraint, where the sum of the weights is equal to 1, and min box constraints. Many other constraints such as the box constraint max, group and position limit constraints will be handled by elimination. 
+
+The 'grid' method to generate random portfolios is based on the gridSearch function in package NMOF. The grid search method only satisfies the min and max box constraints.
+-->
+
+
+<!--- RESULTS -->
 
 # Sampled portfolios
 scatter chart with equal weight portfolio
@@ -333,10 +363,92 @@ add assets to scatter - overconstrained?
 # Constrain by contribution to mETL
 Add a constraint
 
+# Ex-ante results
+scatter plot with multiple objectives
+
+# Ex-ante results
+scatter plot with multiple objectives, but in ETL space rather than variance
+
+# Ex-ante results
+Unstacked bar chart comparing allocations across objectives
+
+# Out-of-sample results
+timeseries charts for cumulative return and drawdown
+
+# Risk contribution
+stacked bar chart of risk contribution through time (ex ante and ex post)
+
+# Conclusions
+As a framework for strategic allocation:
+
+* Component contribution to risk is a useful tool
+* Random Portfolios can help you build intuition about your objectives and constraints
+* Rebalancing periodically and examining out of sample performance can help you refine objectives
+* Differential Optimization and parallelization are valuable as objectives get more complicated
+
+# R Packages used
+
+## _PortfolioAnalytics_
+
+- Provides numerical solutions to portfolios with complex constraints and objectives comprised of any function
+- Unifies the interface across different closed-form optimizers and several analytical solvers
+- Implements three methods for generating Random Portfolios, including 'sample', 'simplex', and 'grid'
+- Preserves the flexibility to define any kind of objective and constraint
+- Work-in-progress, available on R-Forge in the _ReturnAnalytics_ project
+
+## _PerformanceAnalytics_
+  * Returns-based analysis of performance and risk for financial instruments and portfolios, available on CRAN
+
+# Other packages
+## _ROI_
+  * Infrastructure package by K. Hornik, D. Meyer, and S. Theussl for optimization that facilitates use of different solvers...
+  
+## RGLPK
+  * ... such as GLPK, open source software for solving large-scale linear programming (LP), mixed integer linear programming (MILP) and other related problems
+  
+## quadprog
+  * ... or this one, used for solving quadratic programming problems
+  
+# Other packages
+## _DEoptim_
+  * Implements Differential Evolution, a very powerful, elegant, population based stochastic function minimizer
+
+## _GenSA_
+  *  Implements functions for Generalized Simulated Annealing
+  
+## _pso_
+  * An implementation of Partical Swarm Optimization consistent with the standard PSO 2007/2011 by Maurice Clerc, _et al._
+
+# Other packages
+## _foreach_
+* Steve Weston's remarkable parallel computing framework, which maps functions to data and aggregates results in parallel across multiple CPU cores and computers...
+
+## _doRedis_
+  * A companion package to _foreach_ by Bryan Lewis that implements a simple but very flexible parallel back end to Redis, making it to run parallel jobs across multiple R sessions.
+
+## _doMPI_
+  * Another companion to _foreach_ that provides a parallel backend across cores using the _parallel_ package
+
+## _xts_
+  * Time series package specifically for finance by Jeff Ryan and Josh Ulrich
+
+
+# Thanks
+* Brian Peterson
+* Kris Boudt
+* Doug Martin
+* Ross Bennett
+
+# References
+Figure out bibtex links in markup
+
+http://www.portfolioprobe.com/about/random-portfolios-in-finance/
+
+# Appendix
+Slides after this point are not likely to be included in the final presentation
+
 # Differential Evolution
 All numerical optimizations are a tradeoff between speed and accuracy
-
-This space may well be non-convex in real portfolios
 
 Differential evolution will get more directed with each generation, rather than the uniform search of random portfolios
 
@@ -352,72 +464,12 @@ Random jumps are performed in every generation to avoid local minima
 
 # Other Heuristic Methods
 GenSA, SOMA, 
-Such functions are very compute intensive – so linear, quadradic or conical objectives are better addressed through closed-form optimizers
 
-However, many business objectives do not fall into those categories...
 
-...and brute force solutions are often intractable
-
-<!--- RESULTS -->
-
-# Ex-ante results
-scatter plot with multiple objectives
-
-# Ex-ante results
-Unstacked bar chart comparing allocations across objectives
-
+<!-- Delete or leave in appendix? -->
 # Ex-ante vs. ex-post results
 scatter plot with both overlaid
 
-# Out-of-sample results
-timeseries charts for cumulative return and drawdown
-
-# Risk contribution
-stacked bar chart of risk contribution through time (ex ante and ex post)
-
-# Conclusions
-As a framework for strategic allocation:
-
-* Random Portfolios can help you build intuition about your objectives and constraints
-* Rebalancing periodically and examining out of sample performance can help you refine objectives
-* Differential Optimization and parallelization are valuable as objectives get more complicated
-
-
-# _PortfolioAnalytics_
-
-- Provides numerical solutions to portfolios with complex constraints and objectives comprised of any function
-- Unifies the interface across different numerical and closed-form optimizers, including ... *ADD LIST*
-- Implements a front-end to two analytical solvers: **Differential Evolution** and **Random Portfolios**
-- Preserves the flexibility to define any kind of objective and constraint
-- Work-in-progress, available on R-Forge in the _ReturnAnalytics_ project
-
-
-# Other packages
-
-## _PerformanceAnalytics_
-  * Returns-based analysis of performance and risk for financial instruments and portfolios
-
-## _ROI_
-  * Infrastructure package for optimization that facilitates use of different solvers by K. Hornik, D. Meyer, and S. Theussl
-  
-## _DEoptim_
-  * Implements Differential Evolution, a very powerful, elegant, population based stochastic function minimizer
-  
-## _xts_
-  * Time series package specifically for finance by Jeff Ryan and Josh Ulrich
-
-
-# Thanks
-* Brian Peterson
-* Kris Boudt
-* Doug Martin
-* Ross Bennett
-
-# References
-Figure out bibtex links in markup
-
-# Appendix
-Slides after this point are not likely to be included in the final presentation
 
 # Scratch
 Slides likely to be deleted after this point
