@@ -638,7 +638,7 @@ The \code{opt\_meanETL}, \code{opt\_rb\_meanETL}, and \code{opt\_eq\_meanETL} op
 
 Combine the optimizations for easy comparison.
 <<>>=
-opt_combine <- optimizations.combine(list(meanETL=opt_meanETL,
+opt_combine <- combine.optimizations(list(meanETL=opt_meanETL,
                                           rbmeanETL=opt_rb_meanETL,
                                           eqmeanETL=opt_eq_meanETL))
 

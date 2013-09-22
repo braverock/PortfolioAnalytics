@@ -37,7 +37,7 @@ opt.gmv.short <- optimize.portfolio(R=R, portfolio=port.gmv.short, optimize_meth
 opt.qu <- optimize.portfolio(R=R, portfolio=port.qu, optimize_method="ROI", trace=TRUE)
 
 
-opt <- optimizations.combine(list(GMV.LO=opt.gmv.lo, GMV.SHORT=opt.gmv.short, QU=opt.qu))
+opt <- combine.optimizations(list(GMV.LO=opt.gmv.lo, GMV.SHORT=opt.gmv.short, QU=opt.qu))
 class(opt)
 
 chart.Weights(opt, legend.loc="topleft", cex.legend=0.8, ylim=c(-0.3, 1))
