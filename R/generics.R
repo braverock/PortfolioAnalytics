@@ -257,11 +257,6 @@ print.constraint <- function(x, ...){
 #' @param \dots any other passthru parameters
 #' @param digits the number of significant digits to use when printing.
 #' @author Ross Bennett
-#' @aliases print.optimize.portfolio.ROI,
-#'  print.optimize.portfolio.random,
-#'  print.optimize.portfolio.DEoptim,
-#'  print.optimize.portfolio.GenSA,
-#'  print.optimize.portfolio.pso
 #' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.ROI
 #' @S3method print optimize.portfolio.ROI

@@ -266,30 +266,6 @@ charts.RP <- function(RP, risk.col, return.col, chart.assets=FALSE, neighbors=NU
 }
 
 
-#' plot method for optimize.portfolio.random output
-#' 
-#' Scatter and weights chart for random portfolio optimizations run with trace=TRUE
-#' 
-#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights.
-#' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights.
-#' 
-#' \code{neighbors} may be specified in three ways.  
-#' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
-#' portfolios in terms of the \code{out} numerical statistic.
-#' The second method consists of a numeric vector for \code{neighbors}.
-#' This will extract the \code{neighbors} with portfolio index numbers that correspond to the vector contents.
-#' The third method for specifying \code{neighbors} is to pass in a matrix.  
-#' This matrix should look like the output of \code{\link{extractStats}}, and should contain
-#' \code{risk.col},\code{return.col}, and weights columns all properly named.  
-#' @param x set of portfolios created by \code{\link{optimize.portfolio}}
-#' @param ... any other passthru parameters 
-#' @param return.col string name of column to use for returns (vertical axis)
-#' @param risk.col string name of column to use for risk (horizontal axis)
-#' @param chart.assets TRUE/FALSE to include risk-return scatter of assets
-#' @param neighbors set of 'neighbor portfolios to overplot
-#' @param xlim set the limit on coordinates for the x-axis
-#' @param ylim set the limit on coordinates for the y-axis
-#' @param main an overall title for the plot: see \code{\link{title}}
 #' @rdname plot
 #' @method plot optimize.portfolio.random
 #' @S3method plot optimize.portfolio.random
@@ -297,29 +273,7 @@ plot.optimize.portfolio.random <- function(x, ..., return.col='mean', risk.col='
     charts.RP(RP=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
 }
 
-#' plot method for optimize.portfolio output
-#' 
-#' Scatter and weights chart for portfolio optimization
-#' 
-#' This is a fallback that will be called for classes of portfolio that do not have specific pre-existing plot methods.
-#' 
-#' \code{neighbors} may be specified in three ways.  
-#' The first is as a single number of neighbors.  This will extract the \code{neighbors} closest 
-#' portfolios in terms of the \code{out} numerical statistic.
-#' The second method consists of a numeric vector for \code{neighbors}.
-#' This will extract the \code{neighbors} with portfolio index numbers that correspond to the vector contents.
-#' The third method for specifying \code{neighbors} is to pass in a matrix.  
-#' This matrix should look like the output of \code{\link{extractStats}}, and should contain
-#' \code{risk.col},\code{return.col}, and weights columns all properly named.  
-#' @param x set of portfolios created by \code{\link{optimize.portfolio}}
-#' @param ... any other passthru parameters 
-#' @param return.col string name of column to use for returns (vertical axis)
-#' @param risk.col string name of column to use for risk (horizontal axis)
-#' @param chart.assets TRUE/FALSE to include risk-return scatter of assets
-#' @param neighbors set of 'neighbor portfolios to overplot
-#' @param xlim set the limit on coordinates for the x-axis
-#' @param ylim set the limit on coordinates for the y-axis
-#' @param main an overall title for the plot: see \code{\link{title}}
+
 #' @rdname plot
 #' @method plot optimize.portfolio
 #' @S3method plot optimize.portfolio

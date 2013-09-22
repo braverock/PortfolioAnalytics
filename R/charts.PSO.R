@@ -211,26 +211,7 @@ charts.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE
   par(op)
 }
 
-#' plot method for optimize.portfolio.pso output
-#' 
-#' Scatter and weights chart for pso portfolio optimizations run with trace=TRUE
-#' 
-#' \code{return.col} must be the name of a function used to compute the return metric on the random portfolio weights.
-#' \code{risk.col} must be the name of a function used to compute the risk metric on the random portfolio weights.
-#' 
-#' @param x object created by \code{\link{optimize.portfolio}}
-#' @param ... any other passthru parameters 
-#' @param return.col string matching the objective of a 'return' objective, on vertical axis
-#' @param risk.col string matching the objective of a 'risk' objective, on horizontal axis
-#' @param chart.assets TRUE/FALSE to include risk-return scatter of assets
-#' @param cex.axis The magnification to be used for axis annotation relative to the current setting of \code{cex}
-#' @param element.color color for the default plot scatter points
-#' @param neighbors set of 'neighbor' portfolios to overplot
-#' @param main an overall title for the plot: see \code{\link{title}}
-#' @param xlim set the limit on coordinates for the x-axis
-#' @param ylim set the limit on coordinates for the y-axis
-#' @seealso \code{\link{optimize.portfolio}}
-#' @author Ross Bennett
+
 #' @rdname plot
 #' @method plot optimize.portfolio.pso
 #' @S3method plot optimize.portfolio.pso

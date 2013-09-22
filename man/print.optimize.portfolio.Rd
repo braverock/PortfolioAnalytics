@@ -1,13 +1,9 @@
-\name{print.optimize.portfolio.ROI}
+\name{print.optimize.portfolio}
 \alias{print.optimize.portfolio.DEoptim}
-\alias{print.optimize.portfolio.DEoptim,}
 \alias{print.optimize.portfolio.GenSA}
-\alias{print.optimize.portfolio.GenSA,}
 \alias{print.optimize.portfolio.pso}
 \alias{print.optimize.portfolio.random}
-\alias{print.optimize.portfolio.random,}
 \alias{print.optimize.portfolio.ROI}
-\alias{print.optimize.portfolio.ROI,}
 \title{Printing output of optimize.portfolio}
 \usage{
   \method{print}{optimize.portfolio.ROI} (x, ...,
