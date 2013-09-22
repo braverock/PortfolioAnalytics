@@ -1,0 +1,19 @@
+\name{combine.optimizations}
+\alias{combine.optimizations}
+\title{Combine objects created by optimize.portfolio}
+\usage{
+  combine.optimizations(x)
+}
+\arguments{
+  \item{x}{a list of objects created by
+  \code{\link{optimize.portfolio}}}
+}
+\value{
+  an \code{opt.list} object
+}
+\description{
+  This function takes a list of objects created by
+  \code{\link{optimize.portfolio}} and sets the class name
+  attribute to 'opt.list' for use in generic functions
+}
+

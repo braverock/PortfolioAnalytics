@@ -8,7 +8,7 @@
 #' @param x a list of objects created by \code{\link{optimize.portfolio}}
 #' @return an \code{opt.list} object
 #' @export
-optimizations.combine <- function(x){
+combine.optimizations <- function(x){
   if(!is.list(x)) stop("x must be passed in as a list")
   for(i in 1:length(x)){
     if(!inherits(x[[i]], "optimize.portfolio")) stop("All objects in x must be of class 'optimize.portfolio'")
