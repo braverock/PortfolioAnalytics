@@ -87,6 +87,7 @@ chart.Weights.DE <- function(object, neighbors = NULL, ..., main="Weights", las 
 }
 
 #' @rdname chart.Weights
+#' @name chart.Weights
 #' @method chart.Weights optimize.portfolio.DEoptim
 #' @S3method chart.Weights optimize.portfolio.DEoptim
 chart.Weights.optimize.portfolio.DEoptim <- chart.Weights.DE
@@ -291,6 +292,7 @@ chart.Scatter.DE <- function(object, ..., neighbors = NULL, return.col='mean', r
 }
 
 #' @rdname chart.RiskReward
+#' @name chart.RiskReward
 #' @method chart.RiskReward optimize.portfolio.DEoptim
 #' @S3method chart.RiskReward optimize.portfolio.DEoptim
 chart.RiskReward.optimize.portfolio.DEoptim <- chart.Scatter.DE

@@ -1,4 +1,4 @@
-\name{chart.Weights.optimize.portfolio.DEoptim}
+\name{chart.Weights}
 \alias{chart.Weights}
 \alias{chart.Weights.opt.list}
 \alias{chart.Weights.optimize.portfolio.DEoptim}
@@ -6,7 +6,6 @@
 \alias{chart.Weights.optimize.portfolio.pso}
 \alias{chart.Weights.optimize.portfolio.random}
 \alias{chart.Weights.optimize.portfolio.ROI}
-\alias{chart.Weights.optimize.portfolio.RP}
 \title{boxplot of the weights of the optimal portfolios}
 \usage{
   \method{chart.Weights}{optimize.portfolio.DEoptim} (object, neighbors = NULL, ..., main = "Weights",

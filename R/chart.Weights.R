@@ -25,7 +25,7 @@
 #' @seealso \code{\link{optimize.portfolio}}
 #' @rdname chart.Weights
 #' @name chart.Weights
-#' @aliases chart.Weights.optimize.portfolio.ROI chart.Weights.optimize.portfolio.DEoptim chart.Weights.optimize.portfolio.pso chart.Weights.optimize.portfolio.RP chart.Weights.optimize.portfolio.GenSA
+#' @aliases chart.Weights.optimize.portfolio.ROI chart.Weights.optimize.portfolio.DEoptim chart.Weights.optimize.portfolio.pso chart.Weights.optimize.portfolio.GenSA
 #' @export
 chart.Weights <- function(object, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
   UseMethod("chart.Weights")
