@@ -2,48 +2,53 @@
 #' Generic method to chart risk contribution
 #' 
 #' This function is the generic method to chart risk budget objectives for 
-#' \code{optimize.portfolio} and \code{opt.list} objects.
+#' \code{optimize.portfolio} and \code{opt.list} objects. This function charts 
+#' the contribution or percent contribution of the resulting objective measures 
+#' of a \code{risk_budget_objective}.
+#' 
+#' @details
+#' \code{neighbors} may be specified in three ways.  
+#' The first is as a single number of neighbors. This will extract the 
+#' \code{neighbors} closest to the portfolios in terms of the \code{out} 
+#' numerical statistic.
+#' The second method consists of a numeric vector for \code{neighbors}.
+#' This will extract the \code{neighbors} with portfolio index numbers that 
+#' correspond to the vector contents.
+#' The third method for specifying \code{neighbors} is to pass in a matrix.  
+#' This matrix should look like the output of \code{\link{extractStats}}, and 
+#' should contain properly named contribution and pct_contrib columns. 
 #' 
 #' @param object optimal portfolio object created by \code{\link{optimize.portfolio}}
-#' @param ... passthrough parameters to \code{\link{plot}}
+#' @param \dots any other passthru parameters to \code{\link{plot}}
+#' @param neighbors risk contribution or pct_contrib of neighbor portfolios to be plotted, see Details.
+#' @param match.col string of risk column to match. The \code{opt.list} object 
+#' may contain risk budgets for ES or StdDev and this will match the proper 
+#' column names of the objectives list outp (e.g. ES.contribution).
+#' @param risk.type "absolute" or "percentage" to plot risk contribution in absolute terms or percentage contribution.
+#' @param main main title for the chart.
+#' @param plot.type "line" or "barplot".
+#' @param ylab label for the y-axis.
+#' @param xlab label for the x-axis.
+#' @param cex.axis the magnification to be used for axis annotation relative to the current setting of \code{cex}.
+#' @param cex.lab the magnification to be used for axis annotation relative to the current setting of \code{cex}.
+#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
+#' @param las numeric in \{0,1,2,3\}; the style of axis labels
+#'       \describe{
+#'         \item{0:}{always parallel to the axis [\emph{default}],}
+#'         \item{1:}{always horizontal,}
+#'         \item{2:}{always perpendicular to the axis,}
+#'         \item{3:}{always vertical.}
+#'       }
+#' @param ylim set the y-axis limit, same as in \code{\link{plot}}
+#' @param colorset color palette or vector of colors to use
+#' @param legend.loc legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted
+#' @param cex.legend The magnification to be used for the legend relative to the current setting of \code{cex}
 #' @export
 chart.RiskBudget <- function(object, ...){
   UseMethod("chart.RiskBudget")
 }
 
-#' Chart risk contribution of an \code{optimize.portfolio} object
-#' 
-#' This function charts the contribution or percent contribution of the resulting
-#' objective measures in \code{risk_budget_objectives}.
-#' 
-#' \code{neighbors} may be specified in three ways.  
-#' The first is as a single number of neighbors. This will extract the \code{neighbors} closest 
-#' portfolios in terms of the \code{out} numerical statistic.
-#' The second method consists of a numeric vector for \code{neighbors}.
-#' This will extract the \code{neighbors} with portfolio index numbers that correspond to the vector contents.
-#' The third method for specifying \code{neighbors} is to pass in a matrix.  
-#' This matrix should look like the output of \code{\link{extractStats}}, and should contain
-#' properly named contribution and pct_contrib columns. 
-#' 
-#' @param object optimal portfolio object created by \code{\link{optimize.portfolio}}
-#' @param neighbors risk contribution or pct_contrib of neighbor portfolios to be plotted, see details.
-#' @param \dots passthrough parameters to \code{\link{plot}}.
-#' @param risk.type "absolute" or "percentage" to plot risk contribution in absolute terms or percentage contribution.
-#' @param main main title for the chart.
-#' @param ylab label for the y-axis.
-#' @param xlab label for the x-axis
-#' @param cex.lab the magnification to be used for x and y labels relative to the current setting of \code{cex}.
-#' @param cex.axis the magnification to be used for axis annotation relative to the current setting of \code{cex}.
-#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
-#' @param las numeric in \{0,1,2,3\}; the style of axis labels
-#'       \describe{
-#'         \item{0:}{always parallel to the axis,}
-#'         \item{1:}{always horizontal,}
-#'         \item{2:}{always perpendicular to the axis,}
-#'         \item{3:}{always vertical [\emph{default}].}
-#'       }
-#' @param ylim set the y-axis limit, same as in \code{\link{plot}}
-#' @author Ross Bennett
+#' @rdname chart.RiskBudget
 #' @method chart.RiskBudget optimize.portfolio
 #' @S3method chart.RiskBudget optimize.portfolio
 chart.RiskBudget.optimize.portfolio <- function(object, ..., neighbors=NULL, risk.type="absolute", main="Risk Contribution", ylab="", xlab=NULL, cex.axis=0.8, cex.lab=0.8, element.color="darkgray", las=3, ylim=NULL){
@@ -201,34 +206,8 @@ chart.RiskBudget.optimize.portfolio <- function(object, ..., neighbors=NULL, ris
   } # end plot for pct_contrib risk.type
 }
 
-#' Chart risk contribution of an \code{opt.list} object
-#' 
-#' This function charts the absolute contribution or percent contribution of 
-#' the resulting objective measures in the \code{opt.list} object.
-#' 
-#' @param object list of optimal portfolio objects created by \code{\link{optimizations.combine}}.
-#' @param \dots any other passthru parameter.
-#' @param match.col string of risk column to match. The \code{opt.list} object 
-#' may contain risk budgets for ES or StdDev and this will match the proper 
-#' column names of the objectives list outp (e.g. ES.contribution).
-#' @param risk.type "absolute" or "percentage" to plot risk contribution in absolute terms or percentage contribution.
-#' @param main main title for the chart.
-#' @param plot.type "line" or "barplot".
-#' @param cex.axis the magnification to be used for axis annotation relative to the current setting of \code{cex}.
-#' @param cex.lab the magnification to be used for axis annotation relative to the current setting of \code{cex}.
-#' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
-#' @param las numeric in \{0,1,2,3\}; the style of axis labels
-#'       \describe{
-#'         \item{0:}{always parallel to the axis [\emph{default}],}
-#'         \item{1:}{always horizontal,}
-#'         \item{2:}{always perpendicular to the axis,}
-#'         \item{3:}{always vertical.}
-#'       }
-#' @param ylim set the y-axis limit, same as in \code{\link{plot}}
-#' @param colorset color palette or vector of colors to use
-#' @param legend.loc legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted
-#' @param cex.legend The magnification to be used for the legend relative to the current setting of \code{cex}
-#' @author Ross Bennett
+
+#' @rdname chart.RiskBudget
 #' @method chart.RiskBudget opt.list
 #' @S3method chart.RiskBudget opt.list
 chart.RiskBudget.opt.list <- function(object, ..., match.col="ES", risk.type="absolute", main="Risk Budget", plot.type="line", cex.axis=0.8, cex.lab=0.8, element.color="darkgray", las=3, ylim=NULL, colorset=NULL, legend.loc=NULL, cex.legend=0.8){
@@ -381,7 +360,7 @@ barplotRiskBudget <- function(object, ..., match.col="ES", risk.type="absolute",
     if(is.null(colorset)) colorset <- 1:nrow(dat)
     
     # plot the data
-    barplot(dat, names.arg=columnnames, las=las, cex.names=cex.axis, xlab='', col=colorset, main=main, ylab=paste(match.col, "Contribution", sep=" "), cex.lab=cex.lab, cex.axis=cex.axis, ...)
+    barplot(dat, names.arg=columnnames, las=las, cex.names=cex.axis, xlab='', col=colorset, main=main, ylab=paste(match.col, "Contribution", sep=" "), cex.lab=cex.lab, cex.axis=cex.axis, beside=TRUE, ...)
     
     # set the axis
     #axis(2, cex.axis=cex.axis, col=element.color)
