@@ -20,6 +20,7 @@ notebook.md: file to track progress
 ./data/README should cover who downloaded what data from where and when
 ./cache  contains processed data files and intermediary results to be processed
 ./results  contains output, figures, or other generated files.  Should be able to delete the contents and regenerate them
+./docs contains documents with text discussing results
 ./logs: contains logging output 
 ./src: contains non-R source code where needed
 ./bin: compiled binaries or scripts
@@ -28,4 +29,4 @@ May want to organize subdirectories in results and data chronologically at some 
 
 # HOWTO
 To create PDF of slides:
-$ pandoc symposium-slides-2013.Rmd -t beamer -o symposium-slides-2013.pdf
+$ pandoc symposium-slides-2013.Rmd -t beamer -o symposium-slides-2013.pdf --template=beamer.template
