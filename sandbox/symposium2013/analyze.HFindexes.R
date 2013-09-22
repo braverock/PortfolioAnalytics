@@ -48,11 +48,12 @@ dataname="EDHEC"
 ########################################################################
 # Load data
 ########################################################################
-## Just load the data from packages
-### See parse.EDHEC.R
+# Load the data objects from downloaded and parsed files
+## See 'parse.EDHEC.R' and 'download.SP500TR.R'
 
 # Load data from cache
-load("./cache/edhec.Rdata")
+load("./cache/edhec.RData")
+load("./cache/SP500TR.RData")
 
 # Drop some indexes and reorder
 R = edhec[,c("Convertible Arbitrage", "Equity Market Neutral","Fixed Income Arbitrage", "Event Driven", "CTA Global", "Global Macro", "Long/Short Equity")]
@@ -159,11 +160,17 @@ dev.off()
 
 # @TODO: Add 12M rolling correlation to S&P500
 
+# --------------------------------------------------------------------
+# Rolling Correlation to S&P500 TR
+# --------------------------------------------------------------------
 
+png(filename=paste(resultsdir, dataname, "-RollCorr.png", sep=""), units="in", height=5.5, width=9, res=96) 
+chart.RollingCorrelation(R,SP500.TR, width=24, legend.loc="bottomleft", colorset=rainbow8equal, main="Rolling 24-Month Correlations")
+dev.off()
+       
 # --------------------------------------------------------------------
 ## Autocorrelation
 # --------------------------------------------------------------------
-# @TODO: This is frosting, do it last
 
 # require(Hmisc)
 AC.stats = t(table.Autocorrelation(R=R))
