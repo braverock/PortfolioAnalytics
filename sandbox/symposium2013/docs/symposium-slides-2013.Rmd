@@ -117,13 +117,17 @@ Construct a portfolio that:
 
 * maximizes return,
 * with per-asset position limits,
-* with a specific univariate portfolio risk limit,
+* with a specific univariate portfolio risk limit or target,
 * defines risk as losses,
 * considers the effects of skewness and kurtosis, and
 * either limits contribution of risk for constituents or
 * equalizes component risk contribution.
 
 <!-- Not a quadratic (or linear, or conical) problem any more. -->
+
+<!-- Comments:
+* or even target a certain volatility level
+-->
 
 # Risk budgeting
 * Used to allocate the "risk" of a portfolio 
@@ -133,6 +137,9 @@ Construct a portfolio that:
 
 # Return distributions
 \includegraphics[width=1.0\textwidth]{../results/EDHEC-Distributions.png}
+
+# Return distributions
+* Split chart into two for readability
 
 # Measuring risk, not volatility
 Measure risk with Conditional Value-at-Risk (CVaR)
@@ -175,7 +182,8 @@ Use the modified CVaR contribution estimator from Boudt, _et al_ (2008)
 * A high positive %CmETL indicates the position has a large loss when the portfolio also has a large loss
 
 <!-- Comments:
-Enabled through the Euler decomposition 
+SD, VaR and ETL are linearly homogenous functions of portfolio weights w, so Euler’s theorem gives additive decomposition.  Zivot (2011)
+Should point out that this also maps into factor tail risk contributions, which has an intuitive interpretation as stress loss scenarios.
 -->
 
 # Contribution to downside risk
@@ -390,7 +398,6 @@ As a framework for strategic allocation:
 
 ## _PortfolioAnalytics_
 
-- Provides numerical solutions to portfolios with complex constraints and objectives comprised of any function
 - Unifies the interface across different closed-form optimizers and several analytical solvers
 - Implements three methods for generating Random Portfolios, including 'sample', 'simplex', and 'grid'
 - Preserves the flexibility to define any kind of objective and constraint
@@ -399,7 +406,7 @@ As a framework for strategic allocation:
 ## _PerformanceAnalytics_
   * Returns-based analysis of performance and risk for financial instruments and portfolios, available on CRAN
 
-# Other packages
+# Packages for Mathematical Programming Solvers
 ## _ROI_
   * Infrastructure package by K. Hornik, D. Meyer, and S. Theussl for optimization that facilitates use of different solvers...
   
@@ -409,7 +416,7 @@ As a framework for strategic allocation:
 ## quadprog
   * ... or this one, used for solving quadratic programming problems
   
-# Other packages
+# Packages for Generalized Continuous Solvers 
 ## _DEoptim_
   * Implements Differential Evolution, a very powerful, elegant, population based stochastic function minimizer
 
@@ -419,9 +426,9 @@ As a framework for strategic allocation:
 ## _pso_
   * An implementation of Partical Swarm Optimization consistent with the standard PSO 2007/2011 by Maurice Clerc, _et al._
 
-# Other packages
+# Packages for more iron
 ## _foreach_
-* Steve Weston's remarkable parallel computing framework, which maps functions to data and aggregates results in parallel across multiple CPU cores and computers...
+* Steve Weston's parallel computing framework, which maps functions to data and aggregates results in parallel across multiple CPU cores and computers.
 
 ## _doRedis_
   * A companion package to _foreach_ by Bryan Lewis that implements a simple but very flexible parallel back end to Redis, making it to run parallel jobs across multiple R sessions.
@@ -429,15 +436,15 @@ As a framework for strategic allocation:
 ## _doMPI_
   * Another companion to _foreach_ that provides a parallel backend across cores using the _parallel_ package
 
-## _xts_
-  * Time series package specifically for finance by Jeff Ryan and Josh Ulrich
-
+<!-- Comments:
+  * Mention xts, quantmod and ttr
+-->
 
 # Thanks
-* Brian Peterson
-* Kris Boudt
-* Doug Martin
-* Ross Bennett
+* Brian Peterson - Trading Partner at DV Trading, Chicago
+* Kris Boudt - Faculty of Business and Economics, KU Leuven and VU University Amsterdam
+* Doug Martin - Professor and Director of Computational Finance, University of Washington
+* Ross Bennett - Student in the University of Washington's MS-CFRM program and GSOC participant
 
 # References
 Figure out bibtex links in markup
