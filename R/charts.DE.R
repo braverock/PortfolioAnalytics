@@ -333,9 +333,9 @@ charts.DE <- function(DE, risk.col, return.col, chart.assets, neighbors=NULL, ma
 #' @param main an overall title for the plot: see \code{\link{title}}
 #' @param xlim set the limit on coordinates for the x-axis
 #' @param ylim set the limit on coordinates for the y-axis
+#' @rdname plot
 #' @method plot optimize.portfolio.DEoptim
 #' @S3method plot optimize.portfolio.DEoptim
-#' @export
 plot.optimize.portfolio.DEoptim <- function(x, ..., return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, main='optimized portfolio plot', xlim=NULL, ylim=NULL) {
     charts.DE(DE=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
 }

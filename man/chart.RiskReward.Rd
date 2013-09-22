@@ -1,4 +1,4 @@
-\name{chart.RiskReward.optimize.portfolio.DEoptim}
+\name{chart.RiskReward}
 \alias{chart.RiskReward}
 \alias{chart.RiskReward.opt.list}
 \alias{chart.RiskReward.optimize.portfolio.DEoptim}

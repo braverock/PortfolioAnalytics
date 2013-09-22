@@ -231,9 +231,9 @@ charts.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE
 #' @param ylim set the limit on coordinates for the y-axis
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
+#' @rdname plot
 #' @method plot optimize.portfolio.pso
 #' @S3method plot optimize.portfolio.pso
-#' @export
 plot.optimize.portfolio.pso <- function(x, ..., return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="PSO.Portfolios", xlim=NULL, ylim=NULL){
   charts.pso(pso=x, return.col=return.col, risk.col=risk.col, chart.assets=FALSE, cex.axis=cex.axis, element.color=element.color, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...=...)
 }

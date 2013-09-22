@@ -290,9 +290,9 @@ charts.RP <- function(RP, risk.col, return.col, chart.assets=FALSE, neighbors=NU
 #' @param xlim set the limit on coordinates for the x-axis
 #' @param ylim set the limit on coordinates for the y-axis
 #' @param main an overall title for the plot: see \code{\link{title}}
+#' @rdname plot
 #' @method plot optimize.portfolio.random
 #' @S3method plot optimize.portfolio.random
-#' @export
 plot.optimize.portfolio.random <- function(x, ..., return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, xlim=NULL, ylim=NULL, main='optimized portfolio plot') {
     charts.RP(RP=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
 }
@@ -320,9 +320,9 @@ plot.optimize.portfolio.random <- function(x, ..., return.col='mean', risk.col='
 #' @param xlim set the limit on coordinates for the x-axis
 #' @param ylim set the limit on coordinates for the y-axis
 #' @param main an overall title for the plot: see \code{\link{title}}
+#' @rdname plot
 #' @method plot optimize.portfolio
 #' @S3method plot optimize.portfolio
-#' @export
 plot.optimize.portfolio <- function(x, ...,  return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, xlim=NULL, ylim=NULL, main='optimized portfolio plot') {
     charts.RP(RP=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
 }

@@ -178,9 +178,9 @@ charts.ROI <- function(ROI, rp=FALSE, risk.col="ES", return.col="mean", chart.as
 #' @param ylim set the limit on coordinates for the y-axis
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
+#' @rdname plot
 #' @method plot optimize.portfolio.ROI
 #' @S3method plot optimize.portfolio.ROI
-#' @export
 plot.optimize.portfolio.ROI <- function(x, ..., rp=FALSE, risk.col="ES", return.col="mean", chart.assets=FALSE, element.color="darkgray", neighbors=NULL, main="ROI.Portfolios", xlim=NULL, ylim=NULL){
   charts.ROI(ROI=x, rp=rp, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, main=main, xlim=xlim, ylim=ylim, ...)
 }
