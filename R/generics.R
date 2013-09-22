@@ -45,11 +45,11 @@ summary.optimize.portfolio.rebalancing <- function(object, ...) {
 #' 
 #' Print method for objects of class \code{portfolio} created with \code{\link{portfolio.spec}}
 #' 
-#' @param x object of class \code{portfolio}
+#' @param x an object of class \code{portfolio}
 #' @param \dots any other passthru parameters
 #' @author Ross Bennett
 #' @method print portfolio
-#' @export
+#' @S3method print portfolio
 print.portfolio <- function(x, ...){
   if(!is.portfolio(x)) stop("object passed in is not of class 'portfolio'")
   
@@ -244,22 +244,28 @@ summary.portfolio <- function(object, ...){
 #' @param \dots any other passthru parameters
 #' @author Ross Bennett
 #' @method print constraint
-#' @export
+#' @S3method print constraint
 print.constraint <- function(x, ...){
   print.default(x, ...)
 }
 
-#' Printing Output of optimize.portfolio
+#' Printing output of optimize.portfolio
 #' 
-#' print method for optimize.portfolio.ROI
+#' print method for optimize.portfolio objects
 #' 
-#' @param x an object of class \code{optimize.portfolio.ROI} resulting from a call to \code{\link{optimize.portfolio}}
-#' @param ... any other passthru parameters
+#' @param x an object used to select a method
+#' @param \dots any other passthru parameters
 #' @param digits the number of significant digits to use when printing.
 #' @author Ross Bennett
+#' @aliases print.optimize.portfolio.ROI,
+#'  print.optimize.portfolio.random,
+#'  print.optimize.portfolio.DEoptim,
+#'  print.optimize.portfolio.GenSA,
+#'  print.optimize.portfolio.pso
+#' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.ROI
-#' @export
-print.optimize.portfolio.ROI <- function(x, ..., digits = max(3, getOption("digits") - 3)){
+#' @S3method print optimize.portfolio.ROI
+print.optimize.portfolio.ROI <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
   cat(rep("*", 35) ,"\n", sep="")
@@ -296,17 +302,11 @@ print.optimize.portfolio.ROI <- function(x, ..., digits = max(3, getOption("digi
   cat("\n")
 }
 
-#' Printing Output of optimize.portfolio
-#' 
-#' print method for optimize.portfolio.random
-#' 
-#' @param x an object of class \code{optimize.portfolio.random} resulting from a call to \code{\link{optimize.portfolio}}
-#' @param ... any other passthru parameters
-#' @param digits the number of significant digits to use when printing.
-#' @author Ross Bennett
+
+#' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.random
-#' @export
-print.optimize.portfolio.random <- function(x, ..., digits=max(3, getOption("digits")-3)){
+#' @S3method print optimize.portfolio.random
+print.optimize.portfolio.random <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
   cat(rep("*", 35) ,"\n", sep="")
@@ -334,7 +334,7 @@ print.optimize.portfolio.random <- function(x, ..., digits=max(3, getOption("dig
         cat(names(tmpl), ":\n")
         tmpv <- unlist(tmpl)
         names(tmpv) <- names(x$weights)
-        print(tmpv)
+        print(tmpv, digits=digits)
         cat("\n")
       }
     }
@@ -343,17 +343,11 @@ print.optimize.portfolio.random <- function(x, ..., digits=max(3, getOption("dig
   cat("\n")
 }
 
-#' Printing Output of optimize.portfolio
-#' 
-#' print method for optimize.portfolio.DEoptim
-#' 
-#' @param x an object of class \code{optimize.portfolio.DEoptim} resulting from a call to \code{\link{optimize.portfolio}}
-#' @param ... any other passthru parameters
-#' @param digits the number of significant digits to use when printing.
-#' @author Ross Bennett
+
+#' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.DEoptim
-#' @export
-print.optimize.portfolio.DEoptim <- function(x, ..., digits=max(3, getOption("digits")-3)){
+#' @S3method print optimize.portfolio.DEoptim
+print.optimize.portfolio.DEoptim <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
   cat(rep("*", 35) ,"\n", sep="")
@@ -381,7 +375,7 @@ print.optimize.portfolio.DEoptim <- function(x, ..., digits=max(3, getOption("di
         cat(names(tmpl), ":\n")
         tmpv <- unlist(tmpl)
         names(tmpv) <- names(x$weights)
-        print(tmpv)
+        print(tmpv, digits=digits)
         cat("\n")
       }
     }
@@ -390,17 +384,11 @@ print.optimize.portfolio.DEoptim <- function(x, ..., digits=max(3, getOption("di
   cat("\n")
 }
 
-#' Printing Output of optimize.portfolio
-#' 
-#' print method for optimize.portfolio.GenSA
-#' 
-#' @param x an object of class \code{optimize.portfolio.GenSA} resulting from a call to \code{\link{optimize.portfolio}}
-#' @param ... any other passthru parameters
-#' @param digits the number of significant digits to use when printing
-#' @author Ross Bennett
+
+#' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.GenSA
-#' @export
-print.optimize.portfolio.GenSA <- function(x, ..., digits=max(3, getOption("digits")-3)){
+#' @S3method print optimize.portfolio.GenSA
+print.optimize.portfolio.GenSA <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
   cat(rep("*", 35) ,"\n", sep="")
@@ -428,7 +416,7 @@ print.optimize.portfolio.GenSA <- function(x, ..., digits=max(3, getOption("digi
         cat(names(tmpl), ":\n")
         tmpv <- unlist(tmpl)
         names(tmpv) <- names(x$weights)
-        print(tmpv)
+        print(tmpv, digits=digits)
         cat("\n")
       }
     }
@@ -437,17 +425,11 @@ print.optimize.portfolio.GenSA <- function(x, ..., digits=max(3, getOption("digi
   cat("\n")
 }
 
-#' Printing Output of optimize.portfolio
-#' 
-#' print method for optimize.portfolio.pso
-#' 
-#' @param x an object of class \code{optimize.portfolio.pso} resulting from a call to \code{\link{optimize.portfolio}}
-#' @param ... any other passthru parameters
-#' @param digits the number of significant digits to use when printing.
-#' @author Ross Bennett
+
+#' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.pso
-#' @export
-print.optimize.portfolio.pso <- function(x, ..., digits=max(3, getOption("digits")-3)){
+#' @S3method print optimize.portfolio.pso
+print.optimize.portfolio.pso <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
   cat(rep("*", 35) ,"\n", sep="")
@@ -475,7 +457,7 @@ print.optimize.portfolio.pso <- function(x, ..., digits=max(3, getOption("digits
         cat(names(tmpl), ":\n")
         tmpv <- unlist(tmpl)
         names(tmpv) <- names(x$weights)
-        print(tmpv)
+        print(tmpv, digits=digits)
         cat("\n")
       }
     }
@@ -707,10 +689,10 @@ summary.optimize.portfolio <- function(object, ...){
 #' efficient frontier was created or extracted.
 #' 
 #' @param x objective of class \code{efficient.frontier}
-#' @param ... passthrough parameters
+#' @param \dots any other passthru parameters
 #' @author Ross Bennett
 #' @method print efficient.frontier
-#' @export
+#' @S3method print efficient.frontier
 print.efficient.frontier <- function(x, ...){
   if(!inherits(x, "efficient.frontier")) stop("object passed in is not of class 'efficient.frontier'")
   

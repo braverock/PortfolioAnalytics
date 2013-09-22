@@ -5,7 +5,7 @@
   \method{print}{portfolio} (x, ...)
 }
 \arguments{
-  \item{x}{object of class \code{portfolio}}
+  \item{x}{an object of class \code{portfolio}}
 
   \item{\dots}{any other passthru parameters}
 }

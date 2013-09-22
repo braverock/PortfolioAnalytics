@@ -7,7 +7,7 @@
 \arguments{
   \item{x}{objective of class \code{efficient.frontier}}
 
-  \item{...}{passthrough parameters}
+  \item{\dots}{any other passthru parameters}
 }
 \description{
   Print method for efficient frontier objects. Display the
