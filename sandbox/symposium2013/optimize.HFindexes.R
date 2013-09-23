@@ -103,6 +103,8 @@ MeanSD.portf <- add.objective(portfolio=MeanSD.portf,
                               )
 
 ### Construct BUOY 2: Constrained Mean-mETL Portfolio - using ROI
+#@ Cannot maximize mean return per unit ETL with ROI, consider using
+#@ random portfolios or DEoptim. - RB
 # Add the return and mETL objectives
 MeanmETL.portf <- add.objective(portfolio=init.portf,
                                 type="return", # the kind of objective this is
@@ -130,40 +132,47 @@ MinmETL.portf <- add.objective(portfolio=init.portf,
                                )
 
 ### Construct BUOY 5: Constrained Equal Variance Contribution Portfolio - using RP
-EqSD.portf <- add.objective(portfolio=init.portf, 
-                            type="risk_budget", 
-                            name="StdDev",  
-                            min_concentration=TRUE,
-                            arguments = list(clean=clean)
-                            )
+#@ - Add the sub-objectives first. Adding these 3 objectives means that we are
+#@ maximizing mean per unit StdDev with equal volatility contribution portfolios. - RB
 # Without a sub-objective, we get a somewhat undefined result, since there are (potentially) many Equal SD contribution portfolios.
-EqSD.portf <- add.objective(portfolio=EqSD.portf,
+EqSD.portf <- add.objective(portfolio=init.portf,
                             type="risk",
                             name="StdDev"
-                            ) # OR
-EqSD.portf <- add.objective(portfolio=EqSD.portf,
-                            type="return",
-                            name="mean"
-)
-EqSD.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
-EqSD.portf$constraints[[1]]$max_sum = 1.01
-
-### Construct BUOY 6: Constrained Equal mETL Contribution Portfolio - using RP
-EqmETL.portf <- add.objective(init.portf,
-                              type="risk_budget",
-                              name="ES",
-                              min_concentration=TRUE,
-                              arguments = list(p=(1-1/12), clean=clean)
-)
-# Without a sub-objective, we get a somewhat undefined result, since there are (potentially) many Equal SD contribution portfolios.
-EqSD.portf <- add.objective(portfolio=EqSD.portf,
-                            type="risk",
-                            name="var"
 ) # OR
 EqSD.portf <- add.objective(portfolio=EqSD.portf,
                             type="return",
                             name="mean"
 )
+EqSD.portf <- add.objective(portfolio=EqSD.portf, 
+                            type="risk_budget", 
+                            name="StdDev",  
+                            min_concentration=TRUE,
+                            arguments = list(clean=clean)
+                            )
+
+EqSD.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
+EqSD.portf$constraints[[1]]$max_sum = 1.01
+
+### Construct BUOY 6: Constrained Equal mETL Contribution Portfolio - using RP
+#@ Add the sub-objectives first. These should be added to the EqmETL portfolio.
+#@ All objectives below mean that we are maximizing mean return per unit ES with
+#@ equal ES contribution. - RB
+# Without a sub-objective, we get a somewhat undefined result, since there are (potentially) many Equal SD contribution portfolios.
+EqmETL.portf <- add.objective(portfolio=init.portf,
+                            type="risk",
+                            name="ES"
+) # OR
+EqmETL.portf <- add.objective(portfolio=EqmETL.portf,
+                            type="return",
+                            name="mean"
+)
+EqmETL.portf <- add.objective(EqmETL.portf,
+                              type="risk_budget",
+                              name="ES",
+                              min_concentration=TRUE,
+                              arguments = list(p=(1-1/12), clean=clean)
+)
+
 EqmETL.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
 EqmETL.portf$constraints[[1]]$max_sum = 1.01
 
@@ -195,15 +204,16 @@ RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
                                   name="mean"
                                   )
 # Add a risk measure
+#@ Use ETL to be consistent with risk measures in other BUOY portfolios
 RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
                                   type="risk",
-                                  name="ETL",
+                                  name="ES",
                                   arguments = list(p=(1-1/12), clean=clean)
                                   )
 # Set risk budget limits
 RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
                                   type="risk_budget",
-                                  name="ETL",
+                                  name="ES",
                                   max_prisk=0.4,
                                   arguments = list(p=(1-1/12), clean=clean)
                                   )
@@ -267,7 +277,7 @@ EqSD.RND<-optimize.portfolio(R=R,
   search_size=1000, trace=TRUE
   ) 
 plot(EqSD.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
-chart.RiskBudget(EqSD.RND, risk.type="percentage")
+chart.RiskBudget(EqSD.RND, risk.type="percentage", neighbors=25)
 save(EqSD.RND,file=paste(resultsdir, 'EqSD-', Sys.Date(), '-', runname, '.rda',sep=''))
 print(paste('Completed EqSD optimization at',Sys.time(),'moving on to EqmETL'))
 
@@ -287,13 +297,23 @@ EqmETL.RND<-optimize.portfolio(R=R,
   search_size=1000, trace=TRUE
   ) # 
 plot(EqmETL.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
-plot(EqmETL.RND, risk.col="ES", return.col="mean", rp=permutations, chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
+plot(EqmETL.RND, risk.col="ES", return.col="mean", chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
 chart.RiskBudget(EqmETL.RND, neighbors=25)
 save(EqmETL.RND,file=paste(resultsdir, 'EqmETL-', Sys.Date(), '-', runname, '.rda',sep=''))
 print(paste('Completed EqmETL optimization at',Sys.time(),'moving on to RiskBudget'))
 
 ### Evaluate BUOY 7: Equal Weight Portfolio
 # There's only one, so calculate it.
+
+#@ Create a portfolio object with all the objectives we want calculated. - RB
+EqWt.portf <- portfolio.spec(assets=colnames(R))
+EqWt.portf <- add.constraint(portfolio=EqWt.portf, type="leverage", min_sum=0.99, max_sum=1.01)
+EqWt.portf <- add.objective(portfolio=EqWt.portf, type="return", name="mean")
+EqWt.portf <- add.objective(portfolio=EqWt.portf, type="risk_budget", name="ES", arguments=list(p=p, clean=clean))
+EqWt.portf <- add.objective(portfolio=EqWt.portf, type="risk_budget", name="StdDev", arguments=list(clean=clean))
+
+#@ Calculate the objective measures for the equal weight portfolio - RB
+EqWt.opt <- equal.weight(R=R, portfolio=EqWt.portf)
 
 ### Evaluate Risk Budget Portfolio - with DE
 RiskBudget.DE<-optimize.portfolio(R=R,
@@ -302,11 +322,32 @@ RiskBudget.DE<-optimize.portfolio(R=R,
                                search_size=1000, trace=TRUE, verbose=TRUE
                                ) # use the same random portfolios generated above
 plot(RiskBudget.DE, risk.col="StdDev", return.col="mean")
+plot(RiskBudget.DE, risk.col="ES", return.col="mean") # several outlier portfolios
 save(RiskBudget.DE,file=paste(resultsdir, 'RiskBudget-', Sys.Date(), '-', runname, '.rda',sep=''))
 print(paste('Completed Risk Budget optimization at',Sys.time(),'. Done with optimizations.'))
 
-buoys <- combine.optimizations(list(MeanSD=MeanSD.ROI, MeanmETL=MeanmETL.ROI, MinSD=MinSD.ROI, MinmETL=MinmETL.ROI, EqSD=EqSD.RND, EqmETL=EqmETL.RND, RB=RiskBudget.DE))
-                               # how to add an EqWgt to this list?
+buoys <- combine.optimizations(list(MeanSD=MeanSD.ROI, MeanmETL=MeanmETL.ROI, MinSD=MinSD.ROI, MinmETL=MinmETL.ROI, EqSD=EqSD.RND, EqmETL=EqmETL.RND, RB=RiskBudget.DE, EqWt=EqWt.opt))
+# how to add an EqWgt to this list?
+#@ The elements of this list need to be optimize.portfolio objects, so unfortunately we
+#@ can't do this unless we created an optimize.portfolio object for an equal weight
+#@ portfolio. I'll add this. - RB
+chart.Weights(buoys, plot.type="bar", ylim=c(0,1))
+
+#@ Chart the portfolios that have mean and ES as objective measures. - RB
+chart.RiskReward(buoys, risk.col="ES")
+#@ Chart the portfolios that have mean and StdDev as objective measures. - RB
+chart.RiskReward(buoys, risk.col="StdDev")
+
+#@ The EqmETL and RB optimizations would be good to compare because they are
+#@ similar in that they both include component ES as an objective. - RB
+buoyETL <- combine.optimizations(list(EqmETL=EqmETL.RND, RB=RiskBudget.DE, EqWt=EqWt.opt))
+chart.RiskBudget(buoyETL, match.col="ES", risk.type="percentage", legend.loc="topright")
+
+#@ Compare the equal weight portfolio and the equal SD contribution portfolio. - RB
+buoyStdDev <- combine.optimizations(list(EqSD=EqSD.RND, EqWt=EqWt.opt))
+chart.RiskBudget(buoyStdDev, match.col="StdDev", risk.type="absolute", legend.loc="topleft")
+
+
 end_time<-Sys.time()
 end_time-start_time
 
