@@ -204,12 +204,14 @@ RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
                                   name="mean"
                                   )
 # Add a risk measure
-#@ Use ETL to be consistent with risk measures in other BUOY portfolios
+
+# Use ES to be consistent with risk measures in other BUOY portfolios
 RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
                                   type="risk",
                                   name="ES",
                                   arguments = list(p=(1-1/12), clean=clean)
                                   )
+
 # Set risk budget limits
 RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
                                   type="risk_budget",
@@ -217,6 +219,14 @@ RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
                                   max_prisk=0.4,
                                   arguments = list(p=(1-1/12), clean=clean)
                                   )
+# Calculate portfolio variance, but don't use it in the objective; used only for plots
+RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
+                                  type="risk", # the kind of objective this is
+                                  name="StdDev", # the function to minimize
+                                  enabled=TRUE, # enable or disable the objective
+                                  multiplier=0, # calculate it but don't use it in the objective
+                                  arguments=list(clean=clean)
+)
 
 #------------------------------------------------------------------------
 ### Evaluate portfolio objective objects
@@ -304,7 +314,6 @@ print(paste('Completed EqmETL optimization at',Sys.time(),'moving on to RiskBudg
 
 ### Evaluate BUOY 7: Equal Weight Portfolio
 # There's only one, so calculate it.
-
 #@ Create a portfolio object with all the objectives we want calculated. - RB
 EqWt.portf <- portfolio.spec(assets=colnames(R))
 EqWt.portf <- add.constraint(portfolio=EqWt.portf, type="leverage", min_sum=0.99, max_sum=1.01)
@@ -315,17 +324,25 @@ EqWt.portf <- add.objective(portfolio=EqWt.portf, type="risk_budget", name="StdD
 #@ Calculate the objective measures for the equal weight portfolio - RB
 EqWt.opt <- equal.weight(R=R, portfolio=EqWt.portf)
 
+
 ### Evaluate Risk Budget Portfolio - with DE
+registerDoSEQ() # turn off parallelization to keep the trace data
 RiskBudget.DE<-optimize.portfolio(R=R,
                                portfolio=RiskBudget.portf,
                                optimize_method='DEoptim',
-                               search_size=1000, trace=TRUE, verbose=TRUE
+                               search_size=1000, trace=TRUE
                                ) # use the same random portfolios generated above
 plot(RiskBudget.DE, risk.col="StdDev", return.col="mean")
 plot(RiskBudget.DE, risk.col="ES", return.col="mean") # several outlier portfolios
-save(RiskBudget.DE,file=paste(resultsdir, 'RiskBudget-', Sys.Date(), '-', runname, '.rda',sep=''))
-print(paste('Completed Risk Budget optimization at',Sys.time(),'. Done with optimizations.'))
+chart.RiskBudget(RiskBudget.DE)
+chart.RiskBudget(RiskBudget.DE, risk.type="percentage")
 
+save(RiskBudget.DE,file=paste(resultsdir, 'RiskBudget-', Sys.Date(), '-', runname, '.rda',sep=''))
+print(RiskBudget.DE$elapsed_time)
+print('Done with optimizations.')
+
+
+### Combine optimization objects
 buoys <- combine.optimizations(list(MeanSD=MeanSD.ROI, MeanmETL=MeanmETL.ROI, MinSD=MinSD.ROI, MinmETL=MinmETL.ROI, EqSD=EqSD.RND, EqmETL=EqmETL.RND, RB=RiskBudget.DE, EqWt=EqWt.opt))
 # how to add an EqWgt to this list?
 #@ The elements of this list need to be optimize.portfolio objects, so unfortunately we
