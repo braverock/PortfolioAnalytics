@@ -59,3 +59,4 @@ Collate:
     'charts.groups.R'
     'charts.multiple.R'
     'utility.combine.R'
+    'equal.weight.R'
