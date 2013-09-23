@@ -33,7 +33,7 @@ Many real-world portfolio optimization problems are 'global optimization' proble
 This summary attempts to provide an overview of how to construct a portfolio object with constraints and objectives, and then run the optimization.
 }
 
-\section{Optimization}
+\section{Optimization}{
 The portfolio object is instantiated with the \code{\link{portfolio.spec}} function. The main argument to \code{\link{portfolio.spec}} is \code{assets}. The \code{assets} argument can be a scalar value for the number of assets, a character vector of fund names, or a named vector of initial weights.
 
 Adding constraints to the portfolio object is done with \code{\link{add.constraint}}. The \code{\link{add.constraint}} function is the main interface for adding and/or updating constraints to the portfolio object. This function allows the user to specify the portfolio to add the constraints to, the type of constraints, arguments for the constraint, and whether or not to enable the constraint. If updating an existing constraint, the indexnum argument can be specified.
@@ -41,22 +41,28 @@ Adding constraints to the portfolio object is done with \code{\link{add.constrai
 Objectives can be added to the portfolio object with \code{\link{add.objective}}. The \code{\link{add.objective}} function is the main function for adding and/or updating objectives to the portfolio object. This function allows the user to specify the portfolio to add the objectives to, the type, name of the objective function, arguments to the objective function, and whether or not to enable the objective. If updating an existing constraint, the indexnum argument can be specified.
 
 With the constraints and objectives specified in the portfolio object, the portfolio object can be passed to \code{\link{optimize.portfolio}} or \code{\link{optimize.portfolio.rebalancing}} to run the optimization. Arguments to \code{\link{optimize.portfolio}} include asset returns, the portfolio obect specifying constraints and objectives, optimization method, and other parameters specific to the solver. \code{\link{optimize.portfolio.rebalancing}} adds support for backtesting portfolio optimization through time with rebalancing or rolling periods.
+}
 
-\section{Charts and Graphs}
+\section{Charts and Graphs}{
 TODO
+}
 
-\section{Further Work}
+\section{Further Work}{
 TODO
+}
 
-\section{Acknowledgements}
+\section{Acknowledgements}{
 TODO
+}
 
-\section{References}
+\section{References}{
 TODO
 W.T. Shaw Paper
 Modern Portfolio Optimization
 Large-scale portfolio optimization with DEoptim 
 http://cran.r-project.org/web/packages/DEoptim/vignettes/DEoptimPortfolioOptimization.pdf
+}
 
-\section{See Also}
+\section{See Also}{
 TODO
+}
