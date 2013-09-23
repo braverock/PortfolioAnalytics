@@ -13,7 +13,7 @@ require(ROI.plugin.glpk)
 # ... and multi-core packages
 require(foreach)
 require(doMC)
-registerDoMC(3)
+registerDoMC(5)
 
 # Available on r-forge
 # require(FactorAnalytics) # development version > build 
@@ -95,18 +95,18 @@ MeanSD.portf <- init.portf
 # Add the return and sd objectives to the constraints created above
 MeanSD.portf <- add.objective(portfolio=init.portf,
                               type="return", # the kind of objective this is
-                              name="mean", # name of the function
+                              name="mean" # name of the function
                               )
 MeanSD.portf <- add.objective(portfolio=MeanSD.portf,
                               type="risk", # the kind of objective this is
-                              name="var", # name of the function
+                              name="var" # name of the function
                               )
 
 ### Construct BUOY 2: Constrained Mean-mETL Portfolio - using ROI
 # Add the return and mETL objectives
 MeanmETL.portf <- add.objective(portfolio=init.portf,
                                 type="return", # the kind of objective this is
-                                name="mean", # name of the function
+                                name="mean" # name of the function
                                 )
 MeanmETL.portf <- add.objective(portfolio=MeanmETL.portf,
                                 type="risk", # the kind of objective this is
@@ -133,15 +133,18 @@ MinmETL.portf <- add.objective(portfolio=init.portf,
 EqSD.portf <- add.objective(portfolio=init.portf, 
                             type="risk_budget", 
                             name="StdDev",  
-                            enabled=TRUE, 
                             min_concentration=TRUE,
-                            arguments = list(p=(1-1/12), clean=clean
+                            arguments = list(clean=clean)
                             )
 # Without a sub-objective, we get a somewhat undefined result, since there are (potentially) many Equal SD contribution portfolios.
-EqSD.portf <- add.objective(portfolio=init.portf,
-                            type="risk_budget",
+EqSD.portf <- add.objective(portfolio=EqSD.portf,
+                            type="risk",
                             name="StdDev"
-                            )
+                            ) # OR
+EqSD.portf <- add.objective(portfolio=EqSD.portf,
+                            type="return",
+                            name="mean"
+)
 EqSD.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
 EqSD.portf$constraints[[1]]$max_sum = 1.01
 
@@ -156,6 +159,10 @@ EqmETL.portf <- add.objective(init.portf,
 EqSD.portf <- add.objective(portfolio=EqSD.portf,
                             type="risk",
                             name="var"
+) # OR
+EqSD.portf <- add.objective(portfolio=EqSD.portf,
+                            type="return",
+                            name="mean"
 )
 EqmETL.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
 EqmETL.portf$constraints[[1]]$max_sum = 1.01
@@ -257,12 +264,21 @@ print(paste('Completed MinmETL optimization at',Sys.time(),'moving on to EqSD'))
 EqSD.RND<-optimize.portfolio(R=R,
   portfolio=EqSD.portf,
   optimize_method='random',
-  search_size=1000, trace=TRUE, verbose=TRUE,
-  rp=rp) # use the same random portfolios generated above
-plot(EqSD.RND, risk.col="StdDev", return.col="mean", rp=permutations, chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
-chart.RiskBudget(EqSD.RND, neighbors=25)
+  search_size=1000, trace=TRUE
+  ) 
+plot(EqSD.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
+chart.RiskBudget(EqSD.RND, risk.type="percentage")
 save(EqSD.RND,file=paste(resultsdir, 'EqSD-', Sys.Date(), '-', runname, '.rda',sep=''))
 print(paste('Completed EqSD optimization at',Sys.time(),'moving on to EqmETL'))
+
+EqSD.DE<-optimize.portfolio(R=R,
+                             portfolio=EqSD.portf,
+                             optimize_method='DEoptim',
+                             search_size=1000, trace=TRUE, verbose=TRUE
+) 
+plot(EqSD.DE, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
+chart.RiskBudget(EqSD.DE, risk.type="percentage")
+
 
 ### Evaluate BUOY 6: Constrained Equal mETL Contribution Portfolio - with RP
 EqmETL.RND<-optimize.portfolio(R=R,
@@ -270,7 +286,7 @@ EqmETL.RND<-optimize.portfolio(R=R,
   optimize_method='random',
   search_size=1000, trace=TRUE
   ) # 
-plot(EqmETL.RND, risk.col="StdDev", return.col="mean", rp=permutations, chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
+plot(EqmETL.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
 plot(EqmETL.RND, risk.col="ES", return.col="mean", rp=permutations, chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
 chart.RiskBudget(EqmETL.RND, neighbors=25)
 save(EqmETL.RND,file=paste(resultsdir, 'EqmETL-', Sys.Date(), '-', runname, '.rda',sep=''))
