@@ -68,9 +68,7 @@ init.portf <- portfolio.spec(assets=colnames(R),
 )
 # Add leverage constraint
 init.portf <- add.constraint(portfolio=init.portf, 
-                             type="leverage", 
-                             min_sum=1, 
-                             max_sum=1
+                             type="full_investment"
 )
 # Add box constraint
 init.portf <- add.constraint(portfolio=init.portf, 
@@ -177,10 +175,12 @@ EqmETL.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
 EqmETL.portf$constraints[[1]]$max_sum = 1.01
 
 ### Construct BUOY 7: Equal Weight Portfolio
-# There's only one, so construct weights for it.  Rebalance the equal-weight portfolio at the same frequency as the others.
-# dates=index(R[endpoints(R, on=rebalance_period)])
-# weights = xts(matrix(rep(1/NCOL(R),length(dates)*NCOL(R)), ncol=NCOL(R)), order.by=dates)
-# colnames(weights)= colnames(R)
+# There's only one, so create a portfolio object with all the objectives we want calculated. 
+EqWt.portf <- portfolio.spec(assets=colnames(R))
+EqWt.portf <- add.constraint(portfolio=EqWt.portf, type="leverage", min_sum=0.99, max_sum=1.01)
+EqWt.portf <- add.objective(portfolio=EqWt.portf, type="return", name="mean")
+EqWt.portf <- add.objective(portfolio=EqWt.portf, type="risk_budget", name="ES", arguments=list(p=p, clean=clean))
+EqWt.portf <- add.objective(portfolio=EqWt.portf, type="risk_budget", name="StdDev", arguments=list(clean=clean))
 
 ### Construct RISK BUDGET Portfolio
 RiskBudget.portf <- portfolio.spec(assets=colnames(R), 
@@ -230,8 +230,13 @@ RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
 
 #------------------------------------------------------------------------
 ### Evaluate portfolio objective objects
-# Generate a single set of random portfolios to evaluate against all constraint set
+# Generate a single set of random portfolios to evaluate against all RP constraint sets
 print(paste('constructing random portfolios at',Sys.time()))
+
+# Modify the init.portf specification to get RP running 
+rp.portf <- init.portf
+rp.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
+rp.portf$constraints[[1]]$max_sum = 1.01
 rp = random_portfolios(portfolio=init.portf, permutations=permutations)
 print(paste('done constructing random portfolios at',Sys.time()))
 
@@ -263,7 +268,7 @@ print(paste('Completed meanmETL optimization at',Sys.time(),'moving on to MinSD'
 MeanmETL.RND<-optimize.portfolio(R=R,
                                  portfolio=MeanmETL.portf,
                                  optimize_method='random',
-                                 search_size=10000,
+                                 rp=rp,
                                  trace=TRUE
 ) 
 plot(MeanmETL.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Mean-mETL Portfolio")
@@ -294,27 +299,33 @@ print(paste('Completed MinmETL optimization at',Sys.time(),'moving on to EqSD'))
 EqSD.RND<-optimize.portfolio(R=R,
   portfolio=EqSD.portf,
   optimize_method='random',
-  search_size=1000, trace=TRUE
+  rp=rp,
+  trace=TRUE
   ) 
 plot(EqSD.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
 chart.RiskBudget(EqSD.RND, risk.type="percentage", neighbors=25)
-save(EqSD.RND,file=paste(resultsdir, 'EqSD-', Sys.Date(), '-', runname, '.rda',sep=''))
-print(paste('Completed EqSD optimization at',Sys.time(),'moving on to EqmETL'))
+save(EqSD.RND,file=paste(resultsdir, 'EqSD.RND-', Sys.Date(), '-', runname, '.rda',sep=''))
 
+
+# or with DE
 EqSD.DE<-optimize.portfolio(R=R,
-                             portfolio=EqSD.portf,
-                             optimize_method='DEoptim',
-                             search_size=1000, trace=TRUE, verbose=TRUE
+  portfolio=EqSD.portf,
+  optimize_method='DEoptim',
+  search_size=1000, 
+  trace=TRUE, verbose=TRUE
 ) 
 plot(EqSD.DE, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
 chart.RiskBudget(EqSD.DE, risk.type="percentage")
+save(EqSD.DE,file=paste(resultsdir, 'EqSD.DE-', Sys.Date(), '-', runname, '.rda',sep=''))
 
+print(paste('Completed EqSD optimization at',Sys.time(),'moving on to EqmETL'))
 
 ### Evaluate BUOY 6: Constrained Equal mETL Contribution Portfolio - with RP
 EqmETL.RND<-optimize.portfolio(R=R,
   portfolio=EqmETL.portf,
   optimize_method='random',
-  search_size=1000, trace=TRUE
+  rp=rp,
+  trace=TRUE
   ) # 
 plot(EqmETL.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
 plot(EqmETL.RND, risk.col="ES", return.col="mean", chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
@@ -323,15 +334,7 @@ save(EqmETL.RND,file=paste(resultsdir, 'EqmETL-', Sys.Date(), '-', runname, '.rd
 print(paste('Completed EqmETL optimization at',Sys.time(),'moving on to RiskBudget'))
 
 ### Evaluate BUOY 7: Equal Weight Portfolio
-# There's only one, so calculate it.
-#@ Create a portfolio object with all the objectives we want calculated. - RB
-EqWt.portf <- portfolio.spec(assets=colnames(R))
-EqWt.portf <- add.constraint(portfolio=EqWt.portf, type="leverage", min_sum=0.99, max_sum=1.01)
-EqWt.portf <- add.objective(portfolio=EqWt.portf, type="return", name="mean")
-EqWt.portf <- add.objective(portfolio=EqWt.portf, type="risk_budget", name="ES", arguments=list(p=p, clean=clean))
-EqWt.portf <- add.objective(portfolio=EqWt.portf, type="risk_budget", name="StdDev", arguments=list(clean=clean))
-
-#@ Calculate the objective measures for the equal weight portfolio - RB
+# Calculate the objective measures for the equal weight portfolio
 EqWt.opt <- equal.weight(R=R, portfolio=EqWt.portf)
 
 
