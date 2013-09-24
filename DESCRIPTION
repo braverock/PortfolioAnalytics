@@ -4,8 +4,8 @@ Title: Portfolio Analysis, including Numeric Methods for Optimization
     of Portfolios
 Version: 0.8.3
 Date: $Date$
-Author: Kris Boudt, Peter Carl, Brian G. Peterson
-Contributors: Hezky Varon, Guy Yollin
+Author: Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt  
+Contributors: R. Douglas Martin, Guy Yollin, Hezky Varon
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
