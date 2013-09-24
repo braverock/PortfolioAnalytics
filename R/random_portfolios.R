@@ -349,7 +349,15 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #' }
 #' 
 #' The constraint types checked are leverage, box, group, and position limit. Any
-#' portfolio that does not satisfy all these constraints will be eliminated.
+#' portfolio that does not satisfy all these constraints will be eliminated. This
+#' function is particularly sensitive to \code{min_sum} and \code{max_sum} 
+#' leverage constraints. For the sample method, there should be some 
+#' "wiggle room" between \code{min_sum} and \code{max_sum} in order to generate 
+#' a sufficient number of feasible portfolios. For example, \code{min_sum=0.99} 
+#' and \code{max_sum=1.01} is recommended instead of \code{min_sum=1} 
+#' and \code{max_sum=1}. If \code{min_sum=1} and \code{max_sum=1}, the number of
+#' feasible portfolios may be 1/3 or less depending on the other constraints.
+#' 
 #' 
 #' @param portfolio an object of type "portfolio" specifying the constraints for the optimization, see \code{\link{constraint}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
