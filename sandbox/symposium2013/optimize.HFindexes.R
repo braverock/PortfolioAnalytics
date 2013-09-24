@@ -204,11 +204,11 @@ RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
                                   name="mean"
                                   )
 # Add a risk measure
-
 # Use ES to be consistent with risk measures in other BUOY portfolios
 RiskBudget.portf <- add.objective(portfolio=RiskBudget.portf,
                                   type="risk",
                                   name="ES",
+                                  multiplier=1,
                                   arguments = list(p=(1-1/12), clean=clean)
                                   )
 
@@ -257,7 +257,17 @@ MeanmETL.ROI<-optimize.portfolio(R=R,
 plot(MeanmETL.ROI, risk.col="StdDev", return.col="mean", rp=permutations, chart.assets=TRUE, main="Mean-mETL Portfolio")
 plot(MeanmETL.ROI, risk.col="ES", return.col="mean", rp=permutations, chart.assets=TRUE, main="Mean-mETL Portfolio")
 save(MeanmETL.ROI,file=paste(resultsdir, 'MeanETL-', Sys.Date(), '-', runname, '.rda',sep=''))
+chart.EfficientFrontier(MeanmETL.RND)
 print(paste('Completed meanmETL optimization at',Sys.time(),'moving on to MinSD'))
+
+MeanmETL.RND<-optimize.portfolio(R=R,
+                                 portfolio=MeanmETL.portf,
+                                 optimize_method='random',
+                                 search_size=10000,
+                                 trace=TRUE
+) 
+plot(MeanmETL.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Mean-mETL Portfolio")
+plot(MeanmETL.RND, risk.col="ES", return.col="mean", chart.assets=TRUE, main="Mean-mETL Portfolio")
 
 ### Evaluate BUOY 3: Constrained Minimum Variance Portfolio - with ROI
 MinSD.ROI<-optimize.portfolio(R=R,
@@ -364,6 +374,20 @@ chart.RiskBudget(buoyETL, match.col="ES", risk.type="percentage", legend.loc="to
 buoyStdDev <- combine.optimizations(list(EqSD=EqSD.RND, EqWt=EqWt.opt))
 chart.RiskBudget(buoyStdDev, match.col="StdDev", risk.type="absolute", legend.loc="topleft")
 
+Wgts = extractWeights(buoys)
+
+# Extract portfolio measures from each objective
+## We can't just extract them, because they aren't all calculated
+## so fill them in...
+portfmeas=NULL
+for(i in 1:NROW(Wgts)){
+  mean = sum(colMeans(R)*Wgts[i,])
+  sd = StdDev(R, weights=Wgts[i,])
+  es = ES(R, weights=Wgts[i,], method="modified", portfolio_method="component", p=p)
+  portfmeas=rbind(portfmeas, c(mean, sd[1], es[1]))
+}
+colnames(portfmeas)=c("Mean", "StdDev", "mETL")
+rownames(portfmeas)=rownames(Wgts)
 
 end_time<-Sys.time()
 end_time-start_time
