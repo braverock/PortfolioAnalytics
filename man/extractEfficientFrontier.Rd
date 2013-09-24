@@ -50,7 +50,7 @@
   will be extracted from the object via
   \code{extract.efficient.frontier}. This means that
   \code{optimize.portfolio} must be run with
-  \code{trace=TRUE}
+  \code{trace=TRUE}.
 }
 \author{
   Ross Bennett

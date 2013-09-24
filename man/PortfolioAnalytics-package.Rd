@@ -7,7 +7,7 @@ Numeric methods for optimization of portfolios
 }
 
 \description{
-\kbd{PortfolioAnalytics} provides an\R packaged to provide numerical solutions for portfolio problems with complex constraints and objective sets. The goal of the package is to aid practicioners and researchers in solving portfolio optimization problems with complex constraints and objectives that mirror real-world applications.
+\kbd{PortfolioAnalytics} provides an \R packaged to provide numerical solutions for portfolio problems with complex constraints and objective sets. The goal of the package is to aid practicioners and researchers in solving portfolio optimization problems with complex constraints and objectives that mirror real-world applications.
 
 One of the goals of the packages is to provide a common interface to specify constraints and objectives that can be solved by any supported solver (i.e. optimization method). Currently supported optimization methods include random portfolios, differential evolution, particle swarm optimization, generalized simulated annealing, and linear and quadratic programming routines. Additional information on random portfolios is provided below. The differential evolution algorithm is implemented via the \kbd{DEoptim} package, the particle swarm optimization algorithm via the \kbd{pso} package, the generalized simulated annealing via the \kbd{GenSA} package, and linear and quadratic programming are implemented via the \kbd{ROI} package which acts as an interface to the \kbd{Rglpk} and \kbd{quadprog} packages.
 

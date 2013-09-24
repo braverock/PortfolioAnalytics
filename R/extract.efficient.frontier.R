@@ -10,32 +10,7 @@
 #
 ###############################################################################
 
-#' Extract the efficient frontier of portfolios that meet your objectives over a range of risks
-#' 
-#' The efficient frontier is extracted from the set of portfolios created by 
-#' \code{optimize.portfolio} with \code{trace=TRUE}.
-#' 
-#' If you do not have an optimal portfolio object created by 
-#' \code{\link{optimize.portfolio}}, you can pass in a portfolio object and an
-#' optimization will be run via \code{\link{optimize.portfolio}}
-#' 
-#' @note
-#' Note that this function will be extremely sensitive to the objectives in your
-#' \code{\link{portfolio}} object.  It will be especially obvious if you 
-#' are looking at a risk budget objective and your return preference is not set high enough.
-#' 
-#'  
-#' @param object optimial portfolio object as created by \code{\link{optimize.portfolio}}
-#' @param match.col string name of column to use for risk (horizontal axis)
-#' @param from minimum value of the sequence
-#' @param to maximum value of the sequence
-#' @param by number to increment the sequence by
-#' @param n.portfolios number of portfolios along the efficient frontier to extract
-#' @param \dots any other passthru parameters to \code{optimize.portfolio}
-#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization, see \code{\link{portfolio.spec}}
-#' @param optimize_method one of "DEoptim", "random", "ROI", "pso", or "GenSA"
-#' @export
+
 extract.efficient.frontier <- function (object=NULL, match.col='ES', from=NULL, to=NULL, by=0.005, n.portfolios=NULL, ..., R=NULL, portfolio=NULL, optimize_method='random')
 {
     #TODO add a threshold argument for how close it has to be to count
@@ -383,7 +358,7 @@ create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_a
 #' For objects created by \code{optimize.portfolo} with the DEoptim, random, or
 #' pso solvers, the efficient frontier will be extracted from the object via
 #' \code{extract.efficient.frontier}. This means that \code{optimize.portfolio} must
-#' be run with \code{trace=TRUE}
+#' be run with \code{trace=TRUE}.
 #' 
 #' @param object an optimal portfolio object created by \code{optimize.portfolio}
 #' @param match.col string name of column to use for risk (horizontal axis).
