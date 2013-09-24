@@ -63,14 +63,13 @@
   \code{\link{optimize.portfolio}} with
   \code{optimize_method="DEoptim"} and then extract the
   efficient frontier with
-  \code{\link{extract.efficient.frontier}}.}
-  \item{"random":}{ This can handle more complex
-  constraints and objectives than the simple mean-var and
-  mean-ETL cases. For this type, we actually call
-  \code{\link{optimize.portfolio}} with
-  \code{optimize_method="random"} and then extract the
+  \code{extract.efficient.frontier}.} \item{"random":}{
+  This can handle more complex constraints and objectives
+  than the simple mean-var and mean-ETL cases. For this
+  type, we actually call \code{\link{optimize.portfolio}}
+  with \code{optimize_method="random"} and then extract the
   efficient frontier with
-  \code{\link{extract.efficient.frontier}}.} }
+  \code{extract.efficient.frontier}.} }
 }
 \author{
   Ross Bennett
@@ -79,7 +78,6 @@
   \code{\link{optimize.portfolio}},
   \code{\link{portfolio.spec}},
   \code{\link{meanvar.efficient.frontier}},
-  \code{\link{meanetl.efficient.frontier}},
-  \code{\link{extract.efficient.frontier}}
+  \code{\link{meanetl.efficient.frontier}}
 }
 

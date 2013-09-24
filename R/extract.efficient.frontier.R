@@ -266,12 +266,12 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
 #'   than the simple mean-var and mean-ETL cases. For this type, we actually 
 #'   call \code{\link{optimize.portfolio}} with \code{optimize_method="DEoptim"}
 #'   and then extract the efficient frontier with 
-#'   \code{\link{extract.efficient.frontier}}.}
+#'   \code{extract.efficient.frontier}.}
 #'   \item{"random":}{ This can handle more complex constraints and objectives
 #'   than the simple mean-var and mean-ETL cases. For this type, we actually 
 #'   call \code{\link{optimize.portfolio}} with \code{optimize_method="random"}
 #'   and then extract the efficient frontier with 
-#'   \code{\link{extract.efficient.frontier}}.}
+#'   \code{extract.efficient.frontier}.}
 #' }
 #' 
 #' @param R xts object of asset returns
@@ -290,8 +290,7 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
 #' @seealso \code{\link{optimize.portfolio}}, 
 #' \code{\link{portfolio.spec}}, 
 #' \code{\link{meanvar.efficient.frontier}}, 
-#' \code{\link{meanetl.efficient.frontier}}, 
-#' \code{\link{extract.efficient.frontier}}
+#' \code{\link{meanetl.efficient.frontier}}
 #' @export
 create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_aversion=NULL, match.col="ES", search_size=2000, ...){
   # This is just a wrapper around a few functions to easily create efficient frontiers
