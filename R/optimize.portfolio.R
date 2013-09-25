@@ -610,6 +610,12 @@ optimize.portfolio_v2 <- function(
     upper <- constraints$max
     lower <- constraints$min
     
+    # issue message if min_sum and max_sum are restrictive
+    if((constraints$max_sum - constraints$min_sum) < 0.02){
+      message("Leverage constraint min_sum and max_sum are restrictive, 
+              consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01")
+    }
+    
     if(hasArg(rpseed)){ 
       seed <- match.call(expand.dots=TRUE)$rpseed
       DEcformals$initialpop <- seed
@@ -656,6 +662,12 @@ optimize.portfolio_v2 <- function(
   
   # case for random portfolios optimization method
   if(optimize_method=="random"){
+    # issue message if min_sum and max_sum are too restrictive
+    if((constraints$max_sum - constraints$min_sum) < 0.02){
+      message("Leverage constraint min_sum and max_sum are restrictive, 
+              consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01")
+    }
+    
     #' call random_portfolios() with portfolio and search_size to create matrix of portfolios
     if(missing(rp) | is.null(rp)){
       if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
