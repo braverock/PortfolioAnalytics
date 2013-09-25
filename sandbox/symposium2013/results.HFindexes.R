@@ -14,9 +14,9 @@ png(filename="RP-EqWgt-MeanSD-ExAnte.png", units="in", height=5.5, width=9, res=
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
 # Calculate chart bounds to unify with the charts below
 xlim.StdDev=c(min(c(xtract[,"StdDev"], unlist(portfmeas[,"StdDev"]))), max(c(xtract[,"StdDev"], unlist(portfmeas[,"StdDev"]))))
-ylim.StdDev=c(min(c(xtract[,"mean"], unlist(portfmeas[,"Mean"]))), max(c(xtract[,"mean"], unlist(portfmeas[,"Mean"]))))
+ylim.mean=c(min(c(xtract[,"mean"], unlist(portfmeas[,"Mean"]))), max(c(xtract[,"mean"], unlist(portfmeas[,"Mean"]))))
 
-plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev, ylim=ylim.StdDev)
+plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev, ylim=ylim.mean)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
 # Overplot the equal weight portfolio
@@ -53,7 +53,7 @@ dev.off()
 # Done
 png(filename="RP-BUOY-MeanSD-ExAnte.png", units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
-plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev, ylim=ylim.StdDev)
+plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev, ylim=ylim.mean)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
 # Overplot the buoy portfolios
@@ -68,24 +68,26 @@ dev.off()
 # --------------------------------------------------------------------
 # Plot Ex Ante scatter of RP and BUOY portfolios in mETL space
 # --------------------------------------------------------------------
-# @TODO: Recalc chart limits for ES
+# Done
 png(filename="RP-BUOYS-mETL-ExAnte.png", units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
-plot(xtract[,"ES"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7)
+xlim.ES=c(min(c(xtract[,"ES"], unlist(portfmeas[,"mETL"]))), max(c(xtract[,"ES"], unlist(portfmeas[,"mETL"]))))
+plot(xtract[,"ES"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.ES, ylim=ylim.mean)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
 # Overplot the buoy portfolios
-points(as.numeric(portfmeas[,"ES"]),as.numeric(portfmeas[,"mean"]), col=tol8qualitative[8], pch=16, cex=1.5) # watch the order in portfmeas
+points(as.numeric(portfmeas[,"mETL"]),as.numeric(portfmeas[,"Mean"]), col=tol8qualitative, pch=16, cex=1.5) # watch the order in portfmeas
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
-legend("bottomright",legend=results.names[1], col=tol7qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=0.8, inset=.02)
+legend("bottomright",legend=results.names, col=tol8qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=0.8, inset=.02)
 par(op)
 dev.off()
 
 # --------------------------------------------------------------------
 # Plot weights of Buoy portfolios
 # --------------------------------------------------------------------
+# Done
 source('./R/chart.UnStackedBar.R')
 Wgts = extractWeights(buoys)
 png(filename=paste(resultsdir, "Weights-Buoys.png", sep=""), units="in", height=5.5, width=9, res=96)
