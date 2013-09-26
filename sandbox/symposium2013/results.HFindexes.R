@@ -16,7 +16,7 @@ par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
 xlim.StdDev=c(min(c(xtract[,"StdDev"], unlist(portfmeas[,"StdDev"]))), max(c(xtract[,"StdDev"], unlist(portfmeas[,"StdDev"]))))
 ylim.mean=c(min(c(xtract[,"mean"], unlist(portfmeas[,"Mean"]))), max(c(xtract[,"mean"], unlist(portfmeas[,"Mean"]))))
 
-plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev, ylim=ylim.mean)
+plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante Std Dev", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev, ylim=ylim.mean)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
 # Overplot the equal weight portfolio
@@ -104,6 +104,21 @@ png(filename=paste(resultsdir, "Weights-Buoys.png", sep=""), units="in", height=
 chart.UnStackedBar(t(Wgts), colorset=tol8qualitative, equal.line=TRUE)
 dev.off()
 # Alternatively, use table function for ES
+
+# --------------------------------------------------------------------
+# Plot efficient frontier of mean-sd?
+# --------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------
+# Plot efficient frontier of mean-mETL?
+# --------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------
+# Plot efficient frontier of Equal Risk
+# --------------------------------------------------------------------
+
 
 # --------------------------------------------------------------------
 # Plot Ex Post scatter of buoy portfolios?

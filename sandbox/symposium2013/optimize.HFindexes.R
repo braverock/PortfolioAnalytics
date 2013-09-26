@@ -170,7 +170,14 @@ EqmETL.portf <- add.objective(EqmETL.portf,
                               min_concentration=TRUE,
                               arguments = list(p=(1-1/12), clean=clean)
 )
-
+# Calculate portfolio variance, but don't use it in the objective; used only for plots
+EqmETL.portf <- add.objective(portfolio=EqmETL.portf,
+                                  type="risk", # the kind of objective this is
+                                  name="StdDev", # the function to minimize
+                                  enabled=TRUE, # enable or disable the objective
+                                  multiplier=0, # calculate it but don't use it in the objective
+                                  arguments=list(clean=clean)
+)
 EqmETL.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
 EqmETL.portf$constraints[[1]]$max_sum = 1.01
 

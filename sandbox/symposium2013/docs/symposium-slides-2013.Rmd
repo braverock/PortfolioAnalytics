@@ -3,6 +3,12 @@
 % November 11, 2013
 
 <!---
+# TODO
+ - Add a slide comparing traditional risk budgeting to equalized risk portfolios with limits
+ - Move as much text off slides and into comments, add more graphics
+ - Add autocorrelation charts?
+-->
+<!---
 # HOWTO
 To create PDF of these slides:
 $ pandoc symposium-slides-2013.Rmd -t beamer -o slides.pdf
@@ -134,6 +140,7 @@ Construct a portfolio that:
 * Decomposes the total portfolio risk into the risk contribution of each component position
 * Literature on risk contribution has focused on volatility rather than downside risk
 * Most financial returns series seem non-normal, so we want to consider the effects of higher moments
+<!-- compare traditional versus risk equalization and limits -->
 
 # Return distributions
 \includegraphics[width=1.0\textwidth]{../results/EDHEC-Distributions.png}
@@ -159,7 +166,7 @@ Split graphic into two pages so it's readable
 Modified ETL demonstrates a better fit for historical CVaR at lower confidence levels, and can break down at higher confidence levels
 *Insert chart or charts*
 
-<!-- discuss cleaning? -->
+<!-- discuss cleaning method here -->
 
 # _Ex ante_, not _ex post_
 _Ex post_ analysis of risk contribution has been around for a while
@@ -211,16 +218,23 @@ Constraints specified for each asset in the portfolio:
 * Group constraints
 * Rebalancing quarterly
 
-# Estimate
+# Estimates
+Table of Return, Volatility, Skew, Kurt, and Correlations by asset
+
+<!-- Comments:
 One of the largest challenges in optimization is improving the estimates of the moments
+
+For strategic allocations, whether conventional or alternative, we want to use long-term return and risk characteristics.  These estimates are not to be conditional on the current or near-term market and business cycle, but focus on the characteristics relevant to the portfolio over a long horizon.
 
 * Optimizer chooses portfolios based on forward looking estimates of risk and return based on the constituent moments
 * Usually explicitly making trade-offs between correlation and volatility among members 
 * Modified ETL extends the tradeoffs to the first four moments and co-moments
 * Historical sample moments are used here as predictors 
 
-<!-- Comments:
-Historical sample moments work fine in in normal market regimes, but poorly when the market regime shifts
+Historical sample moments work fine in in normal market regimes, but seem to perform poorly when the market regime shifts.  
+
+Another thing we're not doing here is tying to put Alternatives on the same footing as asset classes with traded market prices.  So we're ignoring methods that could be used to "adjust" the returns here for known risks.
+
 For the purposes of this presentation, we're going to ignore this very important topic.
 *** We should discuss using some form of improved but standard method here as to not be completely stupid ***
 -->
@@ -335,23 +349,21 @@ Such functions are very compute intensive - so linear, quadradic or conical obje
 -->
 
 # Random Portfolios
-It is what it sounds like
+From a portfolio seed, generate random permutations of weights that meet your constraints 
 
-* From a portfolio seed, generate random permutations of weights that meet your constraints 
 * Several methods: [Burns (2009)](http://www.portfolioprobe.com/blog/), Shaw (2010), and Gilli, _et al_ (2011)
-
-Sampling can help provide insight into the goals and constraints of the optimization
-
 * Covers the 'edge case' (min/max) constraints well
 * Covers the 'interior' portfolios
 * Useful for finding the search space for an optimizer
 * Allows arbitrary number of samples
 * Allows massively parallel execution
 
+Sampling can help provide insight into the goals and constraints of the optimization
+
 <!-- Comments:
 The 'sample' method to generate random portfolios is based on an idea by Pat Burns. This is the most flexible method, but also the slowest, and can generate portfolios to satisfy leverage, box, group, and position limit constraints.  *** What about Portfolio attribute constraints? Should ***
 
-The 'simplex' method to generate random portfolios is based on a paper by W. T. Shaw. The simplex method is useful to generate random portfolios with the full investment constraint, where the sum of the weights is equal to 1, and min box constraints. Many other constraints such as the box constraint max, group and position limit constraints will be handled by elimination. 
+The 'simplex' method to generate random portfolios is based on a paper by William T. Shaw. The simplex method is useful to generate random portfolios with the full investment constraint, where the sum of the weights is equal to 1, and min box constraints. Many other constraints such as the box constraint max, group and position limit constraints will be handled by elimination. 
 
 The 'grid' method to generate random portfolios is based on the gridSearch function in package NMOF. The grid search method only satisfies the min and max box constraints.
 -->

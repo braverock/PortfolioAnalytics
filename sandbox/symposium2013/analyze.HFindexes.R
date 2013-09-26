@@ -169,7 +169,7 @@ chart.RollingCorrelation(R,SP500.TR, width=24, legend.loc="bottomleft", colorset
 dev.off()
        
 # --------------------------------------------------------------------
-## Autocorrelation
+# Autocorrelation
 # --------------------------------------------------------------------
 
 # require(Hmisc)
@@ -185,3 +185,8 @@ png(filename=paste(resultsdir, dataname, "-ACStackedBars.png", sep=""), units="i
 rownames(AC.stats)= sapply(colnames(R), function(x) paste(strwrap(x,10), collapse = "\n"), USE.NAMES=FALSE)
 chart.StackedBar(as.matrix(AC.stats[,1:6]), colorset=bluemono, main="Observed Autocorrelation")
 dev.off()
+       
+# --------------------------------------------------------------------
+# ETL parameterization charts
+# --------------------------------------------------------------------
+       
