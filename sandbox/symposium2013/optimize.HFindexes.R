@@ -361,8 +361,10 @@ save(RiskBudget.DE,file=paste(resultsdir, 'RiskBudget-', Sys.Date(), '-', runnam
 print(RiskBudget.DE$elapsed_time)
 print('Done with optimizations.')
 
+#------------------------------------------------------------------------
+### Extract data from optimizations for analysis
 
-### Combine optimization objects
+# Combine optimization objects
 buoys <- combine.optimizations(list(MeanSD=MeanSD.ROI, MeanmETL=MeanmETL.ROI, MinSD=MinSD.ROI, MinmETL=MinmETL.ROI, EqSD=EqSD.RND, EqmETL=EqmETL.RND, RB=RiskBudget.DE, EqWt=EqWt.opt))
 # how to add an EqWgt to this list?
 #@ The elements of this list need to be optimize.portfolio objects, so unfortunately we
@@ -386,18 +388,35 @@ chart.RiskBudget(buoyStdDev, match.col="StdDev", risk.type="absolute", legend.lo
 
 Wgts = extractWeights(buoys)
 
-# Extract portfolio measures from each objective
-## We can't just extract them, because they aren't all calculated
-## so fill them in...
-portfmeas=NULL
+### Extract portfolio measures from each objective
+# We can't just extract them, because they aren't all calculated
+# so fill them in...
+buoys.portfmeas =  buoys.contrib.sd = buoys.contrib.es = buoys.perc.sd = buoys.perc.es = NULL
 for(i in 1:NROW(Wgts)){
   mean = sum(colMeans(R)*Wgts[i,])
-  sd = StdDev(R, weights=Wgts[i,])
+  sd = StdDev(R, weights=Wgts[i,], portfolio_method="component")
   es = ES(R, weights=Wgts[i,], method="modified", portfolio_method="component", p=p)
-  portfmeas=rbind(portfmeas, c(mean, sd[1], es[1]))
+  buoys.portfmeas=rbind(buoys.portfmeas, c(mean, sd[[1]][1], es[[1]][1]))
+  buoys.contrib.sd= rbind(buoys.contrib.sd,sd[[2]])
+  buoys.contrib.es= rbind(buoys.contrib.es,es[[2]])
+  buoys.perc.sd = rbind(buoys.perc.sd,sd[[3]])
+  buoys.perc.es = rbind(buoys.perc.es,es[[3]])
 }
-colnames(portfmeas)=c("Mean", "StdDev", "mETL")
-rownames(portfmeas)=rownames(Wgts)
+colnames(buoys.portfmeas)=c("Mean", "StdDev", "mETL")
+rownames(buoys.portfmeas)=
+rownames(buoys.contrib.sd)= 
+rownames(buoys.contrib.es)= 
+rownames(buoys.perc.sd) = 
+rownames(buoys.perc.es) = rownames(Wgts)
+colnames(buoys.contrib.sd)= 
+colnames(buoys.contrib.es)= 
+colnames(buoys.perc.sd) = 
+colnames(buoys.perc.es) = colnames(Wgts)
+
+# get the RP portfolios with risk and return pre-calculated
+xtract = extractStats(EqmETL.RND) 
+# columnnames = colnames(xtract)
+results.names=rownames(buoys.portfmeas)
 
 end_time<-Sys.time()
 end_time-start_time
