@@ -6,7 +6,6 @@
 # TODO
  - Add a slide comparing traditional risk budgeting to equalized risk portfolios with limits
  - Move as much text off slides and into comments, add more graphics
- - Add autocorrelation charts?
 -->
 <!---
 # HOWTO
@@ -148,6 +147,22 @@ Construct a portfolio that:
 # Return distributions
 * Split chart into two for readability
 
+# Return autocorrelation
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-ACStats.png}
+
+<!-- Comments:
+* Keep this super short
+* Discuss GLM view of autocorrelation
+* cast doubt on that interpretation by pointing out EMN
+* note that it isn't a truism - not all strategies seem to show AC
+* alternative interpretation?
+* say that we're ignoring AC for the purposes of this presentation
+* but it could be tackled in estimation with HAC correlation or Okunev-White transformations
+-->
+
+# Return autocorrelation
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-ACStackedBars.png}
+
 # Measuring risk, not volatility
 Measure risk with Conditional Value-at-Risk (CVaR)
 
@@ -163,10 +178,12 @@ Measure risk with Conditional Value-at-Risk (CVaR)
 Split graphic into two pages so it's readable
 
 # ETL sensitivity
-Modified ETL demonstrates a better fit for historical CVaR at lower confidence levels, and can break down at higher confidence levels
-*Insert chart or charts*
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-ETL-sensitivity.png}
 
-<!-- discuss cleaning method here -->
+<!-- Comments:
+Modified ETL demonstrates a better fit for historical CVaR at lower confidence levels, and can break down at higher confidence levels
+*** discuss cleaning method here 
+-->
 
 # _Ex ante_, not _ex post_
 _Ex post_ analysis of risk contribution has been around for a while
@@ -189,7 +206,7 @@ Use the modified CVaR contribution estimator from Boudt, _et al_ (2008)
 * A high positive %CmETL indicates the position has a large loss when the portfolio also has a large loss
 
 <!-- Comments:
-SD, VaR and ETL are linearly homogenous functions of portfolio weights w, so Euler’s theorem gives additive decomposition.  Zivot (2011)
+SD, VaR and ETL are linearly homogenous functions of portfolio weights w, so applying Euler’s theorem gives additive decomposition.  Zivot (2011)
 Should point out that this also maps into factor tail risk contributions, which has an intuitive interpretation as stress loss scenarios.
 -->
 

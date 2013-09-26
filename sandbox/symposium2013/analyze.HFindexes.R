@@ -57,7 +57,7 @@ load("./cache/SP500TR.RData")
 
 # Drop some indexes and reorder
 R = edhec[,c("Convertible Arbitrage", "Equity Market Neutral","Fixed Income Arbitrage", "Event Driven", "CTA Global", "Global Macro", "Long/Short Equity")]
-
+R.names = colnames(R)
 
 ########################################################################
 # Returns-based performance analysis
@@ -137,8 +137,6 @@ dev.off()
 library(gplots)
 # Generate some color choices for the scale
 skewedWB20 = c(colorpanel(16, "#008566","#E1E56D"), colorpanel(5, "#E1E56D", "#742414")[-1])
-skewedGnYeRd10 = c(colorpanel(8, "darkgreen", "yellow"),colorpanel(3, "yellow", "darkred")[-1])
-skewedGnYeRd20 = c(colorpanel(16, "darkgreen", "yellow"),colorpanel(5, "yellow", "darkred")[-1])
        
 M <- cor(R)
 colnames(M) = rownames(M) 
@@ -158,7 +156,11 @@ corrplot(M36.hc2, tl.col="black", tl.cex=0.8, method="shade", col=skewedWB20, cl
 corrRect.hclust(M36.hc2, k=3, method="complete", col="blue")
 dev.off()
 
-# @TODO: Add 12M rolling correlation to S&P500
+# --------------------------------------------------------------------
+# Table of Return correlations
+# --------------------------------------------------------------------
+
+write.csv(M, file=paste(resultsdir, dataname, "-inception-cor.csv", sep=""))
 
 # --------------------------------------------------------------------
 # Rolling Correlation to S&P500 TR
@@ -189,4 +191,17 @@ dev.off()
 # --------------------------------------------------------------------
 # ETL parameterization charts
 # --------------------------------------------------------------------
-       
+  # @TODO: make these y-axes match?
+# source('~/devel/R/returnanalytics/pkg/PerformanceAnalytics/R/chart.VaRSensitivity.R')
+png(filename=paste(resultsdir, dataname, "-ETL-sensitivity.png", sep=""), units="in", height=5.5, width=9, res=96)
+op <- par(no.readonly = TRUE)
+layout(matrix(c(1:8), nrow=2))
+par(mar = c(4, 4, 5, 2)+0.1) #c(bottom, left, top, right)
+for(i in 1:NCOL(R)){
+  chart.VaRSensitivity(R[,i], methods=c("ModifiedES","HistoricalES", "GaussianES"), legend.loc=NULL, clean=clean, colorset=c("orange", "black", "darkgray"), lty=c(3,1,2), lwd=3, main=R.names[i], ylim=c(-0.09,0), ylab="Expected Tail Loss")
+  abline(v = 1-1/12, col = "red", lty = 2, lwd=1)
+}
+  plot.new()
+  legend("center", legend=c("Modified \nETL","Historical \nETL", "Gaussian \nETL"), lty=c(3,1,2), lwd=3, col=c("orange", "black", "darkgray"), cex=1.2, y.intersp=2)
+par(op)
+dev.off()
