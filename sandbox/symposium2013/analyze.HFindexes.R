@@ -191,17 +191,19 @@ dev.off()
 # --------------------------------------------------------------------
 # ETL parameterization charts
 # --------------------------------------------------------------------
-  # @TODO: make these y-axes match?
-# source('~/devel/R/returnanalytics/pkg/PerformanceAnalytics/R/chart.VaRSensitivity.R')
+# Requires a recent modification to the chart in PerformanceAnalytics to make the y-axes match; in  revision 3191
+source('./R/chart.VaRSensitivity.R')
 png(filename=paste(resultsdir, dataname, "-ETL-sensitivity.png", sep=""), units="in", height=5.5, width=9, res=96)
 op <- par(no.readonly = TRUE)
 layout(matrix(c(1:8), nrow=2))
 par(mar = c(4, 4, 5, 2)+0.1) #c(bottom, left, top, right)
 for(i in 1:NCOL(R)){
-  chart.VaRSensitivity(R[,i], methods=c("ModifiedES","HistoricalES", "GaussianES"), legend.loc=NULL, clean=clean, colorset=c("orange", "black", "darkgray"), lty=c(3,1,2), lwd=3, main=R.names[i], ylim=c(-0.09,0), ylab="Expected Tail Loss")
+  chart.VaRSensitivity(R[,i], methods=c("ModifiedES","HistoricalES", "GaussianES"), legend.loc=NULL, clean=clean, colorset=c("orange", "black", "darkgray"), lty=c(2,1,2), lwd=3, main=R.names[i], ylim=c(-0.09,0), ylab="Expected Tail Loss")
   abline(v = 1-1/12, col = "red", lty = 2, lwd=1)
 }
   plot.new()
-  legend("center", legend=c("Modified \nETL","Historical \nETL", "Gaussian \nETL"), lty=c(3,1,2), lwd=3, col=c("orange", "black", "darkgray"), cex=1.2, y.intersp=2)
+  legend("center", legend=c("Modified \nETL","Historical \nETL", "Gaussian \nETL"), lty=c(2,1,2), lwd=3, col=c("orange", "black", "darkgray"), cex=1.2, y.intersp=2)
 par(op)
 dev.off()
+  
+  

@@ -2,10 +2,6 @@
 
 op <- par(no.readonly=TRUE)
 
-xtract = extractStats(EqmETL.RND) # get the RP portfolios with risk and return pre-calculated
-# columnnames = colnames(xtract)
-results.names=rownames(portfmeas)
-
 # --------------------------------------------------------------------
 # Plot Ex Ante scatter of RP and ONLY Equal Weight portfolio in StdDev space
 # --------------------------------------------------------------------
@@ -13,14 +9,14 @@ results.names=rownames(portfmeas)
 png(filename="RP-EqWgt-MeanSD-ExAnte.png", units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
 # Calculate chart bounds to unify with the charts below
-xlim.StdDev=c(min(c(xtract[,"StdDev"], unlist(portfmeas[,"StdDev"]))), max(c(xtract[,"StdDev"], unlist(portfmeas[,"StdDev"]))))
-ylim.mean=c(min(c(xtract[,"mean"], unlist(portfmeas[,"Mean"]))), max(c(xtract[,"mean"], unlist(portfmeas[,"Mean"]))))
+xlim.StdDev=c(min(c(xtract[,"StdDev"], buoys.portfmeas[,"StdDev"])), max(c(xtract[,"StdDev"], buoys.portfmeas[,"StdDev"])))
+ylim.mean=c(min(c(xtract[,"mean"], buoys.portfmeas[,"Mean"])), max(c(xtract[,"mean"], buoys.portfmeas[,"Mean"])))
 
 plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante Std Dev", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev, ylim=ylim.mean)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
 # Overplot the equal weight portfolio
-points(as.numeric(portfmeas[8,"StdDev"]),as.numeric(portfmeas[8,"Mean"]), col=tol8qualitative[8], pch=16, cex=1.5) # watch the order in portfmeas
+points(buoys.portfmeas[8,"StdDev"],buoys.portfmeas[8,"Mean"], col=tol8qualitative[8], pch=16, cex=1.5) # watch the order in portfmeas
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
@@ -32,18 +28,24 @@ dev.off()
 # Plot Ex Ante scatter of RP and ASSET portfolios in StdDev space
 # --------------------------------------------------------------------
 # @TODO: add the assets to this chart
-png(filename="RP-EqWgt-MeanSD-ExAnte.png", units="in", height=5.5, width=9, res=96) 
+png(filename="RP-Assets-MeanSD-ExAnte.png", units="in", height=5.5, width=9, res=96) 
+xlim.StdDev.assets =c(min(c(xtract[,"StdDev"], assets.portfmeas[,"StdDev"], 0)), max(c(xtract[,"StdDev"], assets.portfmeas[,"StdDev"],0.03)))
+ylim.mean.assets =c(min(c(xtract[,"mean"], assets.portfmeas[,"Mean"], 0)), max(c(xtract[,"mean"], assets.portfmeas[,"Mean"])))
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
 # Revise the chart bounds to include the asssets
-plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7)
+plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev.assets, ylim=ylim.mean.assets)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
+abline(v = 0, col = "darkgray")
 # Overplot the equal weight portfolio
-points(as.numeric(portfmeas[8,"StdDev"]),as.numeric(portfmeas[8,"Mean"]), col=tol8qualitative[8], pch=16, cex=1.5) # watch the order in portfmeas
+points(buoys.portfmeas[8,"StdDev"],buoys.portfmeas[8,"Mean"], col=tol8qualitative[8], pch=16, cex=1.5) # watch the order in portfmeas
+text(x=buoys.portfmeas[8,"StdDev"], y=buoys.portfmeas[8,"Mean"], labels=rownames(buoys.portfmeas)[8], pos=4, cex=1)
+points(assets.portfmeas[,"StdDev"],assets.portfmeas[,"Mean"], col=rich8equal, pch=18, cex=1.5) # watch the order in portfmeas
+text(x=assets.portfmeas[,"StdDev"], y=assets.portfmeas[,"Mean"], labels=rownames(assets.portfmeas), pos=4, cex=1)
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
-legend("bottomright",legend=results.names[8], col=tol8qualitative[8], pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=0.8, inset=.02)
+#legend("right",legend=rownames(assets.portfmeas), col=rich8equal, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=0.8, inset=.02)
 par(op)
 dev.off()
 
@@ -53,11 +55,11 @@ dev.off()
 # Done
 png(filename="RP-BUOY-MeanSD-ExAnte.png", units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
-plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev, ylim=ylim.mean)
+plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante Std Dev", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev, ylim=ylim.mean)
 grid(col = "darkgray")
 abline(h = 0, col = "darkgray")
 # Overplot the buoy portfolios
-points(as.numeric(portfmeas[,"StdDev"]),as.numeric(portfmeas[,"Mean"]), col=tol8qualitative, pch=16, cex=1.5) # watch the order in portfmeas
+points(buoys.portfmeas[,"StdDev"],buoys.portfmeas[,"Mean"], col=tol8qualitative, pch=16, cex=1.5) # watch the order in portfmeas
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
@@ -71,12 +73,11 @@ dev.off()
 # Done
 png(filename="RP-BUOYS-mETL-ExAnte.png", units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
-xlim.ES=c(min(c(xtract[,"ES"], unlist(portfmeas[,"mETL"]))), max(c(xtract[,"ES"], unlist(portfmeas[,"mETL"]))))
+xlim.ES=c(min(c(xtract[,"ES"], buoys.portfmeas[,"mETL"])), max(c(xtract[,"ES"], buoys.portfmeas[,"mETL"])))
 plot(xtract[,"ES"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.ES, ylim=ylim.mean)
 grid(col = "darkgray")
-abline(h = 0, col = "darkgray")
 # Overplot the buoy portfolios
-points(as.numeric(portfmeas[,"mETL"]),as.numeric(portfmeas[,"Mean"]), col=tol8qualitative, pch=16, cex=1.5) # watch the order in portfmeas
+points(buoys.portfmeas[,"mETL"],buoys.portfmeas[,"Mean"], col=tol8qualitative, pch=16, cex=1.5) # watch the order in portfmeas
 axis(1, cex.axis = 0.8, col = "darkgray")
 axis(2, cex.axis = 0.8, col = "darkgray")
 box(col = "darkgray")
@@ -89,7 +90,7 @@ dev.off()
 # --------------------------------------------------------------------
 # Done
 source('./R/chart.UnStackedBar.R')
-Wgts = extractWeights(buoys)
+# Wgts = extractWeights(buoys)
 png(filename=paste(resultsdir, "Weights-Buoys.png", sep=""), units="in", height=5.5, width=9, res=96)
 chart.UnStackedBar(t(Wgts), colorset=tol8qualitative, equal.line=TRUE)
 dev.off()
@@ -100,10 +101,46 @@ dev.off()
 # @TODO: revise for this result set
 # @TODO: add contribution to risk to portfmeas
 source('./R/chart.UnStackedBar.R')
-png(filename=paste(resultsdir, "Weights-Buoys.png", sep=""), units="in", height=5.5, width=9, res=96)
-chart.UnStackedBar(t(Wgts), colorset=tol8qualitative, equal.line=TRUE)
+png(filename=paste(resultsdir, "mETL-Perc-Contrib-Buoys.png", sep=""), units="in", height=5.5, width=9, res=96)
+chart.UnStackedBar(t(buoys.perc.es), colorset=tol8qualitative, equal.line=TRUE)
 dev.off()
 # Alternatively, use table function for ES
+
+# --------------------------------------------------------------------
+# Plot cumulative contribution to risk of Buoy portfolios
+# --------------------------------------------------------------------
+cumRisk=NULL
+for(i in 1:NROW(buoys.contrib.es)) {
+  y = cumsum(buoys.contrib.es[i,order(buoys.contrib.es[i,], decreasing=TRUE)])
+  cumRisk=rbind(cumRisk,y)
+}
+colnames(cumRisk)=c("Most",2:6,"Least")
+rownames(cumRisk)= results.names
+
+png(filename=paste(resultsdir, "mETL-CumulPerc-Contrib-Buoys.png", sep=""), units="in", height=5.5, width=9, res=96)
+par(mar=c(5, 4, 1, 4) + 0.1) #c(bottom, left, top, right)
+plot(cumRisk[8,], ylim=c(0,max(cumRisk)), col=tol8qualitative[8], type="l", lwd=2, axes=FALSE, main="", xlab="Rank of Contribution to Risk", ylab="Portfolio Risk")
+grid(col = "darkgray")
+abline(h = 0, col = "darkgray")
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
+for(i in 1:8) {
+  lines(cumRisk[i,], col=tol8qualitative[i], lwd=3)
+  # put the values of the rightmost dot on the plot; that's the portfolio risk 
+  points(7, cumRisk[i,7], col = tol8qualitative[i], pch=20, cex=1)
+	mtext(paste(round(100*cumRisk[i,7],2),"%", sep=""), line=.5, side = 4, at=cumRisk[i,7], adj=0, las=2, cex = 0.9, col = tol8qualitative[i])
+}
+# Add legend
+legend("bottomright",legend=results.names, col=tol8qualitative, pch=16, ncol=1,  border.col="darkgray", y.intersp=1.2, cex=.9, lwd=3, inset=.02)
+par(op)
+dev.off()
+
+
+# --------------------------------------------------------------------
+# Plot contribution of risk in EqWgt portfolio
+# --------------------------------------------------------------------
+
 
 # --------------------------------------------------------------------
 # Plot efficient frontier of mean-sd?

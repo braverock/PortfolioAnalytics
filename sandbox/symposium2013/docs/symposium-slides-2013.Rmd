@@ -181,7 +181,7 @@ Split graphic into two pages so it's readable
 \includegraphics[width=1.0\textwidth]{../results/EDHEC-ETL-sensitivity.png}
 
 <!-- Comments:
-Modified ETL demonstrates a better fit for historical CVaR at lower confidence levels, and can break down at higher confidence levels
+Modified ETL demonstrates a better fit for historical CVaR at lower confidence levels, and can break down at higher confidence levels; 95% is fine in most cases, but lower usually works a little better; interpretation of 91.7%
 *** discuss cleaning method here 
 -->
 
@@ -239,18 +239,21 @@ Constraints specified for each asset in the portfolio:
 Table of Return, Volatility, Skew, Kurt, and Correlations by asset
 
 <!-- Comments:
-One of the largest challenges in optimization is improving the estimates of the moments
+* For strategic allocations, whether conventional or alternative, we want to use long-term return and risk characteristics.  
 
-For strategic allocations, whether conventional or alternative, we want to use long-term return and risk characteristics.  These estimates are not to be conditional on the current or near-term market and business cycle, but focus on the characteristics relevant to the portfolio over a long horizon.
+* These estimates are not to be conditional on the current or near-term market and business cycle, but focus on the characteristics relevant to the portfolio over a long horizon.
+
+* That said, one of the largest challenges in optimization is improving the estimates of the moments
 
 * Optimizer chooses portfolios based on forward looking estimates of risk and return based on the constituent moments
-* Usually explicitly making trade-offs between correlation and volatility among members 
+
+* In most cases explicitly making trade-offs between correlation and volatility among members 
+
 * Modified ETL extends the tradeoffs to the first four moments and co-moments
-* Historical sample moments are used here as predictors 
 
-Historical sample moments work fine in in normal market regimes, but seem to perform poorly when the market regime shifts.  
+* Historical sample moments are used here as predictors; that's fine in in normal market regimes, but seem to perform poorly when the market regime shifts.  
 
-Another thing we're not doing here is tying to put Alternatives on the same footing as asset classes with traded market prices.  So we're ignoring methods that could be used to "adjust" the returns here for known risks.
+* Another thing I'm not doing here is tying to put Alternatives on the same footing as asset classes with traded market prices.  So we're ignoring methods that could be used to "adjust" the returns here for known risks.
 
 For the purposes of this presentation, we're going to ignore this very important topic.
 *** We should discuss using some form of improved but standard method here as to not be completely stupid ***
