@@ -476,7 +476,8 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   
   # Modify the returns matrix. This is done because there are 3 sets of
   # variables 1) w.initial, 2) w.buy, and 3) w.sell
-  returns <- cbind(R, R, R)
+  R0 <- matrix(0, ncol=ncol(R), nrow=nrow(R))
+  returns <- cbind(R, R0, R0)
   V <- cov(returns)
   
   # number of assets
@@ -486,7 +487,8 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   if(is.null(init_weights)) init_weights <- rep(1/ N, N)
   
   # Amat for initial weights
-  Amat <- cbind(diag(N), matrix(0, nrow=N, ncol=N*2))
+  # Amat <- cbind(diag(N), matrix(0, nrow=N, ncol=N*2))
+  Amat <- cbind(diag(N), -1*diag(N), diag(N))
   rhs <- init_weights
   dir <- rep("==", N)
   meq <- 4
@@ -499,30 +501,30 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
     } else {
       tmp_means <- moments$mean
     }
-    Amat <- rbind(Amat, rep(tmp_means, 3))
+    Amat <- rbind(Amat, c(tmp_means, rep(0, 2*N)))
     dir <- c(dir, "==")
     rhs <- c(rhs, target)
     meq <- 5
   }
   
   # Amat for full investment constraint
-  Amat <- rbind(Amat, rbind(rep(1, N*3), rep(-1, N*3)))
+  Amat <- rbind(Amat, rbind(c(rep(1, N), rep(0,2*N)), c(rep(-1, N), rep(0,2*N))))
   rhs <- c(rhs, constraints$min_sum, -constraints$max_sum)
   dir <- c(dir, ">=", ">=")
   
   # Amat for lower box constraints
-  Amat <- rbind(Amat, cbind(diag(N), diag(N), diag(N)))
+  Amat <- rbind(Amat, cbind(diag(N), diag(0, N), diag(0, N)))
   rhs <- c(rhs, constraints$min)
   dir <- c(dir, rep(">=", N))
   
   # Amat for upper box constraints
-  Amat <- rbind(Amat, cbind(-diag(N), -diag(N), -diag(N)))
+  Amat <- rbind(Amat, cbind(-diag(N), diag(0, N), diag(0, N)))
   rhs <- c(rhs, -constraints$max)
   dir <- c(dir, rep(">=", N))
   
   # Amat for turnover constraints
-  Amat <- rbind(Amat, c(rep(0, N), rep(-1, N), rep(1, N)))
-  rhs <- c(rhs, -constraints$toc)
+  Amat <- rbind(Amat, c(rep(0, N), rep(-1, N), rep(-1, N)))
+  rhs <- c(rhs, -constraints$turnover_target)
   dir <- c(dir, ">=")
   
   # Amat for positive weights
@@ -531,7 +533,7 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   dir <- c(dir, rep(">=", N))
   
   # Amat for negative weights
-  Amat <- rbind(Amat, cbind(matrix(0, nrow=N, ncol=2*N), -diag(N)))
+  Amat <- rbind(Amat, cbind(matrix(0, nrow=N, ncol=2*N), diag(N)))
   rhs <- c(rhs, rep(0, N))
   dir <- c(dir, rep(">=", N))
   
@@ -539,13 +541,14 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   if(try(!is.null(constraints$groups), silent=TRUE)){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
+    zeros <- matrix(0, nrow=n.groups, ncol=N)
     for(i in 1:n.groups){
       Amat.group[i, constraints$groups[[i]]] <- 1
     }
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
-    Amat <- rbind(Amat, cbind(Amat.group, Amat.group, Amat.group))
-    Amat <- rbind(Amat, cbind(-Amat.group, -Amat.group, -Amat.group))
+    Amat <- rbind(Amat, cbind(Amat.group, zeros, zeros))
+    Amat <- rbind(Amat, cbind(-Amat.group, zeros, zeros))
     dir <- c(dir, rep(">=", (n.groups + n.groups)))
     rhs <- c(rhs, constraints$cLO, -constraints$cUP)
   }
@@ -553,21 +556,24 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   # Add the factor exposures to Amat, dir, and rhs
   if(!is.null(constraints$B)){
     t.B <- t(constraints$B)
-    Amat <- rbind(Amat, cbind(t.B, t.B, t.B))
-    Amat <- rbind(Amat, cbind(-t.B, -t.B, -t.B))
+    zeros <- matrix(0, nrow=nrow(t.B), ncol=ncol(t.B))
+    Amat <- rbind(Amat, cbind(t.B, zeros, zeros))
+    Amat <- rbind(Amat, cbind(-t.B, zeros, zeros))
     dir <- c(dir, rep(">=", 2 * nrow(t.B)))
     rhs <- c(rhs, constraints$lower, -constraints$upper)
   }
   
   d <- rep(-moments$mean, 3)
   
-  stopifnot("package:corpcor" %in% search() || require("foreach",quietly = TRUE))
+  stopifnot("package:corpcor" %in% search() || require("corpcor",quietly = TRUE))
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
   if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
   
   wts <- qp.result$solution
-  wts.final <- wts[(1:N)] + wts[(1+N):(2*N)] + wts[(2*N+1):(3*N)]
+  wts.final <- wts[(1:N)]
+  # wts.buy <- wts[(1+N):(2*N)]
+  # wts.sell <- wts[(2*N+1):(3*N)]
   
   weights <- wts.final
   names(weights) <- colnames(R)
@@ -673,7 +679,7 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
   
   d <- rep(-moments$mean, 3)
   
-  stopifnot("package:corpcor" %in% search() || require("foreach",quietly = TRUE))
+  stopifnot("package:corpcor" %in% search() || require("corpcor",quietly = TRUE))
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
   if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
