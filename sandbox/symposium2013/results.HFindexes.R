@@ -6,7 +6,7 @@ op <- par(no.readonly=TRUE)
 # Plot Ex Ante scatter of RP and ONLY Equal Weight portfolio in StdDev space
 # --------------------------------------------------------------------
 # Done
-png(filename="RP-EqWgt-MeanSD-ExAnte.png", units="in", height=5.5, width=9, res=96) 
+png(filename=paste(resultsdir, "RP-EqWgt-MeanSD-ExAnte.png", sep=""), units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
 # Calculate chart bounds to unify with the charts below
 xlim.StdDev=c(min(c(xtract[,"StdDev"], buoys.portfmeas[,"StdDev"])), max(c(xtract[,"StdDev"], buoys.portfmeas[,"StdDev"])))
@@ -28,7 +28,7 @@ dev.off()
 # Plot Ex Ante scatter of RP and ASSET portfolios in StdDev space
 # --------------------------------------------------------------------
 # @TODO: add the assets to this chart
-png(filename="RP-Assets-MeanSD-ExAnte.png", units="in", height=5.5, width=9, res=96) 
+png(filename=paste(resultsdir, "RP-Assets-MeanSD-ExAnte.png", sep=""), units="in", height=5.5, width=9, res=96) 
 xlim.StdDev.assets =c(min(c(xtract[,"StdDev"], assets.portfmeas[,"StdDev"], 0)), max(c(xtract[,"StdDev"], assets.portfmeas[,"StdDev"],0.03)))
 ylim.mean.assets =c(min(c(xtract[,"mean"], assets.portfmeas[,"Mean"], 0)), max(c(xtract[,"mean"], assets.portfmeas[,"Mean"])))
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
@@ -53,7 +53,7 @@ dev.off()
 # Plot Ex Ante scatter of RP and BUOY portfolios in StdDev space
 # --------------------------------------------------------------------
 # Done
-png(filename="RP-BUOY-MeanSD-ExAnte.png", units="in", height=5.5, width=9, res=96) 
+png(filename=paste(resultsdir, "RP-BUOY-MeanSD-ExAnte.png", sep=""), units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
 plot(xtract[,"StdDev"],xtract[,"mean"], xlab="Ex Ante Std Dev", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.StdDev, ylim=ylim.mean)
 grid(col = "darkgray")
@@ -71,7 +71,7 @@ dev.off()
 # Plot Ex Ante scatter of RP and BUOY portfolios in mETL space
 # --------------------------------------------------------------------
 # Done
-png(filename="RP-BUOYS-mETL-ExAnte.png", units="in", height=5.5, width=9, res=96) 
+png(filename=paste(resultsdir, "RP-BUOYS-mETL-ExAnte.png", sep=""), units="in", height=5.5, width=9, res=96) 
 par(mar=c(5, 4, 1, 2) + 0.1) #c(bottom, left, top, right)
 xlim.ES=c(min(c(xtract[,"ES"], buoys.portfmeas[,"mETL"])), max(c(xtract[,"ES"], buoys.portfmeas[,"mETL"])))
 plot(xtract[,"ES"],xtract[,"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col="darkgray", axes=FALSE, main="", cex=.7, xlim=xlim.ES, ylim=ylim.mean)
@@ -136,6 +136,14 @@ legend("bottomright",legend=results.names, col=tol8qualitative, pch=16, ncol=1, 
 par(op)
 dev.off()
 
+# --------------------------------------------------------------------
+# Scatter chart with DE trail
+# --------------------------------------------------------------------
+png(filename=paste(resultsdir, "DE-MeanSD-ExAnte.png", sep=""), units="in", height=5.5, width=9, res=96)
+# chart in same coordinates as RP; will leave some of the dots outside the chart bounds
+chart.RiskReward(RiskBudget.DE, risk.col="StdDev", return.col="mean", xlim=xlim.StdDev, ylim=ylim.mean)
+par(op)
+dev.off()
 
 # --------------------------------------------------------------------
 # Plot contribution of risk in EqWgt portfolio
@@ -274,6 +282,148 @@ par(op)
 dev.off()
 
 # --------------------------------------------------------------------
-# Show CONCENTRATION of the RP portfolios?
+# Show CONCENTRATION of the RP portfolios
 # --------------------------------------------------------------------
 # Basically the same chart as above but use HHI instead of turnover calc
+
+png(filename="ConcPercESContrib.png", units="in", height=5.5, width=9, res=96)
+WB20 = c(colorpanel(1, "#008566","#E1E56D"), colorpanel(20, "#E1E56D", "#742414")[-1])
+op <- par(no.readonly=TRUE)
+layout(matrix(c(1,2)),height=c(4,1.25),width=1)
+par(mar=c(4,4,1,2)+.1, cex=1) # c(bottom, left, top, right)
+## Draw the Scatter chart of combined results
+### Get the random portfolios from one of the result sets
+x.hhi=apply(xtract[,10:16], FUN='HHI', MARGIN=1)
+y=(x.hhi-min(x.hhi))/(max(x.hhi)-min(x.hhi)) # normalized HHI between 0 and 1
+plot(xtract[order(y,decreasing=TRUE),"StdDev"],xtract[order(y,decreasing=TRUE),"mean"], xlab="Ex Ante StdDev", ylab="Ex Ante Mean", col=WB20[floor(y[order(y,decreasing=TRUE)]*19)+1], axes=FALSE, main="", cex=.7, pch=16)
+grid(col = "darkgray")
+# points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1.5)
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
+
+# Add legend to bottom panel
+par(mar=c(5,5.5,1,3)+.1, cex=0.7)
+## Create a histogramed legend for sequential colorsets
+## this next bit of code is based on heatmap.2 in gplots package
+x=x.hhi
+scale01 <- function(x, low = min(x), high = max(x)) {
+  return((x - low)/(high - low))
+}
+breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length = length(WB20)+1)
+min.raw <- min(x, na.rm = TRUE)
+max.raw <- max(x, na.rm = TRUE)
+z <- seq(min.raw, max.raw, length = length(WB20))
+image(z = matrix(z, ncol = 1), col = WB20, breaks = breaks, xaxt = "n", yaxt = "n")
+par(usr = c(0, 1, 0, 1)) # needed to draw the histogram correctly
+lv <- pretty(breaks)
+xv <- scale01(as.numeric(lv), min.raw, max.raw)
+axis(1, at = xv, labels=sprintf("%s%%", pretty(lv)))
+h <- hist(x, plot = FALSE, breaks=breaks)
+hx <- scale01(breaks, min(x), max(x))
+hy <- c(h$counts, h$counts[length(h$counts)])
+lines(hx, hy/max(hy)*.95, lwd = 2, type = "s", col = "blue")
+axis(2, at = pretty(hy)/max(hy)*.95, pretty(hy))
+title(ylab="Count")
+title(xlab="Degree of Concentration from Equal Contribution Portfolio")
+par(op)
+dev.off()
+
+# --------------------------------------------------------------------
+# Show CONCENTRATION of the RP portfolios in HHI space
+# --------------------------------------------------------------------
+png(filename="ConcPercESContrib-HHI-wHull.png", units="in", height=5.5, width=9, res=96)
+WB20 = c(colorpanel(1, "#008566","#E1E56D"), colorpanel(20, "#E1E56D", "#742414")[-1])
+op <- par(no.readonly=TRUE)
+layout(matrix(c(1,2)),height=c(4,1.25),width=1)
+par(mar=c(4,4,1,2)+.1, cex=1) # c(bottom, left, top, right)
+seq.col = heat.colors(11)
+## Draw the Scatter chart of combined results
+### Get the random portfolios from one of the result sets
+x.hhi=apply(xtract[,10:16], FUN='HHI', MARGIN=1)
+y=(x.hhi-min(x.hhi))/(max(x.hhi)-min(x.hhi)) # normalized HHI between 0 and 1
+plot(x.hhi[order(y,decreasing=TRUE)],xtract[order(y,decreasing=TRUE),"mean"], xlab="Degree of ex ante Risk Contribution", ylab="Ex Ante Mean", col=WB20[floor(y[order(y,decreasing=TRUE)]*19)+1], axes=FALSE, main="", cex=.7, pch=16)
+grid(col = "darkgray")
+# points(RND.objectives[1,2],RND.objectives[1,1], col="blue", pch=19, cex=1.5)
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
+
+# HOWTO add a hull to this diagram
+# Make a data.frame out of your vectors
+dat <- data.frame(X = x.hhi[order(y,decreasing=TRUE)], Y = xtract[order(y,decreasing=TRUE),"mean"])
+dat <- data.frame(X = x.hhi, Y = xtract[,"mean"])
+# Compute the convex hull. This returns the index for the X and Y coordinates
+c.hull <- chull(dat)
+#Extract the coordinate points from the convex hull with the index.
+z=dat[c.hull,]
+# Plot the full hull
+# with(dat, plot(X,Y))
+# lines(z, col = "pink", lwd = 3)
+
+# Or just do the ascending hull in Y
+z[,3] <- c(diff(as.numeric(z[,1])),z[1,1]-tail(z[,1],1)) # calculate whether the line segment is ascending in X
+z[,4] <- c(tail(z[,2],1)-z[1,2],diff(as.numeric(z[,2]))) # calculate whether the line segment is ascending in Y
+lines(z[z[,3]>0 & z[,4]>0,1:2], col = "darkgrey", lwd = 2, type="b")
+z=cbind(z,c.hull)
+# Here are the portfolios on the hull
+hull.portfolios=z[which(z[,3]>0 & z[,4]>0),5]
+
+# Add legend to bottom panel
+par(mar=c(5,5.5,1,3)+.1, cex=0.7)
+## Create a histogramed legend for sequential colorsets
+## this next bit of code is based on heatmap.2 in gplots package
+x=x.hhi
+scale01 <- function(x, low = min(x), high = max(x)) {
+  return((x - low)/(high - low))
+}
+breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length = length(WB20)+1)
+min.raw <- min(x, na.rm = TRUE)
+max.raw <- max(x, na.rm = TRUE)
+z <- seq(min.raw, max.raw, length = length(WB20))
+image(z = matrix(z, ncol = 1), col = WB20, breaks = breaks, xaxt = "n", yaxt = "n")
+par(usr = c(0, 1, 0, 1)) # needed to draw the histogram correctly
+lv <- pretty(breaks)
+xv <- scale01(as.numeric(lv), min.raw, max.raw)
+axis(1, at = xv, labels=sprintf("%s%%", pretty(lv)))
+h <- hist(x, plot = FALSE, breaks=breaks)
+hx <- scale01(breaks, min(x), max(x))
+hy <- c(h$counts, h$counts[length(h$counts)])
+lines(hx, hy/max(hy)*.95, lwd = 2, type = "s", col = "blue")
+axis(2, at = pretty(hy)/max(hy)*.95, pretty(hy))
+title(ylab="Count")
+title(xlab="Degree of Concentration from Equal Contribution Portfolio")
+par(op)
+dev.off()
+
+
+
+# Again, in Std Dev space with hull outlined
+png(filename="ConcPercESContrib-SD-wHull.png", units="in", height=5.5, width=9, res=96)
+WB20 = c(colorpanel(1, "#008566","#E1E56D"), colorpanel(20, "#E1E56D", "#742414")[-1])
+op <- par(no.readonly=TRUE)
+layout(matrix(c(1,2)),height=c(4,1.25),width=1)
+par(mar=c(4,4,1,2)+.1, cex=1) # c(bottom, left, top, right)
+plot(xtract[order(y,decreasing=TRUE),"StdDev"],xtract[order(y,decreasing=TRUE),"mean"], xlab="Ex Ante StdDev", ylab="Ex Ante Mean", col=WB20[floor(y[order(y,decreasing=TRUE)]*19)+1], axes=FALSE, main="", cex=.7, pch=16)
+points(xtract[hull.portfolios,"StdDev"], xtract[hull.portfolios,"mean"], col='blue')
+lines(xtract[hull.portfolios,"StdDev"], xtract[hull.portfolios,"mean"], type="b", col='blue')
+grid(col = "darkgray")
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
+dev.off()
+
+# Again, in ES space with hull outlined
+png(filename="ConcPercESContrib-mETL-wHull.png", units="in", height=5.5, width=9, res=96)
+WB20 = c(colorpanel(1, "#008566","#E1E56D"), colorpanel(20, "#E1E56D", "#742414")[-1])
+op <- par(no.readonly=TRUE)
+layout(matrix(c(1,2)),height=c(4,1.25),width=1)
+par(mar=c(4,4,1,2)+.1, cex=1) # c(bottom, left, top, right)
+plot(xtract[order(y,decreasing=TRUE),"ES"],xtract[order(y,decreasing=TRUE),"mean"], xlab="Ex Ante mETL", ylab="Ex Ante Mean", col=WB20[floor(y[order(y,decreasing=TRUE)]*19)+1], axes=FALSE, main="", cex=.7, pch=16)
+points(xtract[hull.portfolios,"ES"], xtract[hull.portfolios,"mean"], col='blue')
+lines(xtract[hull.portfolios,"ES"], xtract[hull.portfolios,"mean"], type="b", col='blue')
+grid(col = "darkgray")
+axis(1, cex.axis = 0.8, col = "darkgray")
+axis(2, cex.axis = 0.8, col = "darkgray")
+box(col = "darkgray")
+dev.off()

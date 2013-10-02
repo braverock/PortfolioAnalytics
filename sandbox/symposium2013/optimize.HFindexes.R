@@ -21,7 +21,7 @@ registerDoMC(5)
 ### Set script constants
 runname='historical.moments'
 #rebalance_period = 'quarters' # uses endpoints identifiers from xts; how to do semi-annual?
-clean = "boudt" # "none" 
+clean = "none" #"boudt" # "none" 
 permutations = 2000
 p=1-1/12 # set confidence for VaR/mETL for monthly data
 
@@ -175,8 +175,8 @@ EqmETL.portf <- add.objective(portfolio=EqmETL.portf,
                                   multiplier=0, # calculate it but don't use it in the objective
                                   arguments=list(clean=clean)
 )
-EqmETL.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
-EqmETL.portf$constraints[[1]]$max_sum = 1.01
+# EqmETL.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
+# EqmETL.portf$constraints[[1]]$max_sum = 1.01
 
 ### Construct BUOY 7: Equal Weight Portfolio
 # There's only one, so create a portfolio object with all the objectives we want calculated. 
@@ -357,7 +357,7 @@ EqWt.opt <- equal.weight(R=R, portfolio=EqWt.portf)
 RiskBudget.DE<-optimize.portfolio(R=R,
                                portfolio=RiskBudget.portf,
                                optimize_method='DEoptim',
-                              search_size=1000 #, trace=TRUE
+                              search_size=1000, trace=TRUE
                                ) 
 plot(RiskBudget.DE, risk.col="StdDev", return.col="mean")
 plot(RiskBudget.DE, risk.col="ES", return.col="mean") # several outlier portfolios

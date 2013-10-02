@@ -58,6 +58,7 @@ load("./cache/SP500TR.RData")
 # Drop some indexes and reorder
 R = edhec[,c("Convertible Arbitrage", "Equity Market Neutral","Fixed Income Arbitrage", "Event Driven", "CTA Global", "Global Macro", "Long/Short Equity")]
 R.names = colnames(R)
+R.foldednames = sapply(colnames(R), function(x) paste(strwrap(x,10), collapse = "\n"), USE.NAMES=FALSE)
 
 ########################################################################
 # Returns-based performance analysis
@@ -79,11 +80,19 @@ dev.off()
 # --------------------------------------------------------------------
 # Monthly Returns and Risk
 # --------------------------------------------------------------------
-# @TODO: Too small: break this into two graphics? Directional, non-directional?
+# Done
 png(filename=paste(resultsdir, dataname, "-BarVaR.png", sep=""), units="in", height=5.5, width=9, res=96) 
 # Generate charts of returns with ETL and VaR through time
 par(mar=c(3, 4, 0, 2) + 0.1) #c(bottom, left, top, right)
-charts.BarVaR(R, p=p, gap=36, main="", show.greenredbars=TRUE, 
+charts.BarVaR(R[,1:4], p=p, gap=36, main="", show.greenredbars=TRUE, 
+              methods=c("ModifiedES", "ModifiedVaR"), show.endvalue=TRUE, 
+              colorset=rep("Black",7), ylim=c(-.1,.15))
+par(op)
+dev.off()
+png(filename=paste(resultsdir, dataname, "-BarVaR2.png", sep=""), units="in", height=5.5, width=9, res=96) 
+# Generate charts of returns with ETL and VaR through time
+par(mar=c(3, 4, 0, 2) + 0.1) #c(bottom, left, top, right)
+charts.BarVaR(R[,5:7], p=p, gap=36, main="", show.greenredbars=TRUE, 
               methods=c("ModifiedES", "ModifiedVaR"), show.endvalue=TRUE, 
               colorset=rep("Black",7), ylim=c(-.1,.15))
 par(op)
@@ -114,7 +123,7 @@ dev.off()
 # --------------------------------------------------------------------
 # @TODO: Too small, break into two panels?
 require(Hmisc)
-source(paste(functionsdir,'table.RiskStats.R', sep="")
+source(paste(functionsdir,'table.RiskStats.R', sep=""))
 incept.stats = t(table.RiskStats(R=R, p=p, Rf=Rf))
 write.csv(incept.stats, file=paste(resultsdir, dataname, "-inception-stats.csv", sep=""))
 png(filename=paste(resultsdir, dataname, "-InceptionStats.png", sep=""), units="in", height=5.5, width=9, res=96) 
@@ -124,10 +133,15 @@ dev.off()
 # --------------------------------------------------------------------
 # Compare Distributions
 # --------------------------------------------------------------------
-# @TODO: too small?
+# 
 png(filename=paste(resultsdir, dataname, "-Distributions.png", sep=""), units="in", height=5.5, width=9, res=96) 
-source(paste(functionsdir, "/page.Distributions", sep=""))
-page.Distributions(R)
+#source(paste(functionsdir, "/page.Distributions", sep=""))
+page.Distributions(R[,1:4])
+dev.off()
+
+png(filename=paste(resultsdir, dataname, "-Distributions2.png", sep=""), units="in", height=5.5, width=9, res=96) 
+#source(paste(functionsdir, "/page.Distributions", sep=""))
+page.Distributions(R[,5:7])
 dev.off()
 
 # --------------------------------------------------------------------
@@ -161,7 +175,11 @@ dev.off()
 # --------------------------------------------------------------------
 
 write.csv(M, file=paste(resultsdir, dataname, "-inception-cor.csv", sep=""))
-
+  colnames(M)=R.foldednames
+# write(print(xtable(M, digits=1, align=rep("c",8)), type="html", html.table.attributes = "border = '0', align = 'center'"), file=paste(resultsdir, dataname, "-inception-cor.html", sep=""))
+# write(print(xtable(M, digits=1, align=rep("c",8))), file=paste(resultsdir, dataname, "-inception-cor.latex", sep=""))
+write(pandoc.table.return(M, digits=1, split.tables=Inf), file=paste(resultsdir, dataname, "-inception-cor.md", sep=""))
+  
 # --------------------------------------------------------------------
 # Rolling Correlation to S&P500 TR
 # --------------------------------------------------------------------

@@ -2,6 +2,10 @@
 % Peter Carl, Hedge Fund Strategies, William Blair & Co.
 % November 11, 2013
 
+```{r}
+# R code here
+```
+
 <!---
 # TODO
  - Add a slide comparing traditional risk budgeting to equalized risk portfolios with limits
@@ -10,15 +14,13 @@
 <!---
 # HOWTO
 To create PDF of these slides:
-$ pandoc symposium-slides-2013.Rmd -t beamer -o slides.pdf
+$ pandoc symposium-slides-2013.Rmd -t beamer -o symposium-slides-2013.pdf
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring web pages (click the **MD** toolbar button for help on Markdown).  Or see: http://daringfireball.net/projects/markdown/syntax
 
 When you click the **Knit HTML** button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r}
-summary(cars)
-```
+
 
 You can also embed plots, for example:
 
@@ -69,7 +71,7 @@ Monthly data of EDHEC hedge fund indexes from 1998
 * Convertible Arb
 * Equity Market Neutral
 * Event Driven
-
+***
 ## Directional
 
 * Equity Long/Short
@@ -84,6 +86,10 @@ Monthly data of EDHEC hedge fund indexes from 1998
 
 # Index Performance
 Add table of relevant statistics here
+
+```{r echo=FALSE}
+system('cat results/EDHEC-inception-cor.md')
+```
 
 # Ex-post Correlations
 \includegraphics[width=0.5\textwidth]{../results/EDHEC-cor-inception.png}
@@ -145,7 +151,7 @@ Construct a portfolio that:
 \includegraphics[width=1.0\textwidth]{../results/EDHEC-Distributions.png}
 
 # Return distributions
-* Split chart into two for readability
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-Distributions2.png}
 
 # Return autocorrelation
 \includegraphics[width=1.0\textwidth]{../results/EDHEC-ACStats.png}
@@ -171,11 +177,11 @@ Measure risk with Conditional Value-at-Risk (CVaR)
 * ETL has all the properties a risk measure should have to be coherent and is a convex function of the portfolio weights
 * To account for skew and/or kurtosis, use Cornish-Fisher (or "modified") estimates of ETL instead (mETL)
 
-# Measuring risk
+# Measuring risk - directional strategies
 \includegraphics[width=1.0\textwidth]{../results/EDHEC-BarVaR.png}
 
-# Measuring risk
-Split graphic into two pages so it's readable
+# Measuring risk - non-directional strategies
+\includegraphics[width=1.0\textwidth]{../results/EDHEC-BarVaR2.png}
 
 # ETL sensitivity
 \includegraphics[width=1.0\textwidth]{../results/EDHEC-ETL-sensitivity.png}
@@ -392,31 +398,22 @@ The 'grid' method to generate random portfolios is based on the gridSearch funct
 <!--- RESULTS -->
 
 # Sampled portfolios
-scatter chart with equal weight portfolio
-
-# Turnover from equal-weight
-scatter chart colored by degree of turnover
+\includegraphics[width=1.0\textwidth]{../results/RP-EqWgt-MeanSD-ExAnte.png}
 
 # Sampled portfolios
-add assets to scatter - overconstrained?
+\includegraphics[width=1.0\textwidth]{../results/RP-Assets-MeanSD-ExAnte.png}
 
-# Constrain by contribution to mETL
-Add a constraint
+# Sampled portfolios with multiple objectives
+\includegraphics[width=1.0\textwidth]{../results/RP-BUOY-MeanSD-ExAnte.png}
 
-# Ex-ante results
-scatter plot with multiple objectives
-
-# Ex-ante results
-scatter plot with multiple objectives, but in ETL space rather than variance
+# Modified ETL instead of volatility
+\includegraphics[width=1.0\textwidth]{../results/RP-BUOYS-mETL-ExAnte.png}
 
 # Ex-ante results
-Unstacked bar chart comparing allocations across objectives
-
-# Out-of-sample results
-timeseries charts for cumulative return and drawdown
+\includegraphics[width=1.0\textwidth]{../results/Weights-Buoys.png}
 
 # Risk contribution
-stacked bar chart of risk contribution through time (ex ante and ex post)
+\includegraphics[width=1.0\textwidth]{../results/mETL-CumulPerc-Contrib-Buoys.png}
 
 # Conclusions
 As a framework for strategic allocation:
@@ -509,6 +506,12 @@ GenSA, SOMA,
 # Ex-ante vs. ex-post results
 scatter plot with both overlaid
 
+
+# Turnover from equal-weight
+scatter chart colored by degree of turnover
+
+# Degree of Concentration
+scatter chart of RP colored by degree of concentration (HHI)
 
 # Scratch
 Slides likely to be deleted after this point
