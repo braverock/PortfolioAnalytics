@@ -7,15 +7,16 @@ else
   inputdir=$1
   destdir=$2
 fi
+cd $inputdir
 n=0;
 echo " ";
 echo "Converting:"
 echo " ";
-for file in $inputdir/*.pdf
+for file in *.pdf
   do 
     pngfile=${file%%.pdf}.png
-    echo "$((++n)): $file to $destdir/$pngfile."
+    echo "$((++n)): $file to $destdir/$pngfile"
     convert -density 300 $file -quality 100 -sharpen 0x1.0 $destdir/$pngfile 
-    echo " ";
-    echo "$((n)) files were converted from PDF to PNG format."
-done 
+done
+echo " ";
+echo "$((n)) files were converted from PDF to PNG format."
