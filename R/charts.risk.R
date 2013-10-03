@@ -406,7 +406,7 @@ barplotRiskBudget <- function(object, ..., match.col="ES", risk.type="absolute",
     if(is.null(colorset)) colorset <- 1:nrow(dat)
     
     # plot the data
-    barplot(dat, names.arg=columnnames, las=las, cex.names=cex.axis, col=colorset, main=main, ylab=paste(match.col, "% Contribution", sep=" "), cex.lab=cex.lab, cex.axis=cex.axis, ...)
+    barplot(dat, names.arg=columnnames, las=las, cex.names=cex.axis, col=colorset, main=main, ylab=paste(match.col, "% Contribution", sep=" "), cex.lab=cex.lab, cex.axis=cex.axis, beside=TRUE, ...)
     
     #axis(2, cex.axis=cex.axis, col=element.color)
     #axis(1, labels=columnnames, at=1:numassets, las=las, cex.axis=cex.axis, col=element.color)

@@ -407,28 +407,73 @@ extractWeights.opt.list <- function(object, ...){
 #' @method extractObjectiveMeasures opt.list
 #' @S3method extractObjectiveMeasures opt.list
 extractObjectiveMeasures.opt.list <- function(object){
+  # The idea is that these portfolios in  all have different objectives.
+  # Need a function to evaluate *all* objective measures for each portfolio.
+  # Challenges:
+  # - allow for different R objects across portfolios
+  #    - Done
+  # - detect and remove duplicate objectives
+  #    - Done based on name and objective type
+  # - handle duplicate objective names, but different arguments (i.e. different p for ES)
+  #    - TODO
+  # - risk budget objectives need to be entered last
+  #    - Done
   if(!inherits(object, "opt.list")) stop("object must be of class 'opt.list'")
-  # get/set the names in the object
-  opt_names <- names(object)
-  if(is.null(opt_names)) opt_names <- paste("opt", 1:length(object))
+  # Get the names of the list
+  opt.names <- names(object)
+  if(is.null(opt.names)) opt.names <- paste("portfolio", 1:length(object))
   
-  obj_list <- list()
+  # Initialize a tmp.obj list to store all of the objectives from each 
+  tmp.obj <- list()
+  tmp.budget <- list()
+  
+  # Step 1: Loop through object and get the objectives from each portfolio
   for(i in 1:length(object)){
-    tmp <- unlist(object[[i]]$objective_measures)
+    tmp.portf <- object[[i]]$portfolio
+    for(j in 1:length(tmp.portf$objectives)){
+      if(inherits(tmp.portf$objectives[[j]], "risk_budget_objective")){
+        # tmp.budget <- c(tmp.budget, tmp.portf$objectives[[j]])
+        num.budget <- length(tmp.budget) + 1
+        tmp.budget[[num.budget]] <- tmp.portf$objectives[[j]]
+      } else {
+        # tmp.obj <- c(tmp.obj, tmp.portf$objectives[[j]])
+        num.obj <- length(tmp.obj) + 1
+        tmp.obj[[num.obj]] <- tmp.portf$objectives[[j]]
+      }
+    } # end inner loop of objectives
+  } # end outer loop of object
+  
+  # This will make sure that "risk_budget_objectives" are entered last, but doesn't
+  # address duplicate names with different arguments in the arguments list
+  # e.g. different arguments for p, clean, etc.
+  tmp.obj <- c(tmp.obj, tmp.budget)
+  
+  # Remove any duplicates
+  # The last objective will be the one that is kept
+  out.obj <- list()
+  obj.names <- sapply(tmp.obj, function(x) paste(x$name, class(x)[1], sep="."))
+  if(any(duplicated(obj.names))){
+    idx <- which(!duplicated(obj.names, fromLast=TRUE))
+    for(i in 1:length(idx)){
+      out.obj[[i]] <- tmp.obj[[idx[i]]]
+    }
+  }
+  out.obj
+  
+  # Loop through object and insert the new objectives list into each portfolio
+  # and run constrained_objective on each portfolio to extract the 
+  # objective_measures for each portfolio
+  out <- list()
+  for(i in 1:length(object)){
+    object[[i]]$portfolio$objectives <- tmp.obj
+    tmp.weights <- object[[i]]$weights
+    tmp.R <- object[[i]]$R
+    tmp.portf <- object[[i]]$portfolio
+    tmp <- unlist(constrained_objective(w=tmp.weights, R=tmp.R, portfolio=tmp.portf, trace=TRUE)$objective_measures)
     names(tmp) <- PortfolioAnalytics:::name.replace(names(tmp))
-    obj_list[[opt_names[i]]] <- tmp
+    out[[opt.names[i]]] <- tmp
   }
-  obj_list
-  
-  obj_names <- unique(unlist(lapply(obj_list, names)))
-  
-  obj_mat <- matrix(NA, nrow=length(obj_list), ncol=length(obj_names), 
-                    dimnames=list(opt_names, obj_names))
-  
-  for(i in 1:length(obj_list)){
-    pm <- pmatch(x=names(obj_list[[i]]), table=obj_names)
-    obj_mat[i, pm] <- obj_list[[i]]
-  }
-  return(obj_mat)
+  out <- do.call(rbind, out)
+  return(out)
 }
 
