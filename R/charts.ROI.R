@@ -100,14 +100,20 @@ chart.Scatter.ROI <- function(object, ..., neighbors=NULL, return.col="mean", ri
   # cbind the optimal weights and random portfolio weights
   rp <- rbind(wts, rp)
   
-  returnpoints <- applyFUN(R=R, weights=rp, FUN=return.col, ...=...)
-  riskpoints <- applyFUN(R=R, weights=rp, FUN=risk.col, ...=...)
+  # Get the arguments from the optimize.portfolio$portfolio object
+  # to calculate the risk and return metrics for the scatter plot
+  tmp.args <- unlist(lapply(object$portfolio$objectives, function(x) x$arguments), recursive=FALSE)
+  tmp.args <- tmp.args[!duplicated(names(tmp.args))]
+  if(!is.null(tmp.args$portfolio_method)) tmp.args$portfolio_method <- "single"
+  arguments <- tmp.args
+  
+  returnpoints <- applyFUN(R=R, weights=rp, FUN=return.col, arguments)
+  riskpoints <- applyFUN(R=R, weights=rp, FUN=risk.col, arguments)
   
   if(chart.assets){
   # Include risk reward scatter of asset returns
-  asset_ret <- scatterFUN(R=R, FUN=return.col, ...=...)
-  asset_risk <- scatterFUN(R=R, FUN=risk.col, ...=...)
-  rnames <- colnames(R)
+  asset_ret <- scatterFUN(R=R, FUN=return.col, arguments)
+  asset_risk <- scatterFUN(R=R, FUN=risk.col, arguments)
   } else {
     asset_ret <- NULL
     asset_risk <- NULL

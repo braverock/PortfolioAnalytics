@@ -155,10 +155,19 @@ chart.Scatter.DE <- function(object, ..., neighbors = NULL, return.col='mean', r
   # print(colnames(head(xtract)))
   
   if(chart.assets){
+    # Get the arguments from the optimize.portfolio$portfolio object
+    # to calculate the risk and return metrics for the scatter plot. 
+    # (e.g. arguments=list(p=0.925, clean="boudt")
+    arguments <- NULL # maybe an option to let the user pass in an arguments list?
+    if(is.null(arguments)){
+      tmp.args <- unlist(lapply(object$portfolio$objectives, function(x) x$arguments), recursive=FALSE)
+      tmp.args <- tmp.args[!duplicated(names(tmp.args))]
+      if(!is.null(tmp.args$portfolio_method)) tmp.args$portfolio_method <- "single"
+      arguments <- tmp.args
+    }
     # Include risk reward scatter of asset returns
-    asset_ret <- scatterFUN(R=R, FUN=return.col, ...=...)
-    asset_risk <- scatterFUN(R=R, FUN=risk.col, ...=...)
-    rnames <- colnames(R)
+    asset_ret <- scatterFUN(R=R, FUN=return.col, arguments)
+    asset_risk <- scatterFUN(R=R, FUN=risk.col, arguments)
     xlim <- range(c(xtract[,risk.column], asset_risk))
     ylim <- range(c(xtract[,return.column], asset_ret))
   } else {
