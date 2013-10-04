@@ -39,7 +39,7 @@
 \SweaveOpts{concordance=TRUE}
 
 
-\title{Creating a Portfolio Object with PortfolioAnalytics}
+\title{Introduction to PortfolioAnalytics}
 \author{Ross Bennett}
 
 \maketitle
