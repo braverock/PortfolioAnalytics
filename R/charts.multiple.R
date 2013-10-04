@@ -67,7 +67,7 @@ barplotOptWeights <- function(object, ..., main="Weights", las=3, xlab=NULL, cex
 #' @rdname chart.RiskReward
 #' @method chart.RiskReward opt.list
 #' @S3method chart.RiskReward opt.list
-chart.RiskReward.opt.list <- function(object, ..., risk.col="ES", return.col="mean", main="", ylim=NULL, xlim=NULL, labels.assets=TRUE, pch.assets=1, cex.assets=0.8, cex.axis=0.8, cex.lab=0.8, colorset=NULL, element.color="darkgray"){
+chart.RiskReward.opt.list <- function(object, ..., risk.col="ES", return.col="mean", main="", ylim=NULL, xlim=NULL, labels.assets=TRUE, chart.assets=FALSE, pch.assets=1, cex.assets=0.8, cex.axis=0.8, cex.lab=0.8, colorset=NULL, element.color="darkgray"){
   if(!inherits(object, "opt.list")) stop("object must be of class 'opt.list'")
   # Get the objective measures
   obj <- extractObjectiveMeasures(object)
@@ -76,6 +76,39 @@ chart.RiskReward.opt.list <- function(object, ..., risk.col="ES", return.col="me
   columnnames <- colnames(obj)
   if(!(risk.col %in% columnnames)) stop(paste(risk.col, "not in column names"))
   if(!(return.col %in% columnnames)) stop(paste(return.col, "not in column names"))
+  
+  if(chart.assets){
+    # Get the returns from the firts opt.list object
+    R <- object[[1]]$R
+    if(is.null(R)) stop("Returns object not detected, must run optimize.portfolio with trace=TRUE")
+    if(!all(sapply(X=object, FUN=function(x) identical(x=R, y=x$R)))){
+      message("Not all returns objects are identical, using returns object from first optimize.portfolio object")
+    }
+    # Get the arguments from the optimize.portfolio objects 
+    # to calculate the risk and return metrics for the scatter plot. 
+    # (e.g. arguments=list(p=0.925, clean="boudt")
+    arguments <- NULL # maybe an option to let the user pass in an arguments list?
+    if(is.null(arguments)){
+      # get all the arguments from the portfolio in each optimize.portfolio object
+      tmp <- lapply(X=object, function(x) {
+        lapply(x$portfolio$objectives, function(u) u$arguments)
+      })
+      # Flatten the nested lists
+      tmp.args <- do.call(c, unlist(tmp, recursive=FALSE))
+      # Remove the name that gets added with unlist
+      names(tmp.args) <- gsub("^.*\\.", replacement="", names(tmp.args))
+      # Remove any duplicate arguments
+      # if(any(duplicated(names(tmp.args)))) message("Multiple duplicate arguments, using first valid argument")
+      tmp.args <- tmp.args[!duplicated(names(tmp.args))]
+      if(!is.null(tmp.args$portfolio_method)) tmp.args$portfolio_method <- "single"
+      arguments <- tmp.args
+    }
+    asset_ret <- scatterFUN(R=R, FUN=return.col, arguments)
+    asset_risk <- scatterFUN(R=R, FUN=risk.col, arguments)
+  } else {
+    asset_ret <- NULL
+    asset_risk <- NULL
+  }
   
   # data to plot
   dat <- na.omit(obj[, c(risk.col, return.col)])
@@ -89,13 +122,13 @@ chart.RiskReward.opt.list <- function(object, ..., risk.col="ES", return.col="me
   
   # set xlim and ylim
   if(is.null(xlim)){
-    xlim <- range(dat[, risk.col])
+    xlim <- range(c(dat[, risk.col], asset_risk))
     xlim[1] <- 0
     xlim[2] <- xlim[2] * 1.25
   }
   
   if(is.null(ylim)){
-    ylim <- range(dat[, return.col])
+    ylim <- range(c(dat[, return.col], asset_ret))
     ylim[1] <- 0
     ylim[2] <- ylim[2] * 1.15
   }
@@ -103,6 +136,12 @@ chart.RiskReward.opt.list <- function(object, ..., risk.col="ES", return.col="me
   # plot the points
   plot(x=dat[, risk.col], y=dat[, return.col], cex.lab=cex.lab, main=main, ylab=return.col, xlab=risk.col, xlim=xlim, ylim=ylim, pch=pch.assets, col=colorset, ..., axes=FALSE)
   if(labels.assets) text(x=dat[, risk.col], y=dat[, return.col], labels=dat_names, pos=4, cex=cex.assets, col=colorset)
+  
+  # plot the risk-reward scatter of the assets
+  if(chart.assets){
+    points(x=asset_risk, y=asset_ret)
+    text(x=asset_risk, y=asset_ret, labels=colnames(R), pos=4, cex=0.8)
+  }
   
   # add the axis
   axis(2, cex.axis=cex.axis, col=element.color)
