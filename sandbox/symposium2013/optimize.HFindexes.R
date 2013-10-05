@@ -104,6 +104,7 @@ MeanSD.portf <- add.objective(portfolio=MeanSD.portf,
 MeanmETL.portf <- add.objective(portfolio=init.portf,
                                 type="return", # the kind of objective this is
                                 name="mean" # name of the function
+  , multiplier=-12
                                 )
 MeanmETL.portf <- add.objective(portfolio=MeanmETL.portf,
                                 type="risk", # the kind of objective this is
@@ -239,9 +240,25 @@ print(paste('constructing random portfolios at',Sys.time()))
 
 # Modify the init.portf specification to get RP running 
 rp.portf <- init.portf
-# rp.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
-# rp.portf$constraints[[1]]$max_sum = 1.01
+rp.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
+rp.portf$constraints[[1]]$max_sum = 1.01
 # rp = random_portfolios(portfolio=rp.portf, permutations=10000, max_permutations=400)
+rp1 = random_portfolios(portfolio=rp.portf, permutations=10000, max_permutations=400, rp_method="sample")
+rp1.mean = apply(rp1, 1, function(w) mean(R %*% w))
+rp1.sd = apply(rp1, 1, function(x) StdDev(R=R, weights=x, p=p))
+rp1.etl=NULL; for(i in 1:NROW(rp1)) {rp1.etl[i]=ETL(R=R, weights=as.vector(rp1[i,]), p=p, portfolio_method="component")[[1]]}
+plot(rp1.sd, rp1.mean, col="gray", cex=0.5)
+
+rp2 = random_portfolios(portfolio=rp.portf, permutations=10000, max_permutations=400, rp_method="simplex", fev=2)
+rp2.mean = apply(rp2, 1, function(w) mean(R %*% w))
+rp2.sd = apply(rp2, 1, function(x) StdDev(R=R, weights=x, p=p))
+points(rp2.sd,rp2.mean, col="blue", cex=0.5)
+
+rp3 = random_portfolios(portfolio=rp.portf, permutations=10000, max_permutations=400, rp_method="grid")
+rp3.mean = apply(rp3, 1, function(w) mean(R %*% w))
+rp3.sd = apply(rp3, 1, function(x) StdDev(R=R, weights=x, p=p))
+points(rp3.sd,rp3.mean, col="green", cex=0.5)
+
 # print(paste('done constructing random portfolios at',Sys.time()))
 # save(rp,file=paste(resultsdir, 'random-portfolios-', Sys.Date(), '-', runname, '.rda',sep=''))
 load(file=paste(resultsdir,'random-portfolios-2013-09-28.historical.moments.rda'))
@@ -277,6 +294,13 @@ print(paste('Completed meanmETL optimization at',Sys.time(),'moving on to MinSD'
 #                                  rp=rp,
 #                                  trace=TRUE
 # ) 
+# OR with random portfolios
+MeanmETL.DE<-optimize.portfolio(R=R,
+                                 portfolio=MeanmETL.portf,
+                                 optimize_method='DEoptim',
+                                 search_size=20000
+) 
+
 # plot(MeanmETL.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Mean-mETL Portfolio")
 # plot(MeanmETL.RND, risk.col="ES", return.col="mean", chart.assets=TRUE, main="Mean-mETL Portfolio")
 
@@ -316,18 +340,25 @@ EqSD.RND<-optimize.portfolio(R=R,
   rp=rp,
   trace=TRUE
   ) 
+
+EqSD.DE<-optimize.portfolio(R=R,
+  portfolio=EqSD.portf,
+  optimize_method='DEoptim',
+  search_size=20000,
+  trace=FALSE
+  ) 
 plot(EqSD.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
 chart.RiskBudget(EqSD.RND, risk.type="percentage", neighbors=25)
 save(EqSD.RND,file=paste(resultsdir, 'EqSD.RND-', Sys.Date(), '-', runname, '.rda',sep=''))
 
 
 # or with DE
-# EqSD.DE<-optimize.portfolio(R=R,
-#   portfolio=EqSD.portf,
-#   optimize_method='DEoptim',
-#   search_size=1000, 
-#   trace=TRUE, verbose=TRUE
-# ) 
+EqSD.DE<-optimize.portfolio(R=R,
+  portfolio=EqSD.portf,
+  optimize_method='DEoptim',
+  search_size=1000#, 
+  #trace=TRUE, verbose=TRUE
+) 
 # plot(EqSD.DE, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
 # chart.RiskBudget(EqSD.DE, risk.type="percentage")
 # save(EqSD.DE,file=paste(resultsdir, 'EqSD.DE-', Sys.Date(), '-', runname, '.rda',sep=''))

@@ -1,4 +1,4 @@
-chart.UnStackedBar <- function(w, colorset=1:NROW(w), rotate=c("vertical", "horizontal"), yaxis=TRUE, equal.line=FALSE)
+chart.UnStackedBar <- function(w, colorset=1:NROW(w), rotate=c("vertical", "horizontal"), yaxis=TRUE, equal.line=FALSE, las=par(las), ...)
   {
   # Weights should come in as:
   #              Convertible Arbitrage CTA Global Distressed Securities 
@@ -16,20 +16,20 @@ chart.UnStackedBar <- function(w, colorset=1:NROW(w), rotate=c("vertical", "hori
     layout(matrix(c(1:NCOL(w)), nr = 1, byrow = TRUE))
     for(i in 1:NCOL(w)){
       if(i==1){
-        barplot(w[,i], col=colorset[i], horiz=TRUE, xlim=c(0,max(w)), axes=FALSE, names.arg=row.names, las=2, cex.names=1)
+        barplot(w[,i], col=colorset[i], horiz=TRUE, xlim=c(0,max(w)), axes=FALSE, names.arg=row.names, las=las,...)
         abline(v=0, col="darkgray")
         if(equal.line)
           abline(v=1/NROW(w), col="darkgray", lty=2)
-        axis(1, cex.axis = 1, col = "darkgray", las=1)
+        axis(1, cex.axis = 1, col = "darkgray", las=las)
         mtext(colnames(w)[i], side= 3, cex=0.8, adj=0.5)
       } 
       else{
-        barplot(w[,i], col=colorset[i], horiz=TRUE, xlim=c(0,max(w)), axes=FALSE, names.arg="", ylab=colnames(w)[i])
+        barplot(w[,i], col=colorset[i], horiz=TRUE, xlim=c(0,max(w)), axes=FALSE, names.arg="", ylab=colnames(w)[i], ...)
         abline(v=0, col="darkgray")
         if(equal.line)
           abline(v=1/NROW(w), col="darkgray", lty=2)
         if(yaxis)
-          axis(1, cex.axis = 1, col = "darkgray", las=1)
+          axis(1, cex.axis = 1, col = "darkgray", las=las)
         mtext(colnames(w)[i], side= 3, cex=0.8, adj=0.5)
       }
     }
@@ -39,20 +39,20 @@ chart.UnStackedBar <- function(w, colorset=1:NROW(w), rotate=c("vertical", "hori
     layout(matrix(c(1:NCOL(w)), nr = NCOL(w), byrow = FALSE))
     for(i in 1:NCOL(w)){
       if(i==NCOL(w)){
-        barplot(w[,i], col=colorset[i], horiz=FALSE, ylim=c(0,max(w)), axes=FALSE, names.arg=row.names, las=2, cex.names=1.5)
+        barplot(w[,i], col=colorset[i], horiz=FALSE, ylim=c(0,max(w)), axes=FALSE, names.arg=row.names, las=las, cex.names=1.5, ...)
         abline(h=0, col="darkgray")
         if(equal.line)
           abline(h=1/NROW(w), col="darkgray", lty=2)
-        axis(2, cex.axis = 1, col = "darkgray", las=1)
+        axis(2, cex.axis = 1, col = "darkgray", las=las)
         mtext(colnames(w)[i], side= 3, cex=1, adj=0)
       } 
       else{
-        barplot(w[,i], col=colorset[i], horiz=FALSE, ylim=c(0,max(w)), axes=FALSE, names.arg="", ylab=colnames(w)[i])
+        barplot(w[,i], col=colorset[i], horiz=FALSE, ylim=c(0,max(w)), axes=FALSE, names.arg="", ylab=colnames(w)[i], ...)
         abline(h=0, col="darkgray")
         if(equal.line)
           abline(h=1/NROW(w), col="darkgray", lty=2)
         if(yaxis)
-          axis(2, cex.axis = 1, col = "darkgray", las=1)
+          axis(2, cex.axis = 1, col = "darkgray", las=las)
         mtext(colnames(w)[i], side= 3, cex=1, adj=0)
       }
     }
