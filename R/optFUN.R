@@ -723,11 +723,19 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
   # optimize.portfolio and will throw an error message about nesting too deeply
   
   # Find the maximum return
-  max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, target=NA)
+  if(!is.null(constraints$max_pos)){
+    max_ret <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=NA)
+  } else {
+    max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, target=NA)
+  }
   max_mean <- as.numeric(-max_ret$out)
   
   # Find the starr at the maximum etl portfolio
-  ub_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha)
+  if(!is.null(constraints$max_pos)){
+    ub_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha)
+  } else {
+    ub_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha)
+  }
   ub_weights <- matrix(ub_etl$weights, ncol=1)
   ub_mean <- as.numeric(t(ub_weights) %*% fmean)
   ub_etl <- as.numeric(ub_etl$out)
@@ -735,7 +743,11 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
   ub_starr <- ub_mean / ub_etl
   
   # Find the starr at the minimum etl portfolio
-  lb_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha)
+  if(!is.null(constraints$max_pos)){
+    lb_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha)
+  } else {
+    lb_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha)
+  }
   lb_weights <- matrix(lb_etl$weights)
   lb_mean <- as.numeric(t(lb_weights) %*% fmean)
   lb_etl <- as.numeric(lb_etl$out)
@@ -753,7 +765,11 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
     # print("**********")
     # Find the starr at the mean return midpoint
     new_ret <- (lb_mean + ub_mean) / 2
-    mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+    if(!is.null(constraints$max_pos)){
+      mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+    } else {
+      mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+    }
     mid_weights <- matrix(mid$weights, ncol=1)
     mid_mean <- as.numeric(t(mid_weights) %*% fmean)
     mid_etl <- as.numeric(mid$out)
@@ -765,7 +781,11 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
       ub_mean <- mid_mean
       ub_starr <- mid_starr
       new_ret <- (lb_mean + ub_mean) / 2
-      mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+      if(!is.null(constraints$max_pos)){
+        mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+      } else {
+        mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+      }
       mid_weights <- matrix(mid$weights, ncol=1)
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_etl <- as.numeric(mid$out)
@@ -776,7 +796,11 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
       lb_mean <- mid_mean
       lb_starr <- mid_starr
       new_ret <- (lb_mean + ub_mean) / 2
-      mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+      if(!is.null(constraints$max_pos)){
+        mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+      } else {
+        mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+      }
       mid_weights <- matrix(mid$weights, ncol=1)
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_etl <- as.numeric(mid$out)
