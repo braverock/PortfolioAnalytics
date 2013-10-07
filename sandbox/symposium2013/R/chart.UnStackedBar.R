@@ -10,7 +10,10 @@ chart.UnStackedBar <- function(w, colorset=1:NROW(w), rotate=c("vertical", "hori
   # if (wrap) 
   #   row.names = sapply(rownames(object), function(x) paste(strwrap(x, wrap.rownames), collapse = "\n"), USE.NAMES = FALSE)
   rotate = rotate[1]
-  row.names = sapply(rownames(w), function(x) paste(strwrap(x,10), collapse = "\n"), USE.NAMES=FALSE)
+  if(is(w, "xts"))
+    row.names=index(w)
+  else
+    row.names = sapply(rownames(w), function(x) paste(strwrap(x,10), collapse = "\n"), USE.NAMES=FALSE)
   if(rotate=="vertical"){
     par(oma = c(4,8,2,1), mar=c(0,1,0,1)) # c(bottom, left, top, right)
     layout(matrix(c(1:NCOL(w)), nr = 1, byrow = TRUE))
@@ -47,7 +50,7 @@ chart.UnStackedBar <- function(w, colorset=1:NROW(w), rotate=c("vertical", "hori
         mtext(colnames(w)[i], side= 3, cex=1, adj=0)
       } 
       else{
-        barplot(w[,i], col=colorset[i], horiz=FALSE, ylim=c(0,max(w)), axes=FALSE, names.arg="", ylab=colnames(w)[i], ...)
+        barplot(w[,i], col=colorset[i], horiz=FALSE, ylim=c(0,max(w)), axes=FALSE, names.arg=rep("",length(w[,i])), ylab=colnames(w)[i], ...)
         abline(h=0, col="darkgray")
         if(equal.line)
           abline(h=1/NROW(w), col="darkgray", lty=2)
