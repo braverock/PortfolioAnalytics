@@ -796,22 +796,34 @@ optimize.portfolio_v2 <- function(
     }
     if( any(c("CVaR", "ES", "ETL") %in% names(moments)) ) {
       if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
+      if(ef) meanetl <- TRUE else meanetl <- FALSE
+      tmpnames <- c("CVaR", "ES", "ETL")
+      idx <- which(tmpnames %in% names(moments))
       # Minimize sample ETL/ES/CVaR if CVaR, ETL, or ES is specified as an objective
       if(length(moments) == 2 & all(moments$mean != 0) & ef==FALSE){
         # This is called by meanetl.efficient.frontier and we do not want that, need to have ef==FALSE
         target <- mean_etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
+        meanetl <- TRUE
       }
       if(!is.null(constraints$max_pos)) {
         # This is an MILP problem if max_pos is specified as a constraint
         roi_result <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
         weights <- roi_result$weights
-        obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+        # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+        # calculate obj_vals based on solver output
+        obj_vals <- list()
+        if(meanetl) obj_vals$mean <- as.numeric(t(weights) %*% moments$mean)
+        obj_vals[[tmpnames[idx]]] <- roi_result$out
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       } else {
         # Minimize sample ETL/ES/CVaR LP Problem
         roi_result <- etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
         weights <- roi_result$weights
-        obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+        # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+        # calculate obj_vals based on solver output
+        obj_vals <- list()
+        if(meanetl) obj_vals$mean <- as.numeric(t(weights) %*% moments$mean)
+        obj_vals[[tmpnames[idx]]] <- roi_result$out
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       }
     }

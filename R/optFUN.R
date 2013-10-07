@@ -747,10 +747,10 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
   while((abs(ub_starr - lb_starr) > tol) & (i < maxit)){
     # bisection method to find the maximum mean / etl
     
-    print(i)
-    print(ub_starr)
-    print(lb_starr)
-    print("**********")
+    # print(i)
+    # print(ub_starr)
+    # print(lb_starr)
+    # print("**********")
     # Find the starr at the mean return midpoint
     new_ret <- (lb_mean + ub_mean) / 2
     mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
