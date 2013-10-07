@@ -226,7 +226,7 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   maxret <- extractObjectiveMeasures(tmp)$mean
   
   # run the optimization to get the return at the min ETL portfolio
-  tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI")
+  tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI", ef=TRUE)
   stats <- extractStats(tmp)
   minret <- stats["mean"]
   
@@ -242,7 +242,7 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25){
   stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
   out <- foreach(i=1:length(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
-    extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+    extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI", ef=TRUE))
   }
   colnames(out) <- names(stats)
   return(structure(out, class="frontier"))
