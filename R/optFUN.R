@@ -790,8 +790,7 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_etl <- as.numeric(mid$out)
       mid_starr <- mid_mean / mid_etl
-    }
-    if(mid_starr > lb_starr){
+    } else if(mid_starr > lb_starr){
       # if mid_starr > lb_starr then mid_starr becomes the new lower bound
       lb_mean <- mid_mean
       lb_starr <- mid_starr
@@ -805,6 +804,75 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_etl <- as.numeric(mid$out)
       mid_starr <- mid_mean / mid_etl
+    }
+    i <- i + 1
+  }
+  return(new_ret)
+}
+
+max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups, tol=.Machine$double.eps^0.5, maxit=50){
+  # This function returns the target mean return that maximizes mean / sd (i.e. sharpe ratio)
+  
+  # get the forecast mean from moments
+  fmean <- matrix(moments$mean, ncol=1)
+  
+  # Find the maximum return
+  max_ret <- PortfolioAnalytics:::maxret_opt(R=R, moments=moments, constraints=constraints, target=NA)
+  max_mean <- as.numeric(-max_ret$out)
+  
+  # Calculate the sr at the maximum mean return portfolio
+  ub_weights <- matrix(max_ret$weights, ncol=1)
+  ub_mean <- max_mean
+  ub_sd <- as.numeric(sqrt(t(ub_weights) %*% moments$var %*% ub_weights))
+  # sr at the upper bound
+  ub_sr <- ub_mean / ub_sd
+  
+  # Calculate the sr at the miminum var portfolio
+  lb_sr <- PortfolioAnalytics:::gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1e6, target=NA, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+  lb_weights <- matrix(lb_sr$weights)
+  lb_mean <- as.numeric(t(lb_weights) %*% fmean)
+  lb_sd <- as.numeric(sqrt(t(lb_weights) %*% moments$var %*% lb_weights))
+  # sr at the lower bound
+  lb_sr <- lb_mean / lb_sd
+  
+  # want to find the return that maximizes mean / sd
+  i <- 1
+  while((abs(ub_sr - lb_sr) > tol) & (i < maxit)){
+    # bisection method to find the maximum mean / sd
+    
+    # Find the starr at the mean return midpoint
+    new_ret <- (lb_mean + ub_mean) / 2
+    mid <- PortfolioAnalytics:::gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1e6, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+    mid_weights <- matrix(mid$weights, ncol=1)
+    mid_mean <- as.numeric(t(mid_weights) %*% fmean)
+    mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
+    mid_sr <- mid_mean / mid_sd
+    # tmp_sr <- mid_sr
+    
+    # print(i)
+    # print(mid_sr)
+    # print("**********")
+    
+    if(mid_sr > ub_sr){
+      # if mid_sr > ub_sr then mid_sr becomes the new upper bound
+      ub_mean <- mid_mean
+      ub_sr <- mid_sr
+      new_ret <- (lb_mean + ub_mean) / 2
+      mid <- PortfolioAnalytics:::gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1e6, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+      mid_weights <- matrix(mid$weights, ncol=1)
+      mid_mean <- as.numeric(t(mid_weights) %*% fmean)
+      mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
+      mid_sr <- mid_mean / mid_sd
+    } else if(mid_sr > lb_sr){
+      # if mid_sr > lb_sr then mid_sr becomes the new lower bound
+      lb_mean <- mid_mean
+      lb_sr <- mid_sr
+      new_ret <- (lb_mean + ub_mean) / 2
+      mid <- PortfolioAnalytics:::gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1e6, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+      mid_weights <- matrix(mid$weights, ncol=1)
+      mid_mean <- as.numeric(t(mid_weights) %*% fmean)
+      mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
+      mid_sr <- mid_mean / mid_sd
     }
     i <- i + 1
   }

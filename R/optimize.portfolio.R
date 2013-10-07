@@ -772,6 +772,11 @@ optimize.portfolio_v2 <- function(
           out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=qp_result$out, call=call)
         }
       } else {
+        # if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
+        if(hasArg(maxSR)) maxSR=match.call(expand.dots=TRUE)$maxSR else maxSR=FALSE
+        if(maxSR){
+          target <- max_sr_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+        }
         roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
         weights <- roi_result$weights
         obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
@@ -796,11 +801,12 @@ optimize.portfolio_v2 <- function(
     }
     if( any(c("CVaR", "ES", "ETL") %in% names(moments)) ) {
       if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
+      if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
       if(ef) meanetl <- TRUE else meanetl <- FALSE
       tmpnames <- c("CVaR", "ES", "ETL")
       idx <- which(tmpnames %in% names(moments))
       # Minimize sample ETL/ES/CVaR if CVaR, ETL, or ES is specified as an objective
-      if(length(moments) == 2 & all(moments$mean != 0) & ef==FALSE){
+      if(length(moments) == 2 & all(moments$mean != 0) & ef==FALSE & maxSTARR){
         # This is called by meanetl.efficient.frontier and we do not want that, need to have ef==FALSE
         target <- mean_etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
         meanetl <- TRUE
