@@ -255,6 +255,7 @@ maxret_milp_opt <- function(R, constraints, moments, target){
   types <- c(rep("C", N), rep("B", N))
   
   # Solve directly with Rglpk... getting weird errors with ROI
+  stopifnot("package:Rglpk" %in% search() || require("Rglpk",quietly = TRUE))
   result <- Rglpk_solve_LP(obj=objL, mat=Amat, dir=dir, rhs=rhs, types=types, bounds=bnds, max=FALSE)
   
   # The Rglpk solvers status returns an an integer with status information
@@ -447,6 +448,7 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
   bounds <- list( lower = list( ind = 1L:(m + n + 2 + m), val = c(LB,  -1, rep(0, n), 1, rep(0, m)) ),
                   upper = list( ind = 1L:(m + n + 2 + m), val = c( UB, 1, rep(Inf, n), 1 , rep(1, m)) ) )
   
+  stopifnot("package:Rglpk" %in% search() || require("Rglpk",quietly = TRUE))
   result <- Rglpk_solve_LP(obj=objL, mat=tmpAmat, dir=dir, rhs=rhs, types=types, bounds=bounds)
   # The Rglpk solvers status returns an an integer with status information
   # about the solution returned: 0 if the optimal solution was found, a 
@@ -575,6 +577,7 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   d <- rep(-moments$mean, 3)
   
   stopifnot("package:corpcor" %in% search() || require("corpcor",quietly = TRUE))
+  stopifnot("package:quadprog" %in% search() || require("quadprog",quietly = TRUE))
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
   if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
@@ -692,6 +695,7 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
   d <- rep(-moments$mean, 3)
   
   stopifnot("package:corpcor" %in% search() || require("corpcor",quietly = TRUE))
+  stopifnot("package:quadprog" %in% search() || require("quadprog",quietly = TRUE))
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
   if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
