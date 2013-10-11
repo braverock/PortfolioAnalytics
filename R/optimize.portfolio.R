@@ -733,19 +733,48 @@ optimize.portfolio_v2 <- function(
     #  lambda_hhi <- 0
     #}
     lambda <- 1
+    
+    # list of valid objective names for ROI solvers
+    valid_objnames <- c("HHI", "mean", "var", "sd", "StdDev", "CVaR", "ES", "ETL")
+    
     for(objective in portfolio$objectives){
       if(objective$enabled){
-        if(!any(c(objective$name == "HHI", objective$name == "mean", objective$name == "var", objective$name == "CVaR", objective$name == "ES", objective$name == "ETL")))
-          stop("ROI only solves mean, var, or sample ETL/ES/CVaR type business objectives, choose a different optimize_method.")
+        if(!(objective$name %in% valid_objnames)){
+          stop("ROI only solves mean, var/StdDev, HHI, or sample ETL/ES/CVaR type business objectives, choose a different optimize_method.")
+        }
+        
+        # Grab the arguments list per objective
+        # Currently we are only getting arguments for "p" and "clean", not sure if we need others for the ROI QP/LP solvers
+        # if(length(objective$arguments) >= 1) arguments <- objective$arguments else arguments <- list()
+        arguments <- objective$arguments
+        if(!is.null(arguments$clean)) clean <- arguments$clean else clean <- "none"
+        # Note: arguments$p grabs arguments$portfolio_method if no p is specified
+        # so we need to be explicit with arguments[["p"]]
+        if(!is.null(arguments[["p"]])) alpha <- arguments$p else alpha <- alpha
+        if(alpha > 0.5) alpha <- (1 - alpha)
+        
+        # Some of the sub-functions for optimizations use the returns object as
+        # part of the constraints matrix (e.g. etl_opt and etl_milp_opt) so we
+        # will store the cleaned returns in the moments object. This may not
+        # be the most efficient way to pass around a cleaned returns object, 
+        # but it will keep it separate from the R object passed in by the user
+        # and avoid "re-cleaning" already cleaned returns if specified in 
+        # multiple objectives.
+        if(clean != "none") moments$cleanR <- Return.clean(R=R, method=clean)
+        
         # I'm not sure what changed, but moments$mean used to be a vector of the column means
         # now it is a scalar value of the mean of the entire R object
         if(objective$name == "mean"){
-          moments[[objective$name]] <- try(as.vector(apply(R, 2, "mean", na.rm=TRUE)), silent=TRUE)
+          moments[[objective$name]] <- try(as.vector(apply(Return.clean(R=R, method=clean), 2, "mean", na.rm=TRUE)), silent=TRUE)
+        } else if(objective$name %in% c("StdDev", "sd", "var")){
+          moments[["var"]] <- try(var(x=Return.clean(R=R, method=clean), na.rm=TRUE), silent=TRUE)
         } else {
-          moments[[objective$name]] <- try(eval(as.symbol(objective$name))(R), silent=TRUE)
+          moments[[objective$name]] <- try(eval(as.symbol(objective$name))(Return.clean(R=R, method=clean)), silent=TRUE)
         }
         target <- ifelse(!is.null(objective$target), objective$target, target)
-        alpha <- ifelse(!is.null(objective$alpha), objective$alpha, alpha)
+        # alpha <- ifelse(!is.null(objective$alpha), objective$alpha, alpha)
+        # only accept confidence level for ES/ETL/CVaR to come from the 
+        # arguments list to be consistent with how this is done in other solvers.
         lambda <- ifelse(!is.null(objective$risk_aversion), objective$risk_aversion, lambda)
         if(!is.null(objective$conc_aversion)) lambda_hhi <- objective$conc_aversion else lambda_hhi <- NULL
         if(!is.null(objective$conc_groups)) conc_groups <- objective$conc_groups else conc_groups <- NULL
@@ -807,7 +836,7 @@ optimize.portfolio_v2 <- function(
       idx <- which(tmpnames %in% names(moments))
       # Minimize sample ETL/ES/CVaR if CVaR, ETL, or ES is specified as an objective
       if(length(moments) == 2 & all(moments$mean != 0) & ef==FALSE & maxSTARR){
-        # This is called by meanetl.efficient.frontier and we do not want that, need to have ef==FALSE
+        # This is called by meanetl.efficient.frontier and we do not want that for efficient frontiers, need to have ef==FALSE
         target <- mean_etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
         meanetl <- TRUE
       }

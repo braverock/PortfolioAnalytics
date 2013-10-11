@@ -287,6 +287,9 @@ maxret_milp_opt <- function(R, constraints, moments, target){
 #' @author Ross Bennett
 etl_opt <- function(R, constraints, moments, target, alpha){
   
+  # Check for cleaned returns in moments
+  if(!is.null(moments$cleanR)) R <- moments$cleanR
+  
   N <- ncol(R)
   T <- nrow(R)
   # Applying box constraints
@@ -347,6 +350,9 @@ etl_opt <- function(R, constraints, moments, target, alpha){
 #' @param alpha alpha value for ETL/ES/CVaR
 #' @author Ross Bennett
 etl_milp_opt <- function(R, constraints, moments, target, alpha){
+  
+  # Check for cleaned returns in moments
+  if(!is.null(moments$cleanR)) R <- moments$cleanR
   
   # Number of rows
   n <- nrow(R)
@@ -474,6 +480,9 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
 gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   # function for minimum variance or max quadratic utility problems
   
+  # Check for cleaned returns in moments
+  if(!is.null(moments$cleanR)) R <- moments$cleanR
+  
   # Modify the returns matrix. This is done because there are 3 sets of
   # variables 1) w.initial, 2) w.buy, and 3) w.sell
   R0 <- matrix(0, ncol=ncol(R), nrow=nrow(R))
@@ -598,6 +607,9 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
 gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
   # function for minimum variance or max quadratic utility problems
   # modifying ProportionalCostOpt function from MPO package
+  
+  # Check for cleaned returns in moments
+  if(!is.null(moments$cleanR)) R <- moments$cleanR
   
   # Modify the returns matrix. This is done because there are 3 sets of
   # variables 1) w.initial, 2) w.buy, and 3) w.sell
