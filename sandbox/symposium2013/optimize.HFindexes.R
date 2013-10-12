@@ -13,15 +13,15 @@ require(ROI.plugin.glpk)
 # ... and multi-core packages
 require(foreach)
 require(doMC)
-registerDoMC(5)
+registerDoMC(6)
 
 # Available on r-forge
 # require(FactorAnalytics) # development version > build 
 
 ### Set script constants
 runname='historical.moments'
-rebalance_period = 'quarters' # uses endpoints identifiers from xts; how to do semi-annual?
-clean = "none" #"boudt" # "none" 
+rebalance_period = 'years' #'quarters' # uses endpoints identifiers from xts; how to do semi-annual?
+clean = "boudt" # "none" 
 permutations = 2000
 p=1-1/12 # set confidence for VaR/mETL for monthly data
 
@@ -89,13 +89,14 @@ init.portf <- add.constraint(portfolio=init.portf, type="group",
 ### Construct BUOY 1: Constrained Mean-StdDev Portfolio - using ROI
 # Add the return and sd objectives to the constraints created above
 MeanSD.portf <- add.objective(portfolio=init.portf,
-                              type="return", # the kind of objective this is
-                              name="mean" # name of the function
-                              )
+  type="return", # the kind of objective this is
+  name="mean" # name of the function
+)
 MeanSD.portf <- add.objective(portfolio=MeanSD.portf,
-                              type="risk", # the kind of objective this is
-                              name="var" # name of the function
-                              )
+  type="risk", # the kind of objective this is
+  name="var", # name of the function
+  arguments=list(clean=clean)
+)
 
 ### Construct BUOY 2: Constrained Mean-mETL Portfolio - using ROI
 #@ Cannot maximize mean return per unit ETL with ROI, consider using
@@ -109,83 +110,84 @@ MeanmETL.portf <- add.objective(portfolio=init.portf,
 MeanmETL.portf <- add.objective(portfolio=MeanmETL.portf,
   type="risk", # the kind of objective this is
   name="ES", # the function to minimize
-  arguments=list(p=p)
+  arguments=list(p=p, clean=clean)
   )
 
 ### Construct BUOY 3: Constrained Minimum Variance Portfolio - using ROI
 # Add the variance objective
 MinSD.portf <- add.objective(portfolio=init.portf,
-                             type="risk", # the kind of objective this is
-                             name="var", # name of the function
-                             )
+  type="risk", # the kind of objective this is
+  name="var", # name of the function
+  arguments=list(p=p, clean=clean)
+)
 
 ### Construct BUOY 4: Constrained Minimum mETL Portfolio - using ROI
 # Add the mETL objective
 MinmETL.portf <- add.objective(portfolio=init.portf,
-                               type="risk", # the kind of objective this is
-                               name="ES", # the function to minimize
-                               arguments=list(p=p)
-                               )
+  type="risk", # the kind of objective this is
+  name="ES", # the function to minimize
+  arguments=list(p=p, clean=clean)
+)
 
 ### Construct BUOY 5: Constrained Equal Variance Contribution Portfolio - using RP
 #@ - Add the sub-objectives first. Adding these 3 objectives means that we are
 #@ maximizing mean per unit StdDev with equal volatility contribution portfolios. - RB
 # Without a sub-objective, we get a somewhat undefined result, since there are (potentially) many Equal SD contribution portfolios.
-# EqSD.portf <- add.objective(portfolio=init.portf,
+# MRCSD.portf <- add.objective(portfolio=init.portf,
 #                             type="risk",
 #                             name="StdDev"
 # ) # OR
-EqSD.portf <- add.objective(portfolio=init.portf,
-  type="return",
-  name="mean"
-)
-EqSD.portf <- add.objective(portfolio=EqSD.portf, 
+# MRCSD.portf <- add.objective(portfolio=init.portf,
+#   type="return",
+#   name="mean"
+# )
+MRCSD.portf <- add.objective(portfolio=init.portf, 
   type="risk_budget", 
   name="StdDev",  
   min_concentration=TRUE,
   arguments = list(clean=clean)
-  )
+)
 
-# EqSD.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
-# EqSD.portf$constraints[[1]]$max_sum = 1.01
+# MRCSD.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
+# MRCSD.portf$constraints[[1]]$max_sum = 1.01
 
 ### Construct BUOY 6: Constrained Equal mETL Contribution Portfolio - using RP
-#@ Add the sub-objectives first. These should be added to the EqmETL portfolio.
+#@ Add the sub-objectives first. These should be added to the MRCmETL portfolio.
 #@ All objectives below mean that we are maximizing mean return per unit ES with
 #@ equal ES contribution. - RB
 # Without a sub-objective, we get a somewhat undefined result, since there are (potentially) many Equal SD contribution portfolios.
-# EqmETL.portf <- add.objective(portfolio=init.portf,
+# MRCmETL.portf <- add.objective(portfolio=init.portf,
 #                             type="risk",
 #                             name="ES"
 # ) # OR
-EqmETL.portf <- add.objective(portfolio=init.portf,
+MRCmETL.portf <- add.objective(portfolio=init.portf,
                             type="return",
                             name="mean"
 )
-EqmETL.portf <- add.objective(EqmETL.portf,
+MRCmETL.portf <- add.objective(MRCmETL.portf,
                               type="risk_budget",
                               name="ES",
                               min_concentration=TRUE,
                               arguments = list(p=p, clean=clean)
 )
 # Calculate portfolio variance, but don't use it in the objective; used only for plots
-EqmETL.portf <- add.objective(portfolio=EqmETL.portf,
+MRCmETL.portf <- add.objective(portfolio=MRCmETL.portf,
                                   type="risk", # the kind of objective this is
                                   name="StdDev", # the function to minimize
                                   enabled=TRUE, # enable or disable the objective
                                   multiplier=0, # calculate it but don't use it in the objective
                                   arguments=list(clean=clean)
 )
-# EqmETL.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
-# EqmETL.portf$constraints[[1]]$max_sum = 1.01
+# MRCmETL.portf$constraints[[1]]$min_sum = 0.99 # set to speed up RP
+# MRCmETL.portf$constraints[[1]]$max_sum = 1.01
 
 ### Construct BUOY 7: Equal Weight Portfolio
 # There's only one, so create a portfolio object with all the objectives we want calculated. 
-EqWt.portf <- portfolio.spec(assets=colnames(R))
-EqWt.portf <- add.constraint(portfolio=EqWt.portf, type="leverage", min_sum=0.99, max_sum=1.01)
-EqWt.portf <- add.objective(portfolio=EqWt.portf, type="return", name="mean")
-EqWt.portf <- add.objective(portfolio=EqWt.portf, type="risk_budget", name="ES", arguments=list(p=p, clean=clean))
-EqWt.portf <- add.objective(portfolio=EqWt.portf, type="risk_budget", name="StdDev", arguments=list(clean=clean))
+EqWgt.portf <- portfolio.spec(assets=colnames(R))
+EqWgt.portf <- add.constraint(portfolio=EqWgt.portf, type="leverage", min_sum=1, max_sum=1)
+EqWgt.portf <- add.objective(portfolio=EqWgt.portf, type="return", name="mean")
+EqWgt.portf <- add.objective(portfolio=EqWgt.portf, type="risk_budget", name="ES", arguments=list(p=p, clean=clean))
+EqWgt.portf <- add.objective(portfolio=EqWgt.portf, type="risk_budget", name="StdDev", arguments=list(clean=clean))
 
 ### Construct BUOY 8: Inverse Volatility Portfolio
 # There's only one, so create a portfolio object with all the objectives we want calculated. 
@@ -195,44 +197,45 @@ VolWgt.portf <- add.objective(portfolio=VolWgt.portf, type="return", name="mean"
 VolWgt.portf <- add.objective(portfolio=VolWgt.portf, type="risk_budget", name="ES", arguments=list(p=p, clean=clean))
 VolWgt.portf <- add.objective(portfolio=VolWgt.portf, type="risk_budget", name="StdDev", arguments=list(clean=clean))
 
-### Construct RISK BUDGET Portfolio
-ConstrConcmETL.portf <- portfolio.spec(assets=colnames(R), 
-  weight_seq=generatesequence(by=0.005)
-)
-# Add leverage constraint
-ConstrConcmETL.portf <- add.constraint(portfolio=RiskBudget.portf, 
-  type="leverage", 
-  min_sum=0.99, # set to speed up RP, DE
-  max_sum=1.01
-)
-# Establish position bounds
-ConstrConcmETL.portf <- add.constraint(portfolio=ConstrConcmETL.portf, 
-  type="box", 
-  min=0.01, # leave relatively unconstrained
-  max=1.0
-)
-# Maximize mean return
-ConstrConcmETL.portf <- add.objective(portfolio=ConstrConcmETL.portf,
-  type="return", # maximize return
-  name="mean",
-  multiplier=12
-)
-# Add a risk measure
-# Use ES to be consistent with risk measures in other BUOY portfolios
-ConstrConcmETL.portf <- add.objective(portfolio=ConstrConcmETL.portf,
-  type="risk",
-  name="ETL", # using a different name to avoid clobbering slot below, workaround for bug
-  multiplier=1,
-  arguments = list(p=p, clean=clean)
-)
-
-# Set contribution limits
-ConstrConcmETL.portf <- add.objective(portfolio=ConstrConcmETL.portf,
-  type="risk_budget",
-  name="ES",
-  max_prisk=0.3, # Sets the maximum percentage contribution to risk
-  arguments = list(p=p, clean=clean)
-)
+# REMOVED - to much to show already
+# ### Construct RISK BUDGET Portfolio
+# ConstrConcmETL.portf <- portfolio.spec(assets=colnames(R), 
+#   weight_seq=generatesequence(by=0.005)
+# )
+# # Add leverage constraint
+# ConstrConcmETL.portf <- add.constraint(portfolio=RiskBudget.portf, 
+#   type="leverage", 
+#   min_sum=0.99, # set to speed up RP, DE
+#   max_sum=1.01
+# )
+# # Establish position bounds
+# ConstrConcmETL.portf <- add.constraint(portfolio=ConstrConcmETL.portf, 
+#   type="box", 
+#   min=0.01, # leave relatively unconstrained
+#   max=1.0
+# )
+# # Maximize mean return
+# ConstrConcmETL.portf <- add.objective(portfolio=ConstrConcmETL.portf,
+#   type="return", # maximize return
+#   name="mean",
+#   multiplier=12
+# )
+# # Add a risk measure
+# # Use ES to be consistent with risk measures in other BUOY portfolios
+# ConstrConcmETL.portf <- add.objective(portfolio=ConstrConcmETL.portf,
+#   type="risk",
+#   name="ETL", # using a different name to avoid clobbering slot below, workaround for bug
+#   multiplier=1,
+#   arguments = list(p=p, clean=clean)
+# )
+# 
+# # Set contribution limits
+# ConstrConcmETL.portf <- add.objective(portfolio=ConstrConcmETL.portf,
+#   type="risk_budget",
+#   name="ES",
+#   max_prisk=0.3, # Sets the maximum percentage contribution to risk
+#   arguments = list(p=p, clean=clean)
+# )
 # Calculate portfolio variance, but don't use it in the objective; used only for plots
 # ConstrConcmETL.portf <- add.objective(portfolio=ConstrConcmETL.portf,
 #   type="risk", # the kind of objective this is
@@ -255,11 +258,12 @@ rp.portf <- init.portf
 rp.portf$constraints[[1]]$min_sum = 1.00 # for more accuracy
 rp.portf$constraints[[1]]$max_sum = 1.00
 # rp = random_portfolios(portfolio=rp.portf, permutations=30000, max_permutations=400) # will get fewer with less accuracy
-rp.mean = apply(rp1, 1, function(w) mean(R %*% w))
-rp.sd = apply(rp1, 1, function(x) StdDev(R=R, weights=x, p=p, clean=clean))
+load(file=paste(resultsdir,'random-portfolios-2013-10-05.historical.moments.rda'))
+rp.mean = apply(rp, 1, function(w) mean(R %*% w))
+rp.sd = apply(rp, 1, function(x) StdDev(R=R, weights=x, p=p, clean=clean))
 plot(rp.sd, rp.mean, col="darkgray", cex=0.5)
 
-# This was fruitless:
+# REMOVED: This was fruitless
 # rp1 = random_portfolios(portfolio=rp.portf, permutations=10000, max_permutations=400, rp_method="sample")
 # rp1.mean = apply(rp1, 1, function(w) mean(R %*% w))
 # rp1.sd = apply(rp1, 1, function(x) StdDev(R=R, weights=x, p=p))
@@ -278,7 +282,7 @@ plot(rp.sd, rp.mean, col="darkgray", cex=0.5)
 
 # print(paste('done constructing random portfolios at',Sys.time()))
 # save(rp,file=paste(resultsdir, 'random-portfolios-', Sys.Date(), '-', runname, '.rda',sep=''))
-load(file=paste(resultsdir,'random-portfolios-2013-10-05.historical.moments.rda'))
+
 
 start_time<-Sys.time()
 print(paste('Starting optimization at',Sys.time()))
@@ -330,8 +334,8 @@ print(paste('Completed meanmETL optimization at',Sys.time(),'moving on to MinSD'
 ### Evaluate BUOY 3: Constrained Minimum Variance Portfolio - with ROI
 MinSD.ROI<-optimize.portfolio(R=R,
   portfolio=MinSD.portf,
-  optimize_method='ROI',
-  trace=TRUE, verbose=TRUE
+  optimize_method='ROI', 
+  trace=TRUE
   ) # 
 plot(MinSD.ROI, risk.col="StdDev", return.col="mean", rp=permutations, chart.assets=TRUE, main="Minimum Volatility Portfolio with ROI")
 save(MinSD.ROI,file=paste(resultsdir, 'MinSD-', Sys.Date(), '-', runname, '.rda',sep=''))
@@ -349,105 +353,106 @@ print(paste('Completed MinSD optimization at',Sys.time(),'moving on to MinmETL')
 MinmETL.ROI<-optimize.portfolio(R=R,
   portfolio=MinmETL.portf,
   optimize_method='ROI',
-  trace=TRUE, verbose=TRUE,
+  trace=TRUE, verbose=TRUE
   ) 
 plot(MinmETL.ROI, risk.col="StdDev", return.col="mean", rp=permutations, chart.assets=TRUE, main="Minimum mETL Portfolio")
 plot(MinmETL.ROI, risk.col="ES", return.col="mean", rp=permutations, chart.assets=TRUE, main="Minimum mETL Portfolio")
 save(MinmETL.ROI,file=paste(resultsdir, 'MinmETL-', Sys.Date(), '-', runname, '.rda',sep=''))
-print(paste('Completed MinmETL optimization at',Sys.time(),'moving on to EqSD'))
+print(paste('Completed MinmETL optimization at',Sys.time(),'moving on to MRCSD'))
 
 ### Evaluate BUOY 5: Constrained Equal Variance Contribution Portfolio - with RP
-# EqSD.RND<-optimize.portfolio(R=R,
-#   portfolio=EqSD.portf,
+# MRCSD.RND<-optimize.portfolio(R=R,
+#   portfolio=MRCSD.portf,
 #   optimize_method='random',
 #   rp=rp,
 #   trace=TRUE
 #   ) 
-# plot(EqSD.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
-# chart.RiskBudget(EqSD.RND, risk.type="percentage", neighbors=25)
-# save(EqSD.RND,file=paste(resultsdir, 'EqSD.RND-', Sys.Date(), '-', runname, '.rda',sep=''))
+# plot(MRCSD.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
+# chart.RiskBudget(MRCSD.RND, risk.type="percentage", neighbors=25)
+# save(MRCSD.RND,file=paste(resultsdir, 'MRCSD.RND-', Sys.Date(), '-', runname, '.rda',sep=''))
 # ... not a very satisfying solution
 
 # OR DE optim - this gets very close (a nice, straight line), so use it
-EqSD.DE<-optimize.portfolio(R=R,
-  portfolio=EqSD.portf,
+MRCSD.DE<-optimize.portfolio(R=R,
+  portfolio=MRCSD.portf,
   optimize_method='DEoptim',
   search_size=20000,
+  itermax=400,
   initialpop=rp[1:50,], # seed with a starting population that we know fits the constraint space
   trace=FALSE
   ) 
-plot(EqSD.DE, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
-chart.RiskBudget(EqSD.DE, risk.type="percentage", neighbors=25)
-save(EqSD.DE,file=paste(resultsdir, 'EqSD.DE-', Sys.Date(), '-', runname, '.rda',sep=''))
+plot(MRCSD.DE, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
+chart.RiskBudget(MRCSD.DE, risk.type="percentage", neighbors=25)
+save(MRCSD.DE,file=paste(resultsdir, 'MRCSD.DE-', Sys.Date(), '-', runname, '.rda',sep=''))
 
-print(paste('Completed EqSD optimization at',Sys.time(),'moving on to EqmETL'))
+print(paste('Completed MRCSD optimization at',Sys.time(),'moving on to MRCmETL'))
 
 ### Evaluate BUOY 6: Constrained Equal mETL Contribution Portfolio - with RP
-EqmETL.RND<-optimize.portfolio(R=R,
-  portfolio=EqmETL.portf,
+MRCmETL.RND<-optimize.portfolio(R=R,
+  portfolio=MRCmETL.portf,
   optimize_method='random',
   rp=rp,
   trace=TRUE
   ) # 
-plot(EqmETL.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
-plot(EqmETL.RND, risk.col="ES", return.col="mean", chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
-chart.RiskBudget(EqmETL.RND, neighbors=25)
-save(EqmETL.RND,file=paste(resultsdir, 'EqmETL-', Sys.Date(), '-', runname, '.rda',sep=''))
+plot(MRCmETL.RND, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
+plot(MRCmETL.RND, risk.col="ES", return.col="mean", chart.assets=TRUE, main="Equal mETL Contribution Portfolio")
+chart.RiskBudget(MRCmETL.RND, neighbors=25)
+save(MRCmETL.RND,file=paste(resultsdir, 'MRCmETL-', Sys.Date(), '-', runname, '.rda',sep=''))
 
 # OR DE optim - 
-EqmETL.DE<-optimize.portfolio(R=R,
-  portfolio=EqmETL.portf,
+MRCmETL.DE<-optimize.portfolio(R=R,
+  portfolio=MRCmETL.portf,
   optimize_method='DEoptim',
   search_size=20000,
   NP=200,
   initialpop=rp[1:50,], # seed with a starting population that we know fits the constraint space
   trace=FALSE
   ) 
-plot(EqmETL.DE, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
-chart.RiskBudget(EqmETL.DE, risk.type="percentage", neighbors=25)
-save(EqmETL.DE,file=paste(resultsdir, 'EqmETL.DE-', Sys.Date(), '-', runname, '.rda',sep=''))
+plot(MRCmETL.DE, risk.col="StdDev", return.col="mean", chart.assets=TRUE, main="Equal Volatility Contribution Portfolio")
+chart.RiskBudget(MRCmETL.DE, risk.type="percentage", neighbors=25)
+save(MRCmETL.DE,file=paste(resultsdir, 'MRCmETL.DE-', Sys.Date(), '-', runname, '.rda',sep=''))
 
-# test it unconstrained:
-unconstr.portf <- portfolio.spec(assets=colnames(R), 
-                             weight_seq=generatesequence(by=0.005)
-)
-unconstr.portf <- add.constraint(portfolio=unconstr.portf, 
-                             type="leverage", 
-                             min_sum=0.99, # set to speed up RP
-                             max_sum=1.01
-)
-# Establish position bounds
-unconstr.portf <- add.constraint(portfolio=unconstr.portf, 
-                  type="box", 
-                  min=0.01, 
-                  max=1.0
-)
-EqmETLun.portf <- add.objective(portfolio=unconstr.portf,
-                            type="return",
-                            name="mean"
-)
-EqmETLun.portf <- add.objective(EqmETL.portf,
-                              type="risk_budget",
-                              name="ES",
-                              min_concentration=TRUE,
-                              arguments = list(p=p, clean=clean)
-)
+# # test it unconstrained:
+# unconstr.portf <- portfolio.spec(assets=colnames(R), 
+#                              weight_seq=generatesequence(by=0.005)
+# )
+# unconstr.portf <- add.constraint(portfolio=unconstr.portf, 
+#                              type="leverage", 
+#                              min_sum=0.99, # set to speed up RP
+#                              max_sum=1.01
+# )
+# # Establish position bounds
+# unconstr.portf <- add.constraint(portfolio=unconstr.portf, 
+#                   type="box", 
+#                   min=0.01, 
+#                   max=1.0
+# )
+# MRCmETLun.portf <- add.objective(portfolio=unconstr.portf,
+#                             type="return",
+#                             name="mean"
+# )
+# MRCmETLun.portf <- add.objective(MRCmETL.portf,
+#                               type="risk_budget",
+#                               name="ES",
+#                               min_concentration=TRUE,
+#                               arguments = list(p=p, clean=clean)
+# )
+# 
+# # ...in DE optim - 
+# MRCmETLun.DE<-optimize.portfolio(R=R,
+#   portfolio=MRCmETLun.portf,
+#   optimize_method='DEoptim',
+#   search_size=20000,
+#   NP=200,
+#   initialpop=rp[1:50,], # seed with a starting population that we know fits the constraint space
+#   trace=FALSE
+#   ) 
 
-# ...in DE optim - 
-EqmETLun.DE<-optimize.portfolio(R=R,
-  portfolio=EqmETLun.portf,
-  optimize_method='DEoptim',
-  search_size=20000,
-  NP=200,
-  initialpop=rp[1:50,], # seed with a starting population that we know fits the constraint space
-  trace=FALSE
-  ) 
-
-print(paste('Completed EqmETL optimization at',Sys.time(),'moving on to RiskBudget'))
+print(paste('Completed MRCmETL optimization at',Sys.time(),'moving on to RiskBudget'))
 
 ### Evaluate BUOY 7: Equal Weight Portfolio
 # Calculate the objective measures for the equal weight portfolio
-EqWt.opt <- equal.weight(R=R, portfolio=EqWt.portf)
+EqWgt.opt <- equal.weight(R=R, portfolio=EqWgt.portf)
 
 ### Evaluate BUOY 8: Inverse Volatility Portfolio
 volatility.weight <- function (R, portfolio, ...) 
@@ -476,47 +481,48 @@ volatility.weight <- function (R, portfolio, ...)
 # Calculate the objective measures for the vol weight portfolio
 VolWgt.opt <- volatility.weight(R=R, portfolio=VolWgt.portf)
 
-### Evaluate Constrained Concentration to mETL Portfolio - with DE
-# registerDoSEQ() # turn off parallelization to keep the trace data
-ConstrConcmETL.DE<-optimize.portfolio(R=R,
-  portfolio=ConstrConcmETL.portf,
-  optimize_method='DEoptim',
-  search_size=40000,
-  NP=4000,
-  itermax=400,
-  trace=FALSE
-) 
-#   list(c=0.25, # speed of crossover adaption (0,1]
-#   CR=0.75) # crossover probability [0,1]
-plot(ConstrConcmETL.DE, risk.col="StdDev", return.col="mean")
-plot(ConstrConcmETL.DE, risk.col="ES", return.col="mean") # several outlier portfolios
-chart.RiskBudget(ConstrConcmETL.DE)
-chart.RiskBudget(ConstrConcmETL.DE, risk.type="percentage")
-
-save(ConstrConcmETL.DE,file=paste(resultsdir, 'ConstrConcmETL-', Sys.Date(), '-', runname, '.rda',sep=''))
-print(ConstrConcmETL.DE$elapsed_time)
+# REMOVED
+# ### Evaluate Constrained Concentration to mETL Portfolio - with DE
+# # registerDoSEQ() # turn off parallelization to keep the trace data
+# ConstrConcmETL.DE<-optimize.portfolio(R=R,
+#   portfolio=ConstrConcmETL.portf,
+#   optimize_method='DEoptim',
+#   search_size=40000,
+#   NP=4000,
+#   itermax=400,
+#   trace=FALSE
+# ) 
+# #   list(c=0.25, # speed of crossover adaption (0,1]
+# #   CR=0.75) # crossover probability [0,1]
+# plot(ConstrConcmETL.DE, risk.col="StdDev", return.col="mean")
+# plot(ConstrConcmETL.DE, risk.col="ES", return.col="mean") # several outlier portfolios
+# chart.RiskBudget(ConstrConcmETL.DE)
+# chart.RiskBudget(ConstrConcmETL.DE, risk.type="percentage")
+# 
+# save(ConstrConcmETL.DE,file=paste(resultsdir, 'ConstrConcmETL-', Sys.Date(), '-', runname, '.rda',sep=''))
+# print(ConstrConcmETL.DE$elapsed_time)
 print('Done with optimizations.')
 
 #------------------------------------------------------------------------
 ### Extract data from optimizations for analysis
 #------------------------------------------------------------------------
 # Combine optimization objects
-buoys <- combine.optimizations(list(MeanSD=MeanSD.ROI, MeanmETL=MeanmETL.ROI, MinSD=MinSD.ROI, MinmETL=MinmETL.ROI, EqSD=EqSD.RND, EqmETL=EqmETL.RND, RB=RiskBudget.DE, EqWt=EqWt.opt))
-chart.Weights(buoys, plot.type="bar", ylim=c(0,1))
-
-#@ Chart the portfolios that have mean and ES as objective measures. - RB
-chart.RiskReward(buoys, risk.col="ES")
-#@ Chart the portfolios that have mean and StdDev as objective measures. - RB
-chart.RiskReward(buoys, risk.col="StdDev")
-
-#@ The EqmETL and RB optimizations would be good to compare because they are
-#@ similar in that they both include component ES as an objective. - RB
-buoyETL <- combine.optimizations(list(EqmETL=EqmETL.RND, RB=RiskBudget.DE, EqWt=EqWt.opt))
-chart.RiskBudget(buoyETL, match.col="ES", risk.type="percentage", legend.loc="topright")
-
-#@ Compare the equal weight portfolio and the equal SD contribution portfolio. - RB
-buoyStdDev <- combine.optimizations(list(EqSD=EqSD.RND, EqWt=EqWt.opt))
-chart.RiskBudget(buoyStdDev, match.col="StdDev", risk.type="absolute", legend.loc="topleft")
+buoys <- combine.optimizations(list(MeanSD=MeanSD.ROI, MeanmETL=MeanmETL.RND, MinSD=MinSD.ROI, MinmETL=MinmETL.ROI, MRCSD=MRCSD.DE, MRCmETL=MRCmETL.DE, VolWgt=VolWgt.opt, EqWgt=EqWgt.opt))
+# chart.Weights(buoys, plot.type="bar", ylim=c(0,1))
+# 
+# #@ Chart the portfolios that have mean and ES as objective measures. - RB
+# chart.RiskReward(buoys, risk.col="ES")
+# #@ Chart the portfolios that have mean and StdDev as objective measures. - RB
+# chart.RiskReward(buoys, risk.col="StdDev")
+# 
+# #@ The MRCmETL and RB optimizations would be good to compare because they are
+# #@ similar in that they both include component ES as an objective. - RB
+# buoyETL <- combine.optimizations(list(MRCmETL=MRCmETL.RND, RB=RiskBudget.DE, EqWgt=EqWgt.opt))
+# chart.RiskBudget(buoyETL, match.col="ES", risk.type="percentage", legend.loc="topright")
+# 
+# #@ Compare the equal weight portfolio and the equal SD contribution portfolio. - RB
+# buoyStdDev <- combine.optimizations(list(MRCSD=MRCSD.RND, EqWgt=EqWgt.opt))
+# chart.RiskBudget(buoyStdDev, match.col="StdDev", risk.type="absolute", legend.loc="topleft")
 
 Wgts = extractWeights(buoys)
 
@@ -526,8 +532,8 @@ Wgts = extractWeights(buoys)
 buoys.portfmeas =  buoys.contrib.sd = buoys.contrib.es = buoys.perc.sd = buoys.perc.es = NULL
 for(i in 1:NROW(Wgts)){
   mean = sum(colMeans(R)*Wgts[i,])
-  sd = StdDev(R, weights=Wgts[i,], portfolio_method="component")
-  es = ES(R, weights=Wgts[i,], method="modified", portfolio_method="component", p=p)
+  sd = StdDev(R, weights=Wgts[i,], portfolio_method="component", clean=clean)
+  es = ES(R, weights=Wgts[i,], method="modified", portfolio_method="component", p=p, clean=clean)
   buoys.portfmeas=rbind(buoys.portfmeas, c(mean, sd[[1]][1], es[[1]][1]))
   buoys.contrib.sd= rbind(buoys.contrib.sd,sd[[2]])
   buoys.contrib.es= rbind(buoys.contrib.es,es[[2]])
@@ -546,15 +552,15 @@ colnames(buoys.perc.sd) =
 colnames(buoys.perc.es) = colnames(Wgts)
 
 # get the RP portfolios with risk and return pre-calculated
-xtract = extractStats(EqmETL.RND) 
+xtract = extractStats(MRCmETL.RND) 
 save(xtract,file=paste(resultsdir, 'xtract-RPs-', Sys.Date(), '-', runname, '.rda',sep=''))
 # columnnames = colnames(xtract)
 results.names=rownames(buoys.portfmeas)
 
 # by Asset metrics
 assets.portfmeas=as.matrix(scatterFUN(R, FUN="mean"))
-assets.portfmeas=cbind(assets.portfmeas, scatterFUN(R, FUN="StdDev"))
-assets.portfmeas=cbind(assets.portfmeas, scatterFUN(R, FUN="ES"))
+assets.portfmeas=cbind(assets.portfmeas, scatterFUN(R, FUN="StdDev", clean=clean))
+assets.portfmeas=cbind(assets.portfmeas, scatterFUN(R, FUN="ES", clean=clean))
 colnames(assets.portfmeas)=c("Mean", "StdDev", "mETL")
 rownames(assets.portfmeas)=colnames(Wgts)
 
@@ -572,9 +578,9 @@ colnames(EqWgt.w)= colnames(R)
 EqWgt.R=Return.rebalancing(R, EqWgt.w)
 chart.StackedBar(EqWgt.w, colorset=wb13color, gap=0)
 
-# Equal mETL
-EqmETL.DE.t = optimize.portfolio.rebalancing(R=R,
-  portfolio=EqmETL.portf, 
+# Equal SD
+MRCSD.DE.t = optimize.portfolio.rebalancing(R=R,
+  portfolio=MRCSD.portf, 
   optimize_method='DEoptim',
   search_size=20000,
   NP=200,
@@ -583,14 +589,54 @@ EqmETL.DE.t = optimize.portfolio.rebalancing(R=R,
   rebalance_on=rebalance_period, # uses xts 'endpoints'
   trailing_periods=NULL, # calculates from inception
   training_period=36) # starts 3 years in to the data history
-EqmETL.w = extractWeights.rebal(EqmETL.DE.t)
-chart.UnStackedBar(EqmETL.w, rotate="horizontal", colorset=wb13color, space=0, las=2)
-EqmETL=Return.rebalancing(edhec.R, EqmETL.w)
-colnames(EqmETL) = "EqmETL"
-save(EqmETL.DE.t,file=paste(resultsdir, 'EqmETL.DE.t-', Sys.Date(), '-', runname, '.rda',sep=''))
+MRCSD.w = extractWeights(MRCSD.DE.t)
+MRCSD.gw = extractGroups(MRCSD.DE.t)
+save(MRCSD.DE.t,file=paste(resultsdir, 'MRCSD.DE.t-', Sys.Date(), '-', runname, '.rda',sep=''))
+chart.UnStackedBar(MRCSD.w, rotate="horizontal", colorset=wb13color, space=0, las=2)
+MRCSD.R=Return.rebalancing(edhec.R, MRCSD.w)
+colnames(MRCSD) = "MRCSD"
+
+# Extract perc contrib of mES from results object
+x=NULL
+for(i in 1:length(names(MRCSD.DE.t)))  {
+  x = rbind(x,MRCSD.DE.t[[i]][["objective_measures"]]$StdDev$pct_contrib_StdDev)
+}
+MRCSD.DE.pct_contrib_StdDev.t = as.xts(x, order.by=as.POSIXct(names(MRCSD.DE.t)))
+chart.UnStackedBar(x.xts, rotate="horizontal", colorset=wb13color, space=0, las=2)
 
 
+# MRC mETL
+MRCmETL.DE.t = optimize.portfolio.rebalancing(R=R,
+  portfolio=MRCmETL.portf, 
+  optimize_method='DEoptim',
+  search_size=20000,
+  NP=200,
+  initialpop=rp[1:50,], # seed with a starting population that we know fits the constraint space
+  trace=FALSE,
+  rebalance_on=rebalance_period, # uses xts 'endpoints'
+  trailing_periods=NULL, # calculates from inception
+  training_period=36) # starts 3 years in to the data history
+MRCmETL.w = extractWeights(MRCmETL.DE.t)
+MRCmETL.gw = extractGroups(MRCmETL.DE.t)
+save(MRCmETL.DE.t,file=paste(resultsdir, 'MRCmETL.DE.t-', Sys.Date(), '-', runname, '.rda',sep=''))
+chart.UnStackedBar(MRCmETL.w, rotate="horizontal", colorset=wb13color, space=0, las=2)
+MRCmETL=Return.rebalancing(edhec.R, MRCmETL.w)
+colnames(MRCmETL) = "MRCmETL"
 
+MRCmETL.RND.t = optimize.portfolio.rebalancing(R=R,
+  portfolio=MRCmETL.portf, 
+  optimize_method='random',
+  rp=rp,
+  trace=TRUE,
+  rebalance_on=rebalance_period, # uses xts 'endpoints'
+  trailing_periods=NULL, # calculates from inception
+  training_period=36) # starts 3 years in to the data history
+MRCmETL.RND.w = extractWeights(MRCmETL.RND.t)
+MRCmETL.gw = extractGroups(MRCmETL.RND.t)
+save(MRCmETL.DE.t,file=paste(resultsdir, 'MRCmETL.DE.t-', Sys.Date(), '-', runname, '.rda',sep=''))
+chart.UnStackedBar(MRCmETL.w, rotate="horizontal", colorset=wb13color, space=0, las=2)
+MRCmETL=Return.rebalancing(edhec.R, MRCmETL.w)
+colnames(MRCmETL) = "MRCmETL"
 end_time<-Sys.time()
 end_time-start_time
 
