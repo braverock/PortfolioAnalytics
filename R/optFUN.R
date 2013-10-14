@@ -497,13 +497,6 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   # initial weights for solver
   if(is.null(init_weights)) init_weights <- rep(1/ N, N)
   
-  # Amat for initial weights
-  # Amat <- cbind(diag(N), matrix(0, nrow=N, ncol=N*2))
-  Amat <- cbind(diag(N), -1*diag(N), diag(N))
-  rhs <- init_weights
-  dir <- rep("==", N)
-  meq <- 4
-  
   # check for a target return constraint
   if(!is.na(target)) {
     # If var is the only objective specified, then moments$mean won't be calculated
@@ -511,27 +504,22 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
       tmp_means <- colMeans(R)
     } else {
       tmp_means <- moments$mean
+      target <- 0
     }
-    Amat <- rbind(Amat, c(tmp_means, rep(0, 2*N)))
-    dir <- c(dir, "==")
-    rhs <- c(rhs, target)
-    meq <- 5
+  } else {
+    tmp_means <- moments$mean
+    target <- 0
   }
+  Amat <- c(tmp_means, rep(0, 2*N))
+  dir <- "=="
+  rhs <- target
+  meq <- N + 1
   
-  # Amat for full investment constraint
-  Amat <- rbind(Amat, rbind(c(rep(1, N), rep(0,2*N)), c(rep(-1, N), rep(0,2*N))))
-  rhs <- c(rhs, constraints$min_sum, -constraints$max_sum)
-  dir <- c(dir, ">=", ">=")
-  
-  # Amat for lower box constraints
-  Amat <- rbind(Amat, cbind(diag(N), diag(0, N), diag(0, N)))
-  rhs <- c(rhs, constraints$min)
-  dir <- c(dir, rep(">=", N))
-  
-  # Amat for upper box constraints
-  Amat <- rbind(Amat, cbind(-diag(N), diag(0, N), diag(0, N)))
-  rhs <- c(rhs, -constraints$max)
-  dir <- c(dir, rep(">=", N))
+  # Amat for initial weights
+  # Amat <- cbind(diag(N), matrix(0, nrow=N, ncol=N*2))
+  Amat <- rbind(Amat, cbind(diag(N), -1*diag(N), diag(N)))
+  rhs <- c(rhs, init_weights)
+  dir <- c(dir, rep("==", N))
   
   # Amat for turnover constraints
   Amat <- rbind(Amat, c(rep(0, N), rep(-1, N), rep(-1, N)))
@@ -546,6 +534,21 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   # Amat for negative weights
   Amat <- rbind(Amat, cbind(matrix(0, nrow=N, ncol=2*N), diag(N)))
   rhs <- c(rhs, rep(0, N))
+  dir <- c(dir, rep(">=", N))
+  
+  # Amat for full investment constraint
+  Amat <- rbind(Amat, rbind(c(rep(1, N), rep(0,2*N)), c(rep(-1, N), rep(0,2*N))))
+  rhs <- c(rhs, constraints$min_sum, -constraints$max_sum)
+  dir <- c(dir, ">=", ">=")
+  
+  # Amat for lower box constraints
+  Amat <- rbind(Amat, cbind(diag(N), diag(0, N), diag(0, N)))
+  rhs <- c(rhs, constraints$min)
+  dir <- c(dir, rep(">=", N))
+  
+  # Amat for upper box constraints
+  Amat <- rbind(Amat, cbind(-diag(N), diag(0, N), diag(0, N)))
+  rhs <- c(rhs, -constraints$max)
   dir <- c(dir, rep(">=", N))
   
   # include group constraints
@@ -575,7 +578,7 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   }
   
   d <- rep(-moments$mean, 3)
-  
+  # print(Amat)
   stopifnot("package:corpcor" %in% search() || require("corpcor",quietly = TRUE))
   stopifnot("package:quadprog" %in% search() || require("quadprog",quietly = TRUE))
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
@@ -583,6 +586,7 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
   
   wts <- qp.result$solution
+  # print(round(wts,4))
   wts.final <- wts[(1:N)]
   # wts.buy <- wts[(1+N):(2*N)]
   # wts.sell <- wts[(2*N+1):(3*N)]
