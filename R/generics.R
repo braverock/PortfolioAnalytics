@@ -468,33 +468,34 @@ print.optimize.portfolio.pso <- function(x, ..., digits=4){
 #' @param object an object of class "optimize.portfolio.pso" resulting from a call to optimize.portfolio
 #' @param ... any other passthru parameters. Currently not used.
 #' @author Ross Bennett
-#' @method summary optimize.portfolio
-#' @export
-summary.optimize.portfolio <- function(object, ...){
+#' @method print summary.optimize.portfolio
+#' @S3method print summary.optimize.portfolio
+print.summary.optimize.portfolio <- function(x, ...){
   
   cat(rep("*", 50) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization Summary", "\n")
   cat(rep("*", 50) ,"\n", sep="")
   
   # show the call to optimize.portfolio
-  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), 
-      "\n\n", sep = "")
+  cat("\nCall:\n")
+  print(x$call)
+  cat("\n")
   
   # get optimal weights
   cat("Optimal Weights:\n")
-  print.default(round(object$weights, digits=4))
+  print.default(round(x$weights, digits=4))
   cat("\n")
   
   # objective measures
   # The objective measure is object$out for ROI
   cat("Objective Measures:\n")
-  if(!is.null(object$objective_measures)){
+  if(!is.null(x$objective_values)){
     # get objective measures
-    objective_measures <- object$objective_measures
+    objective_measures <- x$objective_values
     tmp_obj <- as.numeric(unlist(objective_measures))
     names(tmp_obj) <- names(objective_measures)
     for(i in 1:length(objective_measures)){
-      print(tmp_obj[i], digits=4)
+      print.default(tmp_obj[i], digits=4)
       cat("\n")
       if(length(objective_measures[[i]]) > 1){
         # This will be the case for any objective measures with risk budgets
@@ -502,86 +503,70 @@ summary.optimize.portfolio <- function(object, ...){
           tmpl <- objective_measures[[i]][j]
           cat(names(tmpl), ":\n")
           tmpv <- unlist(tmpl)
-          names(tmpv) <- names(object$weights)
-          print(tmpv)
+          names(tmpv) <- names(x$weights)
+          print.default(tmpv)
           cat("\n")
         }
       }
       cat("\n")
     }
   } else {
-    print(as.numeric(object$out))
+    print.default(as.numeric(x$out))
   }
-  cat("\n")
   
   # get initial portfolio
   cat("Portfolio Assets and Initial Weights:\n")
-  print.default(object$portfolio$assets)
+  print.default(x$initial_weights)
   cat("\n")
   
   # print the portfolio object
-  print(object$portfolio)
+  print(x$portfolio)
   
   # Constraints
   cat(rep("*", 40), "\n", sep="")
   cat("Constraints\n")
   cat(rep("*", 40), "\n", sep="")
   
-  # get the constraints
-  constraints <- get_constraints(object$portfolio)
-  
   # leverage constraints
   cat("Leverage Constraint:\n")
-  if(!is.null(constraints$min_sum) & !is.null(constraints$max_sum)){
-    cat("min_sum = ", constraints$min_sum, "\n", sep="")
-    cat("max_sum = ", constraints$max_sum, "\n", sep="")
+  if(!is.null(x$leverage_constraint)){
+    cat("min_sum = ", x$leverage_constraint$min_sum, "\n", sep="")
+    cat("max_sum = ", x$leverage_constraint$max_sum, "\n", sep="")
+    cat("actual_leverage = ", x$leverage_constraint$actual, "\n", sep="")
     cat("\n")
   }
   
   # box constraints
   cat("Box Constraints:\n")
-  if(!is.null(constraints$min) & !is.null(constraints$max)){
+  if(!is.null(x$box_constraint)){
     cat("min:\n")
-    print(constraints$min)
+    print.default(x$box_constraint$min)
     cat("max:\n")
-    print(constraints$max)
+    print.default(x$box_constraint$max)
     cat("\n")
   }
   
   # group constraints
   group_weights <- NULL
-  if(!is.null(constraints$groups) & !is.null(constraints$cLO) & !is.null(constraints$cUP)){
+  if(!is.null(x$group_constraint)){
     cat("Group Constraints:\n")
     cat("Groups:\n")
-    groups <- constraints$groups
-    group_labels <- constraints$group_labels
-    names(groups) <- group_labels
-    print(groups)
+    print.default(x$group_constraint$groups)
     cat("\n")
     cat("Lower bound on group weights, group_min:\n")
-    cLO <- constraints$cLO
-    names(cLO) <- group_labels
-    print(cLO)
+    print.default(x$group_constraint$group_min)
     cat("\n")
     cat("Upper bound on group weights, group_max:\n")
-    cUP <- constraints$cUP
-    names(cUP) <- group_labels
-    print(cUP)
+    print.default(x$group_constraint$group_max)
     cat("\n")
-    cat("Group position limits, group_pos:\n")
-    group_pos <- constraints$group_pos
-    if(!is.null(group_pos)) names(group_pos) <- group_labels
-    print(group_pos)
-    cat("\n")
+#    cat("Group position limits, group_pos:\n")
+#     group_pos <- constraints$group_pos
+#     if(!is.null(group_pos)) names(group_pos) <- group_labels
+#     print(group_pos)
+#     cat("\n")
     
     cat("Group Weights:\n")
-    n.groups <- length(groups)
-    group_weights <- rep(0, n.groups)
-    for(i in 1:n.groups){
-      group_weights[i] <- sum(object$weights[groups[[i]]])
-    }
-    names(group_weights) <- group_labels
-    print(group_weights)
+    print.default(x$group_constraint$group_weights_actual)
     cat("\n")
   }
   tolerance <- .Machine$double.eps^0.5
@@ -589,64 +574,73 @@ summary.optimize.portfolio <- function(object, ...){
   # position limit constraints
   cat("Position Limit Constraints:\n")
   cat("Maximum number of non-zero weights, max_pos:\n")
-  print(constraints$max_pos)
+  if(!is.null(x$position_limit_constraint[["max_pos"]])){
+    print.default(x$position_limit_constraint[["max_pos"]])
+  } else {
+    print("Unconstrained")
+  }
   cat("Realized number of non-zero weights (i.e. positions):\n")
-  print(sum(abs(object$weights) > tolerance))
+  print.default(x$position_limit_constraint$max_pos_actual)
   cat("\n")
   
   cat("Maximum number of long positions, max_pos_long:\n")
-  print(constraints$max_pos_long)
+  if(!is.null(x$position_limit_constraint[["max_pos_long"]])){
+    print.default(x$position_limit_constraint[["max_pos_long"]])
+  } else {
+    print("Unconstrained")
+  }
   cat("Realized number of long positions:\n")
-  print(sum(object$weights > tolerance))
+  print.default(x$position_limit_constraint$max_pos_long_actual)
   cat("\n")
   
   cat("Maximum number of short positions, max_pos_short:\n")
-  print(constraints$max_pos_short)
+  if(!is.null(x$position_limit_constraint[["max_pos_short"]])){
+    print.default(x$position_limit_constraint[["max_pos_short"]])
+  } else {
+    print("Unconstrained")
+  }
   cat("Realized number of short positions:\n")
-  print(sum(object$weights < -tolerance))
+  print.default(x$position_limit_constraint$max_pos_short_actual)
   cat("\n\n")
   
   # diversification
   cat("Diversification Target Constraint:\n")
-  print(constraints$div_target)
+  if(!is.null(x$diversification_constraint$diversification_target)){
+    print.default(x$diversification_constraint$diversification_target)
+  } else {
+    print("Unconstrained")
+  }
   cat("\n")
   cat("Realized diversification:\n")
-  print(diversification(object$weights))
+  print.default(x$diversification_constraint$diversification_actual)
   cat("\n")
   
   # turnover
   cat("Turnover Target Constraint:\n")
-  print(constraints$turnover_target)
+  if(!is.null(x$turnover_constraint$turnover_target)){
+    print.default(x$turnover_constraint$turnover_target)
+  } else {
+    print("Unconstrained")
+  }
   cat("\n")
   cat("Realized turnover from initial weights:\n")
-  print(turnover(object$weights, wts.init=object$portfolio$assets))
+  print.default(x$turnover_constraint$turnover_actual)
   cat("\n")
   
   # Factor exposure constraint
-  tmpexp <- NULL
-  if(!is.null(constraints$B) & !is.null(constraints$lower) & !is.null(constraints$upper)){
+  if(!is.null(x$factor_exposure_constraint)){
     cat("Factor Exposure Constraints:\n")
-    t.B <- t(constraints$B)
     cat("Factor Exposure B Matrix:\n")
-    print(constraints$B)
+    print.default(x$factor_exposure_constraint$B)
     cat("\n")
     cat("Lower bound on factor exposures, lower:\n")
-    lower <- constraints$lower
-    names(lower) <- colnames(constraints$B)
-    print(lower)
+    print.default(x$factor_exposure_constraint$lower)
     cat("\n")
-    cat("Upper bound on group weights, group_max:\n")
-    upper <- constraints$upper
-    names(upper) <- colnames(constraints$B)
-    print(upper)
+    cat("Upper bound on group weights, upper:\n")
+    print.default(x$factor_exposure_constraint$upper)
     cat("\n")
     cat("Realized Factor Exposures:\n")
-    tmpexp <- vector(mode="numeric", length=nrow(t.B))
-    for(i in 1:nrow(t.B)){
-      tmpexp[i] <- t(object$weights) %*% t.B[i, ]
-    }
-    names(tmpexp) <- rownames(t.B)
-    print(tmpexp)
+    print.default(x$factor_exposure_constraint$exposure_actual)
     cat("\n\n")
   }
   
@@ -655,26 +649,145 @@ summary.optimize.portfolio <- function(object, ...){
   cat("Objectives\n")
   cat(rep("*", 40), "\n\n", sep="")
   
-  for(obj in object$portfolio$objectives){
+  for(obj in x$portfolio$objectives){
     cat("Objective:", class(obj)[1], "\n")
-    print(obj)
+    print.default(obj)
     cat("\n", rep("*", 40), "\n", sep="")
   }
   cat("\n")
   
   # show the elapsed time for the optimization
   cat("Elapsed Time:\n")
-  print(object$elapsed_time)
+  print(x$elapsed_time)
   cat("\n")
-  invisible(list(weights=object$weights,
-                 opt_values=object$objective_measures,
-                 group_weights=group_weights,
-                 factor_exposures=tmpexp,
-                 diversification=diversification(object$weights),
-                 turnover=turnover(object$weights, wts.init=object$portfolio$assets),
-                 positions=sum(abs(object$weights) > tolerance),
-                 long_positions=sum(object$weights > tolerance),
-                 short_positions=sum(object$weights < -tolerance)))
+}
+
+#' Summarizing output of optimize.portfolio
+#' 
+#' summary method for class "optimize.portfolio"
+#' 
+#' @param object an object of class "optimize.portfolio.pso" resulting from a call to optimize.portfolio
+#' @param ... any other passthru parameters. Currently not used.
+#' @author Ross Bennett
+#' @method summary optimize.portfolio
+#' @S3method summary optimize.portfolio
+summary.optimize.portfolio <- function(object, ...){
+  
+  out <- list()
+  
+  out$call <- object$call
+  
+  # optimal weights
+  opt_weights <- extractWeights(object)
+  out$weights <- opt_weights
+  
+  # objective measure values
+  out$objective_values <- extractObjectiveMeasures(object)
+  
+  # optimization time
+  out$elapsed_time <- object$elapsed_time
+  
+  # initial weights
+  initial_weights <- object$portfolio$assets
+  out$initial_weights <- initial_weights
+  
+  ### constraint realization
+  constraints <- get_constraints(object$portfolio)
+  # leverage
+  leverage_constraint <- list()
+  leverage_constraint$min_sum <- constraints$min_sum
+  leverage_constraint$max_sum <- constraints$max_sum
+  leverage_constraint$actual <- sum(opt_weights)
+  out$leverage_constraint <- leverage_constraint
+  
+  # box
+  box_constraint <- list()
+  box_constraint$min <- constraints$min
+  box_constraint$max <- constraints$max
+  box_constraint$actual <- opt_weights
+  out$box_constraint <- box_constraint
+  
+  # group
+  if(!is.null(constraints$groups)){
+    asset_names <- names(opt_weights)
+    group_constraint <- list()
+    group_constraint$groups <- list()
+    groups <- constraints$groups
+    for(i in 1:length(groups)){
+      groups[[i]] <- asset_names[groups[[i]]]
+    }
+    group_constraint$groups <- groups
+    group_constraint$group_min <- constraints$cLO
+    group_constraint$group_max <- constraints$cUP
+    group_constraint$group_pos <- constraints$group_pos
+    
+    # actual weights by group and/or category
+    tmp_groups <- extractGroups(object)
+    group_constraint$group_weights_actual <- tmp_groups$group_weights
+    out$group_constraint <- group_constraint
+  }
+  
+  # category weights
+  if(is.null(constraints$groups) & !is.null(object$portfolio$category_labels)){
+    category_weights <- list()
+    category_weights$category_weights <- object$portfolio$category_labels
+    tmp_groups <- extractGroups(object)
+    category_weights$category_weights_actual <- tmp_groups$category_weights
+    out$category_weights <- category_weights
+  }
+  
+  # factor exposure
+  if(!is.null(constraints$B) & !is.null(constraints$lower) & !is.null(constraints$upper)){
+    factor_exposure_constraint <- list()
+    factor_exposure_constraint$B <- constraints$B
+    factor_exposure_constraint$lower <- constraints$lower
+    names(factor_exposure_constraint$lower) <- colnames(constraints$B)
+    factor_exposure_constraint$upper <- constraints$upper
+    names(factor_exposure_constraint$upper) <- colnames(constraints$B)
+    
+    t.B <- t(constraints$B)
+    tmpexp <- vector(mode="numeric", length=nrow(t.B))
+    for(i in 1:nrow(t.B)){
+      tmpexp[i] <- t(opt_weights) %*% t.B[i, ]
+    }
+    names(tmpexp) <- rownames(t.B)
+    factor_exposure_constraint$exposure_actual <- tmpexp
+    out$factor_exposure_constraint <- factor_exposure_constraint
+  }
+  
+  # position limit
+  tolerance <- .Machine$double.eps^0.5
+  position_limit_constraint <- list()
+  position_limit_constraint$max_pos <- constraints$max_pos
+  position_limit_constraint$max_pos_long <- constraints$max_pos_long
+  position_limit_constraint$max_pos_short <- constraints$max_pos_short
+  # number of positions with non-zero weights
+  position_limit_constraint$max_pos_actual <- sum(abs(object$weights) > tolerance)
+  # actual long positions
+  position_limit_constraint$max_pos_long_actual <- sum(object$weights > tolerance)
+  # actual short positions
+  position_limit_constraint$max_pos_short_actual <- sum(object$weights < -tolerance)
+  out$position_limit_constraint <- position_limit_constraint
+  
+  # diversification
+  diversification_constraint <- list()
+  # target diversification
+  diversification_constraint$diversification_target <- constraints$div_target
+  # actual realized diversification
+  diversification_constraint$diversification_actual <- diversification(opt_weights)
+  out$diversification_constraint <- diversification_constraint
+  
+  # turnover
+  turnover_constraint <- list()
+  turnover_constraint$turnover_target <- constraints$turnover_target
+  turnover_constraint$turnover_actual <- turnover(opt_weights, wts.init=initial_weights)
+  out$turnover_constraint <- turnover_constraint
+  
+  # original portfolio object
+  out$portfolio <- object$portfolio
+  
+  class(out) <- "summary.optimize.portfolio"
+  return(out)
 }
 
 #' Print an efficient frontier object

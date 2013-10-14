@@ -38,8 +38,8 @@
   \method{chart.RiskReward}{opt.list} (object, ...,
     risk.col = "ES", return.col = "mean", main = "",
     ylim = NULL, xlim = NULL, labels.assets = TRUE,
-    pch.assets = 1, cex.assets = 0.8, cex.axis = 0.8,
-    cex.lab = 0.8, colorset = NULL,
+    chart.assets = FALSE, pch.assets = 1, cex.assets = 0.8,
+    cex.axis = 0.8, cex.lab = 0.8, colorset = NULL,
     element.color = "darkgray")
 }
 \arguments{

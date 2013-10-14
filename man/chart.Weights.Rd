@@ -1,4 +1,4 @@
-\name{chart.Weights}
+\name{chart.Weights.optimize.portfolio.DEoptim}
 \alias{chart.Weights}
 \alias{chart.Weights.opt.list}
 \alias{chart.Weights.optimize.portfolio.DEoptim}

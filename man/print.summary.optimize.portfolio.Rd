@@ -1,8 +1,8 @@
-\name{summary.optimize.portfolio}
-\alias{summary.optimize.portfolio}
-\title{Summarizing output of optimize.portfolio}
+\name{print.summary.optimize.portfolio}
+\alias{print.summary.optimize.portfolio}
+\title{Summarizing Output of optimize.portfolio}
 \usage{
-  \method{summary}{optimize.portfolio} (object, ...)
+  \method{print}{summary.optimize.portfolio} (x, ...)
 }
 \arguments{
   \item{object}{an object of class "optimize.portfolio.pso"
