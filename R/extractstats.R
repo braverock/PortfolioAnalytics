@@ -297,6 +297,36 @@ extractStats.optimize.portfolio.GenSA <- function(object, prefix=NULL, ...) {
   return(result)
 }
 
+#' @method extractStats optimize.portfolio.invol
+#' @S3method extractStats optimize.portfolio.invol
+#' @export 
+extractStats.optimize.portfolio.invol <- function(object, prefix=NULL, ...) {
+  if(!inherits(object, "optimize.portfolio.invol")) stop("object must be of class optimize.portfolio.invol")
+  trow<-c(out=object$out, object$weights)
+  
+  obj <- unlist(object$objective_measures)
+  result <- c(obj, trow)
+  
+  rnames <- name.replace(names(result))
+  names(result) <- rnames
+  return(result)
+}
+
+#' @method extractStats optimize.portfolio.eqwt
+#' @S3method extractStats optimize.portfolio.eqwt
+#' @export 
+extractStats.optimize.portfolio.eqwt <- function(object, prefix=NULL, ...) {
+  if(!inherits(object, "optimize.portfolio.eqwt")) stop("object must be of class optimize.portfolio.eqwt")
+  trow<-c(out=object$out, object$weights)
+  
+  obj <- unlist(object$objective_measures)
+  result <- c(obj, trow)
+  
+  rnames <- name.replace(names(result))
+  names(result) <- rnames
+  return(result)
+}
+
 #' Extract the objective measures
 #' 
 #' This function will extract the objective measures from the optimal portfolio

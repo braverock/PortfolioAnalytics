@@ -37,11 +37,12 @@ inverse.volatility.weight <- function(R, portfolio, ...){
   weights <- as.vector((1/StdDev(R))/sum(1/StdDev(R)))
   names(weights) <- names(assets)
   
-  out <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, ...)$objective_measures
+  tmpout <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, ...)
   return(structure(list(
     R=R,
     weights=weights,
-    objective_measures=out,
+    out=tmpout$out,
+    objective_measures=tmpout$objective_measures,
     call=match.call(),
     portfolio=portfolio),
                    class=c("optimize.portfolio.invol", "optimize.portfolio"))

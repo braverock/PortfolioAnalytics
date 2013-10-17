@@ -36,11 +36,12 @@ equal.weight <- function(R, portfolio, ...){
     }
   }
   
-  out <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, ...)$objective_measures
+  tmpout <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, ...)
   return(structure(list(
     R=R,
     weights=weights,
-    objective_measures=out,
+    out=tmpout$out,
+    objective_measures=tmpout$objective_measures,
     call=match.call(),
     portfolio=portfolio),
                    class=c("optimize.portfolio.eqwt", "optimize.portfolio"))
