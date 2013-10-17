@@ -60,3 +60,4 @@ Collate:
     'charts.multiple.R'
     'utility.combine.R'
     'equal.weight.R'
+    'inverse.volatility.weight.R'

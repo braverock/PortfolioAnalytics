@@ -1,4 +1,4 @@
-\name{plot}
+\name{plot.optimize.portfolio}
 \alias{plot.optimize.portfolio}
 \alias{plot.optimize.portfolio.DEoptim}
 \alias{plot.optimize.portfolio.GenSA}
