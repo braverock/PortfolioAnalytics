@@ -13,29 +13,45 @@
 #' @param conc_groups list of vectors specifying the groups of the assets. 
 #' @author Ross Bennett
 gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups){
-
+  stopifnot("package:quadprog" %in% search() || require("quadprog",quietly = TRUE))
+  
   N <- ncol(R)
-  # Applying box constraints
-  bnds <- list(lower=list(ind=seq.int(1L, N), val=as.numeric(constraints$min)),
-               upper=list(ind=seq.int(1L, N), val=as.numeric(constraints$max)))
+  # Applying box constraints, used for ROI
+  # bnds <- list(lower=list(ind=seq.int(1L, N), val=as.numeric(constraints$min)),
+  #              upper=list(ind=seq.int(1L, N), val=as.numeric(constraints$max)))
   
-  # set up initial A matrix for leverage constraints
-  Amat <- rbind(rep(1, N), rep(1, N))
-  dir.vec <- c(">=","<=")
-  rhs.vec <- c(constraints$min_sum, constraints$max_sum)
-  
-  # check for a target return
+  # check for a target return constraint
   if(!is.na(target)) {
     # If var is the only objective specified, then moments$mean won't be calculated
     if(all(moments$mean==0)){
       tmp_means <- colMeans(R)
     } else {
       tmp_means <- moments$mean
+      target <- 0
     }
-    Amat <- rbind(Amat, tmp_means)
-    dir.vec <- c(dir.vec, "==")
-    rhs.vec <- c(rhs.vec, target)
+  } else {
+    tmp_means <- moments$mean
+    target <- 0
   }
+  Amat <- tmp_means
+  # dir.vec <- "=="
+  rhs.vec <- target
+  meq <- 1
+  
+  # set up initial A matrix for leverage constraints
+  Amat <- rbind(Amat, rep(1, N), rep(-1, N))
+  # dir.vec <- c(dir.vec, ">=",">=")
+  rhs.vec <- c(rhs.vec, constraints$min_sum, -constraints$max_sum)
+  
+  # Add min box constraints
+  Amat <- rbind(Amat, diag(N))
+  # dir.vec <- c(dir.vec, rep(">=", N))
+  rhs.vec <- c(rhs.vec, constraints$min)
+  
+  # Add max box constraints
+  Amat <- rbind(Amat, -1*diag(N))
+  # dir.vec <- c(dir.vec, rep(">=", N))
+  rhs.vec <- c(rhs.vec, -constraints$max)
   
   # include group constraints
   if(try(!is.null(constraints$groups), silent=TRUE)){
@@ -47,7 +63,7 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
     if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
     if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
     Amat <- rbind(Amat, Amat.group, -Amat.group)
-    dir.vec <- c(dir.vec, rep(">=", (n.groups + n.groups)))
+    # dir.vec <- c(dir.vec, rep(">=", (n.groups + n.groups)))
     rhs.vec <- c(rhs.vec, constraints$cLO, -constraints$cUP)
   }
   
@@ -55,14 +71,16 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   if(!is.null(constraints$B)){
     t.B <- t(constraints$B)
     Amat <- rbind(Amat, t.B, -t.B)
-    dir.vec <- c(dir.vec, rep(">=", 2 * nrow(t.B)))
+    # dir.vec <- c(dir.vec, rep(">=", 2 * nrow(t.B)))
     rhs.vec <- c(rhs.vec, constraints$lower, -constraints$upper)
   }
   
   # set up the quadratic objective
   if(!is.null(lambda_hhi)){
     if(length(lambda_hhi) == 1 & is.null(conc_groups)){
-      ROI_objective <- Q_objective(Q=2*lambda*(moments$var + lambda_hhi * diag(N)), L=-moments$mean)
+      # ROI_objective <- Q_objective(Q=2*lambda*(moments$var + lambda_hhi * diag(N)), L=-moments$mean) # ROI
+      Dmat <- 2*lambda*(moments$var + lambda_hhi * diag(N)) # solve.QP
+      dvec <- -moments$mean # solve.QP
     } else if(!is.null(conc_groups)){
       # construct the matrix with concentration aversion values by group
       hhi_mat <- matrix(0, nrow=N, ncol=N)
@@ -76,22 +94,29 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
         }
         hhi_mat <- hhi_mat + lambda_hhi[i] * tmpI
       }
-      ROI_objective <- Q_objective(Q=2*lambda*(moments$var + hhi_mat), L=-moments$mean)
+      # ROI_objective <- Q_objective(Q=2*lambda*(moments$var + hhi_mat), L=-moments$mean) # ROI
+      Dmat <- 2 * lambda * (moments$var + hhi_mat) # solve.QP
+      dvec <- -moments$mean # solve.QP
     }
   } else {
-    ROI_objective <- Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
+    # ROI_objective <- Q_objective(Q=2*lambda*moments$var, L=-moments$mean) # ROI
+    Dmat <- 2 * lambda * moments$var # solve.QP
+    dvec <- -moments$mean # solve.QP
   }
   # set up the optimization problem and solve
-  opt.prob <- OP(objective=ROI_objective, 
-                       constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
-                       bounds=bnds)
-  roi.result <- ROI_solve(x=opt.prob, solver="quadprog")
+  # opt.prob <- OP(objective=ROI_objective, 
+  #                      constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
+  #                      bounds=bnds)
+  # roi.result <- ROI_solve(x=opt.prob, solver="quadprog")
   
-  weights <- roi.result$solution[1:N]
+  result <- try(solve.QP(Dmat=Dmat, dvec=dvec, Amat=t(Amat), bvec=rhs.vec, meq=meq), silent=TRUE)
+  
+  weights <- result$solution[1:N]
   names(weights) <- colnames(R)
   out <- list()
   out$weights <- weights
-  out$out <- roi.result$objval
+  out$out <- result$value
+  # out$out <- result$objval # ROI
   # out$call <- call # need to get the call outside of the function
   return(out)
 }
