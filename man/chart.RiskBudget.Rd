@@ -13,8 +13,7 @@
     cex.axis = 0.8, cex.lab = 0.8,
     element.color = "darkgray", las = 3, ylim = NULL)
 
-  \method{chart.RiskBudget}{optimize.portfolio.rebalancing}
-    (object, ..., match.col = "ES", risk.type = "absolute",
+  \method{chart.RiskBudget}{optimize.portfolio.rebalancing} (object, ..., match.col = "ES", risk.type = "absolute",
     main = "Risk Contribution")
 
   \method{chart.RiskBudget}{opt.list} (object, ...,
