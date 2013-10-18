@@ -32,8 +32,6 @@
 #' @param cex.lab numerical value giving the amount by which the labels should be magnified relative to the default.
 #' @param colorset color palette or vector of colors to use.
 #' @seealso \code{\link{optimize.portfolio}}
-#' @rdname chart.RiskReward
-#' @name chart.RiskReward
 #' @export
 chart.RiskReward <- function(object, ...){
   UseMethod("chart.RiskReward")

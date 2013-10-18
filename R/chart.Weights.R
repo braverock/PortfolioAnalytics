@@ -1,7 +1,12 @@
 
 #' boxplot of the weights of the optimal portfolios
 #' 
-#' Chart the optimal weights and upper and lower bounds on weights of a portfolio run via \code{\link{optimize.portfolio}}.
+#' This function charts the optimal weights of a portfolio run via 
+#' \code{\link{optimize.portfolio}} or \code{\link{optimize.portfolio.rebalancing}}.
+#' The upper and lower bounds on weights can be plotted for single period optimizations.
+#' The optimal weights will be charted through time for \code{optimize.portfolio.rebalancing}
+#' objects. For \code{optimize.portfolio.rebalancing} objects, the weights are
+#' plotted with \code{\link[PerformanceAnalytics]{chart.StackedBar}}.
 #' 
 #' @param object optimal portfolio object created by \code{\link{optimize.portfolio}}.
 #' @param neighbors set of 'neighbor' portfolios to overplot. See Details.
@@ -22,12 +27,10 @@
 #' @param legend.loc location of the legend. If NULL, the legend will not be plotted.
 #' @param cex.legend The magnification to be used for legend annotation relative to the current setting of \code{cex}.
 #' @param plot.type "line" or "barplot" to plot.
-#' @seealso \code{\link{optimize.portfolio}}
-#' @rdname chart.Weights
+#' @seealso \code{\link{optimize.portfolio}} \code{\link{optimize.portfolio.rebalancing}} \code{\link[PerformanceAnalytics]{chart.StackedBar}}
 #' @name chart.Weights
-#' @aliases chart.Weights.optimize.portfolio.ROI chart.Weights.optimize.portfolio.DEoptim chart.Weights.optimize.portfolio.pso chart.Weights.optimize.portfolio.GenSA
 #' @export
-chart.Weights <- function(object, neighbors = NULL, ..., main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8){
+chart.Weights <- function(object, ...){
   UseMethod("chart.Weights")
 }
 
@@ -90,4 +93,12 @@ barplotWeights <- function(object, ..., main="Weights", las=3, xlab=NULL, cex.la
     legend(legend.loc, legend=names(weights), cex=cex.legend, fill=colorset, bty="n")
   }
   box(col=element.color)
+}
+
+#' @rdname chart.Weights
+#' @method chart.Weights optimize.portfolio.rebalancing
+#' @S3method chart.Weights optimize.portfolio.rebalancing
+chart.Weights.optimize.portfolio.rebalancing <- function(object, ..., main="Weights"){
+  rebal.weights <- extractWeights(object)
+  chart.StackedBar(w=rebal.weights, main=main, ...)
 }
