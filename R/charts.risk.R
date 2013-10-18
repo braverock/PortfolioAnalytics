@@ -2,9 +2,11 @@
 #' Generic method to chart risk contribution
 #' 
 #' This function is the generic method to chart risk budget objectives for 
-#' \code{optimize.portfolio} and \code{opt.list} objects. This function charts 
-#' the contribution or percent contribution of the resulting objective measures 
-#' of a \code{risk_budget_objective}.
+#' \code{optimize.portfolio}, \code{optimize.portfolio.rebalancing}, and 
+#' \code{opt.list} objects. This function charts the contribution or percent 
+#' contribution of the resulting objective measures of a 
+#' \code{risk_budget_objective}. The risk contributions for \code{optimize.portfolio.rebalancing}
+#' objects are plotted through time with \code{\link[PerformanceAnalytics]{chart.StackedBar}}.
 #' 
 #' @details
 #' \code{neighbors} may be specified in three ways.  
@@ -43,6 +45,7 @@
 #' @param colorset color palette or vector of colors to use
 #' @param legend.loc legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted
 #' @param cex.legend The magnification to be used for the legend relative to the current setting of \code{cex}
+#' @seealso \code{\link{optimize.portfolio}} \code{\link{optimize.portfolio.rebalancing}} \code{\link[PerformanceAnalytics]{chart.StackedBar}}
 #' @export
 chart.RiskBudget <- function(object, ...){
   UseMethod("chart.RiskBudget")
@@ -204,6 +207,29 @@ chart.RiskBudget.optimize.portfolio <- function(object, ..., neighbors=NULL, ris
       box(col = element.color)
     } # end for loop of risk_budget_objective
   } # end plot for pct_contrib risk.type
+}
+
+#' @rdname chart.RiskBudget
+#' @method chart.RiskBudget optimize.portfolio.rebalancing
+#' @S3method chart.RiskBudget optimize.portfolio.rebalancing
+chart.RiskBudget.optimize.portfolio.rebalancing <- function(object, ..., match.col="ES", risk.type="absolute", main="Risk Contribution"){
+  
+  # Get the objective measures at each rebalance period
+  rebal.obj <- extractObjectiveMeasures(object)
+  
+  if(risk.type == "absolute"){
+    rbcols <- grep(paste(match.col, "pct_contrib", sep="."), colnames(rebal.obj))
+    if(length(rbcols) < 1) stop(paste("No ", match.col, ".contribution columns.", sep=""))
+    rbdata <- rebal.obj[, rbcols]
+    chart.StackedBar(w=rbdata, ylab=paste(match.col, "Contribution", sep=" "), main=main, ...)
+  }
+  
+  if(risk.type %in% c("percent", "percentage", "pct_contrib")){
+    rbcols <- grep(paste(match.col, "pct_contrib", sep="."), colnames(rebal.obj))
+    if(length(rbcols) < 1) stop(paste("No ", match.col, ".pct_contrib columns.", sep=""))
+    rbdata <- rebal.obj[, rbcols]
+    chart.StackedBar(w=rbdata, ylab=paste(match.col, "% Contribution", sep=" "), main=main, ...)
+  }
 }
 
 

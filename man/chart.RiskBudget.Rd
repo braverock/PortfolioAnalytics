@@ -2,6 +2,7 @@
 \alias{chart.RiskBudget}
 \alias{chart.RiskBudget.opt.list}
 \alias{chart.RiskBudget.optimize.portfolio}
+\alias{chart.RiskBudget.optimize.portfolio.rebalancing}
 \title{Generic method to chart risk contribution}
 \usage{
   chart.RiskBudget(object, ...)
@@ -11,6 +12,10 @@
     main = "Risk Contribution", ylab = "", xlab = NULL,
     cex.axis = 0.8, cex.lab = 0.8,
     element.color = "darkgray", las = 3, ylim = NULL)
+
+  \method{chart.RiskBudget}{optimize.portfolio.rebalancing}
+    (object, ..., match.col = "ES", risk.type = "absolute",
+    main = "Risk Contribution")
 
   \method{chart.RiskBudget}{opt.list} (object, ...,
     match.col = "ES", risk.type = "absolute",
@@ -78,10 +83,15 @@
 }
 \description{
   This function is the generic method to chart risk budget
-  objectives for \code{optimize.portfolio} and
+  objectives for \code{optimize.portfolio},
+  \code{optimize.portfolio.rebalancing}, and
   \code{opt.list} objects. This function charts the
   contribution or percent contribution of the resulting
-  objective measures of a \code{risk_budget_objective}.
+  objective measures of a \code{risk_budget_objective}. The
+  risk contributions for
+  \code{optimize.portfolio.rebalancing} objects are plotted
+  through time with
+  \code{\link[PerformanceAnalytics]{chart.StackedBar}}.
 }
 \details{
   \code{neighbors} may be specified in three ways. The
@@ -95,5 +105,10 @@
   in a matrix. This matrix should look like the output of
   \code{\link{extractStats}}, and should contain properly
   named contribution and pct_contrib columns.
+}
+\seealso{
+  \code{\link{optimize.portfolio}}
+  \code{\link{optimize.portfolio.rebalancing}}
+  \code{\link[PerformanceAnalytics]{chart.StackedBar}}
 }
 
