@@ -30,9 +30,12 @@
   when printing.}
 }
 \description{
-  print method for optimize.portfolio objects
+  print method for \code{optimize.portfolio} objects
 }
 \author{
   Ross Bennett
+}
+\seealso{
+  \code{\link{optimize.portfolio}}
 }
 

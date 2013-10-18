@@ -1,16 +1,16 @@
 \name{print.constraint}
 \alias{print.constraint}
-\title{print method for objects of class 'constraint'}
+\title{print method for constraint objects}
 \usage{
   \method{print}{constraint} (x, ...)
 }
 \arguments{
-  \item{x}{object of class constraint}
+  \item{x}{object of class \code{constraint}}
 
   \item{\dots}{any other passthru parameters}
 }
 \description{
-  print method for objects of class 'constraint'
+  print method for constraint objects
 }
 \author{
   Ross Bennett

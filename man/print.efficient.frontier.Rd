@@ -18,4 +18,7 @@
 \author{
   Ross Bennett
 }
+\seealso{
+  \code{\link{create.EfficientFrontier}}
+}
 

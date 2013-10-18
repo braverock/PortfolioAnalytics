@@ -16,4 +16,7 @@
 \author{
   Ross Bennett
 }
+\seealso{
+  \code{\link{portfolio.spec}}
+}
 

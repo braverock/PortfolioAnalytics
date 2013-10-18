@@ -47,6 +47,7 @@ summary.optimize.portfolio.rebalancing <- function(object, ...) {
 #' 
 #' @param x an object of class \code{portfolio}
 #' @param \dots any other passthru parameters
+#' @seealso \code{\link{portfolio.spec}}
 #' @author Ross Bennett
 #' @method print portfolio
 #' @S3method print portfolio
@@ -189,8 +190,9 @@ print.portfolio <- function(x, ...){
 #' 
 #' summary method for class \code{portfolio} created with \code{\link{portfolio.spec}}
 #' 
-#' @param object object of class portfolio
+#' @param object an object of class \code{portfolio}
 #' @param \dots any other passthru parameters
+#' @seealso \code{\link{portfolio.spec}}
 #' @author Ross Bennett
 #' @method summary portfolio
 #' @export
@@ -238,9 +240,9 @@ summary.portfolio <- function(object, ...){
   }
 }
 
-#' print method for objects of class 'constraint'
+#' print method for constraint objects
 #' 
-#' @param x object of class constraint
+#' @param x object of class \code{constraint}
 #' @param \dots any other passthru parameters
 #' @author Ross Bennett
 #' @method print constraint
@@ -251,11 +253,12 @@ print.constraint <- function(x, ...){
 
 #' Printing output of optimize.portfolio
 #' 
-#' print method for optimize.portfolio objects
+#' print method for \code{optimize.portfolio} objects
 #' 
 #' @param x an object used to select a method
 #' @param \dots any other passthru parameters
 #' @param digits the number of significant digits to use when printing.
+#' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.ROI
@@ -461,12 +464,13 @@ print.optimize.portfolio.pso <- function(x, ..., digits=4){
   cat("\n")
 }
 
-#' Summarizing Output of optimize.portfolio
+#' Printing summary output of optimize.portfolio
 #' 
-#' summary method for class "optimize.portfolio"
+#' print method for objects of class \code{summary.optimize.portfolio}
 #' 
-#' @param object an object of class "optimize.portfolio.pso" resulting from a call to optimize.portfolio
+#' @param x an object of class \code{summary.optimize.portfolio}.
 #' @param ... any other passthru parameters. Currently not used.
+#' @seealso \code{\link{summary.optimize.portfolio}}
 #' @author Ross Bennett
 #' @method print summary.optimize.portfolio
 #' @S3method print summary.optimize.portfolio
@@ -664,10 +668,11 @@ print.summary.optimize.portfolio <- function(x, ...){
 
 #' Summarizing output of optimize.portfolio
 #' 
-#' summary method for class "optimize.portfolio"
+#' summary method for class \code{optimize.portfolio}
 #' 
-#' @param object an object of class "optimize.portfolio.pso" resulting from a call to optimize.portfolio
+#' @param object an object of class \code{optimize.portfolio}.
 #' @param ... any other passthru parameters. Currently not used.
+#' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @method summary optimize.portfolio
 #' @S3method summary optimize.portfolio
@@ -798,6 +803,7 @@ summary.optimize.portfolio <- function(object, ...){
 #' 
 #' @param x objective of class \code{efficient.frontier}
 #' @param \dots any other passthru parameters
+#' @seealso \code{\link{create.EfficientFrontier}}
 #' @author Ross Bennett
 #' @method print efficient.frontier
 #' @S3method print efficient.frontier

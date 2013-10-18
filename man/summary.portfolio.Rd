@@ -5,7 +5,7 @@
   \method{summary}{portfolio} (object, ...)
 }
 \arguments{
-  \item{object}{object of class portfolio}
+  \item{object}{an object of class \code{portfolio}}
 
   \item{\dots}{any other passthru parameters}
 }
@@ -15,5 +15,8 @@
 }
 \author{
   Ross Bennett
+}
+\seealso{
+  \code{\link{portfolio.spec}}
 }
 
