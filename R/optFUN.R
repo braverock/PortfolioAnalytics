@@ -32,7 +32,7 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
       target <- 0
     }
   } else {
-    tmp_means <- moments$mean
+    tmp_means <- rep(0, N)
     target <- 0
   }
   Amat <- tmp_means
@@ -76,6 +76,17 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
     # dir.vec <- c(dir.vec, rep(">=", 2 * nrow(t.B)))
     rhs.vec <- c(rhs.vec, constraints$lower, -constraints$upper)
   }
+
+  # quadprog cannot handle infinite values so replace Inf with .Machine$double.xmax
+  # This is the strategy used in ROI
+  # Amat[ is.infinite(Amat) & (Amat <= 0) ] <- -.Machine$double.xmax
+  # Amat[ is.infinite(Amat) & (Amat >= 0) ] <-  .Machine$double.xmax
+  # rhs.vec[is.infinite(rhs.vec) & (rhs.vec <= 0)] <- -.Machine$double.xmax
+  # rhs.vec[is.infinite(rhs.vec) & (rhs.vec >= 0)] <- .Machine$double.xmax
+  
+  # Remove the rows of Amat and elements of rhs.vec where rhs.vec is Inf or -Inf
+  Amat <- Amat[!is.infinite(rhs.vec), ]
+  rhs.vec <- rhs.vec[!is.infinite(rhs.vec)]
   
   # set up the quadratic objective
   if(!is.null(lambda_hhi)){
@@ -112,6 +123,7 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   # roi.result <- ROI_solve(x=opt.prob, solver="quadprog")
   
   result <- try(solve.QP(Dmat=Dmat, dvec=dvec, Amat=t(Amat), bvec=rhs.vec, meq=meq), silent=TRUE)
+  if(inherits(x=result, "try-error")) stop(paste("No solution found:", result))
   
   weights <- result$solution[1:N]
   names(weights) <- colnames(R)
@@ -139,8 +151,17 @@ maxret_opt <- function(R, moments, constraints, target){
   
   N <- ncol(R)
   # Applying box constraints
-  bnds <- list(lower=list(ind=seq.int(1L, N), val=as.numeric(constraints$min)),
-               upper=list(ind=seq.int(1L, N), val=as.numeric(constraints$max)))
+  # maxret_opt needs non infinite values for upper and lower bounds
+  lb <- constraints$min
+  ub <- constraints$max
+  if(any(is.infinite(lb)) | any(is.infinite(ub))){
+    warning("Inf or -Inf values detected in box constraints, maximum return 
+            objectives must have finite box constraint values.")
+    ub[is.infinite(ub)] <- max(abs(c(constraints$min_sum, constraints$max_sum)))
+    lb[is.infinite(lb)] <- 0
+  }
+  bnds <- list(lower=list(ind=seq.int(1L, N), val=as.numeric(lb)),
+               upper=list(ind=seq.int(1L, N), val=as.numeric(ub)))
   
   # set up initial A matrix for leverage constraints
   Amat <- rbind(rep(1, N), rep(1, N))
@@ -615,9 +636,13 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   d <- rep(-moments$mean, 3)
   # print(Amat)
   
+  # Remove the rows of Amat and elements of rhs.vec where rhs is Inf or -Inf
+  Amat <- Amat[!is.infinite(rhs), ]
+  rhs <- rhs.vec[!is.infinite(rhs)]
+  
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
-  if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
+  if(inherits(qp.result, "try-error")) stop(paste("No solution found:", result))
   
   wts <- qp.result$solution
   # print(round(wts,4))
@@ -734,9 +759,13 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
   
   d <- rep(-moments$mean, 3)
   
+  # Remove the rows of Amat and elements of rhs.vec where rhs is Inf or -Inf
+  Amat <- Amat[!is.infinite(rhs), ]
+  rhs <- rhs.vec[!is.infinite(rhs)]
+  
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
-  if(inherits(qp.result, "try-error")) stop("No solution found, consider adjusting constraints.")
+  if(inherits(qp.result, "try-error")) stop(paste("No solution found:", result))
   
   wts <- qp.result$solution
   w.buy <- qp.result$solution[(N+1):(2*N)]

@@ -2,14 +2,6 @@
 #  OPTIMIZATION TESTING: ROI
 #
 
-library(xts)
-library(quadprog)
-library(Rglpk)
-library(PerformanceAnalytics)
-library(ROI)
-library(ROI.plugin.glpk)
-library(ROI.plugin.quadprog)
-library(Ecdat)
 library(PortfolioAnalytics)
 
 # General Parameters for sample code
@@ -31,7 +23,7 @@ max.port <- gen.constr
 max.port$min <- rep(0.01,N)
 max.port$max <- rep(0.30,N)
 max.port$objectives[[1]]$enabled <- TRUE
-max.port$objectives[[1]]$target <- NULL
+max.port$objectives[[1]]$target <- NA
 max.solution <- optimize.portfolio(R=edhec, constraints=max.port, optimize_method="ROI")
 
 
@@ -77,7 +69,7 @@ cvar.solution <- optimize.portfolio(R=edhec, constraints=cvar.port, optimize_met
 # Mean-variance:  Fully invested, Global Minimum Variance Portfolio, Groups Constraints
 #
 groups.port <- gen.constr
-groups <- c(3,3,3,4)
+groups <- list(1:3, 4:6, 7:9, 10:13)
 groups.port$groups <- groups 
 groups.port$cLO <- rep(0.15,length(groups))
 groups.port$cUP <- rep(0.30,length(groups)) 
@@ -90,11 +82,11 @@ groups.solution <- optimize.portfolio(R=edhec, constraints=groups.port, optimize
 # Minimize CVaR with target return and group constraints
 #
 group.cvar.port <- gen.constr
-groups <- c(3,3,3,4)
+groups <- list(1:3, 4:6, 7:9, 10:13)
 group.cvar.port$groups <- groups
 group.cvar.port$cLO <- rep(0.15,length(groups))
 group.cvar.port$cUP <- rep(0.30,length(groups))
 group.cvar.port$objectives[[1]]$enabled <- TRUE
 group.cvar.port$objectives[[3]]$enabled <- TRUE
-group.cvar.solution <- optimize.portfolio(R=edhec, constraints=group.cvar.port, optimize_method="ROI")
+group.cvar.solution <- optimize.portfolio(R=edhec, constraints=group.cvar.port, optimize_method="ROI", maxSTARR=FALSE)
 

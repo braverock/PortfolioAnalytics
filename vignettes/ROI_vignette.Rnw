@@ -23,12 +23,8 @@ The purpose of this vignette is to demonstrate a sample of the optimzation probl
 Load the necessary packages.
 <<>>=
 suppressMessages(library(PortfolioAnalytics))
-suppressMessages(library(Rglpk))
 suppressMessages(library(foreach))
 suppressMessages(library(iterators))
-suppressMessages(library(ROI))
-suppressMessages(require(ROI.plugin.glpk))
-suppressMessages(require(ROI.plugin.quadprog))
 @
 
 \subsection{Data}
