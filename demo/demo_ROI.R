@@ -43,7 +43,7 @@ pl_constr <- position_limit_constraint(assets=pspec$assets, max_pos=2)
 ret_constr <- return_constraint(return_target=0.007)
 
 # Group constraint
-group_constr <- group_constraint(assets=pspec$assets, groups=c(1, 2, 1), 
+group_constr <- group_constraint(assets=pspec$assets, groups=list(1, 2:3, 4), 
                                  group_min=0, group_max=0.5)
 
 # Factor exposure constraint
@@ -173,11 +173,11 @@ opt_qu <- optimize.portfolio(R=ret, portfolio=pspec,
 opt_qu
 
 # Full investment, long only, target return, and group constraints
-opt_qu <- optimize.portfolio(R=ret, portfolio=pspec, 
-                             constraints=list(fi_constr, lo_constr, ret_constr, group_constr),
-                             objectives=list(ret_obj, var_obj),
-                             optimize_method="ROI")
-opt_qu
+# opt_qu <- optimize.portfolio(R=ret, portfolio=pspec, 
+#                              constraints=list(fi_constr, lo_constr, ret_constr, group_constr),
+#                              objectives=list(ret_obj, var_obj),
+#                              optimize_method="ROI")
+# opt_qu
 
 ##### Minimize ETL Optimization #####
 # The ROI solver uses the glpk plugin to interface to the Rglpk package for 

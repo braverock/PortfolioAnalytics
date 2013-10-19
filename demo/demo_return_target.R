@@ -8,7 +8,7 @@ ret <- edhec[, 1:4]
 
 # set up portfolio specification object target in the return object
 pspec1 <- portfolio.spec(assets=colnames(ret))
-pspec1 <- add.constraint(portfolio=pspec1, type="leverage", min_sum=1, max_sum=1)
+pspec1 <- add.constraint(portfolio=pspec1, type="leverage", min_sum=0.99, max_sum=1.01)
 pspec1 <- add.constraint(portfolio=pspec1, type="box")
 pspec1 <- add.objective(portfolio=pspec1, type="return", name="mean", target=0.007)
 
@@ -20,7 +20,7 @@ wts1 <- extractWeights(opt1)
 
 # set up portfolio specification object target with the return constraint
 pspec2 <- portfolio.spec(assets=colnames(ret))
-pspec2 <- add.constraint(portfolio=pspec2, type="leverage", min_sum=1, max_sum=1)
+pspec2 <- add.constraint(portfolio=pspec2, type="leverage", min_sum=0.99, max_sum=1.01)
 pspec2 <- add.constraint(portfolio=pspec2, type="box")
 pspec2 <- add.constraint(portfolio=pspec2, type="return", return_target=0.007)
 pspec2 <- add.objective(portfolio=pspec2, type="return", name="mean")

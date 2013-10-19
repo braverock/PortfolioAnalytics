@@ -15,7 +15,7 @@ lev_constr <- weight_sum_constraint(min_sum=1, max_sum=1)
 # box constraint
 lo_constr <- box_constraint(assets=pspec$assets, min=c(0.01, 0.02, 0.03, 0.04), max=0.65)
 # group constraint
-grp_constr <- group_constraint(assets=pspec$assets, groups=c(2, 1, 1), group_min=0.1, group_max=0.4)
+grp_constr <- group_constraint(assets=pspec$assets, groups=list(1:2, 3, 4), group_min=0.1, group_max=0.4)
 # position limit constraint
 pl_constr <- position_limit_constraint(assets=pspec$assets, max_pos=4)
 
