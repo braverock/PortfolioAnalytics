@@ -584,7 +584,7 @@ opt_rb_meanETL <- optimize.portfolio(R=R, portfolio=rb_meanETL,
 print(opt_rb_meanETL)
 @
 
-<<fig.cap="mean=ETL Optimization with Risk Budget", fig.align='center', fig.width=5, fig.height=8>>=
+<<fig.cap="mean-ETL Optimization with Risk Budget", fig.align="center", fig.width=5, fig.height=8>>=
 plot(opt_rb_meanETL, risk.col="ETL", return.col="mean", 
      main="Risk Budget mean-ETL Optimization",
      xlim=c(0,0.12), ylim=c(0.005,0.009))
@@ -624,7 +624,7 @@ plot(opt_eq_meanETL, risk.col="ETL", return.col="mean",
 @
 
 Chart the contribution to risk in percentage terms. It is clear in this chart that the optimization results in a near equal risk contribution portfolio.
-<<fig.cap="Percentage Contibution to Risk", fig.height=3.5, fig.width=5,fig.align='center'>>=
+<<fig.cap="Percentage Contibution to Risk", fig.height=3.5, fig.width=5, fig.align='center'>>=
 chart.RiskBudget(opt_eq_meanETL, risk.type="percentage", neighbors=25)
 @
 
