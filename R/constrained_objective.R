@@ -681,7 +681,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
             if(isTRUE(objective$min_concentration)){
               # use HHI to calculate concentration
               # actual HHI
-              act_hhi <- sum(tmp_measure[[3]]^2)
+              act_hhi <- sum(tmp_measure[[3]]^2)/100
               # minimum possible HHI
               min_hhi <- sum(rep(1/length(tmp_measure[[3]]), length(tmp_measure[[3]]))^2)/100
               out <- out + penalty * objective$multiplier * abs(act_hhi - min_hhi)
