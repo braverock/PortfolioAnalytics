@@ -29,7 +29,6 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
       tmp_means <- colMeans(R)
     } else {
       tmp_means <- moments$mean
-      target <- 0
     }
   } else {
     tmp_means <- rep(0, N)
@@ -93,7 +92,7 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
     if(length(lambda_hhi) == 1 & is.null(conc_groups)){
       # ROI_objective <- Q_objective(Q=2*lambda*(moments$var + lambda_hhi * diag(N)), L=-moments$mean) # ROI
       Dmat <- 2*lambda*(moments$var + lambda_hhi * diag(N)) # solve.QP
-      dvec <- -moments$mean # solve.QP
+      dvec <- moments$mean # solve.QP
     } else if(!is.null(conc_groups)){
       # construct the matrix with concentration aversion values by group
       hhi_mat <- matrix(0, nrow=N, ncol=N)
@@ -109,12 +108,12 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
       }
       # ROI_objective <- Q_objective(Q=2*lambda*(moments$var + hhi_mat), L=-moments$mean) # ROI
       Dmat <- 2 * lambda * (moments$var + hhi_mat) # solve.QP
-      dvec <- -moments$mean # solve.QP
+      dvec <- moments$mean # solve.QP
     }
   } else {
     # ROI_objective <- Q_objective(Q=2*lambda*moments$var, L=-moments$mean) # ROI
     Dmat <- 2 * lambda * moments$var # solve.QP
-    dvec <- -moments$mean # solve.QP
+    dvec <- moments$mean # solve.QP
   }
   # set up the optimization problem and solve
   # opt.prob <- OP(objective=ROI_objective, 
@@ -560,7 +559,6 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
       tmp_means <- colMeans(R)
     } else {
       tmp_means <- moments$mean
-      target <- 0
     }
   } else {
     tmp_means <- moments$mean
@@ -900,7 +898,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
   fmean <- matrix(moments$mean, ncol=1)
   
   # Find the maximum return
-  max_ret <- PortfolioAnalytics:::maxret_opt(R=R, moments=moments, constraints=constraints, target=NA)
+  max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, target=NA)
   max_mean <- as.numeric(-max_ret$out)
   
   # Calculate the sr at the maximum mean return portfolio
@@ -911,7 +909,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
   ub_sr <- ub_mean / ub_sd
   
   # Calculate the sr at the miminum var portfolio
-  lb_sr <- PortfolioAnalytics:::gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1e6, target=NA, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+  lb_sr <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1e6, target=NA, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
   lb_weights <- matrix(lb_sr$weights)
   lb_mean <- as.numeric(t(lb_weights) %*% fmean)
   lb_sd <- as.numeric(sqrt(t(lb_weights) %*% moments$var %*% lb_weights))
@@ -925,7 +923,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
     
     # Find the starr at the mean return midpoint
     new_ret <- (lb_mean + ub_mean) / 2
-    mid <- PortfolioAnalytics:::gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1e6, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+    mid <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
     mid_weights <- matrix(mid$weights, ncol=1)
     mid_mean <- as.numeric(t(mid_weights) %*% fmean)
     mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
@@ -941,7 +939,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
       ub_mean <- mid_mean
       ub_sr <- mid_sr
       new_ret <- (lb_mean + ub_mean) / 2
-      mid <- PortfolioAnalytics:::gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1e6, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+      mid <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
       mid_weights <- matrix(mid$weights, ncol=1)
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
@@ -951,7 +949,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
       lb_mean <- mid_mean
       lb_sr <- mid_sr
       new_ret <- (lb_mean + ub_mean) / 2
-      mid <- PortfolioAnalytics:::gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1e6, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+      mid <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
       mid_weights <- matrix(mid$weights, ncol=1)
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
