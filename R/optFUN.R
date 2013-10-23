@@ -568,7 +568,7 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
       tmp_means <- moments$mean
     }
   } else {
-    tmp_means <- moments$mean
+    tmp_means <- rep(0, N)
     target <- 0
   }
   Amat <- c(tmp_means, rep(0, 2*N))
@@ -638,16 +638,20 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
     rhs <- c(rhs, constraints$lower, -constraints$upper)
   }
   
-  d <- rep(-moments$mean, 3)
-  # print(Amat)
+  d <- rep(moments$mean, 3)
   
   # Remove the rows of Amat and elements of rhs.vec where rhs is Inf or -Inf
   Amat <- Amat[!is.infinite(rhs), ]
   rhs <- rhs[!is.infinite(rhs)]
-  
+  # print("Amat")
+  # print(Amat)
+  # print("rhs")
+  # print(rhs)
+  # print("d")
+  # print(d)
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
-  if(inherits(qp.result, "try-error")) stop(paste("No solution found:", result))
+  if(inherits(qp.result, "try-error")) stop(paste("No solution found:", qp.result))
   
   wts <- qp.result$solution
   # print(round(wts,4))
@@ -770,7 +774,7 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
   
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
-  if(inherits(qp.result, "try-error")) stop(paste("No solution found:", result))
+  if(inherits(qp.result, "try-error")) stop(paste("No solution found:", qp.result))
   
   wts <- qp.result$solution
   w.buy <- qp.result$solution[(N+1):(2*N)]

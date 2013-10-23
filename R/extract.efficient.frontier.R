@@ -110,7 +110,7 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   
   # for a mean-var efficient frontier, there must be two objectives 1) "mean" and 2) "var"
   if(!((length(objnames) >= 2) & ("var" %in% objnames | "StdDev" %in% objnames | "sd" %in% objnames) & ("mean" %in% objnames))){
-    stop("The portfolio object must have both 'mean' and 'var' specified as objectives")
+    stop("The portfolio object must have both 'mean' and 'var', 'StdDev', or'sd' specified as objectives")
   }
   
   # If the user has passed in a portfolio object with return_constraint, we need to disable it
@@ -125,29 +125,48 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   # get the index number of the mean objective
   mean_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "mean")
   
+  ##### get the maximum return #####
+  
   # set the risk_aversion to a very small number for equivalent to max return portfolio
-  portfolio$objectives[[var_idx]]$risk_aversion <- 1e-6
+  # portfolio$objectives[[var_idx]]$risk_aversion <- 1e-6
+  
+  # Disable the risk objective
+  portfolio$objectives[[var_idx]]$enabled <- FALSE
   
   # run the optimization to get the maximum return
   tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI")
-  maxret <- extractObjectiveMeasures(tmp)$mean
+  mean_ret <- colMeans(R)
+  maxret <- sum(extractWeights(tmp) * mean_ret)
+  
+  ##### Get the return at the minimum variance portfolio #####
   
   # set the risk_aversion to a very large number equivalent to a minvar portfolio
-  portfolio$objectives[[var_idx]]$risk_aversion <- 1e6
+  # portfolio$objectives[[var_idx]]$risk_aversion <- 1e6
+  
+  # Disable the return objective
+  portfolio$objectives[[mean_idx]]$enabled <- FALSE
+  
+  # Enable the risk objective
+  portfolio$objectives[[var_idx]]$enabled <- TRUE
+  
+  # Run the optimization to get the global minimum variance portfolio with the
+  # given constraints.
+  # Do we want to disable the turnover or transaction costs constraints here?
   tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI")
   stats <- extractStats(tmp)
-  minret <- stats["mean"]
+  minret <- sum(extractWeights(tmp) * mean_ret)
   
   # length.out is the number of portfolios to create
   ret_seq <- seq(from=minret, to=maxret, length.out=n.portfolios)
   
-#   out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))  
-#   for(i in 1:length(ret_seq)){
-#     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
-#     out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
-#   }
+  # Add target return constraint to step along the efficient frontier for target returns
+  portfolio <- add.constraint(portfolio=portfolio, type="return", return_target=minret, enabled=FALSE)
+  ret_constr_idx <- which(unlist(lapply(portfolio$constraints, function(x) inherits(x, "return_constraint"))))
+  
   stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
   if(!is.null(risk_aversion)){
+    # Enable the return objective so we are doing quadratic utility
+    portfolio$objectives[[mean_idx]]$enabled <- TRUE
     out <- foreach(i=1:length(risk_aversion), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
       portfolio$objectives[[var_idx]]$risk_aversion <- risk_aversion[i]
       extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
@@ -155,11 +174,14 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
     out <- cbind(out, risk_aversion)
     colnames(out) <- c(names(stats), "lambda")
   } else {
+    # Enable the return constraint
+    portfolio$constraints[[ret_constr_idx]]$enabled <- TRUE
     out <- foreach(i=1:length(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
-      portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
-      extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+      portfolio$constraints[[ret_constr_idx]]$return_target <- ret_seq[i]
+      opt <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI")
+      c(sum(extractWeights(opt) * mean_ret), extractStats(opt))
     }
-    colnames(out) <- names(stats)
+    colnames(out) <- c("mean", names(stats))
   }
   return(structure(out, class="frontier"))
 }
