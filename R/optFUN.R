@@ -348,6 +348,13 @@ etl_opt <- function(R, constraints, moments, target, alpha){
   bnds <- list(lower=list(ind=seq.int(1L, N), val=as.numeric(constraints$min)),
                upper=list(ind=seq.int(1L, N), val=as.numeric(constraints$max)))
   
+  # Add this check if mean is not an objective and return is a constraints
+  if(!is.na(target)){
+    if(all(moments$mean == 0)){
+      moments$mean <- colMeans(R)
+    }
+  }
+  
   Rmin <- ifelse(is.na(target), 0, target)
   
   Amat <- cbind(rbind(1, 1, moments$mean, coredata(R)), rbind(0, 0, 0, cbind(diag(T), 1))) 
@@ -636,7 +643,7 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   
   # Remove the rows of Amat and elements of rhs.vec where rhs is Inf or -Inf
   Amat <- Amat[!is.infinite(rhs), ]
-  rhs <- rhs.vec[!is.infinite(rhs)]
+  rhs <- rhs[!is.infinite(rhs)]
   
   qp.result <- try(solve.QP(Dmat=make.positive.definite(2*lambda*V), 
                             dvec=d, Amat=t(Amat), bvec=rhs, meq=meq), silent=TRUE)
