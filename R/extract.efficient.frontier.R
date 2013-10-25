@@ -100,7 +100,7 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
     if(objnames == "mean"){
       # The user has only passed in a mean objective, add a var objective to the portfolio
       portfolio <- add.objective(portfolio=portfolio, type="risk", name="var")
-    } else if(objnames == "var"){
+    } else if(objnames %in% c("var", "sd", "StdDev")){
       # The user has only passed in a var objective, add a mean objective
       portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
     }

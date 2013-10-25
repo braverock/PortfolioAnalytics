@@ -353,14 +353,15 @@ etl_opt <- function(R, constraints, moments, target, alpha){
     if(all(moments$mean == 0)){
       moments$mean <- colMeans(R)
     }
+  } else {
+    moments$mean <- rep(0, N)
+    target <- 0
   }
-  
-  Rmin <- ifelse(is.na(target), 0, target)
   
   Amat <- cbind(rbind(1, 1, moments$mean, coredata(R)), rbind(0, 0, 0, cbind(diag(T), 1))) 
   dir.vec <- c(">=","<=",">=",rep(">=",T))
-  rhs.vec <- c(constraints$min_sum, constraints$max_sum, Rmin ,rep(0, T))
-  
+  rhs.vec <- c(constraints$min_sum, constraints$max_sum, target ,rep(0, T))
+
   if(try(!is.null(constraints$groups), silent=TRUE)){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
@@ -833,6 +834,7 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
   ub_etl <- as.numeric(ub_etl$out)
   # starr at the upper bound
   ub_starr <- ub_mean / ub_etl
+  if(is.infinite(ub_starr)) stop("Inf value for STARR, objective value is 0")
   
   # Find the starr at the minimum etl portfolio
   if(!is.null(constraints$max_pos)){
@@ -840,11 +842,20 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
   } else {
     lb_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha)
   }
-  lb_weights <- matrix(lb_etl$weights)
-  lb_mean <- as.numeric(t(lb_weights) %*% fmean)
+  lb_weights <- matrix(lb_etl$weights)  
+  lb_mean <- as.numeric(t(lb_weights) %*% fmean)  
   lb_etl <- as.numeric(lb_etl$out)
+  
   # starr at the lower bound
   lb_starr <- lb_mean / lb_etl
+  # if(is.infinite(lb_starr)) stop("Inf value for STARR, objective value is 0")
+  
+  # set lb_starr equal to 0, should this be a negative number like -1e6?
+  # the lb_* values will be 0 for a dollar-neutral strategy so we need to reset the values
+  if(is.na(lb_starr) | is.infinite(lb_starr)) lb_starr <- 0
+  
+  # cat("ub_starr", ub_starr, "\n")
+  # cat("lb_starr", lb_starr, "\n")
   
   # want to find the return that maximizes mean / etl
   i <- 1
@@ -852,8 +863,8 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
     # bisection method to find the maximum mean / etl
     
     # print(i)
-    # print(ub_starr)
-    # print(lb_starr)
+    # cat("ub_starr", ub_starr, "\n")
+    # cat("lb_starr", lb_starr, "\n")
     # print("**********")
     # Find the starr at the mean return midpoint
     new_ret <- (lb_mean + ub_mean) / 2
@@ -920,12 +931,18 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
   ub_sr <- ub_mean / ub_sd
   
   # Calculate the sr at the miminum var portfolio
-  lb_sr <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1e6, target=NA, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+  tmpmoments <- moments
+  tmpmoments$mean <- rep(0, length(moments$mean))
+  lb_sr <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=NA, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
   lb_weights <- matrix(lb_sr$weights)
   lb_mean <- as.numeric(t(lb_weights) %*% fmean)
   lb_sd <- as.numeric(sqrt(t(lb_weights) %*% moments$var %*% lb_weights))
   # sr at the lower bound
   lb_sr <- lb_mean / lb_sd
+  
+  # cat("lb_mean:", lb_mean, "\n")
+  # cat("ub_mean:", ub_mean, "\n")
+  # print("**********")
   
   # want to find the return that maximizes mean / sd
   i <- 1
@@ -934,7 +951,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
     
     # Find the starr at the mean return midpoint
     new_ret <- (lb_mean + ub_mean) / 2
-    mid <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+    mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
     mid_weights <- matrix(mid$weights, ncol=1)
     mid_mean <- as.numeric(t(mid_weights) %*% fmean)
     mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
@@ -942,7 +959,8 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
     # tmp_sr <- mid_sr
     
     # print(i)
-    # print(mid_sr)
+    # cat("new_ret:", new_ret, "\n")
+    # cat("mid_sr:", mid_sr, "\n")
     # print("**********")
     
     if(mid_sr > ub_sr){
@@ -950,7 +968,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
       ub_mean <- mid_mean
       ub_sr <- mid_sr
       new_ret <- (lb_mean + ub_mean) / 2
-      mid <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+      mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
       mid_weights <- matrix(mid$weights, ncol=1)
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
@@ -960,7 +978,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
       lb_mean <- mid_mean
       lb_sr <- mid_sr
       new_ret <- (lb_mean + ub_mean) / 2
-      mid <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+      mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
       mid_weights <- matrix(mid$weights, ncol=1)
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))

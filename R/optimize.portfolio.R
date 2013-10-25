@@ -805,6 +805,7 @@ optimize.portfolio_v2 <- function(
         if(hasArg(maxSR)) maxSR=match.call(expand.dots=TRUE)$maxSR else maxSR=FALSE
         if(maxSR){
           target <- max_sr_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+          moments$mean <- rep(0, length(moments$mean))
         }
         roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
         weights <- roi_result$weights
