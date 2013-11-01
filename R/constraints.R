@@ -352,6 +352,12 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
                                                                                             message=message, 
                                                                                             ...=...)
          },
+         # leverage exposure constraint
+         leverage_exposure = {tmp_constraint <- leverage_exposure_constraint( type=type,
+                                                                              enabled=enabled,
+                                                                              message=message,
+                                                                              ...=...)
+         },
          # Do nothing and return the portfolio object if type is NULL
          null = {return(portfolio)}
   )
@@ -730,6 +736,9 @@ get_constraints <- function(portfolio){
       if(inherits(constraint, "transaction_cost_constraint")){
         out$ptc <- constraint$ptc
       }
+      if(inherits(constraint, "leverage_exposure_constraint")){
+        out$leverage <- constraint$leverage
+      }
     }
   }
   
@@ -1012,6 +1021,40 @@ transaction_cost_constraint <- function(type="transaction_cost", assets, ptc, en
   if(length(ptc) != nassets) stop("length of ptc must be equal to number of assets")
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="transaction_cost_constraint", ...)
   Constraint$ptc <- ptc
+  return(Constraint)
+}
+
+#' constructor for leverage_exposure_constraint
+#' 
+#' The leverage_exposure constraint specifies a maximum leverage. This should
+#' be used for constructing, for example, 130/30 portfolios or dollar neutral
+#' portfolios with 2:1 leverage. For the ROI solvers, this is implemented
+#' as a MILP problem and is not supported for problems formulated as a 
+#' quadratic programming problem. This ma changed in the future if a MIQP
+#' solver is added.
+#' 
+#' This function is called by add.constraint when type="leverage_exposure" 
+#' is specified, see \code{\link{add.constraint}}.
+#' 
+#' @param type character type of the constraint
+#' @param leverage maximum leverage value
+#' @param enabled TRUE/FALSE
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
+#' @param \dots any other passthru parameters to specify diversification constraint
+#' an object of class 'diversification_constraint'
+#' @author Ross Bennett
+#' @seealso \code{\link{add.constraint}}
+#' @examples
+#' data(edhec)
+#' ret <- edhec[, 1:4]
+#' 
+#' pspec <- portfolio.spec(assets=colnames(ret))
+#' 
+#' pspec <- add.constraint(portfolio=pspec, type="leverage_exposure", leverage=1.6)
+#' @export
+leverage_exposure_constraint <- function(type="leverage_exposure", leverage=NULL, enabled=TRUE, message=FALSE, ...){
+  Constraint <- constraint_v2(type, enabled=enabled, constrclass="leverage_exposure_constraint", ...)
+  Constraint$leverage <- leverage
   return(Constraint)
 }
 
