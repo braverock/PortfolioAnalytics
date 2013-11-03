@@ -815,7 +815,7 @@ optimize.portfolio_v2 <- function(
     }
     if(length(names(moments)) == 1 & "mean" %in% names(moments)) {
       # Maximize return if the only objective specified is mean
-      if(!is.null(constraints$max_pos)) {
+      if(!is.null(constraints$max_pos) | !is.null(constraints$leverage)) {
         # This is an MILP problem if max_pos is specified as a constraint
         roi_result <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=target)
         weights <- roi_result$weights

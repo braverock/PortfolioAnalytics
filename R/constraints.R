@@ -1206,6 +1206,7 @@ check_constraints <- function(weights, portfolio){
   max_pos <- constraints$max_pos
   max_pos_long <- constraints$max_pos_long
   max_pos_short <- constraints$max_pos_short
+  leverage_exposure <- constraints$leverage
   tolerance <- .Machine$double.eps^0.5
   
   log_vec <- c()
@@ -1229,6 +1230,11 @@ check_constraints <- function(weights, portfolio){
   # check position limit constraints
   if(!is.null(max_pos) | !is.null(max_pos_long) | !is.null(max_pos_short)){
     log_vec <- c(log_vec, !pos_limit_fail(weights, max_pos, max_pos_long, max_pos_short))
+  }
+  
+  # check leverage exposure constraints
+  if(!is.null(leverage_exposure)){
+    log_vec <- c(log_vec, sum(abs(weights)) <= leverage_exposure)
   }
   # return TRUE if all constraints are satisfied, FALSE if any constraint is violated
   return(all(log_vec))

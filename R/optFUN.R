@@ -205,6 +205,7 @@ maxret_opt <- function(R, moments, constraints, target){
                  constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
                  bounds=bnds)
   roi.result <- ROI_solve(x=opt.prob, solver="glpk")
+  
   # roi.result <- Rglpk_solve_LP(obj=objL, mat=Amat, dir=dir.vec, rhs=rhs.vec, bounds=bnds)
   
   # The Rglpk solvers status returns an an integer with status information
@@ -240,87 +241,100 @@ maxret_milp_opt <- function(R, constraints, moments, target){
   
   N <- ncol(R)
   
+  # position limit constraint
   max_pos <- constraints$max_pos
+  if(is.null(max_pos)) max_pos <- N
   
+  # leverage exposure constraint
+  leverage <- constraints$leverage
+  if(is.null(leverage)) leverage <- 1
+  
+  # upper and lower bounds for box constraints on weights
   LB <- as.numeric(constraints$min)
   UB <- as.numeric(constraints$max)
   
-  # Check for target return
+  # The leverage exposure constraint splits the weights into long weights and short weights
+  
+  # Add weight sum constraint
+  Amat <- rbind(c(rep(1, N), rep(-1, N), rep(0, N)),
+                c(rep(1, N), rep(-1, N), rep(0, N)))
+  dir <- c("<=", ">=")
+  rhs <- c(constraints$max_sum, constraints$min_sum)
+  
+  # Add leverage exposure constraint
+  Amat <- rbind(Amat, c(rep(1, 2*N), rep(0, N)))
+  dir <- c(dir, "==")
+  rhs <- c(rhs, leverage)
+  
+  # Add target return
   if(!is.na(target)){
-    # We have a target
-    targetcon <- rbind(c(moments$mean, rep(0, N)),
-                       c(-moments$mean, rep(0, N)))
-    targetdir <- c("<=", "==")
-    targetrhs <- c(Inf, -target)
+    tmp_mean <- moments$mean
   } else {
-    # No target specified, just maximize
-    targetcon <- NULL
-    targetdir <- NULL
-    targetrhs <- NULL
+    tmp_mean <- rep(0, N)
+    target <- 0
   }
+  Amat <- rbind(Amat, c(tmp_mean, -1 * tmp_mean, rep(0, N)))
+  dir <- c(dir, "==")
+  rhs <- c(rhs, target)
   
-  Amat <- rbind(c(rep(1, N), rep(0, N)),
-                c(rep(1, N), rep(0, N)))
-  Amat <- rbind(Amat, targetcon)
-  Amat <- rbind(Amat, cbind(-diag(N), diag(LB)))
-  Amat <- rbind(Amat, cbind(diag(N), -diag(UB)))
-  Amat <- rbind(Amat, c(rep(0, N), rep(1, N)))
+  # Add constraints for long and short weights
+  Amat <- rbind(Amat, cbind(diag(2*N), rbind(-1 * diag(N), diag(N))))
+  dir <- c(dir, rep("<=", 2*N))
+  rhs <- c(rhs, rep(0, N), rep(1, N))
   
-  dir <- c("<=", ">=", targetdir, rep("<=", 2*N), "==")
-  
-  rhs <- c(1, 1, targetrhs, rep(0, 2*N), max_pos)
-  
-  # include group constraints
-  if(try(!is.null(constraints$groups), silent=TRUE)){
-    n.groups <- length(constraints$groups)
-    Amat.group <- matrix(0, nrow=n.groups, ncol=N)
-    for(i in 1:n.groups){
-      Amat.group[i, constraints$groups[[i]]] <- 1
-    }
-    if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
-    if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
-    zeros <- matrix(data=0, nrow=nrow(Amat.group), ncol=ncol(Amat.group))
-    Amat <- rbind(Amat, cbind(Amat.group, zeros), cbind(-Amat.group, zeros))
-    dir <- c(dir, rep(">=", (n.groups + n.groups)))
-    rhs <- c(rhs, constraints$cLO, -constraints$cUP)
-  }
-  
-  # Add the factor exposures to Amat, dir, and rhs
+  # Add factor_exposure constraints
   if(!is.null(constraints$B)){
     t.B <- t(constraints$B)
     zeros <- matrix(data=0, nrow=nrow(t.B), ncol=ncol(t.B))
-    Amat <- rbind(Amat, cbind(t.B, zeros), cbind(-t.B, zeros))
-    dir <- c(dir, rep(">=", 2 * nrow(t.B)))
-    rhs <- c(rhs, constraints$lower, -constraints$upper)
+    Amat <- rbind(Amat, cbind(t.B, -t.B, zeros))
+    Amat <- rbind(Amat, cbind(t.B, -t.B, zeros))
+    dir <- c(dir, ">=", "<=")
+    rhs <- c(rhs, constraints$lower, constraints$upper)
   }
   
-  objL <- c(-moments$mean, rep(0, N))
+  # include group constraints
+    if(!is.null(constraints$groups)){
+      n.groups <- length(constraints$groups)
+      Amat.group <- matrix(0, nrow=n.groups, ncol=N)
+      for(i in 1:n.groups){
+        Amat.group[i, constraints$groups[[i]]] <- 1
+      }
+      zeros <- matrix(data=0, nrow=nrow(Amat.group), ncol=ncol(Amat.group))
+      Amat <- rbind(Amat, cbind(Amat.group, -Amat.group, zeros))
+      Amat <- rbind(Amat, cbind(Amat.group, -Amat.group, zeros))
+      dir <- c(dir, rep(">=", n.groups), rep("<=", n.groups))
+      rhs <- c(rhs, constraints$cLO, constraints$cUP)
+    }
   
-  # Only seems to work if I do not specify bounds
-  # bounds = list( lower=list( ind=1L:(2*N), val=c(LB, rep(0, N)) ),
-  #                upper=list( ind=1L:(2*N), val=c(UB, rep(1, N)) ) )
-  bnds <- NULL
+  # Add position limit constraint
+  zeros <- matrix(data=0, nrow=nrow(Amat), ncol=N)
+  Amat <- cbind(Amat, zeros)
+  Amat <- rbind(Amat, c(rep(0, 3*N), rep(1, N)))
+  dir <- c(dir, "<=")
+  rhs <- c(rhs, max_pos)
   
-  # Set up the types vector with continuous and binary variables
-  types <- c(rep("C", N), rep("B", N))
+  # Bounds on the weights
+  bnds <- list(lower=list(ind=seq.int(1L, ncol(Amat)), val=rep(0, ncol(Amat))),
+               upper=list(ind=seq.int(1L, ncol(Amat)), val=c(UB, abs(LB), rep(1, 2*N))))
   
-  # Solve directly with Rglpk... getting weird errors with ROI
-  result <- Rglpk_solve_LP(obj=objL, mat=Amat, dir=dir, rhs=rhs, types=types, bounds=bnds, max=FALSE)
+  # Objective function
+  objL <- c(moments$mean, rep(0, 3*N))
   
-  # The Rglpk solvers status returns an an integer with status information
-  # about the solution returned: 0 if the optimal solution was found, a 
-  #non-zero value otherwise.
-  if(result$status != 0) {
-    message("Undefined Solution")
-    return(NULL)
-  }
+  # Set the types of variables (Continuous and Binary)
+  types <- c(rep("C", 2*N), rep("B", 2*N))
   
-  weights <- result$solution[1:N]
+  # Run the optimization
+  result <- try(Rglpk_solve_LP(obj=objL, mat=Amat, dir=dir, rhs=rhs, types=types, bounds=bnds, max=TRUE), silent=TRUE)
+  if(inherits(result, "try-error")) stop(paste("No solution found:", result))
+  
+  long_weights <- result$solution[1:N]
+  short_weights <- result$solution[(N+1):(2*N)]
+  weights <- long_weights - short_weights
   names(weights) <- colnames(R)
+  
   out <- list()
   out$weights <- weights
-  out$out <- result$optimum
-  #out$call <- call # add this outside of here, this function doesn't have the call
+  out$out <- result$objval
   return(out)
 }
 
@@ -361,7 +375,7 @@ etl_opt <- function(R, constraints, moments, target, alpha){
   Amat <- cbind(rbind(1, 1, moments$mean, coredata(R)), rbind(0, 0, 0, cbind(diag(T), 1))) 
   dir.vec <- c(">=","<=",">=",rep(">=",T))
   rhs.vec <- c(constraints$min_sum, constraints$max_sum, target ,rep(0, T))
-
+  
   if(try(!is.null(constraints$groups), silent=TRUE)){
     n.groups <- length(constraints$groups)
     Amat.group <- matrix(0, nrow=n.groups, ncol=N)
@@ -388,7 +402,9 @@ etl_opt <- function(R, constraints, moments, target, alpha){
   opt.prob <- OP(objective=ROI_objective, 
                        constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
                        bounds=bnds)
-  roi.result <- ROI_solve(x=opt.prob, solver="glpk")
+  roi.result <- try(ROI_solve(x=opt.prob, solver="glpk"), silent=TRUE)
+  if(inherits(x=roi.result, "try-error")) stop(paste("No solution found:", roi.result))
+  
   weights <- roi.result$solution[1:N]
   names(weights) <- colnames(R)
   out <- list()
@@ -836,6 +852,10 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
   ub_starr <- ub_mean / ub_etl
   if(is.infinite(ub_starr)) stop("Inf value for STARR, objective value is 0")
   
+  # cat("ub_mean", ub_mean, "\n")
+  # cat("ub_etl", ub_etl, "\n")
+  # cat("ub_starr", ub_starr, "\n")
+  
   # Find the starr at the minimum etl portfolio
   if(!is.null(constraints$max_pos)){
     lb_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha)
@@ -854,7 +874,8 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
   # the lb_* values will be 0 for a dollar-neutral strategy so we need to reset the values
   if(is.na(lb_starr) | is.infinite(lb_starr)) lb_starr <- 0
   
-  # cat("ub_starr", ub_starr, "\n")
+  # cat("lb_mean", lb_mean, "\n")
+  # cat("lb_etl", lb_etl, "\n")
   # cat("lb_starr", lb_starr, "\n")
   
   # want to find the return that maximizes mean / etl
@@ -873,11 +894,18 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
     } else {
       mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
     }
+    print(mid)
     mid_weights <- matrix(mid$weights, ncol=1)
     mid_mean <- as.numeric(t(mid_weights) %*% fmean)
     mid_etl <- as.numeric(mid$out)
     mid_starr <- mid_mean / mid_etl
+    # the mid_* values MIGHT be 0 for a dollar-neutral strategy so we need to reset the values
+    # if(is.na(mid_starr) | is.infinite(mid_starr)) mid_starr <- 0
     # tmp_starr <- mid_starr
+    
+    # cat("mid_mean", mid_mean, "\n")
+    # cat("mid_etl", mid_etl, "\n")
+    # cat("mid_starr", mid_starr, "\n")
     
     if(mid_starr > ub_starr){
       # if mid_starr > ub_starr then mid_starr becomes the new upper bound
@@ -893,6 +921,8 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_etl <- as.numeric(mid$out)
       mid_starr <- mid_mean / mid_etl
+      # the mid_* values MIGHT be 0 for a dollar-neutral strategy so we need to reset the values
+      # if(is.na(mid_starr) | is.infinite(mid_starr)) mid_starr <- 0
     } else if(mid_starr > lb_starr){
       # if mid_starr > lb_starr then mid_starr becomes the new lower bound
       lb_mean <- mid_mean
@@ -907,6 +937,8 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_etl <- as.numeric(mid$out)
       mid_starr <- mid_mean / mid_etl
+      # the mid_* values MIGHT be 0 for a dollar-neutral strategy so we need to reset the values
+      # if(is.na(mid_starr) | is.infinite(mid_starr)) mid_starr <- 0
     }
     i <- i + 1
   }

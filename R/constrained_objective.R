@@ -504,6 +504,16 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     mult <- 1
     out <- out + mult * tc
   } # End transaction cost penalty
+  
+  # Add penalty for leverage exposure
+  # This could potentially be added to random portfolios
+  if(!is.null(constraints$leverage)){
+    if((sum(abs(w)) > constraints$leverage)){
+      # only penalize if leverage is exceeded
+      mult <- 1/100
+      out <- out + penalty * mult * abs(sum(abs(w)) - constraints$leverage)
+    }
+  } # End leverage exposure penalty
     
   nargs <- list(...)
   if(length(nargs)==0) nargs <- NULL
