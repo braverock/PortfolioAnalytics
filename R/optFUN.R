@@ -894,7 +894,7 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
     } else {
       mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
     }
-    print(mid)
+    # print(mid)
     mid_weights <- matrix(mid$weights, ncol=1)
     mid_mean <- as.numeric(t(mid_weights) %*% fmean)
     mid_etl <- as.numeric(mid$out)
