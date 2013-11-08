@@ -129,6 +129,23 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   out <- list()
   out$weights <- weights
   out$out <- result$value
+  obj_vals <- list()
+  # Calculate the objective values here so that we can use the moments$mean
+  # and moments$var that might be passed in by the user. This will avoid
+  # the extra call to constrained_objective
+  if(!all(moments$mean == 0)){
+    port.mean <- as.numeric(sum(weights * moments$mean))
+    names(port.mean) <- "mean"
+    obj_vals[["mean"]] <- port.mean
+    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    names(port.sd) <- "StdDev"
+    obj_vals[["StdDev"]] <- port.sd
+  } else {
+    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    names(port.sd) <- "StdDev"
+    obj_vals[["StdDev"]] <- port.sd
+  }
+  out$obj_vals <- obj_vals
   # out$out <- result$objval # ROI
   # out$call <- call # need to get the call outside of the function
   return(out)
@@ -222,6 +239,14 @@ maxret_opt <- function(R, moments, constraints, target){
   out <- list()
   out$weights <- weights
   out$out <- roi.result$objval
+  obj_vals <- list()
+  # Calculate the objective values here so that we can use the moments$mean
+  # that might be passed in by the user. This will avoid
+  # the extra call to constrained_objective
+  port.mean <- -roi.result$objval
+  names(port.mean) <- "mean"
+  obj_vals[["mean"]] <- port.mean
+  out$obj_vals <- obj_vals
   # out$call <- call # need to get the call outside of the function
   return(out)
 }
@@ -334,7 +359,16 @@ maxret_milp_opt <- function(R, constraints, moments, target){
   
   out <- list()
   out$weights <- weights
-  out$out <- result$objval
+  out$out <- result$optimum
+  obj_vals <- list()
+  # Calculate the objective values here so that we can use the moments$mean
+  # that might be passed in by the user. This will avoid
+  # the extra call to constrained_objective
+  
+  port.mean <- -result$optimum
+  names(port.mean) <- "mean"
+  obj_vals[["mean"]] <- port.mean
+  out$obj_vals <- obj_vals
   return(out)
 }
 
@@ -410,6 +444,25 @@ etl_opt <- function(R, constraints, moments, target, alpha){
   out <- list()
   out$weights <- weights
   out$out <- roi.result$objval
+  es_names <- c("ES", "ETL", "CVaR")
+  es_idx <- which(es_names %in% names(moments))
+  obj_vals <- list()
+  # Calculate the objective values here so that we can use the moments$mean
+  # and moments$var that might be passed in by the user. This will avoid
+  # the extra call to constrained_objective
+  if(!all(moments$mean == 0)){
+    port.mean <- as.numeric(sum(weights * moments$mean))
+    names(port.mean) <- "mean"
+    obj_vals[["mean"]] <- port.mean
+    port.es <- roi.result$objval
+    names(port.es) <- es_names[es_idx]
+    obj_vals[[es_names[es_idx]]] <- port.es
+  } else {
+    port.es <- roi.result$objval
+    names(port.es) <- es_names[es_idx]
+    obj_vals[[es_names[es_idx]]] <- port.es
+  }
+  out$obj_vals <- obj_vals
   #out$call <- call # add this outside of here, this function doesn't have the call
   return(out)
 }
@@ -540,6 +593,25 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
   out <- list()
   out$weights <- weights
   out$out <- result$optimum
+  es_names <- c("ES", "ETL", "CVaR")
+  es_idx <- which(es_names %in% names(moments))
+  obj_vals <- list()
+  # Calculate the objective values here so that we can use the moments$mean
+  # and moments$var that might be passed in by the user. This will avoid
+  # the extra call to constrained_objective
+  if(!all(moments$mean == 0)){
+    port.mean <- as.numeric(sum(weights * moments$mean))
+    names(port.mean) <- "mean"
+    obj_vals[["mean"]] <- port.mean
+    port.es <- result$optimum
+    names(port.es) <- es_names[es_idx]
+    obj_vals[[es_names[es_idx]]] <- port.es
+  } else {
+    port.es <- result$optimum
+    names(port.es) <- es_names[es_idx]
+    obj_vals[[es_names[es_idx]]] <- port.es
+  }
+  out$obj_vals <- obj_vals
   #out$call <- call # add this outside of here, this function doesn't have the call
   return(out)
 }
@@ -680,7 +752,24 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   names(weights) <- colnames(R)
   out <- list()
   out$weights <- weights
-  out$out <- qp.result$val
+  out$out <- qp.result$value
+  obj_vals <- list()
+  # Calculate the objective values here so that we can use the moments$mean
+  # and moments$var that might be passed in by the user. This will avoid
+  # the extra call to constrained_objective
+  if(!all(moments$mean == 0)){
+    port.mean <- as.numeric(sum(weights * moments$mean))
+    names(port.mean) <- "mean"
+    obj_vals[["mean"]] <- port.mean
+    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    names(port.sd) <- "StdDev"
+    obj_vals[["StdDev"]] <- port.sd
+  } else {
+    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    names(port.sd) <- "StdDev"
+    obj_vals[["StdDev"]] <- port.sd
+  }
+  out$obj_vals <- obj_vals
   return(out)
   
   # TODO
@@ -803,7 +892,24 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
   names(weights) <- colnames(R)
   out <- list()
   out$weights <- weights
-  out$out <- qp.result$val
+  out$out <- qp.result$value
+  obj_vals <- list()
+  # Calculate the objective values here so that we can use the moments$mean
+  # and moments$var that might be passed in by the user. This will avoid
+  # the extra call to constrained_objective
+  if(!all(moments$mean == 0)){
+    port.mean <- as.numeric(sum(weights * moments$mean))
+    names(port.mean) <- "mean"
+    obj_vals[["mean"]] <- port.mean
+    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    names(port.sd) <- "StdDev"
+    obj_vals[["StdDev"]] <- port.sd
+  } else {
+    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    names(port.sd) <- "StdDev"
+    obj_vals[["StdDev"]] <- port.sd
+  }
+  out$obj_vals <- obj_vals
   return(out)
   
   # TODO
