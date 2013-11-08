@@ -15,4 +15,13 @@ backwards_compat Demonstrate how to solve optimization problems using v1 specifi
 demo_random_portfolios Demonstrate examples from script.workshop2012.R using random portfolios.
 demo_proportional_cost Demonstrate how to use proportional transaction cost constraint.
 demo_return_target Demonstrate how to specify a target return as a constraint or objective.
+demo_group_constraints Demonstrate using group constraints.
+demo_leverage_exposure_constraint Demonstrate using the leverage exposure constraint to put a constraint on overall portfolio leverage exposure.
+demo_max_STARR Demonstrate maximizing STARR as an objective using ROI, DEoptim, and random solvers.
+demo_max_Sharpe Demonstrate maximizing sharpe ratio as an objective using ROI, DEoptim, and random solvers.
+demo_max_quadratic_utility Demonstrate solving maximum quadratic utility objective with ROI solver.
+demo_max_return Demonstrate objective to maximize portfolio mean return.
+demo_min_StdDev Demonstrate objective to minimize portfolio standard deviation.
+demo_min_expected_shortfall Demonstrate objective to minimize expected shortfall.
+demo_risk_budgets Demonstrate using risk budget objectives.
 
