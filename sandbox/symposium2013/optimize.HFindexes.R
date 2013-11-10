@@ -481,6 +481,7 @@ volatility.weight <- function (R, portfolio, ...)
 # Calculate the objective measures for the vol weight portfolio
 VolWgt.opt <- volatility.weight(R=R, portfolio=VolWgt.portf)
 
+
 # REMOVED
 # ### Evaluate Constrained Concentration to mETL Portfolio - with DE
 # # registerDoSEQ() # turn off parallelization to keep the trace data
@@ -578,11 +579,19 @@ colnames(EqWgt.w)= colnames(R)
 EqWgt.R=Return.rebalancing(R, EqWgt.w)
 chart.StackedBar(EqWgt.w, colorset=wb13color, gap=0)
 
+VolWgt.w = NULL
+for(i in 3:length(dates)){
+  x = volatility.weight(R=R[paste0("::",dates[i]),], portfolio=VolWgt.portf)
+  VolWgt.w = rbind(VolWgt.w, x$weights)
+}
+VolWgt.w = as.xts(VolWgt.w, order.by=dates[-1:-2])
+VolWgt.R=Return.rebalancing(R, VolWgt.w)
+
 # Equal SD
 MRCSD.DE.t = optimize.portfolio.rebalancing(R=R,
   portfolio=MRCSD.portf, 
   optimize_method='DEoptim',
-  search_size=20000,
+  search_size=2000,
   NP=200,
   initialpop=rp[1:50,], # seed with a starting population that we know fits the constraint space
   trace=FALSE,
