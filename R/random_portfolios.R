@@ -271,14 +271,15 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
       # randomly permute and increase a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tportfolio[cur_index]
-      if (length(weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]) > 1)
-      {
+      tmp_seq <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]
+      n_tmp_seq <- length(tmp_seq)
+      if(n_tmp_seq > 1){
         # randomly sample one of the larger weights
-        tportfolio[cur_index] <- sample(weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])], 1)
+        tportfolio[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
         # print(paste("new val:",tportfolio[cur_index]))
       } else {
-        if (length(weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]) == 1) {
-          tportfolio[cur_index] <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]
+        if(n_tmp_seq == 1){
+          tportfolio[cur_index] <- tmp_seq
         }
       }
       i <- i + 1 # increment our counter
@@ -287,12 +288,14 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
       # randomly permute and decrease a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tportfolio[cur_index]
-      if (length(weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index])] ) > 1) {
+      tmp_seq <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index])]
+      n_tmp_seq <- length(tmp_seq)
+      if(n_tmp_seq > 1) {
         # randomly sample one of the smaller weights
-        tportfolio[cur_index] <- sample(weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index] )], 1)
+        tportfolio[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
       } else {
-        if (length(weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index])] ) == 1) {
-          tportfolio[cur_index] <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index])]
+        if(n_tmp_seq == 1){
+          tportfolio[cur_index] <- tmp_seq
         }
       }
       i <- i + 1 # increment our counter
@@ -427,16 +430,13 @@ rp_sample <- function(portfolio, permutations, ...){
   result[2,] <- rep(1/length(seed),length(seed))
   # rownames(result)[1]<-"seed.portfolio"
   # rownames(result)[2]<-"equal.weight"
-  i <- 3
-  while (i <= permutations) {
-    result[i,] <- as.matrix(randomize_portfolio_v2(portfolio=portfolio, ...))
-    if(i == permutations) {
-      result <- unique(result)
-      i <- nrow(result)
-      result <- rbind(result, matrix(nrow=(permutations-i), ncol=length(seed)))
-    }
-    i <- i + 1
+  for(i in 3:permutations) {
+    #result[i,] <- as.matrix(randomize_portfolio_v2(portfolio=portfolio, ...))
+    result[i,] <- randomize_portfolio_v2(portfolio=portfolio, ...)
   }
+  result <- unique(result)
+  # i <- nrow(result)
+  # result <- rbind(result, matrix(nrow=(permutations-i), ncol=length(seed)))
   colnames(result) <- names(seed)
   return(result)
 }
