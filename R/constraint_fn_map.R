@@ -404,13 +404,17 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
       # randomly permute and increase a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tmp_w[cur_index]
-      if (length(weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]) > 1) {
+      tmp_seq <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]
+      n_tmp_seq <- length(tmp_seq)
+      if (n_tmp_seq > 1) {
         # randomly sample an element from weight_seq that is greater than cur_val and less than max
-        tmp_w[cur_index] <- sample(weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])], 1)
+        # tmp_w[cur_index] <- sample(weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])], 1)
+        tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
         # print(paste("new val:",tmp_w[cur_index]))
       } else {
-        if (length(weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]) == 1) {
-          tmp_w[cur_index] <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]
+        if (n_tmp_seq == 1) {
+          # tmp_w[cur_index] <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]
+          tmp_w[cur_index] <- tmp_seq
         }
       }
       i=i+1 # increment our counter
@@ -423,12 +427,16 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
       # randomly permute and decrease a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tmp_w[cur_index]
-      if (length(weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])] ) > 1) {
+      tmp_seq <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])]
+      n_tmp_seq <- length(tmp_seq)
+      if (n_tmp_seq > 1) {
         # randomly sample an element from weight_seq that is less than cur_val and greater than tmp_min
-        tmp_w[cur_index] <- sample(weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])] , 1)
+        # tmp_w[cur_index] <- sample(weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])] , 1)
+        tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
       } else {
-        if (length(weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])] ) == 1) {
-          tmp_w[cur_index] <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])]
+        if (n_tmp_seq == 1) {
+          # tmp_w[cur_index] <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= tmp_min[cur_index])]
+          tmp_w[cur_index] <- tmp_seq
         }
       }
       i=i+1 # increment our counter
