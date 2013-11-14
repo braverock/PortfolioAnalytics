@@ -514,15 +514,32 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
       out <- out + penalty * mult * abs(sum(abs(w)) - constraints$leverage)
     }
   } # End leverage exposure penalty
-    
-  nargs <- list(...)
-  if(length(nargs)==0) nargs <- NULL
-  if (length('...')==0 | is.null('...')) {
-    # rm('...')
-    nargs <- NULL
-  }
   
-  nargs <- set.portfolio.moments(R, portfolio, momentargs=nargs)
+  # The "..." are passed in from optimize.portfolio and contain the output of
+  # the momentFUN. The default is momentFUN=set.portfolio.moments and returns
+  # moments$mu, moments$sigma, moments$m3, moments$m4, etc. depending on the
+  # the functions corresponding to portfolio$objective$name. Would it be better
+  # to make this a formal argument for constrained_objective?
+  
+  # nargs are used as the arguments for functions corresponding to 
+  # objective$name called in the objective loop later
+  
+  momentargs <- eval(substitute(alist(...)))
+  .formals <- formals(set.portfolio.moments)
+  .formals <- modify.args(formals=.formals, arglist=alist(momentargs=momentargs), dots=TRUE)
+  .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=TRUE)
+  .formals <- modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=TRUE)
+  .formals$... <- NULL
+  # print(.formals)
+  nargs <- do.call(set.portfolio.moments, .formals)
+  
+  #nargs <- list(...)
+  #if(length(nargs)==0) nargs <- NULL
+  #if (length('...')==0 | is.null('...')) {
+  #  # rm('...')
+  #  nargs <- NULL
+  #}
+  #nargs <- set.portfolio.moments(R, portfolio, momentargs=nargs)
   
   if(is.null(portfolio$objectives)) {
     warning("no objectives specified in portfolio")
@@ -537,7 +554,8 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
         switch(objective$name,
                mean =,
                median = {
-                 fun = match.fun(objective$name)  
+                 fun = match.fun(objective$name)
+                 # would it be better to do crossprod(w, moments$mu)?
                  nargs$x <- ( R %*% w ) #do the multivariate mean/median with Kroneker product
                },
                sd =,
@@ -595,6 +613,11 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
             .formals$... <- NULL
           }
         } # TODO do some funky return magic here on try-error
+        
+        #.formals <- formals(fun)
+        #.formals <- modify.args(formals=.formals, arglist=objective$arguments, ...=nargs, dots=TRUE)
+        #print(.formals)
+        #print(nargs)
         
         tmp_measure <- try((do.call(fun,.formals)), silent=TRUE)
         

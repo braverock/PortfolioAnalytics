@@ -61,3 +61,5 @@ Collate:
     'utility.combine.R'
     'equal.weight.R'
     'inverse.volatility.weight.R'
+    'utils.R'
+
