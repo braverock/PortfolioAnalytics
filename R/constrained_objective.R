@@ -345,7 +345,7 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
 #' @aliases constrained_objective constrained_objective_v1
 #' @rdname constrained_objective
 #' @export
-constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normalize=TRUE, storage=FALSE)
+constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normalize=TRUE, storage=FALSE, moments=NULL)
 { 
   if (ncol(R) > length(w)) {
     R <- R[ ,1:length(w)]
@@ -516,30 +516,35 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   } # End leverage exposure penalty
   
   # The "..." are passed in from optimize.portfolio and contain the output of
-  # the momentFUN. The default is momentFUN=set.portfolio.moments and returns
+  # momentFUN. The default is momentFUN=set.portfolio.moments and returns
   # moments$mu, moments$sigma, moments$m3, moments$m4, etc. depending on the
   # the functions corresponding to portfolio$objective$name. Would it be better
-  # to make this a formal argument for constrained_objective?
+  # to make this a formal argument for constrained_objective? This means that
+  # we completely avoid evaluating the set.portfolio.moments function. Can we
+  # trust that all the moments are correctly set in optimize.portfolio through
+  # momentFUN?
   
-  # nargs are used as the arguments for functions corresponding to 
-  # objective$name called in the objective loop later
+  if(!is.null(moments)){
+    nargs <- moments
+  } else {
+    # print("calculating moments")
+    # calculating the moments
+    # nargs are used as the arguments for functions corresponding to 
+    # objective$name called in the objective loop later
+    momentargs <- eval(substitute(alist(...)))
+    .formals <- formals(set.portfolio.moments)
+    .formals <- modify.args(formals=.formals, arglist=alist(momentargs=momentargs), dots=TRUE)
+    .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=TRUE)
+    .formals <- modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=TRUE)
+    .formals$... <- NULL
+    # print(.formals)
+    nargs <- do.call(set.portfolio.moments, .formals)
+  }
   
-  momentargs <- eval(substitute(alist(...)))
-  .formals <- formals(set.portfolio.moments)
-  .formals <- modify.args(formals=.formals, arglist=alist(momentargs=momentargs), dots=TRUE)
-  .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=TRUE)
-  .formals <- modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=TRUE)
-  .formals$... <- NULL
-  # print(.formals)
-  nargs <- do.call(set.portfolio.moments, .formals)
-  
-  #nargs <- list(...)
-  #if(length(nargs)==0) nargs <- NULL
-  #if (length('...')==0 | is.null('...')) {
-  #  # rm('...')
-  #  nargs <- NULL
-  #}
-  #nargs <- set.portfolio.moments(R, portfolio, momentargs=nargs)
+  # We should avoid modifying nargs in the loop below.
+  # If we modify nargs with something like nargs$x, nargs is copied and this
+  # should be avoided because nargs could be large because it contains the moments.
+  tmp_args <- list()
   
   if(is.null(portfolio$objectives)) {
     warning("no objectives specified in portfolio")
@@ -556,7 +561,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
                median = {
                  fun = match.fun(objective$name)
                  # would it be better to do crossprod(w, moments$mu)?
-                 nargs$x <- ( R %*% w ) #do the multivariate mean/median with Kroneker product
+                 tmp_args$x <- ( R %*% w ) #do the multivariate mean/median with Kroneker product
                },
                sd =,
                var =,
@@ -566,7 +571,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
                mVaR =,
                VaR = {
                  fun = match.fun(VaR) 
-                 if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method) & is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+                 if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method) & is.null(nargs$portfolio_method)) tmp_args$portfolio_method='single'
                  if(is.null(objective$arguments$invert)) objective$arguments$invert = FALSE
                },
                es =,
@@ -577,7 +582,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
                mETL=,
                ES = {
                  fun = match.fun(ES)
-                 if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method)& is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+                 if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method) & is.null(nargs$portfolio_method)) tmp_args$portfolio_method='single'
                  if(is.null(objective$arguments$invert)) objective$arguments$invert = FALSE
                },
                turnover = {
@@ -587,38 +592,22 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   fun <- try(match.fun(objective$name))
 }
         )
+        
         if(is.function(fun)){
-          .formals  <- formals(fun)
-          onames <- names(.formals)
-          if(is.list(objective$arguments)){
-            #TODO FIXME only do this if R and weights are in the argument list of the fn
-            if(is.null(nargs$R) | !length(nargs$R)==length(R)) nargs$R <- R
-            
-            if(is.null(nargs$weights)) nargs$weights <- w
-            
-            pm <- pmatch(names(objective$arguments), onames, nomatch = 0L)
-            if (any(pm == 0L))
-              warning(paste("some arguments stored for", objective$name, "do not match"))
-            # this line overwrites the names of things stored in $arguments with names from formals.
-            # I'm not sure it's a good idea, so commenting for now, until we prove we need it
-            #names(objective$arguments[pm > 0L]) <- onames[pm]
-            .formals[pm] <- objective$arguments[pm > 0L]
-            #now add dots
-            if (length(nargs)) {
-              dargs <- nargs
-              pm <- pmatch(names(dargs), onames, nomatch = 0L)
-              names(dargs[pm > 0L]) <- onames[pm]
-              .formals[pm] <- dargs[pm > 0L]
-            }
-            .formals$... <- NULL
-          }
-        } # TODO do some funky return magic here on try-error
+          .formals <- formals(fun)
+          # Add the moments from the nargs object
+          .formals <- modify.args(formals=.formals, arglist=nargs, dots=TRUE)
+          # Add anything from tmp_args
+          .formals <- modify.args(formals=.formals, arglist=tmp_args, dots=TRUE)
+          # Now add the objective$arguments
+          .formals <- modify.args(formals=.formals, arglist=objective$arguments, dots=TRUE)
+          # Add R and weights if necessary
+          if("R" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=TRUE)
+          if("weights" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, weights=w, dots=TRUE)
+          .formals$... <- NULL
+        }
         
-        #.formals <- formals(fun)
-        #.formals <- modify.args(formals=.formals, arglist=objective$arguments, ...=nargs, dots=TRUE)
-        #print(.formals)
-        #print(nargs)
-        
+        # print(.formals)
         tmp_measure <- try((do.call(fun,.formals)), silent=TRUE)
         
         if(isTRUE(trace) | isTRUE(storage)) {

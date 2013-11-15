@@ -443,7 +443,8 @@ optimize.portfolio_v2 <- function(
   trace=FALSE, ...,
   rp=NULL,
   momentFUN='set.portfolio.moments',
-  message=FALSE
+  message=FALSE,
+  reuse_moments=TRUE
 )
 {
   optimize_method <- optimize_method[1]
@@ -681,7 +682,11 @@ optimize.portfolio_v2 <- function(
     if ("package:foreach" %in% search() & !hasArg(parallel)){
       rp_objective_results <- foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,], R, portfolio, trace=trace,...=dotargs, normalize=FALSE)
     } else {
-      rp_objective_results <- apply(rp, 1, constrained_objective, R=R, portfolio=portfolio, trace=trace, ...=dotargs, normalize=FALSE)
+      if(reuse_moments){
+        rp_objective_results <- apply(rp, 1, constrained_objective, R=R, portfolio=portfolio, trace=trace, normalize=FALSE, moments=dotargs)
+      } else {
+        rp_objective_results <- apply(rp, 1, constrained_objective, R=R, portfolio=portfolio, trace=trace, ...=dotargs, normalize=FALSE, moments=NULL)
+      }
     }
     #' if trace=TRUE , store results of foreach in out$random_results
     if(isTRUE(trace)) out$random_portfolio_objective_results <- rp_objective_results
@@ -705,7 +710,11 @@ optimize.portfolio_v2 <- function(
     }
     #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
     out$weights <- min_objective_weights
-    obj_vals <- try(constrained_objective(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE)$objective_measures)
+    if(reuse_moments){
+      obj_vals <- try(constrained_objective(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE, moments=dotargs)$objective_measures)
+    } else {
+      obj_vals <- try(constrained_objective(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE)$objective_measures)
+    }
     out$objective_measures <- obj_vals
     out$opt_values <- obj_vals
     out$call <- call
@@ -736,7 +745,7 @@ optimize.portfolio_v2 <- function(
     
     # list of valid objective names for ROI solvers
     valid_objnames <- c("HHI", "mean", "var", "sd", "StdDev", "CVaR", "ES", "ETL")
-    
+    #objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
     for(objective in portfolio$objectives){
       if(objective$enabled){
         if(!(objective$name %in% valid_objnames)){
@@ -762,19 +771,17 @@ optimize.portfolio_v2 <- function(
         # multiple objectives.
         if(clean != "none") moments$cleanR <- Return.clean(R=R, method=clean)
         
-        # I'm not sure what changed, but moments$mean used to be a vector of the column means
-        # now it is a scalar value of the mean of the entire R object
+        # Use $mu and $sigma estimates from momentFUN if available, fall back to
+        # calculating sample mean and variance
         if(objective$name == "mean"){
-          if(!is.null(objective$estimate)){
-            print("User has specified an estimated mean returns vector")
-            moments[["mean"]] <- as.vector(objective$estimate)
+          if(!is.null(mout$mu)){
+            moments[["mean"]] <- as.vector(mout$mu)
           } else {
             moments[["mean"]] <- try(as.vector(apply(Return.clean(R=R, method=clean), 2, "mean", na.rm=TRUE)), silent=TRUE)
           }
         } else if(objective$name %in% c("StdDev", "sd", "var")){
-          if(!is.null(objective$estimate)){
-            print("User has specified an estimated covariance matrix")
-            moments[["var"]] <- objective$estimate
+          if(!is.null(mout$sigma)){
+            moments[["var"]] <- mout$sigma
           } else {
             moments[["var"]] <- try(var(x=Return.clean(R=R, method=clean), na.rm=TRUE), silent=TRUE)
           }
@@ -790,6 +797,7 @@ optimize.portfolio_v2 <- function(
         if(!is.null(objective$conc_groups)) conc_groups <- objective$conc_groups else conc_groups <- NULL
       }
     }
+    
     if("var" %in% names(moments)){
       # Minimize variance if the only objective specified is variance
       # Maximize Quadratic Utility if var and mean are specified as objectives
