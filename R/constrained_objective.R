@@ -474,7 +474,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   # penalize weights that violate return target constraint
   if(!is.null(constraints$return_target)){
     return_target <- constraints$return_target
-    mean_return <- mean(R %*% w)
+    mean_return <- port.mean(weights=w, mu=moments$mu)
     mult <- 1
     out = out + penalty * mult * abs(mean_return - return_target)
   } # End return constraint penalty
@@ -559,8 +559,12 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
         switch(objective$name,
                mean =,
                median = {
-                 fun = match.fun(objective$name)
+                 fun = match.fun(port.mean)
                  # would it be better to do crossprod(w, moments$mu)?
+                 # tmp_args$x <- ( R %*% w ) #do the multivariate mean/median with Kroneker product
+               },
+               median = {
+                 fun = match.fun(objective$name)
                  tmp_args$x <- ( R %*% w ) #do the multivariate mean/median with Kroneker product
                },
                sd =,
@@ -596,6 +600,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
         if(is.function(fun)){
           .formals <- formals(fun)
           # Add the moments from the nargs object
+          # nargs contains the moments, these are being evaluated
           .formals <- modify.args(formals=.formals, arglist=nargs, dots=TRUE)
           # Add anything from tmp_args
           .formals <- modify.args(formals=.formals, arglist=tmp_args, dots=TRUE)
