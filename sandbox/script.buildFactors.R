@@ -11,6 +11,7 @@
 require(gdata)
 require(quantmod)
 require(RQuantLib)
+Sys.setenv(TZ="GMT")
 
 ## Factor set of several commonly used factors
 
@@ -18,16 +19,15 @@ require(RQuantLib)
 # @TODO: Find a source for TR of SP500
 
 ### Equities
-# Get S&P price returns from FRED for now, TR later
-  # @TODO: Get total returns for S&P factor rather than price returns
-  getSymbols("SP500", src="FRED") # daily price series
-  index(SP500) = as.Date(as.yearmon(index(SP500)), frac=1)
-  # Calculate monthly returns
-  SP500.R=monthlyReturn(SP500)
-  colnames(SP500.R)="SP500"
-  # Calculate quarterly returns
-  SP500.Q.R=quarterlyReturn(SP500)
-  colnames(SP500.Q.R)="SP500"
+# Download the first sheet in the xls workbook directly from the S&P web site:
+  x = read.xls("http://www.spindices.com/documents/additional-material/monthly.xlsx?force_download=true")
+  rawdates = x[-1:-4,1]
+  rawreturns = x[-1:-4,12]
+  ISOdates = as.Date(as.yearmon(rawdates, "%m/%Y"), frac=1)
+  totalreturns = as.numeric(as.character((sub("%", "", rawreturns, fixed=TRUE))))/100
+  SP500.TR=na.omit(as.xts(totalreturns, order.by=ISOdates))
+  colnames(SP500.TR)="SP500TR"
+  # see parse.SP500TR.R in the FinancialInstrument package's inst/parsers directory for more detail
 
 ### Bonds
 # Calculate total returns from the yeild of the 10 year constant maturity index maintained by the Fed
@@ -67,7 +67,9 @@ require(RQuantLib)
 ### Credit Spread
 # Yield spread of Merrill Lynch High-Yield Corporate Master II Index minus 10-year Treasury
   getSymbols("BAMLH0A0HYM2EY",src="FRED")
-  CREDIT=BAMLH0A0HYM2EY/100-GS10/100
+BAMLH0A0HYM2EY.M=Cl(to.monthly(BAMLH0A0HYM2EY))
+index(BAMLH0A0HYM2EY.M) = as.Date(as.yearmon(index(BAMLH0A0HYM2EY.M)), frac=1)
+  CREDIT=(BAMLH0A0HYM2EY.M-GS10)/100
   colnames(CREDIT)="Credit Spread"
   CREDIT.Q=CREDIT[endpoints(CREDIT, on="quarters"),]
   colnames(CREDIT.Q)="Credit Spread"
@@ -199,3 +201,26 @@ factors=cbind(SP500.R, GS10.R, USDI.R, TERM, CREDIT, DJUBS.R, dVIX, TED, OIL.R, 
 factors=factors["1997::",]
 factors.Q=cbind(SP500.Q.R, GS10.Q.R, USDI.Q.R, TERM.Q, CREDIT.Q, DJUBS.Q.R, dVIX.Q, TED.Q, OIL.Q.R, TB3MS[endpoints(TB3MS, on="quarters"),]/100)
 factors.Q=factors.Q[paste("1997::",lastquarter,sep=""),]
+
+asofdate= tail(index(factors),1)
+labels=colnames(factors)
+pdf(file=paste("Cumulative Factor Returns as of ", asofdate, ".pdf", sep=""), paper="letter", width=7.5, height=10)
+op <- par(no.readonly=TRUE)
+layout(matrix(c(1:NCOL(factors)), ncol = 1, byrow = TRUE), widths=1)
+op <- par(oma = c(5,0,4,0), mar=c(0,4,0,4))
+for(i in 1:NCOL(factors)){
+  xaxis=FALSE
+  yaxis=TRUE
+  if(even(i))
+    yaxis.right=TRUE
+  else
+    yaxis.right=FALSE
+  if(i==NCOL(factors))
+    xaxis = TRUE
+  chart.TimeSeries(cbind(factors["1997::",i],SMA(na.locf(factors["1997::",i], n=12))), type="l", colorset=c("blue","lightblue"), ylog=FALSE, xaxis=xaxis, main="", ylab="", yaxis=yaxis, yaxis.right=yaxis.right, lwd=2)
+  text(.9, .70*(par("usr")[4]), adj=c(0,1), cex = 1.1, labels = labels[i])
+}
+par(op)
+mtext(expression(bold("Monthly Factor Returns")), side=3, outer=TRUE, line=-3, adj=0.1, col="black", cex=1.2)
+mtext(paste("As of", asofdate), side=3, outer=TRUE, line=-3, adj=0.9, col="darkgray", cex=0.8)
+dev.off()
