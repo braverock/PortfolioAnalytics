@@ -13,9 +13,8 @@ require(quantmod)
 require(RQuantLib)
 Sys.setenv(TZ="GMT")
 
-## Factor set of several commonly used factors
+## Set up required directory structure
 
-# @TODO: Find a better source for VIX
 
 ### Equities
 # Download the first sheet in the xls workbook directly from the S&P web site:
@@ -24,9 +23,10 @@ Sys.setenv(TZ="GMT")
   rawreturns = x[-1:-4,12]
   ISOdates = as.Date(as.yearmon(rawdates, "%m/%Y"), frac=1)
   totalreturns = as.numeric(as.character((sub("%", "", rawreturns, fixed=TRUE))))/100
-  SP500.TR=na.omit(as.xts(totalreturns, order.by=ISOdates))
-  colnames(SP500.TR)="SP500TR"
+  SP500.R=na.omit(as.xts(totalreturns, order.by=ISOdates))
+  colnames(SP500.R)="SP500TR"
   # see parse.SP500TR.R in the FinancialInstrument package's inst/parsers directory for more detail
+
 
 ### Bonds
 # Calculate total returns from the yeild of the 10 year constant maturity index maintained by the Fed
@@ -39,15 +39,12 @@ Sys.setenv(TZ="GMT")
   for (i in 1:(NROW(GS10)-1)) {
     GS10.pr[i+1,1] <- FixedRateBondPriceByYield(yield=GS10[i+1,1]/100, issueDate=Sys.Date(), maturityDate=advance("UnitedStates/GovernmentBond", Sys.Date(), 10, 3), rates=GS10[i,1]/100,period=2)[1]/100-1
   }
-  #total return will be the price return + yield/12 for one month
+  # total return will be the price return + yield/12 for one month
   GS10.R <- GS10.pr + lag(GS10,k=1)/12/100
   colnames(GS10.R)<-"GS10TR"
 
-  #   GS10.idx =cumprod(1 + na.omit(GS10.R))
-  #   GS10.Q.idx=to.quarterly(GS10.idx)
-  #   GS10.Q.R=quarterlyReturn(Cl(GS10.Q.idx))
-  #   colnames(GS10.Q.R)<-"GS10TR"
-  #   index(GS10.Q.R) = as.Date(as.yearqtr(index(GS10.Q.R)), frac=1)
+  #@TODO: Calc the same for 2y and 5y
+
 
 ### Currencies
 # Trade Weighted U.S. Dollar Index: Major Currencies - TWEXMMTH
@@ -57,11 +54,6 @@ Sys.setenv(TZ="GMT")
   USDI.R=ROC(TWEXMMTH)
   colnames(USDI.R)="USD Index"
 
-  #   USDI.idx =cumprod(1 + na.omit(USDI.R))
-  #   USDI.Q.idx=to.quarterly(USDI.idx)
-  #   USDI.Q.R=quarterlyReturn(Cl(USDI.Q.idx))
-  #   colnames(USDI.Q.R)<-"USD Index"
-  #   index(USDI.Q.R) = as.Date(as.yearqtr(index(USDI.Q.R)), frac=1)
 
 ### Credit Spread
 # Yield spread of Merrill Lynch High-Yield Corporate Master II Index minus 10-year Treasury
@@ -70,8 +62,7 @@ Sys.setenv(TZ="GMT")
   index(BAMLH0A0HYM2EY.M) = as.Date(as.yearmon(index(BAMLH0A0HYM2EY.M)), frac=1)
   CREDIT=(BAMLH0A0HYM2EY.M-GS10)/100
   colnames(CREDIT)="Credit Spread"
-  #   CREDIT.Q=CREDIT[endpoints(CREDIT, on="quarters"),]
-  #   colnames(CREDIT.Q)="Credit Spread"
+
 
 ### Liquidity
   getSymbols("TB3MS",src="FRED")
@@ -80,8 +71,7 @@ Sys.setenv(TZ="GMT")
   index(MED3) = as.Date(as.yearmon(index(MED3)), frac=1)
   TED=MED3/100-TB3MS/100
   colnames(TED)="TED Spread"
-  #   TED.Q=TED[endpoints(TED, on="quarters"),]
-  #   colnames(TED.Q)="TED Spread"
+
 
 ### Real estate
 # Use the NAREIT index
@@ -89,6 +79,7 @@ Sys.setenv(TZ="GMT")
   x.dates = as.Date(as.yearmon(x[,1], format="%b-%y"), frac=1)
   REALESTATE.R = xts(x[,2]/100, order.by = x.dates)
   colnames(REALESTATE.R) = "NAREIT Returns"
+
 
 ### Commodities
 ## Use the DJUBS Commodities index
@@ -101,38 +92,18 @@ Sys.setenv(TZ="GMT")
   system("wget http://www.djindexes.com/mdsidx/downloads/xlspages/ubsci_public/DJUBS_full_hist.xls")
   if(!file.exists("DJUBS_full_hist.xls"))
     stop(paste("No spreadsheet exists.  Download the spreadsheet to be processed from www.djindexes.com into ", filesroot, "/.incoming", sep=""))
-
-  # Parse the spreadsheet
   print("Reading sheet... This will take a moment...")
   x = read.xls("DJUBS_full_hist.xls", sheet="Total Return")
   x=x[-1:-2,] # Get rid of the headings  
   x=x[-dim(x)[1],] # Get rid of the last line, which contains the disclaimer
   ISOdates = as.Date(x[,1], "%m/%d/%Y") # Get dates
-
-  # Make an xts object of prices
   x.xts = as.xts(as.numeric(as.vector(x[,2])), order.by=ISOdates)
-
-  # Construct a monthly series from the daily series
   x.m.xts = to.monthly(x.xts)
   x.m.xts = ROC(Cl(x.m.xts)) # Calc monthly returns
-  #   x.q.xts = to.quarterly(x.xts)
-  #   x.q.xts = ROC(Cl(x.q.xts)) # Calc monthly returns
-  # @ TODO Want to delete the last line off ONLY IF the month is incomplete
-  #  if(tail(index(x.xts),1) != as.Date(as.yearmon(tail(index(x.xts),1)), frac=1)) {
-      # That test isn't quite right, but its close.  It won't work on the first
-      # day of a new month when the last business day wasn't the last day of 
-      # the month.  It will work for the second day.
-  #     x.m.xts = x.m.xts[-dim(x.m.xts)[1],]
-  #   }
-  
-  # Index is set to last trading day of the month.  
-  # Reset index to last day of the month to make alignment easier with other monthly series.  
   index(x.m.xts)=as.Date(index(x.m.xts), frac=1)
-  #   index(x.q.xts)=as.Date(index(x.q.xts), frac=1)
   DJUBS.R = x.m.xts
-  #   DJUBS.Q.R = x.q.xts
   colnames(DJUBS.R)="DJUBSTR"
-  #   colnames(DJUBS.Q.R)="DJUBSTR"
+
 
 ### Volatility
 # as per Lo, the first difference of the end-of-month value of the CBOE Volatility Index (VIX)
@@ -158,12 +129,14 @@ Sys.setenv(TZ="GMT")
   colnames(dVIX)="dVIX"
   #   colnames(dVIX.Q)="dVIX"
 
+
 ### Term spread
 # 10 year yield minus 3 month
   TERM = GS10/100-TB3MS/100
   colnames(TERM)="Term Spread"
   #   TERM.Q=TERM[endpoints(TERM, on="quarters"),]
   #   colnames(TERM.Q)="Term Spread"
+
 
 ### Gold
 # Monthly return on gold spot price
@@ -177,39 +150,34 @@ Sys.setenv(TZ="GMT")
 # Monthly returns of spot price of West Texas Intermediate
   getSymbols("OILPRICE", src="FRED")
   index(OILPRICE) = as.Date(as.yearmon(index(OILPRICE)), frac=1)
-  OIL.R = ROC(OILPRICE)
-  #   OIL.Q.R = ROC(Cl(to.quarterly(OILPRICE)))
-  #   index(OIL.Q.R) = as.Date(as.yearqtr(index(OIL.Q.R)), frac=1)
+
 
 ### PUT
-system("wget https://www.cboe.com/micro/put/PUT_86-06.xls")
-x = read.xls("PUT_86-06.xls")
-x=na.omit(x[-1:-4,1:2])
-ISOdates = as.Date(x[,1], "%d-%b-%Y") # Get dates
-PUT1 = xts(as.numeric(as.vector(x[,2])), order.by=ISOdates)
+# Monthly returns of PUT Index
+  # Retrieve in two pieces; first the historical from 1986 to 2006
+  system("wget https://www.cboe.com/micro/put/PUT_86-06.xls")
+  x = read.xls("PUT_86-06.xls")
+  x=na.omit(x[-1:-4,1:2])
+  ISOdates = as.Date(x[,1], "%d-%b-%Y") # Get dates
+  PUT1 = xts(as.numeric(as.vector(x[,2])), order.by=ISOdates)
+  # Next is current from 2007 on
+  system("wget https://www.cboe.com/publish/ScheduledTask/MktData/datahouse/PUTDailyPrice.csv")
+  y=read.csv("PUTDailyPrice.csv")
+  y=y[-1:-4,]
+  ISOdates = as.Date(y[,1], "%m/%d/%Y") # Get dates
+  PUT2 = xts(as.numeric(as.vector(y[,2])), order.by=ISOdates)
+  # Combine the two series
+  PUT = rbind(PUT1,PUT2)
+  colnames(PUT)="Close"
+  PUT = ROC(Cl(to.monthly(PUT)))
+  index(PUT) = as.Date(as.yearmon(index(PUT)), frac=1)
+  # need to drop the last row if inter-month
 
 
-system("wget https://www.cboe.com/publish/ScheduledTask/MktData/datahouse/PUTDailyPrice.csv")
-y=read.csv("PUTDailyPrice.csv")
-y=y[-1:-4,]
-ISOdates = as.Date(y[,1], "%m/%d/%Y") # Get dates
-PUT2 = xts(as.numeric(as.vector(y[,2])), order.by=ISOdates)
-
-PUT = rbind(PUT1,PUT2)
-colnames(PUT)="Close"
-PUT = ROC(Cl(to.monthly(PUT)))
-index(PUT) = as.Date(as.yearmon(index(PUT)), frac=1)
-# need to drop the last row if inter-month
-
-
-# lastquarter=format(as.Date(as.yearqtr(Sys.Date())-.25, frac=1), "%Y-%m")
-
-
-factors=cbind(SP500.R, GS10.R, USDI.R, TERM, CREDIT, DJUBS.R, dVIX, TED, OIL.R, TB3MS/100)
+factors=cbind(SP500.R, GS10.R, USDI.R, TERM, CREDIT, DJUBS.R, dVIX, TED, OIL.R, TB3MS/100) # GOLD.R, REALESTATE.R
 factors=factors["1997::",]
-# factors.Q=cbind(SP500.Q.R, GS10.Q.R, USDI.Q.R, TERM.Q, CREDIT.Q, DJUBS.Q.R, dVIX.Q, TED.Q, OIL.Q.R, TB3MS[endpoints(TB3MS, on="quarters"),]/100)
-# factors.Q=factors.Q[paste("1997::",lastquarter,sep=""),]
 
+## Create a chart of the factor set
 asofdate= tail(index(factors),1)
 labels=colnames(factors)
 pdf(file=paste("Cumulative Factor Returns as of ", asofdate, ".pdf", sep=""), paper="letter", width=7.5, height=10)
