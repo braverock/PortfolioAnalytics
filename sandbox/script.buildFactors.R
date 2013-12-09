@@ -85,6 +85,10 @@ Sys.setenv(TZ="GMT")
 
 ### Real estate
 # Use the NAREIT index
+  x = read.xls("http://returns.reit.com/returns/MonthlyHistoricalReturns.xls", pattern="Date", sheet="Index Data", stringsAsFactors=FALSE)
+  x.dates = as.Date(as.yearmon(x[,1], format="%b-%y"), frac=1)
+  REALESTATE.R = xts(x[,2]/100, order.by = x.dates)
+  colnames(REALESTATE.R) = "NAREIT Returns"
 
 ### Commodities
 ## Use the DJUBS Commodities index
