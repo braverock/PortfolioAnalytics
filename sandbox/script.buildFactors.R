@@ -83,17 +83,7 @@ Sys.setenv(TZ="GMT")
 
 ### Commodities
 ## Use the DJUBS Commodities index
-  # Remove the old file if it exists
-  if(file.exists("DJUBS_full_hist.xls"))
-    system("rm DJUBS_full_hist.xls")
-  # Download the most recent file
-  print("Downloading excel spreadsheet from DJUBS web site...")
-  # Can't get it directly, sorry windows users
-  system("wget http://www.djindexes.com/mdsidx/downloads/xlspages/ubsci_public/DJUBS_full_hist.xls")
-  if(!file.exists("DJUBS_full_hist.xls"))
-    stop(paste("No spreadsheet exists.  Download the spreadsheet to be processed from www.djindexes.com into ", filesroot, "/.incoming", sep=""))
-  print("Reading sheet... This will take a moment...")
-  x = read.xls("DJUBS_full_hist.xls", sheet="Total Return")
+  x = read.xls("http://www.djindexes.com/mdsidx/downloads/xlspages/ubsci_public/DJUBS_full_hist.xls", sheet="Total Return")
   x=x[-1:-2,] # Get rid of the headings  
   x=x[-dim(x)[1],] # Get rid of the last line, which contains the disclaimer
   ISOdates = as.Date(x[,1], "%m/%d/%Y") # Get dates
@@ -107,7 +97,6 @@ Sys.setenv(TZ="GMT")
 
 ### Volatility
 # as per Lo, the first difference of the end-of-month value of the CBOE Volatility Index (VIX)
-
   # Older VIX data is available at:
   # http://www.cboe.com/publish/ScheduledTask/MktData/datahouse/vixarchive.xls
   # Daily from 1990-2003
@@ -115,27 +104,19 @@ Sys.setenv(TZ="GMT")
   ISOdates = as.Date(x[,1], "%m/%d/%y") # Get dates
   x.xts = as.xts(as.numeric(as.vector(x[,5])), order.by=ISOdates)
   x.m.xts = to.monthly(x.xts)
-  #   x.q.xts = to.quarterly(x.xts)
   getSymbols("VIXCLS", src="FRED")
   # Calculate monthly returns
   VIX=to.monthly(VIXCLS)
-  #   VIX.Q=to.quarterly(VIXCLS)
   VIX=rbind(x.m.xts,VIX)
-  #   VIX.Q=rbind(x.q.xts,VIX.Q)
   index(VIX)=as.Date(index(VIX), frac=1)
-  #   index(VIX.Q)=as.Date(index(VIX.Q), frac=1)
   dVIX=diff(Cl(VIX))
-  #   dVIX.Q=diff(Cl(VIX.Q))
   colnames(dVIX)="dVIX"
-  #   colnames(dVIX.Q)="dVIX"
 
 
 ### Term spread
 # 10 year yield minus 3 month
   TERM = GS10/100-TB3MS/100
   colnames(TERM)="Term Spread"
-  #   TERM.Q=TERM[endpoints(TERM, on="quarters"),]
-  #   colnames(TERM.Q)="Term Spread"
 
 
 ### Gold
