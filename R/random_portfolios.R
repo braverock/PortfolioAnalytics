@@ -324,8 +324,8 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 
 #' version 2 generate an arbitary number of constrained random portfolios
 #' 
-#' repeatedly calls \code{\link{randomize_portfolio}} to generate an 
-#' arbitrary number of constrained random portfolios.
+#' Generate random portfolios using the 'sample', 'simplex', or 'grid' method. 
+#' See details.
 #' 
 #' @details
 #' Random portfolios can be generate using one of three methods.
@@ -362,7 +362,7 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #' feasible portfolios may be 1/3 or less depending on the other constraints.
 #' 
 #' 
-#' @param portfolio an object of type "portfolio" specifying the constraints for the optimization, see \code{\link{constraint}}
+#' @param portfolio an object of class 'portfolio' specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
 #' @param \dots any other passthru parameters
 #' @param rp_method method to generate random portfolios. Currently "sample", "simplex", or "grid". See Details.
@@ -373,7 +373,7 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #' \code{\link{rp_sample}},
 #' \code{\link{rp_simplex}},
 #' \code{\link{rp_grid}}
-#' @author Peter Carl, Brian G. Peterson, Ross Bennett (based on an idea by Pat Burns)
+#' @author Peter Carl, Brian G. Peterson, Ross Bennett
 #' @aliases random_portfolios
 #' @rdname random_portfolios
 #' @export
@@ -381,11 +381,11 @@ random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample
   if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
   if(hasArg(normalize)) normalize=match.call(expand.dots=TRUE)$normalize else normalize=TRUE
   switch(rp_method,
-         sample = {rp <- rp_sample(portfolio, permutations, ...)
+         sample = {rp <- rp_sample(portfolio, permutations)
                    },
-         simplex = {rp <- rp_simplex(portfolio, permutations, fev, ...)
+         simplex = {rp <- rp_simplex(portfolio, permutations, fev)
                     },
-         grid = {rp <- rp_grid(portfolio, permutations, normalize, ...)
+         grid = {rp <- rp_grid(portfolio, permutations, normalize)
          }
   )
   if(eliminate){
@@ -419,10 +419,10 @@ random_portfolios <- random_portfolios_v2
 #' and position limit constraints.
 #' @param portfolio an object of type "portfolio" specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
-#' @param \dots any other passthru parameters
+#' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
 #' @return a matrix of random portfolio weights
 #' @export
-rp_sample <- function(portfolio, permutations, ...){
+rp_sample <- function(portfolio, permutations, max_permutations=200){
   # this function generates a series of portfolios that are a "random walk" from the current portfolio
   seed <- portfolio$assets
   result <- matrix(nrow=permutations, ncol=length(seed))
@@ -432,7 +432,7 @@ rp_sample <- function(portfolio, permutations, ...){
   # rownames(result)[2]<-"equal.weight"
   for(i in 3:permutations) {
     #result[i,] <- as.matrix(randomize_portfolio_v2(portfolio=portfolio, ...))
-    result[i,] <- randomize_portfolio_v2(portfolio=portfolio, ...)
+    result[i,] <- randomize_portfolio_v2(portfolio=portfolio, max_permutations=max_permutations)
   }
   result <- unique(result)
   # i <- nrow(result)
@@ -473,10 +473,9 @@ rp_sample <- function(portfolio, permutations, ...){
 #' @param portfolio an object of class 'portfolio' specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
 #' @param fev scalar or vector for FEV biasing
-#' @param \dots any other passthru parameters
 #' @return a matrix of random portfolio weights
 #' @export
-rp_simplex <- function(portfolio, permutations, fev=0:5, ...){
+rp_simplex <- function(portfolio, permutations, fev=0:5){
   # get the assets from the portfolio
   assets <- portfolio$assets
   nassets <- length(assets)
@@ -526,10 +525,9 @@ rp_simplex <- function(portfolio, permutations, fev=0:5, ...){
 #' @param portfolio an object of class 'portfolio' specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
 #' @param permutations integer: number of unique constrained random portfolios to generate
 #' @param normalize TRUE/FALSE to normalize the weghts to satisfy min_sum or max_sum
-#' @param \dots any passthru parameters. Currently ignored
 #' @return matrix of random portfolio weights
 #' @export
-rp_grid <- function(portfolio, permutations=2000, normalize=TRUE, ...){
+rp_grid <- function(portfolio, permutations=2000, normalize=TRUE){
   
   # get the constraints from the portfolio
   constraints <- get_constraints(portfolio)
