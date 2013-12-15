@@ -40,7 +40,7 @@ meanvar.portf <- add.objective(portfolio=init, type="risk", name="var", risk_ave
 
 # mean-var efficient frontier
 meanvar.ef <- create.EfficientFrontier(R=R, portfolio=meanvar.portf, type="mean-StdDev")
-print(meanvar.ef)
+meanvar.ef
 summary(meanvar.ef, digits=2)
 meanvar.ef$frontier
 
@@ -107,15 +107,17 @@ chart.Weights.EF(opt_meanvar, match.col="StdDev", by.groups=TRUE)
 # the optimize.portfolio object, it is best to extractEfficientFrontier as shown
 # below
 ef <- extractEfficientFrontier(object=opt_meanvar, match.col="StdDev", n.portfolios=15)
-print(ef)
+ef
 summary(ef, digits=5)
 chart.Weights.EF(ef, match.col="StdDev", colorset=bluemono)
 chart.Weights.EF(ef, match.col="StdDev", colorset=bluemono, by.groups=TRUE)
 
 # mean-etl efficient frontier
 meanetl.ef <- create.EfficientFrontier(R=R, portfolio=meanetl.portf, type="mean-ES")
-print(meanetl.ef)
+meanetl.ef
 summary(meanetl.ef)
+meanetl.ef$frontier
+
 chart.EfficientFrontier(meanetl.ef, match.col="ES", main="mean-ETL Efficient Frontier", type="l", col="blue", RAR.text="STARR")
 chart.Weights.EF(meanetl.ef, colorset=bluemono, match.col="ES")
 chart.Weights.EF(meanetl.ef, by.groups=TRUE, colorset=bluemono, match.col="ES")

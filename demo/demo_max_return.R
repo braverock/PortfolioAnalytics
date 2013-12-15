@@ -12,7 +12,7 @@ init.portf <- portfolio.spec(assets=funds)
 init.portf <- add.constraint(portfolio=init.portf, type="full_investment")
 init.portf <- add.constraint(portfolio=init.portf, type="long_only")
 init.portf <- add.objective(portfolio=init.portf, type="return", name="mean")
-print(init.portf)
+init.portf
 
 # Maximizing return can be formulated as a linear programming problem and
 # solved very quickly using optimize_method="ROI". We are using long_only
@@ -20,7 +20,7 @@ print(init.portf)
 # highest mean return.
 maxret.lo.ROI <- optimize.portfolio(R=R, portfolio=init.portf, 
                                     optimize_method="ROI", trace=TRUE)
-print(maxret.lo.ROI)
+maxret.lo.ROI
 
 chart.Weights(maxret.lo.ROI, main="Long Only Maximize Return")
 
@@ -31,7 +31,7 @@ init.portf <- add.constraint(portfolio=init.portf, type="box",
 
 maxret.box.ROI <- optimize.portfolio(R=R, portfolio=init.portf, 
                                      optimize_method="ROI", trace=TRUE)
-print(maxret.box.ROI)
+maxret.box.ROI
 
 chart.Weights(maxret.box.ROI, main="Box Maximize Return")
 
@@ -61,9 +61,9 @@ port1 <- add.constraint(portfolio=init.portf, type="box",
 
 maxret.box1.RP <- optimize.portfolio(R=R, portfolio=port1, 
                                     optimize_method="random", 
-                                    search_size=5000, 
+                                    search_size=2000, 
                                     trace=TRUE)
-print(maxret.box1.RP)
+maxret.box1.RP
 ploy(maxret.box1.RP, risk.col="StdDev")
 
 # create a new portfolio called 'port2' by using init.portf and modify the 
@@ -73,15 +73,15 @@ port2 <- add.constraint(portfolio=init.portf, type="box",
 
 maxret.box2.RP <- optimize.portfolio(R=R, portfolio=port2, 
                                     optimize_method="random", 
-                                    search_size=5000, 
+                                    search_size=2000, 
                                     trace=TRUE)
-print(maxret.box2.RP)
+maxret.box2.RP
 plot(maxret.box2.RP, risk.col="StdDev")
 
 # Now solve the problem with DEoptim
 maxret.box.DE <- optimize.portfolio(R=R, portfolio=init.portf, 
                                     optimize_method="DEoptim", 
-                                    search_size=5000, 
+                                    search_size=2000, 
                                     trace=TRUE)
-print(maxret.box.DE)
+maxret.box.DE
 plot(maxret.box.DE, risk.col="StdDev", return.col="mean")

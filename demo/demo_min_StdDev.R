@@ -63,7 +63,7 @@ port1 <- add.constraint(portfolio=init.portf, type="box",
 
 minStdDev.box1.RP <- optimize.portfolio(R=R, portfolio=port1, 
                                         optimize_method="random", 
-                                        search_size=5000, 
+                                        search_size=2000, 
                                         trace=TRUE)
 print(minStdDev.box1.RP)
 ploy(minStdDev.box1.RP, risk.col="StdDev")
@@ -75,7 +75,7 @@ port2 <- add.constraint(portfolio=init.portf, type="box",
 
 minStdDev.box2.RP <- optimize.portfolio(R=R, portfolio=port2, 
                                         optimize_method="random", 
-                                        search_size=5000, 
+                                        search_size=2000, 
                                         trace=TRUE)
 print(minStdDev.box2.RP)
 plot(minStdDev.box2.RP, risk.col="StdDev")
@@ -83,7 +83,7 @@ plot(minStdDev.box2.RP, risk.col="StdDev")
 # Now solve the problem with DEoptim
 minStdDev.box.DE <- optimize.portfolio(R=R, portfolio=init.portf, 
                                        optimize_method="DEoptim", 
-                                       search_size=5000, 
+                                       search_size=2000, 
                                        trace=TRUE)
 print(minStdDev.box.DE)
 plot(minStdDev.box.DE, risk.col="StdDev", return.col="mean")

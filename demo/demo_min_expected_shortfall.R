@@ -13,7 +13,7 @@ init.portf <- portfolio.spec(assets=funds)
 init.portf <- add.constraint(portfolio=init.portf, type="full_investment")
 init.portf <- add.constraint(portfolio=init.portf, type="long_only")
 # Add objective to minimize expected shortfall with a confidence level of
-# 0.95.
+# 0.9.
 init.portf <- add.objective(portfolio=init.portf, type="risk", name="ES",
                             arguments=list(p=0.9))
 print(init.portf)
@@ -71,7 +71,7 @@ port1 <- add.constraint(portfolio=init.portf, type="box",
 
 minES.box1.RP <- optimize.portfolio(R=R, portfolio=port1, 
                                     optimize_method="random", 
-                                    search_size=5000, 
+                                    search_size=2000, 
                                     trace=TRUE)
 print(minES.box1.RP)
 plot(minES.box1.RP, risk.col="ES", return.col="mean")
@@ -83,7 +83,7 @@ port2 <- add.constraint(portfolio=init.portf, type="box",
 
 minES.box2.RP <- optimize.portfolio(R=R, portfolio=port2, 
                                     optimize_method="random", 
-                                    search_size=5000, 
+                                    search_size=2000, 
                                     trace=TRUE)
 print(minES.box2.RP)
 plot(minES.box2.RP, risk.col="ES", return.col="mean")
@@ -91,7 +91,7 @@ plot(minES.box2.RP, risk.col="ES", return.col="mean")
 # Now solve the problem with DEoptim
 minES.box.DE <- optimize.portfolio(R=R, portfolio=init.portf, 
                                    optimize_method="DEoptim", 
-                                   search_size=5000, 
+                                   search_size=2000, 
                                    trace=TRUE)
 print(minES.box.DE)
 plot(minES.box.DE, risk.col="ES", return.col="mean")

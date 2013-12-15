@@ -4,7 +4,7 @@
 library(PortfolioAnalytics)
 
 data(edhec)
-R <- edhec[, 1:5]
+R <- edhec[, 1:10]
 funds <- colnames(R)
 
 # Set up an initial portfolio object with basic constraints
@@ -30,8 +30,8 @@ dollar.neutral.portf <- add.constraint(portfolio=dollar.neutral.portf,
 # Run optimization
 dollar.neutral.opt <- optimize.portfolio(R=R, portfolio=dollar.neutral.portf, 
                                          optimize_method="DEoptim",
-                                         search_size=2500)
-print(dollar.neutral.opt)
+                                         search_size=2000)
+dollar.neutral.opt
 
 # Leveraged portfolio with max 1.6:1 leverage constraint
 leveraged.portf <- init.portf
@@ -46,7 +46,6 @@ leveraged.portf <- add.constraint(portfolio=leveraged.portf,
 # Run optimization
 leveraged.opt <- optimize.portfolio(R=R, portfolio=leveraged.portf, 
                                          optimize_method="DEoptim",
-                                         search_size=2500)
-print(leveraged.opt)
-
+                                         search_size=2000)
+leveraged.opt
 

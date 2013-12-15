@@ -6,45 +6,49 @@ require(ROI.plugin.quadprog)
 data(edhec)
 ret <- edhec[, 1:4]
 
-# set up portfolio specification object target in the return object
-pspec1 <- portfolio.spec(assets=colnames(ret))
-pspec1 <- add.constraint(portfolio=pspec1, type="leverage", min_sum=0.99, max_sum=1.01)
-pspec1 <- add.constraint(portfolio=pspec1, type="box")
-pspec1 <- add.objective(portfolio=pspec1, type="return", name="mean", target=0.007)
+# Create an initial portfolio object
+init.portf <- portfolio.spec(assets=colnames(ret))
+init.portf <- add.constraint(portfolio=init.portf, type="full_investment")
+init.portf <- add.constraint(portfolio=init.portf, type="long_only")
 
-# run optimization using ROI with pspec1
-opt1 <- optimize.portfolio(R=ret, portfolio=pspec1, optimize_method="ROI")
-opt1
-summary(opt1)
-wts1 <- extractWeights(opt1)
+# Add mean return objective with target return
+ret.obj.portf <- add.objective(portfolio=init.portf, type="return", 
+                         name="mean", target=0.007)
 
-# set up portfolio specification object target with the return constraint
-pspec2 <- portfolio.spec(assets=colnames(ret))
-pspec2 <- add.constraint(portfolio=pspec2, type="leverage", min_sum=0.99, max_sum=1.01)
-pspec2 <- add.constraint(portfolio=pspec2, type="box")
-pspec2 <- add.constraint(portfolio=pspec2, type="return", return_target=0.007)
-pspec2 <- add.objective(portfolio=pspec2, type="return", name="mean")
+# Add return target constraint
+ret.constr.portf <- add.constraint(portfolio=init.portf, type="return", return_target=0.007)
+ret.constr.portf <- add.objective(portfolio=ret.constr.portf, type="return", name="mean")
 
-# run optimization using ROI with pspec2
-opt2 <- optimize.portfolio(R=ret, portfolio=pspec2, optimize_method="ROI")
-opt2
-summary(opt2)
-wts2 <- extractWeights(opt2)
 
-# run optimization with DEoptim using pspec1
+# Run optimization using ROI with target return as an objective
+ret.obj.opt <- optimize.portfolio(R=ret, portfolio=ret.obj.portf, optimize_method="ROI")
+ret.obj.opt
+
+# Run optimization using ROI with target return as a constraint
+ret.constr.opt <- optimize.portfolio(R=ret, portfolio=ret.constr.portf, optimize_method="ROI")
+ret.constr.opt
+
+# Relaxe constraints for the sum of weights for DEoptim and random portfolios
+ret.obj.portf$constraints[[1]]$min_sum <- 0.99
+ret.obj.portf$constraints[[1]]$max_sum <- 1.01
+
+ret.constr.portf$constraints[[1]]$min_sum <- 0.99
+ret.constr.portf$constraints[[1]]$max_sum <- 1.01
+
+# run optimization with DEoptim using ret.obj.portf
 set.seed(123)
-opt_de1 <- optimize.portfolio(R=ret, portfolio=pspec1, optimize_method="DEoptim", search_size=4000, traceDE=5)
-opt_de1
+opt.obj.de <- optimize.portfolio(R=ret, portfolio=ret.obj.portf, optimize_method="DEoptim", search_size=2000, traceDE=5)
+opt.obj.de
 
-# run optimization with DEoptim using pspec2
+# run optimization with DEoptim using ret.constr.portf
 set.seed(123)
-opt_de2 <- optimize.portfolio(R=ret, portfolio=pspec2, optimize_method="DEoptim", search_size=4000, traceDE=5)
-opt_de2
+opt.constr.de <- optimize.portfolio(R=ret, portfolio=ret.constr.portf, optimize_method="DEoptim", search_size=2000, traceDE=5)
+opt.constr.de
 
-# run optimizations with random portfolios using pspec1
-opt_rp1 <- optimize.portfolio(R=ret, portfolio=pspec1, optimize_method="random", search_size=4000)
-opt_rp1
+# run optimizations with random portfolios using ret.obj.portf
+opt.obj.rp <- optimize.portfolio(R=ret, portfolio=ret.obj.portf, optimize_method="random", search_size=2000)
+opt.obj.rp
 
-# run optimizations with random portfolios using pspec2
-opt_rp2 <- optimize.portfolio(R=ret, portfolio=pspec2, optimize_method="random", search_size=4000)
-opt_rp2
+# run optimizations with random portfolios using ret.constr.portf
+opt.constr.rp <- optimize.portfolio(R=ret, portfolio=ret.constr.portf, optimize_method="random", search_size=2000)
+opt.constr.rp

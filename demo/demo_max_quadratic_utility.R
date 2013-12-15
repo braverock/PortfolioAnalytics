@@ -16,7 +16,7 @@ init.portf <- add.objective(portfolio=init.portf, type="return", name="mean")
 # is penalized
 init.portf <- add.objective(portfolio=init.portf, type="risk", name="StdDev",
                             risk_aversion=4)
-print(init.portf)
+init.portf
 
 # Maximizing quadratic utility can be formulated as a quardratic programming 
 # problem and solved very quickly using optimize_method="ROI". Although "StdDev"
@@ -24,7 +24,7 @@ print(init.portf)
 # variance-covariance matrix in the objective function.
 maxQU.lo.ROI <- optimize.portfolio(R=R, portfolio=init.portf, 
                                     optimize_method="ROI", trace=TRUE)
-print(maxQU.lo.ROI)
+maxQU.lo.ROI
 
 plot(maxQU.lo.ROI, risk.col="StdDev", main=expression("Long Only Max Quadratic Utility" ~ lambda ~"=0.25"))
 
@@ -34,7 +34,7 @@ plot(maxQU.lo.ROI, risk.col="StdDev", main=expression("Long Only Max Quadratic U
 init.portf$objectives[[2]]$risk_aversion <- 1e-6
 
 maxQU.maxret.ROI <- optimize.portfolio(R=R, portfolio=init.portf, optimize_method="ROI", trace=TRUE)
-print(maxQU.maxret.ROI)
+maxQU.maxret.ROI
 
 plot(maxQU.maxret.ROI, risk.col="StdDev", main=expression("Long Only Max Quadratic Utility" ~ lambda ~"= 1e-6"))
 
@@ -43,7 +43,7 @@ plot(maxQU.maxret.ROI, risk.col="StdDev", main=expression("Long Only Max Quadrat
 init.portf$objectives[[2]]$risk_aversion <- 1e6
 
 maxQU.minvol.ROI <- optimize.portfolio(R=R, portfolio=init.portf, optimize_method="ROI", trace=TRUE)
-print(maxQU.minvol.ROI)
+maxQU.minvol.ROI
 
 plot(maxQU.minvol.ROI, risk.col="StdDev", main=expression("Long Only Max Quadratic Utility" ~ lambda ~"= 1e6"))
 
