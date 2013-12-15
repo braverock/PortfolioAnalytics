@@ -396,8 +396,10 @@ etl_opt <- function(R, constraints, moments, target, alpha){
   N <- ncol(R)
   T <- nrow(R)
   # Applying box constraints
-  bnds <- list(lower=list(ind=seq.int(1L, N), val=as.numeric(constraints$min)),
-               upper=list(ind=seq.int(1L, N), val=as.numeric(constraints$max)))
+  LB <- c(as.numeric(constraints$min), rep(0, T), -1)
+  UB <- c(as.numeric(constraints$max), rep(Inf, T), 1)
+  bnds <- V_bound(li=seq.int(1L, N+T+1), lb=LB,
+                  ui=seq.int(1L, N+T+1), ub=UB)
   
   # Add this check if mean is not an objective and return is a constraints
   if(!is.na(target)){

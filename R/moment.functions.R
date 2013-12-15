@@ -197,6 +197,9 @@ set.portfolio.moments_v2 <- function(R, portfolio, momentargs=NULL,...){
     }
     for (objective in portfolio$objectives){
       switch(objective$name,
+             mean = {
+               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean', na.rm=TRUE)),ncol=1)
+               },
              sd =,
              StdDev = { 
                if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean', na.rm=TRUE)),ncol=1);
