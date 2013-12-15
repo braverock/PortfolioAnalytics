@@ -10,7 +10,7 @@ context("Backwards compatibility is maintained")
 
 # class
 test_that("Class of gen.constr is v1_constraint", 
-          { expect_that(inherits(gen.constr, "v1_constraint", is_true()) })
+          { expect_that(inherits(gen.constr, "v1_constraint"), is_true()) })
 
 # assets
 test_that("Initial assets form an equal weight portfolio", 
