@@ -9,8 +9,8 @@
 #' @param ... any passthrough arguments to FUN
 #' @author Ross Bennett
 #' @export
-applyFUN <- function(R, weights, FUN="mean", ...){
-  nargs <- list(...)
+applyFUN <- function(R, weights, FUN="mean", arguments){
+  nargs <- arguments
   
   moments <- function(R){
     momentargs <- list()
@@ -95,8 +95,8 @@ applyFUN <- function(R, weights, FUN="mean", ...){
 #' @param ... any passthrough arguments to FUN
 #' @author Ross Bennett
 #' @export
-scatterFUN <- function(R, FUN, ...){
-  nargs <- list(...)
+scatterFUN <- function(R, FUN, arguments){
+  nargs <- arguments
   
   # match the FUN arg to a risk or return function
   switch(FUN,
