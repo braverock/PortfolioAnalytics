@@ -345,7 +345,7 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
 #' @aliases constrained_objective constrained_objective_v1
 #' @rdname constrained_objective
 #' @export
-constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normalize=TRUE, storage=FALSE, moments=NULL)
+constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normalize=TRUE, storage=FALSE, env=NULL)
 { 
   if (ncol(R) > length(w)) {
     R <- R[ ,1:length(w)]
@@ -474,7 +474,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   # penalize weights that violate return target constraint
   if(!is.null(constraints$return_target)){
     return_target <- constraints$return_target
-    mean_return <- port.mean(weights=w, mu=moments$mu)
+    mean_return <- port.mean(weights=w, mu=env$mu)
     mult <- 1
     out = out + penalty * mult * abs(mean_return - return_target)
   } # End return constraint penalty
@@ -524,8 +524,12 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   # trust that all the moments are correctly set in optimize.portfolio through
   # momentFUN?
   
-  if(!is.null(moments)){
-    nargs <- moments
+  # Add R and w to the environment with the moments
+  # env$R <- R
+  # env$weights <- w
+  
+  if(!is.null(env)){
+    nargs <- env
   } else {
     # print("calculating moments")
     # calculating the moments
@@ -545,6 +549,9 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   # If we modify nargs with something like nargs$x, nargs is copied and this
   # should be avoided because nargs could be large because it contains the moments.
   tmp_args <- list()
+  
+  # JMU: Add all the variables in 'env' to tmp_args as names/symbols
+  # tmp_args[ls(env)] <- lapply(ls(env), as.name)
   
   if(is.null(portfolio$objectives)) {
     warning("no objectives specified in portfolio")
@@ -576,7 +583,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
                VaR = {
                  fun = match.fun(VaR) 
                  if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method) & is.null(nargs$portfolio_method)) tmp_args$portfolio_method='single'
-                 if(is.null(objective$arguments$invert)) objective$arguments$invert = FALSE
+                 if(is.null(objective$arguments$invert)) tmp_args$invert = FALSE
                },
                es =,
                mES =,
@@ -587,7 +594,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
                ES = {
                  fun = match.fun(ES)
                  if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method) & is.null(nargs$portfolio_method)) tmp_args$portfolio_method='single'
-                 if(is.null(objective$arguments$invert)) objective$arguments$invert = FALSE
+                 if(is.null(objective$arguments$invert)) tmp_args$invert = FALSE
                },
                turnover = {
                  fun = match.fun(turnover) # turnover function included in objectiveFUN.R
@@ -609,11 +616,12 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
           # Add R and weights if necessary
           if("R" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=TRUE)
           if("weights" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, weights=w, dots=TRUE)
+          # .formals <- modify.args(formals=.formals, arglist=tmp_args, dots=TRUE)
           .formals$... <- NULL
         }
         
-        # print(.formals)
-        tmp_measure <- try((do.call(fun,.formals)), silent=TRUE)
+        # tmp_measure <- try(do.call(fun, .formals, envir=env), silent=TRUE)
+        tmp_measure <- try(do.call(fun, .formals), silent=TRUE)
         
         if(isTRUE(trace) | isTRUE(storage)) {
           # Subsitute 'StdDev' if the objective name is 'var'

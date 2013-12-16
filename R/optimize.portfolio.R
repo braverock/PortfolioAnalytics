@@ -511,9 +511,16 @@ optimize.portfolio_v2 <- function(
   
   # call momentFUN
   mout <- try(do.call(momentFUN, .formals), silent=TRUE)
-  if(inherits(mout,"try-error")) { 
-    message(paste("portfolio moment function failed with message",mout))
+  
+  if(inherits(mout, "try-error")) { 
+    message(paste("portfolio moment function failed with message", mout))
   } else {
+    #.args_env <- as.environment(mout)
+    #.args_env <- new.env()
+    # Assign each element of mout to the .args_env environment
+    #for(name in names(mout)){
+    #  .args_env[[name]] <- mout[[name]]
+    #}
     dotargs <- mout
   }
   
@@ -614,14 +621,15 @@ optimize.portfolio_v2 <- function(
       # if(hasArg(eps)) eps=match.call(expand.dots=TRUE)$eps else eps = 0.01
       if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
       if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
-      rp <- random_portfolios(portfolio=portfolio, permutations=NP, rp_method=rp_method, eliminate=eliminate, ...)
+      if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
+      rp <- random_portfolios(portfolio=portfolio, permutations=NP, rp_method=rp_method, eliminate=eliminate, fev=fev)
       DEcformals$initialpop <- rp
     }
     controlDE <- do.call(DEoptim.control, DEcformals)
     
     # We are passing fn_map to the optional fnMap function to do the 
     # transformation so we need to force normalize=FALSE in call to constrained_objective
-    minw = try(DEoptim( constrained_objective,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, moments = dotargs, normalize=FALSE, fnMap=function(x) fn_map(x, portfolio=portfolio)$weights)) # add ,silent=TRUE here?
+    minw = try(DEoptim( constrained_objective,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, env=dotargs, normalize=FALSE, fnMap=function(x) fn_map(x, portfolio=portfolio)$weights), silent=TRUE)
     
     if(inherits(minw, "try-error")) { minw=NULL }
     if(is.null(minw)){
@@ -636,7 +644,7 @@ optimize.portfolio_v2 <- function(
     # is it necessary to normalize the weights here?
     # weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
-    obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE, moments=dotargs)$objective_measures
+    obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE, env=dotargs)$objective_measures
     out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=minw$optim$bestval, call=call)
     if (isTRUE(trace)){
       out$DEoutput <- minw
@@ -658,16 +666,17 @@ optimize.portfolio_v2 <- function(
     if(missing(rp) | is.null(rp)){
       if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
       if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
-      rp <- random_portfolios(portfolio=portfolio, permutations=search_size, rp_method=rp_method, eliminate=eliminate, ...)
+      if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
+      rp <- random_portfolios(portfolio=portfolio, permutations=search_size, rp_method=rp_method, eliminate=eliminate, fev=fev)
     }
     #' store matrix in out if trace=TRUE
     if (isTRUE(trace)) out$random_portfolios <- rp
     # rp is already being generated with a call to fn_map so set normalize=FALSE in the call to constrained_objective
     #' write foreach loop to call constrained_objective() with each portfolio
     if ("package:foreach" %in% search() & !hasArg(parallel)){
-      rp_objective_results <- foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,], R=R, portfolio=portfolio, trace=trace, moments=dotargs, normalize=FALSE)
+      rp_objective_results <- foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,], R=R, portfolio=portfolio, trace=trace, env=dotargs, normalize=FALSE)
     } else {
-      rp_objective_results <- apply(rp, 1, constrained_objective, R=R, portfolio=portfolio, trace=trace, normalize=FALSE, moments=dotargs)
+      rp_objective_results <- apply(rp, 1, constrained_objective, R=R, portfolio=portfolio, trace=trace, normalize=FALSE, env=dotargs)
     }
     #' if trace=TRUE , store results of foreach in out$random_results
     if(isTRUE(trace)) out$random_portfolio_objective_results <- rp_objective_results
@@ -691,7 +700,7 @@ optimize.portfolio_v2 <- function(
     }
     #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
     out$weights <- min_objective_weights
-    obj_vals <- try(constrained_objective(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE, moments=dotargs)$objective_measures)
+    obj_vals <- try(constrained_objective(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE, env=dotargs)$objective_measures)
     out$objective_measures <- obj_vals
     out$opt_values <- obj_vals
     out$call <- call
@@ -898,7 +907,7 @@ optimize.portfolio_v2 <- function(
     upper <- constraints$max
     lower <- constraints$min
     
-    minw <- try(psoptim( par = rep(NA, N), fn = constrained_objective,  R=R, portfolio=portfolio, moments=dotargs,
+    minw <- try(psoptim( par = rep(NA, N), fn = constrained_objective,  R=R, portfolio=portfolio, env=dotargs,
                          lower = lower[1:N] , upper = upper[1:N] , control = controlPSO)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
@@ -910,7 +919,7 @@ optimize.portfolio_v2 <- function(
     weights <- as.vector( minw$par)
     weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
-    obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, moments=dotargs)$objective_measures
+    obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
     out <- list(weights=weights, 
                 objective_measures=obj_vals,
                 opt_values=obj_vals,
@@ -944,7 +953,7 @@ optimize.portfolio_v2 <- function(
     lower <- constraints$min
     
     minw = try(GenSA( par = rep(1/N, N), lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
-                      fn = constrained_objective ,  R=R, portfolio=portfolio, moments=dotargs)) # add ,silent=TRUE here?
+                      fn = constrained_objective ,  R=R, portfolio=portfolio, env=dotargs)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
     if(is.null(minw)){
@@ -955,7 +964,7 @@ optimize.portfolio_v2 <- function(
     weights <- as.vector(minw$par)
     weights <- normalize_weights(weights)
     names(weights) <- colnames(R)
-    obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, moments=dotargs)$objective_measures
+    obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
     out = list(weights=weights, 
                objective_measures=obj_vals,
                opt_values=obj_vals,
