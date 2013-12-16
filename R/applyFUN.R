@@ -6,7 +6,7 @@
 #' @param R xts object of asset returns
 #' @param weights a matrix of weights generated from random_portfolios or \code{optimize.portfolio}
 #' @param FUN name of a function
-#' @param ... any passthrough arguments to FUN
+#' @param arguments named list of arguments to FUN
 #' @author Ross Bennett
 #' @export
 applyFUN <- function(R, weights, FUN="mean", arguments){
@@ -92,11 +92,15 @@ applyFUN <- function(R, weights, FUN="mean", arguments){
 #' 
 #' @param R xts object of asset returns
 #' @param FUN name of function
-#' @param ... any passthrough arguments to FUN
+#' @param arguments named list of arguments to FUN
 #' @author Ross Bennett
 #' @export
-scatterFUN <- function(R, FUN, arguments){
-  nargs <- arguments
+scatterFUN <- function(R, FUN, arguments=NULL){
+  if(is.null(arguments)){
+    nargs <- list()
+  } else{
+    nargs <- arguments
+  }
   
   # match the FUN arg to a risk or return function
   switch(FUN,
