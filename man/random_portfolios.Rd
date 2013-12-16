@@ -7,9 +7,9 @@
     rp_method = "sample", eliminate = TRUE, ...)
 }
 \arguments{
-  \item{portfolio}{an object of type "portfolio" specifying
-  the constraints for the optimization, see
-  \code{\link{constraint}}}
+  \item{portfolio}{an object of class 'portfolio'
+  specifying the constraints for the optimization, see
+  \code{\link{portfolio.spec}}}
 
   \item{permutations}{integer: number of unique constrained
   random portfolios to generate}
@@ -26,9 +26,8 @@
   matrix of random portfolio weights
 }
 \description{
-  repeatedly calls \code{\link{randomize_portfolio}} to
-  generate an arbitrary number of constrained random
-  portfolios.
+  Generate random portfolios using the 'sample', 'simplex',
+  or 'grid' method. See details.
 }
 \details{
   Random portfolios can be generate using one of three
@@ -73,8 +72,7 @@
   be 1/3 or less depending on the other constraints.
 }
 \author{
-  Peter Carl, Brian G. Peterson, Ross Bennett (based on an
-  idea by Pat Burns)
+  Peter Carl, Brian G. Peterson, Ross Bennett
 }
 \seealso{
   \code{\link{portfolio.spec}}, \code{\link{objective}},

@@ -1,0 +1,50 @@
+\name{leverage_exposure_constraint}
+\alias{leverage_exposure_constraint}
+\title{constructor for leverage_exposure_constraint}
+\usage{
+  leverage_exposure_constraint(type = "leverage_exposure",
+    leverage = NULL, enabled = TRUE, message = FALSE, ...)
+}
+\arguments{
+  \item{type}{character type of the constraint}
+
+  \item{leverage}{maximum leverage value}
+
+  \item{enabled}{TRUE/FALSE}
+
+  \item{message}{TRUE/FALSE. The default is message=FALSE.
+  Display messages if TRUE.}
+
+  \item{\dots}{any other passthru parameters to specify
+  diversification constraint an object of class
+  'diversification_constraint'}
+}
+\description{
+  The leverage_exposure constraint specifies a maximum
+  leverage. This should be used for constructing, for
+  example, 130/30 portfolios or dollar neutral portfolios
+  with 2:1 leverage. For the ROI solvers, this is
+  implemented as a MILP problem and is not supported for
+  problems formulated as a quadratic programming problem.
+  This ma changed in the future if a MIQP solver is added.
+}
+\details{
+  This function is called by add.constraint when
+  type="leverage_exposure" is specified, see
+  \code{\link{add.constraint}}.
+}
+\examples{
+data(edhec)
+ret <- edhec[, 1:4]
+
+pspec <- portfolio.spec(assets=colnames(ret))
+
+pspec <- add.constraint(portfolio=pspec, type="leverage_exposure", leverage=1.6)
+}
+\author{
+  Ross Bennett
+}
+\seealso{
+  \code{\link{add.constraint}}
+}
+

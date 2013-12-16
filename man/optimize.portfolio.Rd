@@ -2,7 +2,7 @@
 \alias{optimize.portfolio}
 \alias{optimize.portfolio_v1}
 \alias{optimize.portfolio_v2}
-\title{constrained optimization of portfolios}
+\title{Constrained optimization of portfolios}
 \usage{
   optimize.portfolio_v1(R, constraints,
     optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
@@ -166,14 +166,26 @@
   turnover, and/or factor exposure constraints and risk
   aversion parameter. (The risk aversion parameter is
   passed into \code{optimize.portfolio} as an added
-  argument to the \code{portfolio} object).} \item{Mean
-  CVaR optimization subject to leverage, box, group,
-  position limit, target mean return, and/or factor
-  exposure constraints and target portfolio return.} }
-  These problems also support a weight_concentration
-  objective where concentration of weights as measured by
-  HHI is added as a penalty term to the quadratic
-  objective.
+  argument to the \code{portfolio} object).} \item{Maximize
+  portfolio mean return per unit standard deviation (i.e.
+  the Sharpe Ratio) can be done by specifying
+  \code{maxSR=TRUE} in \code{optimize.portfolio}. If both
+  mean and StdDev are specified as objective names, the
+  default action is to maximize quadratic utility,
+  therefore \code{maxSR=TRUE} must be specified to maximize
+  Sharpe Ratio.} \item{Minimize portfolio ES/ETL/CVaR
+  optimization subject to leverage, box, group, position
+  limit, target mean return, and/or factor exposure
+  constraints and target portfolio return.} \item{Maximize
+  portfolio mean return per unit ES/ETL/CVaR (i.e. the
+  STARR Ratio) can be done by specifying
+  \code{maxSTARR=TRUE} in \code{optimize.portfolio}. If
+  both mean and ES/ETL/CVaR are specified as objective
+  names, the default action is to maximize mean return per
+  unit ES/ETL/CVaR.} } These problems also support a
+  weight_concentration objective where concentration of
+  weights as measured by HHI is added as a penalty term to
+  the quadratic objective.
 
   Because these convex optimization problem are
   standardized, there is no need for a penalty term. The

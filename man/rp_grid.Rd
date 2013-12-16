@@ -2,8 +2,7 @@
 \alias{rp_grid}
 \title{Generate random portfolios based on grid search method}
 \usage{
-  rp_grid(portfolio, permutations = 2000, normalize = TRUE,
-    ...)
+  rp_grid(portfolio, permutations = 2000, normalize = TRUE)
 }
 \arguments{
   \item{portfolio}{an object of class 'portfolio'
@@ -15,8 +14,6 @@
 
   \item{normalize}{TRUE/FALSE to normalize the weghts to
   satisfy min_sum or max_sum}
-
-  \item{\dots}{any passthru parameters. Currently ignored}
 }
 \value{
   matrix of random portfolio weights

@@ -2,7 +2,7 @@
 \alias{applyFUN}
 \title{Apply a risk or return function to a set of weights}
 \usage{
-  applyFUN(R, weights, FUN = "mean", ...)
+  applyFUN(R, weights, FUN = "mean", arguments)
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -12,7 +12,7 @@
 
   \item{FUN}{name of a function}
 
-  \item{...}{any passthrough arguments to FUN}
+  \item{arguments}{named list of arguments to FUN}
 }
 \description{
   This function is used to calculate risk or return metrics

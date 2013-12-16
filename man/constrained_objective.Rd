@@ -8,10 +8,12 @@
     trace = FALSE, normalize = TRUE, storage = FALSE)
 
   constrained_objective_v2(w, R, portfolio, ...,
-    trace = FALSE, normalize = TRUE, storage = FALSE)
+    trace = FALSE, normalize = TRUE, storage = FALSE,
+    env = NULL)
 
   constrained_objective(w, R, portfolio, ...,
-    trace = FALSE, normalize = TRUE, storage = FALSE)
+    trace = FALSE, normalize = TRUE, storage = FALSE,
+    env = NULL)
 }
 \arguments{
   \item{R}{an xts, vector, matrix, data frame, timeSeries
@@ -39,6 +41,9 @@
 
   \item{constraints}{a v1_constraint object for backwards
   compatibility with \code{constrained_objective_v1}.}
+
+  \item{env}{environment of moments calculated in
+  \code{optimize.portfolio}}
 }
 \description{
   Function to calculate a numeric return value for a

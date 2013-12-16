@@ -3,7 +3,7 @@
 \title{Generate the efficient frontier for a mean-etl portfolio}
 \usage{
   meanetl.efficient.frontier(portfolio, R,
-    n.portfolios = 25)
+    n.portfolios = 25, ...)
 }
 \arguments{
   \item{portfolio}{a portfolio object with constraints and
@@ -13,6 +13,9 @@
 
   \item{n.portfolios}{number of portfolios to generate the
   efficient frontier}
+
+  \item{\dots}{passthru parameters to
+  \code{\link{optimize.portfolio}}}
 }
 \value{
   a matrix of objective measure values and weights along

@@ -2,7 +2,8 @@
 \alias{rp_sample}
 \title{Generate random portfolios using the sample method}
 \usage{
-  rp_sample(portfolio, permutations, ...)
+  rp_sample(portfolio, permutations,
+    max_permutations = 200)
 }
 \arguments{
   \item{portfolio}{an object of type "portfolio" specifying
@@ -12,7 +13,8 @@
   \item{permutations}{integer: number of unique constrained
   random portfolios to generate}
 
-  \item{\dots}{any other passthru parameters}
+  \item{max_permutations}{integer: maximum number of
+  iterations to try for a valid portfolio, default 200}
 }
 \value{
   a matrix of random portfolio weights

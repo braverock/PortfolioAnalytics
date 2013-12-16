@@ -2,7 +2,7 @@
 \alias{rp_simplex}
 \title{Generate random portfolios using the simplex method}
 \usage{
-  rp_simplex(portfolio, permutations, fev = 0:5, ...)
+  rp_simplex(portfolio, permutations, fev = 0:5)
 }
 \arguments{
   \item{portfolio}{an object of class 'portfolio'
@@ -13,8 +13,6 @@
   random portfolios to generate}
 
   \item{fev}{scalar or vector for FEV biasing}
-
-  \item{\dots}{any other passthru parameters}
 }
 \value{
   a matrix of random portfolio weights

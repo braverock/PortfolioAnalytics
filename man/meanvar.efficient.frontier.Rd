@@ -3,7 +3,7 @@
 \title{Generate the efficient frontier for a mean-variance portfolio}
 \usage{
   meanvar.efficient.frontier(portfolio, R,
-    n.portfolios = 25, risk_aversion = NULL)
+    n.portfolios = 25, risk_aversion = NULL, ...)
 }
 \arguments{
   \item{portfolio}{a portfolio object with constraints and
@@ -19,6 +19,9 @@
   ignored if \code{risk_aversion} is specified and the
   number of points along the efficient frontier is equal to
   the length of \code{risk_aversion}.}
+
+  \item{\dots}{passthru parameters to
+  \code{\link{optimize.portfolio}}}
 }
 \value{
   a matrix of objective measure values and weights along
