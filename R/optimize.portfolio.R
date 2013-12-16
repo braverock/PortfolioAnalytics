@@ -227,7 +227,7 @@ optimize.portfolio_v1 <- function(
     # ROI constraint object, but with an additional solver arg.
     # then we can do something like this
     print("ROI_old is going to be depricated.")
-    roi.result <- ROI:::ROI_solve(x=constraints$constrainted_objective, constraints$solver)
+    roi.result <- ROI::ROI_solve(x=constraints$constrainted_objective, constraints$solver)
     weights <- roi.result$solution
     names(weights) <- colnames(R)
     out$weights <- weights
@@ -265,8 +265,8 @@ optimize.portfolio_v1 <- function(
       }
     }
     plugin <- ifelse(any(names(moments)=="var"), "quadprog", "glpk")  
-    if(plugin == "quadprog") ROI_objective <- ROI:::Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
-    if(plugin == "glpk") ROI_objective <- ROI:::L_objective(L=-moments$mean)
+    if(plugin == "quadprog") ROI_objective <- ROI::Q_objective(Q=2*lambda*moments$var, L=-moments$mean)
+    if(plugin == "glpk") ROI_objective <- ROI::L_objective(L=-moments$mean)
     Amat <- rbind(rep(1, N), rep(1, N))
     dir.vec <- c(">=","<=")
     rhs.vec <- c(constraints$min_sum, constraints$max_sum)
@@ -298,7 +298,7 @@ optimize.portfolio_v1 <- function(
     }
     if(any(names(moments)=="CVaR")) {
       Rmin <- ifelse(is.na(target), 0, target)
-      ROI_objective <- ROI:::L_objective(c(rep(0,N), rep(1/(alpha*T),T), 1))
+      ROI_objective <- ROI::L_objective(c(rep(0,N), rep(1/(alpha*T),T), 1))
       Amat <- cbind(rbind(1, 1, moments$mean, coredata(R)), rbind(0, 0, 0, cbind(diag(T), 1))) 
       dir.vec <- c(">=","<=",">=",rep(">=",T))
       rhs.vec <- c(constraints$min_sum, constraints$max_sum, Rmin ,rep(0, T))
@@ -309,10 +309,10 @@ optimize.portfolio_v1 <- function(
         rhs.vec <- c(rhs.vec, constraints$cLO, -constraints$cUP)
       }
     }
-    opt.prob <- ROI:::OP(objective=ROI_objective, 
-                         constraints=ROI:::L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
+    opt.prob <- ROI::OP(objective=ROI_objective, 
+                         constraints=ROI::L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
                          bounds=bnds)
-    roi.result <- ROI:::ROI_solve(x=opt.prob, solver=plugin)
+    roi.result <- ROI::ROI_solve(x=opt.prob, solver=plugin)
     weights <- roi.result$solution[1:N]
     names(weights) <- colnames(R)
     out$weights <- weights
