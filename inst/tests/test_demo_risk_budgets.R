@@ -4,7 +4,8 @@ require(testthat)
 require(PortfolioAnalytics)
 
 ##### Source Demo Script #####
-source("demo/demo_risk_budgets.R")
+source(system.file("demo/demo_risk_budgets.R", package="PortfolioAnalytics"))
+
 
 context("Risk Budget Optimizations")
 

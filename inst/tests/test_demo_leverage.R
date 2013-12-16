@@ -4,7 +4,8 @@ require(testthat)
 require(PortfolioAnalytics)
 
 ##### Source Demo Script #####
-source("demo/demo_leverage_exposure_constraint.R")
+source(system.file("demo/demo_leverage_exposure_constraint.R", package="PortfolioAnalytics"))
+
 
 context("dollar neutral portfolio")
 
@@ -41,14 +42,14 @@ test_that("leveraged.portf max_sum constraint is 1.01",
 test_that("leveraged.portf leverage exposure constraint is 1.6", 
           { expect_equal(leveraged.portf$constraints[[3]]$leverage, 1.6) })
 
-test_that("leveraged.portf weights is a numeric vector", 
-          { expect_that(is.numeric(extractWeights(leveraged.portf)), is_true()) })
+test_that("leveraged.opt weights is a numeric vector", 
+          { expect_that(is.numeric(extractWeights(leveraged.opt)), is_true()) })
 
-test_that("leveraged.portf leverage exposure constraint is not violated", 
-          { expect_that(sum(abs(extractWeights(leveraged.portf))) <= 1.6, is_true()) })
+test_that("leveraged.opt leverage exposure constraint is not violated", 
+          { expect_that(sum(abs(extractWeights(leveraged.opt))) <= 1.6, is_true()) })
 
-test_that("leveraged.portf objective measure mean is numeric", 
-          { expect_that(is.numeric(extractObjectiveMeasures(leveraged.portf)$mean), is_true()) })
+test_that("leveraged.opt objective measure mean is numeric", 
+          { expect_that(is.numeric(extractObjectiveMeasures(leveraged.opt)$mean), is_true()) })
 
-test_that("leveraged.portf objective measure ES is numeric", 
-          { expect_that(is.numeric(extractObjectiveMeasures(leveraged.portf)$ES), is_true()) })
+test_that("leveraged.opt objective measure ES is numeric", 
+          { expect_that(is.numeric(extractObjectiveMeasures(leveraged.opt)$ES), is_true()) })

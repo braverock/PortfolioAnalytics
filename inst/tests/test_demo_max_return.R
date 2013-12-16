@@ -3,7 +3,8 @@ require(testthat)
 require(PortfolioAnalytics)
 
 ##### Source Demo Script #####
-source("demo/demo_max_return.R")
+source(system.file("demo/demo_max_return.R", package="PortfolioAnalytics"))
+
 
 context("demo_max_return")
 
@@ -14,7 +15,7 @@ test_that("maxret.lo.ROI contains mean as an objective",
           { expect_that(maxret.lo.ROI$portfolio$objectives[[1]]$name == "mean", is_true()) })
 
 test_that("maxret.lo.ROI objective measure mean = 0.008246053", 
-          { expect_that(all.equal(extractObjectiveMeasures(maxret.lo.ROI)$mean, 0.008246053), is_true()) })
+          { expect_equal(as.numeric(extractObjectiveMeasures(maxret.lo.ROI)$mean), 0.008246053, tolerance=1e-6) })
 
 test_that("maxret.lo.ROI min box constraints are not violated", 
           { expect_that(all(extractWeights(maxret.lo.ROI) >= maxret.lo.ROI$portfolio$constraints[[2]]$min), is_true()) })
@@ -30,7 +31,7 @@ test_that("maxret.box.ROI contains mean as an objective",
           { expect_that(maxret.box.ROI$portfolio$objectives[[1]]$name == "mean", is_true()) })
 
 test_that("maxret.box.ROI objective measure mean = 0.007508355", 
-          { expect_that(all.equal(extractObjectiveMeasures(maxret.box.ROI)$mean, 0.007508355), is_true()) })
+          { expect_equal(as.numeric(extractObjectiveMeasures(maxret.box.ROI)$mean), 0.007508355, tolerance=1e-6) })
 
 test_that("maxret.box.ROI min box constraints are not violated", 
           { expect_that(all(extractWeights(maxret.box.ROI) >= maxret.box.ROI$portfolio$constraints[[2]]$min), is_true()) })

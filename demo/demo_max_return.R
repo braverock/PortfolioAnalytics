@@ -64,7 +64,7 @@ maxret.box1.RP <- optimize.portfolio(R=R, portfolio=port1,
                                     search_size=2000, 
                                     trace=TRUE)
 maxret.box1.RP
-ploy(maxret.box1.RP, risk.col="StdDev")
+plot(maxret.box1.RP, risk.col="StdDev")
 
 # create a new portfolio called 'port2' by using init.portf and modify the 
 # box constraints

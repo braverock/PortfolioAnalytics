@@ -4,7 +4,7 @@ require(testthat)
 require(PortfolioAnalytics)
 
 ##### Source Demo Script #####
-source("demo/backwards_compat.R")
+source(system.file("demo/backwards_compat.R", package="PortfolioAnalytics"))
 
 context("Backwards compatibility is maintained")
 
@@ -21,8 +21,8 @@ test_that("Box constraints min vector is all 0s",
           { expect_that(all.equal(as.numeric(gen.constr$min), rep(0, 4)), is_true()) })
 
 # max
-test_that("Box constraints max vector is all 1s", 
-          { expect_that(all.equal(as.numeric(gen.constr$max), rep(1, 4)), is_true()) })
+test_that("Box constraints max vector is all 0.55", 
+          { expect_that(all.equal(as.numeric(gen.constr$max), rep(0.55, 4)), is_true()) })
 
 # min_mult
 test_that("min_mult is null", 
@@ -62,7 +62,7 @@ test_that("random portfolios returns an objective measure",
 
 # DEoptim optimization
 test_that("DE optim updated portfolio object", 
-          { expect_that(inherits(optrdev1$portfolio, "portfolio.spec"), is_true()) })
+          { expect_that(inherits(optdev1$portfolio, "portfolio.spec"), is_true()) })
 
 test_that("DE optim returns optimal weights", 
           { expect_that(is.numeric(extractWeights(optdev1)), is_true()) })
@@ -78,5 +78,5 @@ test_that("ROI returns optimal weights equal to c(0, 0, 0.46, 0.55)",
           { expect_equal(as.numeric(extractWeights(optroiv1)), c(0, 0, 0.46, 0.55)) })
 
 test_that("ROI returns an objective measure mean=0.008193842", 
-          { expect_equal(is.numeric(extractObjectiveMeasures(optroiv1)$mean), 0.008193842) })
+          { expect_equal(as.numeric(extractObjectiveMeasures(optroiv1)$mean), 0.008193842) })
 

@@ -66,7 +66,7 @@ minStdDev.box1.RP <- optimize.portfolio(R=R, portfolio=port1,
                                         search_size=2000, 
                                         trace=TRUE)
 print(minStdDev.box1.RP)
-ploy(minStdDev.box1.RP, risk.col="StdDev")
+plot(minStdDev.box1.RP, risk.col="StdDev")
 
 # create a new portfolio called 'port2' by using init.portf and modify the 
 # box constraints

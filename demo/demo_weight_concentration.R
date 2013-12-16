@@ -28,7 +28,7 @@ opt1
 conc.portf <- add.objective(portfolio=init.portf, type="weight_concentration", name="HHI", 
                             conc_aversion=0, conc_groups=init.portf$category_labels)
 
-opt2 <- optimize.portfolio(R=R, portfolio=conc, optimize_method="ROI", trace=TRUE)
+opt2 <- optimize.portfolio(R=R, portfolio=conc.portf, optimize_method="ROI", trace=TRUE)
 opt2
 all.equal(opt1$weights, opt2$weights)
 chart.Weights(opt2)

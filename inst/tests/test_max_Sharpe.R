@@ -4,7 +4,8 @@ require(testthat)
 require(PortfolioAnalytics)
 
 ##### Source Demo Script #####
-source("demo/demo_max_Sharpe.R")
+source(system.file("demo/demo_max_Sharpe.R", package="PortfolioAnalytics"))
+
 
 context("demo_max_Sharpe")
 
@@ -18,10 +19,10 @@ test_that("init.portf contains StdDev as an objective",
 context("maxSR.lo.ROI")
 
 test_that("maxSR.lo.ROI objective measure mean = 0.006062083", 
-          { expect_that(all.equal(extractObjectiveMeasures(maxSR.lo.ROI)$mean, 0.006062083), is_true()) })
+          { expect_equal(as.numeric(extractObjectiveMeasures(maxSR.lo.ROI)$mean), 0.006062083, tolerance=1e-6) })
 
 test_that("maxSR.lo.ROI objective measure StdDev = 0.008843188", 
-          { expect_that(all.equal(extractObjectiveMeasures(maxSR.lo.ROI)$StdDev, 0.008843188), is_true()) })
+          { expect_equal(as.numeric(extractObjectiveMeasures(maxSR.lo.ROI)$StdDev), 0.008843188, tolerance=1e-6) })
 
 ##### maxSR.lo.RP #####
 context("maxSR.lo.RP")

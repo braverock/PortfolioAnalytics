@@ -3,7 +3,8 @@ require(testthat)
 require(PortfolioAnalytics)
 
 ##### Source Demo Script #####
-source("demo/demo_min_StdDev.R")
+source(system.file("demo/demo_min_StdDev.R", package="PortfolioAnalytics"))
+
 
 context("demo_min_StdDev")
 
@@ -14,7 +15,7 @@ test_that("minStdDev.lo.ROI contains StdDev as an objective",
           { expect_that(minStdDev.lo.ROI$portfolio$objectives[[1]]$name == "StdDev", is_true()) })
 
 test_that("minStdDev.lo.ROI objective measure StdDev = 0.008251084", 
-          { expect_that(all.equal(extractObjectiveMeasures(minStdDev.lo.ROI)$StdDev, 0.008251084), is_true()) })
+          { expect_equal(as.numeric(extractObjectiveMeasures(minStdDev.lo.ROI)$StdDev), 0.008251084, tolerance=1e-6) })
 
 test_that("minStdDev.lo.ROI min box constraints are not violated", 
           { expect_that(all(extractWeights(minStdDev.lo.ROI) >= minStdDev.lo.ROI$portfolio$constraints[[2]]$min), is_true()) })
@@ -29,7 +30,7 @@ test_that("minStdDev.box.ROI contains StdDev as an objective",
           { expect_that(minStdDev.box.ROI$portfolio$objectives[[1]]$name == "StdDev", is_true()) })
 
 test_that("minStdDev.box.ROI objective measure StdDev = 0.01096122", 
-          { expect_that(all.equal(extractObjectiveMeasures(minStdDev.box.ROI)$StdDev, 0.01096122), is_true()) })
+          { expect_equal(as.numeric(extractObjectiveMeasures(minStdDev.box.ROI)$StdDev), 0.01096122, tolerance=1e-6) })
 
 test_that("minStdDev.box.ROI min box constraints are not violated", 
           { expect_that(all(extractWeights(minStdDev.box.ROI) >= minStdDev.box.ROI$portfolio$constraints[[2]]$min), is_true()) })

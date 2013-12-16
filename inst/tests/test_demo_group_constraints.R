@@ -4,7 +4,7 @@ require(testthat)
 require(PortfolioAnalytics)
 
 ##### Source Demo Script #####
-source("demo/demo_group_constraints.R")
+source(system.file("demo/demo_group_constraints.R", package="PortfolioAnalytics"))
 
 ##### Test the constraints #####
 context("demo_group_constraints")
@@ -30,13 +30,15 @@ cLO <- group_constr$cLO
 cUP <- group_constr$cUP
 
 ##### ROI Optimization #####
-context("demo_group_constraints")
+context("demo_group_constraints optimization")
 
 test_that("minStdDev.ROI weights equal c(4.593895e-03, 2.540430e-01, -1.387779e-17, 4.595703e-02, 6.954061e-01)", 
-          { expect_equal(extractWeights(minStdDev.ROI), c(4.593895e-03, 2.540430e-01, -1.387779e-17, 4.595703e-02, 6.954061e-01)) })
+          { expect_equal(as.numeric(extractWeights(minStdDev.ROI)), c(4.593895e-03, 2.540430e-01, -1.387779e-17, 4.595703e-02, 6.954061e-01),
+                         tolerance=1e-6) })
 
 test_that("minStdDev.ROI objective measure StdDev = 0.01042408", 
-          { expect_equal(extractObjectiveMeasures(minStdDev.ROI)$StdDev, 0.01042408) })
+          { expect_equal(as.numeric(extractObjectiveMeasures(minStdDev.ROI)$StdDev), 0.01042408,
+                         tolerance=1e-6) })
 
 weights.ROI <- extractWeights(minStdDev.ROI)
 
@@ -58,13 +60,13 @@ test_that("minStdDev.RP weights is a numeric vector",
           { expect_that(is.numeric(extractWeights(minStdDev.RP)), is_true()) })
 
 test_that("minStdDev.RP objective measure StdDev is numeric", 
-          { expect_that(extractObjectiveMeasures(minStdDev.RP)$StdDev, is_true()) })
+          { expect_that(is.numeric(extractObjectiveMeasures(minStdDev.RP)$StdDev), is_true()) })
 
 weights.RP <- extractWeights(minStdDev.RP)
 
 test_that("minStdDev.RP group weights are calculated correctly", 
           { expect_equal(as.numeric(extractGroups(minStdDev.RP)$group_weights), 
-                         c(sum(weights.RB[c(1, 3, 5)]), sum(weights.RB[c(2, 4)]))) })
+                         c(sum(weights.RP[c(1, 3, 5)]), sum(weights.RP[c(2, 4)]))) })
 
 test_that("minStdDev.RP group constraint cLO is not violated", 
           { expect_that(all(extractGroups(minStdDev.RP)$group_weights >= cLO), is_true()) })
@@ -77,7 +79,7 @@ test_that("minStdDev.RP group constraint cUP is not violated",
 context("minStdDev.DE")
 
 test_that("minStdDev.DE weights is a numeric vector", 
-          { expect_equal(extractWeights(minStdDev.DE), is_true()) })
+          { expect_that(is.numeric(extractWeights(minStdDev.DE)), is_true()) })
 
 test_that("minStdDev.DE objective measure StdDev is numeric", 
           { expect_that(is.numeric(extractObjectiveMeasures(minStdDev.ROI)$StdDev), is_true()) })
