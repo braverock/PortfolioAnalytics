@@ -1,0 +1,8 @@
+******
+[1] "2013-12-17 10:45:18 PST"
+ES optimization benchmark with random portfolios and DEoptim 
+Unit: seconds
+     expr       min        lq     median         uq        max neval
+ opt_rp()  8.539322  8.581483   8.685236   9.019323   9.510726    10
+ opt_de() 42.417468 98.721399 113.836677 128.932124 142.691423    10
+******

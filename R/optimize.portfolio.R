@@ -609,22 +609,37 @@ optimize.portfolio_v2 <- function(
               consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01")
     }
     
-    if(hasArg(rpseed)){ 
-      seed <- match.call(expand.dots=TRUE)$rpseed
+    #if(hasArg(rpseed)){ 
+    #  seed <- match.call(expand.dots=TRUE)$rpseed
+    #  DEcformals$initialpop <- seed
+    #  rpseed <- FALSE
+    #} else {
+    #  rpseed <- TRUE
+    #}
+    #if(hasArg(rpseed) & isTRUE(rpseed)) {
+    #  # initial seed population is generated with random_portfolios function
+    #  # if(hasArg(eps)) eps=match.call(expand.dots=TRUE)$eps else eps = 0.01
+    #  if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
+    #  if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
+    #  if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
+    #  rp <- random_portfolios(portfolio=portfolio, permutations=NP, rp_method=rp_method, eliminate=eliminate, fev=fev)
+    #  DEcformals$initialpop <- rp
+    #}
+    
+    # Use rp as the initial population or generate from random portfolios
+    if(!is.null(rp)){
+      rp_len <- min(nrow(rp), NP)
+      seed <- rp[1:rp_len,]
       DEcformals$initialpop <- seed
-      rpseed <- FALSE
-    } else {
-      rpseed <- TRUE
-    }
-    if(hasArg(rpseed) & isTRUE(rpseed)) {
-      # initial seed population is generated with random_portfolios function
-      # if(hasArg(eps)) eps=match.call(expand.dots=TRUE)$eps else eps = 0.01
+    } else{
+      # Initial seed population is generated with random_portfolios function if rp is not passed in
       if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
       if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
       if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
       rp <- random_portfolios(portfolio=portfolio, permutations=NP, rp_method=rp_method, eliminate=eliminate, fev=fev)
       DEcformals$initialpop <- rp
     }
+    
     controlDE <- do.call(DEoptim.control, DEcformals)
     
     # We are passing fn_map to the optional fnMap function to do the 
