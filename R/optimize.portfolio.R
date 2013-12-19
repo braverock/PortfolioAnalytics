@@ -504,9 +504,9 @@ optimize.portfolio_v2 <- function(
   }
   # match the args for momentFUN
   .formals <- formals(momentFUN)
-  .formals <- modify.args(formals=.formals, arglist=NULL, ..., dots=TRUE)
-  if("R" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=TRUE)
-  if("portfolio" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=TRUE)
+  .formals <- modify.args(formals=.formals, arglist=NULL, ..., dots=FALSE)
+  if("R" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=FALSE)
+  if("portfolio" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=FALSE)
   .formals$... <- NULL
   
   # call momentFUN
@@ -634,19 +634,21 @@ optimize.portfolio_v2 <- function(
     } else{
       # Initial seed population is generated with random_portfolios function if rp is not passed in
       if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
-      if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
+      # if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
       if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
-      rp <- random_portfolios(portfolio=portfolio, permutations=NP, rp_method=rp_method, eliminate=eliminate, fev=fev)
+      rp <- random_portfolios(portfolio=portfolio, permutations=(NP+1), rp_method=rp_method, eliminate=FALSE, fev=fev)
       DEcformals$initialpop <- rp
     }
     
     controlDE <- do.call(DEoptim.control, DEcformals)
-    
     # We are passing fn_map to the optional fnMap function to do the 
     # transformation so we need to force normalize=FALSE in call to constrained_objective
     minw = try(DEoptim( constrained_objective,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, env=dotargs, normalize=FALSE, fnMap=function(x) fn_map(x, portfolio=portfolio)$weights), silent=TRUE)
     
-    if(inherits(minw, "try-error")) { minw=NULL }
+    if(inherits(minw, "try-error")) { 
+      message(minw)
+      minw=NULL
+    }
     if(is.null(minw)){
       message(paste("Optimizer was unable to find a solution for target"))
       return (paste("Optimizer was unable to find a solution for target"))

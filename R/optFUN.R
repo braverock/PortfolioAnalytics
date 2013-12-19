@@ -85,6 +85,7 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   
   # Remove the rows of Amat and elements of rhs.vec where rhs.vec is Inf or -Inf
   Amat <- Amat[!is.infinite(rhs.vec), ]
+  dir.vec <- dir.vec[!is.infinite(rhs.vec)]
   rhs.vec <- rhs.vec[!is.infinite(rhs.vec)]
   
   # Set up the quadratic objective
