@@ -3,7 +3,6 @@
 \usepackage{bm}
 \usepackage{verbatim}
 \usepackage[latin1]{inputenc}
-% \VignetteIndexEntry{Portfolio Optimization with CVaR budgets in PortfolioAnalytics}
 \bibliographystyle{abbrvnat}
 
 \usepackage{url}
@@ -30,8 +29,9 @@
 % Or whatever. Note that the encoding and the font should match. If T1
 % does not look nice, try deleting the line with the fontenc.
 
+\VignetteIndexEntry{Portfolio Optimization with CVaR budgets in PortfolioAnalytics}
+
 \begin{document}
-\SweaveOpts{concordance=TRUE}
 
 \title{Vignette: Portfolio Optimization with CVaR budgets\\
 in PortfolioAnalytics}
@@ -87,7 +87,7 @@ in the dataset \verb"indexes". The first step is to load the package \verb"Portf
 options(width=80)
 @
 
-<<echo=TRUE>>=| 
+<<echo=TRUE>>=
 library(PortfolioAnalytics)
 data(indexes)
 class(indexes)
@@ -102,7 +102,7 @@ In what follows, we first illustrate the construction of the penalty augmented o
 
 \subsection{Weight constraints}
   
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 # Create the portfolio specification object
 Wcons <- portfolio.spec( assets = colnames(indexes) )
 # Add box constraints
@@ -112,7 +112,7 @@ Wcons <- add.constraint( portfolio=Wcons, type="full_investment")
 @
 
 Given the weight constraints, we can call the value of the function to be minimized. We consider the case of no violation and a case of violation. By default, \verb"normalize=TRUE" which means that if the sum of weights exceeds \verb"max_sum", the weight vector is normalized by multiplying it with \verb"sum(weights)/max_sum" such that the weights evaluated in the objective function satisfy the \verb"max_sum" constraint.    
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 constrained_objective( w = rep(1/4,4) , R = indexes, portfolio = Wcons) 
 constrained_objective( w = rep(1/3,4) , R = indexes, portfolio = Wcons) 
 constrained_objective( w = rep(1/3,4) , R = indexes, portfolio = Wcons, 
@@ -125,32 +125,33 @@ The latter value can be recalculated as penalty times the weight violation, that
 
 Suppose now we want to find the portfolio that minimizes the 95\% portfolio CVaR subject to the weight constraints listed above.  
 
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 ObjSpec = add.objective( portfolio = Wcons , type="risk",name="CVaR",
                          arguments=list(p=0.95), enabled=TRUE)   
 @
 
 The value of the objective function is: 
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 constrained_objective( w = rep(1/4,4) , R = indexes, portfolio = ObjSpec) 
 @
 
 This is the CVaR of the equal-weight portfolio as computed by the function \verb"ES" in the \verb"PerformanceAnalytics" package of \citet{ Carl2007}
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 library(PerformanceAnalytics)
-out<-ES(indexes, weights = rep(1/4,4),p=0.95, portfolio_method="component")
+out<-ES(indexes, weights = rep(1/4,4),p=0.95, 
+        portfolio_method="component")
 out$MES
 @
 All arguments in the function \verb"ES" can be passed on through \verb"arguments". E.g. to reduce the impact of extremes on the portfolio results, it is recommended to winsorize the data using the option clean="boudt".
 
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 out<-ES(indexes, weights = rep(1/4,4),p=0.95, clean="boudt", 
         portfolio_method="component")
 out$MES
 @
 
 For the formulation of the objective function, this implies setting: 
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 ObjSpec = add.objective( portfolio = Wcons , type="risk",name="CVaR",
                          arguments=list(p=0.95,clean="boudt"), enabled=TRUE)   
 constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , portfolio = ObjSpec)
@@ -159,7 +160,7 @@ constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , portfolio = ObjSpec)
 An additional argument that is not available for the moment in \verb"ES" is to estimate the conditional covariance matrix through the constant conditional correlation model of \citet{Bollerslev90}. 
 
 For the formulation of the objective function, this implies setting: 
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 ObjSpec = add.objective( portfolio = Wcons , type="risk",name="CVaR",
                          arguments=list(p=0.95,clean="boudt"), 
                          enabled=TRUE, garch=TRUE)   
@@ -169,20 +170,20 @@ constrained_objective( w = rep(1/4,4) , R = indexes[,1:4] , portfolio = ObjSpec)
 \subsection{Minimum CVaR concentration objective function}
 
 Add the minimum 95\% CVaR concentration objective to the objective function: 
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 ObjSpec = add.objective( portfolio = Wcons , type="risk_budget_objective",
                          name="CVaR", arguments=list(p=0.95, clean="boudt"), 
                          min_concentration=TRUE, enabled=TRUE)   
 @
 
 The value of the objective function is: 
-<<echo=TRUE>>=| 
-constrained_objective( w = rep(1/4,4) , R = indexes, portfolio = ObjSpec,
-                       trace=TRUE)
+<<echo=TRUE, tidy=FALSE>>=
+constrained_objective( w = rep(1/4,4) , R = indexes, 
+                       portfolio = ObjSpec, trace=TRUE)
 @
 
 We can verify that this is effectively the largest CVaR contribution of that portfolio as follows:
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 ES(indexes[,1:4],weights = rep(1/4,4),p=0.95,clean="boudt", 
    portfolio_method="component")
 @
@@ -191,7 +192,7 @@ ES(indexes[,1:4],weights = rep(1/4,4),p=0.95,clean="boudt",
 
 We see that in the equal-weight portfolio, the international equities and commodities investment cause more than 30\% of total risk. We could specify as a constraint that no asset can contribute more than 30\% to total portfolio risk with the argument \verb"max_prisk=0.3". This involves the construction of the following objective function:
 
-<<echo=TRUE>>=| 
+<<echo=TRUE, tidy=FALSE>>=
 ObjSpec = add.objective( portfolio = Wcons , type="risk_budget_objective", 
                          name="CVaR", max_prisk = 0.3, 
                          arguments=list(p=0.95,clean="boudt"), enabled=TRUE) 
@@ -213,13 +214,14 @@ reader to \citet{Ardia2010}.
 \subsection{Minimum CVaR portfolio under an upper 40\% CVaR allocation constraint} 
 
 The portfolio object and functions needed to obtain the minimum CVaR portfolio under an upper 40\% CVaR allocation objective are the following:
-<<echo=TRUE>>=
+<<echo=TRUE, tidy=FALSE>>=
 # Create the portfolio specification object
 ObjSpec <- portfolio.spec(assets=colnames(indexes[,1:4]))
 # Add box constraints
 ObjSpec <- add.constraint(portfolio=ObjSpec, type='box', min = 0, max=1)
 # Add the full investment constraint that specifies the weights must sum to 1.
-ObjSpec <- add.constraint(portfolio=ObjSpec, type="full_investment")
+ObjSpec <- add.constraint(portfolio=ObjSpec, type="weight_sum", 
+                          min_sum=0.99, max_sum=1.01)
 # Add objective to minimize CVaR
 ObjSpec <- add.objective(portfolio=ObjSpec, type="risk", name="CVaR", 
                          arguments=list(p=0.95, clean="boudt"))
@@ -231,7 +233,7 @@ ObjSpec <- add.objective(portfolio=ObjSpec, type="risk_budget_objective",
 
 After the call to these functions it starts to explore the feasible space iteratively and is shown in the output. Iterations are given as intermediate output and by default every iteration will be printed. We set \verb"traceDE=5" to print every 5 iterations and \verb"itermax=50" for a maximum of 50 iterations.
 
-<<echo=TRUE>>=
+<<echo=TRUE, tidy=FALSE>>=
 set.seed(1234)
 out <- optimize.portfolio(R=indexes, portfolio=ObjSpec, 
                           optimize_method="DEoptim", search_size=2000,
@@ -245,7 +247,7 @@ If \verb"trace=TRUE" in \verb"optimize.portfolio", additional output from the DE
 <<echo=TRUE>>=
 names(out)
 # View the DEoptim_objective_results information at the last iteration
-out$DEoptim_objective_results[[601]]
+out$DEoptim_objective_results[[length(out$DEoptim_objective_results)]]
 
 # Extract stats from the out object into a matrix
 xtract <- extractStats(out)
@@ -264,7 +266,7 @@ chart.RiskBudget(out, risk.type="pct_contrib", col="blue", pch=18)
 
 The functions needed to obtain the minimum CVaR concentration portfolio are the following:
 
-<<echo=TRUE>>=
+<<echo=TRUE, tidy=FALSE>>=
 # Create the portfolio specification object
 ObjSpec <- portfolio.spec(assets=colnames(indexes))
 # Add box constraints
@@ -284,7 +286,7 @@ out <- optimize.portfolio(R=indexes, portfolio=ObjSpec,
 
 
 This portfolio has the near equal risk contribution characteristic: 
-<<echo=TRUE>>=
+<<echo=TRUE, tidy=FALSE>>=
 print(out)
 
 # Verify results with ES function
@@ -293,8 +295,9 @@ ES(indexes[,1:4], weights=out$weights, p=0.95, clean="boudt",
 @
 
 The 95\% CVaR percent contribution to risk is near equal for all four indexes. The neighbor portfolios can be plotted to view other near optimal portfolios. Alternatively, the contribution to risk in absolute terms can plotted by setting \verb"risk.type="absolute".
-<<>>=
-chart.RiskBudget(out, neighbors=25, risk.type="pct_contrib", col="blue", pch=18)
+<<tidy=FALSE>>=
+chart.RiskBudget(out, neighbors=25, risk.type="pct_contrib", 
+                 col="blue", pch=18)
 @
 
 
@@ -304,7 +307,7 @@ Dynamic rebalancing of the risk budget optimized portfolio is possible through t
 
 As an example, consider the minimum CVaR concentration portfolio, with estimation from inception and monthly rebalancing. Since we require a minimum estimation length of total number of observations -1, we can optimize the portfolio only for the last two months.  
 
-<<echo=TRUE>>=
+<<echo=TRUE, tidy=FALSE>>=
 library(iterators)
 set.seed(1234)
 out <- optimize.portfolio.rebalancing(R=indexes, portfolio=ObjSpec, 

@@ -5,6 +5,8 @@
 \usepackage{Rd}
 \usepackage{amsmath}
 
+\VignetteIndexEntry{Portfolio Optimization with ROI in PortfolioAnalytics}
+
 \begin{document}
 
 \title{Using the ROI solvers with PortfolioAnalytics}
@@ -34,6 +36,7 @@ data(edhec)
 
 # Use the first 4 columns in edhec for a returns object
 returns <- edhec[, 1:4]
+colnames(returns) <- c("CA", "CTAG", "DS", "EM")
 print(head(returns, 5))
 
 # Get a character vector of the fund names
@@ -55,7 +58,7 @@ Where $\hat{\boldsymbol{\mu}}$ is the estimated mean asset returns and $\boldsym
 \subsection{Portfolio Object}
 
 The first step is to create the portfolio object. Then add constraints and a return objective.
-<<>>=
+<<tidy=FALSE>>=
 # Create portfolio object
 portf_maxret <- portfolio.spec(assets=funds)
 
@@ -77,9 +80,10 @@ summary(portf_maxret)
 
 \subsection{Optimization}
 The next step is to run the optimization. Note that \code{optimize\_method="ROI"} is specified in the call to \code{optimize.portfolio} to select the solver used for the optimization.
-<<>>=
+<<tidy=FALSE>>=
 # Run the optimization
-opt_maxret <- optimize.portfolio(R=returns, portfolio=portf_maxret, optimize_method="ROI", trace=TRUE)
+opt_maxret <- optimize.portfolio(R=returns, portfolio=portf_maxret, 
+                                 optimize_method="ROI", trace=TRUE)
 @
 
 The print method for the \code{opt\_maxret} object shows the call, optimal weights, and the objective measure
@@ -109,28 +113,22 @@ extractWeights(opt_maxret)
 @
 
 \subsection{Visualization}
-The chart of the optimal weights as well as the box constraints can be created with \code{chart.Weights}. The blue dots are the optimal weights and the gray triangles are the \code{min} and \code{max} of the box constraints.
-<<fig.align='center',fig.height=5, fig.width=5>>=
-chart.Weights(opt_maxret)
+The \code{plot} method charts of the optimal weights with the box constraints along with the optimal portfolio in risk-return space. The blue dots are the optimal weights and the gray triangles are the \code{min} and \code{max} of the box constraints.
+<<>>=
+plot(opt_maxret, chart.assets=TRUE, xlim=c(0.02, 0.18))
 @
 
 The optimal portfolio can be plotted in risk-return space along with other feasible portfolios. The return metric is defined in the \code{return.col} argument and the risk metric is defined in the \code{risk.col} argument. The scatter chart includes the optimal portfolio (blue dot) and other feasible portfolios (gray circles) to show the overall feasible space given the constraints. By default, if \code{rp} is not passed in, the feasible portfolios are generated with \code{random\_portfolios} to satisfy the constraints of the portfolio object.
 
 Volatility as the risk metric
-<<fig.align='center',fig.height=5, fig.width=5>>=
+<<tidy=FALSE, fig.align='center',fig.height=5, fig.width=5>>=
 chart.RiskReward(opt_maxret,return.col="mean", risk.col="sd", 
                  chart.assets=TRUE, xlim=c(0.01, 0.05), main="Maximum Return")
 @
 
-Expected tail loss as the risk metric
-<<fig.align='center',fig.height=5, fig.width=5>>=
-chart.RiskReward(opt_maxret, return.col="mean", risk.col="ES", 
-                 chart.assets=TRUE, xlim=c(0.02, 0.18), main="Maximum Return")
-@
-
 \subsection{Backtesting}
 An out of sample backtest is run with \code{optimize.portfolio.rebalancing}. In this example, an initial training period of 36 months is used and the portfolio is rebalanced quarterly. 
-<<>>=
+<<tidy=FALSE>>=
 bt_maxret <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_maxret,
                                             optimize_method="ROI", 
                                             rebalance_on="quarters", 
@@ -166,7 +164,7 @@ portf_minvar <- add.objective(portfolio=portf_minvar, type="risk", name="var")
 The only constraint specified is the full investment constraint, therefore the optimization problem is solving for the global minimum variance portfolio.
 
 \subsubsection{Optimization}
-<<>>=
+<<tidy=FALSE>>=
 # Run the optimization
 opt_gmv <- optimize.portfolio(R=returns, portfolio=portf_minvar, 
                               optimize_method="ROI", trace=TRUE)
@@ -174,7 +172,7 @@ print(opt_gmv)
 @
 
 \subsubsection{Backtesting}
-<<>>=
+<<tidy=FALSE>>=
 bt_gmv <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_minvar,
                                          optimize_method="ROI", 
                                          rebalance_on="quarters", 
@@ -186,7 +184,7 @@ bt_gmv <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_minvar,
 
 \subsubsection{Portfolio Object}
 Constraints can be added to the \code{portf\_minvar} portfolio object previously created.
-<<>>=
+<<tidy=FALSE>>=
 # Add long only constraints
 portf_minvar <- add.constraint(portfolio=portf_minvar, type="box", 
                                min=0, max=1)
@@ -202,7 +200,7 @@ portf_minvar <- add.constraint(portfolio=portf_minvar,
 @
 
 \subsubsection{Optimization}
-<<>>=
+<<tidy=FALSE>>=
 # Run the optimization
 opt_minvar <- optimize.portfolio(R=returns, portfolio=portf_minvar, 
                                  optimize_method="ROI", trace=TRUE)
@@ -210,7 +208,7 @@ print(opt_minvar)
 @
 
 \subsubsection{Backtesting}
-<<>>=
+<<tidy=FALSE>>=
 bt_minvar <- optimize.portfolio.rebalancing(R=returns, portfolio=portf_minvar,
                                             optimize_method="ROI", 
                                             rebalance_on="quarters", 
@@ -256,7 +254,7 @@ qu_obj <- list(ret_obj, var_obj)
 
 \subsection{Optimization}
 Note how the constraints and objectives are passed to optimize.portfolio.
-<<>>=
+<<tidy=FALSE>>=
 # Run the optimization
 opt_qu <- optimize.portfolio(R=returns, portfolio=init_portf, 
                              constraints=qu_constr, 
@@ -266,7 +264,7 @@ opt_qu <- optimize.portfolio(R=returns, portfolio=init_portf,
 @
 
 \subsection{Backtesting}
-<<>>=
+<<tidy=FALSE>>=
 bt_qu <- optimize.portfolio.rebalancing(R=returns, portfolio=init_portf,
                                         constraints=qu_constr, 
                                         objectives=qu_obj, 
