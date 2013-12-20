@@ -3,7 +3,6 @@
 \usepackage{bm}
 \usepackage{verbatim}
 \usepackage[latin1]{inputenc}
-\bibliographystyle{abbrvnat}
 
 \usepackage{url}
 
@@ -29,7 +28,7 @@
 % Or whatever. Note that the encoding and the font should match. If T1
 % does not look nice, try deleting the line with the fontenc.
 
-\VignetteIndexEntry{Portfolio Optimization with CVaR budgets in PortfolioAnalytics}
+% \VignetteIndexEntry{Portfolio Optimization with CVaR budgets in PortfolioAnalytics}
 
 \begin{document}
 
@@ -46,7 +45,7 @@ in PortfolioAnalytics}
 
 \section{General information}
 
-Risk budgets are a central tool to estimate and manage the portfolio risk allocation. They decompose total portfolio risk into the risk contribution of each position.  \citet{ BoudtCarlPeterson2010}  propose several portfolio allocation strategies that use an appropriate transformation of the portfolio Conditional Value at Risk (CVaR) budget as an objective or constraint in the portfolio optimization problem.  This document explains how risk allocation optimized portfolios can be obtained under general constraints in the \verb"PortfolioAnalytics" package of \citet{PortfolioAnalytics}. 
+Risk budgets are a central tool to estimate and manage the portfolio risk allocation. They decompose total portfolio risk into the risk contribution of each position.  \citet{BoudtCarlPeterson2010}  propose several portfolio allocation strategies that use an appropriate transformation of the portfolio Conditional Value at Risk (CVaR) budget as an objective or constraint in the portfolio optimization problem.  This document explains how risk allocation optimized portfolios can be obtained under general constraints in the \verb"PortfolioAnalytics" package of \citet{PortfolioAnalytics}. 
 
 \verb"PortfolioAnalytics" is designed to provide numerical solutions for portfolio problems with complex constraints and objective sets comprised of any R function. It can e.g.~construct portfolios that minimize a risk objective with (possibly non-linear) per-asset constraints on returns and drawdowns \citep{CarlPetersonBoudt2010}. The generality of possible constraints and objectives is a distinctive characteristic of the package with respect to RMetrics \verb"fPortfolio" of \citet{fPortfolioBook}. For standard Markowitz optimization problems, use of \verb"fPortfolio" rather than \verb"PortfolioAnalytics" is recommended.
 
@@ -256,8 +255,14 @@ head(xtract)
 @
 
 It can be seen from the charts that although US Bonds has a higher weight allocation, the percentage contribution to risk is the lowest of all four indexes.
-<<>>=
+
+<<tidy=FALSE, fig.height=4, fig.width=6>>=
+plot.new()
 chart.Weights(out)
+@
+
+<<tidy=FALSE, fig.height=4, fig.width=6>>=
+plot.new()
 chart.RiskBudget(out, risk.type="pct_contrib", col="blue", pch=18)
 @
 
@@ -272,7 +277,8 @@ ObjSpec <- portfolio.spec(assets=colnames(indexes))
 # Add box constraints
 ObjSpec <- add.constraint(portfolio=ObjSpec, type='box', min = 0, max=1)
 # Add the full investment constraint that specifies the weights must sum to 1.
-ObjSpec <- add.constraint(portfolio=ObjSpec, type="full_investment")
+ObjSpec <- add.constraint(portfolio=ObjSpec, type="weight_sum", 
+                          min_sum=0.99, max_sum=1.01)
 # Add objective for min CVaR concentration
 ObjSpec <- add.objective(portfolio=ObjSpec, type="risk_budget_objective",
                          name="CVaR", arguments=list(p=0.95, clean="boudt"),
@@ -295,7 +301,9 @@ ES(indexes[,1:4], weights=out$weights, p=0.95, clean="boudt",
 @
 
 The 95\% CVaR percent contribution to risk is near equal for all four indexes. The neighbor portfolios can be plotted to view other near optimal portfolios. Alternatively, the contribution to risk in absolute terms can plotted by setting \verb"risk.type="absolute".
-<<tidy=FALSE>>=
+
+<<tidy=FALSE, fig.height=4.5, fig.width=6>>=
+plot.new()
 chart.RiskBudget(out, neighbors=25, risk.type="pct_contrib", 
                  col="blue", pch=18)
 @
@@ -347,8 +355,9 @@ out[[2]]$data_summary
 @
 
 
-Of course, DE is a stochastic optimizer and typically will only find a near-optimal solution that depends on the seed. The function \verb"optimize.portfolio.parallel" in \verb"PortfolioAnalytics" allows to run an arbitrary number of portfolio sets in parallel in order to develop "confidence bands" around your solution. It is based on Revolution's    \verb"foreach" package \citep{foreach}.  
+Of course, DE is a stochastic optimizer and typically will only find a near-optimal solution that depends on the seed. The function \verb"optimize.portfolio.parallel" in \verb"PortfolioAnalytics" allows to run an arbitrary number of portfolio sets in parallel in order to develop "confidence bands" around your solution. It is based on Revolution's \verb"foreach" package \citep{foreach}.  
 
+\bibliographystyle{abbrvnat}
 \bibliography{PA}
 
 

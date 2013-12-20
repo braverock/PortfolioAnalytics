@@ -35,7 +35,7 @@
 % Or whatever. Note that the encoding and the font should match. If T1
 % does not look nice, try deleting the line with the fontenc.
 
-\VignetteIndexEntry{An Introduction to Portfolio Optimization with PortfolioAnalytics}
+% \VignetteIndexEntry{An Introduction to Portfolio Optimization with PortfolioAnalytics}
 
 \begin{document}
 
@@ -582,7 +582,7 @@ Run the optimization. Set \code{traceDE=5} so that every fifth iteration is prin
 opt_rb_meanETL <- optimize.portfolio(R=R, portfolio=rb_meanETL, 
                                      optimize_method="DEoptim", 
                                      search_size=2000, 
-                                     trace=TRUE)
+                                     trace=TRUE, traceDE=5)
 print(opt_rb_meanETL)
 @
 
@@ -594,6 +594,7 @@ plot(opt_rb_meanETL, risk.col="ETL", return.col="mean",
 
 Chart the contribution to risk in percentage terms. 
 <<fig.cap="mean-ETL with Risk Budget Objective", fig.height=3.5, fig.width=5, fig.align='center'>>=
+plot.new()
 chart.RiskBudget(opt_rb_meanETL, risk.type="percentage", neighbors=25)
 @
 
@@ -627,6 +628,7 @@ plot(opt_eq_meanETL, risk.col="ETL", return.col="mean",
 
 Chart the contribution to risk in percentage terms. It is clear in this chart that the optimization results in a near equal risk contribution portfolio.
 <<fig.cap="Percentage Contibution to Risk", fig.height=3.5, fig.width=5, fig.align='center'>>=
+plot.new()
 chart.RiskBudget(opt_eq_meanETL, risk.type="percentage", neighbors=25)
 @
 
@@ -668,6 +670,7 @@ barplot(STARR, col="blue", cex.names=0.8, cex.axis=0.8,
 @
 
 <<fig.cap="Percentage Contribution to Risk of Optimizations", fig.height=3.5, fig.width=5, fig.align='center', tidy=FALSE>>=
+plot.new()
 chart.RiskBudget(opt_combine, match.col="ETL", risk.type="percent", 
                  ylim=c(0,1), legend.loc="topright")
 @

@@ -5,9 +5,9 @@
 \usepackage{Rd}
 \usepackage{amsmath}
 
-\VignetteIndexEntry{Portfolio Optimization with ROI in PortfolioAnalytics}
-
 \begin{document}
+
+% \VignetteIndexEntry{Portfolio Optimization with ROI in PortfolioAnalytics}
 
 \title{Using the ROI solvers with PortfolioAnalytics}
 \author{Ross Bennett}
