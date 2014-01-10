@@ -759,7 +759,7 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   names(weights) <- colnames(R)
   out <- list()
   out$weights <- weights
-  out$out <- roi.result$value
+  out$out <- roi.result$objval
   obj_vals <- list()
   # Calculate the objective values here so that we can use the moments$mean
   # and moments$var that might be passed in by the user.
