@@ -1,8 +1,9 @@
 
 ##### GMV and QU QP Function #####
-#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' GMV/QU QP Optimization
 #' 
-#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' This function is called by optimize.portfolio to solve minimum variance or 
+#' maximum quadratic utility problems
 #' 
 #' @param R xts object of asset returns
 #' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
@@ -10,9 +11,10 @@
 #' @param lambda risk_aversion parameter
 #' @param target target return value
 #' @param lambda_hhi concentration aversion parameter
-#' @param conc_groups list of vectors specifying the groups of the assets. 
+#' @param conc_groups list of vectors specifying the groups of the assets.
+#' @param solver solver to use
 #' @author Ross Bennett
-gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups){
+gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups, solver="quadprog"){
   stopifnot("package:ROI" %in% search() || require("ROI", quietly = TRUE))
   stopifnot("package:ROI.plugin.quadprog" %in% search() || require("ROI.plugin.quadprog", quietly = TRUE))
   
@@ -119,7 +121,7 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   # set up the optimization problem and solve
   opt.prob <- OP(objective=ROI_objective, 
                        constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec))
-  result <- ROI_solve(x=opt.prob, solver="quadprog")
+  result <- ROI_solve(x=opt.prob, solver=solver)
   
   # result <- try(solve.QP(Dmat=Dmat, dvec=dvec, Amat=t(Amat), bvec=rhs.vec, meq=meq), silent=TRUE)
   if(inherits(x=result, "try-error")) stop(paste("No solution found:", result))
@@ -152,16 +154,17 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
 }
 
 ##### Maximize Return LP Function #####
-#' Optimization function to solve minimum variance or maximum quadratic utility problems
+#' Maximum Return LP Optimization
 #' 
-#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' This function is called by optimize.portfolio to solve maximum return
 #' 
 #' @param R xts object of asset returns
 #' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
 #' @param moments object of moments computed based on objective functions
 #' @param target target return value
+#' @param solver solver to use
 #' @author Ross Bennett
-maxret_opt <- function(R, moments, constraints, target){
+maxret_opt <- function(R, moments, constraints, target, solver="glpk"){
   stopifnot("package:ROI" %in% search() || require("ROI",quietly = TRUE))
   stopifnot("package:ROI.plugin.glpk" %in% search() || require("ROI.plugin.glpk",quietly = TRUE))
   
@@ -224,7 +227,7 @@ maxret_opt <- function(R, moments, constraints, target){
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
                  bounds=bnds)
-  roi.result <- ROI_solve(x=opt.prob, solver="glpk")
+  roi.result <- ROI_solve(x=opt.prob, solver=solver)
   
   # roi.result <- Rglpk_solve_LP(obj=objL, mat=Amat, dir=dir.vec, rhs=rhs.vec, bounds=bnds)
   
@@ -255,16 +258,18 @@ maxret_opt <- function(R, moments, constraints, target){
 }
 
 ##### Maximize Return MILP Function #####
-#' Optimization function to solve maximum return problems
+#' Maximum Return MILP Optimization
 #' 
-#' This function is called by optimize.portfolio to solve maximum return problems via mixed integer linear programming.
+#' This function is called by optimize.portfolio to solve maximum return 
+#' problems via mixed integer linear programming.
 #' 
 #' @param R xts object of asset returns
 #' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
 #' @param moments object of moments computed based on objective functions
 #' @param target target return value
+#' @param solver solver to use
 #' @author Ross Bennett
-maxret_milp_opt <- function(R, constraints, moments, target){
+maxret_milp_opt <- function(R, constraints, moments, target, solver="glpk"){
   stopifnot("package:ROI" %in% search() || require("ROI",quietly = TRUE))
   stopifnot("package:ROI.plugin.glpk" %in% search() || require("ROI.plugin.glpk",quietly = TRUE))
   
@@ -356,7 +361,7 @@ maxret_milp_opt <- function(R, constraints, moments, target){
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=Amat, dir=dir, rhs=rhs),
                  bounds=bnds, types=types)
-  roi.result <- try(ROI_solve(x=opt.prob, solver="glpk"), silent=TRUE)
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver), silent=TRUE)
   if(inherits(roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
   # Weights
@@ -377,7 +382,7 @@ maxret_milp_opt <- function(R, constraints, moments, target){
 }
 
 ##### Minimize ETL LP Function #####
-#' Optimization function to solve minimum ETL problems
+#' Minimum ETL LP Optimization
 #' 
 #' This function is called by optimize.portfolio to solve minimum ETL problems.
 #' 
@@ -386,8 +391,9 @@ maxret_milp_opt <- function(R, constraints, moments, target){
 #' @param moments object of moments computed based on objective functions
 #' @param target target return value
 #' @param alpha alpha value for ETL/ES/CVaR
+#' @param solver solver to use
 #' @author Ross Bennett
-etl_opt <- function(R, constraints, moments, target, alpha){
+etl_opt <- function(R, constraints, moments, target, alpha, solver="glpk"){
   stopifnot("package:ROI" %in% search() || require("ROI",quietly = TRUE))
   stopifnot("package:ROI.plugin.glpk" %in% search() || require("ROI.plugin.glpk",quietly = TRUE))
   
@@ -442,7 +448,7 @@ etl_opt <- function(R, constraints, moments, target, alpha){
   opt.prob <- OP(objective=ROI_objective, 
                        constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
                        bounds=bnds)
-  roi.result <- try(ROI_solve(x=opt.prob, solver="glpk"), silent=TRUE)
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver), silent=TRUE)
   if(inherits(x=roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
   weights <- roi.result$solution[1:N]
@@ -473,17 +479,19 @@ etl_opt <- function(R, constraints, moments, target, alpha){
 }
 
 ##### Minimize ETL MILP Function #####
-#' Optimization function to solve minimum ETL problems
+#' Minimum ETL MILP Optimization
 #' 
-#' This function is called by optimize.portfolio to solve minimum ETL problems via mixed integer linear programming.
+#' This function is called by optimize.portfolio to solve minimum ETL problems 
+#' via mixed integer linear programming.
 #' 
 #' @param R xts object of asset returns
 #' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
 #' @param moments object of moments computed based on objective functions
 #' @param target target return value
 #' @param alpha alpha value for ETL/ES/CVaR
+#' @param solver solver to use
 #' @author Ross Bennett
-etl_milp_opt <- function(R, constraints, moments, target, alpha){
+etl_milp_opt <- function(R, constraints, moments, target, alpha, solver="glpk"){
   stopifnot("package:ROI" %in% search() || require("ROI",quietly = TRUE))
   stopifnot("package:ROI.plugin.glpk" %in% search() || require("ROI.plugin.glpk",quietly = TRUE))
   
@@ -589,7 +597,7 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=tmpAmat, dir=dir, rhs=rhs),
                  bounds=bnds, types=types)
-  roi.result <- ROI_solve(x=opt.prob, solver="glpk")
+  roi.result <- ROI_solve(x=opt.prob, solver=solver)
   
   # The Rglpk solvers status returns an an integer with status information
   # about the solution returned: 0 if the optimal solution was found, a 
@@ -626,9 +634,10 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
 }
 
 ##### minimize variance or maximize quadratic utility with turnover constraints #####
-#' Optimization function to solve minimum variance or maximum quadratic utility problems with turnover constraint
+#' GMV/QU QP Optimization with Turnover Constraint
 #' 
-#' This function is called by optimize.portfolio to solve minimum variance or maximum quadratic utility problems
+#' This function is called by optimize.portfolio to solve minimum variance or 
+#' maximum quadratic utility problems with turnover constraint
 #' 
 #' @param R xts object of asset returns
 #' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
@@ -636,8 +645,9 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha){
 #' @param lambda risk_aversion parameter
 #' @param target target return value
 #' @param init_weights initial weights to compute turnover
+#' @param solver solver to use
 #' @author Ross Bennett
-gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
+gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights, solver="quadprog"){
   # function for minimum variance or max quadratic utility problems
   stopifnot("package:corpcor" %in% search() || require("corpcor",quietly = TRUE))
   stopifnot("package:ROI" %in% search() || require("ROI", quietly = TRUE))
@@ -748,7 +758,7 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=Amat, dir=dir, rhs=rhs))
   
-  roi.result <- try(ROI_solve(x=opt.prob, solver="quadprog"), silent=TRUE)
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver), silent=TRUE)
   
   if(inherits(roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
@@ -779,8 +789,21 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights){
   return(out)
 }
 
-# proportional transaction cost constraint
-gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
+##### minimize variance or maximize quadratic utility with proportional transactioncosts constraints #####
+#' GMV/QU QP Optimization with Proportional Transaction Cost Constraint
+#' 
+#' This function is called by optimize.portfolio to solve minimum variance or 
+#' maximum quadratic utility problems with proportional transaction cost constraint
+#' 
+#' @param R xts object of asset returns
+#' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
+#' @param moments object of moments computed based on objective functions
+#' @param lambda risk_aversion parameter
+#' @param target target return value
+#' @param init_weights initial weights to compute turnover
+#' @param solver solver to use
+#' @author Ross Bennett
+gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, solver="quadprog"){
   # function for minimum variance or max quadratic utility problems
   # modifying ProportionalCostOpt function from MPO package
   stopifnot("package:corpcor" %in% search() || require("corpcor", quietly = TRUE))
@@ -880,7 +903,7 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
   
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=Amat, dir=dir, rhs=rhs))
-  roi.result <- try(ROI_solve(x=opt.prob, solver="quadprog"), silent=TRUE)
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver), silent=TRUE)
 
   if(inherits(roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
@@ -915,7 +938,7 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights){
 }
 
 
-mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$double.eps^0.5, maxit=50){
+mean_etl_opt <- function(R, constraints, moments, target, alpha, solver="glpk", tol=.Machine$double.eps^0.5, maxit=50){
   # This function returns the target mean return that maximizes mean / etl (i.e. starr)
   
   # if all(moments$mean == 0) then the user did not specify mean as an objective,
@@ -929,17 +952,17 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
   
   # Find the maximum return
   if(!is.null(constraints$max_pos)){
-    max_ret <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=NA)
+    max_ret <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=NA, solver=solver)
   } else {
-    max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, target=NA)
+    max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, target=NA, solver=solver)
   }
   max_mean <- as.numeric(-max_ret$out)
   
   # Find the starr at the maximum etl portfolio
   if(!is.null(constraints$max_pos)){
-    ub_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha)
+    ub_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha, solver=solver)
   } else {
-    ub_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha)
+    ub_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha, solver=solver)
   }
   ub_weights <- matrix(ub_etl$weights, ncol=1)
   ub_mean <- as.numeric(t(ub_weights) %*% fmean)
@@ -954,9 +977,9 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
   
   # Find the starr at the minimum etl portfolio
   if(!is.null(constraints$max_pos)){
-    lb_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha)
+    lb_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha, solver=solver)
   } else {
-    lb_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha)
+    lb_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha, solver=solver)
   }
   lb_weights <- matrix(lb_etl$weights)  
   lb_mean <- as.numeric(t(lb_weights) %*% fmean)  
@@ -986,9 +1009,9 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
     # Find the starr at the mean return midpoint
     new_ret <- (lb_mean + ub_mean) / 2
     if(!is.null(constraints$max_pos)){
-      mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+      mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
     } else {
-      mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+      mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
     }
     # print(mid)
     mid_weights <- matrix(mid$weights, ncol=1)
@@ -1009,9 +1032,9 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
       ub_starr <- mid_starr
       new_ret <- (lb_mean + ub_mean) / 2
       if(!is.null(constraints$max_pos)){
-        mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+        mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
       } else {
-        mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+        mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
       }
       mid_weights <- matrix(mid$weights, ncol=1)
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
@@ -1025,9 +1048,9 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
       lb_starr <- mid_starr
       new_ret <- (lb_mean + ub_mean) / 2
       if(!is.null(constraints$max_pos)){
-        mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+        mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
       } else {
-        mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha)
+        mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
       }
       mid_weights <- matrix(mid$weights, ncol=1)
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
@@ -1041,7 +1064,7 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, tol=.Machine$do
   return(new_ret)
 }
 
-max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups, tol=.Machine$double.eps^0.5, maxit=50){
+max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups, solver="quadprog", tol=.Machine$double.eps^0.5, maxit=50){
   # This function returns the target mean return that maximizes mean / sd (i.e. sharpe ratio)
   
   # get the forecast mean from moments
@@ -1061,7 +1084,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
   # Calculate the sr at the miminum var portfolio
   tmpmoments <- moments
   tmpmoments$mean <- rep(0, length(moments$mean))
-  lb_sr <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=NA, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+  lb_sr <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=NA, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
   lb_weights <- matrix(lb_sr$weights)
   lb_mean <- as.numeric(t(lb_weights) %*% fmean)
   lb_sd <- as.numeric(sqrt(t(lb_weights) %*% moments$var %*% lb_weights))
@@ -1079,7 +1102,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
     
     # Find the starr at the mean return midpoint
     new_ret <- (lb_mean + ub_mean) / 2
-    mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+    mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
     mid_weights <- matrix(mid$weights, ncol=1)
     mid_mean <- as.numeric(t(mid_weights) %*% fmean)
     mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
@@ -1096,7 +1119,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
       ub_mean <- mid_mean
       ub_sr <- mid_sr
       new_ret <- (lb_mean + ub_mean) / 2
-      mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+      mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
       mid_weights <- matrix(mid$weights, ncol=1)
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
@@ -1106,7 +1129,7 @@ max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc
       lb_mean <- mid_mean
       lb_sr <- mid_sr
       new_ret <- (lb_mean + ub_mean) / 2
-      mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+      mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
       mid_weights <- matrix(mid$weights, ncol=1)
       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
       mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))

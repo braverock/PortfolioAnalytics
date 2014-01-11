@@ -24,4 +24,5 @@ demo_max_return Demonstrate objective to maximize portfolio mean return.
 demo_min_StdDev Demonstrate objective to minimize portfolio standard deviation.
 demo_min_expected_shortfall Demonstrate objective to minimize expected shortfall.
 demo_risk_budgets Demonstrate using risk budget objectives.
+demo_roi_solvers Demonstrate specifying a solver using ROI
 

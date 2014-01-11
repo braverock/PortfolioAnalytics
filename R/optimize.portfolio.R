@@ -438,7 +438,7 @@ optimize.portfolio_v2 <- function(
   portfolio=NULL,
   constraints=NULL,
   objectives=NULL,
-  optimize_method=c("DEoptim","random","ROI","ROI_old","pso","GenSA"),
+  optimize_method=c("DEoptim","random","ROI","pso","GenSA"),
   search_size=20000,
   trace=FALSE, ...,
   rp=NULL,
@@ -725,11 +725,11 @@ optimize.portfolio_v2 <- function(
     
   } ## end case for random
   
-  if(optimize_method == "ROI"){
-    # This takes in a regular portfolio object and extracts the desired business objectives
-    # and converts them to matrix form to be inputed into a closed form solver
-    # retrieve the objectives to minimize, these should either be "var" and/or "mean"
-    # we can either miniminze variance or maximize quiadratic utility (we will be minimizing the neg. quad. utility)
+  roi_solvers <- c("ROI", "quadprog", "glpk", "symphony", "ipop", "cplex")
+  if(optimize_method %in% roi_solvers){
+    # This takes in a regular portfolio object and extracts the constraints and
+    #  objectives and converts them for input. to a closed form solver using
+    # ROI as an interface.
     moments <- list(mean=rep(0, N))
     alpha <- 0.05
     if(!is.null(constraints$return_target)){
@@ -737,13 +737,6 @@ optimize.portfolio_v2 <- function(
     } else {
       target <- NA
     }
-    # comment out so concentration aversion can only be specified as an objective
-    # because it is added to the quadratic objective term for QP problems (minvar and qu)
-    # if(!is.null(constraints$conc_aversion)){
-    #  lambda_hhi <- constraints$conc_aversion
-    #} else {
-    #  lambda_hhi <- 0
-    #}
     lambda <- 1
     
     # list of valid objective names for ROI solvers
@@ -802,6 +795,13 @@ optimize.portfolio_v2 <- function(
     }
     
     if("var" %in% names(moments)){
+      # Set a default solver if optimize_method == "ROI", otherwise assume the
+      # optimize_method specified by the user is the solver for ROI
+      if(optimize_method == "ROI"){
+        solver <- "quadprog"
+      } else {
+        solver <- optimize_method
+      }
       # Minimize variance if the only objective specified is variance
       # Maximize Quadratic Utility if var and mean are specified as objectives
       if(!is.null(constraints$turnover_target) | !is.null(constraints$ptc)){
@@ -810,14 +810,14 @@ optimize.portfolio_v2 <- function(
           constraints$ptc <- NULL
         }
         if(!is.null(constraints$turnover_target) & is.null(constraints$ptc)){
-          qp_result <- gmv_opt_toc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets)
+          qp_result <- gmv_opt_toc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets, solver=solver)
           weights <- qp_result$weights
           # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
           obj_vals <- qp_result$obj_vals
           out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=qp_result$out, call=call)
         }
         if(!is.null(constraints$ptc) & is.null(constraints$turnover_target)){
-          qp_result <- gmv_opt_ptc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets)
+          qp_result <- gmv_opt_ptc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets, solver=solver)
           weights <- qp_result$weights
           # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
           obj_vals <- qp_result$obj_vals
@@ -827,12 +827,12 @@ optimize.portfolio_v2 <- function(
         # if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
         if(hasArg(maxSR)) maxSR=match.call(expand.dots=TRUE)$maxSR else maxSR=FALSE
         if(maxSR){
-          target <- max_sr_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+          target <- max_sr_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
           # need to set moments$mean=0 here because quadratic utility and target return is sensitive to returning no solution
           tmp_moments_mean <- moments$mean
           moments$mean <- rep(0, length(moments$mean))
         }
-        roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups)
+        roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         obj_vals <- roi_result$obj_vals
@@ -846,17 +846,25 @@ optimize.portfolio_v2 <- function(
       }
     }
     if(length(names(moments)) == 1 & "mean" %in% names(moments)) {
+      # Set a default solver if optimize_method == "ROI", otherwise assume the
+      # optimize_method specified by the user is the solver for ROI
+      if(optimize_method == "ROI"){
+        solver <- "glpk"
+      } else {
+        solver <- optimize_method
+      }
+      
       # Maximize return if the only objective specified is mean
       if(!is.null(constraints$max_pos) | !is.null(constraints$leverage)) {
         # This is an MILP problem if max_pos is specified as a constraint
-        roi_result <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=target)
+        roi_result <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=target, solver=solver)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         obj_vals <- roi_result$obj_vals
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       } else {
         # Maximize return LP problem
-        roi_result <- maxret_opt(R=R, constraints=constraints, moments=moments, target=target)
+        roi_result <- maxret_opt(R=R, constraints=constraints, moments=moments, target=target, solver=solver)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         obj_vals <- roi_result$obj_vals
@@ -864,6 +872,14 @@ optimize.portfolio_v2 <- function(
       }
     }
     if( any(c("CVaR", "ES", "ETL") %in% names(moments)) ) {
+      # Set a default solver if optimize_method == "ROI", otherwise assume the
+      # optimize_method specified by the user is the solver for ROI
+      if(optimize_method == "ROI"){
+        solver <- "glpk"
+      } else {
+        solver <- optimize_method
+      }
+      
       if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
       if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
       if(ef) meanetl <- TRUE else meanetl <- FALSE
@@ -872,12 +888,12 @@ optimize.portfolio_v2 <- function(
       # Minimize sample ETL/ES/CVaR if CVaR, ETL, or ES is specified as an objective
       if(length(moments) == 2 & all(moments$mean != 0) & ef==FALSE & maxSTARR){
         # This is called by meanetl.efficient.frontier and we do not want that for efficient frontiers, need to have ef==FALSE
-        target <- mean_etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
+        target <- mean_etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha, solver=solver)
         meanetl <- TRUE
       }
       if(!is.null(constraints$max_pos)) {
         # This is an MILP problem if max_pos is specified as a constraint
-        roi_result <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
+        roi_result <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha, solver=solver)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         # obj_vals <- roi_result$obj_vals
@@ -888,7 +904,7 @@ optimize.portfolio_v2 <- function(
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       } else {
         # Minimize sample ETL/ES/CVaR LP Problem
-        roi_result <- etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha)
+        roi_result <- etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha, solver=solver)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         # obj_vals <- roi_result$obj_vals
@@ -898,6 +914,8 @@ optimize.portfolio_v2 <- function(
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       }
     }
+    # Set here at the end so we get optimize.portfolio.ROI and not optimize.portfolio.{solver} classes
+    optimize_method <- "ROI"
   } ## end case for ROI
   
   ## case if method=pso---particle swarm
@@ -1032,6 +1050,13 @@ optimize.portfolio_v2 <- function(
 #' 
 #' When using GenSA and want to set \code{verbose=TRUE}, instead use \code{trace}. 
 #' 
+#' If \code{optimize_method="ROI"} is specified, a default solver will be 
+#' selected based on the optimization problem. The \code{glpk} solver is the
+#' default solver for LP and MILP optimization problems. The \code{quadprog} 
+#' solver is the default solver for QP optimization problems. For example,
+#' \code{optimize_method = "quadprog"} can be specified and the optimization
+#' problem will be solved via ROI using the quadprog solver.
+#' 
 #' The extension to ROI solves a limited type of convex optimization problems:
 #' \itemize{
 #' \item{Maxmimize portfolio return subject leverage, box, group, position limit, target mean return, and/or factor exposure constraints on weights.}
@@ -1063,7 +1088,8 @@ optimize.portfolio_v2 <- function(
 #' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
 #' @param constraints default=NULL, a list of constraint objects. An object of class v1_constraint' can be passed in here.
 #' @param objectives default=NULL, a list of objective objects.
-#' @param optimize_method one of "DEoptim", "random", "ROI","ROI_old", "pso", "GenSA".  For using \code{ROI_old}, need to use a constraint_ROI object in constraints. For using \code{ROI}, pass standard \code{constratint} object in \code{constraints} argument.  Presently, ROI has plugins for \code{quadprog} and \code{Rglpk}.
+#' @param optimize_method one of "DEoptim", "random", "ROI", "pso", "GenSA". A solver
+#' for ROI can also be specified and will be solved using ROI. See Details.
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
