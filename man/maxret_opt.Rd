@@ -1,8 +1,9 @@
 \name{maxret_opt}
 \alias{maxret_opt}
-\title{Optimization function to solve minimum variance or maximum quadratic utility problems}
+\title{Maximum Return LP Optimization}
 \usage{
-  maxret_opt(R, moments, constraints, target)
+  maxret_opt(R, moments, constraints, target,
+    solver = "glpk")
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -14,10 +15,12 @@
   objective functions}
 
   \item{target}{target return value}
+
+  \item{solver}{solver to use}
 }
 \description{
   This function is called by optimize.portfolio to solve
-  minimum variance or maximum quadratic utility problems
+  maximum return
 }
 \author{
   Ross Bennett

@@ -1,8 +1,9 @@
 \name{maxret_milp_opt}
 \alias{maxret_milp_opt}
-\title{Optimization function to solve maximum return problems}
+\title{Maximum Return MILP Optimization}
 \usage{
-  maxret_milp_opt(R, constraints, moments, target)
+  maxret_milp_opt(R, constraints, moments, target,
+    solver = "glpk")
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -14,6 +15,8 @@
   objective functions}
 
   \item{target}{target return value}
+
+  \item{solver}{solver to use}
 }
 \description{
   This function is called by optimize.portfolio to solve

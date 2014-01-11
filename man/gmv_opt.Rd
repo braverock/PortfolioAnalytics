@@ -1,9 +1,9 @@
 \name{gmv_opt}
 \alias{gmv_opt}
-\title{Optimization function to solve minimum variance or maximum quadratic utility problems}
+\title{GMV/QU QP Optimization}
 \usage{
   gmv_opt(R, constraints, moments, lambda, target,
-    lambda_hhi, conc_groups)
+    lambda_hhi, conc_groups, solver = "quadprog")
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -22,6 +22,8 @@
 
   \item{conc_groups}{list of vectors specifying the groups
   of the assets.}
+
+  \item{solver}{solver to use}
 }
 \description{
   This function is called by optimize.portfolio to solve

@@ -1,8 +1,9 @@
 \name{etl_milp_opt}
 \alias{etl_milp_opt}
-\title{Optimization function to solve minimum ETL problems}
+\title{Minimum ETL MILP Optimization}
 \usage{
-  etl_milp_opt(R, constraints, moments, target, alpha)
+  etl_milp_opt(R, constraints, moments, target, alpha,
+    solver = "glpk")
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -16,6 +17,8 @@
   \item{target}{target return value}
 
   \item{alpha}{alpha value for ETL/ES/CVaR}
+
+  \item{solver}{solver to use}
 }
 \description{
   This function is called by optimize.portfolio to solve

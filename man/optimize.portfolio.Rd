@@ -11,13 +11,13 @@
 
   optimize.portfolio_v2(R, portfolio = NULL,
     constraints = NULL, objectives = NULL,
-    optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
+    optimize_method = c("DEoptim", "random", "ROI", "pso", "GenSA"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
     momentFUN = "set.portfolio.moments", message = FALSE)
 
   optimize.portfolio(R, portfolio = NULL,
     constraints = NULL, objectives = NULL,
-    optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
+    optimize_method = c("DEoptim", "random", "ROI", "pso", "GenSA"),
     search_size = 20000, trace = FALSE, ..., rp = NULL,
     momentFUN = "set.portfolio.moments", message = FALSE)
 }
@@ -35,13 +35,9 @@
   \item{objectives}{default=NULL, a list of objective
   objects.}
 
-  \item{optimize_method}{one of "DEoptim", "random",
-  "ROI","ROI_old", "pso", "GenSA".  For using
-  \code{ROI_old}, need to use a constraint_ROI object in
-  constraints. For using \code{ROI}, pass standard
-  \code{constratint} object in \code{constraints} argument.
-  Presently, ROI has plugins for \code{quadprog} and
-  \code{Rglpk}.}
+  \item{optimize_method}{one of "DEoptim", "random", "ROI",
+  "pso", "GenSA". A solver for ROI can also be specified
+  and will be solved using ROI. See Details.}
 
   \item{search_size}{integer, how many portfolios to test,
   default 20,000}
@@ -150,6 +146,15 @@
 
   When using GenSA and want to set \code{verbose=TRUE},
   instead use \code{trace}.
+
+  If \code{optimize_method="ROI"} is specified, a default
+  solver will be selected based on the optimization
+  problem. The \code{glpk} solver is the default solver for
+  LP and MILP optimization problems. The \code{quadprog}
+  solver is the default solver for QP optimization
+  problems. For example, \code{optimize_method =
+  "quadprog"} can be specified and the optimization problem
+  will be solved via ROI using the quadprog solver.
 
   The extension to ROI solves a limited type of convex
   optimization problems: \itemize{ \item{Maxmimize

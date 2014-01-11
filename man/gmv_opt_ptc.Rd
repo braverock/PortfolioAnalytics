@@ -1,9 +1,9 @@
-\name{etl_opt}
-\alias{etl_opt}
-\title{Minimum ETL LP Optimization}
+\name{gmv_opt_ptc}
+\alias{gmv_opt_ptc}
+\title{GMV/QU QP Optimization with Proportional Transaction Cost Constraint}
 \usage{
-  etl_opt(R, constraints, moments, target, alpha,
-    solver = "glpk")
+  gmv_opt_ptc(R, constraints, moments, lambda, target,
+    init_weights, solver = "quadprog")
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -14,15 +14,18 @@
   \item{moments}{object of moments computed based on
   objective functions}
 
+  \item{lambda}{risk_aversion parameter}
+
   \item{target}{target return value}
 
-  \item{alpha}{alpha value for ETL/ES/CVaR}
+  \item{init_weights}{initial weights to compute turnover}
 
   \item{solver}{solver to use}
 }
 \description{
   This function is called by optimize.portfolio to solve
-  minimum ETL problems.
+  minimum variance or maximum quadratic utility problems
+  with proportional transaction cost constraint
 }
 \author{
   Ross Bennett
