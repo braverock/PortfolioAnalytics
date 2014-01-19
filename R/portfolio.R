@@ -1,12 +1,12 @@
 ###############################################################################
 # R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2012 Kris Boudt, Peter Carl and Brian G. Peterson
+# Copyright (c) 2004-2014 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
 #
-# $Id: constraints.R 2362 2013-06-18 23:48:13Z rossbennett34 $
+# $Id$
 #
 ###############################################################################
 

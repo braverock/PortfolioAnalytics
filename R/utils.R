@@ -50,3 +50,16 @@ modify.args <- function(formals, arglist, ..., dots=FALSE)
 # .formals$`...` <- NULL
 # 
 # tmp_val <- do.call(indicator$name, .formals)
+
+
+###############################################################################
+# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+#
+# Copyright (c) 2004-2014 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id$
+#
+###############################################################################

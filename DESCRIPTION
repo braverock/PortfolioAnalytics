@@ -1,8 +1,8 @@
 Package: PortfolioAnalytics
 Type: Package
-Title: Portfolio Analysis, including Numeric Methods for Optimization
+Title: Portfolio Analysis, including Numerical Methods for Optimization
     of Portfolios
-Version: 0.8.3
+Version: 0.9.0
 Date: $Date$
 Author: Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
 Contributors: R. Douglas Martin, Guy Yollin, Hezky Varon
@@ -27,9 +27,10 @@ Suggests:
     ROI.plugin.symphony (>= 0.0.2),
     pso,
     GenSA,
-    corpcor
+    corpcor,
+    testthat
 License: GPL
-Copyright: (c) 2004-2012
+Copyright: (c) 2004-2014
 Collate:
     'charts.DE.R'
     'charts.RP.R'
