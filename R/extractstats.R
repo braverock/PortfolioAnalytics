@@ -194,21 +194,27 @@ extractWeights.optimize.portfolio.rebalancing <- function(object, ...){
   if(!inherits(object, "optimize.portfolio.rebalancing")){
     stop("Object passed in must be of class 'optimize.portfolio.rebalancing'")
   }
-  
-  numColumns = length(object[[1]]$weights)
-  numRows = length(object)
+  rebal_object <- object$opt_rebal
+  numColumns = length(rebal_object[[1]]$weights)
+  numRows = length(rebal_object)
 
   result <- matrix(nrow=numRows, ncol=numColumns)
 
   for(i in 1:numRows)
-    result[i,] = unlist(object[[i]]$weights)
+    result[i,] = unlist(rebal_object[[i]]$weights)
 
-  colnames(result) = names(unlist(object[[1]]$weights))
-  rownames(result) = names(object)
+  colnames(result) = names(unlist(rebal_object[[1]]$weights))
+  rownames(result) = names(rebal_object)
   result = as.xts(result)
   return(result)
 }
 
+#' @method extractWeights summary.optimize.portfolio.rebalancing
+#' @S3method extractWeights summary.optimize.portfolio.rebalancing
+#' @export
+extractWeights.summary.optimize.portfolio.rebalancing <- function(object, ...){
+  object$weights
+}
 
 #' @method extractStats optimize.portfolio.ROI
 #' @S3method extractStats optimize.portfolio.ROI
@@ -350,7 +356,7 @@ extractStats.optimize.portfolio.eqwt <- function(object, prefix=NULL, ...) {
 #' @export 
 extractStats.optimize.portfolio.rebalancing <- function(object, prefix=NULL, ...) {
   if(!inherits(object, "optimize.portfolio.rebalancing")) stop("object must be of class optimize.portfolio.rebalancing")
-  return(lapply(object, extractStats, ...))
+  return(lapply(object$opt_rebal, extractStats, ...))
 }
 
 #' Extract the objective measures
@@ -381,19 +387,27 @@ extractObjectiveMeasures.optimize.portfolio <- function(object){
 extractObjectiveMeasures.optimize.portfolio.rebalancing <- function(object){
   if(!inherits(object, "optimize.portfolio.rebalancing")) stop("object must be of class 'optimize.portfolio.rebalancing'")
   
-  num.columns <- length(unlist(extractObjectiveMeasures(object[[1]])))
-  num.rows <- length(object)
+  rebal_object <- object$opt_rebal
+  
+  num.columns <- length(unlist(extractObjectiveMeasures(rebal_object[[1]])))
+  num.rows <- length(rebal_object)
   
   result <- matrix(nrow=num.rows, ncol=num.columns)
   
   for(i in 1:num.rows){
-    result[i,] <- unlist(extractObjectiveMeasures(object[[i]]))
+    result[i,] <- unlist(extractObjectiveMeasures(rebal_object[[i]]))
   }
   
-  colnames(result) <- name.replace(names(unlist(extractObjectiveMeasures(object[[1]]))))
-  rownames(result) <- names(object)
+  colnames(result) <- name.replace(names(unlist(extractObjectiveMeasures(rebal_object[[1]]))))
+  rownames(result) <- names(rebal_object)
   result <- as.xts(result)
   return(result)
+}
+
+#' @method extractObjectiveMeasures summary.optimize.portfolio.rebalancing
+#' @S3method extractObjectiveMeasures summary.optimize.portfolio.rebalancing
+extractObjectiveMeasures.summary.optimize.portfolio.rebalancing <- function(object){
+  object$objective_measures
 }
 
 #' Extract the group and/or category weights

@@ -218,7 +218,7 @@ chart.RiskBudget.optimize.portfolio.rebalancing <- function(object, ..., match.c
   rebal.obj <- extractObjectiveMeasures(object)
   
   if(risk.type == "absolute"){
-    rbcols <- grep(paste(match.col, "pct_contrib", sep="."), colnames(rebal.obj))
+    rbcols <- grep(paste(match.col, "contribution", sep="."), colnames(rebal.obj))
     if(length(rbcols) < 1) stop(paste("No ", match.col, ".contribution columns.", sep=""))
     rbdata <- rebal.obj[, rbcols]
     chart.StackedBar(w=rbdata, ylab=paste(match.col, "Contribution", sep=" "), main=main, ...)

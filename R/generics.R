@@ -10,6 +10,47 @@
 #
 ###############################################################################
 
+#' Printing output of optimize.portfolio.rebalancing
+#' 
+#' print method for \code{optimize.portfolio.rebalancing} objects
+#' 
+#' @param x an object used to select a method
+#' @param \dots any other passthru parameters
+#' @param digits the number of significant digits to use when printing.
+#' @seealso \code{\link{optimize.portfolio.rebalancing}}
+#' @author Ross Bennett
+#' @rdname print.optimize.portfolio.rebalancing
+#' @method print optimize.portfolio.rebalancing
+#' @S3method print optimize.portfolio.rebalancing
+print.optimize.portfolio.rebalancing <- function(x, ..., digits=4){
+  cat(rep("*", 50) ,"\n", sep="")
+  cat("PortfolioAnalytics Optimization with Rebalancing\n")
+  cat(rep("*", 50) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  tmp_summary <- summary(x)
+  rebal_dates <- tmp_summary$rebalance_dates
+  num_dates <- length(rebal_dates)
+  cat("Number of rebalancing dates: ", num_dates, "\n")
+  
+  cat("First rebalance date:\n")
+  print(rebal_dates[1])
+  
+  cat("Last rebalance date:\n")
+  print(rebal_dates[num_dates])
+  
+  cat("\n")
+  cat("Annualized Portfolio Rebalancing Return:\n")
+  print(as.numeric(tmp_summary$annualized_returns))
+  cat("\n")
+  
+  cat("Annualized Portfolio Standard Deviation:\n")
+  print(as.numeric(tmp_summary$annualized_StdDev))
+  cat("\n")
+}
+
 #' summary method for optimize.portfolio.rebalancing
 #' @param object object of type optimize.portfolio.rebalancing
 #' @param \dots any other passthru parameters
@@ -18,27 +59,83 @@
 summary.optimize.portfolio.rebalancing <- function(object, ...) {
     if(!inherits(object,"optimize.portfolio.rebalancing")) 
         stop ("passed object is not of class optimize.portfolio.rebalancing")
+    call <- object$call
+    elapsed_time <- object$elapsed_time
     
+    # Extract the weights and objective measures
+    weights <- extractWeights(object)
+    rebalance_dates <- index(weights)
+    objective_measures <- extractObjectiveMeasures(object)
     
-    # loop through and show the results and weights
-    cat('Weights:\n')
-    for(i in 1:length(object)){
-        cat(names(object[i]))
-        cat('\n')
-        if(!inherits(object[i],'try-error')){
-            print(round(object[[i]]$weights,4))
-        } else {
-            print(object[i])
-        }
-    }
-    cat('Objective Measures\n')
-    for(i in 1:length(object)){
-        if(!inherits(object[i],'try-error')){
-            cat(names(object[i]))
-            cat('\n')
-            print(object[[i]]$constrained_objective)
-        }
-    }    
+    # Calculate the portfolio rebalancing returns and some useful 
+    # performance metrics
+    portfolio_returns <- Return.rebalancing(object$R, weights)
+    annualized_returns <- Return.annualized(portfolio_returns)
+    annualized_StdDev <- StdDev.annualized(portfolio_returns)
+    downside_risk <- table.DownsideRisk(portfolio_returns)
+    
+    # Structure and return
+    return(structure(list(weights=weights,
+                          objective_measures=objective_measures,
+                          portfolio_returns=portfolio_returns,
+                          annualized_returns=annualized_returns,
+                          annualized_StdDev=annualized_StdDev,
+                          downside_risk=downside_risk,
+                          rebalance_dates=rebalance_dates,
+                          call=call,
+                          elapsed_time=elapsed_time),
+                     class="summary.optimize.portfolio.rebalancing")
+    )
+}
+
+#' Printing summary output of optimize.portfolio.rebalancing
+#' 
+#' print method for objects of class \code{summary.optimize.portfolio.rebalancing}
+#' 
+#' @param x an object of class \code{summary.optimize.portfolio.rebalancing}.
+#' @param ... any other passthru parameters
+#' @param digits number of digits used for printing
+#' @seealso \code{\link{summary.optimize.portfolio.rebalancing}}
+#' @author Ross Bennett
+#' @method print summary.optimize.portfolio.rebalancing
+#' @S3method print summary.optimize.portfolio.rebalancing
+print.summary.optimize.portfolio.rebalancing <- function(x, ..., digits=4){
+  cat(rep("*", 50) ,"\n", sep="")
+  cat("PortfolioAnalytics Optimization with Rebalancing\n")
+  cat(rep("*", 50) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  rebal_dates <- x$rebalance_dates
+  num_dates <- length(rebal_dates)
+  cat("First rebalance date:\n")
+  print(rebal_dates[1])
+  cat("\n")
+  cat("Last rebalance date:\n")
+  print(rebal_dates[num_dates])
+  cat("\n")
+  
+  cat("Annualized Portfolio Rebalancing Return:\n")
+  print(as.numeric(x$annualized_returns))
+  cat("\n")
+  
+  cat("Annualized Portfolio Standard Deviation:\n")
+  print(as.numeric(x$annualized_StdDev))
+  cat("\n")
+  
+  cat("Downside Risk Measures:\n")
+  print(x$downside_risk, ...=...)
+  
+  # Should we include the optimal weights and objective measure values on the
+  # first or last rebalance date?
+  # cat("Optimal weights on first rebalance date:\n")
+  # print(round(first(x$weights), digits=digits), digits=digits)
+  # cat("\n")
+  
+  # cat("Objective measures on first rebalance date:\n")
+  # print(round(first(x$objective_measures), digits=digits), digits=digits)
+  # cat("\n")
 }
 
 #' Printing Portfolio Specification Objects

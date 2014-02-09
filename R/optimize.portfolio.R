@@ -1245,6 +1245,10 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
 {
   stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
   stopifnot("package:iterators" %in% search() || require("iterators",quietly=TRUE))
+  
+  # Store the call to return later
+  call <- match.call()
+  
   start_t<-Sys.time()
   
   if (!is.null(portfolio) & !is.portfolio(portfolio)){
@@ -1298,12 +1302,24 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
       optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
     }
   }
+  # out_list is a list where each element is an optimize.portfolio object
+  # at each rebalance date
   names(out_list)<-index(R[ep.i])
   
-  end_t<-Sys.time()
-  message(c("overall elapsed time:",end_t-start_t))
-  class(out_list)<-c("optimize.portfolio.rebalancing")
-  return(out_list)
+  end_t <- Sys.time()
+  # message(c("overall elapsed time:",end_t-start_t))
+  elapsed_time <- end_t - start_t
+  
+  # out object to return
+  out <- list()
+  out$portfolio <- portfolio
+  out$R <- R
+  out$call <- call
+  out$elapsed_time <- elapsed_time
+  out$opt_rebalancing <- out_list
+  
+  class(out) <- c("optimize.portfolio.rebalancing")
+  return(out)
 }
 
 #'execute multiple optimize.portfolio calls, presumably in parallel
