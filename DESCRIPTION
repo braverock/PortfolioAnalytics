@@ -64,3 +64,4 @@ Collate:
     'equal.weight.R'
     'inverse.volatility.weight.R'
     'utils.R'
+    'chart.concentration.R'

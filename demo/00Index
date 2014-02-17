@@ -26,4 +26,4 @@ demo_min_expected_shortfall Demonstrate objective to minimize expected shortfall
 demo_risk_budgets Demonstrate using risk budget objectives.
 demo_roi_solvers Demonstrate specifying a solver using ROI.
 risk_budget_backtesting Demonstrate optimize.portfolio.rebalancing with standard deviation risk budget objective.
-
+chart_concentration Demonstrate chart.Concentration
