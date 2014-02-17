@@ -321,39 +321,57 @@ set.seed(1234)
 out <- optimize.portfolio.rebalancing(R=indexes, portfolio=ObjSpec, 
                                       optimize_method="DEoptim", search_size=5000,
                                       rebalance_on="months", 
-                                      training_period=nrow(indexes)-1,
-                                      traceDE=10)
+                                      training_period=nrow(indexes)-10,
+                                      traceDE=0)
 @
 
 
-The output of \verb"optimize.portfolio.rebalancing" is a list of objects created by \verb"optimize.portfolio", one for each rebalancing period.
+The output of \verb"optimize.portfolio.rebalancing" in the \verb"opt_rebalancing" slot is a list of objects created by \verb"optimize.portfolio", one for each rebalancing period. 
 
 <<echo=TRUE>>=
 names(out)
-names(out[[1]])
-print(out)
+names(out$opt_rebalancing[[1]])
+out
 @
 
-The optimal weights for each rebalancing period can be extracted fron the object with the following function:
+The \verb"summary" method provides a brief output of the optimization result along with return and risk measures.
+<<echo=TRUE>>=
+opt.summary <- summary(out)
+names(opt.summary)
+opt.summary
+@
+
+The optimal weights for each rebalancing period can be extracted fron the object with \verb"extractWeights" and are charted with \verb"chart.Weights".
 
 <<echo=TRUE>>=
 extractWeights(out)
+plot.new()
+chart.Weights(out, colorset=bluemono)
 @
 
 
-Also the value of the objective function at each rebalancing period:
+Also, the value of the objective function at each rebalancing date is extracted with \verb"extractObjectiveMeasures".
 <<echo=TRUE>>=
-out[[1]]$out
-out[[2]]$out
+head(extractObjectiveMeasures(out))
 @
 
 
 The first and last observation from the estimation sample:
 <<echo=TRUE>>=
-out[[1]]$data_summary
-out[[2]]$data_summary
+out$opt_rebalancing[[1]]$data_summary
+out$opt_rebalancing[[2]]$data_summary
 @
 
+The component contribution to risk at each rebalance date can be charted with \verb"chart.RiskBudget". The component contribution to risk in absolute or percentage.
+<<echo=TRUE>>=
+plot.new()
+chart.RiskBudget(out, match.col="CVaR", risk.type="percentage", col=bluemono)
+@
+
+<<echo=TRUE>>=
+plot.new()
+chart.RiskBudget(out, match.col="CVaR", risk.type="absolute", col=bluemono)
+@
 
 Of course, DE is a stochastic optimizer and typically will only find a near-optimal solution that depends on the seed. The function \verb"optimize.portfolio.parallel" in \verb"PortfolioAnalytics" allows to run an arbitrary number of portfolio sets in parallel in order to develop "confidence bands" around your solution. It is based on Revolution's \verb"foreach" package \citep{foreach}.  
 
