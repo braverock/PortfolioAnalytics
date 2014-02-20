@@ -11,13 +11,15 @@
 combine.optimizations <- function(x){
   if(!is.list(x)) stop("x must be passed in as a list")
   for(i in 1:length(x)){
-    if(!inherits(x[[i]], "optimize.portfolio")) stop("All objects in x must be of class 'optimize.portfolio'")
+    if(!(inherits(x[[i]], "optimize.portfolio") | inherits(x[[i]], "optimize.portfolio.rebalancing"))){
+      stop("All objects in x must be of class 'optimize.portfolio' or 'optimize.portfolio.rebalancing'")
+    }
   }
   class(x) <- "opt.list"
   return(x)
 }
 
-#' Combine objects created by portfolio
+#' Combine a list of portfolio objects
 #' 
 #' This function takes a list of objects created by \code{\link{portfolio.spec}}
 #' and sets the class name attribute to 'portfolio.list' for use in generic functions
@@ -25,12 +27,12 @@ combine.optimizations <- function(x){
 #' @param x a list of objects created by \code{\link{portfolio.spec}}
 #' @return a \code{portfolio.list} object
 #' @export
-portfolios.combine <- function(x){
+combine.portfolios <- function(x){
   if(!is.list(x)) stop("x must be passed in as a list")
   for(i in 1:length(x)){
     if(!inherits(x[[i]], "portfolio")) stop("All objects in x must be of class 'portfolio'")
   }
-  class(x) <- "portfolio.list"
+  class(x) <- c("portfolio.list", "portfolio")
   return(x)
 }
 

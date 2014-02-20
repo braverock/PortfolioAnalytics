@@ -595,3 +595,54 @@ extractObjectiveMeasures.opt.list <- function(object){
   return(out)
 }
 
+#' @method extractStats opt.list
+#' @S3method extractStats opt.list
+#' @export
+extractStats.opt.list <- function(object, ...){
+  # get the stats of each optimization in a list
+  # each element in the list is an optimize.portfolio object
+  stats_list <- vector("list", length(object))
+  for(i in 1:length(stats_list)){
+    stats_list[[i]] <- extractStats(object[[i]])
+  }
+  return(stats_list)
+}
+
+#' @method extractWeights opt.rebal.list
+#' @S3method extractWeights opt.rebal.list
+#' @export
+extractWeights.opt.rebal.list <- function(object, ...){
+  # get the optimal weights of each optimization in a list
+  # each element in the list is an optimize.portfolio.rebalancing object
+  weights_list <- vector("list", length(object))
+  for(i in 1:length(weights_list)){
+    weights_list[[i]] <- extractWeights(object[[i]])
+  }
+  return(weights_list)
+}
+
+#' @method extractObjectiveMeasures opt.rebal.list
+#' @S3method extractObjectiveMeasures opt.rebal.list
+#' @export
+extractObjectiveMeasures.opt.rebal.list <- function(object, ...){
+  # get the optimal weights of each optimization in a list
+  # each element in the list is an optimize.portfolio.rebalancing object
+  obj_list <- vector("list", length(object))
+  for(i in 1:length(obj_list)){
+    obj_list[[i]] <- extractObjectiveMeasures(object[[i]])
+  }
+  return(obj_list)
+}
+
+#' @method extractStats opt.rebal.list
+#' @S3method extractStats opt.rebal.list
+#' @export
+extractStats.opt.rebal.list <- function(object, ...){
+  # get the stats of each optimization in a list
+  # each element in the list is an optimize.portfolio.rebalancing object
+  stats_list <- vector("list", length(object))
+  for(i in 1:length(stats_list)){
+    stats_list[[i]] <- extractStats(object[[i]])
+  }
+  return(stats_list)
+}

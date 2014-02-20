@@ -962,3 +962,33 @@ summary.efficient.frontier <- function(object, ..., digits=3){
   invisible(list(weights=wts, metrics=riskret))
 }
 
+#' @method print portfolio.list
+#' @S3method print portfolio.list
+#' @export
+print.portfolio.list <- function(x, ...){
+  for(i in 1:length(x)){
+    cat("Portfolio ", i, "\n", sep="")
+    print(x[[i]])
+  }
+}
+
+#' @method print opt.list
+#' @S3method print opt.list
+#' @export
+print.opt.list <- function(x, ...){
+  for(i in 1:length(x)){
+    cat("Optimization ", i, "\n", sep="")
+    print(x[[i]])
+  }
+}
+
+#' @method print opt.rebal.list
+#' @S3method print opt.rebal.list
+#' @export
+print.opt.rebal.list <- function(x, ...){
+  for(i in 1:length(x)){
+    cat("Optimization ", i, "\n", sep="")
+    print(x[[i]])
+  }
+}
+

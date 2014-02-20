@@ -446,6 +446,36 @@ optimize.portfolio_v2 <- function(
   message=FALSE
 )
 {
+  # This is the case where the user has passed in a list of portfolio objects
+  # for the portfolio argument.
+  # Loop through the portfolio list and recursively call optimize.portfolio
+  # Note that I return at the end of this block. I know it is not good practice
+  # to return before the end of a function, but I am not sure of another way
+  # to handle a list of portfolio objects with the recursive call to 
+  # optimize.portfolio. 
+  if(inherits(portfolio, "portfolio.list")){
+    n.portf <- length(portfolio)
+    opt.list <- vector("list", n.portf)
+    for(i in 1:length(opt.list)){
+      if(message) cat("Starting optimization of portfolio ", i, "\n")
+      opt.list[[i]] <- optimize.portfolio(R=R, 
+                                          portfolio=portfolio[[i]],
+                                          constraints=constraints, 
+                                          objectives=objectives, 
+                                          optimize_method=optimize_method, 
+                                          search_size=search_size, 
+                                          trace=trace, 
+                                          ...=..., 
+                                          rp=rp, 
+                                          momentFUN=momentFUN, 
+                                          message=message)
+    }
+    out <- combine.optimizations(opt.list)
+    ##### return here for portfolio.list because this is a recursive call
+    ##### for optimize.portfolio
+    return(out)
+  }
+  
   optimize_method <- optimize_method[1]
   tmptrace <- NULL
   start_t <- Sys.time()
@@ -1246,6 +1276,40 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
   stopifnot("package:iterators" %in% search() || require("iterators",quietly=TRUE))
   
+  # This is the case where the user has passed in a list of portfolio objects
+  # for the portfolio argument.
+  # Loop through the portfolio list and recursively call 
+  # optimize.portfolio.rebalancing. 
+  #Note that I return at the end of this block. I know it is not good practice
+  # to return before the end of a function, but I am not sure of another way
+  # to handle a list of portfolio objects with the recursive call to 
+  # optimize.portfolio. 
+  if(inherits(portfolio, "portfolio.list")){
+    n.portf <- length(portfolio)
+    opt.list <- vector("list", n.portf)
+    for(i in 1:length(opt.list)){
+      if(hasArg(message)) message=match.call(expand.dots=TRUE)$message else message=FALSE
+      if(message) cat("Starting optimization of portfolio ", i, "\n")
+      opt.list[[i]] <- optimize.portfolio.rebalancing(R=R, 
+                                                      portfolio=portfolio[[i]], 
+                                                      constraints=constraints, 
+                                                      objectives=objectives, 
+                                                      optimize_method=optimize_method, 
+                                                      search_size=search_size, 
+                                                      trace=trace, 
+                                                      ...=..., 
+                                                      rp=rp, 
+                                                      rebalance_on=rebalance_on, 
+                                                      training_period=training_period, 
+                                                      trailing_periods=trailing_periods)
+    }
+    out <- combine.optimizations(opt.list)
+    class(out) <- "opt.rebal.list"
+    ##### return here for portfolio.list because this is a recursive call
+    ##### for optimize.portfolio.rebalancing
+    return(out)
+  }
+  
   # Store the call to return later
   call <- match.call()
   
@@ -1254,6 +1318,8 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   if (!is.null(portfolio) & !is.portfolio(portfolio)){
     stop("you must pass in an object of class 'portfolio' to control the optimization")
   }
+  
+  if(hasArg(message)) message=match.call(expand.dots=TRUE)$message else message=FALSE
   
   # Check for constraints and objectives passed in separately outside of the portfolio object
   if(!is.null(constraints)){
@@ -1307,8 +1373,8 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   names(out_list)<-index(R[ep.i])
   
   end_t <- Sys.time()
-  # message(c("overall elapsed time:",end_t-start_t))
   elapsed_time <- end_t - start_t
+  if(message) message(c("overall elapsed time:", end_t-start_t))
   
   # out object to return
   out <- list()
