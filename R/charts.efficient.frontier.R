@@ -518,7 +518,8 @@ chart.EfficientFrontier.efficient.frontier <- function(object, ..., match.col="E
 #' Overlay the efficient frontiers of multiple portfolio objects on a single plot.
 #' 
 #' @param R an xts object of asset returns
-#' @param portfolio_list list of portfolio objects created by \code{\link{portfolio.spec}}
+#' @param portfolio_list list of portfolio objects created by 
+#' \code{\link{portfolio.spec}} and combined with \code{\link{combine.portfolios}}
 #' @param type type of efficient frontier, see \code{\link{create.EfficientFrontier}}
 #' @param n.portfolios number of portfolios to extract along the efficient frontier.
 #' This is only used for objects of class \code{optimize.portfolio}
@@ -545,7 +546,7 @@ chart.EfficientFrontier.efficient.frontier <- function(object, ..., match.col="E
 #' @export
 chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios=25, match.col="ES", search_size=2000, main="Efficient Frontiers", cex.axis=0.8, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
   # create multiple efficient frontier objects (one per portfolio in portfolio_list)
-  if(!is.list(portfolio_list)) stop("portfolio_list must be passed in as a list")
+  if(!inherits(portfolio_list, "portfolio.list")) stop("portfolio_list must be passed in as a list")
   if(length(portfolio_list) == 1) warning("Only one portfolio object in portfolio_list")
   # store in out
   out <- list()
