@@ -857,7 +857,7 @@ optimize.portfolio_v2 <- function(
         # if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
         if(hasArg(maxSR)) maxSR=match.call(expand.dots=TRUE)$maxSR else maxSR=FALSE
         if(maxSR){
-          target <- max_sr_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
+          target <- max_sr_opt(R=R, constraints=constraints, moments=moments, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
           # need to set moments$mean=0 here because quadratic utility and target return is sensitive to returning no solution
           tmp_moments_mean <- moments$mean
           moments$mean <- rep(0, length(moments$mean))
@@ -918,7 +918,7 @@ optimize.portfolio_v2 <- function(
       # Minimize sample ETL/ES/CVaR if CVaR, ETL, or ES is specified as an objective
       if(length(moments) == 2 & all(moments$mean != 0) & ef==FALSE & maxSTARR){
         # This is called by meanetl.efficient.frontier and we do not want that for efficient frontiers, need to have ef==FALSE
-        target <- mean_etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha, solver=solver)
+        target <- mean_etl_opt(R=R, constraints=constraints, moments=moments, alpha=alpha, solver=solver)
         meanetl <- TRUE
       }
       if(!is.null(constraints$max_pos)) {

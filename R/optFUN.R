@@ -937,18 +937,12 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, s
   return(out)
 }
 
-
-mean_etl_opt <- function(R, constraints, moments, target, alpha, solver="glpk", tol=.Machine$double.eps^0.5, maxit=50){
-  # This function returns the target mean return that maximizes mean / etl (i.e. starr)
-  
-  # if all(moments$mean == 0) then the user did not specify mean as an objective,
-  # and we just want to return the target mean return value
-  if(all(moments$mean == 0)) return(target)
-  
-  fmean <- matrix(moments$mean, ncol=1)
-  
-  # can't use optimize.portfolio here, this function is called inside 
-  # optimize.portfolio and will throw an error message about nesting too deeply
+# This function uses optimize() to find the target return value that 
+# results in the maximum starr ratio (mean / ES).
+# returns the target return value
+mean_etl_opt <- function(R, constraints, moments, alpha, solver){
+  # create a copy of the moments that can be modified
+  tmp_moments <- moments
   
   # Find the maximum return
   if(!is.null(constraints$max_pos)){
@@ -958,187 +952,299 @@ mean_etl_opt <- function(R, constraints, moments, target, alpha, solver="glpk", 
   }
   max_mean <- as.numeric(-max_ret$out)
   
-  # Find the starr at the maximum etl portfolio
+  # Find the minimum return
+  tmp_moments$mean <- -1 * moments$mean
   if(!is.null(constraints$max_pos)){
-    ub_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha, solver=solver)
+    min_ret <- maxret_milp_opt(R=R, constraints=constraints, moments=tmp_moments, target=NA, solver=solver)
   } else {
-    ub_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha, solver=solver)
+    min_ret <- maxret_opt(R=R, constraints=constraints, moments=tmp_moments, target=NA, solver=solver)
   }
-  ub_weights <- matrix(ub_etl$weights, ncol=1)
-  ub_mean <- as.numeric(t(ub_weights) %*% fmean)
-  ub_etl <- as.numeric(ub_etl$out)
-  # starr at the upper bound
-  ub_starr <- ub_mean / ub_etl
-  if(is.infinite(ub_starr)) stop("Inf value for STARR, objective value is 0")
+  min_mean <- as.numeric(min_ret$out)
   
-  # cat("ub_mean", ub_mean, "\n")
-  # cat("ub_etl", ub_etl, "\n")
-  # cat("ub_starr", ub_starr, "\n")
-  
-  # Find the starr at the minimum etl portfolio
-  if(!is.null(constraints$max_pos)){
-    lb_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha, solver=solver)
-  } else {
-    lb_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha, solver=solver)
+  # use optimize() to find the target return value that maximizes sharpe ratio
+  opt <- try(optimize(f=starr_obj_fun, R=R, constraints=constraints, 
+                      solver=solver, moments=moments, alpha=alpha,
+                      lower=min_mean, upper=max_mean, 
+                      maximum=TRUE, tol=.Machine$double.eps), 
+             silent=TRUE)
+  if(inherits(opt, "try-error")){
+    stop(paste("Objective function failed with message\n", opt))
+    return(NULL)
   }
-  lb_weights <- matrix(lb_etl$weights)  
-  lb_mean <- as.numeric(t(lb_weights) %*% fmean)  
-  lb_etl <- as.numeric(lb_etl$out)
-  
-  # starr at the lower bound
-  lb_starr <- lb_mean / lb_etl
-  # if(is.infinite(lb_starr)) stop("Inf value for STARR, objective value is 0")
-  
-  # set lb_starr equal to 0, should this be a negative number like -1e6?
-  # the lb_* values will be 0 for a dollar-neutral strategy so we need to reset the values
-  if(is.na(lb_starr) | is.infinite(lb_starr)) lb_starr <- 0
-  
-  # cat("lb_mean", lb_mean, "\n")
-  # cat("lb_etl", lb_etl, "\n")
-  # cat("lb_starr", lb_starr, "\n")
-  
-  # want to find the return that maximizes mean / etl
-  i <- 1
-  while((abs(ub_starr - lb_starr) > tol) & (i < maxit)){
-    # bisection method to find the maximum mean / etl
-    
-    # print(i)
-    # cat("ub_starr", ub_starr, "\n")
-    # cat("lb_starr", lb_starr, "\n")
-    # print("**********")
-    # Find the starr at the mean return midpoint
-    new_ret <- (lb_mean + ub_mean) / 2
-    if(!is.null(constraints$max_pos)){
-      mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
-    } else {
-      mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
-    }
-    # print(mid)
-    mid_weights <- matrix(mid$weights, ncol=1)
-    mid_mean <- as.numeric(t(mid_weights) %*% fmean)
-    mid_etl <- as.numeric(mid$out)
-    mid_starr <- mid_mean / mid_etl
-    # the mid_* values MIGHT be 0 for a dollar-neutral strategy so we need to reset the values
-    # if(is.na(mid_starr) | is.infinite(mid_starr)) mid_starr <- 0
-    # tmp_starr <- mid_starr
-    
-    # cat("mid_mean", mid_mean, "\n")
-    # cat("mid_etl", mid_etl, "\n")
-    # cat("mid_starr", mid_starr, "\n")
-    
-    if(mid_starr > ub_starr){
-      # if mid_starr > ub_starr then mid_starr becomes the new upper bound
-      ub_mean <- mid_mean
-      ub_starr <- mid_starr
-      new_ret <- (lb_mean + ub_mean) / 2
-      if(!is.null(constraints$max_pos)){
-        mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
-      } else {
-        mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
-      }
-      mid_weights <- matrix(mid$weights, ncol=1)
-      mid_mean <- as.numeric(t(mid_weights) %*% fmean)
-      mid_etl <- as.numeric(mid$out)
-      mid_starr <- mid_mean / mid_etl
-      # the mid_* values MIGHT be 0 for a dollar-neutral strategy so we need to reset the values
-      # if(is.na(mid_starr) | is.infinite(mid_starr)) mid_starr <- 0
-    } else if(mid_starr > lb_starr){
-      # if mid_starr > lb_starr then mid_starr becomes the new lower bound
-      lb_mean <- mid_mean
-      lb_starr <- mid_starr
-      new_ret <- (lb_mean + ub_mean) / 2
-      if(!is.null(constraints$max_pos)){
-        mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
-      } else {
-        mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
-      }
-      mid_weights <- matrix(mid$weights, ncol=1)
-      mid_mean <- as.numeric(t(mid_weights) %*% fmean)
-      mid_etl <- as.numeric(mid$out)
-      mid_starr <- mid_mean / mid_etl
-      # the mid_* values MIGHT be 0 for a dollar-neutral strategy so we need to reset the values
-      # if(is.na(mid_starr) | is.infinite(mid_starr)) mid_starr <- 0
-    }
-    i <- i + 1
-  }
-  return(new_ret)
+  return(opt$maximum)
 }
 
-max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups, solver="quadprog", tol=.Machine$double.eps^0.5, maxit=50){
-  # This function returns the target mean return that maximizes mean / sd (i.e. sharpe ratio)
-  
-  # get the forecast mean from moments
-  fmean <- matrix(moments$mean, ncol=1)
+# Function to calculate the starr ratio.
+# Used as the objective function for optimize()
+starr_obj_fun <- function(target_return, R, constraints, moments, alpha, solver){
+  if(!is.null(constraints$max_pos)){
+    opt <- etl_milp_opt(R=R, constraints=constraints, moments=moments, 
+                        target=target_return, alpha=alpha, solver=solver)
+  } else {
+    opt <- etl_opt(R=R, constraints=constraints, moments=moments, 
+                   target=target_return, alpha=alpha, solver=solver)
+  }
+  weights <- matrix(opt$weights, ncol=1)
+  opt_mean <- as.numeric(t(weights) %*% matrix(moments$mean, ncol=1))
+  opt_etl <- as.numeric(opt$out)
+  starr <- opt_mean / opt_etl
+  return(starr)
+}
+
+
+# This was my implementation of a binary search for the maximum starr ratio 
+# target return. Better to use optimize() in R rather than my method. -Ross Bennett
+# mean_etl_opt <- function(R, constraints, moments, target, alpha, solver="glpk", tol=.Machine$double.eps^0.5, maxit=50){
+#   # This function returns the target mean return that maximizes mean / etl (i.e. starr)
+#   
+#   # if all(moments$mean == 0) then the user did not specify mean as an objective,
+#   # and we just want to return the target mean return value
+#   if(all(moments$mean == 0)) return(target)
+#   
+#   fmean <- matrix(moments$mean, ncol=1)
+#   
+#   # can't use optimize.portfolio here, this function is called inside 
+#   # optimize.portfolio and will throw an error message about nesting too deeply
+#   
+#   # Find the maximum return
+#   if(!is.null(constraints$max_pos)){
+#     max_ret <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=NA, solver=solver)
+#   } else {
+#     max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, target=NA, solver=solver)
+#   }
+#   max_mean <- as.numeric(-max_ret$out)
+#   
+#   # Find the starr at the maximum etl portfolio
+#   if(!is.null(constraints$max_pos)){
+#     ub_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha, solver=solver)
+#   } else {
+#     ub_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=max_mean, alpha=alpha, solver=solver)
+#   }
+#   ub_weights <- matrix(ub_etl$weights, ncol=1)
+#   ub_mean <- as.numeric(t(ub_weights) %*% fmean)
+#   ub_etl <- as.numeric(ub_etl$out)
+#   # starr at the upper bound
+#   ub_starr <- ub_mean / ub_etl
+#   if(is.infinite(ub_starr)) stop("Inf value for STARR, objective value is 0")
+#   
+#   # cat("ub_mean", ub_mean, "\n")
+#   # cat("ub_etl", ub_etl, "\n")
+#   # cat("ub_starr", ub_starr, "\n")
+#   
+#   # Find the starr at the minimum etl portfolio
+#   if(!is.null(constraints$max_pos)){
+#     lb_etl <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha, solver=solver)
+#   } else {
+#     lb_etl <- etl_opt(R=R, constraints=constraints, moments=moments, target=NA, alpha=alpha, solver=solver)
+#   }
+#   lb_weights <- matrix(lb_etl$weights)  
+#   lb_mean <- as.numeric(t(lb_weights) %*% fmean)  
+#   lb_etl <- as.numeric(lb_etl$out)
+#   
+#   # starr at the lower bound
+#   lb_starr <- lb_mean / lb_etl
+#   # if(is.infinite(lb_starr)) stop("Inf value for STARR, objective value is 0")
+#   
+#   # set lb_starr equal to 0, should this be a negative number like -1e6?
+#   # the lb_* values will be 0 for a dollar-neutral strategy so we need to reset the values
+#   if(is.na(lb_starr) | is.infinite(lb_starr)) lb_starr <- 0
+#   
+#   # cat("lb_mean", lb_mean, "\n")
+#   # cat("lb_etl", lb_etl, "\n")
+#   # cat("lb_starr", lb_starr, "\n")
+#   
+#   # want to find the return that maximizes mean / etl
+#   i <- 1
+#   while((abs(ub_starr - lb_starr) > tol) & (i < maxit)){
+#     # bisection method to find the maximum mean / etl
+#     
+#     # print(i)
+#     # cat("ub_starr", ub_starr, "\n")
+#     # cat("lb_starr", lb_starr, "\n")
+#     # print("**********")
+#     # Find the starr at the mean return midpoint
+#     new_ret <- (lb_mean + ub_mean) / 2
+#     if(!is.null(constraints$max_pos)){
+#       mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
+#     } else {
+#       mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
+#     }
+#     # print(mid)
+#     mid_weights <- matrix(mid$weights, ncol=1)
+#     mid_mean <- as.numeric(t(mid_weights) %*% fmean)
+#     mid_etl <- as.numeric(mid$out)
+#     mid_starr <- mid_mean / mid_etl
+#     # the mid_* values MIGHT be 0 for a dollar-neutral strategy so we need to reset the values
+#     # if(is.na(mid_starr) | is.infinite(mid_starr)) mid_starr <- 0
+#     # tmp_starr <- mid_starr
+#     
+#     # cat("mid_mean", mid_mean, "\n")
+#     # cat("mid_etl", mid_etl, "\n")
+#     # cat("mid_starr", mid_starr, "\n")
+#     
+#     if(mid_starr > ub_starr){
+#       # if mid_starr > ub_starr then mid_starr becomes the new upper bound
+#       ub_mean <- mid_mean
+#       ub_starr <- mid_starr
+#       new_ret <- (lb_mean + ub_mean) / 2
+#       if(!is.null(constraints$max_pos)){
+#         mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
+#       } else {
+#         mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
+#       }
+#       mid_weights <- matrix(mid$weights, ncol=1)
+#       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
+#       mid_etl <- as.numeric(mid$out)
+#       mid_starr <- mid_mean / mid_etl
+#       # the mid_* values MIGHT be 0 for a dollar-neutral strategy so we need to reset the values
+#       # if(is.na(mid_starr) | is.infinite(mid_starr)) mid_starr <- 0
+#     } else if(mid_starr > lb_starr){
+#       # if mid_starr > lb_starr then mid_starr becomes the new lower bound
+#       lb_mean <- mid_mean
+#       lb_starr <- mid_starr
+#       new_ret <- (lb_mean + ub_mean) / 2
+#       if(!is.null(constraints$max_pos)){
+#         mid <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
+#       } else {
+#         mid <- etl_opt(R=R, constraints=constraints, moments=moments, target=new_ret, alpha=alpha, solver=solver)
+#       }
+#       mid_weights <- matrix(mid$weights, ncol=1)
+#       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
+#       mid_etl <- as.numeric(mid$out)
+#       mid_starr <- mid_mean / mid_etl
+#       # the mid_* values MIGHT be 0 for a dollar-neutral strategy so we need to reset the values
+#       # if(is.na(mid_starr) | is.infinite(mid_starr)) mid_starr <- 0
+#     }
+#     i <- i + 1
+#   }
+#   return(new_ret)
+# }
+
+
+
+# Function to calculate the sharpe ratio.
+# Used as the objective function for optimize()
+sharpe_obj_fun <- function(target_return, R, constraints, moments, lambda_hhi=NULL, conc_groups=NULL, solver="quadprog"){
+  opt <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1, 
+                 target=target_return, lambda_hhi=lambda_hhi, 
+                 conc_groups=conc_groups, solver=solver)
+  weights <- opt$weights
+  opt_mean <- as.numeric(t(weights) %*% matrix(moments$mean, ncol=1))
+  opt_sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+  opt_sr <- opt_mean / opt_sd
+  return(opt_sr)
+}
+
+# This function uses optimize() to find the target return value that 
+# results in the maximum sharpe ratio (mean / sd).
+# returns the target return value
+max_sr_opt <- function(R, constraints, moments, lambda_hhi, conc_groups, solver){
+  # create a copy of the moments that can be modified
+  tmp_moments <- moments
   
   # Find the maximum return
-  max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, target=NA)
+  max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, 
+                        target=NA, solver="glpk")
   max_mean <- as.numeric(-max_ret$out)
   
-  # Calculate the sr at the maximum mean return portfolio
-  ub_weights <- matrix(max_ret$weights, ncol=1)
-  ub_mean <- max_mean
-  ub_sd <- as.numeric(sqrt(t(ub_weights) %*% moments$var %*% ub_weights))
-  # sr at the upper bound
-  ub_sr <- ub_mean / ub_sd
+  # Find the minimum return
+  tmp_moments$mean <- -1 * moments$mean
+  min_ret <- maxret_opt(R=R, moments=tmp_moments, constraints=constraints, 
+                        target=NA, solver="glpk")
+  min_mean <- as.numeric(min_ret$out)
   
-  # Calculate the sr at the miminum var portfolio
-  tmpmoments <- moments
-  tmpmoments$mean <- rep(0, length(moments$mean))
-  lb_sr <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=NA, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
-  lb_weights <- matrix(lb_sr$weights)
-  lb_mean <- as.numeric(t(lb_weights) %*% fmean)
-  lb_sd <- as.numeric(sqrt(t(lb_weights) %*% moments$var %*% lb_weights))
-  # sr at the lower bound
-  lb_sr <- lb_mean / lb_sd
-  
-  # cat("lb_mean:", lb_mean, "\n")
-  # cat("ub_mean:", ub_mean, "\n")
-  # print("**********")
-  
-  # want to find the return that maximizes mean / sd
-  i <- 1
-  while((abs(ub_sr - lb_sr) > tol) & (i < maxit)){
-    # bisection method to find the maximum mean / sd
-    
-    # Find the starr at the mean return midpoint
-    new_ret <- (lb_mean + ub_mean) / 2
-    mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
-    mid_weights <- matrix(mid$weights, ncol=1)
-    mid_mean <- as.numeric(t(mid_weights) %*% fmean)
-    mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
-    mid_sr <- mid_mean / mid_sd
-    # tmp_sr <- mid_sr
-    
-    # print(i)
-    # cat("new_ret:", new_ret, "\n")
-    # cat("mid_sr:", mid_sr, "\n")
-    # print("**********")
-    
-    if(mid_sr > ub_sr){
-      # if mid_sr > ub_sr then mid_sr becomes the new upper bound
-      ub_mean <- mid_mean
-      ub_sr <- mid_sr
-      new_ret <- (lb_mean + ub_mean) / 2
-      mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
-      mid_weights <- matrix(mid$weights, ncol=1)
-      mid_mean <- as.numeric(t(mid_weights) %*% fmean)
-      mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
-      mid_sr <- mid_mean / mid_sd
-    } else if(mid_sr > lb_sr){
-      # if mid_sr > lb_sr then mid_sr becomes the new lower bound
-      lb_mean <- mid_mean
-      lb_sr <- mid_sr
-      new_ret <- (lb_mean + ub_mean) / 2
-      mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
-      mid_weights <- matrix(mid$weights, ncol=1)
-      mid_mean <- as.numeric(t(mid_weights) %*% fmean)
-      mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
-      mid_sr <- mid_mean / mid_sd
-    }
-    i <- i + 1
+  # use optimize() to find the target return value that maximizes sharpe ratio
+  opt <- try(optimize(f=sharpe_obj_fun, R=R, constraints=constraints, 
+                      solver=solver, lambda_hhi=lambda_hhi, 
+                      conc_groups=conc_groups, moments=moments, 
+                      lower=min_mean, upper=max_mean, 
+                      maximum=TRUE, tol=.Machine$double.eps), 
+             silent=TRUE)
+  if(inherits(opt, "try-error")){
+    stop(paste("Objective function failed with message\n", opt))
+    return(NULL)
   }
-  return(new_ret)
+  return(opt$maximum)
 }
+
+
+# This was my implementation of a binary search for the maximum sharpe ratio 
+# target return. Better to use optimize() in R rather than my method. -Ross Bennett
+# max_sr_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups, solver="quadprog", tol=.Machine$double.eps^0.5, maxit=50){
+#   # This function returns the target mean return that maximizes mean / sd (i.e. sharpe ratio)
+#   
+#   # get the forecast mean from moments
+#   fmean <- matrix(moments$mean, ncol=1)
+#   
+#   # Find the maximum return
+#   max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, target=NA)
+#   max_mean <- as.numeric(-max_ret$out)
+#   
+#   # Calculate the sr at the maximum mean return portfolio
+#   ub_weights <- matrix(max_ret$weights, ncol=1)
+#   ub_mean <- max_mean
+#   ub_sd <- as.numeric(sqrt(t(ub_weights) %*% moments$var %*% ub_weights))
+#   # sr at the upper bound
+#   ub_sr <- ub_mean / ub_sd
+#   
+#   # Calculate the sr at the miminum var portfolio
+#   tmpmoments <- moments
+#   tmpmoments$mean <- rep(0, length(moments$mean))
+#   lb_sr <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=NA, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
+#   lb_weights <- matrix(lb_sr$weights)
+#   lb_mean <- as.numeric(t(lb_weights) %*% fmean)
+#   lb_sd <- as.numeric(sqrt(t(lb_weights) %*% moments$var %*% lb_weights))
+#   # sr at the lower bound
+#   lb_sr <- lb_mean / lb_sd
+#   
+#   # cat("lb_mean:", lb_mean, "\n")
+#   # cat("ub_mean:", ub_mean, "\n")
+#   # print("**********")
+#   
+#   # want to find the return that maximizes mean / sd
+#   i <- 1
+#   while((abs(ub_sr - lb_sr) > tol) & (i < maxit)){
+#     # bisection method to find the maximum mean / sd
+#     
+#     # Find the starr at the mean return midpoint
+#     new_ret <- (lb_mean + ub_mean) / 2
+#     mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
+#     mid_weights <- matrix(mid$weights, ncol=1)
+#     mid_mean <- as.numeric(t(mid_weights) %*% fmean)
+#     mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
+#     mid_sr <- mid_mean / mid_sd
+#     # tmp_sr <- mid_sr
+#     
+#     # print(i)
+#     # cat("new_ret:", new_ret, "\n")
+#     # cat("mid_sr:", mid_sr, "\n")
+#     # print("**********")
+#     
+#     if(mid_sr > ub_sr){
+#       # if mid_sr > ub_sr then mid_sr becomes the new upper bound
+#       ub_mean <- mid_mean
+#       ub_sr <- mid_sr
+#       new_ret <- (lb_mean + ub_mean) / 2
+#       mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
+#       mid_weights <- matrix(mid$weights, ncol=1)
+#       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
+#       mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
+#       mid_sr <- mid_mean / mid_sd
+#     } else if(mid_sr > lb_sr){
+#       # if mid_sr > lb_sr then mid_sr becomes the new lower bound
+#       lb_mean <- mid_mean
+#       lb_sr <- mid_sr
+#       new_ret <- (lb_mean + ub_mean) / 2
+#       mid <- gmv_opt(R=R, constraints=constraints, moments=tmpmoments, lambda=1, target=new_ret, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
+#       mid_weights <- matrix(mid$weights, ncol=1)
+#       mid_mean <- as.numeric(t(mid_weights) %*% fmean)
+#       mid_sd <- as.numeric(sqrt(t(mid_weights) %*% moments$var %*% mid_weights))
+#       mid_sr <- mid_mean / mid_sd
+#     }
+#     i <- i + 1
+#   }
+#   return(new_ret)
+# }
 
 
 ###############################################################################
