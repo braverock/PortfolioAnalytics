@@ -16,7 +16,8 @@
   \item{R}{an xts object of asset returns}
 
   \item{portfolio_list}{list of portfolio objects created
-  by \code{\link{portfolio.spec}}}
+  by \code{\link{portfolio.spec}} and combined with
+  \code{\link{combine.portfolios}}}
 
   \item{type}{type of efficient frontier, see
   \code{\link{create.EfficientFrontier}}}

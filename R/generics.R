@@ -93,7 +93,7 @@ summary.optimize.portfolio.rebalancing <- function(object, ...) {
 #' print method for objects of class \code{summary.optimize.portfolio.rebalancing}
 #' 
 #' @param x an object of class \code{summary.optimize.portfolio.rebalancing}.
-#' @param ... any other passthru parameters
+#' @param \dots any other passthru parameters
 #' @param digits number of digits used for printing
 #' @seealso \code{\link{summary.optimize.portfolio.rebalancing}}
 #' @author Ross Bennett
