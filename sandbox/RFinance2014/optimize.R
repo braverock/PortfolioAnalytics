@@ -118,11 +118,11 @@ opt.minVarLW <- optimize.portfolio.rebalancing(equity.data, portf.minvar,
                                                training_period=training, 
                                                trailing_periods=trailing)
 
-# Chart the weights
+# Chart the weights through time
 chart.Weights(opt.minVarSample, main="minVarSample Weights")
 chart.Weights(opt.minVarLW, main="minVarLW Weights")
 
-# Compute and chart the returns
+# Compute and chart the performance summary
 ret.minVarSample <- summary(opt.minVarSample)$portfolio_returns
 ret.minVarRobust <- summary(opt.minVarLW)$portfolio_returns
 ret.minVar <- cbind(ret.minVarSample, ret.minVarRobust)
@@ -136,15 +136,19 @@ portf.init <- portfolio.spec(stocks,
 # weights sum to 0
 portf.dn <- add.constraint(portf.init, type="weight_sum", 
                                   min_sum=-0.01, max_sum=0.01)
-# box constraints such that no stock has weight less than -20% or greater than 20%
+
+# Add box constraints such that no stock has weight less than -20% or 
+# greater than 20%
 portf.dn <- add.constraint(portf.dn, type="box", 
                                   min=-0.2, max=0.2)
-# maximum of 20 non-zero positions
+# Add position limit constraint such that the portfolio has a maximum
+# of 20 non-zero positions
 portf.dn <- add.constraint(portf.dn, type="position_limit", max_pos=20)
 
-# cov(equity.data[,1], market) / var(market)
-# coef(lm(equity.data ~ market))[2,]
+# Compute the betas of each stock
 betas <- t(CAPM.beta(equity.data, market, Rf))
+
+# Add factor exposure constraint to limit portfolio beta
 portf.dn <- add.constraint(portf.dn, type="factor_exposure", B=betas, 
                            lower=-0.5, upper=0.5)
 # portf.dn <- add.constraint(portf.dn, type="leverage_exposure", leverage=2)
@@ -152,16 +156,16 @@ portf.dn <- add.constraint(portf.dn, type="factor_exposure", B=betas,
 rp <- random_portfolios(portf.dn, 10000, eliminate=TRUE)
 dim(rp)
 
-# Add objective
-# objective to minimize portfolio variance
+# Add objective to target return of 0.001
 portf.dn.StdDev <- add.objective(portf.dn, type="return", name="mean", 
                                  target=0.001)
+# Add objective to minimize portfolio variance
 portf.dn.StdDev <- add.objective(portf.dn.StdDev, type="risk", name="StdDev")
 
+# Run optimization
 opt <- optimize.portfolio(equity.data, portf.dn.StdDev, 
                           optimize_method="random", rp=rp,
                           trace=TRUE)
-opt
 
 plot(opt, risk.col="StdDev", neighbors=10)
 
@@ -175,7 +179,7 @@ plot(opt, risk.col="StdDev", neighbors=10)
 # sum(wts != 0)
 
 # Prep data for Examples 3 and 4
-# For now, use the first 8
+# For now, use the first 8 
 R <- edhec[,1:8]
 # Abreviate column names for convenience and plotting
 colnames(R) <- c("CA", "CTAG", "DS", "EM", "EQN", "ED", "FA", "GM")
@@ -201,27 +205,43 @@ portf.init <- add.objective(portf.init, type="return",
 # Add objective to minimize expected shortfall
 portf.minES <- add.objective(portf.init, type="risk", name="ES")
 
-# Add objective to 
+# Add risk budget objective with upper limit on percentage contribution
 portf.minES.RB <- add.objective(portf.minES, type="risk_budget", 
-                                name="ES", max_prisk=0.3)
+                                name="ES", max_prisk=0.2)
 
+# Relax the box constraint
+portf.minES.RB$constraints[[2]]$max <- rep(1,ncol(R))
+# print.default(portf.minES.RB$constraints[[2]])
+
+# Add risk budget objective to minimize concentration of percentage component
+# contribution to risk. Concentration is defined as the Herfindahl-Hirschman
+# Index (HHI). $\sum_{i=1}^n x_i^2$
 portf.minES.EqRB <- add.objective(portf.minES, type="risk_budget", 
                                   name="ES", min_concentration=TRUE)
+# relax the box constraint
+portf.minES.EqRB <- add.constraint(portf.minES.EqRB, type="box", 
+                                   min=0.05, max=1, indexnum=2)
+# portf.minES.RB$constraints[[2]]$max <- rep(1,ncol(R))
+# print.default(portf.minES.EqRB$constraints[[2]])
 
+# Combine the portfolios so we can make a single call to 
+# optimize.portfolio
 portf <- combine.portfolios(list(minES=portf.minES, 
                                  minES.RB=portf.minES.RB, 
                                  minES.EqRB=portf.minES.EqRB))
 
+# Run the optimization
 opt.minES <- optimize.portfolio(R, portf, optimize_method="DEoptim", 
                                 search_size=2000, trace=TRUE, traceDE=0,
                                 message=TRUE)
 
-extractObjectiveMeasures(opt.minES)
+# ES(R, portfolio_method="component", weights=extractWeights(opt.minES[[1]]))
+# extractObjectiveMeasures(opt.minES)
 
+# extract objective measures, out, and weights 
 xtract <- extractStats(opt.minES)
-str(xtract)
 
-# get the mean column from each element of the list
+# get the 'mean' and 'ES' columns from each element of the list
 xtract.mean <- unlist(lapply(xtract, function(x) x[,"mean"]))
 xtract.ES <- unlist(lapply(xtract, function(x) x[,"ES"]))
 
@@ -239,7 +259,7 @@ text(x=opt.minES[[1]]$objective_measures$ES,
      y=opt.minES[[1]]$objective_measures$mean,
      labels="Min ES", pos=4, col="purple", cex=0.8)
 
-# min ES with Risk Budget
+# min ES with risk budget upper limit on component contribution to risk
 points(x=opt.minES[[2]]$objective_measures$ES$MES,
        y=opt.minES[[2]]$objective_measures$mean,
        pch=15, col="black")
@@ -247,7 +267,7 @@ text(x=opt.minES[[2]]$objective_measures$ES$MES,
      y=opt.minES[[2]]$objective_measures$mean,
      labels="Min ES RB", pos=4, col="black", cex=0.8)
 
-# opt.MeanES.EqRB
+# min ES with equal (i.e. min concentration) component contribution to risk
 points(x=opt.minES[[3]]$objective_measures$ES$MES,
        y=opt.minES[[3]]$objective_measures$mean,
        pch=15, col="darkgreen")
@@ -255,9 +275,17 @@ text(x=opt.minES[[3]]$objective_measures$ES$MES,
      y=opt.minES[[3]]$objective_measures$mean,
      labels="Min ES EqRB", pos=4, col="darkgreen", cex=0.8)
 
-
+# Chart the risk contribution
+chart.RiskBudget(opt.minES[[1]], risk.type="percentage", neighbors=10)
 chart.RiskBudget(opt.minES[[2]], risk.type="percentage", neighbors=10)
 chart.RiskBudget(opt.minES[[3]], risk.type="percentage", neighbors=10)
+
+# Now we want to evaluate portfolio through time
+
+# Add risk budget objective to minES portfolio with multiplier=0 so that it
+# is calculated, but does not affect optimization
+portf.minES <- add.objective(portf.minES, type="risk_budget", 
+                             name="ES", multiplier=0)
 
 # Rebalancing parameters
 # Set rebalancing frequency
@@ -275,8 +303,18 @@ bt.opt.minES <- optimize.portfolio.rebalancing(R, portf,
                                                trailing_periods=trailing,
                                                traceDE=0, message=TRUE)
 
-##### Example 4 #####
+# Plot the risk contribution through time
+chart.RiskBudget(bt.opt.minES[[1]], risk.type="percentage")
+chart.RiskBudget(bt.opt.minES[[2]], risk.type="percentage")
+chart.RiskBudget(bt.opt.minES[[3]], risk.type="percentage")
 
+# Extract the returns from each element and chart the performance summary
+ret.bt.opt <- do.call(cbind, lapply(bt.opt.minES, function(x) summary(x)$portfolio_returns))
+colnames(ret.bt.opt) <- c("min ES", "min ES RB", "min ES Eq RB")
+head(ret.bt.opt)
+charts.PerformanceSummary(ret.bt.opt)
+
+##### Example 4 #####
 
 # CRRA 4th order expansion expected utility
 # PerformanceAnalytics for moments
@@ -286,6 +324,42 @@ bt.opt.minES <- optimize.portfolio.rebalancing(R, portf,
 # skewness.MM
 # kurtosis.MM
 
+# Simple function to compute the moments used in CRRA
+custom.moments <- function(R, ...){
+  out <- list()
+  out$sigma <- cov(R)
+  out$m3 <- PerformanceAnalytics:::M3.MM(R)
+  out$m4 <- PerformanceAnalytics:::M4.MM(R)
+  out
+}
+
+
+# Fourth order expansion of CRRA expected utility
+CRRA <- function(R, weights, lambda, sigma, m3, m4){
+  M2.w <- t(weights) %*% sigma %*% weights
+  M3.w <- t(weights) %*% m3 %*% (weights %x% weights)
+  M4.w <- t(weights) %*% m4 %*% (weights %x% weights %x% weights)
+  term1 <- 0.5 * lambda * M2.w
+  term2 <- (1 / 6) * lambda * (lambda + 1) * M3.w
+  term3 <- (1 / 24) * lambda * (lambda + 1) * (lambda + 2) * M4.w
+  out <- -term1 + term2 - term3
+  out
+}
+
+# test the CRRA function
+portf.tmp <- portfolio.spec(funds)
+portf.tmp <- add.constraint(portf.tmp, type="weight_sum", 
+                             min_sum=0.99, max_sum=1.01)
+
+portf.tmp <- add.constraint(portf.tmp, type="box", 
+                             min=0.05, max=0.4)
+
+# Set multiplier=0 so that it is calculated, but does not affect the optimization
+portf.tmp <- add.objective(portf.tmp, type="return", 
+                            name="CRRA", arguments=list(lambda=5))
+
+momentargs <- custom.moments(R)
+constrained_objective(weights, R, portf.tmp, env=momentargs)
 
 
 # # Calculate the turnover per period
