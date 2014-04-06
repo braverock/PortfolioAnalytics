@@ -6,6 +6,10 @@ output: beamer_presentation
 toc: true
 ---
 
+
+
+
+
 # Portfolio Optimization
 
 ## General
@@ -85,9 +89,18 @@ TODO: Add a nice graphic here (Guy might have one)
 
 Specify a Portfolio --> Add Constraints --> Add Objectives --> Run Optimization --> Analyze Results
 
-# Examples
+<!---
+Describe each function:
+- portfolio.spec
+- add.constraint
+- add.objective
+- optimize.portfolio and optimize.portfolio.rebalancing
+Just give a general description of the functions to analyze results
+-->
 
-## Data
+# Data
+
+## Data Setup
 Here we will look at portfolio optimization in the context of portfolio of hedge funds
 
 * EDHEC-Risk Alternative Indexes
@@ -102,11 +115,27 @@ Here we will look at portfolio optimization in the context of portfolio of hedge
 
 
 
-![](figure/unnamed-chunk-2.png) 
+![](figure/unnamed-chunk-3.png) 
 
 
 ## Distribution of Monthly Returns
-![](figure/unnamed-chunk-3.png) 
+![](figure/unnamed-chunk-4.png) 
+
+
+# Example 1
+
+## Minimum Variance Portfolio
+Set up portfolio to minimize variance
+
+```r
+# Specify initial portfolio
+init <- portfolio.spec(funds)
+# Add constraints
+port1 <- add.constraint(init, type="full_investment")
+port1 <- add.constraint(port1, type="box", min=0.05, max=0.6)
+# Add objective
+port1 <- add.objective(port1, type="risk", name="var")
+```
 
 
 

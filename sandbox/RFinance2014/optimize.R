@@ -1,221 +1,263 @@
 # script used to run the portfolio optimizations
 
+# Examples to consider
+# Example 1: Consider a portfolio of stocks. Full investment and long 
+# only (or box) constraints. Objective to minimize portfolio variance. 
+# Demonstrate a custom moments function to compare a sample covariance 
+# matrix estimate and a robust covariance matrix estimate. An alternative 
+# to a MCD estimate is ledoit-wolf shrinkage, DCC GARCH model, 
+# factor model, etc.
+
+# Example 2: Consider a portfolio of stocks. Dollar neutral, beta
+# neutral, box constraints, and leverage_exposure constraints. Objective
+# to minimize portfolio StdDev. This will demonstrate some of the 
+# more advanced constraint types. Could also introduce position limit
+# constraints here in this example. 
+
+# Example 3: Consider an allocation to hedge funds using the 
+# EDHEC-Risk Alternative Index as a proxy. This will be an extended
+# example starting with an objective to minimize portfolio expected
+# shortfall, then risk budget percent contribution limit, then equal 
+# risk contribution limit. 
+
+# Example 4: Consider an allocation to hedge funds using the 
+# EDHEC-Risk Alternative Index as a proxy. 
+
+# Option 1 for example 4
+# Objective to maximize a risk adjusted return measure 
+# (e.g.Calmar Ratio, Sterling Ratio, Sortino Ratio, or Upside Potential 
+# Ratio)
+
+# I prefer doing this option
+# Option 2 for example 4
+# Objective to maximize the
+# fourth order expansion of the Constant Relative Risk Aversion (CRRA)
+# expected utility function. Demonstrate a custom moment function and
+# a custom objective function.
+
+# Load the packages
 library(PortfolioAnalytics)
+library(foreach)
+library(ROI)
+library(ROI.plugin.quadprog)
+library(ROI.plugin.glpk)
+
+# Source in the lwShrink function
+source("R/lwShrink.R")
+
+# Example 1 and Example 2 will use the crsp_weekly data
+# load the CRSP weekly data
+load("data/crsp_weekly.rda")
+
+# Example 3 and Example 4 will use the edhec data
 # Load the updated edhec dataset
 load("data/edhec.rda")
 
+
+# Prep data for Examples 1 and 2
+# use the first 10 stocks in largecap_weekly, midcap_weekly, and smallcap_weekly
+N <- 10
+equity.data <- cbind(largecap_weekly[,1:N], 
+                     midcap_weekly[,1:N], 
+                     smallcap_weekly[,1:N])
+market <- largecap_weekly[,21]
+Rf <- largecap_weekly[,22]
+stocks <- colnames(equity.data)
+
+# Specify an initial portfolio
+portf.init <- portfolio.spec(stocks)
+
+##### Example 1 #####
+# Add constraints
+# weights sum to 1
+portf.minvar <- add.constraint(portf.init, type="full_investment")
+# box constraints such that no stock has weight less than 1% or greater than 20%
+portf.minvar <- add.constraint(portf.minvar, type="box", min=0.01, max=0.2)
+
+# Add objective
+# objective to minimize portfolio variance
+portf.minvar <- add.objective(portf.minvar, type="risk", name="var")
+
+# Rebalancing parameters
+# Set rebalancing frequency
+rebal.freq <- "quarters"
+# Training Period
+training <- 400
+# Trailing Period
+trailing <- 250
+
+# Run optimization
+# Sample Covariance Matrix Estimate
+
+# By default, momentFUN uses set.portfolio.moments which computes the sample
+# moment estimates
+
+opt.minVarSample <- optimize.portfolio.rebalancing(equity.data, portf.minvar, 
+                                                   optimize_method="ROI", 
+                                                   rebalance_on=rebal.freq, 
+                                                   training_period=training, 
+                                                   trailing_periods=trailing)
+
+# Custom moment function to use Ledoit-Wolf shinkage covariance matrix estimate
+lw.sigma <- function(R, ...){
+  out <- list()
+  # estimate covariance matrix via robust covariance matrix estimate, 
+  # ledoit-wolf shrinkage, GARCH, factor model, etc.
+  # set.seed(1234)
+  # out$sigma <- MASS::cov.rob(R, method="mcd", ...)$cov
+  out$sigma <- lwShrink(R)$cov
+  #print(index(last(R)))
+  return(out)
+}
+
+# Using Ledoit-Wolf Shrinkage Covariance Matrix Estimate
+opt.minVarLW <- optimize.portfolio.rebalancing(equity.data, portf.minvar, 
+                                               optimize_method="ROI", 
+                                               momentFUN=lw.sigma,
+                                               rebalance_on=rebal.freq, 
+                                               training_period=training, 
+                                               trailing_periods=trailing)
+
+# Chart the weights
+chart.Weights(opt.minVarSample, main="minVarSample Weights")
+chart.Weights(opt.minVarLW, main="minVarLW Weights")
+
+# Compute and chart the returns
+ret.minVarSample <- summary(opt.minVarSample)$portfolio_returns
+ret.minVarRobust <- summary(opt.minVarLW)$portfolio_returns
+ret.minVar <- cbind(ret.minVarSample, ret.minVarRobust)
+colnames(ret.minVar) <- c("Sample", "LW")
+charts.PerformanceSummary(ret.minVar)
+
+##### Example 2 #####
+portf.init <- portfolio.spec(stocks, 
+                             weight_seq=generatesequence(min=-0.2, max=0.2, by=0.001))
+
+# weights sum to 0
+portf.dn <- add.constraint(portf.init, type="weight_sum", 
+                                  min_sum=-0.01, max_sum=0.01)
+# box constraints such that no stock has weight less than -20% or greater than 20%
+portf.dn <- add.constraint(portf.dn, type="box", 
+                                  min=-0.2, max=0.2)
+# maximum of 20 non-zero positions
+portf.dn <- add.constraint(portf.dn, type="position_limit", max_pos=20)
+
+# cov(equity.data[,1], market) / var(market)
+# coef(lm(equity.data ~ market))[2,]
+betas <- t(CAPM.beta(equity.data, market, Rf))
+portf.dn <- add.constraint(portf.dn, type="factor_exposure", B=betas, 
+                           lower=-0.5, upper=0.5)
+# portf.dn <- add.constraint(portf.dn, type="leverage_exposure", leverage=2)
+
+rp <- random_portfolios(portf.dn, 10000, eliminate=TRUE)
+dim(rp)
+
+# Add objective
+# objective to minimize portfolio variance
+portf.dn.StdDev <- add.objective(portf.dn, type="return", name="mean", 
+                                 target=0.001)
+portf.dn.StdDev <- add.objective(portf.dn.StdDev, type="risk", name="StdDev")
+
+opt <- optimize.portfolio(equity.data, portf.dn.StdDev, 
+                          optimize_method="random", rp=rp,
+                          trace=TRUE)
+opt
+
+plot(opt, risk.col="StdDev", neighbors=10)
+
+# chart.RiskReward(opt, risk.col="StdDev", neighbors=25)
+# chart.Weights(opt, plot.type="bar", legend.loc=NULL)
+# wts <- extractWeights(opt)
+# t(wts) %*% betas
+# sum(abs(wts))
+# sum(wts[wts > 0])
+# sum(wts[wts < 0])
+# sum(wts != 0)
+
+# Prep data for Examples 3 and 4
 # For now, use the first 8
 R <- edhec[,1:8]
 # Abreviate column names for convenience and plotting
 colnames(R) <- c("CA", "CTAG", "DS", "EM", "EQN", "ED", "FA", "GM")
 funds <- colnames(R)
 
-# Example 1
-# Box constraints, minimum variance portfolio
-# specify portfolio
-init <- portfolio.spec(funds)
+##### Example 3 #####
+# Example 3 will consider three portfolios
+# - minES
+# - minES with 30% component contribution limit
+# - minES with equal risk contribution
 
-# Add constraints
-port1 <- add.constraint(init, type="full_investment")
-port1 <- add.constraint(port1, type="box", min=0.05, max=0.6)
+portf.init <- portfolio.spec(funds)
+portf.init <- add.constraint(portf.init, type="weight_sum", 
+                             min_sum=0.99, max_sum=1.01)
 
-# Add objective
-port1 <- add.objective(port1, type="risk", name="var")
+portf.init <- add.constraint(portf.init, type="box", 
+                             min=0.05, max=0.4)
 
-# Custom moment function to use 
-robust.sigma <- function(R, ...){
-  out <- list()
-  set.seed(1234)
-  out$sigma <- MASS::cov.rob(R, method="mcd", ...)$cov
-  return(out)
-}
+# Set multiplier=0 so that it is calculated, but does not affect the optimization
+portf.init <- add.objective(portf.init, type="return", 
+                            name="mean", multiplier=0)
 
-# Rebalancing parameters
-# Set rebalancing frequency
-rebal.freq <- "quarters"
-# Training Period
-training <- 120
-# Trailing Period
-trailing <- 72
+# Add objective to minimize expected shortfall
+portf.minES <- add.objective(portf.init, type="risk", name="ES")
 
-# Run optimization
-# Sample Covariance Matrix Estimate
-opt.minVarSample <- optimize.portfolio.rebalancing(R, port1, 
-                                                   optimize_method="ROI", 
-                                                   rebalance_on=rebal.freq, 
-                                                   training_period=training, 
-                                                   trailing_periods=trailing)
-ret.minVarSample <- summary(opt.minVarSample)$portfolio_returns
+# Add objective to 
+portf.minES.RB <- add.objective(portf.minES, type="risk_budget", 
+                                name="ES", max_prisk=0.3)
 
+portf.minES.EqRB <- add.objective(portf.minES, type="risk_budget", 
+                                  name="ES", min_concentration=TRUE)
 
-# MCD Covarinace Matrix Estimate
-opt.minVarRobust <- optimize.portfolio.rebalancing(R, port1, 
-                                                   optimize_method="ROI", 
-                                                   momentFUN=robust.sigma,
-                                                   rebalance_on=rebal.freq, 
-                                                   training_period=training, 
-                                                   trailing_periods=trailing)
+portf <- combine.portfolios(list(minES=portf.minES, 
+                                 minES.RB=portf.minES.RB, 
+                                 minES.EqRB=portf.minES.EqRB))
 
-# Chart the weights
-chart.Weights(opt.minVarSample, main="minVarSample Weights")
-chart.Weights(opt.minVarRobust, main="minVarRobust Weights")
+opt.minES <- optimize.portfolio(R, portf, optimize_method="DEoptim", 
+                                search_size=2000, trace=TRUE, traceDE=0,
+                                message=TRUE)
 
-# Calculate the turnover per period
-turnover.rebalancing <- function(object){
-  weights <- extractWeights(object)
-  n <- nrow(weights)
-  out <- vector("numeric", n)
-  out[1] <- NA
-  for(i in 2:n){
-    out[i] <- out[i] <- sum(abs(as.numeric(weights[i,]) - as.numeric(weights[i-1,])))
-  }
-  xts(out, index(weights))
-}
+extractObjectiveMeasures(opt.minES)
 
-# Compute the average turnover
-to.minVarSample <- mean(turnover.rebalancing(opt.minVarSample), na.rm=TRUE)
-to.minVarRobust <- mean(turnover.rebalancing(opt.minVarRobust), na.rm=TRUE)
+xtract <- extractStats(opt.minES)
+str(xtract)
 
-
-# Calculate the diversification per period
-diversification.rebalancing <- function(object){
-  weights <- extractWeights(object)
-  n <- nrow(weights)
-  out <- vector("numeric", n)
-  for(i in 1:n){
-    out[i] <- 1 - sum(weights[i,]^2)
-  }
-  xts(out, index(weights))
-}
-
-# Compute the average diversification
-div.minVarSample <- mean(diversification.rebalancing(opt.minVarSample))
-div.minVarRobust <- mean(diversification.rebalancing(opt.minVarRobust))
-
-# Compute the returns
-ret.minVarSample <- summary(opt.minVarSample)$portfolio_returns
-ret.minVarRobust <- summary(opt.minVarRobust)$portfolio_returns
-ret.minVar <- cbind(ret.minVarSample, ret.minVarRobust)
-colnames(ret.minVar) <- c("Sample", "Robust")
-charts.PerformanceSummary(ret.minVar)
-
-## Example 2
-
-# Example 2 will consider three portfolios
-# - meanES
-# - meanES with 30% component contribution limit
-# - meanES equal risk contribution
-
-# meanES
-# Add constraints
-port2 <- add.constraint(init, type="full_investment")
-port2 <- add.constraint(port2, type="box", min=0, max=0.6)
-
-# Add objectives
-port2 <- add.objective(port2, type="return", name="mean")
-port2 <- add.objective(port2, type="risk", name="ES", 
-                       arguments=list(p=0.92, clean="boudt"))
-
-opt.MeanES.ROI <- optimize.portfolio(R, port2, optimize_method="ROI", trace=TRUE)
-plot(opt.MeanES.ROI)
-
-# relax the constraints for random portfolio
-port2$constraints[[1]]$min_sum <- 0.99
-port2$constraints[[1]]$max_sum <- 1.01
-
-search.size <- 20000
-
-set.seed(123)
-rp <- random_portfolios(port2, permutations=search.size)
-
-#set.seed(123)
-#rp1 <- random_portfolios(port2, permutations=search.size)
-#all.equal(rp, rp1)
-
-
-opt.MeanES.RP <- optimize.portfolio(R, port2, optimize_method="random", 
-                                    rp=rp, trace=TRUE)
-#extractObjectiveMeasures(combine.optimizations(list(opt.MeanES.ROI, opt.MeanES.RP)))
-#extractWeights(combine.optimizations(list(opt.MeanES.ROI, opt.MeanES.RP)))
-
-plot(opt.MeanES.RP, neighbors=25)
-
-# Calculate the component contribution to risk
-portContribES <- ES(R, p=0.92, portfolio_method="component", 
-                    weights=extractWeights(opt.MeanES.RP))
-portContribES$pct_contrib_MES
-
-# Now suppose we want to place limits on percent component contribution to risk
-port3 <- add.objective(port2, type="risk_budget", name="ES", 
-                       arguments=list(p=0.92, clean="boudt"), max_prisk=0.35)
-
-opt.MeanES.RB <- optimize.portfolio(R, port3, optimize_method="random", 
-                                   trace=TRUE, rp=rp)
-opt.MeanES.RB
-
-chart.RiskBudget(opt.MeanES.RB, risk.type="percentage", neighbors=25)
-
-
-port4 <- add.objective(port2, type="risk_budget", name="ES", 
-                       arguments=list(p=0.92, clean="boudt"), 
-                       min_concentration=TRUE)
-opt.MeanES.EqRB <- optimize.portfolio(R, port4, optimize_method="random", 
-                                   trace=TRUE, rp=rp)
-opt.MeanES.EqRB
-chart.RiskBudget(opt.MeanES.EqRB, risk.type="percentage", neighbors=25)
-
-# plot
-# - opt.meanES.ROI
-# - opt.meanES.RP
-# - opt.meanES.RB
-# - opt.meanES.EqRB
-
-xtract <- extractStats(opt.MeanES.RP)
+# get the mean column from each element of the list
+xtract.mean <- unlist(lapply(xtract, function(x) x[,"mean"]))
+xtract.ES <- unlist(lapply(xtract, function(x) x[,"ES"]))
 
 # plot the feasible space
-par(mar=c(6,4,4,1)+0.1)
-plot(xtract[,"ES"], xtract[,"mean"], col="gray", 
+par(mar=c(7,4,4,1)+0.1)
+plot(xtract.ES, xtract.mean, col="gray", 
      xlab="ES", ylab="Mean",
-     xlim=c(0, max(xtract[,"ES"])))
+     xlim=c(0, max(xtract.ES)))
 
-# opt.MeanES.ROI
-points(x=opt.MeanES.ROI$objective_measures$ES,
-       y=opt.MeanES.ROI$objective_measures$mean,
-       pch=15, col="blue")
-text(x=opt.MeanES.ROI$objective_measures$ES,
-       y=opt.MeanES.ROI$objective_measures$mean,
-       labels="Mean ES ROI", pos=4, col="blue", cex=0.8)
-
-# opt.MeanES.RP
-points(x=opt.MeanES.RP$objective_measures$ES,
-       y=opt.MeanES.RP$objective_measures$mean,
+# min ES
+points(x=opt.minES[[1]]$objective_measures$ES,
+       y=opt.minES[[1]]$objective_measures$mean,
        pch=15, col="purple")
-text(x=opt.MeanES.RP$objective_measures$ES,
-     y=opt.MeanES.RP$objective_measures$mean,
-     labels="Mean ES RP", pos=1, col="purple", cex=0.8)
+text(x=opt.minES[[1]]$objective_measures$ES,
+     y=opt.minES[[1]]$objective_measures$mean,
+     labels="Min ES", pos=4, col="purple", cex=0.8)
 
-# opt.MeanES.RB
-points(x=opt.MeanES.RB$objective_measures$ES$MES,
-       y=opt.MeanES.RB$objective_measures$mean,
+# min ES with Risk Budget
+points(x=opt.minES[[2]]$objective_measures$ES$MES,
+       y=opt.minES[[2]]$objective_measures$mean,
        pch=15, col="black")
-text(x=opt.MeanES.RB$objective_measures$ES$MES,
-     y=opt.MeanES.RB$objective_measures$mean,
-     labels="Mean ES RB", pos=4, col="black", cex=0.8)
+text(x=opt.minES[[2]]$objective_measures$ES$MES,
+     y=opt.minES[[2]]$objective_measures$mean,
+     labels="Min ES RB", pos=4, col="black", cex=0.8)
 
 # opt.MeanES.EqRB
-points(x=opt.MeanES.EqRB$objective_measures$ES$MES,
-       y=opt.MeanES.EqRB$objective_measures$mean,
+points(x=opt.minES[[3]]$objective_measures$ES$MES,
+       y=opt.minES[[3]]$objective_measures$mean,
        pch=15, col="darkgreen")
-text(x=opt.MeanES.EqRB$objective_measures$ES$MES,
-     y=opt.MeanES.EqRB$objective_measures$mean,
-     labels="Mean ES EqRB", pos=4, col="darkgreen", cex=0.8)
+text(x=opt.minES[[3]]$objective_measures$ES$MES,
+     y=opt.minES[[3]]$objective_measures$mean,
+     labels="Min ES EqRB", pos=4, col="darkgreen", cex=0.8)
 
 
-# Backtest these three portfolios
-# I'm going to add a risk budget object to port2 with multiplier=0 so that
-# it is calculated, but does not affect the optimization
-port2 <- add.objective(port2, name="ES", type="risk_budget", arguments=list(p=0.92), multiplier=0)
-
+chart.RiskBudget(opt.minES[[2]], risk.type="percentage", neighbors=10)
+chart.RiskBudget(opt.minES[[3]], risk.type="percentage", neighbors=10)
 
 # Rebalancing parameters
 # Set rebalancing frequency
@@ -225,47 +267,46 @@ training <- 120
 # Trailing Period
 trailing <- 72
 
-bt.opt.MeanES <- optimize.portfolio.rebalancing(R, port2, rp=rp,
-                                                optimize_method="random", 
-                                                rebalance_on=rebal.freq, 
-                                                training_period=training, 
-                                                trailing_periods=trailing)
-chart.RiskBudget(bt.opt.MeanES, main="Mean ES", risk.type="percentage")
+# Backtest
+bt.opt.minES <- optimize.portfolio.rebalancing(R, portf,
+                                               optimize_method="DEoptim", 
+                                               rebalance_on=rebal.freq, 
+                                               training_period=training, 
+                                               trailing_periods=trailing,
+                                               traceDE=0, message=TRUE)
 
-bt.opt.MeanES.RB <- optimize.portfolio.rebalancing(R, port3, rp=rp,
-                                                   optimize_method="random", 
-                                                   rebalance_on=rebal.freq, 
-                                                   training_period=training, 
-                                                   trailing_periods=trailing)
-chart.RiskBudget(bt.opt.MeanES.RB, main="Mean-ES 30% Limit", 
-                 risk.type="percentage")
+##### Example 4 #####
 
-
-bt.opt.MeanES.EqRB <- optimize.portfolio.rebalancing(R, port4, rp=rp,
-                                                     optimize_method="random", 
-                                                     rebalance_on=rebal.freq, 
-                                                     training_period=training, 
-                                                     trailing_periods=trailing)
-chart.RiskBudget(bt.opt.MeanES.EqRB, main="Mean-ES Equal Risk", 
-                 risk.type="percentage")
-
-# pass in a portfolio.list instead of typing this 3 times
-
-# calculate the returns
-ret.MeanES <- summary(bt.opt.MeanES)$portfolio_returns
-ret.MeanES.RB <- summary(bt.opt.MeanES.RB)$portfolio_returns
-ret.MeanES.EqRB <- summary(bt.opt.MeanES.EqRB)$portfolio_returns
-
-# Combine the returns
-ret <- cbind(ret.MeanES, ret.MeanES.RB, ret.MeanES.EqRB)
-colnames(ret) <- c("Mean.ES", "MeanES.RB", "MeanES.EqRB")
-charts.PerformanceSummary(ret)
 
 # CRRA 4th order expansion expected utility
-# look in PerformanceAnalytics
+# PerformanceAnalytics for moments
 # M3.MM
 # M4.MM
 # StdDev.MM
 # skewness.MM
 # kurtosis.MM
 
+
+
+# # Calculate the turnover per period
+# turnover.rebalancing <- function(object){
+#   weights <- extractWeights(object)
+#   n <- nrow(weights)
+#   out <- vector("numeric", n)
+#   out[1] <- NA
+#   for(i in 2:n){
+#     out[i] <- out[i] <- sum(abs(as.numeric(weights[i,]) - as.numeric(weights[i-1,])))
+#   }
+#   xts(out, index(weights))
+# }
+# 
+# # Calculate the diversification per period
+# diversification.rebalancing <- function(object){
+#   weights <- extractWeights(object)
+#   n <- nrow(weights)
+#   out <- vector("numeric", n)
+#   for(i in 1:n){
+#     out[i] <- 1 - sum(weights[i,]^2)
+#   }
+#   xts(out, index(weights))
+# }
