@@ -139,17 +139,26 @@ boxplot(coredata(R[,order(ES(R, p=p, invert=FALSE))]),
 # Example 1
 
 ## Minimum Variance Portfolio
-Set up portfolio to minimize variance
-```{r, eval=FALSE}
-# Specify initial portfolio
-init <- portfolio.spec(funds)
-# Add constraints
-port1 <- add.constraint(init, type="full_investment")
-port1 <- add.constraint(port1, type="box", min=0.05, max=0.6)
-# Add objective
-port1 <- add.objective(port1, type="risk", name="var")
-```
+Consider a portfolio of stocks. Full investment and long only (or box) constraints. Objective to minimize portfolio variance. Demonstrate a custom moments function to compare a sample covariance matrix estimate and a Ledoit-Wolf shrinkage covariance matrix estimate. An alternative is a robust (MCD, MVE, etc.) estimate, DCC GARCH model, factor model, etc.
 
+Use the crsp_weekly data set
+
+# Example 2
+
+## Market Neutral Portfolio
+Consider a portfolio of stocks. Dollar neutral, beta neutral, box, and position limit constraints. Objective to minimize portfolio StdDev. This will demonstrate some of the more advanced constraint types.
+
+Use the crsp_weekly data set
+
+# Example 3
+
+## Minimum Expected Shortfall
+Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. This will be an extended example starting with an objective to minimize portfolio expected shortfall, then risk budget percent contribution limit, then equal risk contribution limit.
+
+# Example 4
+
+## Maximize CRRA
+Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. Objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in the Boudt paper and Martinelli paper. Demonstrate a custom moment function and a custom objective function.
 
 # Conclusion
 

@@ -316,17 +316,11 @@ charts.PerformanceSummary(ret.bt.opt)
 
 ##### Example 4 #####
 
-# CRRA 4th order expansion expected utility
-# PerformanceAnalytics for moments
-# M3.MM
-# M4.MM
-# StdDev.MM
-# skewness.MM
-# kurtosis.MM
 
 # Simple function to compute the moments used in CRRA
 custom.moments <- function(R, ...){
   out <- list()
+  out$mu <- colMeans(R)
   out$sigma <- cov(R)
   out$m3 <- PerformanceAnalytics:::M3.MM(R)
   out$m4 <- PerformanceAnalytics:::M4.MM(R)
@@ -336,6 +330,7 @@ custom.moments <- function(R, ...){
 
 # Fourth order expansion of CRRA expected utility
 CRRA <- function(R, weights, lambda, sigma, m3, m4){
+  weights <- matrix(weights, ncol=1)
   M2.w <- t(weights) %*% sigma %*% weights
   M3.w <- t(weights) %*% m3 %*% (weights %x% weights)
   M4.w <- t(weights) %*% m4 %*% (weights %x% weights %x% weights)
@@ -354,13 +349,38 @@ portf.tmp <- add.constraint(portf.tmp, type="weight_sum",
 portf.tmp <- add.constraint(portf.tmp, type="box", 
                              min=0.05, max=0.4)
 
-# Set multiplier=0 so that it is calculated, but does not affect the optimization
 portf.tmp <- add.objective(portf.tmp, type="return", 
                             name="CRRA", arguments=list(lambda=5))
 
-momentargs <- custom.moments(R)
-constrained_objective(weights, R, portf.tmp, env=momentargs)
+# I just want these for plotting
+# Set multiplier=0 so that it is calculated, but does not affect the optimization
+portf.tmp <- add.objective(portf.tmp, type="return", name="mean", multiplier=0)
+portf.tmp <- add.objective(portf.tmp, type="risk", name="ES", multiplier=0)
+portf.tmp <- add.objective(portf.tmp, type="risk", name="StdDev", multiplier=0)
 
+# Run the optimization
+opt.crra <- optimize.portfolio(R, portf.tmp, optimize_method="DEoptim", 
+                               search_size=5000, trace=TRUE, 
+                               momentFUN="custom.moments")
+
+opt.crra
+chart.RiskReward(opt.crra, risk.col="ES")
+chart.RiskReward(opt.crra, risk.col="StdDev")
+
+# Run the optimization with rebalancing
+bt.opt.crra <- optimize.portfolio.rebalancing(R, portf.tmp, 
+                                              optimize_method="DEoptim",
+                                              search_size=5000, trace=TRUE,
+                                              momentFUN="custom.moments",
+                                              rebalance_on=rebal.freq, 
+                                              training_period=training, 
+                                              trailing_periods=trailing)
+# Compute the portfolio returns with rebalancing
+ret.crra <- summary(bt.opt.crra)$portfolio_returns
+colnames(ret.crra) <- "CRRA"
+
+# Plot the performance summary of the returns from example 3 and CRRA
+charts.PerformanceSummary(cbind(ret.bt.opt, ret.crra))
 
 # # Calculate the turnover per period
 # turnover.rebalancing <- function(object){
