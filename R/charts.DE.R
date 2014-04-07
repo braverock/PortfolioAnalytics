@@ -223,38 +223,43 @@ chart.Scatter.DE <- function(object, ..., neighbors = NULL, return.col='mean', r
   if(!is.null(R) & !is.null(portfolio)){
     w.traj = unique(object$DEoutput$member$bestmemit)
     rows = nrow(w.traj)
-    rr = matrix(nrow=rows, ncol=2)
-    ## maybe rewrite as an apply statement by row on w.traj
-    rtc = NULL
-    rsc = NULL
-    trajnames = NULL
-    for(i in 1:rows){
-      
-      w = w.traj[i,]
-      x = unlist(constrained_objective(w=w, R=R, portfolio=portfolio, trace=TRUE))
-      names(x)<-PortfolioAnalytics:::name.replace(names(x))
-      if(is.null(trajnames)) trajnames<-names(x)
-      if(is.null(rsc)){
-        rtc = pmatch(return.col,trajnames)
-        if(is.na(rtc)) {
-          rtc = pmatch(paste(return.col,return.col,sep='.'),trajnames)
+    # Only attempt to draw trajectory if rows is greater than or equal to 1
+    # There may be some corner cases where nrow(w.traj) is equal to 0, 
+    # resulting in a 'subscript out of bounds' error.
+    if(rows >= 1){
+      rr = matrix(nrow=rows, ncol=2)
+      ## maybe rewrite as an apply statement by row on w.traj
+      rtc = NULL
+      rsc = NULL
+      trajnames = NULL
+      for(i in 1:rows){
+        
+        w = w.traj[i,]
+        x = unlist(constrained_objective(w=w, R=R, portfolio=portfolio, trace=TRUE))
+        names(x)<-PortfolioAnalytics:::name.replace(names(x))
+        if(is.null(trajnames)) trajnames<-names(x)
+        if(is.null(rsc)){
+          rtc = pmatch(return.col,trajnames)
+          if(is.na(rtc)) {
+            rtc = pmatch(paste(return.col,return.col,sep='.'),trajnames)
+          }
+          rsc = pmatch(risk.col,trajnames)
+          if(is.na(rsc)) {
+            rsc = pmatch(paste(risk.col,risk.col,sep='.'),trajnames)
+          }
         }
-        rsc = pmatch(risk.col,trajnames)
-        if(is.na(rsc)) {
-          rsc = pmatch(paste(risk.col,risk.col,sep='.'),trajnames)
-        }
+        rr[i,1] = x[rsc] #'FIXME
+        rr[i,2] = x[rtc]  #'FIXME      
       }
-      rr[i,1] = x[rsc] #'FIXME
-      rr[i,2] = x[rtc]  #'FIXME      
-    }
-    colors2 = colorRamp(c("blue","lightblue"))
-    colortrail = rgb(colors2((0:rows)/rows),maxColorValue=255)
-    for(i in 1:rows){
-      points(rr[i,1], rr[i,2], pch=1, col = colortrail[rows-i+1])
-    }
-    
-    for(i in 2:rows){
-      segments(rr[i,1], rr[i,2], rr[i-1,1], rr[i-1,2],col = colortrail[rows-i+1], lty = 1, lwd = 2)
+      colors2 = colorRamp(c("blue","lightblue"))
+      colortrail = rgb(colors2((0:rows)/rows),maxColorValue=255)
+      for(i in 1:rows){
+        points(rr[i,1], rr[i,2], pch=1, col = colortrail[rows-i+1])
+      }
+      
+      for(i in 2:rows){
+        segments(rr[i,1], rr[i,2], rr[i-1,1], rr[i-1,2],col = colortrail[rows-i+1], lty = 1, lwd = 2)
+      }
     }
   } else{
     message("Trajectory cannot be drawn because return object or constraints were not passed.")
