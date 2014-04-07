@@ -47,14 +47,21 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   rhs.vec <- c(rhs.vec, constraints$min_sum, -constraints$max_sum)
   
   # Add min box constraints
-  Amat <- rbind(Amat, diag(N))
-  dir.vec <- c(dir.vec, rep(">=", N))
-  rhs.vec <- c(rhs.vec, constraints$min)
+  # Amat <- rbind(Amat, diag(N))
+  # dir.vec <- c(dir.vec, rep(">=", N))
+  # rhs.vec <- c(rhs.vec, constraints$min)
   
   # Add max box constraints
-  Amat <- rbind(Amat, -1*diag(N))
-  dir.vec <- c(dir.vec, rep(">=", N))
-  rhs.vec <- c(rhs.vec, -constraints$max)
+  # Amat <- rbind(Amat, -1*diag(N))
+  # dir.vec <- c(dir.vec, rep(">=", N))
+  # rhs.vec <- c(rhs.vec, -constraints$max)
+  
+  # Applying box constraints
+  lb <- constraints$min
+  ub <- constraints$max
+  
+  bnds <- V_bound(li=seq.int(1L, N), lb=as.numeric(lb),
+                  ui=seq.int(1L, N), ub=as.numeric(ub))
   
   # Include group constraints
   if(try(!is.null(constraints$groups), silent=TRUE)){
@@ -86,9 +93,9 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   # rhs.vec[is.infinite(rhs.vec) & (rhs.vec >= 0)] <- .Machine$double.xmax
   
   # Remove the rows of Amat and elements of rhs.vec where rhs.vec is Inf or -Inf
-  Amat <- Amat[!is.infinite(rhs.vec), ]
-  dir.vec <- dir.vec[!is.infinite(rhs.vec)]
-  rhs.vec <- rhs.vec[!is.infinite(rhs.vec)]
+  # Amat <- Amat[!is.infinite(rhs.vec), ]
+  # dir.vec <- dir.vec[!is.infinite(rhs.vec)]
+  # rhs.vec <- rhs.vec[!is.infinite(rhs.vec)]
   
   # Set up the quadratic objective
   if(!is.null(lambda_hhi)){
@@ -120,8 +127,9 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   }
   # set up the optimization problem and solve
   opt.prob <- OP(objective=ROI_objective, 
-                       constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec))
-  result <- ROI_solve(x=opt.prob, solver=solver)
+                       constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
+                 bounds=bnds)
+  result <- try(ROI_solve(x=opt.prob, solver=solver), silent=TRUE)
   
   # result <- try(solve.QP(Dmat=Dmat, dvec=dvec, Amat=t(Amat), bvec=rhs.vec, meq=meq), silent=TRUE)
   if(inherits(x=result, "try-error")) stop(paste("No solution found:", result))
