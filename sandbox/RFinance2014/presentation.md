@@ -1,10 +1,12 @@
----
+% R/Finance 2014: Complex Portfolio Optimization with PortfolioAnalytics
+% Ross Bennett
+% May 16, 2014
+
+<!---
 title: "R/Finance 2014:Complex Portfolio Optimization with PortfolioAnalytics"
 author: Ross Bennett
 date: May 16, 2014
-output: beamer_presentation
-toc: true
----
+-->
 
 
 
@@ -13,7 +15,7 @@ toc: true
 # Portfolio Optimization
 
 ## General
-TODO: Add some general comments here about goals and pitfalls of optimizatio in the context of constructing a portfolio.
+TODO: Add some general comments here about goals and pitfalls of optimization in the context of constructing a portfolio.
 
 ## Modern Portfolio Theory
 "Modern" Portfolio Theory (MPT) was introduced by Harry Markowitz in 1952.
@@ -392,8 +394,14 @@ bt.opt.minES <- optimize.portfolio.rebalancing(R, portf,
 ```
 
 
-## Risk Contributions Through Time
-TODO: Add figure of risk budget
+## Min ES Risk Contributions Through Time
+![alt text](optimization_figures/risk_minES.png)
+
+## Min ES Risk Budget Limit Risk Contributions Through Time
+![alt text](optimization_figures/risk_minESRB.png)
+
+## Min ES Equal Component Contribution Risk Contributions Through Time
+![alt text](optimization_figures/risk_minESEqRB.png)
 
 
 ## Compute Returns and Chart Performance

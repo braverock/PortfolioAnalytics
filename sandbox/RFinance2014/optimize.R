@@ -236,6 +236,11 @@ portf.minES.EqRB <- add.constraint(portf.minES.EqRB, type="box",
 # portf.minES.RB$constraints[[2]]$max <- rep(1,ncol(R))
 # print.default(portf.minES.EqRB$constraints[[2]])
 
+# Add risk budget objective to minES portfolio with multiplier=0 so that it
+# is calculated, but does not affect optimization
+portf.minES <- add.objective(portf.minES, type="risk_budget", 
+                             name="ES", multiplier=0)
+
 # Combine the portfolios so we can make a single call to 
 # optimize.portfolio
 portf <- combine.portfolios(list(minES=portf.minES, 
@@ -255,11 +260,6 @@ if(file.exists(paste(results.dir, "opt.minES.rda", sep="/"))){
 }
 
 # Now we want to evaluate the optimization through time
-
-# Add risk budget objective to minES portfolio with multiplier=0 so that it
-# is calculated, but does not affect optimization
-portf.minES <- add.objective(portf.minES, type="risk_budget", 
-                             name="ES", multiplier=0)
 
 # Rebalancing parameters
 # Set rebalancing frequency
