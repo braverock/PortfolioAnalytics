@@ -47,14 +47,14 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   rhs.vec <- c(rhs.vec, constraints$min_sum, -constraints$max_sum)
   
   # Add min box constraints
-  # Amat <- rbind(Amat, diag(N))
-  # dir.vec <- c(dir.vec, rep(">=", N))
-  # rhs.vec <- c(rhs.vec, constraints$min)
+  Amat <- rbind(Amat, diag(N))
+  dir.vec <- c(dir.vec, rep(">=", N))
+  rhs.vec <- c(rhs.vec, constraints$min)
   
   # Add max box constraints
-  # Amat <- rbind(Amat, -1*diag(N))
-  # dir.vec <- c(dir.vec, rep(">=", N))
-  # rhs.vec <- c(rhs.vec, -constraints$max)
+  Amat <- rbind(Amat, -1*diag(N))
+  dir.vec <- c(dir.vec, rep(">=", N))
+  rhs.vec <- c(rhs.vec, -constraints$max)
   
   # Applying box constraints
   lb <- constraints$min
@@ -92,10 +92,10 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   # rhs.vec[is.infinite(rhs.vec) & (rhs.vec <= 0)] <- -.Machine$double.xmax
   # rhs.vec[is.infinite(rhs.vec) & (rhs.vec >= 0)] <- .Machine$double.xmax
   
-  # Remove the rows of Amat and elements of rhs.vec where rhs.vec is Inf or -Inf
-  # Amat <- Amat[!is.infinite(rhs.vec), ]
-  # dir.vec <- dir.vec[!is.infinite(rhs.vec)]
-  # rhs.vec <- rhs.vec[!is.infinite(rhs.vec)]
+  # Remove the rows of Amat and elements of dir.vec and rhs.vec where rhs.vec is Inf or -Inf
+  Amat <- Amat[!is.infinite(rhs.vec), ]
+  dir.vec <- dir.vec[!is.infinite(rhs.vec)]
+  rhs.vec <- rhs.vec[!is.infinite(rhs.vec)]
   
   # Set up the quadratic objective
   if(!is.null(lambda_hhi)){
