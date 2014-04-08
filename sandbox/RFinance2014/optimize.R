@@ -35,12 +35,17 @@
 # expected utility function. Demonstrate a custom moment function and
 # a custom objective function.
 
+# Set the directory to save the optimization results
+results.dir <- "optimization_results"
+
 # Load the packages
 library(PortfolioAnalytics)
 library(foreach)
 library(ROI)
 library(ROI.plugin.quadprog)
-library(ROI.plugin.glpk)
+
+# for running via Rscript
+library(methods)
 
 # Source in the lwShrink function
 source("R/lwShrink.R")
@@ -56,18 +61,17 @@ load("data/edhec.rda")
 
 # Prep data for Examples 1 and 2
 # use the first 10 stocks in largecap_weekly, midcap_weekly, and smallcap_weekly
-N <- 10
-equity.data <- cbind(largecap_weekly[,1:N], 
-                     midcap_weekly[,1:N], 
-                     smallcap_weekly[,1:N])
+equity.data <- cbind(largecap_weekly[,1:10], 
+                     midcap_weekly[,1:10], 
+                     smallcap_weekly[,1:10])
 market <- largecap_weekly[,21]
 Rf <- largecap_weekly[,22]
 stocks <- colnames(equity.data)
 
-# Specify an initial portfolio
-portf.init <- portfolio.spec(stocks)
 
 ##### Example 1 #####
+# Specify an initial portfolio
+portf.init <- portfolio.spec(stocks)
 # Add constraints
 # weights sum to 1
 portf.minvar <- add.constraint(portf.init, type="full_investment")
@@ -78,7 +82,7 @@ portf.minvar <- add.constraint(portf.minvar, type="box", min=0.01, max=0.2)
 # objective to minimize portfolio variance
 portf.minvar <- add.objective(portf.minvar, type="risk", name="var")
 
-# Rebalancing parameters
+# Backtesting parameters
 # Set rebalancing frequency
 rebal.freq <- "quarters"
 # Training Period
@@ -92,11 +96,19 @@ trailing <- 250
 # By default, momentFUN uses set.portfolio.moments which computes the sample
 # moment estimates
 
-opt.minVarSample <- optimize.portfolio.rebalancing(equity.data, portf.minvar, 
-                                                   optimize_method="ROI", 
-                                                   rebalance_on=rebal.freq, 
-                                                   training_period=training, 
-                                                   trailing_periods=trailing)
+cat("Example 1: running minimum variance with sample covariance matrix 
+    estimate backtest\n")
+if(file.exists(paste(results.dir, "opt.minVarSample.rda", sep="/"))){
+  cat("file already exists\n")
+} else {
+  opt.minVarSample <- optimize.portfolio.rebalancing(equity.data, portf.minvar, 
+                                                     optimize_method="ROI", 
+                                                     rebalance_on=rebal.freq, 
+                                                     training_period=training, 
+                                                     trailing_periods=trailing)
+  cat("opt.minVarSample complete. Saving results to ", results.dir, "\n") 
+  save(opt.minVarSample, file=paste(results.dir, "opt.minVarSample.rda", sep="/"))
+}
 
 # Custom moment function to use Ledoit-Wolf shinkage covariance matrix estimate
 lw.sigma <- function(R, ...){
@@ -110,28 +122,24 @@ lw.sigma <- function(R, ...){
   return(out)
 }
 
-# Using Ledoit-Wolf Shrinkage Covariance Matrix Estimate
-opt.minVarLW <- optimize.portfolio.rebalancing(equity.data, portf.minvar, 
-                                               optimize_method="ROI", 
-                                               momentFUN=lw.sigma,
-                                               rebalance_on=rebal.freq, 
-                                               training_period=training, 
-                                               trailing_periods=trailing)
-
-# Chart the weights through time
-chart.Weights(opt.minVarSample, main="minVarSample Weights")
-chart.Weights(opt.minVarLW, main="minVarLW Weights")
-
-# Compute and chart the performance summary
-ret.minVarSample <- summary(opt.minVarSample)$portfolio_returns
-ret.minVarRobust <- summary(opt.minVarLW)$portfolio_returns
-ret.minVar <- cbind(ret.minVarSample, ret.minVarRobust)
-colnames(ret.minVar) <- c("Sample", "LW")
-charts.PerformanceSummary(ret.minVar)
+cat("Example 1: running minimum variance with Ledoit-Wolf shrinkage covariance 
+    matrix estimate backtest\n")
+if(file.exists(paste(results.dir, "opt.minVarLW.rda", sep="/"))){
+  cat("file already exists\n")
+} else{
+  # Using Ledoit-Wolf Shrinkage Covariance Matrix Estimate
+  opt.minVarLW <- optimize.portfolio.rebalancing(equity.data, portf.minvar, 
+                                                 optimize_method="ROI", 
+                                                 momentFUN=lw.sigma,
+                                                 rebalance_on=rebal.freq, 
+                                                 training_period=training, 
+                                                 trailing_periods=trailing)
+  cat("opt.minVarLW complete. Saving results to ", results.dir, "\n") 
+  save(opt.minVarLW, file=paste(results.dir, "opt.minVarLW.rda", sep="/"))
+}
 
 ##### Example 2 #####
-portf.init <- portfolio.spec(stocks, 
-                             weight_seq=generatesequence(min=-0.2, max=0.2, by=0.001))
+portf.init <- portfolio.spec(stocks)
 
 # weights sum to 0
 portf.dn <- add.constraint(portf.init, type="weight_sum", 
@@ -153,44 +161,48 @@ portf.dn <- add.constraint(portf.dn, type="factor_exposure", B=betas,
                            lower=-0.5, upper=0.5)
 # portf.dn <- add.constraint(portf.dn, type="leverage_exposure", leverage=2)
 
-rp <- random_portfolios(portf.dn, 10000, eliminate=TRUE)
-dim(rp)
+# generate random portfolios
+if(file.exists(paste(results.dir, "rp.rda", sep="/"))){
+  cat("random portfolios already generated\n")
+} else {
+  cat("generating random portfolios\n")
+  rp <- random_portfolios(portf.dn, 10000, eliminate=TRUE)
+  cat("random portfolios generated. Saving rp to ", results.dir, "\n") 
+  save(rp, file=paste(results.dir, "rp.rda", sep="/"))
+}
 
-# Add objective to target return of 0.001
-portf.dn.StdDev <- add.objective(portf.dn, type="return", name="mean", 
-                                 target=0.001)
-# Add objective to minimize portfolio variance
-portf.dn.StdDev <- add.objective(portf.dn.StdDev, type="risk", name="StdDev")
+# Add objective to maximize return
+portf.dn.StdDev <- add.objective(portf.dn, type="return", name="mean")
+# Add objective to target a portfolio standard deviation of 2%
+portf.dn.StdDev <- add.objective(portf.dn.StdDev, type="risk", name="StdDev",
+                                 target=0.02)
 
-# Run optimization
-opt <- optimize.portfolio(equity.data, portf.dn.StdDev, 
-                          optimize_method="random", rp=rp,
-                          trace=TRUE)
-
-plot(opt, risk.col="StdDev", neighbors=10)
-
-# chart.RiskReward(opt, risk.col="StdDev", neighbors=25)
-# chart.Weights(opt, plot.type="bar", legend.loc=NULL)
-# wts <- extractWeights(opt)
-# t(wts) %*% betas
-# sum(abs(wts))
-# sum(wts[wts > 0])
-# sum(wts[wts < 0])
-# sum(wts != 0)
+cat("Example 2: running dollar neutral optimization\n")
+if(file.exists(paste(results.dir, "opt.dn.rda", sep="/"))){
+  cat("file already exists\n")
+} else {
+  # Run optimization
+  opt.dn <- optimize.portfolio(equity.data, portf.dn.StdDev, 
+                               optimize_method="random", rp=rp,
+                               trace=TRUE)
+  cat("opt.dn complete. Saving results to ", results.dir, "\n") 
+  save(opt.dn, file=paste(results.dir, "opt.dn.rda", sep="/"))
+}
 
 # Prep data for Examples 3 and 4
 # For now, use the first 8 
 R <- edhec[,1:8]
 # Abreviate column names for convenience and plotting
 colnames(R) <- c("CA", "CTAG", "DS", "EM", "EQN", "ED", "FA", "GM")
-funds <- colnames(R)
+
 
 ##### Example 3 #####
 # Example 3 will consider three portfolios
 # - minES
-# - minES with 30% component contribution limit
+# - minES with component contribution limit
 # - minES with equal risk contribution
 
+funds <- colnames(R)
 portf.init <- portfolio.spec(funds)
 portf.init <- add.constraint(portf.init, type="weight_sum", 
                              min_sum=0.99, max_sum=1.01)
@@ -230,57 +242,19 @@ portf <- combine.portfolios(list(minES=portf.minES,
                                  minES.RB=portf.minES.RB, 
                                  minES.EqRB=portf.minES.EqRB))
 
-# Run the optimization
-opt.minES <- optimize.portfolio(R, portf, optimize_method="DEoptim", 
-                                search_size=2000, trace=TRUE, traceDE=0,
-                                message=TRUE)
+cat("Example 3: running minimum ES optimizations\n")
+if(file.exists(paste(results.dir, "opt.minES.rda", sep="/"))){
+  cat("file already exists\n")
+} else {
+  # Run the optimization
+  opt.minES <- optimize.portfolio(R, portf, optimize_method="DEoptim", 
+                                  search_size=2000, trace=TRUE, traceDE=0,
+                                  message=TRUE)
+  cat("opt.minES complete. Saving results to ", results.dir, "\n")
+  save(opt.minES, file=paste(results.dir, "opt.minES.rda", sep="/"))
+}
 
-# ES(R, portfolio_method="component", weights=extractWeights(opt.minES[[1]]))
-# extractObjectiveMeasures(opt.minES)
-
-# extract objective measures, out, and weights 
-xtract <- extractStats(opt.minES)
-
-# get the 'mean' and 'ES' columns from each element of the list
-xtract.mean <- unlist(lapply(xtract, function(x) x[,"mean"]))
-xtract.ES <- unlist(lapply(xtract, function(x) x[,"ES"]))
-
-# plot the feasible space
-par(mar=c(7,4,4,1)+0.1)
-plot(xtract.ES, xtract.mean, col="gray", 
-     xlab="ES", ylab="Mean",
-     xlim=c(0, max(xtract.ES)))
-
-# min ES
-points(x=opt.minES[[1]]$objective_measures$ES,
-       y=opt.minES[[1]]$objective_measures$mean,
-       pch=15, col="purple")
-text(x=opt.minES[[1]]$objective_measures$ES,
-     y=opt.minES[[1]]$objective_measures$mean,
-     labels="Min ES", pos=4, col="purple", cex=0.8)
-
-# min ES with risk budget upper limit on component contribution to risk
-points(x=opt.minES[[2]]$objective_measures$ES$MES,
-       y=opt.minES[[2]]$objective_measures$mean,
-       pch=15, col="black")
-text(x=opt.minES[[2]]$objective_measures$ES$MES,
-     y=opt.minES[[2]]$objective_measures$mean,
-     labels="Min ES RB", pos=4, col="black", cex=0.8)
-
-# min ES with equal (i.e. min concentration) component contribution to risk
-points(x=opt.minES[[3]]$objective_measures$ES$MES,
-       y=opt.minES[[3]]$objective_measures$mean,
-       pch=15, col="darkgreen")
-text(x=opt.minES[[3]]$objective_measures$ES$MES,
-     y=opt.minES[[3]]$objective_measures$mean,
-     labels="Min ES EqRB", pos=4, col="darkgreen", cex=0.8)
-
-# Chart the risk contribution
-chart.RiskBudget(opt.minES[[1]], risk.type="percentage", neighbors=10)
-chart.RiskBudget(opt.minES[[2]], risk.type="percentage", neighbors=10)
-chart.RiskBudget(opt.minES[[3]], risk.type="percentage", neighbors=10)
-
-# Now we want to evaluate portfolio through time
+# Now we want to evaluate the optimization through time
 
 # Add risk budget objective to minES portfolio with multiplier=0 so that it
 # is calculated, but does not affect optimization
@@ -295,30 +269,25 @@ training <- 120
 # Trailing Period
 trailing <- 72
 
-# Backtest
-bt.opt.minES <- optimize.portfolio.rebalancing(R, portf,
-                                               optimize_method="DEoptim", 
-                                               rebalance_on=rebal.freq, 
-                                               training_period=training, 
-                                               trailing_periods=trailing,
-                                               traceDE=0, message=TRUE)
-
-# Plot the risk contribution through time
-chart.RiskBudget(bt.opt.minES[[1]], risk.type="percentage")
-chart.RiskBudget(bt.opt.minES[[2]], risk.type="percentage")
-chart.RiskBudget(bt.opt.minES[[3]], risk.type="percentage")
-
-# Extract the returns from each element and chart the performance summary
-ret.bt.opt <- do.call(cbind, lapply(bt.opt.minES, function(x) summary(x)$portfolio_returns))
-colnames(ret.bt.opt) <- c("min ES", "min ES RB", "min ES Eq RB")
-head(ret.bt.opt)
-charts.PerformanceSummary(ret.bt.opt)
+cat("Example 3: running minimum ES backtests\n")
+if(file.exists(paste(results.dir, "bt.opt.minES.rda", sep="/"))){
+  cat("file already exists\n")
+} else {
+  # Backtest
+  bt.opt.minES <- optimize.portfolio.rebalancing(R, portf,
+                                                 optimize_method="DEoptim", 
+                                                 rebalance_on=rebal.freq, 
+                                                 training_period=training, 
+                                                 trailing_periods=trailing,
+                                                 traceDE=0, message=TRUE)
+  cat("bt.opt.minES complete. Saving results to ", results.dir, "\n")
+  save(bt.opt.minES, file=paste(results.dir, "bt.opt.minES.rda", sep="/"))
+}
 
 ##### Example 4 #####
 
-
 # Simple function to compute the moments used in CRRA
-custom.moments <- function(R, ...){
+crra.moments <- function(R, ...){
   out <- list()
   out$mu <- colMeans(R)
   out$sigma <- cov(R)
@@ -342,45 +311,50 @@ CRRA <- function(R, weights, lambda, sigma, m3, m4){
 }
 
 # test the CRRA function
-portf.tmp <- portfolio.spec(funds)
-portf.tmp <- add.constraint(portf.tmp, type="weight_sum", 
+portf.crra <- portfolio.spec(funds)
+portf.crra <- add.constraint(portf.crra, type="weight_sum", 
                              min_sum=0.99, max_sum=1.01)
 
-portf.tmp <- add.constraint(portf.tmp, type="box", 
+portf.crra <- add.constraint(portf.crra, type="box", 
                              min=0.05, max=0.4)
 
-portf.tmp <- add.objective(portf.tmp, type="return", 
+portf.crra <- add.objective(portf.crra, type="return", 
                             name="CRRA", arguments=list(lambda=5))
 
 # I just want these for plotting
 # Set multiplier=0 so that it is calculated, but does not affect the optimization
-portf.tmp <- add.objective(portf.tmp, type="return", name="mean", multiplier=0)
-portf.tmp <- add.objective(portf.tmp, type="risk", name="ES", multiplier=0)
-portf.tmp <- add.objective(portf.tmp, type="risk", name="StdDev", multiplier=0)
+portf.crra <- add.objective(portf.crra, type="return", name="mean", multiplier=0)
+portf.crra <- add.objective(portf.crra, type="risk", name="ES", multiplier=0)
+portf.crra <- add.objective(portf.crra, type="risk", name="StdDev", multiplier=0)
 
-# Run the optimization
-opt.crra <- optimize.portfolio(R, portf.tmp, optimize_method="DEoptim", 
-                               search_size=5000, trace=TRUE, 
-                               momentFUN="custom.moments")
+cat("Example 4: running maximum CRRA optimization\n")
+if(file.exists(paste(results.dir, "opt.crra.rda", sep="/"))){
+  cat("file already exists\n")
+} else {
+  # Run the optimization
+  opt.crra <- optimize.portfolio(R, portf.crra, optimize_method="DEoptim", 
+                                 search_size=5000, trace=TRUE, traceDE=0,
+                                 momentFUN="crra.moments")
+  cat("opt.crra complete. Saving results to ", results.dir, "\n") 
+  save(opt.crra, file=paste(results.dir, "opt.crra.rda", sep="/"))
+}
 
-opt.crra
-chart.RiskReward(opt.crra, risk.col="ES")
-chart.RiskReward(opt.crra, risk.col="StdDev")
-
-# Run the optimization with rebalancing
-bt.opt.crra <- optimize.portfolio.rebalancing(R, portf.tmp, 
-                                              optimize_method="DEoptim",
-                                              search_size=5000, trace=TRUE,
-                                              momentFUN="custom.moments",
-                                              rebalance_on=rebal.freq, 
-                                              training_period=training, 
-                                              trailing_periods=trailing)
-# Compute the portfolio returns with rebalancing
-ret.crra <- summary(bt.opt.crra)$portfolio_returns
-colnames(ret.crra) <- "CRRA"
-
-# Plot the performance summary of the returns from example 3 and CRRA
-charts.PerformanceSummary(cbind(ret.bt.opt, ret.crra))
+cat("Example 4: running maximum CRRA backtest\n")
+if(file.exists(paste(results.dir, "bt.opt.crra.rda", sep="/"))){
+  cat("file already exists\n")
+} else {
+  # Run the optimization with rebalancing
+  bt.opt.crra <- optimize.portfolio.rebalancing(R, portf.crra, 
+                                                optimize_method="DEoptim",
+                                                search_size=5000, trace=TRUE,
+                                                traceDE=0,
+                                                momentFUN="crra.moments",
+                                                rebalance_on=rebal.freq, 
+                                                training_period=training, 
+                                                trailing_periods=trailing)
+  cat("bt.opt.crra complete. Saving results to ", results.dir, "\n")
+  save(bt.opt.crra, file=paste(results.dir, "bt.opt.crra.rda", sep="/"))
+}
 
 # # Calculate the turnover per period
 # turnover.rebalancing <- function(object){
