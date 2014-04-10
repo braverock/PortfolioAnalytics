@@ -106,32 +106,19 @@ Describe each function:
 Just give a general description of the functions to analyze results
 -->
 
-# Data
-
-## Data Setup
-Here we will look at portfolio optimization in the context of portfolio of hedge funds
-
-* EDHEC-Risk Alternative Indexes
-* Monthly returns from 1/31/1997 to 1/31/2014
-    * Convertible Arbitrage (CA)
-    * CTA Global (CTAG)
-    * Distressed Securities (DS)
-    * Emerging Markets (EM)
-
-
-## Monthly Returns
-
-
-
-![](figure/unnamed-chunk-3.png) 
-
-
-## Distribution of Monthly Returns
-![](figure/unnamed-chunk-4.png) 
-
-
 
 # Example 1
+
+## Data Setup
+Here we will look at portfolio optimization in the context of stocks.
+
+* Selection of large cap, mid cap, and small cap stocks from CRSP data
+* 15 Large Cap
+* 15 Mid Cap
+* 5 Small Cap
+
+## Distribution of Monthly Returns
+![alt text](data_figures/equity_box.png)
 
 ## Minimum Variance Portfolio
 Consider a portfolio of stocks. Our objective to minimize portfolio variance subect to full investment and box constraints. We will use out of sample backtesting to compare the sample covariance matrix estimate and a Ledoit-Wolf shinkage estimate. 
@@ -143,10 +130,9 @@ Demonstrate a custom moments function to compare a sample covariance matrix esti
 ## Data
 
 ```r
-load("data/crsp_weekly.rda")
-equity.data <- cbind(largecap_weekly[,1:10], 
-                     midcap_weekly[,1:10], 
-                     smallcap_weekly[,1:10])
+equity.data <- cbind(largecap_weekly[,1:15], 
+                     midcap_weekly[,1:15], 
+                     smallcap_weekly[,1:5])
 ```
 
 
@@ -287,6 +273,28 @@ plot(opt.dn, main="Dollar Neutral Portfolio", risk.col="StdDev", neighbors=10)
 
 # Example 3
 
+## Data Setup
+Here we will look at portfolio optimization in the context of portfolio of hedge funds.
+
+* EDHEC-Risk Alternative Indexes
+* Monthly returns from 1/31/1997 to 1/31/2014
+    * Convertible Arbitrage (CA)
+    * Equity Market Neutral (EMN)
+    * Fixed Income Arbitrage (FIA)
+    * CTA Global (CTAG)
+    * Emerging Markets (EM)
+    * Global Macro (GM)
+
+
+## Monthly Returns
+![alt text](data_figures/relative_barvar.png)
+![alt text](data_figures/directional_barvar.png)
+
+
+## Distribution of Monthly Returns
+![alt text](data_figures/edhec_box.png)
+
+
 ## Minimum Expected Shortfall
 Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. This will be an extended example starting with an objective to minimize portfolio expected shortfall, then risk budget percent contribution limit, then equal risk contribution limit.
 * Minimize Expected Shortfall
@@ -298,9 +306,11 @@ Add risk budget objective to minimize concentration of percentage component cont
 ## Data
 
 ```r
-R <- edhec[,1:8]
+R <- edhec[,c("Convertible.Arbitrage", "Equity.Market.Neutral", 
+              "Fixed.Income.Arbitrage", 
+              "CTA.Global", "Emerging.Markets", "Global.Macro")]
 # Abreviate column names for convenience and plotting
-colnames(R) <- c("CA", "CTAG", "DS", "EM", "EQN", "ED", "FA", "GM")
+colnames(R) <- c("CA", "EMN", "FIA", "CTAG", "EM", "GM")
 ```
 
 

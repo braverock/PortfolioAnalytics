@@ -51,25 +51,12 @@ library(methods)
 source("R/lwShrink.R")
 
 # Example 1 and Example 2 will use the crsp_weekly data
-# load the CRSP weekly data
-load("data/crsp_weekly.rda")
-
 # Example 3 and Example 4 will use the edhec data
-# Load the updated edhec dataset
-load("data/edhec.rda")
-
-
-# Prep data for Examples 1 and 2
-# use the first 10 stocks in largecap_weekly, midcap_weekly, and smallcap_weekly
-equity.data <- cbind(largecap_weekly[,1:10], 
-                     midcap_weekly[,1:10], 
-                     smallcap_weekly[,1:10])
-market <- largecap_weekly[,21]
-Rf <- largecap_weekly[,22]
-stocks <- colnames(equity.data)
+source("data_prep.R")
 
 
 ##### Example 1 #####
+stocks <- colnames(equity.data)
 # Specify an initial portfolio
 portf.init <- portfolio.spec(stocks)
 # Add constraints
@@ -188,13 +175,6 @@ if(file.exists(paste(results.dir, "opt.dn.rda", sep="/"))){
   cat("opt.dn complete. Saving results to ", results.dir, "\n") 
   save(opt.dn, file=paste(results.dir, "opt.dn.rda", sep="/"))
 }
-
-# Prep data for Examples 3 and 4
-# For now, use the first 8 
-R <- edhec[,1:8]
-# Abreviate column names for convenience and plotting
-colnames(R) <- c("CA", "CTAG", "DS", "EM", "EQN", "ED", "FA", "GM")
-
 
 ##### Example 3 #####
 # Example 3 will consider three portfolios

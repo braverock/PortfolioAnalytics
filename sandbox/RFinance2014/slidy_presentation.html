@@ -155,44 +155,34 @@ Describe each function:
 Just give a general description of the functions to analyze results
 -->
 
+
 </div>
-<div id="data" class="titleslide slide section level1"><h1>Data</h1></div><div id="data-setup" class="slide section level2">
+<div id="example-1" class="titleslide slide section level1"><h1>Example 1</h1></div><div id="data-setup" class="slide section level2">
 <h1>Data Setup</h1>
-<p>Here we will look at portfolio optimization in the context of portfolio of hedge funds</p>
+<p>Here we will look at portfolio optimization in the context of stocks.</p>
 <ul>
-<li>EDHEC-Risk Alternative Indexes</li>
-<li>Monthly returns from 1/31/1997 to 1/31/2014
-<ul>
-<li>Convertible Arbitrage (CA)</li>
-<li>CTA Global (CTAG)</li>
-<li>Distressed Securities (DS)</li>
-<li>Emerging Markets (EM)</li>
-</ul></li>
+<li>Selection of large cap, mid cap, and small cap stocks from CRSP data</li>
+<li>15 Large Cap</li>
+<li>15 Mid Cap</li>
+<li>5 Small Cap</li>
 </ul>
-</div><div id="monthly-returns" class="slide section level2">
-<h1>Monthly Returns</h1>
-<div class="figure">
-<img src="figure/unnamed-chunk-3.png" />
-</div>
 </div><div id="distribution-of-monthly-returns" class="slide section level2">
 <h1>Distribution of Monthly Returns</h1>
 <div class="figure">
-<img src="figure/unnamed-chunk-4.png" />
+<img src="data_figures/equity_box.png" alt="alt text" /><p class="caption">alt text</p>
 </div>
-</div>
-<div id="example-1" class="titleslide slide section level1"><h1>Example 1</h1></div><div id="minimum-variance-portfolio" class="slide section level2">
+</div><div id="minimum-variance-portfolio" class="slide section level2">
 <h1>Minimum Variance Portfolio</h1>
 <p>Consider a portfolio of stocks. Our objective to minimize portfolio variance subect to full investment and box constraints. We will use out of sample backtesting to compare the sample covariance matrix estimate and a Ledoit-Wolf shinkage estimate.</p>
 <!---
 Demonstrate a custom moments function to compare a sample covariance matrix estimate and a Ledoit-Wolf shrinkage covariance matrix estimate. An alternative is a robust (MCD, MVE, etc.) estimate, DCC GARCH model, factor model, etc.
 -->
 
-</div><div id="data-1" class="slide section level2">
+</div><div id="data" class="slide section level2">
 <h1>Data</h1>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">load</span>(<span class="st">&quot;data/crsp_weekly.rda&quot;</span>)
-equity.data &lt;-<span class="st"> </span><span class="kw">cbind</span>(largecap_weekly[,<span class="dv">1</span>:<span class="dv">10</span>], 
-                     midcap_weekly[,<span class="dv">1</span>:<span class="dv">10</span>], 
-                     smallcap_weekly[,<span class="dv">1</span>:<span class="dv">10</span>])</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">equity.data &lt;-<span class="st"> </span><span class="kw">cbind</span>(largecap_weekly[,<span class="dv">1</span>:<span class="dv">15</span>], 
+                     midcap_weekly[,<span class="dv">1</span>:<span class="dv">15</span>], 
+                     smallcap_weekly[,<span class="dv">1</span>:<span class="dv">5</span>])</code></pre>
 </div><div id="specify-portfolio" class="slide section level2">
 <h1>Specify Portfolio</h1>
 <pre class="sourceCode r"><code class="sourceCode r">stocks &lt;-<span class="st"> </span><span class="kw">colnames</span>(equity.data)
@@ -294,15 +284,40 @@ opt.dn &lt;-<span class="st"> </span><span class="kw">optimize.portfolio</span>(
 <img src="optimization_figures/opt_dn.png" alt="alt text" /><p class="caption">alt text</p>
 </div>
 </div>
-<div id="example-3" class="titleslide slide section level1"><h1>Example 3</h1></div><div id="minimum-expected-shortfall" class="slide section level2">
+<div id="example-3" class="titleslide slide section level1"><h1>Example 3</h1></div><div id="data-setup-1" class="slide section level2">
+<h1>Data Setup</h1>
+<p>Here we will look at portfolio optimization in the context of portfolio of hedge funds.</p>
+<ul>
+<li>EDHEC-Risk Alternative Indexes</li>
+<li>Monthly returns from 1/31/1997 to 1/31/2014
+<ul>
+<li>Convertible Arbitrage (CA)</li>
+<li>Equity Market Neutral (EMN)</li>
+<li>Fixed Income Arbitrage (FIA)</li>
+<li>CTA Global (CTAG)</li>
+<li>Emerging Markets (EM)</li>
+<li>Global Macro (GM)</li>
+</ul></li>
+</ul>
+</div><div id="monthly-returns" class="slide section level2">
+<h1>Monthly Returns</h1>
+<p><img src="data_figures/relative_barvar.png" alt="alt text" /> <img src="data_figures/directional_barvar.png" alt="alt text" /></p>
+</div><div id="distribution-of-monthly-returns-1" class="slide section level2">
+<h1>Distribution of Monthly Returns</h1>
+<div class="figure">
+<img src="data_figures/edhec_box.png" alt="alt text" /><p class="caption">alt text</p>
+</div>
+</div><div id="minimum-expected-shortfall" class="slide section level2">
 <h1>Minimum Expected Shortfall</h1>
 <p>Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. This will be an extended example starting with an objective to minimize portfolio expected shortfall, then risk budget percent contribution limit, then equal risk contribution limit. * Minimize Expected Shortfall * Minimize Expected Shortfall with Risk Budget Limit * Minimize Expected Shortfall with Equal Risk Contribution</p>
 <p>Add risk budget objective to minimize concentration of percentage component contribution to risk. Concentration is defined as the Herfindahl-Hirschman Index (HHI). <span class="math">∑<sub><em>i</em> = 1</sub><sup><em>n</em></sup><em>x</em><sub><em>i</em></sub><sup>2</sup></span></p>
-</div><div id="data-2" class="slide section level2">
+</div><div id="data-1" class="slide section level2">
 <h1>Data</h1>
-<pre class="sourceCode r"><code class="sourceCode r">R &lt;-<span class="st"> </span>edhec[,<span class="dv">1</span>:<span class="dv">8</span>]
+<pre class="sourceCode r"><code class="sourceCode r">R &lt;-<span class="st"> </span>edhec[,<span class="kw">c</span>(<span class="st">&quot;Convertible.Arbitrage&quot;</span>, <span class="st">&quot;Equity.Market.Neutral&quot;</span>, 
+              <span class="st">&quot;Fixed.Income.Arbitrage&quot;</span>, 
+              <span class="st">&quot;CTA.Global&quot;</span>, <span class="st">&quot;Emerging.Markets&quot;</span>, <span class="st">&quot;Global.Macro&quot;</span>)]
 <span class="co"># Abreviate column names for convenience and plotting</span>
-<span class="kw">colnames</span>(R) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;CA&quot;</span>, <span class="st">&quot;CTAG&quot;</span>, <span class="st">&quot;DS&quot;</span>, <span class="st">&quot;EM&quot;</span>, <span class="st">&quot;EQN&quot;</span>, <span class="st">&quot;ED&quot;</span>, <span class="st">&quot;FA&quot;</span>, <span class="st">&quot;GM&quot;</span>)</code></pre>
+<span class="kw">colnames</span>(R) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;CA&quot;</span>, <span class="st">&quot;EMN&quot;</span>, <span class="st">&quot;FIA&quot;</span>, <span class="st">&quot;CTAG&quot;</span>, <span class="st">&quot;EM&quot;</span>, <span class="st">&quot;GM&quot;</span>)</code></pre>
 </div><div id="specify-initial-portfolio" class="slide section level2">
 <h1>Specify Initial Portfolio</h1>
 <pre class="sourceCode r"><code class="sourceCode r">funds &lt;-<span class="st"> </span><span class="kw">colnames</span>(R)
