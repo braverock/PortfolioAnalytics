@@ -145,7 +145,7 @@ betas <- t(CAPM.beta(equity.data, market, Rf))
 
 # Add factor exposure constraint to limit portfolio beta
 portf.dn <- add.constraint(portf.dn, type="factor_exposure", B=betas, 
-                           lower=-0.5, upper=0.5)
+                           lower=-0.25, upper=0.25)
 # portf.dn <- add.constraint(portf.dn, type="leverage_exposure", leverage=2)
 
 # generate random portfolios
@@ -159,7 +159,8 @@ if(file.exists(paste(results.dir, "rp.rda", sep="/"))){
 }
 
 # Add objective to maximize return
-portf.dn.StdDev <- add.objective(portf.dn, type="return", name="mean")
+portf.dn.StdDev <- add.objective(portf.dn, type="return", name="mean",
+                                 target=0.0015)
 # Add objective to target a portfolio standard deviation of 2%
 portf.dn.StdDev <- add.objective(portf.dn.StdDev, type="risk", name="StdDev",
                                  target=0.02)
@@ -199,7 +200,7 @@ portf.minES <- add.objective(portf.init, type="risk", name="ES")
 
 # Add risk budget objective with upper limit on percentage contribution
 portf.minES.RB <- add.objective(portf.minES, type="risk_budget", 
-                                name="ES", max_prisk=0.2)
+                                name="ES", max_prisk=0.3)
 
 # Relax the box constraint
 portf.minES.RB$constraints[[2]]$max <- rep(1,ncol(R))
@@ -207,7 +208,7 @@ portf.minES.RB$constraints[[2]]$max <- rep(1,ncol(R))
 
 # Add risk budget objective to minimize concentration of percentage component
 # contribution to risk. Concentration is defined as the Herfindahl-Hirschman
-# Index (HHI). $\sum_{i=1}^n x_i^2$
+# Index (HHI). $\sum_i x_i^2$
 portf.minES.EqRB <- add.objective(portf.minES, type="risk_budget", 
                                   name="ES", min_concentration=TRUE)
 # relax the box constraint
@@ -233,7 +234,7 @@ if(file.exists(paste(results.dir, "opt.minES.rda", sep="/"))){
 } else {
   # Run the optimization
   opt.minES <- optimize.portfolio(R, portf, optimize_method="DEoptim", 
-                                  search_size=2000, trace=TRUE, traceDE=0,
+                                  search_size=5000, trace=TRUE, traceDE=0,
                                   message=TRUE)
   cat("opt.minES complete. Saving results to ", results.dir, "\n")
   save(opt.minES, file=paste(results.dir, "opt.minES.rda", sep="/"))
@@ -259,6 +260,7 @@ if(file.exists(paste(results.dir, "bt.opt.minES.rda", sep="/"))){
                                                  rebalance_on=rebal.freq, 
                                                  training_period=training, 
                                                  trailing_periods=trailing,
+                                                 search_size=5000,
                                                  traceDE=0, message=TRUE)
   cat("bt.opt.minES complete. Saving results to ", results.dir, "\n")
   save(bt.opt.minES, file=paste(results.dir, "bt.opt.minES.rda", sep="/"))
@@ -299,7 +301,7 @@ portf.crra <- add.constraint(portf.crra, type="box",
                              min=0.05, max=0.4)
 
 portf.crra <- add.objective(portf.crra, type="return", 
-                            name="CRRA", arguments=list(lambda=5))
+                            name="CRRA", arguments=list(lambda=10))
 
 # I just want these for plotting
 # Set multiplier=0 so that it is calculated, but does not affect the optimization
@@ -334,6 +336,85 @@ if(file.exists(paste(results.dir, "bt.opt.crra.rda", sep="/"))){
                                                 trailing_periods=trailing)
   cat("bt.opt.crra complete. Saving results to ", results.dir, "\n")
   save(bt.opt.crra, file=paste(results.dir, "bt.opt.crra.rda", sep="/"))
+}
+
+##### RP Demo #####
+cat("Random portfolio method comparison\n")
+if(file.exists("optimization_figures/rp_plot.png")){
+  cat("file already exists\n")
+} else {
+  portf.lo <- portfolio.spec(colnames(R))
+  portf.lo <- add.constraint(portf.lo, type="weight_sum", 
+                             min_sum=0.99, max_sum=1.01)
+  
+  portf.lo <- add.constraint(portf.lo, type="long_only")
+  
+  # Use the long only portfolio previously created
+  # Generate random portfolios using the 3 methods
+  rp1 <- random_portfolios(portf.lo, permutations=5000, 
+                           rp_method='sample')
+  rp2 <- random_portfolios(portf.lo, permutations=5000, 
+                           rp_method='simplex') 
+  rp3 <- random_portfolios(portf.lo, permutations=5000, 
+                           rp_method='grid')
+  
+  # Calculate the portfolio mean return and standard deviation
+  rp1_mean <- apply(rp1, 1, function(x) mean(R %*% x))
+  rp1_StdDev <- apply(rp1, 1, function(x) StdDev(R, weights=x))
+  rp2_mean <- apply(rp2, 1, function(x) mean(R %*% x))
+  rp2_StdDev <- apply(rp2, 1, function(x) StdDev(R, weights=x))
+  rp3_mean <- apply(rp3, 1, function(x) mean(R %*% x))
+  rp3_StdDev <- apply(rp3, 1, function(x) StdDev(R, weights=x))
+  
+  x.assets <- StdDev(R)
+  y.assets <- colMeans(R)
+  
+  x.lower <- min(x.assets) * 0.9
+  x.upper <- max(x.assets) * 1.1
+  y.lower <- min(y.assets) * 0.9
+  y.upper <- max(y.assets) * 1.1
+  
+  png("optimization_figures/rp_plot.png")
+  # plot feasible portfolios 
+  plot(x=rp1_StdDev, y=rp1_mean, col="gray", main="Random Portfolio Methods",
+       ylab="mean", xlab="StdDev", xlim=c(x.lower, x.upper), 
+       ylim=c(y.lower, y.upper))
+  points(x=rp2_StdDev, y=rp2_mean, col="red", pch=2)
+  points(x=rp3_StdDev, y=rp3_mean, col="green", pch=5)
+  points(x=x.assets, y=y.assets)
+  text(x=x.assets, y=y.assets, labels=colnames(R), pos=4, cex=0.8)
+  legend("bottomright", legend=c("sample", "simplex", "grid"), 
+         col=c("gray", "red", "green"),
+         pch=c(1, 2, 5), bty="n")
+  dev.off()
+}
+
+cat("Random portfolio simplex method fev biasing\n")
+if(file.exists("optimization_figures/fev_plot.png")){
+  cat("file already exists\n")
+} else {
+  png("optimization_figures/fev_plot.png")
+  fev <- 0:5
+  x.assets <- StdDev(R)
+  y.assets <- colMeans(R)
+  par(mfrow=c(2, 3))
+  for(i in 1:length(fev)){
+    rp <- rp_simplex(portfolio=portf.lo, permutations=2000, fev=fev[i])
+    tmp.mean <- apply(rp, 1, function(x) mean(R %*% x))
+    tmp.StdDev <- apply(rp, 1, function(x) StdDev(R=R, weights=x))
+    x.lower <- min(c(tmp.StdDev, x.assets)) * 0.85
+    x.upper <- max(c(tmp.StdDev, x.assets)) * 1.15
+    y.lower <- min(c(tmp.mean, y.assets)) * 0.85
+    y.upper <- max(c(tmp.mean, y.assets)) * 1.15
+    plot(x=tmp.StdDev, y=tmp.mean, main=paste("FEV =", fev[i]),
+         ylab="mean", xlab="StdDev", col=rgb(0, 0, 100, 50, maxColorValue=255),
+         xlim=c(x.lower, x.upper), 
+         ylim=c(y.lower, y.upper))
+    points(x=x.assets, y=y.assets)
+    text(x=x.assets, y=y.assets, labels=colnames(R), pos=4, cex=0.8)
+  }
+  par(mfrow=c(1,1))
+  dev.off()
 }
 
 # # Calculate the turnover per period

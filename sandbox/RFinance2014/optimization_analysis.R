@@ -107,20 +107,34 @@ chart.RiskBudget(opt.minES[[3]], main="Equal ES Component Contribution",
                  risk.type="percentage", neighbors=10)
 dev.off()
 
-# Plot the risk contribution through time
+# Plot the risk contribution  of portfolio 1 through time
 png(paste(figures.dir, "risk_minES.png", sep="/"))
 chart.RiskBudget(bt.opt.minES[[1]], main="Min ES Risk Contribution", 
                  risk.type="percentage")
 dev.off()
+# Plot the risk contribution  of portfolio 1 through time
+png(paste(figures.dir, "weights_minES.png", sep="/"))
+chart.Weights(bt.opt.minES[[1]], main="Min ES Weights")
+dev.off()
 
+# Plot the risk contribution  of portfolio 3 through time
 png(paste(figures.dir, "risk_minESRB.png", sep="/"))
 chart.RiskBudget(bt.opt.minES[[2]], main="Min ES RB Risk Contribution",
                  risk.type="percentage")
 dev.off()
+# Plot the weights of portfolio 2 through time
+png(paste(figures.dir, "weights_minESRB.png", sep="/"))
+chart.Weights(bt.opt.minES[[2]], main="Min ES RB Weights")
+dev.off()
 
+# Plot the risk contribution  of portfolio 3 through time
 png(paste(figures.dir, "risk_minESEqRB.png", sep="/"))
 chart.RiskBudget(bt.opt.minES[[3]], main="Min ES EqRB Risk Contribution",
                  risk.type="percentage")
+dev.off()
+# Plot the weights of portfolio 3 through time
+png(paste(figures.dir, "weights_minESEqRB.png", sep="/"))
+chart.Weights(bt.opt.minES[[3]], main="Min ES EqRB Weights")
 dev.off()
 
 # Extract the returns from each element and chart the performance summary
@@ -149,14 +163,12 @@ CRRA <- function(R, weights, lambda, sigma, m3, m4){
 }
 
 # Chart the optimization in Risk-Reward space
-png(paste(figures.dir, "crra_RR.png", sep="/"))
-par(mfrow=c(1,2))
+png(paste(figures.dir, "crra_RR_ES.png", sep="/"))
 chart.RiskReward(opt.crra, risk.col="ES")
 # dev.off()
 
-# png(paste(figures.dir, "crra_minES.png", sep="/"))
+png(paste(figures.dir, "crra_RR_StdDev.png", sep="/"))
 chart.RiskReward(opt.crra, risk.col="StdDev")
-par(mfrow=c(1,1))
 dev.off()
 
 # Compute the portfolio returns with rebalancing
