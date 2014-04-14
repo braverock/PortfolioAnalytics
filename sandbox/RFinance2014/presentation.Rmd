@@ -2,14 +2,12 @@
 % Ross Bennett
 % May 16, 2014
 
+# Overview
+* Discuss Portfolio Optimization
+* Introduce PortfolioAnalytics
+* Demonstrate PortfolioAnalytics with Examples
+
 # Portfolio Optimization
-
-## General
-TODO: Add some general comments here about goals and pitfalls of optimization in the context of constructing a portfolio.
-
-<!---
-comments
--->
 
 ## Modern Portfolio Theory
 "Modern" Portfolio Theory (MPT) was introduced by Harry Markowitz in 1952.
@@ -20,12 +18,11 @@ General Objectives
 
 * Maximize a measure of gain per unit measure of risk
 * Minimize a measure of risk
-* Maximize a utility function
 
-How do we define risk?
+How do we define risk? What about more complex objectives?
 
 <!---
-comments
+Several approaches follow the Markowitz approach using mean return as a measure of gain and standard deviation of returns as a measure of risk
 -->
 
 ## Portfolio Optimization Objectives
@@ -43,7 +40,7 @@ comments
     * Quadratic, CRRA, CARA, etc.
 
 <!---
-comments
+The challenge here is knowing what solver to use and the capabilities/limits of the chosen solver. Talk about pros/cons of closed-form solvers vs. global solvers and what objectives can be solved. 
 -->
 
 # PortfolioAnalytics
@@ -66,7 +63,10 @@ The key points to make here are:
   - The multiple types and modularity of constraints and objectives allows us to add, remove, combine, etc. multiple constraint and objective types very easily.
   - Define an objective as any valid R function
   - Define a function to compute the moments (sample, robust, shrinkage, factor model, GARCH model, etc.)
+  - Estimation error is a significant concern with optimization. Having the ability to test different models with different parameters is critical.
 - PortfolioAnalytics comes "pre-built" with several constraint types.
+- Visualization helps to build intuition about the problem and understand the feasible space of portfolios
+- Periodic rebalancing and analyzing out of sample performance will help refine objectives and constraints
 -->
 
 
@@ -98,6 +98,8 @@ PortfolioAnalytics has three methods to generate random portfolios.
 3. The **grid** method to generate random portfolios is based on the `gridSearch` function in the NMOF package.
 
 <!---
+Random portfolios allow one to generate an arbitray number of portfolios based on given constraints. Will cover the edges as well as evenly cover the interior of the feasible space. 
+
 The sample method to generate random portfolios is based on an idea by Pat Burns. This is the most flexible method, but also the slowest, and can generate portfolios to satisfy leverage, box, group, and position limit constraints.
 
 The simplex method to generate random portfolios is based on a paper by W. T. Shaw. The simplex method is useful to generate random portfolios with the full investment constraint, where the sum of the weights is equal to 1, and min box constraints. Values for min_sum and max_sum of the leverage constraint will be ignored, the sum of weights will equal 1. All other constraints such as the box constraint max, group and position limit constraints will be handled by elimination. If the constraints are very restrictive, this may result in very few feasible portfolios remaining. Another key point to note is that the solution may not be along the vertexes depending on the objective. For example, a risk budget objective will likely place the portfolio somewhere on the interior.
@@ -505,6 +507,9 @@ CRRA <- function(R, weights, lambda, sigma, m3, m4){
 }
 ```
 
+<!---
+The function arguments should have 'R' as the name of the returns and 'weights' as the name of the weights. 'R' and 'weights' are automatically matched, any other function arguments can be passed in through arguments in add.objective.
+-->
 
 ## Specify Portfolio
 ```{r, eval=FALSE, tidy=FALSE}
@@ -587,18 +592,14 @@ Many thanks to
 -->
 
 ## References
-* TODO: Add relevant links and references
-* ROI
-* DEoptim
-* pso
-* GenSA
-* PerformanceAnalytics
+* [ROI](http://cran.r-project.org/web/packages/ROI/index.html)
+* [DEoptim](http://cran.r-project.org/web/packages/DEoptim/index.html)
+* [pso](http://cran.r-project.org/web/packages/pso/index.html)
+* [GenSA](http://cran.r-project.org/web/packages/GenSA/index.html)
+* [PerformanceAnalytics](http://cran.r-project.org/web/packages/PerformanceAnalytics/index.html)
 * Pat Burns Random Portfolios
 * W.T. Shaw Random Portfolios
 * Martinelli paper
 * Boudt paper
-* PortfolioAnalytics on R-Forge
+* [PortfolioAnalytics on R-Forge](https://r-forge.r-project.org/projects/returnanalytics/)
 * Shiny App?
-
-
-
