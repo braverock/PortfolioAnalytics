@@ -255,6 +255,29 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' 
 #' # Add target mean return constraint
 #' pspec <- add.constraint(portfolio=pspec, type="return", return_target=0.007)
+#' 
+#' # Example using the indexnum argument
+#' portf <- portfolio.spec(assets=fund.names)
+#' portf <- add.constraint(portf, type="full_investment")
+#' portf <- add.constraint(portf, type="long_only")
+#' 
+#' # indexnum corresponds to the index number of the constraint
+#' # The full_investment constraint was the first constraint added and has 
+#' # indexnum=1
+#' portf$constraints[[1]]
+#' 
+#' # View the constraint with indexnum=2
+#' portf$constraints[[2]]
+#' 
+#' # Update the constraint to relax the sum of weights constraint
+#' portf <- add.constraint(portf, type="weight_sum", 
+#' min_sum=0.99, max_sum=1.01, 
+#' indexnum=1)
+#' 
+#' # Update the constraint to modify the box constraint
+#' portf <- add.constraint(portf, type="box", 
+#' min=0.1, max=0.8, 
+#' indexnum=2)
 #' @export
 add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., indexnum=NULL){
   # Check to make sure that the portfolio passed in is a portfolio object

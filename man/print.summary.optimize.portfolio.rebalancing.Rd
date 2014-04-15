@@ -2,8 +2,7 @@
 \alias{print.summary.optimize.portfolio.rebalancing}
 \title{Printing summary output of optimize.portfolio.rebalancing}
 \usage{
-  \method{print}{summary.optimize.portfolio.rebalancing}
-    (x, ..., digits = 4)
+  \method{print}{summary.optimize.portfolio.rebalancing}(x, ..., digits = 4)
 }
 \arguments{
   \item{x}{an object of class
