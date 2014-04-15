@@ -13,71 +13,73 @@
 
 extract.efficient.frontier <- function (object=NULL, match.col='ES', from=NULL, to=NULL, by=0.005, n.portfolios=NULL, ..., R=NULL, portfolio=NULL, optimize_method='random')
 {
-    #TODO add a threshold argument for how close it has to be to count
-    # do we need to recalc the constrained_objective too?  I don't think so.
-    if(!inherits(object, "optimize.portfolio")) stop("object passed in must of of class 'portfolio'")
-    
-    #set<-seq(from=from,to=to,by=by)
-    #set<-cbind(quantmod::Lag(set,1),as.matrix(set))[-1,]
-    if(is.null(object)){
-        if(!is.null(R) & !is.null(portfolio)){
-            portfolios<-optimize.portfolio(portfolio=portfolio, R=R, optimize_method=optimize_method[1], trace=TRUE, ...)
-        } else {
-            stop('you must specify a portfolio object and a return series or an objective of class optimize.portfolio')
-        }
-    }
-    
-    xtract<-extractStats(object)
-    columnnames=colnames(xtract)
-    # optimal portfolio stats from xtract
-    opt <- xtract[which.min(xtract[, "out"]),]
-    #if("package:multicore" %in% search() || require("multicore",quietly = TRUE)){
-    #    mclapply
-    #}
-    stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
-#    rtc = pmatch(return.col,columnnames)
-#    if(is.na(rtc)) {
-#        rtc = pmatch(paste(return.col,return.col,sep='.'),columnnames)
-#    }
-    mtc = pmatch(match.col,columnnames)
-    if(is.na(mtc)) {
-        mtc = pmatch(paste(match.col,match.col,sep='.'),columnnames)
-    }
-    if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
-    
-    if(is.null(from)){
-      from <- min(xtract[, mtc])
-    }
-    if(is.null(to)){
-      to <- max(xtract[, mtc])
-    }
-    if(!is.null(n.portfolios)){
-      # create the sequence using length.out if the user has specified a value for the n.portfolios arg
-      set<-seq(from=from, to=to, length.out=n.portfolios)
+  #TODO add a threshold argument for how close it has to be to count
+  # do we need to recalc the constrained_objective too?  I don't think so.
+  if(!inherits(object, "optimize.portfolio")) stop("object passed in must of of class 'portfolio'")
+  
+  #set<-seq(from=from,to=to,by=by)
+  #set<-cbind(quantmod::Lag(set,1),as.matrix(set))[-1,]
+  if(is.null(object)){
+    if(!is.null(R) & !is.null(portfolio)){
+      portfolios<-optimize.portfolio(portfolio=portfolio, R=R, optimize_method=optimize_method[1], trace=TRUE, ...)
     } else {
-      # fall back to using by to create the sequence
-      set<-seq(from=from, to=to, by=by)
+      stop('you must specify a portfolio object and a return series or an objective of class optimize.portfolio')
     }
-    
-    set<-cbind(quantmod::Lag(set,1),as.matrix(set))[-1,]
-    result <- foreach(i=1:nrow(set),.inorder=TRUE, .combine=rbind, .errorhandling='remove') %do% {
-        tmp<-xtract[which(xtract[,mtc]>=set[i,1] & xtract[,mtc]<set[i,2]),]
-        #tmp<-tmp[which.min(tmp[,'out']),]
-        tmp<-tmp[which.max(tmp[,'mean']),]
-        #tmp
-    }
-    # combine the stats from the optimal portfolio to result matrix
-    result <- rbind(opt, result)
-    return(structure(result, class="frontier"))
+  }
+  
+  xtract<-extractStats(object)
+  columnnames=colnames(xtract)
+  # optimal portfolio stats from xtract
+  opt <- xtract[which.min(xtract[, "out"]),]
+  #if("package:multicore" %in% search() || require("multicore",quietly = TRUE)){
+  #    mclapply
+  #}
+  stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+  #    rtc = pmatch(return.col,columnnames)
+  #    if(is.na(rtc)) {
+  #        rtc = pmatch(paste(return.col,return.col,sep='.'),columnnames)
+  #    }
+  mtc = pmatch(match.col,columnnames)
+  if(is.na(mtc)) {
+    mtc = pmatch(paste(match.col,match.col,sep='.'),columnnames)
+  }
+  if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
+  
+  if(is.null(from)){
+    from <- min(xtract[, mtc])
+  }
+  if(is.null(to)){
+    to <- max(xtract[, mtc])
+  }
+  if(!is.null(n.portfolios)){
+    # create the sequence using length.out if the user has specified a value for the n.portfolios arg
+    set<-seq(from=from, to=to, length.out=n.portfolios)
+  } else {
+    # fall back to using by to create the sequence
+    set<-seq(from=from, to=to, by=by)
+  }
+  
+  set<-cbind(quantmod::Lag(set,1),as.matrix(set))[-1,]
+  result <- foreach(i=1:nrow(set),.inorder=TRUE, .combine=rbind, .errorhandling='remove') %do% {
+    tmp<-xtract[which(xtract[,mtc]>=set[i,1] & xtract[,mtc]<set[i,2]),]
+    #tmp<-tmp[which.min(tmp[,'out']),]
+    tmp<-tmp[which.max(tmp[,'mean']),]
+    #tmp
+  }
+  # combine the stats from the optimal portfolio to result matrix
+  result <- rbind(opt, result)
+  return(structure(result, class="frontier"))
 }
 
 #' Generate the efficient frontier for a mean-variance portfolio
 #' 
 #' This function generates the mean-variance efficient frontier of a portfolio
-#' specifying constraints and objectives. To generate the mean-var efficient 
-#' frontier, the portfolio must have two objectives 1) "mean" and 2) "var".
+#' specifying the constraints and objectives. The \code{portfolio} object 
+#' should have two objectives: 1) mean and 2) var (or sd or StdDev). If the 
+#' portfolio object does not contain these objectives, they will be added 
+#' using default parameters.
 #' 
-#' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
+#' @param portfolio a portfolio object with constraints created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
 #' @param n.portfolios number of portfolios to plot along the efficient frontier
 #' @param risk_aversion vector of risk_aversion values to construct the efficient frontier.
@@ -94,25 +96,21 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   # step 3: 'step' along the returns and run the optimization to calculate
   # the weights and objective measures along the efficient frontier
   
-  # get the names of the objectives
-  objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
-  
-  if(length(objnames) == 1){
-    if(objnames == "mean"){
-      # The user has only passed in a mean objective, add a var objective to the portfolio
-      portfolio <- add.objective(portfolio=portfolio, type="risk", name="var")
-    } else if(objnames %in% c("var", "sd", "StdDev")){
-      # The user has only passed in a var objective, add a mean objective
-      portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
-    }
-    # get the objective names again after we add an objective to the portfolio
-    objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
+  # Use the portfolio_risk_objective from the portfolio if they have it
+  # check for a var, StdDev, or sd objective
+  var_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name))  %in% c("var", "StdDev", "sd"))
+  if(length(var_idx) >= 1){
+    # the portfolio object has a var, StdDev, or sd objective
+    var_obj <- portfolio$objectives[[var_idx]]
+  } else {
+    var_obj <- portfolio_risk_objective(name="var")
   }
   
-  # for a mean-var efficient frontier, there must be two objectives 1) "mean" and 2) "var"
-  if(!((length(objnames) >= 2) & ("var" %in% objnames | "StdDev" %in% objnames | "sd" %in% objnames) & ("mean" %in% objnames))){
-    stop("The portfolio object must have both 'mean' and 'var', 'StdDev', or'sd' specified as objectives")
-  }
+  # Clear out the objectives in portfolio and add them here to simplify checks
+  # and so we can control the optimization along the efficient frontier.
+  portfolio$objectives <- list()
+  portfolio$objectives[[1]] <- var_obj
+  portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
   
   # If the user has passed in a portfolio object with return_constraint, we need to disable it
   for(i in 1:length(portfolio$constraints)){
@@ -128,9 +126,6 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   
   ##### get the maximum return #####
   
-  # set the risk_aversion to a very small number for equivalent to max return portfolio
-  # portfolio$objectives[[var_idx]]$risk_aversion <- 1e-6
-  
   # Disable the risk objective
   portfolio$objectives[[var_idx]]$enabled <- FALSE
   
@@ -140,9 +135,6 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   maxret <- sum(extractWeights(tmp) * mean_ret)
   
   ##### Get the return at the minimum variance portfolio #####
-  
-  # set the risk_aversion to a very large number equivalent to a minvar portfolio
-  # portfolio$objectives[[var_idx]]$risk_aversion <- 1e6
   
   # Disable the return objective
   portfolio$objectives[[mean_idx]]$enabled <- FALSE
@@ -165,11 +157,12 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   ret_constr_idx <- which(unlist(lapply(portfolio$constraints, function(x) inherits(x, "return_constraint"))))
   
   stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+  stopifnot("package:iterators" %in% search() || require("iterators",quietly = TRUE))
   if(!is.null(risk_aversion)){
     # Enable the return objective so we are doing quadratic utility
     portfolio$objectives[[mean_idx]]$enabled <- TRUE
-    out <- foreach(i=1:length(risk_aversion), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
-      portfolio$objectives[[var_idx]]$risk_aversion <- risk_aversion[i]
+    out <- foreach(lambda=iter(risk_aversion), .inorder=TRUE, .combine=rbind, .errorhandling='remove', .packages='PortfolioAnalytics') %dopar% {
+      portfolio$objectives[[var_idx]]$risk_aversion <- lambda
       extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI", ...=...))
     }
     out <- cbind(out, risk_aversion)
@@ -177,8 +170,8 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   } else {
     # Enable the return constraint
     portfolio$constraints[[ret_constr_idx]]$enabled <- TRUE
-    out <- foreach(i=1:length(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
-      portfolio$constraints[[ret_constr_idx]]$return_target <- ret_seq[i]
+    out <- foreach(ret=iter(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove', .packages='PortfolioAnalytics') %dopar% {
+      portfolio$constraints[[ret_constr_idx]]$return_target <- ret
       opt <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI", ...=...)
       c(sum(extractWeights(opt) * mean_ret), extractStats(opt))
     }
@@ -191,10 +184,10 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
 #' Generate the efficient frontier for a mean-etl portfolio
 #' 
 #' This function generates the mean-ETL efficient frontier of a portfolio
-#' specifying constraints and objectives. To generate the mean-ETL efficient 
-#' frontier, the portfolio must have two objectives 1) "mean" and 2) "ETL/ES/CVaR". If
-#' the only objective in the \code{portfolio} object is ETL/ES/CVaR, the we will
-#' add a mean objective.
+#' specifying the constraints and objectives. The \code{portfolio} object 
+#' should have two objectives: 1) mean and 2) ES (or ETL or cVaR). If the 
+#' portfolio object does not contain these objectives, they will be added 
+#' using default parameters.
 #' 
 #' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
@@ -210,25 +203,24 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
   # step 3: 'step' along the returns and run the optimization to calculate
   # the weights and objective measures along the efficient frontier
   
+  # Use the portfolio_risk_objective from the portfolio if they have it
+  # check for a ETL, ES, or cVaR objective
+  etl_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name))  %in% c("ETL", "ES", "CVaR"))
+  if(length(etl_idx) >= 1){
+    # the portfolio object has a ETL, ES, CVaR objective
+    etl_obj <- portfolio$objectives[[etl_idx]]
+  } else {
+    etl_obj <- portfolio_risk_objective(name="ES", arguments=list(p=0.95))
+  }
+  
+  # Clear out the objectives in portfolio and add them here to simplify checks
+  # and so we can control the optimization along the efficient frontier.
+  portfolio$objectives <- list()
+  portfolio$objectives[[1]] <- etl_obj
+  portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
+  
+  # get the objective names from the portfolio object
   objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
-  
-  if(length(objnames) == 1){
-    if(objnames == "mean"){
-      # The user has only passed in a mean objective, add ES objective to the portfolio
-      portfolio <- add.objective(portfolio=portfolio, type="risk", name="ES")
-    } else if(objnames %in% c("ETL", "ES", "CVaR")){
-      # The user has only passed in ETL/ES/CVaR objective, add a mean objective
-      portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
-    }
-    # get the objective names again after we add an objective to the portfolio
-    objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
-  }
-  
-  # for a mean-etl efficient frontier, there must be two objectives 1) "mean" and 2) "ETL/ES/CVaR"
-  # get the names of the objectives
-  if(!((length(objnames) == 2) & any(objnames %in% c("ETL", "ES", "CVaR")) & ("mean" %in% objnames))){
-    stop("The portfolio object must have both 'mean' and 'var' specified as objectives")
-  }
   
   # If the user has passed in a portfolio object with return_constraint, we need to disable it
   for(i in 1:length(portfolio$constraints)){
@@ -258,14 +250,15 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
   # length.out is the number of portfolios to create
   ret_seq <- seq(from=minret, to=maxret, length.out=n.portfolios)
   
-#   out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))
-#   for(i in 1:length(ret_seq)){
-#     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
-#     out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
-#   }
+  #   out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))
+  #   for(i in 1:length(ret_seq)){
+  #     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
+  #     out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+  #   }
   stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
-  out <- foreach(i=1:length(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
-    portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
+  stopifnot("package:iterators" %in% search() || require("iterators",quietly = TRUE))
+  out <- foreach(ret=iter(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove', .packages='PortfolioAnalytics') %dopar% {
+    portfolio$objectives[[mean_idx]]$target <- ret
     extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI", ef=TRUE, ...=...))
   }
   colnames(out) <- names(stats)
@@ -280,12 +273,16 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
 #'   \item{"mean-var", "mean-sd", or "mean-StdDev":}{ This is a special case for 
 #'   an efficient frontier that can be created by a QP solver.
 #'   The \code{portfolio} object should have two
-#'   objectives: 1) mean and 2) var. The efficient frontier will be created via
+#'   objectives: 1) mean and 2) var. If the portfolio object does not contain these 
+#'   objectives, they will be added using default parameters.
+#'   The efficient frontier will be created via
 #'   \code{\link{meanvar.efficient.frontier}}.}
 #'   \item{"mean-ETL", "mean-ES", "mean-CVaR", "mean-etl":}{ This is a special 
 #'   case for an efficient frontier that can be created by an LP solver.
 #'   The \code{portfolio} object should have two objectives: 1) mean
-#'   and 2) ETL/ES/CVaR. The efficient frontier will be created via
+#'   and 2) ETL/ES/CVaR. If the portfolio object does not contain these 
+#'   objectives, they will be added using default parameters.
+#'   The efficient frontier is created via 
 #'   \code{\link{meanetl.efficient.frontier}}.}
 #'   \item{"DEoptim":}{ This can handle more complex constraints and objectives
 #'   than the simple mean-var and mean-ETL cases. For this type, we actually 

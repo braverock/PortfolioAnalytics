@@ -27,19 +27,18 @@ init <- add.constraint(portfolio=init, type="group",
                        group_min=0.05,
                        group_max=0.7)
 
-# initial objective
-init <- add.objective(portfolio=init, type="return", name="mean")
-
 # create mean-etl portfolio
 meanetl.portf <- add.objective(portfolio=init, type="risk", name="ES")
+meanetl.portf <- add.objective(portfolio=meanetl.portf, type="return", name="mean")
 
 # create mean-var portfolio
-meanvar.portf <- add.objective(portfolio=init, type="risk", name="var", risk_aversion=1e6)
+meanvar.portf <- add.objective(portfolio=init, type="risk", name="var", risk_aversion=10)
+meanvar.portf <- add.objective(portfolio=meanvar.portf, type="return", name="mean")
 
 # create efficient frontiers
 
 # mean-var efficient frontier
-meanvar.ef <- create.EfficientFrontier(R=R, portfolio=meanvar.portf, type="mean-StdDev")
+meanvar.ef <- create.EfficientFrontier(R=R, portfolio=init, type="mean-StdDev")
 meanvar.ef
 summary(meanvar.ef, digits=2)
 meanvar.ef$frontier
@@ -113,7 +112,7 @@ chart.Weights.EF(ef, match.col="StdDev", colorset=bluemono)
 chart.Weights.EF(ef, match.col="StdDev", colorset=bluemono, by.groups=TRUE)
 
 # mean-etl efficient frontier
-meanetl.ef <- create.EfficientFrontier(R=R, portfolio=meanetl.portf, type="mean-ES")
+meanetl.ef <- create.EfficientFrontier(R=R, portfolio=init, type="mean-ES")
 meanetl.ef
 summary(meanetl.ef)
 meanetl.ef$frontier
@@ -136,8 +135,6 @@ chart.EfficientFrontier(meanetl.rp.ef, match.col="ES", main="mean-ETL RP Efficie
 # set up an initial portfolio with the full investment constraint and mean and var objectives
 init.portf <- portfolio.spec(assets=funds)
 init.portf <- add.constraint(portfolio=init.portf, type="full_investment")
-init.portf <- add.objective(portfolio=init.portf, type="risk", name="var")
-init.portf <- add.objective(portfolio=init.portf, type="return", name="mean")
 
 # long only constraints
 lo.portf <- add.constraint(portfolio=init.portf, type="long_only")
@@ -154,10 +151,28 @@ group.portf <- add.constraint(portfolio=init.portf, type="group",
 group.portf <- add.constraint(portfolio=group.portf, type="long_only")
 # optimize.portfolio(R=R, portfolio=group.portf, optimize_method="ROI")
 
-portf.list <- list(lo.portf, box.portf, group.portf)
+portf.list <- combine.portfolios(list(lo.portf, box.portf, group.portf))
 legend.labels <- c("Long Only", "Box", "Group + Long Only")
 chart.EfficientFrontierOverlay(R=R, portfolio_list=portf.list, type="mean-StdDev", 
                                match.col="StdDev", legend.loc="topleft", 
+                               legend.labels=legend.labels, cex.legend=0.6,
+                               labels.assets=FALSE, pch.assets=18)
+
+# Efficient frontier in mean-ES space with varying confidence leves for
+# ES calculation
+ES90 <- add.objective(portfolio=lo.portf, type="risk", name="ES", 
+                          arguments=list(p=0.9))
+
+ES92 <- add.objective(portfolio=lo.portf, type="risk", name="ES", 
+                          arguments=list(p=0.92))
+
+ES95 <- add.objective(portfolio=lo.portf, type="risk", name="ES", 
+                      arguments=list(p=0.95))
+
+portf.list <- combine.portfolios(list(ES.90=ES90, ES.92=ES92, ES.95=ES95))
+legend.labels <- c("ES (p=0.9)", "ES (p=0.92)", "ES (p=0.95)")
+chart.EfficientFrontierOverlay(R=R, portfolio_list=portf.list, type="mean-ES", 
+                               match.col="ES", legend.loc="topleft", 
                                legend.labels=legend.labels, cex.legend=0.6,
                                labels.assets=FALSE, pch.assets=18)
 
