@@ -23,11 +23,11 @@
 }
 \description{
   This function generates the mean-ETL efficient frontier
-  of a portfolio specifying constraints and objectives. To
-  generate the mean-ETL efficient frontier, the portfolio
-  must have two objectives 1) "mean" and 2) "ETL/ES/CVaR".
-  If the only objective in the \code{portfolio} object is
-  ETL/ES/CVaR, the we will add a mean objective.
+  of a portfolio specifying the constraints and objectives.
+  The \code{portfolio} object should have two objectives:
+  1) mean and 2) ES (or ETL or cVaR). If the portfolio
+  object does not contain these objectives, they will be
+  added using default parameters.
 }
 \author{
   Ross Bennett

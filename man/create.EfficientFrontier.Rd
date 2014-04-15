@@ -49,13 +49,17 @@
   "mean-sd", or "mean-StdDev":}{ This is a special case for
   an efficient frontier that can be created by a QP solver.
   The \code{portfolio} object should have two objectives:
-  1) mean and 2) var. The efficient frontier will be
+  1) mean and 2) var. If the portfolio object does not
+  contain these objectives, they will be added using
+  default parameters.  The efficient frontier will be
   created via \code{\link{meanvar.efficient.frontier}}.}
   \item{"mean-ETL", "mean-ES", "mean-CVaR", "mean-etl":}{
   This is a special case for an efficient frontier that can
   be created by an LP solver.  The \code{portfolio} object
   should have two objectives: 1) mean and 2) ETL/ES/CVaR.
-  The efficient frontier will be created via
+  If the portfolio object does not contain these
+  objectives, they will be added using default parameters.
+  The efficient frontier is created via
   \code{\link{meanetl.efficient.frontier}}.}
   \item{"DEoptim":}{ This can handle more complex
   constraints and objectives than the simple mean-var and

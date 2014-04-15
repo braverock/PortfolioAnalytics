@@ -6,8 +6,8 @@
     n.portfolios = 25, risk_aversion = NULL, ...)
 }
 \arguments{
-  \item{portfolio}{a portfolio object with constraints and
-  objectives created via \code{\link{portfolio.spec}}}
+  \item{portfolio}{a portfolio object with constraints
+  created via \code{\link{portfolio.spec}}}
 
   \item{R}{an xts or matrix of asset returns}
 
@@ -29,10 +29,11 @@
 }
 \description{
   This function generates the mean-variance efficient
-  frontier of a portfolio specifying constraints and
-  objectives. To generate the mean-var efficient frontier,
-  the portfolio must have two objectives 1) "mean" and 2)
-  "var".
+  frontier of a portfolio specifying the constraints and
+  objectives. The \code{portfolio} object should have two
+  objectives: 1) mean and 2) var (or sd or StdDev). If the
+  portfolio object does not contain these objectives, they
+  will be added using default parameters.
 }
 \author{
   Ross Bennett
