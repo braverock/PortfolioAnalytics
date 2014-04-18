@@ -316,12 +316,11 @@ Dynamic rebalancing of the risk budget optimized portfolio is possible through t
 As an example, consider the minimum CVaR concentration portfolio, with estimation from inception and monthly rebalancing. Since we require a minimum estimation length of total number of observations -1, we can optimize the portfolio only for the last two months.  
 
 <<echo=TRUE, tidy=FALSE>>=
-library(iterators)
 set.seed(1234)
 out <- optimize.portfolio.rebalancing(R=indexes, portfolio=ObjSpec, 
                                       optimize_method="DEoptim", search_size=5000,
-                                      rebalance_on="months", 
-                                      training_period=nrow(indexes)-10,
+                                      rebalance_on="quarters", 
+                                      training_period=nrow(indexes)-12,
                                       traceDE=0)
 @
 
