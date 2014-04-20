@@ -757,8 +757,11 @@ optimize.portfolio_v2 <- function(
   
   roi_solvers <- c("ROI", "quadprog", "glpk", "symphony", "ipop", "cplex")
   if(optimize_method %in% roi_solvers){
+    # check for a control argument for list of solver control arguments
+    if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=NULL
+    
     # This takes in a regular portfolio object and extracts the constraints and
-    #  objectives and converts them for input. to a closed form solver using
+    # objectives and converts them for input. to a closed form solver using
     # ROI as an interface.
     moments <- list(mean=rep(0, N))
     alpha <- 0.05
@@ -840,14 +843,14 @@ optimize.portfolio_v2 <- function(
           constraints$ptc <- NULL
         }
         if(!is.null(constraints$turnover_target) & is.null(constraints$ptc)){
-          qp_result <- gmv_opt_toc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets, solver=solver)
+          qp_result <- gmv_opt_toc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets, solver=solver, control=control)
           weights <- qp_result$weights
           # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
           obj_vals <- qp_result$obj_vals
           out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=qp_result$out, call=call)
         }
         if(!is.null(constraints$ptc) & is.null(constraints$turnover_target)){
-          qp_result <- gmv_opt_ptc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets, solver=solver)
+          qp_result <- gmv_opt_ptc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets, solver=solver, control=control)
           weights <- qp_result$weights
           # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
           obj_vals <- qp_result$obj_vals
@@ -857,12 +860,12 @@ optimize.portfolio_v2 <- function(
         # if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
         if(hasArg(maxSR)) maxSR=match.call(expand.dots=TRUE)$maxSR else maxSR=FALSE
         if(maxSR){
-          target <- max_sr_opt(R=R, constraints=constraints, moments=moments, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
+          target <- max_sr_opt(R=R, constraints=constraints, moments=moments, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver, control=control)
           # need to set moments$mean=0 here because quadratic utility and target return is sensitive to returning no solution
           tmp_moments_mean <- moments$mean
           moments$mean <- rep(0, length(moments$mean))
         }
-        roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver)
+        roi_result <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, lambda_hhi=lambda_hhi, conc_groups=conc_groups, solver=solver, control=control)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         obj_vals <- roi_result$obj_vals
@@ -887,14 +890,14 @@ optimize.portfolio_v2 <- function(
       # Maximize return if the only objective specified is mean
       if(!is.null(constraints$max_pos) | !is.null(constraints$leverage)) {
         # This is an MILP problem if max_pos is specified as a constraint
-        roi_result <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=target, solver=solver)
+        roi_result <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=target, solver=solver, control=control)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         obj_vals <- roi_result$obj_vals
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       } else {
         # Maximize return LP problem
-        roi_result <- maxret_opt(R=R, constraints=constraints, moments=moments, target=target, solver=solver)
+        roi_result <- maxret_opt(R=R, constraints=constraints, moments=moments, target=target, solver=solver, control=control)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         obj_vals <- roi_result$obj_vals
@@ -918,12 +921,12 @@ optimize.portfolio_v2 <- function(
       # Minimize sample ETL/ES/CVaR if CVaR, ETL, or ES is specified as an objective
       if(length(moments) == 2 & all(moments$mean != 0) & ef==FALSE & maxSTARR){
         # This is called by meanetl.efficient.frontier and we do not want that for efficient frontiers, need to have ef==FALSE
-        target <- mean_etl_opt(R=R, constraints=constraints, moments=moments, alpha=alpha, solver=solver)
+        target <- mean_etl_opt(R=R, constraints=constraints, moments=moments, alpha=alpha, solver=solver, control=control)
         meanetl <- TRUE
       }
       if(!is.null(constraints$max_pos)) {
         # This is an MILP problem if max_pos is specified as a constraint
-        roi_result <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha, solver=solver)
+        roi_result <- etl_milp_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha, solver=solver, control=control)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         # obj_vals <- roi_result$obj_vals
@@ -934,7 +937,7 @@ optimize.portfolio_v2 <- function(
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       } else {
         # Minimize sample ETL/ES/CVaR LP Problem
-        roi_result <- etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha, solver=solver)
+        roi_result <- etl_opt(R=R, constraints=constraints, moments=moments, target=target, alpha=alpha, solver=solver, control=control)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         # obj_vals <- roi_result$obj_vals

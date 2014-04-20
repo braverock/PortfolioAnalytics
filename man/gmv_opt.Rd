@@ -3,7 +3,8 @@
 \title{GMV/QU QP Optimization}
 \usage{
   gmv_opt(R, constraints, moments, lambda, target,
-    lambda_hhi, conc_groups, solver = "quadprog")
+    lambda_hhi, conc_groups, solver = "quadprog",
+    control = NULL)
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -24,6 +25,8 @@
   of the assets.}
 
   \item{solver}{solver to use}
+
+  \item{control}{list of solver control parameters}
 }
 \description{
   This function is called by optimize.portfolio to solve

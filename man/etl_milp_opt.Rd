@@ -3,7 +3,7 @@
 \title{Minimum ETL MILP Optimization}
 \usage{
   etl_milp_opt(R, constraints, moments, target, alpha,
-    solver = "glpk")
+    solver = "glpk", control = NULL)
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -19,6 +19,8 @@
   \item{alpha}{alpha value for ETL/ES/CVaR}
 
   \item{solver}{solver to use}
+
+  \item{control}{list of solver control parameters}
 }
 \description{
   This function is called by optimize.portfolio to solve

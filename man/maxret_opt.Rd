@@ -3,7 +3,7 @@
 \title{Maximum Return LP Optimization}
 \usage{
   maxret_opt(R, moments, constraints, target,
-    solver = "glpk")
+    solver = "glpk", control = NULL)
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -17,6 +17,8 @@
   \item{target}{target return value}
 
   \item{solver}{solver to use}
+
+  \item{control}{list of solver control parameters}
 }
 \description{
   This function is called by optimize.portfolio to solve

@@ -13,10 +13,12 @@
 #' @param lambda_hhi concentration aversion parameter
 #' @param conc_groups list of vectors specifying the groups of the assets.
 #' @param solver solver to use
+#' @param control list of solver control parameters
 #' @author Ross Bennett
-gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups, solver="quadprog"){
-  stopifnot("package:ROI" %in% search() || require("ROI", quietly = TRUE))
-  stopifnot("package:ROI.plugin.quadprog" %in% search() || require("ROI.plugin.quadprog", quietly = TRUE))
+gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups, solver="quadprog", control=NULL){
+  stopifnot("package:ROI" %in% search() || require("ROI", quietly=TRUE))
+  plugin <- paste0("ROI.plugin.", solver)
+  stopifnot(paste0("package:", plugin) %in% search() || require(plugin, quietly=TRUE, character.only=TRUE))
   
   # Check for cleaned returns in moments
   if(!is.null(moments$cleanR)) R <- moments$cleanR
@@ -129,7 +131,7 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   opt.prob <- OP(objective=ROI_objective, 
                        constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
                  bounds=bnds)
-  result <- try(ROI_solve(x=opt.prob, solver=solver), silent=TRUE)
+  result <- try(ROI_solve(x=opt.prob, solver=solver, control=control), silent=TRUE)
   
   # result <- try(solve.QP(Dmat=Dmat, dvec=dvec, Amat=t(Amat), bvec=rhs.vec, meq=meq), silent=TRUE)
   if(inherits(x=result, "try-error")) stop(paste("No solution found:", result))
@@ -171,10 +173,12 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
 #' @param moments object of moments computed based on objective functions
 #' @param target target return value
 #' @param solver solver to use
+#' @param control list of solver control parameters
 #' @author Ross Bennett
-maxret_opt <- function(R, moments, constraints, target, solver="glpk"){
+maxret_opt <- function(R, moments, constraints, target, solver="glpk", control=NULL){
   stopifnot("package:ROI" %in% search() || require("ROI",quietly = TRUE))
-  stopifnot("package:ROI.plugin.glpk" %in% search() || require("ROI.plugin.glpk",quietly = TRUE))
+  plugin <- paste0("ROI.plugin.", solver)
+  stopifnot(paste0("package:", plugin) %in% search() || require(plugin, quietly=TRUE, character.only=TRUE))
   
   # Check for cleaned returns in moments
   if(!is.null(moments$cleanR)) R <- moments$cleanR
@@ -235,7 +239,8 @@ maxret_opt <- function(R, moments, constraints, target, solver="glpk"){
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
                  bounds=bnds)
-  roi.result <- ROI_solve(x=opt.prob, solver=solver)
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver, control=control), silent=TRUE)
+  if(inherits(roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
   # roi.result <- Rglpk_solve_LP(obj=objL, mat=Amat, dir=dir.vec, rhs=rhs.vec, bounds=bnds)
   
@@ -276,10 +281,12 @@ maxret_opt <- function(R, moments, constraints, target, solver="glpk"){
 #' @param moments object of moments computed based on objective functions
 #' @param target target return value
 #' @param solver solver to use
+#' @param control list of solver control parameters
 #' @author Ross Bennett
-maxret_milp_opt <- function(R, constraints, moments, target, solver="glpk"){
+maxret_milp_opt <- function(R, constraints, moments, target, solver="glpk", control=NULL){
   stopifnot("package:ROI" %in% search() || require("ROI",quietly = TRUE))
-  stopifnot("package:ROI.plugin.glpk" %in% search() || require("ROI.plugin.glpk",quietly = TRUE))
+  plugin <- paste0("ROI.plugin.", solver)
+  stopifnot(paste0("package:", plugin) %in% search() || require(plugin, quietly=TRUE, character.only=TRUE))
   
   # Check for cleaned returns in moments
   if(!is.null(moments$cleanR)) R <- moments$cleanR
@@ -369,7 +376,7 @@ maxret_milp_opt <- function(R, constraints, moments, target, solver="glpk"){
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=Amat, dir=dir, rhs=rhs),
                  bounds=bnds, types=types)
-  roi.result <- try(ROI_solve(x=opt.prob, solver=solver), silent=TRUE)
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver, control=control), silent=TRUE)
   if(inherits(roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
   # Weights
@@ -400,10 +407,12 @@ maxret_milp_opt <- function(R, constraints, moments, target, solver="glpk"){
 #' @param target target return value
 #' @param alpha alpha value for ETL/ES/CVaR
 #' @param solver solver to use
+#' @param control list of solver control parameters
 #' @author Ross Bennett
-etl_opt <- function(R, constraints, moments, target, alpha, solver="glpk"){
+etl_opt <- function(R, constraints, moments, target, alpha, solver="glpk", control=NULL){
   stopifnot("package:ROI" %in% search() || require("ROI",quietly = TRUE))
-  stopifnot("package:ROI.plugin.glpk" %in% search() || require("ROI.plugin.glpk",quietly = TRUE))
+  plugin <- paste0("ROI.plugin.", solver)
+  stopifnot(paste0("package:", plugin) %in% search() || require(plugin, quietly=TRUE, character.only=TRUE))
   
   # Check for cleaned returns in moments
   if(!is.null(moments$cleanR)) R <- moments$cleanR
@@ -456,7 +465,7 @@ etl_opt <- function(R, constraints, moments, target, alpha, solver="glpk"){
   opt.prob <- OP(objective=ROI_objective, 
                        constraints=L_constraint(L=Amat, dir=dir.vec, rhs=rhs.vec),
                        bounds=bnds)
-  roi.result <- try(ROI_solve(x=opt.prob, solver=solver), silent=TRUE)
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver, control=control), silent=TRUE)
   if(inherits(x=roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
   weights <- roi.result$solution[1:N]
@@ -498,10 +507,12 @@ etl_opt <- function(R, constraints, moments, target, alpha, solver="glpk"){
 #' @param target target return value
 #' @param alpha alpha value for ETL/ES/CVaR
 #' @param solver solver to use
+#' @param control list of solver control parameters
 #' @author Ross Bennett
-etl_milp_opt <- function(R, constraints, moments, target, alpha, solver="glpk"){
+etl_milp_opt <- function(R, constraints, moments, target, alpha, solver="glpk", control=NULL){
   stopifnot("package:ROI" %in% search() || require("ROI",quietly = TRUE))
-  stopifnot("package:ROI.plugin.glpk" %in% search() || require("ROI.plugin.glpk",quietly = TRUE))
+  plugin <- paste0("ROI.plugin.", solver)
+  stopifnot(paste0("package:", plugin) %in% search() || require(plugin, quietly=TRUE, character.only=TRUE))
   
   # Check for cleaned returns in moments
   if(!is.null(moments$cleanR)) R <- moments$cleanR
@@ -605,7 +616,8 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha, solver="glpk"){
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=tmpAmat, dir=dir, rhs=rhs),
                  bounds=bnds, types=types)
-  roi.result <- ROI_solve(x=opt.prob, solver=solver)
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver, control=control), silent=TRUE)
+  if(inherits(roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
   # The Rglpk solvers status returns an an integer with status information
   # about the solution returned: 0 if the optimal solution was found, a 
@@ -654,12 +666,14 @@ etl_milp_opt <- function(R, constraints, moments, target, alpha, solver="glpk"){
 #' @param target target return value
 #' @param init_weights initial weights to compute turnover
 #' @param solver solver to use
+#' @param control list of solver control parameters
 #' @author Ross Bennett
-gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights, solver="quadprog"){
+gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights, solver="quadprog", control=NULL){
   # function for minimum variance or max quadratic utility problems
   stopifnot("package:corpcor" %in% search() || require("corpcor",quietly = TRUE))
   stopifnot("package:ROI" %in% search() || require("ROI", quietly = TRUE))
-  stopifnot("package:ROI.plugin.quadprog" %in% search() || require("ROI.plugin.quadprog", quietly = TRUE))
+  plugin <- paste0("ROI.plugin.", solver)
+  stopifnot(paste0("package:", plugin) %in% search() || require(plugin, quietly=TRUE, character.only=TRUE))
   
   # Check for cleaned returns in moments
   if(!is.null(moments$cleanR)) R <- moments$cleanR
@@ -766,8 +780,7 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights, s
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=Amat, dir=dir, rhs=rhs))
   
-  roi.result <- try(ROI_solve(x=opt.prob, solver=solver), silent=TRUE)
-  
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver, control=control), silent=TRUE)
   if(inherits(roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
   wts <- roi.result$solution
@@ -810,13 +823,15 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights, s
 #' @param target target return value
 #' @param init_weights initial weights to compute turnover
 #' @param solver solver to use
+#' @param control list of solver control parameters
 #' @author Ross Bennett
-gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, solver="quadprog"){
+gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, solver="quadprog", control=NULL){
   # function for minimum variance or max quadratic utility problems
   # modifying ProportionalCostOpt function from MPO package
   stopifnot("package:corpcor" %in% search() || require("corpcor", quietly = TRUE))
   stopifnot("package:ROI" %in% search() || require("ROI", quietly = TRUE))
-  stopifnot("package:ROI.plugin.quadprog" %in% search() || require("ROI.plugin.quadprog", quietly = TRUE))
+  plugin <- paste0("ROI.plugin.", solver)
+  stopifnot(paste0("package:", plugin) %in% search() || require(plugin, quietly=TRUE, character.only=TRUE))
   
   # Check for cleaned returns in moments
   if(!is.null(moments$cleanR)) R <- moments$cleanR
@@ -911,8 +926,7 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, s
   
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=Amat, dir=dir, rhs=rhs))
-  roi.result <- try(ROI_solve(x=opt.prob, solver=solver), silent=TRUE)
-
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver, control=control), silent=TRUE)
   if(inherits(roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
   wts <- roi.result$solution
@@ -948,31 +962,31 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, s
 # This function uses optimize() to find the target return value that 
 # results in the maximum starr ratio (mean / ES).
 # returns the target return value
-mean_etl_opt <- function(R, constraints, moments, alpha, solver){
+mean_etl_opt <- function(R, constraints, moments, alpha, solver, control){
   # create a copy of the moments that can be modified
   tmp_moments <- moments
   
   # Find the maximum return
   if(!is.null(constraints$max_pos)){
-    max_ret <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=NA, solver=solver)
+    max_ret <- maxret_milp_opt(R=R, constraints=constraints, moments=moments, target=NA, solver=solver, control=control)
   } else {
-    max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, target=NA, solver=solver)
+    max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, target=NA, solver=solver, control=control)
   }
   max_mean <- as.numeric(-max_ret$out)
   
   # Find the minimum return
   tmp_moments$mean <- -1 * moments$mean
   if(!is.null(constraints$max_pos)){
-    min_ret <- maxret_milp_opt(R=R, constraints=constraints, moments=tmp_moments, target=NA, solver=solver)
+    min_ret <- maxret_milp_opt(R=R, constraints=constraints, moments=tmp_moments, target=NA, solver=solver, control=control)
   } else {
-    min_ret <- maxret_opt(R=R, constraints=constraints, moments=tmp_moments, target=NA, solver=solver)
+    min_ret <- maxret_opt(R=R, constraints=constraints, moments=tmp_moments, target=NA, solver=solver, control=control)
   }
   min_mean <- as.numeric(min_ret$out)
   
   # use optimize() to find the target return value that maximizes sharpe ratio
   opt <- try(optimize(f=starr_obj_fun, R=R, constraints=constraints, 
                       solver=solver, moments=moments, alpha=alpha,
-                      lower=min_mean, upper=max_mean, 
+                      lower=min_mean, upper=max_mean, control=control,
                       maximum=TRUE, tol=.Machine$double.eps), 
              silent=TRUE)
   if(inherits(opt, "try-error")){
@@ -984,13 +998,15 @@ mean_etl_opt <- function(R, constraints, moments, alpha, solver){
 
 # Function to calculate the starr ratio.
 # Used as the objective function for optimize()
-starr_obj_fun <- function(target_return, R, constraints, moments, alpha, solver){
+starr_obj_fun <- function(target_return, R, constraints, moments, alpha, solver, control){
   if(!is.null(constraints$max_pos)){
     opt <- etl_milp_opt(R=R, constraints=constraints, moments=moments, 
-                        target=target_return, alpha=alpha, solver=solver)
+                        target=target_return, alpha=alpha, solver=solver, 
+                        control=control)
   } else {
     opt <- etl_opt(R=R, constraints=constraints, moments=moments, 
-                   target=target_return, alpha=alpha, solver=solver)
+                   target=target_return, alpha=alpha, solver=solver,
+                   control=control)
   }
   weights <- matrix(opt$weights, ncol=1)
   opt_mean <- as.numeric(t(weights) %*% matrix(moments$mean, ncol=1))
@@ -1132,10 +1148,10 @@ starr_obj_fun <- function(target_return, R, constraints, moments, alpha, solver)
 
 # Function to calculate the sharpe ratio.
 # Used as the objective function for optimize()
-sharpe_obj_fun <- function(target_return, R, constraints, moments, lambda_hhi=NULL, conc_groups=NULL, solver="quadprog"){
+sharpe_obj_fun <- function(target_return, R, constraints, moments, lambda_hhi=NULL, conc_groups=NULL, solver="quadprog", control=control){
   opt <- gmv_opt(R=R, constraints=constraints, moments=moments, lambda=1, 
-                 target=target_return, lambda_hhi=lambda_hhi, 
-                 conc_groups=conc_groups, solver=solver)
+                 target=target_return, lambda_hhi=lambda_hhi,
+                 conc_groups=conc_groups, solver=solver, control=control)
   weights <- opt$weights
   opt_mean <- as.numeric(t(weights) %*% matrix(moments$mean, ncol=1))
   opt_sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
@@ -1146,25 +1162,25 @@ sharpe_obj_fun <- function(target_return, R, constraints, moments, lambda_hhi=NU
 # This function uses optimize() to find the target return value that 
 # results in the maximum sharpe ratio (mean / sd).
 # returns the target return value
-max_sr_opt <- function(R, constraints, moments, lambda_hhi, conc_groups, solver){
+max_sr_opt <- function(R, constraints, moments, lambda_hhi, conc_groups, solver, control){
   # create a copy of the moments that can be modified
   tmp_moments <- moments
   
   # Find the maximum return
   max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, 
-                        target=NA, solver="glpk")
+                        target=NA, solver=solver, control=control)
   max_mean <- as.numeric(-max_ret$out)
   
   # Find the minimum return
   tmp_moments$mean <- -1 * moments$mean
   min_ret <- maxret_opt(R=R, moments=tmp_moments, constraints=constraints, 
-                        target=NA, solver="glpk")
+                        target=NA, solver=solver, control=control)
   min_mean <- as.numeric(min_ret$out)
   
   # use optimize() to find the target return value that maximizes sharpe ratio
   opt <- try(optimize(f=sharpe_obj_fun, R=R, constraints=constraints, 
                       solver=solver, lambda_hhi=lambda_hhi, 
-                      conc_groups=conc_groups, moments=moments, 
+                      conc_groups=conc_groups, moments=moments, control=control,
                       lower=min_mean, upper=max_mean, 
                       maximum=TRUE, tol=.Machine$double.eps), 
              silent=TRUE)

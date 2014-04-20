@@ -3,7 +3,7 @@
 \title{GMV/QU QP Optimization with Turnover Constraint}
 \usage{
   gmv_opt_toc(R, constraints, moments, lambda, target,
-    init_weights, solver = "quadprog")
+    init_weights, solver = "quadprog", control = NULL)
 }
 \arguments{
   \item{R}{xts object of asset returns}
@@ -21,6 +21,8 @@
   \item{init_weights}{initial weights to compute turnover}
 
   \item{solver}{solver to use}
+
+  \item{control}{list of solver control parameters}
 }
 \description{
   This function is called by optimize.portfolio to solve
