@@ -101,15 +101,24 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   var_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name))  %in% c("var", "StdDev", "sd"))
   if(length(var_idx) >= 1){
     # the portfolio object has a var, StdDev, or sd objective
-    var_obj <- portfolio$objectives[[var_idx]]
+    var_obj <- portfolio$objectives[[var_idx[1]]]
   } else {
     var_obj <- portfolio_risk_objective(name="var")
+  }
+  
+  hhi_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name))  == "HHI")
+  if(length(hhi_idx) >= 1){
+    # the portfolio object has an HHI objective
+    hhi_obj <- portfolio$objectives[[hhi_idx[1]]]
+  } else {
+    hhi_obj <- NULL
   }
   
   # Clear out the objectives in portfolio and add them here to simplify checks
   # and so we can control the optimization along the efficient frontier.
   portfolio$objectives <- list()
   portfolio$objectives[[1]] <- var_obj
+  portfolio$objectives[[2]] <- hhi_obj
   portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
   
   # If the user has passed in a portfolio object with return_constraint, we need to disable it
@@ -123,11 +132,14 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   var_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name))  %in% c("var", "StdDev", "sd"))
   # get the index number of the mean objective
   mean_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "mean")
+  # get the index number of the hhi objective
+  hhi_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "HHI")
   
   ##### get the maximum return #####
   
-  # Disable the risk objective
+  # Disable the risk objective and hhi objective if applicable
   portfolio$objectives[[var_idx]]$enabled <- FALSE
+  if(length(hhi_idx) >= 1) portfolio$objectives[[hhi_idx]]$enabled <- FALSE
   
   # run the optimization to get the maximum return
   tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI", ...=...)
@@ -139,8 +151,9 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   # Disable the return objective
   portfolio$objectives[[mean_idx]]$enabled <- FALSE
   
-  # Enable the risk objective
+  # Enable the risk objective and hhi objective if applicable
   portfolio$objectives[[var_idx]]$enabled <- TRUE
+  if(length(hhi_idx) >= 1) portfolio$objectives[[hhi_idx]]$enabled <- TRUE
   
   # Run the optimization to get the global minimum variance portfolio with the
   # given constraints.
@@ -208,7 +221,7 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
   etl_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name))  %in% c("ETL", "ES", "CVaR"))
   if(length(etl_idx) >= 1){
     # the portfolio object has a ETL, ES, CVaR objective
-    etl_obj <- portfolio$objectives[[etl_idx]]
+    etl_obj <- portfolio$objectives[[etl_idx[1]]]
   } else {
     etl_obj <- portfolio_risk_objective(name="ES", arguments=list(p=0.95))
   }
