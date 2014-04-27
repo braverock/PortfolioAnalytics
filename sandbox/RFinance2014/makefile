@@ -13,7 +13,11 @@ all: $(OUT_FILES) slidy_presentation.html presentation.Rmd
 
 # Generate slidy presentation from markdown file
 slidy_presentation.html: $(RFILES) $(OUT_FILES) presentation.md
-	pandoc -t slidy -s presentation.md -o slidy_presentation.html
+	pandoc -t slidy -s --mathjax presentation.md -o slidy_presentation.html
+
+# Generate slidy presentation from markdown file
+slides.pdf: $(RFILES) $(OUT_FILES) presentation.md
+	pandoc -t -S beamer —-slide-level 2 presentation.md -o slides.pdf
 
 # Generate markdown file from R markdown file
 presentation.md: presentation.Rmd
@@ -38,6 +42,9 @@ data_prep.Rout: data_prep.R
 lwShrink.Rout: R/lwShrink.R
 	R CMD BATCH --vanilla R/lwShrink.R
 
+charting.Rout: R/charting.R
+	R CMD BATCH --vanilla R/charting.R
+
 # Use Rscript to run the necessary R files as an alternative to R CMD BATCH
 runR:
 	Rscript data_prep.R
@@ -52,4 +59,5 @@ clean:
 	rm -f optimization_results/*.rda
 	rm -f *.md
 	rm -f *.html
+	rm -f cache/*
 	

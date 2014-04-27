@@ -62,8 +62,8 @@ portf.init <- portfolio.spec(stocks)
 # Add constraints
 # weights sum to 1
 portf.minvar <- add.constraint(portf.init, type="full_investment")
-# box constraints such that no stock has weight less than 1% or greater than 20%
-portf.minvar <- add.constraint(portf.minvar, type="box", min=0.01, max=0.2)
+# box constraints
+portf.minvar <- add.constraint(portf.minvar, type="box", min=0.01, max=0.45)
 
 # Add objective
 # objective to minimize portfolio variance
@@ -368,7 +368,15 @@ if(file.exists("optimization_figures/rp_plot.png")){
   
   x.assets <- StdDev(R)
   y.assets <- colMeans(R)
-  
+  ###
+  # create an interactive plot using rCharts and nvd3 scatterChart
+  # tmp1 <- data.frame(name="sample", mean=rp1_mean, sd=rp1_StdDev)
+  # tmp2 <- data.frame(name="simplex", mean=rp2_mean, sd=rp2_StdDev)
+  # tmp3 <- data.frame(name="grid", mean=rp3_mean, sd=rp3_StdDev)
+  # tmp <- rbind(tmp1, tmp2, tmp3)
+  # n1 <- nPlot(mean ~ sd, group="name", data=tmp, type="scatterChart")
+  # n1
+  ###
   x.lower <- min(x.assets) * 0.9
   x.upper <- max(x.assets) * 1.1
   y.lower <- min(y.assets) * 0.9

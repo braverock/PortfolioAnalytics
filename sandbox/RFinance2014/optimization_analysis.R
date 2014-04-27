@@ -1,6 +1,8 @@
 library(PortfolioAnalytics)
 library(methods)
 
+source("R/charting.R")
+
 # Set the directory where the optimization results are saved
 results.dir <- "optimization_results"
 figures.dir <- "optimization_figures"
@@ -15,9 +17,16 @@ png(paste(figures.dir, "weights_minVarSample.png", sep="/"))
 chart.Weights(opt.minVarSample, main="minVarSample Weights", legend.loc=NULL)
 dev.off()
 
+w1 <- nvd3WeightsPlot(opt.minVarSample)
+save(w1, file=paste(figures.dir, "w1.rda", sep="/"))
+
+
 png(paste(figures.dir, "weights_minVarLW.png", sep="/"))
 chart.Weights(opt.minVarLW, main="minVarLW Weights", legend.loc=NULL)
 dev.off()
+
+w2 <- nvd3WeightsPlot(opt.minVarLW)
+save(w2, file=paste(figures.dir, "w2.rda", sep="/"))
 
 # Compute the returns and chart the performance summary
 ret.minVarSample <- summary(opt.minVarSample)$portfolio_returns
@@ -65,8 +74,9 @@ png(paste(figures.dir, "opt_minES.png", sep="/"))
 # plot the feasible space
 par(mar=c(7,4,4,1)+0.1)
 plot(xtract.ES, xtract.mean, col="gray", 
+     main="Minimum ES Portfolios",
      xlab="ES", ylab="Mean",
-     ylim=c(0.005, 0.008),
+     ylim=c(0.005, 0.007),
      xlim=c(0.015, 0.085))
 
 # min ES
@@ -92,7 +102,7 @@ points(x=opt.minES[[3]]$objective_measures$ES$MES,
 text(x=opt.minES[[3]]$objective_measures$ES$MES,
      y=opt.minES[[3]]$objective_measures$mean,
      labels="Min ES EqRB", pos=4, col="darkgreen", cex=0.8)
-# par(mar=c(7,4,4,1)+0.1)
+par(mar=c(5,4,4,1)+0.1)
 dev.off()
 
 # Chart the risk contribution
@@ -145,6 +155,13 @@ colnames(ret.bt.opt) <- c("min ES", "min ES RB", "min ES Eq RB")
 png(paste(figures.dir, "ret_minES.png", sep="/"))
 charts.PerformanceSummary(ret.bt.opt)
 dev.off()
+
+###
+# interactive plot of risk budgets through time using nvd3
+# nvd3RiskPlot(bt.opt.minES[[1]])
+# nvd3RiskPlot(bt.opt.minES[[2]])
+# nvd3RiskPlot(bt.opt.minES[[3]])
+###
 
 ##### Example 4 #####
 load(file=paste(results.dir, "opt.crra.rda", sep="/"))

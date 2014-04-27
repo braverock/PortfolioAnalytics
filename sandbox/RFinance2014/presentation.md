@@ -1,13 +1,30 @@
-% R/Finance 2014: Complex Portfolio Optimization with PortfolioAnalytics
-% Ross Bennett
-% May 16, 2014
+---
+title       : Complex Portfolio Optimization with PortfolioAnalytics
+subtitle    : R/Finance 2014
+author      : Ross Bennett
+date        : May 16, 2014
+---
 
-# Overview
+
+
+
+
+## Overview
 * Discuss Portfolio Optimization
 * Introduce PortfolioAnalytics
 * Demonstrate PortfolioAnalytics with Examples
 
-# Portfolio Optimization
+<!---
+Discuss Portfolio Optimization
+- Some background and theory of portfolio theory
+- challenges
+Introduce PortfolioAnalytics
+- What PortfolioAnalytics does and the problems it solves
+Demonstrate PortfolioAnalytics with Examples
+- Brief overview of the examples I will be giving
+-->
+
+---
 
 ## Modern Portfolio Theory
 "Modern" Portfolio Theory (MPT) was introduced by Harry Markowitz in 1952.
@@ -22,8 +39,10 @@ General Objectives
 How do we define risk? What about more complex objectives?
 
 <!---
-Several approaches follow the Markowitz approach using mean return as a measure of gain and standard deviation of returns as a measure of risk
+Several approaches follow the Markowitz approach using mean return as a measure of gain and standard deviation of returns as a measure of risk.
 -->
+
+---
 
 ## Portfolio Optimization Objectives
 * Minimize Risk
@@ -43,10 +62,9 @@ Several approaches follow the Markowitz approach using mean return as a measure 
 The challenge here is knowing what solver to use and the capabilities/limits of the chosen solver. Talk about pros/cons of closed-form solvers vs. global solvers and what objectives can be solved. 
 -->
 
-# PortfolioAnalytics
+---
 
-## Overview
-
+## PortfolioAnalytics Overview
 PortfolioAnalytics is an R package designed to provide numerical solutions and visualizations for portfolio optimization problems with complex constraints and objectives.
 
 * Support for multiple constraint and objective types
@@ -69,9 +87,9 @@ The key points to make here are:
 - Periodic rebalancing and analyzing out of sample performance will help refine objectives and constraints
 -->
 
+---
 
 ## Support Multiple Solvers
-
 Linear and Quadratic Programming Solvers
 
 * R Optimization Infrastructure (ROI)
@@ -90,6 +108,8 @@ Global (stochastic or continuous solvers)
 Brief explanation of each solver and what optimization problems (constraints and objectives) are supported
 -->
 
+---
+
 ## Random Portfolios
 PortfolioAnalytics has three methods to generate random portfolios.
 
@@ -107,17 +127,24 @@ The simplex method to generate random portfolios is based on a paper by W. T. Sh
 The grid method to generate random portfolios is based on the gridSearch function in NMOF package. The grid search method only satisfies the min and max box constraints. The min_sum and max_sum leverage constraint will likely be violated and the weights in the random portfolios should be normalized. Normalization may cause the box constraints to be violated and will be penalized in constrained_objective.
 -->
 
+---
+
 ## Comparison of Random Portfolio Methods
 ![](optimization_figures/rp_plot.png)
+
+<!---
+This chart is a prime candidate for an interactive viz
+-->
+
+---
 
 ## Random Portfolios: Simplex Method
 ![](optimization_figures/fev_plot.png)
 
+---
 
 ## Workflow
-TODO: Add a nice graphic here (Guy might have one)
-
-Specify a Portfolio --> Add Constraints --> Add Objectives --> Run Optimization --> Analyze Results
+![](misc_figures/workflow.png)
 
 <!---
 Describe each function:
@@ -128,10 +155,132 @@ Describe each function:
 Just give a general description of the functions to analyze results
 -->
 
+---
 
-# Example 1
+## Workflow: Specify Portfolio
 
-## Data Setup
+```r
+args(portfolio.spec)
+```
+
+```
+## function (assets = NULL, category_labels = NULL, weight_seq = NULL, 
+##     message = FALSE) 
+## NULL
+```
+
+
+---
+
+## Workflow: Add Constraints
+
+```r
+args(add.constraint)
+```
+
+```
+## function (portfolio, type, enabled = TRUE, message = FALSE, ..., 
+##     indexnum = NULL) 
+## NULL
+```
+
+
+Supported Constraint Types
+
+* Sum of Weights
+* Box
+* Group
+* Turnover
+* Diversification
+* Position Limit
+* Return
+* Factor Exposure
+
+---
+
+## Workflow: Add Objectives
+
+```r
+args(add.objective)
+```
+
+```
+## function (portfolio, constraints = NULL, type, name, arguments = NULL, 
+##     enabled = TRUE, ..., indexnum = NULL) 
+## NULL
+```
+
+
+Supported Objective types
+
+* Return
+* Risk
+* Risk Budget
+* Weight Concentration
+
+---
+
+## Workflow: Run Optimization
+
+```r
+args(optimize.portfolio)
+```
+
+```
+## function (R, portfolio = NULL, constraints = NULL, objectives = NULL, 
+##     optimize_method = c("DEoptim", "random", "ROI", "pso", "GenSA"), 
+##     search_size = 20000, trace = FALSE, ..., rp = NULL, momentFUN = "set.portfolio.moments", 
+##     message = FALSE) 
+## NULL
+```
+
+```r
+args(optimize.portfolio.rebalancing)
+```
+
+```
+## function (R, portfolio = NULL, constraints = NULL, objectives = NULL, 
+##     optimize_method = c("DEoptim", "random", "ROI"), search_size = 20000, 
+##     trace = FALSE, ..., rp = NULL, rebalance_on = NULL, training_period = NULL, 
+##     trailing_periods = NULL) 
+## NULL
+```
+
+
+Supported Optimization Methods
+
+* ROI
+* random
+* DEoptim
+* pso
+* GenSA
+
+---
+
+## Workflow: Analyze Results
+
+Charting Functions
+
+* plot
+* chart.Concentration
+* chart.EfficientFrontier
+* chart.RiskBudget
+* chart.RiskReward
+* chart.Weights
+
+Extract Functions
+
+* extractObjectiveMeasures
+* extractStats
+* extractWeights
+
+<!---
+I'd like to make this a two column slide if possible. Might have to try slidify.
+-->
+
+---
+
+## Example 1: Data Setup
 Here we will look at portfolio optimization in the context of stocks.
 
 * Selection of large cap, mid cap, and small cap stocks from CRSP data
@@ -147,15 +296,25 @@ equity.data <- cbind(largecap_weekly[,1:15],
 ```
 
 
+---
+
 ## Distribution of Monthly Returns
 ![](data_figures/equity_box.png)
 
+---
+
 ## Minimum Variance Portfolio
-Consider a portfolio of stocks. Our objective to minimize portfolio variance subect to full investment and box constraints. We will use out of sample backtesting to compare the sample covariance matrix estimate and a Ledoit-Wolf shinkage estimate. 
+Here we consider a portfolio of stocks. Our objective is to minimize portfolio variance subect to full investment and box constraints. We will use out of sample backtesting to compare the sample covariance matrix estimate and a Ledoit-Wolf shinkage estimate.
+
+$$
+\min_{w} w^{T} \Sigma w
+$$
 
 <!---
 Demonstrate a custom moments function to compare a sample covariance matrix estimate and a Ledoit-Wolf shrinkage covariance matrix estimate. An alternative is a robust (MCD, MVE, etc.) estimate, DCC GARCH model, factor model, etc.
 -->
+
+---
 
 ## Specify Portfolio
 
@@ -168,8 +327,8 @@ portf.init <- portfolio.spec(stocks)
 portf.minvar <- add.constraint(portf.init, type = "full_investment")
 
 # Add box constraint such that no asset can have a weight of greater than
-# 20% or less than 1%
-portf.minvar <- add.constraint(portf.minvar, type = "box", min = 0.01, max = 0.2)
+# 45% or less than 1%
+portf.minvar <- add.constraint(portf.minvar, type = "box", min = 0.01, max = 0.45)
 
 # Add objective to minimize portfolio variance
 portf.minvar <- add.objective(portf.minvar, type = "risk", name = "var")
@@ -179,6 +338,8 @@ portf.minvar <- add.objective(portf.minvar, type = "risk", name = "var")
 <!---
 Talk a little about adding constraints and objectives
 -->
+
+---
 
 ## Ledoit-Wolf Shrinkage Estimate
 The default function for `momentFUN` is `set.portfolio.moments`. We need to write our own function to estimate the covariance matrix.
@@ -193,22 +354,7 @@ lw.sigma <- function(R, ...) {
 ```
 
 
-## Backtesting Parameters
-
-```r
-# Set rebalancing frequency
-rebal.freq <- "quarters"
-
-# Training Period
-training <- 400
-
-# Trailing Period
-trailing <- 250
-```
-
-<!---
-Explain each of the rebalancing parameters
--->
+---
 
 ## Run Optimization
 
@@ -216,19 +362,25 @@ Explain each of the rebalancing parameters
 # Backtest using sample covariance matrix estimate
 opt.minVarSample <- optimize.portfolio.rebalancing(equity.data, portf.minvar, 
                                                    optimize_method="ROI", 
-                                                   rebalance_on=rebal.freq, 
-                                                   training_period=training, 
-                                                   trailing_periods=trailing)
+                                                   rebalance_on="quarters", 
+                                                   training_period=400, 
+                                                   trailing_periods=250)
 
 # Backtest using Ledoit-Wolf shrinkage covariance matrix estimate
 opt.minVarLW <- optimize.portfolio.rebalancing(equity.data, portf.minvar, 
                                                optimize_method="ROI", 
                                                momentFUN=lw.sigma,
-                                               rebalance_on=rebal.freq, 
-                                               training_period=training, 
-                                               trailing_periods=trailing)
+                                               rebalance_on="quarters", 
+                                               training_period=400, 
+                                               trailing_periods=250)
 ```
 
+
+<!---
+Explain each of the rebalancing parameters
+-->
+
+---
 
 ## Chart Weights Through Time
 
@@ -239,6 +391,8 @@ chart.Weights(opt.minVarLW, main = "minVarLW Weights", legend.loc = NULL)
 
 ![](optimization_figures/weights_minVarSample.png)
 ![](optimization_figures/weights_minVarLW.png)
+
+---
 
 ## Returns
 Compute the portfolio rebalancing returns and chart the performance.
@@ -251,20 +405,20 @@ colnames(ret.minVar) <- c("Sample", "LW")
 charts.PerformanceSummary(ret.minVar)
 ```
 
-
-## Performance Summary
 ![](optimization_figures/ret_minVar.png)
 
-# Example 2
+---
 
-## Market Neutral Portfolio
+## Example 2: Market Neutral Portfolio
 Here we consider a portfolio of stocks. Our objective is to maximize portfolio return with a target of 0.0015 and minimize portfolio StdDev with a target of 0.02 subject to dollar neutral, beta, box, and position limit constraints. We will use the same data considered in Example 1.
 
 <!---
-comments
+This involves combining several constraints. This is an MIQPQC problem that can't be solved by quadprog so we will use random portfolios.
 -->
 
-## Specify Portfolio: Contraints
+---
+
+## Specify Portfolio: Constraints
 
 ```r
 portf.init <- portfolio.spec(stocks)
@@ -293,6 +447,8 @@ portf.dn <- add.constraint(portf.dn, type="factor_exposure", B=betas,
 explain the constraints
 -->
 
+---
+
 ## Specify Portfolio: Objectives
 
 ```r
@@ -309,6 +465,8 @@ portf.dn.StdDev <- add.objective(portf.dn.StdDev, type="risk", name="StdDev",
 <!---
 explain the objectives, specifically the target
 -->
+
+---
 
 ## Run Optimization
 
@@ -327,6 +485,8 @@ opt.dn <- optimize.portfolio(equity.data, portf.dn.StdDev,
 generate a set of random portfolios and then pass directly to optimize.portfolio. Could just specify optimize_method = "random" and will automatically generate for you.
 -->
 
+---
+
 ## Plot Results
 
 ```r
@@ -335,10 +495,9 @@ plot(opt.dn, main="Dollar Neutral Portfolio", risk.col="StdDev", neighbors=10)
 
 ![](optimization_figures/opt_dn.png)
 
+---
 
-# Example 3
-
-## Data Setup
+## Example 3: Data Setup
 Here we will look at portfolio optimization in the context of portfolio of hedge funds.
 
 * EDHEC-Risk Alternative Indexes
@@ -350,7 +509,6 @@ Here we will look at portfolio optimization in the context of portfolio of hedge
     * Emerging Markets (EM)
     * Global Macro (GM)
 
-## Data
 
 ```r
 R <- edhec[,c("Convertible.Arbitrage", "Equity.Market.Neutral", 
@@ -361,14 +519,18 @@ colnames(R) <- c("CA", "EMN", "FIA", "CTAG", "EM", "GM")
 ```
 
 
+---
+
 ## Monthly Returns
 ![](data_figures/relative_barvar.png)
 ![](data_figures/directional_barvar.png)
 
+---
 
 ## Distribution of Monthly Returns
 ![](data_figures/edhec_box.png)
 
+---
 
 ## Minimum Expected Shortfall
 Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. This will be an extended example starting with an objective to minimize modified expected shortfall, then add risk budget percent contribution limit, and finally add equal risk contribution limit.
@@ -377,11 +539,15 @@ Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as 
 * Minimize Expected Shortfall with Risk Budget Limit
 * Minimize Expected Shortfall with Equal Risk Contribution
 
-Add risk budget objective to minimize concentration of percentage component contribution to risk. Concentration is defined as the Herfindahl-Hirschman Index (HHI). $\sum_i x_i^2$
+Add risk budget objective to minimize concentration of percentage component contribution to risk. Concentration is defined as the Herfindahl Hirschman Index (HHI).
+
+$$ \sum_{i=1}^n x_i^2 $$
 
 <!---
 comments
 -->
+
+---
 
 ## Specify Initial Portfolio
 
@@ -410,6 +576,8 @@ portf.init <- add.objective(portf.init, type="return",
 basic comments about setting up an initial portfolio
 -->
 
+---
+
 ## Add Objectives
 
 ```r
@@ -435,6 +603,7 @@ portf.minES.EqRB <- add.constraint(portf.minES.EqRB, type="box",
 Key points here are that we are creating 3 new portfolios by reusing the initial portfolio and we are relaxing the box constraints because we are no longer concerned with controlling weight concentration. We have limits on risk contribution.
 -->
 
+---
 
 ## Run Optimization
 
@@ -454,8 +623,12 @@ opt.minES <- optimize.portfolio(R, portf, optimize_method="DEoptim",
 explain how portf is a list of portfolios and passed to optimize.portfolio
 -->
 
+---
+
 ## Plot in Risk-Return Space
 ![](optimization_figures/opt_minES.png)
+
+---
 
 ## Chart Risk Budgets
 
@@ -469,6 +642,8 @@ chart.RiskBudget(opt.minES[[3]], main="Equal ES Component Contribution",
 
 ![](optimization_figures/rb_minES.png)
 ![](optimization_figures/eqrb_minES.png)
+
+---
 
 ## Set Rebalancing Parameters and Run Backtest
 
@@ -492,18 +667,25 @@ bt.opt.minES <- optimize.portfolio.rebalancing(R, portf,
 ```
 
 
+---
+
 ## Min ES Risk Contributions and Weights Through Time
 ![](optimization_figures/risk_minES.png)
 ![](optimization_figures/weights_minES.png)
+
+---
 
 ## Min ES Risk Budget Limit Risk Contributions and Weights Through Time
 ![](optimization_figures/risk_minESRB.png)
 ![](optimization_figures/weights_minESRB.png)
 
+---
+
 ## Min ES Equal Component Contribution Risk Contributions and Weights Through Time
 ![](optimization_figures/risk_minESEqRB.png)
 ![](optimization_figures/weights_minESEqRB.png)
 
+---
 
 ## Compute Returns and Chart Performance
 
@@ -516,17 +698,22 @@ charts.PerformanceSummary(ret.bt.opt)
 
 ![](optimization_figures/ret_minES.png)
 
+---
 
-# Example 4
-
-## Maximize CRRA
+## Example 4: Maximize CRRA
 Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. Our objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in the Boudt paper and Martinelli paper. We use the same data as Example 3.
 
-TODO: Add equation
+$$
+EU_{\lambda}(w) = - \frac{\lambda}{2} m_{(2)}(w) + 
+\frac{\lambda (\lambda + 1)}{6} m_{(3)}(w) -
+\frac{\lambda (\lambda + 1) (\lambda + 2)}{24} m_{(4)}(w)
+$$
 
 <!---
 Demonstrate a custom moment function and a custom objective function.
 -->
+
+---
 
 ## Define a function to compute CRRA
 
@@ -549,6 +736,8 @@ CRRA <- function(R, weights, lambda, sigma, m3, m4){
 The function arguments should have 'R' as the name of the returns and 'weights' as the name of the weights. 'R' and 'weights' are automatically matched, any other function arguments can be passed in through arguments in add.objective.
 -->
 
+---
+
 ## Specify Portfolio
 
 ```r
@@ -567,12 +756,20 @@ portf.crra <- add.constraint(portf.crra, type="box",
 # Add objective to maximize CRRA
 portf.crra <- add.objective(portf.crra, type="return", 
                             name="CRRA", arguments=list(lambda=10))
+
+# I just want these for plotting
+# Set multiplier=0 so that it is calculated, but does not affect the optimization
+portf.crra <- add.objective(portf.crra, type="return", name="mean", multiplier=0)
+portf.crra <- add.objective(portf.crra, type="risk", name="ES", multiplier=0)
+portf.crra <- add.objective(portf.crra, type="risk", name="StdDev", multiplier=0)
 ```
 
 
 <!---
 Focus on how CRRA is added as an objective
 -->
+
+---
 
 ## Run Optimization
 
@@ -583,13 +780,63 @@ opt.crra <- optimize.portfolio(R, portf.crra, optimize_method="DEoptim",
 ```
 
 
+
+
+
+```r
+opt.crra
+```
+
+```
+## ***********************************
+## PortfolioAnalytics Optimization
+## ***********************************
+## 
+## Call:
+## optimize.portfolio(R = R, portfolio = portf.crra, optimize_method = "DEoptim", 
+##     search_size = 5000, trace = TRUE, traceDE = 0, momentFUN = "crra.moments")
+## 
+## Optimal Weights:
+##     CA    EMN    FIA   CTAG     EM     GM 
+## 0.0540 0.3960 0.3121 0.1284 0.0500 0.0500 
+## 
+## Objective Measures:
+##       CRRA 
+## -0.0004953 
+## 
+## 
+##     mean 
+## 0.005311 
+## 
+## 
+##      ES 
+## 0.02715 
+## 
+## 
+##   StdDev 
+## 0.009703
+```
+
+
+
 <!---
 remember to specify a momentFUN to match the arguments in CRRA
 -->
 
+---
+
 ## Chart Results
+
+```r
+chart.RiskReward(opt.crra, risk.col = "ES")
+chart.RiskReward(opt.crra, risk.col = "StdDev")
+```
+
+
 ![](optimization_figures/crra_RR_ES.png)
 ![](optimization_figures/crra_RR_StdDev.png)
+
+---
 
 ## Run Backtest and Compute Returns
 
@@ -612,6 +859,8 @@ colnames(ret.crra) <- "CRRA"
 Run optimization and extract the portfolio rebalancing returns from the summary method
 -->
 
+---
+
 ## Chart Performance
 
 ```r
@@ -621,7 +870,13 @@ charts.PerformanceSummary(cbind(ret.bt.opt, ret.crra),
 
 ![](optimization_figures/ret_crra.png)
 
-# Conclusion
+---
+
+## Conclusion
+TODO
+
+* Overview of what was covered
+* Additional information and plans for PortfolioAnalytics
 
 ## Acknowledgements
 Many thanks to
@@ -637,7 +892,10 @@ Many thanks to
 - Google for funding the Google Summer of Code for PortfolioAnalytics and many other proposals for R
 -->
 
-## References
+---
+
+## References and Useful Links
+
 * [ROI](http://cran.r-project.org/web/packages/ROI/index.html)
 * [DEoptim](http://cran.r-project.org/web/packages/DEoptim/index.html)
 * [pso](http://cran.r-project.org/web/packages/pso/index.html)
@@ -648,4 +906,4 @@ Many thanks to
 * Martinelli paper
 * Boudt paper
 * [PortfolioAnalytics on R-Forge](https://r-forge.r-project.org/projects/returnanalytics/)
-* Shiny App?
+* [Shiny App](http://spark.rstudio.com/rossbennett3/PortfolioOptimization/)
