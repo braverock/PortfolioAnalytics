@@ -221,6 +221,7 @@ chart.RiskBudget.optimize.portfolio.rebalancing <- function(object, ..., match.c
     rbcols <- grep(paste(match.col, "contribution", sep="."), colnames(rebal.obj))
     if(length(rbcols) < 1) stop(paste("No ", match.col, ".contribution columns.", sep=""))
     rbdata <- rebal.obj[, rbcols]
+    colnames(rbdata) <- gsub("^.*\\.", "", colnames(rbdata))
     chart.StackedBar(w=rbdata, ylab=paste(match.col, "Contribution", sep=" "), main=main, ...)
   }
   
@@ -228,6 +229,7 @@ chart.RiskBudget.optimize.portfolio.rebalancing <- function(object, ..., match.c
     rbcols <- grep(paste(match.col, "pct_contrib", sep="."), colnames(rebal.obj))
     if(length(rbcols) < 1) stop(paste("No ", match.col, ".pct_contrib columns.", sep=""))
     rbdata <- rebal.obj[, rbcols]
+    colnames(rbdata) <- gsub("^.*\\.", "", colnames(rbdata))
     chart.StackedBar(w=rbdata, ylab=paste(match.col, "% Contribution", sep=" "), main=main, ...)
   }
 }

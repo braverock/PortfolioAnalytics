@@ -67,6 +67,8 @@
 
 \newcommand{\comm}[1]{\begin{quote}{\large \bf (#1)}\end{quote}}
 
+% \VignetteIndexEntry{Design Thoughts of the PortfolioAnalytics Package}
+
 \begin{document}
 \vspace{-2cm}
 %\baselineskip=20pt

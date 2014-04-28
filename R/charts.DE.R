@@ -226,7 +226,7 @@ chart.Scatter.DE <- function(object, ..., neighbors = NULL, return.col='mean', r
     # Only attempt to draw trajectory if rows is greater than or equal to 1
     # There may be some corner cases where nrow(w.traj) is equal to 0, 
     # resulting in a 'subscript out of bounds' error.
-    if(rows >= 1){
+    if(rows >= 2){
       rr = matrix(nrow=rows, ncol=2)
       ## maybe rewrite as an apply statement by row on w.traj
       rtc = NULL
