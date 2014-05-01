@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Ross Bennett" />
+  <meta name="date" content="2014-05-16" />
+  <title>Complex Portfolio Optimization with PortfolioAnalytics</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+  <script src="http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">Complex Portfolio Optimization with PortfolioAnalytics</h1>
+  <h1 class="subtitle">R/Finance 2014</h1>
+  <p class="author">
+Ross Bennett
+  </p>
+  <p class="date">May 16, 2014</p>
+</div>
+<div id="overview" class="slide section level2">
+<h1>Overview</h1>
+<ul>
+<li>Discuss Portfolio Optimization</li>
+<li>Introduce PortfolioAnalytics</li>
+<li>Demonstrate PortfolioAnalytics with Examples</li>
+</ul>
+<!---
+Discuss Portfolio Optimization
+- Some background and theory of portfolio theory
+- challenges
+Introduce PortfolioAnalytics
+- What PortfolioAnalytics does and the problems it solves
+Demonstrate PortfolioAnalytics with Examples
+- Brief overview of the examples I will be giving
+-->
+
+</div>
+<div id="modern-portfolio-theory" class="slide section level2">
+<h1>Modern Portfolio Theory</h1>
+<p>&quot;Modern&quot; Portfolio Theory (MPT) was introduced by Harry Markowitz in 1952.</p>
+<p>In general, MPT states that an investor's objective is to maximize portfolio expected return for a given amount of risk.</p>
+<p>General Objectives</p>
+<ul>
+<li>Maximize a measure of gain per unit measure of risk</li>
+<li>Minimize a measure of risk</li>
+</ul>
+<p>How do we define risk? What about more complex objectives?</p>
+<!---
+Several approaches follow the Markowitz approach using mean return as a measure of gain and standard deviation of returns as a measure of risk.
+-->
+
+</div>
+<div id="portfolio-optimization-objectives" class="slide section level2">
+<h1>Portfolio Optimization Objectives</h1>
+<ul>
+<li>Minimize Risk
+<ul>
+<li>Volatility</li>
+<li>Tail Loss (VaR, ES)</li>
+<li>Other Downside Risk Measure</li>
+</ul></li>
+<li>Maximize Risk Adjusted Return
+<ul>
+<li>Sharpe Ratio, Modified Sharpe Ratio</li>
+<li>Several Others</li>
+</ul></li>
+<li>Risk Budgets
+<ul>
+<li>Equal Component Contribution to Risk (i.e. Risk Parity)</li>
+<li>Limits on Component Contribution</li>
+</ul></li>
+<li>Maximize a Utility Function
+<ul>
+<li>Quadratic, CRRA, CARA, etc.</li>
+</ul></li>
+</ul>
+<!---
+The challenge here is knowing what solver to use and the capabilities/limits of the chosen solver. Talk about pros/cons of closed-form solvers vs. global solvers and what objectives can be solved. 
+-->
+
+</div>
+<div id="portfolioanalytics-overview" class="slide section level2">
+<h1>PortfolioAnalytics Overview</h1>
+<p>PortfolioAnalytics is an R package designed to provide numerical solutions and visualizations for portfolio optimization problems with complex constraints and objectives.</p>
+<ul>
+<li>Support for multiple constraint and objective types</li>
+<li>An objective function can be any valid R function</li>
+<li>Modular constraints and objectives</li>
+<li>Support for user defined moment functions</li>
+<li>Visualizations</li>
+<li>Solver agnostic</li>
+<li>Support for parallel computing</li>
+</ul>
+<!---
+The key points to make here are:
+- Flexibility
+  - The multiple types and modularity of constraints and objectives allows us to add, remove, combine, etc. multiple constraint and objective types very easily.
+  - Define an objective as any valid R function
+  - Define a function to compute the moments (sample, robust, shrinkage, factor model, GARCH model, etc.)
+  - Estimation error is a significant concern with optimization. Having the ability to test different models with different parameters is critical.
+- PortfolioAnalytics comes "pre-built" with several constraint types.
+- Visualization helps to build intuition about the problem and understand the feasible space of portfolios
+- Periodic rebalancing and analyzing out of sample performance will help refine objectives and constraints
+-->
+
+</div>
+<div id="support-multiple-solvers" class="slide section level2">
+<h1>Support Multiple Solvers</h1>
+<p>Linear and Quadratic Programming Solvers</p>
+<ul>
+<li>R Optimization Infrastructure (ROI)
+<ul>
+<li>GLPK (Rglpk)</li>
+<li>Symphony (Rsymphony)</li>
+<li>Quadprog (quadprog)</li>
+</ul></li>
+</ul>
+<p>Global (stochastic or continuous solvers)</p>
+<ul>
+<li>Random Portfolios</li>
+<li>Differential Evolution (DEoptim)</li>
+<li>Particle Swarm Optimization (pso)</li>
+<li>Generalized Simulated Annealing (GenSA)</li>
+</ul>
+<!---
+Brief explanation of each solver and what optimization problems (constraints and objectives) are supported
+-->
+
+</div>
+<div id="random-portfolios" class="slide section level2">
+<h1>Random Portfolios</h1>
+<p>PortfolioAnalytics has three methods to generate random portfolios.</p>
+<ol style="list-style-type: decimal">
+<li>The <strong>sample</strong> method to generate random portfolios is based on an idea by Pat Burns.</li>
+<li>The <strong>simplex</strong> method to generate random portfolios is based on a paper by W. T. Shaw.</li>
+<li>The <strong>grid</strong> method to generate random portfolios is based on the <code>gridSearch</code> function in the NMOF package.</li>
+</ol>
+<!---
+Random portfolios allow one to generate an arbitray number of portfolios based on given constraints. Will cover the edges as well as evenly cover the interior of the feasible space. 
+
+The sample method to generate random portfolios is based on an idea by Pat Burns. This is the most flexible method, but also the slowest, and can generate portfolios to satisfy leverage, box, group, and position limit constraints.
+
+The simplex method to generate random portfolios is based on a paper by W. T. Shaw. The simplex method is useful to generate random portfolios with the full investment constraint, where the sum of the weights is equal to 1, and min box constraints. Values for min_sum and max_sum of the leverage constraint will be ignored, the sum of weights will equal 1. All other constraints such as the box constraint max, group and position limit constraints will be handled by elimination. If the constraints are very restrictive, this may result in very few feasible portfolios remaining. Another key point to note is that the solution may not be along the vertexes depending on the objective. For example, a risk budget objective will likely place the portfolio somewhere on the interior.
+
+The grid method to generate random portfolios is based on the gridSearch function in NMOF package. The grid search method only satisfies the min and max box constraints. The min_sum and max_sum leverage constraint will likely be violated and the weights in the random portfolios should be normalized. Normalization may cause the box constraints to be violated and will be penalized in constrained_objective.
+-->
+
+</div>
+<div id="comparison-of-random-portfolio-methods" class="slide section level2">
+<h1>Comparison of Random Portfolio Methods</h1>
+<div class="figure">
+<img src="figures/rp_plot.png" />
+</div>
+<!---
+This chart is a prime candidate for an interactive viz
+-->
+
+</div>
+<div id="random-portfolios-simplex-method" class="slide section level2">
+<h1>Random Portfolios: Simplex Method</h1>
+<div class="figure">
+<img src="figures/fev_plot.png" />
+</div>
+</div>
+<div id="workflow" class="slide section level2">
+<h1>Workflow</h1>
+<div class="figure">
+<img src="figures/workflow.png" />
+</div>
+<!---
+Describe each function:
+- portfolio.spec
+- add.constraint
+- add.objective
+- optimize.portfolio and optimize.portfolio.rebalancing
+Just give a general description of the functions to analyze results
+-->
+
+</div>
+<div id="workflow-specify-portfolio" class="slide section level2">
+<h1>Workflow: Specify Portfolio</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">args</span>(portfolio.spec)</code></pre>
+<pre><code>## function (assets = NULL, category_labels = NULL, weight_seq = NULL, 
+##     message = FALSE) 
+## NULL</code></pre>
+</div>
+<div id="workflow-add-constraints" class="slide section level2">
+<h1>Workflow: Add Constraints</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">args</span>(add.constraint)</code></pre>
+<pre><code>## function (portfolio, type, enabled = TRUE, message = FALSE, ..., 
+##     indexnum = NULL) 
+## NULL</code></pre>
+<p>Supported Constraint Types</p>
+<ul>
+<li>Sum of Weights</li>
+<li>Box</li>
+<li>Group</li>
+<li>Turnover</li>
+<li>Diversification</li>
+<li>Position Limit</li>
+<li>Return</li>
+<li>Factor Exposure</li>
+</ul>
+</div>
+<div id="workflow-add-objectives" class="slide section level2">
+<h1>Workflow: Add Objectives</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">args</span>(add.objective)</code></pre>
+<pre><code>## function (portfolio, constraints = NULL, type, name, arguments = NULL, 
+##     enabled = TRUE, ..., indexnum = NULL) 
+## NULL</code></pre>
+<p>Supported Objective types</p>
+<ul>
+<li>Return</li>
+<li>Risk</li>
+<li>Risk Budget</li>
+<li>Weight Concentration</li>
+</ul>
+</div>
+<div id="workflow-run-optimization" class="slide section level2">
+<h1>Workflow: Run Optimization</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">args</span>(optimize.portfolio)</code></pre>
+<pre><code>## function (R, portfolio = NULL, constraints = NULL, objectives = NULL, 
+##     optimize_method = c(&quot;DEoptim&quot;, &quot;random&quot;, &quot;ROI&quot;, &quot;pso&quot;, &quot;GenSA&quot;), 
+##     search_size = 20000, trace = FALSE, ..., rp = NULL, momentFUN = &quot;set.portfolio.moments&quot;, 
+##     message = FALSE) 
+## NULL</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">args</span>(optimize.portfolio.rebalancing)</code></pre>
+<pre><code>## function (R, portfolio = NULL, constraints = NULL, objectives = NULL, 
+##     optimize_method = c(&quot;DEoptim&quot;, &quot;random&quot;, &quot;ROI&quot;), search_size = 20000, 
+##     trace = FALSE, ..., rp = NULL, rebalance_on = NULL, training_period = NULL, 
+##     trailing_periods = NULL) 
+## NULL</code></pre>
+<p>Supported Optimization Methods</p>
+<ul>
+<li>ROI</li>
+<li>random</li>
+<li>DEoptim</li>
+<li>pso</li>
+<li>GenSA</li>
+</ul>
+</div>
+<div id="workflow-analyze-results" class="slide section level2">
+<h1>Workflow: Analyze Results</h1>
+<p>*** =left</p>
+<ul>
+<li>plot</li>
+<li>chart.Concentration</li>
+<li>chart.EfficientFrontier</li>
+<li>chart.RiskBudget</li>
+<li>chart.RiskReward</li>
+<li>chart.Weights</li>
+</ul>
+<p>***=right</p>
+<ul>
+<li>extractObjectiveMeasures</li>
+<li>extractStats</li>
+<li>extractWeights</li>
+</ul>
+<!---
+I'd like to make this a two column slide if possible. Might have to try slidify.
+-->
+
+</div>
+<div id="example-1-data-setup" class="slide section level2">
+<h1>Example 1: Data Setup</h1>
+<p>Here we will look at portfolio optimization in the context of stocks.</p>
+<ul>
+<li>Selection of large cap, mid cap, and small cap stocks from CRSP data</li>
+<li>15 Large Cap</li>
+<li>15 Mid Cap</li>
+<li>5 Small Cap</li>
+</ul>
+<pre class="sourceCode r"><code class="sourceCode r">equity.data &lt;-<span class="st"> </span><span class="kw">cbind</span>(largecap_weekly[,<span class="dv">1</span>:<span class="dv">15</span>], 
+                     midcap_weekly[,<span class="dv">1</span>:<span class="dv">15</span>], 
+                     smallcap_weekly[,<span class="dv">1</span>:<span class="dv">5</span>])</code></pre>
+</div>
+<div id="distribution-of-monthly-returns" class="slide section level2">
+<h1>Distribution of Monthly Returns</h1>
+<div class="figure">
+<img src="figures/equity_box.png" />
+</div>
+</div>
+<div id="minimum-variance-portfolio" class="slide section level2">
+<h1>Minimum Variance Portfolio</h1>
+<p>Here we consider a portfolio of stocks. Our objective is to minimize portfolio variance subect to full investment and box constraints. We will use out of sample backtesting to compare the sample covariance matrix estimate and a Ledoit-Wolf shinkage estimate.</p>
+<p><span class="math">\[
+\min_{w} w^{T} \Sigma w
+\]</span></p>
+<!---
+Demonstrate a custom moments function to compare a sample covariance matrix estimate and a Ledoit-Wolf shrinkage covariance matrix estimate. An alternative is a robust (MCD, MVE, etc.) estimate, DCC GARCH model, factor model, etc.
+-->
+
+</div>
+<div id="specify-portfolio" class="slide section level2">
+<h1>Specify Portfolio</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Specify an initial portfolio</span>
+stocks &lt;-<span class="st"> </span><span class="kw">colnames</span>(equity.data)
+portf.init &lt;-<span class="st"> </span><span class="kw">portfolio.spec</span>(stocks)
+
+<span class="co"># Add full investment constraint such that the weights sum to 1</span>
+portf.minvar &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.init, <span class="dt">type =</span> <span class="st">&quot;full_investment&quot;</span>)
+
+<span class="co"># Add box constraint such that no asset can have a weight of greater than</span>
+<span class="co"># 45% or less than 1%</span>
+portf.minvar &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.minvar, <span class="dt">type =</span> <span class="st">&quot;box&quot;</span>, <span class="dt">min =</span> <span class="fl">0.01</span>, <span class="dt">max =</span> <span class="fl">0.45</span>)
+
+<span class="co"># Add objective to minimize portfolio variance</span>
+portf.minvar &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.minvar, <span class="dt">type =</span> <span class="st">&quot;risk&quot;</span>, <span class="dt">name =</span> <span class="st">&quot;var&quot;</span>)</code></pre>
+<!---
+Talk a little about adding constraints and objectives
+-->
+
+</div>
+<div id="ledoit-wolf-shrinkage-estimate" class="slide section level2">
+<h1>Ledoit-Wolf Shrinkage Estimate</h1>
+<p>The default function for <code>momentFUN</code> is <code>set.portfolio.moments</code>. We need to write our own function to estimate the covariance matrix.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Function to estimate covariance matrix via Ledoit-Wolf shrinkage</span>
+lw.sigma &lt;-<span class="st"> </span>function(R, ...) {
+    out &lt;-<span class="st"> </span><span class="kw">list</span>()
+    out$sigma &lt;-<span class="st"> </span><span class="kw">lwShrink</span>(R)$cov
+    <span class="kw">return</span>(out)
+}</code></pre>
+</div>
+<div id="run-optimization" class="slide section level2">
+<h1>Run Optimization</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Backtest using sample covariance matrix estimate</span>
+opt.minVarSample &lt;-<span class="st"> </span><span class="kw">optimize.portfolio.rebalancing</span>(equity.data, portf.minvar, 
+                                                   <span class="dt">optimize_method=</span><span class="st">&quot;ROI&quot;</span>, 
+                                                   <span class="dt">rebalance_on=</span><span class="st">&quot;quarters&quot;</span>, 
+                                                   <span class="dt">training_period=</span><span class="dv">400</span>, 
+                                                   <span class="dt">trailing_periods=</span><span class="dv">250</span>)
+
+<span class="co"># Backtest using Ledoit-Wolf shrinkage covariance matrix estimate</span>
+opt.minVarLW &lt;-<span class="st"> </span><span class="kw">optimize.portfolio.rebalancing</span>(equity.data, portf.minvar, 
+                                               <span class="dt">optimize_method=</span><span class="st">&quot;ROI&quot;</span>, 
+                                               <span class="dt">momentFUN=</span>lw.sigma,
+                                               <span class="dt">rebalance_on=</span><span class="st">&quot;quarters&quot;</span>, 
+                                               <span class="dt">training_period=</span><span class="dv">400</span>, 
+                                               <span class="dt">trailing_periods=</span><span class="dv">250</span>)</code></pre>
+<!---
+Explain each of the rebalancing parameters
+-->
+
+</div>
+<div id="chart-weights-through-time" class="slide section level2">
+<h1>Chart Weights Through Time</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">chart.Weights</span>(opt.minVarSample, <span class="dt">main =</span> <span class="st">&quot;minVarSample Weights&quot;</span>, <span class="dt">legend.loc =</span> <span class="ot">NULL</span>)
+<span class="kw">chart.Weights</span>(opt.minVarLW, <span class="dt">main =</span> <span class="st">&quot;minVarLW Weights&quot;</span>, <span class="dt">legend.loc =</span> <span class="ot">NULL</span>)</code></pre>
+<p><img src="figures/weights_minVarSample.png" /> <img src="figures/weights_minVarLW.png" /></p>
+</div>
+<div id="chart-weights-through-time-1" class="slide section level2">
+<h1>Chart Weights Through Time</h1>
+<pre><code>Error: could not find function &quot;loadMethod&quot;</code></pre>
+</div>
+<div id="returns" class="slide section level2">
+<h1>Returns</h1>
+<p>Compute the portfolio rebalancing returns and chart the performance.</p>
+<pre class="sourceCode r"><code class="sourceCode r">ret.minVarSample &lt;-<span class="st"> </span><span class="kw">summary</span>(opt.minVarSample)$portfolio_returns
+ret.minVarRobust &lt;-<span class="st"> </span><span class="kw">summary</span>(opt.minVarLW)$portfolio_returns
+ret.minVar &lt;-<span class="st"> </span><span class="kw">cbind</span>(ret.minVarSample, ret.minVarRobust)
+<span class="kw">colnames</span>(ret.minVar) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Sample&quot;</span>, <span class="st">&quot;LW&quot;</span>)
+<span class="kw">charts.PerformanceSummary</span>(ret.minVar)</code></pre>
+<div class="figure">
+<img src="figures/ret_minVar.png" />
+</div>
+</div>
+<div id="example-2-market-neutral-portfolio" class="slide section level2">
+<h1>Example 2: Market Neutral Portfolio</h1>
+<p>Here we consider a portfolio of stocks. Our objective is to maximize portfolio return with a target of 0.0015 and minimize portfolio StdDev with a target of 0.02 subject to dollar neutral, beta, box, and position limit constraints. We will use the same data considered in Example 1.</p>
+<!---
+This involves combining several constraints. This is an MIQPQC problem that can't be solved by quadprog so we will use random portfolios.
+-->
+
+</div>
+<div id="specify-portfolio-constraints" class="slide section level2">
+<h1>Specify Portfolio: Constraints</h1>
+<pre class="sourceCode r"><code class="sourceCode r">portf.init &lt;-<span class="st"> </span><span class="kw">portfolio.spec</span>(stocks)
+
+<span class="co"># Add constraint such that the portfolio weights sum to 0*</span>
+portf.dn &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.init, <span class="dt">type=</span><span class="st">&quot;weight_sum&quot;</span>, 
+                                  <span class="dt">min_sum=</span>-<span class="fl">0.01</span>, <span class="dt">max_sum=</span><span class="fl">0.01</span>)
+
+<span class="co"># Add box constraint such that no asset can have a weight of greater than</span>
+<span class="co"># 20% or less than -20%</span>
+portf.dn &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.dn, <span class="dt">type=</span><span class="st">&quot;box&quot;</span>, <span class="dt">min=</span>-<span class="fl">0.2</span>, <span class="dt">max=</span><span class="fl">0.2</span>)
+
+<span class="co"># Add constraint such that we have at most 20 positions</span>
+portf.dn &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.dn, <span class="dt">type=</span><span class="st">&quot;position_limit&quot;</span>, <span class="dt">max_pos=</span><span class="dv">20</span>)
+
+<span class="co"># Compute the betas of each stock</span>
+betas &lt;-<span class="st"> </span><span class="kw">t</span>(<span class="kw">CAPM.beta</span>(equity.data, market, Rf))
+
+<span class="co"># Add constraint such that the portfolio beta is between -0.25 and 0.25</span>
+portf.dn &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.dn, <span class="dt">type=</span><span class="st">&quot;factor_exposure&quot;</span>, <span class="dt">B=</span>betas, 
+                           <span class="dt">lower=</span>-<span class="fl">0.25</span>, <span class="dt">upper=</span><span class="fl">0.25</span>)</code></pre>
+<!---
+explain the constraints
+-->
+
+</div>
+<div id="specify-portfolio-objectives" class="slide section level2">
+<h1>Specify Portfolio: Objectives</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Add objective to maximize portfolio return with a target of 0.0015</span>
+portf.dn.StdDev &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.dn, <span class="dt">type=</span><span class="st">&quot;return&quot;</span>, <span class="dt">name=</span><span class="st">&quot;mean&quot;</span>,
+                                 <span class="dt">target=</span><span class="fl">0.0015</span>)
+
+<span class="co"># Add objective to minimize portfolio StdDev with a target of 0.02</span>
+portf.dn.StdDev &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.dn.StdDev, <span class="dt">type=</span><span class="st">&quot;risk&quot;</span>, <span class="dt">name=</span><span class="st">&quot;StdDev&quot;</span>,
+                                 <span class="dt">target=</span><span class="fl">0.02</span>)</code></pre>
+<!---
+explain the objectives, specifically the target
+-->
+
+</div>
+<div id="run-optimization-1" class="slide section level2">
+<h1>Run Optimization</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Generate random portfolios</span>
+rp &lt;-<span class="st"> </span><span class="kw">random_portfolios</span>(portf.dn, <span class="dv">10000</span>, <span class="st">&quot;sample&quot;</span>, <span class="dt">eliminate=</span><span class="ot">TRUE</span>)
+
+<span class="co"># Run the optimization</span>
+opt.dn &lt;-<span class="st"> </span><span class="kw">optimize.portfolio</span>(equity.data, portf.dn.StdDev, 
+                               <span class="dt">optimize_method=</span><span class="st">&quot;random&quot;</span>, <span class="dt">rp=</span>rp,
+                               <span class="dt">trace=</span><span class="ot">TRUE</span>)</code></pre>
+<!---
+generate a set of random portfolios and then pass directly to optimize.portfolio. Could just specify optimize_method = "random" and will automatically generate for you.
+-->
+
+</div>
+<div id="plot-results" class="slide section level2">
+<h1>Plot Results</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(opt.dn, <span class="dt">main=</span><span class="st">&quot;Dollar Neutral Portfolio&quot;</span>, <span class="dt">risk.col=</span><span class="st">&quot;StdDev&quot;</span>, <span class="dt">neighbors=</span><span class="dv">10</span>)</code></pre>
+<div class="figure">
+<img src="figures/opt_dn.png" />
+</div>
+</div>
+<div id="example-3-data-setup" class="slide section level2">
+<h1>Example 3: Data Setup</h1>
+<p>Here we will look at portfolio optimization in the context of portfolio of hedge funds.</p>
+<ul>
+<li>EDHEC-Risk Alternative Indexes</li>
+<li>Monthly returns from 1/31/1997 to 1/31/2014
+<ul>
+<li>Convertible Arbitrage (CA)</li>
+<li>Equity Market Neutral (EMN)</li>
+<li>Fixed Income Arbitrage (FIA)</li>
+<li>CTA Global (CTAG)</li>
+<li>Emerging Markets (EM)</li>
+<li>Global Macro (GM)</li>
+</ul></li>
+</ul>
+<pre class="sourceCode r"><code class="sourceCode r">R &lt;-<span class="st"> </span>edhec[,<span class="kw">c</span>(<span class="st">&quot;Convertible.Arbitrage&quot;</span>, <span class="st">&quot;Equity.Market.Neutral&quot;</span>, 
+              <span class="st">&quot;Fixed.Income.Arbitrage&quot;</span>, 
+              <span class="st">&quot;CTA.Global&quot;</span>, <span class="st">&quot;Emerging.Markets&quot;</span>, <span class="st">&quot;Global.Macro&quot;</span>)]
+<span class="co"># Abreviate column names for convenience and plotting</span>
+<span class="kw">colnames</span>(R) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;CA&quot;</span>, <span class="st">&quot;EMN&quot;</span>, <span class="st">&quot;FIA&quot;</span>, <span class="st">&quot;CTAG&quot;</span>, <span class="st">&quot;EM&quot;</span>, <span class="st">&quot;GM&quot;</span>)</code></pre>
+</div>
+<div id="monthly-returns" class="slide section level2">
+<h1>Monthly Returns</h1>
+<p><img src="figures/relative_barvar.png" /> <img src="figures/directional_barvar.png" /></p>
+</div>
+<div id="distribution-of-monthly-returns-1" class="slide section level2">
+<h1>Distribution of Monthly Returns</h1>
+<div class="figure">
+<img src="figures/edhec_box.png" />
+</div>
+</div>
+<div id="minimum-expected-shortfall" class="slide section level2">
+<h1>Minimum Expected Shortfall</h1>
+<p>Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. This will be an extended example starting with an objective to minimize modified expected shortfall, then add risk budget percent contribution limit, and finally add equal risk contribution limit.</p>
+<ul>
+<li>Minimize Expected Shortfall</li>
+<li>Minimize Expected Shortfall with Risk Budget Limit</li>
+<li>Minimize Expected Shortfall with Equal Risk Contribution</li>
+</ul>
+<p>Add risk budget objective to minimize concentration of percentage component contribution to risk. Concentration is defined as the Herfindahl Hirschman Index (HHI).</p>
+<p><span class="math">\[ \sum_{i=1}^n x_i^2 \]</span></p>
+<!---
+comments
+-->
+
+</div>
+<div id="specify-initial-portfolio" class="slide section level2">
+<h1>Specify Initial Portfolio</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Specify an initial portfolio</span>
+funds &lt;-<span class="st"> </span><span class="kw">colnames</span>(R)
+portf.init &lt;-<span class="st"> </span><span class="kw">portfolio.spec</span>(funds)
+
+<span class="co"># Add constraint such that the weights sum to 1*</span>
+portf.init &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.init, <span class="dt">type=</span><span class="st">&quot;weight_sum&quot;</span>, 
+                             <span class="dt">min_sum=</span><span class="fl">0.99</span>, <span class="dt">max_sum=</span><span class="fl">1.01</span>)
+
+<span class="co"># Add box constraint such that no asset can have a weight of greater than</span>
+<span class="co"># 40% or less than 5%</span>
+portf.init &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.init, <span class="dt">type=</span><span class="st">&quot;box&quot;</span>, 
+                             <span class="dt">min=</span><span class="fl">0.05</span>, <span class="dt">max=</span><span class="fl">0.4</span>)
+
+<span class="co"># Add return objective with multiplier=0 such that the portfolio mean</span>
+<span class="co"># return is calculated, but does not impact optimization</span>
+portf.init &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.init, <span class="dt">type=</span><span class="st">&quot;return&quot;</span>, 
+                            <span class="dt">name=</span><span class="st">&quot;mean&quot;</span>, <span class="dt">multiplier=</span><span class="dv">0</span>)</code></pre>
+<!---
+basic comments about setting up an initial portfolio
+-->
+
+</div>
+<div id="add-objectives" class="slide section level2">
+<h1>Add Objectives</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Add objective to minimize expected shortfall</span>
+portf.minES &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.init, <span class="dt">type=</span><span class="st">&quot;risk&quot;</span>, <span class="dt">name=</span><span class="st">&quot;ES&quot;</span>)
+
+<span class="co"># Add objective to set upper bound on percentage component contribution</span>
+portf.minES.RB &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.minES, <span class="dt">type=</span><span class="st">&quot;risk_budget&quot;</span>, 
+                                <span class="dt">name=</span><span class="st">&quot;ES&quot;</span>, <span class="dt">max_prisk=</span><span class="fl">0.3</span>)
+<span class="co"># Relax box constraints</span>
+portf.minES.RB$constraints[[<span class="dv">2</span>]]$max &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="dv">1</span>,<span class="kw">ncol</span>(R))
+
+<span class="co"># Add objective to minimize concentration of modified ES</span>
+<span class="co"># component contribution</span>
+portf.minES.EqRB &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.minES, <span class="dt">type=</span><span class="st">&quot;risk_budget&quot;</span>, 
+                                  <span class="dt">name=</span><span class="st">&quot;ES&quot;</span>, <span class="dt">min_concentration=</span><span class="ot">TRUE</span>)
+<span class="co"># Relax box constraints</span>
+portf.minES.EqRB &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.minES.EqRB, <span class="dt">type=</span><span class="st">&quot;box&quot;</span>, 
+                                   <span class="dt">min=</span><span class="fl">0.05</span>, <span class="dt">max=</span><span class="dv">1</span>, <span class="dt">indexnum=</span><span class="dv">2</span>)</code></pre>
+<!---
+Key points here are that we are creating 3 new portfolios by reusing the initial portfolio and we are relaxing the box constraints because we are no longer concerned with controlling weight concentration. We have limits on risk contribution.
+-->
+
+</div>
+<div id="run-optimization-2" class="slide section level2">
+<h1>Run Optimization</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Combine the 3 portfolios</span>
+portf &lt;-<span class="st"> </span><span class="kw">combine.portfolios</span>(<span class="kw">list</span>(<span class="dt">minES=</span>portf.minES, 
+                                 <span class="dt">minES.RB=</span>portf.minES.RB, 
+                                 <span class="dt">minES.EqRB=</span>portf.minES.EqRB))
+
+<span class="co"># Run the optimization</span>
+opt.minES &lt;-<span class="st"> </span><span class="kw">optimize.portfolio</span>(R, portf, <span class="dt">optimize_method=</span><span class="st">&quot;DEoptim&quot;</span>, 
+                                <span class="dt">search_size=</span><span class="dv">5000</span>, <span class="dt">trace=</span><span class="ot">TRUE</span>, <span class="dt">traceDE=</span><span class="dv">0</span>)</code></pre>
+<!---
+explain how portf is a list of portfolios and passed to optimize.portfolio
+-->
+
+</div>
+<div id="plot-in-risk-return-space" class="slide section level2">
+<h1>Plot in Risk-Return Space</h1>
+<div class="figure">
+<img src="figures/opt_minES.png" />
+</div>
+</div>
+<div id="chart-risk-budgets" class="slide section level2">
+<h1>Chart Risk Budgets</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">chart.RiskBudget</span>(opt.minES[[<span class="dv">2</span>]], <span class="dt">main=</span><span class="st">&quot;Risk Budget Limit&quot;</span>, 
+                 <span class="dt">risk.type=</span><span class="st">&quot;percentage&quot;</span>, <span class="dt">neighbors=</span><span class="dv">10</span>)
+
+<span class="kw">chart.RiskBudget</span>(opt.minES[[<span class="dv">3</span>]], <span class="dt">main=</span><span class="st">&quot;Equal ES Component Contribution&quot;</span>, 
+                 <span class="dt">risk.type=</span><span class="st">&quot;percentage&quot;</span>, <span class="dt">neighbors=</span><span class="dv">10</span>)</code></pre>
+<p><img src="figures/rb_minES.png" /> <img src="figures/eqrb_minES.png" /></p>
+</div>
+<div id="set-rebalancing-parameters-and-run-backtest" class="slide section level2">
+<h1>Set Rebalancing Parameters and Run Backtest</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Set rebalancing frequency</span>
+rebal.freq &lt;-<span class="st"> &quot;quarters&quot;</span>
+
+<span class="co"># Training Period</span>
+training &lt;-<span class="st"> </span><span class="dv">120</span>
+
+<span class="co"># Trailing Period</span>
+trailing &lt;-<span class="st"> </span><span class="dv">72</span>
+
+bt.opt.minES &lt;-<span class="st"> </span><span class="kw">optimize.portfolio.rebalancing</span>(R, portf,
+                                               <span class="dt">optimize_method=</span><span class="st">&quot;DEoptim&quot;</span>, 
+                                               <span class="dt">rebalance_on=</span>rebal.freq, 
+                                               <span class="dt">training_period=</span>training, 
+                                               <span class="dt">trailing_periods=</span>trailing,
+                                               <span class="dt">search_size=</span><span class="dv">5000</span>,
+                                               <span class="dt">traceDE=</span><span class="dv">0</span>)</code></pre>
+</div>
+<div id="min-es-risk-contributions-and-weights-through-time" class="slide section level2">
+<h1>Min ES Risk Contributions and Weights Through Time</h1>
+<p><img src="figures/risk_minES.png" /> <img src="figures/weights_minES.png" /></p>
+</div>
+<div id="min-es-risk-budget-limit-risk-contributions-and-weights-through-time" class="slide section level2">
+<h1>Min ES Risk Budget Limit Risk Contributions and Weights Through Time</h1>
+<p><img src="figures/risk_minESRB.png" /> <img src="figures/weights_minESRB.png" /></p>
+</div>
+<div id="min-es-equal-component-contribution-risk-contributions-and-weights-through-time" class="slide section level2">
+<h1>Min ES Equal Component Contribution Risk Contributions and Weights Through Time</h1>
+<p><img src="figures/risk_minESEqRB.png" /> <img src="figures/weights_minESEqRB.png" /></p>
+</div>
+<div id="compute-returns-and-chart-performance" class="slide section level2">
+<h1>Compute Returns and Chart Performance</h1>
+<pre class="sourceCode r"><code class="sourceCode r">ret.bt.opt &lt;-<span class="st"> </span><span class="kw">do.call</span>(cbind, <span class="kw">lapply</span>(bt.opt.minES, 
+                                    function(x) <span class="kw">summary</span>(x)$portfolio_returns))
+<span class="kw">colnames</span>(ret.bt.opt) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;min ES&quot;</span>, <span class="st">&quot;min ES RB&quot;</span>, <span class="st">&quot;min ES Eq RB&quot;</span>)
+<span class="kw">charts.PerformanceSummary</span>(ret.bt.opt)</code></pre>
+<div class="figure">
+<img src="figures/ret_minES.png" />
+</div>
+</div>
+<div id="example-4-maximize-crra" class="slide section level2">
+<h1>Example 4: Maximize CRRA</h1>
+<p>Consider an allocation to hedge funds using the EDHEC-Risk Alternative Index as a proxy. Our objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in the Boudt paper and Martinelli paper. We use the same data as Example 3.</p>
+<p><span class="math">\[
+EU_{\lambda}(w) = - \frac{\lambda}{2} m_{(2)}(w) + 
+\frac{\lambda (\lambda + 1)}{6} m_{(3)}(w) -
+\frac{\lambda (\lambda + 1) (\lambda + 2)}{24} m_{(4)}(w)
+\]</span></p>
+<!---
+Demonstrate a custom moment function and a custom objective function.
+-->
+
+</div>
+<div id="define-a-function-to-compute-crra" class="slide section level2">
+<h1>Define a function to compute CRRA</h1>
+<pre class="sourceCode r"><code class="sourceCode r">CRRA &lt;-<span class="st"> </span>function(R, weights, lambda, sigma, m3, m4){
+  weights &lt;-<span class="st"> </span><span class="kw">matrix</span>(weights, <span class="dt">ncol=</span><span class="dv">1</span>)
+  M2.w &lt;-<span class="st"> </span><span class="kw">t</span>(weights) %*%<span class="st"> </span>sigma %*%<span class="st"> </span>weights
+  M3.w &lt;-<span class="st"> </span><span class="kw">t</span>(weights) %*%<span class="st"> </span>m3 %*%<span class="st"> </span>(weights %x%<span class="st"> </span>weights)
+  M4.w &lt;-<span class="st"> </span><span class="kw">t</span>(weights) %*%<span class="st"> </span>m4 %*%<span class="st"> </span>(weights %x%<span class="st"> </span>weights %x%<span class="st"> </span>weights)
+  term1 &lt;-<span class="st"> </span>(<span class="dv">1</span> /<span class="st"> </span><span class="dv">2</span>) *<span class="st"> </span>lambda *<span class="st"> </span>M2.w
+  term2 &lt;-<span class="st"> </span>(<span class="dv">1</span> /<span class="st"> </span><span class="dv">6</span>) *<span class="st"> </span>lambda *<span class="st"> </span>(lambda +<span class="st"> </span><span class="dv">1</span>) *<span class="st"> </span>M3.w
+  term3 &lt;-<span class="st"> </span>(<span class="dv">1</span> /<span class="st"> </span><span class="dv">24</span>) *<span class="st"> </span>lambda *<span class="st"> </span>(lambda +<span class="st"> </span><span class="dv">1</span>) *<span class="st"> </span>(lambda +<span class="st"> </span><span class="dv">2</span>) *<span class="st"> </span>M4.w
+  out &lt;-<span class="st"> </span>-term1 +<span class="st"> </span>term2 -<span class="st"> </span>term3
+  out
+}</code></pre>
+<!---
+The function arguments should have 'R' as the name of the returns and 'weights' as the name of the weights. 'R' and 'weights' are automatically matched, any other function arguments can be passed in through arguments in add.objective.
+-->
+
+</div>
+<div id="specify-portfolio-1" class="slide section level2">
+<h1>Specify Portfolio</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Specify portfolio</span>
+portf.crra &lt;-<span class="st"> </span><span class="kw">portfolio.spec</span>(funds)
+
+<span class="co"># Add constraint such that the weights sum to 1</span>
+portf.crra &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.crra, <span class="dt">type=</span><span class="st">&quot;weight_sum&quot;</span>, 
+                             <span class="dt">min_sum=</span><span class="fl">0.99</span>, <span class="dt">max_sum=</span><span class="fl">1.01</span>)
+
+<span class="co"># Add box constraint such that no asset can have a weight of greater than</span>
+<span class="co"># 40% or less than 5% </span>
+portf.crra &lt;-<span class="st"> </span><span class="kw">add.constraint</span>(portf.crra, <span class="dt">type=</span><span class="st">&quot;box&quot;</span>, 
+                             <span class="dt">min=</span><span class="fl">0.05</span>, <span class="dt">max=</span><span class="fl">0.4</span>)
+
+<span class="co"># Add objective to maximize CRRA</span>
+portf.crra &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.crra, <span class="dt">type=</span><span class="st">&quot;return&quot;</span>, 
+                            <span class="dt">name=</span><span class="st">&quot;CRRA&quot;</span>, <span class="dt">arguments=</span><span class="kw">list</span>(<span class="dt">lambda=</span><span class="dv">10</span>))
+
+<span class="co"># I just want these for plotting</span>
+<span class="co"># Set multiplier=0 so that it is calculated, but does not affect the optimization</span>
+portf.crra &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.crra, <span class="dt">type=</span><span class="st">&quot;return&quot;</span>, <span class="dt">name=</span><span class="st">&quot;mean&quot;</span>, <span class="dt">multiplier=</span><span class="dv">0</span>)
+portf.crra &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.crra, <span class="dt">type=</span><span class="st">&quot;risk&quot;</span>, <span class="dt">name=</span><span class="st">&quot;ES&quot;</span>, <span class="dt">multiplier=</span><span class="dv">0</span>)
+portf.crra &lt;-<span class="st"> </span><span class="kw">add.objective</span>(portf.crra, <span class="dt">type=</span><span class="st">&quot;risk&quot;</span>, <span class="dt">name=</span><span class="st">&quot;StdDev&quot;</span>, <span class="dt">multiplier=</span><span class="dv">0</span>)</code></pre>
+<!---
+Focus on how CRRA is added as an objective
+-->
+
+</div>
+<div id="run-optimization-3" class="slide section level2">
+<h1>Run Optimization</h1>
+<pre class="sourceCode r"><code class="sourceCode r">opt.crra &lt;-<span class="st"> </span><span class="kw">optimize.portfolio</span>(R, portf.crra, <span class="dt">optimize_method=</span><span class="st">&quot;DEoptim&quot;</span>, 
+                                 <span class="dt">search_size=</span><span class="dv">5000</span>, <span class="dt">trace=</span><span class="ot">TRUE</span>, <span class="dt">traceDE=</span><span class="dv">0</span>,
+                                 <span class="dt">momentFUN=</span><span class="st">&quot;crra.moments&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">opt.crra</code></pre>
+<pre><code>## ***********************************
+## PortfolioAnalytics Optimization
+## ***********************************
+## 
+## Call:
+## optimize.portfolio(R = R, portfolio = portf.crra, optimize_method = &quot;DEoptim&quot;, 
+##     search_size = 5000, trace = TRUE, traceDE = 0, momentFUN = &quot;crra.moments&quot;)
+## 
+## Optimal Weights:
+##    CA   EMN   FIA  CTAG    EM    GM 
+## 0.062 0.382 0.344 0.094 0.050 0.072 
+## 
+## Objective Measures:
+##       CRRA 
+## -0.0005303 
+## 
+## 
+##     mean 
+## 0.005418 
+## 
+## 
+##     ES 
+## 0.0307 
+## 
+## 
+##   StdDev 
+## 0.009984</code></pre>
+<!---
+remember to specify a momentFUN to match the arguments in CRRA
+-->
+
+</div>
+<div id="chart-results" class="slide section level2">
+<h1>Chart Results</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">chart.RiskReward</span>(opt.crra, <span class="dt">risk.col =</span> <span class="st">&quot;ES&quot;</span>)
+<span class="kw">chart.RiskReward</span>(opt.crra, <span class="dt">risk.col =</span> <span class="st">&quot;StdDev&quot;</span>)</code></pre>
+<p><img src="figures/crra_RR_ES.png" /> <img src="figures/crra_RR_StdDev.png" /></p>
+</div>
+<div id="run-backtest-and-compute-returns" class="slide section level2">
+<h1>Run Backtest and Compute Returns</h1>
+<pre class="sourceCode r"><code class="sourceCode r">bt.opt.crra &lt;-<span class="st"> </span><span class="kw">optimize.portfolio.rebalancing</span>(R, portf.crra, 
+                                              <span class="dt">optimize_method=</span><span class="st">&quot;DEoptim&quot;</span>,
+                                              <span class="dt">search_size=</span><span class="dv">5000</span>, <span class="dt">trace=</span><span class="ot">TRUE</span>,
+                                              <span class="dt">traceDE=</span><span class="dv">0</span>,
+                                              <span class="dt">momentFUN=</span><span class="st">&quot;crra.moments&quot;</span>,
+                                              <span class="dt">rebalance_on=</span>rebal.freq, 
+                                              <span class="dt">training_period=</span>training, 
+                                              <span class="dt">trailing_periods=</span>trailing)
+
+ret.crra &lt;-<span class="st"> </span><span class="kw">summary</span>(bt.opt.crra)$portfolio_returns
+<span class="kw">colnames</span>(ret.crra) &lt;-<span class="st"> &quot;CRRA&quot;</span></code></pre>
+<!---
+Run optimization and extract the portfolio rebalancing returns from the summary method
+-->
+
+</div>
+<div id="chart-performance" class="slide section level2">
+<h1>Chart Performance</h1>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">charts.PerformanceSummary</span>(<span class="kw">cbind</span>(ret.bt.opt, ret.crra), 
+                          <span class="dt">main=</span><span class="st">&quot;Optimization Performance&quot;</span>)</code></pre>
+<div class="figure">
+<img src="figures/ret_crra.png" />
+</div>
+</div>
+<div id="conclusion" class="slide section level2">
+<h1>Conclusion</h1>
+<p>TODO</p>
+<ul>
+<li>Overview of what was covered</li>
+<li>Additional information and plans for PortfolioAnalytics</li>
+</ul>
+</div>
+<div id="acknowledgements" class="slide section level2">
+<h1>Acknowledgements</h1>
+<p>Many thanks to</p>
+<ul>
+<li>Google: funding for Google Summer of Code (GSoC)</li>
+<li>GSoC Mentors: Brian Peterson, Peter Carl, Doug Martin, and Guy Yollin</li>
+<li>R/Finance Committee</li>
+</ul>
+<!---
+- One of the best things about GSoC is the opportunity to work and interact with the mentors.
+- Thank the GSoC mentors for offering help and guidance during the GSoC project and after as I continued to work on the PortfolioAnalytics package.
+- R/Finance Committee for the conference and the opportunity to talk about PortfolioAnalytics.
+- Google for funding the Google Summer of Code for PortfolioAnalytics and many other proposals for R
+-->
+
+</div>
+<div id="references-and-useful-links" class="slide section level2">
+<h1>References and Useful Links</h1>
+<ul>
+<li><a href="http://cran.r-project.org/web/packages/ROI/index.html">ROI</a></li>
+<li><a href="http://cran.r-project.org/web/packages/DEoptim/index.html">DEoptim</a></li>
+<li><a href="http://cran.r-project.org/web/packages/pso/index.html">pso</a></li>
+<li><a href="http://cran.r-project.org/web/packages/GenSA/index.html">GenSA</a></li>
+<li><a href="http://cran.r-project.org/web/packages/PerformanceAnalytics/index.html">PerformanceAnalytics</a></li>
+<li>Pat Burns Random Portfolios</li>
+<li>W.T. Shaw Random Portfolios</li>
+<li>Martinelli paper</li>
+<li>Boudt paper</li>
+<li><a href="https://r-forge.r-project.org/projects/returnanalytics/">PortfolioAnalytics on R-Forge</a></li>
+<li><a href="http://spark.rstudio.com/rossbennett3/PortfolioOptimization/">Shiny App</a></li>
+</ul>
+</div>
+</body>
+</html>
