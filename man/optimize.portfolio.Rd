@@ -29,7 +29,7 @@
   the constraints and objectives for the optimization}
 
   \item{constraints}{default=NULL, a list of constraint
-  objects. An object of class v1_constraint' can be passed
+  objects. An object of class 'v1_constraint' can be passed
   in here.}
 
   \item{objectives}{default=NULL, a list of objective

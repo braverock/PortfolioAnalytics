@@ -1,7 +1,7 @@
 \name{optimize.portfolio.rebalancing}
 \alias{optimize.portfolio.rebalancing}
 \alias{optimize.portfolio.rebalancing_v1}
-\title{portfolio optimization with support for rebalancing or rolling periods}
+\title{Portfolio Optimization with Rebalancing Periods}
 \usage{
   optimize.portfolio.rebalancing_v1(R, constraints,
     optimize_method = c("DEoptim", "random", "ROI"),
@@ -23,10 +23,10 @@
   \item{portfolio}{an object of type "portfolio" specifying
   the constraints and objectives for the optimization}
 
-  \item{constraints}{default=NULL, a list of constraint
+  \item{constraints}{default NULL, a list of constraint
   objects}
 
-  \item{objectives}{default=NULL, a list of objective
+  \item{objectives}{default NULL, a list of objective
   objects}
 
   \item{optimize_method}{one of "DEoptim", "random", "pso",
@@ -39,40 +39,87 @@
   additional information on the path or portfolios
   searched}
 
-  \item{\dots}{any other passthru parameters}
+  \item{\dots}{any other passthru parameters to
+  \code{\link{optimize.portfolio}}}
 
   \item{rp}{a set of random portfolios passed into the
-  function, to prevent recalculation}
+  function to prevent recalculation}
 
-  \item{rebalance_on}{a periodicity as returned by xts
-  function periodicity and usable by endpoints}
+  \item{rebalance_on}{character string of period to
+  rebalance on. See \code{\link[xts]{endpoints}} for valid
+  names.}
 
-  \item{training_period}{period to use as training in the
-  front of the data}
+  \item{training_period}{an integer of the number of
+  periods to use as a training data in the front of the
+  returns data}
 
-  \item{trailing_periods}{if set, an integer with the
-  number of periods to roll over, default NULL will run
-  from inception}
+  \item{trailing_periods}{an integer with the number of
+  periods to roll over (i.e. width of the moving or rolling
+  window), the default is NULL will run using the returns
+  data from inception}
 }
 \value{
-  a list containing the optimal weights, some summary
-  statistics, the function call, and optionally trace
-  information
+  a list containing the following elements \itemize{
+  \item{\code{portfolio}:}{ The portfolio object.}
+  \item{\code{R}:}{ The asset returns.}
+  \item{\code{call}:}{ The function call.}
+  \item{\code{elapsed_time:}}{ The amount of time that
+  elapses while the optimization is run.}
+  \item{\code{opt_rebalancing:}}{ A list of
+  \code{optimize.portfolio} objects computed at each
+  rebalancing period.} }
 }
 \description{
-  This function may eventually be wrapped into
-  optimize.portfolio
+  Portfolio optimization with support for rebalancing
+  periods for out-of-sample testing (i.e. backtesting)
 }
 \details{
-  For now, we'll set the rebalancing periods here, though I
-  think they should eventually be part of the constraints
-  object
+  Run portfolio optimization with periodic rebalancing at
+  specified time periods. Running the portfolio
+  optimization with periodic rebalancing can help refine
+  the constraints and objectives by evaluating the out of
+  sample performance of the portfolio based on historical
+  data
 
-  This function is massively parallel, and will require
-  'foreach' and we suggest that you register a parallel
+  This function is a essentially a wrapper around
+  \code{optimize.portfolio} and thus the discussion in the
+  Details section of the \code{optimize.portfolio} help
+  file is valid here as well.
+
+  This function is massively parallel and requires the
+  'foreach' package. It is suggested to register a parallel
   backend.
+}
+\examples{
+\dontrun{
+data(edhec)
+R <- edhec[,1:4]
+funds <- colnames(R)
+
+portf <- portfolio.spec(funds)
+portf <- add.constraint(portf, type="full_investment")
+portf <- add.constraint(portf, type="long_only")
+portf <- add.objective(portf, type="risk", name="StdDev")
+
+# Quarterly rebalancing with 5 year training period
+bt.opt1 <- optimize.portfolio.rebalancing(R, portf,
+optimize_method="ROI",
+rebalance_on="quarters",
+training_period=60)
+
+# Monthly rebalancing with 5 year training period and 4 year trailing (moving window)
+bt.opt2 <- optimize.portfolio.rebalancing(R, portf,
+optimize_method="ROI",
+rebalance_on="months",
+training_period=60,
+trailing_period=48)
+}
 }
 \author{
   Kris Boudt, Peter Carl, Brian G. Peterson
+}
+\seealso{
+  \code{\link{portfolio.spec}}
+  \code{\link{optimize.portfolio}}
 }
 
