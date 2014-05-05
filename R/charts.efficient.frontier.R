@@ -461,10 +461,15 @@ chart.EfficientFrontier.efficient.frontier <- function(object, ..., match.col="E
   }
   if(is.na(mtc)) stop("could not match match.col with column name of efficient frontier")
   
-  # get the data to plot scatter of asset returns
-  asset_ret <- scatterFUN(R=R, FUN="mean")
-  asset_risk <- scatterFUN(R=R, FUN=match.col)
-  rnames <- colnames(R)
+  if(chart.assets){
+    # get the data to plot scatter of asset returns
+    asset_ret <- scatterFUN(R=R, FUN="mean")
+    asset_risk <- scatterFUN(R=R, FUN=match.col)
+    rnames <- colnames(R)
+  } else {
+    asset_ret <- NULL
+    asset_risk <- NULL
+  }
   
   # set the x and y limits
   if(is.null(xlim)){
