@@ -938,7 +938,7 @@ optimize.portfolio_v2 <- function(
         # obj_vals <- roi_result$obj_vals
         # calculate obj_vals based on solver output
         obj_vals <- list()
-        if(meanetl) obj_vals$mean <- as.numeric(t(weights) %*% moments$mean)
+        if(meanetl) obj_vals$mean <- sum(weights * moments$mean)
         obj_vals[[tmpnames[idx]]] <- roi_result$out
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       } else {
@@ -948,7 +948,7 @@ optimize.portfolio_v2 <- function(
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         # obj_vals <- roi_result$obj_vals
         obj_vals <- list()
-        if(meanetl) obj_vals$mean <- as.numeric(t(weights) %*% moments$mean)
+        if(meanetl) obj_vals$mean <- sum(weights * moments$mean)
         obj_vals[[tmpnames[idx]]] <- roi_result$out
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       }

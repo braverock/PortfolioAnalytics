@@ -200,12 +200,12 @@ set.portfolio.moments_v2 <- function(R, portfolio, momentargs=NULL,...){
              mean = {
                if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean', na.rm=TRUE)),ncol=1)
                },
+             var =,
              sd =,
              StdDev = { 
                if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean', na.rm=TRUE)),ncol=1);
                if(is.null(momentargs$sigma)) momentargs$sigma = cov(R, use='pairwise.complete.obs')
              },
-             var =,
              mVaR =,
              VaR = {
                if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);

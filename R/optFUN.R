@@ -149,11 +149,13 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
     port.mean <- as.numeric(sum(weights * moments$mean))
     names(port.mean) <- "mean"
     obj_vals[["mean"]] <- port.mean
-    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    # faster and more efficient way to compute t(w) %*% Sigma %*% w
+    port.sd <- sqrt(sum(crossprod(weights, moments$var) * weights))
     names(port.sd) <- "StdDev"
     obj_vals[["StdDev"]] <- port.sd
   } else {
-    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    # faster and more efficient way to compute t(w) %*% Sigma %*% w
+    port.sd <- sqrt(sum(crossprod(weights, moments$var) * weights))
     names(port.sd) <- "StdDev"
     obj_vals[["StdDev"]] <- port.sd
   }
@@ -798,11 +800,13 @@ gmv_opt_toc <- function(R, constraints, moments, lambda, target, init_weights, s
     port.mean <- as.numeric(sum(weights * moments$mean))
     names(port.mean) <- "mean"
     obj_vals[["mean"]] <- port.mean
-    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    # faster and more efficient way to compute t(w) %*% Sigma %*% w
+    port.sd <- sqrt(sum(crossprod(weights, moments$var) * weights))
     names(port.sd) <- "StdDev"
     obj_vals[["StdDev"]] <- port.sd
   } else {
-    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    # faster and more efficient way to compute t(w) %*% Sigma %*% w
+    port.sd <- sqrt(sum(crossprod(weights, moments$var) * weights))
     names(port.sd) <- "StdDev"
     obj_vals[["StdDev"]] <- port.sd
   }
@@ -947,11 +951,13 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, s
     port.mean <- as.numeric(sum(weights * moments$mean))
     names(port.mean) <- "mean"
     obj_vals[["mean"]] <- port.mean
-    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    # faster and more efficient way to compute t(w) %*% Sigma %*% w
+    port.sd <- sqrt(sum(crossprod(weights, moments$var) * weights))
     names(port.sd) <- "StdDev"
     obj_vals[["StdDev"]] <- port.sd
   } else {
-    port.sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+    # faster and more efficient way to compute t(w) %*% Sigma %*% w
+    port.sd <- sqrt(sum(crossprod(weights, moments$var) * weights))
     names(port.sd) <- "StdDev"
     obj_vals[["StdDev"]] <- port.sd
   }
@@ -1009,7 +1015,7 @@ starr_obj_fun <- function(target_return, R, constraints, moments, alpha, solver,
                    control=control)
   }
   weights <- matrix(opt$weights, ncol=1)
-  opt_mean <- as.numeric(t(weights) %*% matrix(moments$mean, ncol=1))
+  opt_mean <- sum(weights * moments$mean)
   opt_etl <- as.numeric(opt$out)
   starr <- opt_mean / opt_etl
   return(starr)
@@ -1153,8 +1159,11 @@ sharpe_obj_fun <- function(target_return, R, constraints, moments, lambda_hhi=NU
                  target=target_return, lambda_hhi=lambda_hhi,
                  conc_groups=conc_groups, solver=solver, control=control)
   weights <- opt$weights
-  opt_mean <- as.numeric(t(weights) %*% matrix(moments$mean, ncol=1))
-  opt_sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+  # opt_mean <- as.numeric(t(weights) %*% matrix(moments$mean, ncol=1))
+  opt_mean <- sum(weights * moments$mean)
+  # opt_sd <- as.numeric(sqrt(t(weights) %*% moments$var %*% weights))
+  # faster and more efficient way to compute t(w) %*% Sigma %*% w
+  opt_sd <- sqrt(sum(crossprod(weights, moments$var) * weights))
   opt_sr <- opt_mean / opt_sd
   return(opt_sr)
 }
