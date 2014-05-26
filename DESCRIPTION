@@ -12,7 +12,7 @@ Depends:
     R (>= 2.14.0),
     zoo,
     xts (>= 0.8),
-    PerformanceAnalytics (>= 1.1.4)
+    PerformanceAnalytics (>= 1.1.0)
 Suggests:
     quantmod,
     DEoptim(>= 2.2.1),
