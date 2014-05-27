@@ -10,6 +10,32 @@
 #
 ###############################################################################
 
+#' utility function to replace awkward named from unlist
+#' @param rnames character vector of names to check for cleanup
+name.replace <- function(rnames){
+  rnames<-gsub("objective_measures.",'',rnames)
+  matchvec<-c('mean.mean','median.median','ES.ES','ETL.ETL','CVaR.ES','ES.MES','ETL.MES','CVaR.MES','VaR.MVaR','maxDrawdown.maxDrawdown','sd.sd','StdDev.StdDev')
+  for(str in matchvec){
+    pos<-pmatch(str,rnames)
+    if(!is.na(pos)){
+      switch(str,
+             mean.mean = {rnames[pos]<-'mean'},
+             median.median = {rnames[pos]<-'median'},
+             CVaR.MES =, CVaR.ES = {rnames[pos]<-'CVaR'}, 
+             ES.MES =, ES.ES =  {rnames[pos]<-'ES'},
+             ETL.MES =, ETL.ETL =  {rnames[pos]<-'ETL'},
+             VaR.MVaR = {rnames[pos]<-'VaR'},
+             maxDrawdown.maxDrawdown = {rnames[pos]<-'maxDrawdown'},
+             sd.sd=, StdDev.StdDev = {rnames[pos]<-'StdDev'},
+             #pamean={rnames[pos]<-'mean'}
+      )
+    }
+  } 
+  return(rnames)
+}
+
+##### extractStats #####
+
 #' extract some stats and weights from a portfolio run via \code{optimize.portfolio}
 #' 
 #' This function will dispatch to the appropriate class handler based on the
@@ -54,31 +80,6 @@ extractStats <- function (object, prefix=NULL, ...){
     UseMethod('extractStats')
 }
 
-#' utility function to replace awkward named from unlist
-#' @param rnames character vector of names to check for cleanup
-name.replace <- function(rnames){
-    rnames<-gsub("objective_measures.",'',rnames)
-    matchvec<-c('mean.mean','median.median','ES.ES','ETL.ETL','CVaR.ES','ES.MES','ETL.MES','CVaR.MES','VaR.MVaR','maxDrawdown.maxDrawdown','sd.sd','StdDev.StdDev')
-    for(str in matchvec){
-        pos<-pmatch(str,rnames)
-        if(!is.na(pos)){
-            switch(str,
-                    mean.mean = {rnames[pos]<-'mean'},
-                    median.median = {rnames[pos]<-'median'},
-                    CVaR.MES =, CVaR.ES = {rnames[pos]<-'CVaR'}, 
-                    ES.MES =, ES.ES =  {rnames[pos]<-'ES'},
-                   ETL.MES =, ETL.ETL =  {rnames[pos]<-'ETL'},
-                    VaR.MVaR = {rnames[pos]<-'VaR'},
-                    maxDrawdown.maxDrawdown = {rnames[pos]<-'maxDrawdown'},
-                    sd.sd=, StdDev.StdDev = {rnames[pos]<-'StdDev'},
-                    #pamean={rnames[pos]<-'mean'}
-            )
-        }
-    } 
-    return(rnames)
-}
-
-
 #' @method extractStats optimize.portfolio.DEoptim
 #' @S3method extractStats optimize.portfolio.DEoptim
 #' @export 
@@ -111,109 +112,6 @@ extractStats.optimize.portfolio.DEoptim <- function(object, prefix=NULL, ...) {
   rownames(result) = paste(prefix,"DE.portf", index(object$DEoptim_objective_results), sep=".")
   #rownames(result) = paste("DE.portf.", index(result), sep="")
   return(result)
-}
-
-
-
-#' @method extractStats optimize.portfolio.parallel
-#' @S3method extractStats optimize.portfolio.parallel
-#' @export
-extractStats.optimize.portfolio.parallel <- function(object,prefix=NULL,...) {
-    resultlist<-object
-    l = length(resultlist)
-    result=NULL
-    for (i in 1:l) {
-        if(is.null(result)) result<-extractStats(resultlist[[i]])
-        else result <- rbind(result,extractStats(resultlist[[i]]))
-    }
-    
-    rownames(result) = paste("par", index(result), rownames(result), sep=".")
-    return(result)
-}
-
-#' @method extractStats optimize.portfolio.random
-#' @S3method extractStats optimize.portfolio.random
-#' @export
-extractStats.optimize.portfolio.random <- function(object, prefix=NULL, ...){
-# This just flattens the $random_portfolio_objective_results part of the object
-  if(!inherits(object, "optimize.portfolio.random")) stop("object must be of class optimize.portfolio.random")
-  
-  # Check if object$random_portfolio_objective_results is null, the user called optimize.portfolio with trace=FALSE
-  if(is.null(object$random_portfolio_objective_results)) stop("random_portfolio_objective_results is null, trace=TRUE must be specified in optimize.portfolio")
-  
-  OptimResults<-object  
-
-  l = length(OptimResults$random_portfolio_objective_results)
-  nobj<-length(unlist(OptimResults$random_portfolio_objective_results[[1]]$objective_measures))
-  result=matrix(nrow=l,ncol=(nobj+length(OptimResults$weights))+1)
-  ncols<-ncol(result)
-  
-  for (i in 1:l) {
-      if(!is.atomic(OptimResults$random_portfolio_objective_results[[i]])) {
-          result[i,1:nobj]<-unlist(OptimResults$random_portfolio_objective_results[[i]]$objective_measures)
-          result[i,(nobj+1)]<-OptimResults$random_portfolio_objective_results[[i]]$out
-          result[i,(nobj+2):ncols]<-OptimResults$random_portfolio_objective_results[[i]]$weights
-      }
-  }
-  
-  rnames<-c(names(unlist(OptimResults$random_portfolio_objective_results[[1]]$objective_measures)),'out',paste('w',names(OptimResults$weights),sep='.'))
-  rnames<-name.replace(rnames)
-  colnames(result)<-rnames
-  rownames(result) = paste(prefix,"rnd.portf", index(OptimResults$random_portfolio_objective_results), sep=".")
-
-  return(result)
-}
-
-#' Extract weights from a portfolio run via \code{optimize.portfolio} or \code{optimize.portfolio.rebalancing}
-#' 
-#' This function will dispatch to the appropriate class handler based on the
-#' input class of the optimize.portfolio or optimize.portfolio.rebalancing output object
-#'  
-#' @param object list returned by optimize.portfolio
-#' @param \dots any other passthru parameters
-#' @seealso \code{\link{optimize.portfolio}}, \code{\link{optimize.portfolio.rebalancing}}
-#' @export
-extractWeights <- function (object, ...){
-  UseMethod('extractWeights')
-}
-
-#' @method extractWeights optimize.portfolio
-#' @S3method extractWeights optimize.portfolio
-#' @export
-extractWeights.optimize.portfolio <- function(object, ...){
-  if(!inherits(object, "optimize.portfolio")){
-    stop("object must be of class 'optimize.portfolio'")
-  }
-  return(object$weights)
-}
-
-#' @method extractWeights optimize.portfolio.rebalancing
-#' @S3method extractWeights optimize.portfolio.rebalancing
-#' @export
-extractWeights.optimize.portfolio.rebalancing <- function(object, ...){
-  if(!inherits(object, "optimize.portfolio.rebalancing")){
-    stop("Object passed in must be of class 'optimize.portfolio.rebalancing'")
-  }
-  rebal_object <- object$opt_rebal
-  numColumns = length(rebal_object[[1]]$weights)
-  numRows = length(rebal_object)
-
-  result <- matrix(nrow=numRows, ncol=numColumns)
-
-  for(i in 1:numRows)
-    result[i,] = unlist(rebal_object[[i]]$weights)
-
-  colnames(result) = names(unlist(rebal_object[[1]]$weights))
-  rownames(result) = names(rebal_object)
-  result = as.xts(result)
-  return(result)
-}
-
-#' @method extractWeights summary.optimize.portfolio.rebalancing
-#' @S3method extractWeights summary.optimize.portfolio.rebalancing
-#' @export
-extractWeights.summary.optimize.portfolio.rebalancing <- function(object, ...){
-  object$weights
 }
 
 #' @method extractStats optimize.portfolio.ROI
@@ -359,6 +257,180 @@ extractStats.optimize.portfolio.rebalancing <- function(object, prefix=NULL, ...
   return(lapply(object$opt_rebal, extractStats, ...))
 }
 
+#' @method extractStats optimize.portfolio.parallel
+#' @S3method extractStats optimize.portfolio.parallel
+#' @export
+extractStats.optimize.portfolio.parallel <- function(object,prefix=NULL,...) {
+    resultlist<-object
+    l = length(resultlist)
+    result=NULL
+    for (i in 1:l) {
+        if(is.null(result)) result<-extractStats(resultlist[[i]])
+        else result <- rbind(result,extractStats(resultlist[[i]]))
+    }
+    
+    rownames(result) = paste("par", index(result), rownames(result), sep=".")
+    return(result)
+}
+
+#' @method extractStats optimize.portfolio.random
+#' @S3method extractStats optimize.portfolio.random
+#' @export
+extractStats.optimize.portfolio.random <- function(object, prefix=NULL, ...){
+# This just flattens the $random_portfolio_objective_results part of the object
+  if(!inherits(object, "optimize.portfolio.random")) stop("object must be of class optimize.portfolio.random")
+  
+  # Check if object$random_portfolio_objective_results is null, the user called optimize.portfolio with trace=FALSE
+  if(is.null(object$random_portfolio_objective_results)) stop("random_portfolio_objective_results is null, trace=TRUE must be specified in optimize.portfolio")
+  
+  OptimResults<-object  
+
+  l = length(OptimResults$random_portfolio_objective_results)
+  nobj<-length(unlist(OptimResults$random_portfolio_objective_results[[1]]$objective_measures))
+  result=matrix(nrow=l,ncol=(nobj+length(OptimResults$weights))+1)
+  ncols<-ncol(result)
+  
+  for (i in 1:l) {
+      if(!is.atomic(OptimResults$random_portfolio_objective_results[[i]])) {
+          result[i,1:nobj]<-unlist(OptimResults$random_portfolio_objective_results[[i]]$objective_measures)
+          result[i,(nobj+1)]<-OptimResults$random_portfolio_objective_results[[i]]$out
+          result[i,(nobj+2):ncols]<-OptimResults$random_portfolio_objective_results[[i]]$weights
+      }
+  }
+  
+  rnames<-c(names(unlist(OptimResults$random_portfolio_objective_results[[1]]$objective_measures)),'out',paste('w',names(OptimResults$weights),sep='.'))
+  rnames<-name.replace(rnames)
+  colnames(result)<-rnames
+  rownames(result) = paste(prefix,"rnd.portf", index(OptimResults$random_portfolio_objective_results), sep=".")
+
+  return(result)
+}
+
+#' @method extractStats opt.list
+#' @S3method extractStats opt.list
+#' @export
+extractStats.opt.list <- function(object, ...){
+  # get the stats of each optimization in a list
+  # each element in the list is an optimize.portfolio object
+  stats_list <- vector("list", length(object))
+  for(i in 1:length(stats_list)){
+    stats_list[[i]] <- extractStats(object[[i]])
+  }
+  return(stats_list)
+}
+
+#' @method extractStats opt.rebal.list
+#' @S3method extractStats opt.rebal.list
+#' @export
+extractStats.opt.rebal.list <- function(object, ...){
+  # get the stats of each optimization in a list
+  # each element in the list is an optimize.portfolio.rebalancing object
+  stats_list <- vector("list", length(object))
+  for(i in 1:length(stats_list)){
+    stats_list[[i]] <- extractStats(object[[i]])
+  }
+  return(stats_list)
+}
+
+##### extractWeights #####
+
+#' Extract weights from a portfolio run via \code{optimize.portfolio} or \code{optimize.portfolio.rebalancing}
+#' 
+#' This function will dispatch to the appropriate class handler based on the
+#' input class of the optimize.portfolio or optimize.portfolio.rebalancing output object
+#'  
+#' @param object list returned by optimize.portfolio
+#' @param \dots any other passthru parameters
+#' @seealso \code{\link{optimize.portfolio}}, \code{\link{optimize.portfolio.rebalancing}}
+#' @export
+extractWeights <- function (object, ...){
+  UseMethod('extractWeights')
+}
+
+#' @method extractWeights optimize.portfolio
+#' @S3method extractWeights optimize.portfolio
+#' @export
+extractWeights.optimize.portfolio <- function(object, ...){
+  if(!inherits(object, "optimize.portfolio")){
+    stop("object must be of class 'optimize.portfolio'")
+  }
+  return(object$weights)
+}
+
+#' @method extractWeights optimize.portfolio.rebalancing
+#' @S3method extractWeights optimize.portfolio.rebalancing
+#' @export
+extractWeights.optimize.portfolio.rebalancing <- function(object, ...){
+  if(!inherits(object, "optimize.portfolio.rebalancing")){
+    stop("Object passed in must be of class 'optimize.portfolio.rebalancing'")
+  }
+  rebal_object <- object$opt_rebal
+  numColumns = length(rebal_object[[1]]$weights)
+  numRows = length(rebal_object)
+
+  result <- matrix(nrow=numRows, ncol=numColumns)
+
+  for(i in 1:numRows)
+    result[i,] = unlist(rebal_object[[i]]$weights)
+
+  colnames(result) = names(unlist(rebal_object[[1]]$weights))
+  rownames(result) = names(rebal_object)
+  result = as.xts(result)
+  return(result)
+}
+
+#' @method extractWeights summary.optimize.portfolio.rebalancing
+#' @S3method extractWeights summary.optimize.portfolio.rebalancing
+#' @export
+extractWeights.summary.optimize.portfolio.rebalancing <- function(object, ...){
+  object$weights
+}
+
+#' @method extractWeights opt.list
+#' @S3method extractWeights opt.list
+#' @export
+extractWeights.opt.list <- function(object, ...){
+  # get the optimal weights of each optimization in a list
+  weights_list <- list()
+  for(i in 1:length(object)){
+    weights_list[[i]] <- object[[i]]$weights
+  }
+  
+  # get/set the names in the object
+  opt_names <- names(object)
+  if(is.null(opt_names)) opt_names <- paste("opt", 1:length(object))
+  
+  # get the names of each element in weights_list
+  weights_names <- unlist(lapply(weights_list, names))
+  
+  # unique names in weights_names
+  names_unique <- unique(weights_names)
+  
+  # create a matrix of zeros to fill in with weights later
+  weights_mat <- matrix(0, nrow=length(weights_list), ncol=length(names_unique), 
+                        dimnames=list(opt_names, names_unique))
+  for(i in 1:length(weights_list)){
+    pm <- pmatch(x=names(weights_list[[i]]), table=names_unique)
+    weights_mat[i, pm] <- weights_list[[i]]
+  }
+  return(weights_mat)
+}
+
+#' @method extractWeights opt.rebal.list
+#' @S3method extractWeights opt.rebal.list
+#' @export
+extractWeights.opt.rebal.list <- function(object, ...){
+  # get the optimal weights of each optimization in a list
+  # each element in the list is an optimize.portfolio.rebalancing object
+  weights_list <- vector("list", length(object))
+  for(i in 1:length(weights_list)){
+    weights_list[[i]] <- extractWeights(object[[i]])
+  }
+  return(weights_list)
+}
+
+##### extractObjectiveMeasures #####
+
 #' Extract the objective measures
 #' 
 #' This function will extract the objective measures from the optimal portfolio
@@ -445,90 +517,6 @@ extractObjRegime <- function(object){
 #' @S3method extractObjectiveMeasures summary.optimize.portfolio.rebalancing
 extractObjectiveMeasures.summary.optimize.portfolio.rebalancing <- function(object){
   object$objective_measures
-}
-
-#' Extract the group and/or category weights
-#' 
-#' This function extracts the weights by group and/or category from an object
-#' of class \code{optimize.portfolio}. Group constraints or category_labels must
-#' be specified for this to return group constraints.
-#' 
-#' @param object object of class \code{optimize.portfolio}
-#' @param ... passthrough parameters. Not currently used
-#' @return a list with two elements
-#' \itemize{
-#'   \item{weights: }{Optimal set of weights from the \code{optimize.portfolio} object}
-#'   \item{category_weights: }{Weights by category if category_labels are supplied in the \code{portfolio} object}
-#'   \item{group_weights: }{Weights by group if group is a constraint type}
-#' }
-#' @author Ross Bennett
-#' @export
-extractGroups <- function(object, ...){
-  if(!inherits(object, "optimize.portfolio")) stop("object must be of class 'optimize.portfolio'")
-  
-  # Check category_labels in portfolio object
-  category_labels <- object$portfolio$category_labels
-  
-  # Get the constraints to check for group constraints
-  constraints <- get_constraints(object$portfolio)
-  
-  groups <- constraints$groups
-  
-  cat_weights <- NULL
-  group_weights <- NULL
-  
-  if(!is.null(category_labels)){
-    cat_names <- names(category_labels)
-    ncats <- length(category_labels)
-    cat_weights <- rep(0, ncats)
-    for(i in 1:ncats){
-      cat_weights[i] <- sum(object$weights[category_labels[[i]]])
-    }
-    names(cat_weights) <- cat_names
-  }
-  
-  if(!is.null(groups)){
-    n.groups <- length(groups)
-    group_weights <- rep(0, n.groups)
-    for(i in 1:n.groups){
-      group_weights[i] <- sum(object$weights[groups[[i]]])
-    }
-    names(group_weights) <- constraints$group_labels
-  }
-  return(list(weights=object$weights, 
-              category_weights=cat_weights, 
-              group_weights=group_weights)
-  )
-}
-
-#' @method extractWeights opt.list
-#' @S3method extractWeights opt.list
-#' @export
-extractWeights.opt.list <- function(object, ...){
-  # get the optimal weights of each optimization in a list
-  weights_list <- list()
-  for(i in 1:length(object)){
-    weights_list[[i]] <- object[[i]]$weights
-  }
-  
-  # get/set the names in the object
-  opt_names <- names(object)
-  if(is.null(opt_names)) opt_names <- paste("opt", 1:length(object))
-  
-  # get the names of each element in weights_list
-  weights_names <- unlist(lapply(weights_list, names))
-  
-  # unique names in weights_names
-  names_unique <- unique(weights_names)
-  
-  # create a matrix of zeros to fill in with weights later
-  weights_mat <- matrix(0, nrow=length(weights_list), ncol=length(names_unique), 
-                        dimnames=list(opt_names, names_unique))
-  for(i in 1:length(weights_list)){
-    pm <- pmatch(x=names(weights_list[[i]]), table=names_unique)
-    weights_mat[i, pm] <- weights_list[[i]]
-  }
-  return(weights_mat)
 }
 
 #' @method extractObjectiveMeasures opt.list
@@ -632,32 +620,6 @@ extractObjectiveMeasures.opt.list <- function(object){
   return(out)
 }
 
-#' @method extractStats opt.list
-#' @S3method extractStats opt.list
-#' @export
-extractStats.opt.list <- function(object, ...){
-  # get the stats of each optimization in a list
-  # each element in the list is an optimize.portfolio object
-  stats_list <- vector("list", length(object))
-  for(i in 1:length(stats_list)){
-    stats_list[[i]] <- extractStats(object[[i]])
-  }
-  return(stats_list)
-}
-
-#' @method extractWeights opt.rebal.list
-#' @S3method extractWeights opt.rebal.list
-#' @export
-extractWeights.opt.rebal.list <- function(object, ...){
-  # get the optimal weights of each optimization in a list
-  # each element in the list is an optimize.portfolio.rebalancing object
-  weights_list <- vector("list", length(object))
-  for(i in 1:length(weights_list)){
-    weights_list[[i]] <- extractWeights(object[[i]])
-  }
-  return(weights_list)
-}
-
 #' @method extractObjectiveMeasures opt.rebal.list
 #' @S3method extractObjectiveMeasures opt.rebal.list
 #' @export
@@ -671,15 +633,59 @@ extractObjectiveMeasures.opt.rebal.list <- function(object, ...){
   return(obj_list)
 }
 
-#' @method extractStats opt.rebal.list
-#' @S3method extractStats opt.rebal.list
+##### extractGroups #####
+
+#' Extract the group and/or category weights
+#' 
+#' This function extracts the weights by group and/or category from an object
+#' of class \code{optimize.portfolio}. Group constraints or category_labels must
+#' be specified for this to return group constraints.
+#' 
+#' @param object object of class \code{optimize.portfolio}
+#' @param ... passthrough parameters. Not currently used
+#' @return a list with two elements
+#' \itemize{
+#'   \item{weights: }{Optimal set of weights from the \code{optimize.portfolio} object}
+#'   \item{category_weights: }{Weights by category if category_labels are supplied in the \code{portfolio} object}
+#'   \item{group_weights: }{Weights by group if group is a constraint type}
+#' }
+#' @author Ross Bennett
 #' @export
-extractStats.opt.rebal.list <- function(object, ...){
-  # get the stats of each optimization in a list
-  # each element in the list is an optimize.portfolio.rebalancing object
-  stats_list <- vector("list", length(object))
-  for(i in 1:length(stats_list)){
-    stats_list[[i]] <- extractStats(object[[i]])
+extractGroups <- function(object, ...){
+  if(!inherits(object, "optimize.portfolio")) stop("object must be of class 'optimize.portfolio'")
+  
+  # Check category_labels in portfolio object
+  category_labels <- object$portfolio$category_labels
+  
+  # Get the constraints to check for group constraints
+  constraints <- get_constraints(object$portfolio)
+  
+  groups <- constraints$groups
+  
+  cat_weights <- NULL
+  group_weights <- NULL
+  
+  if(!is.null(category_labels)){
+    cat_names <- names(category_labels)
+    ncats <- length(category_labels)
+    cat_weights <- rep(0, ncats)
+    for(i in 1:ncats){
+      cat_weights[i] <- sum(object$weights[category_labels[[i]]])
+    }
+    names(cat_weights) <- cat_names
   }
-  return(stats_list)
+  
+  if(!is.null(groups)){
+    n.groups <- length(groups)
+    group_weights <- rep(0, n.groups)
+    for(i in 1:n.groups){
+      group_weights[i] <- sum(object$weights[groups[[i]]])
+    }
+    names(group_weights) <- constraints$group_labels
+  }
+  return(list(weights=object$weights, 
+              category_weights=cat_weights, 
+              group_weights=group_weights)
+  )
 }
+
