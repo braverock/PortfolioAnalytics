@@ -254,7 +254,43 @@ extractStats.optimize.portfolio.eqwt <- function(object, prefix=NULL, ...) {
 #' @export 
 extractStats.optimize.portfolio.rebalancing <- function(object, prefix=NULL, ...) {
   if(!inherits(object, "optimize.portfolio.rebalancing")) stop("object must be of class optimize.portfolio.rebalancing")
-  return(lapply(object$opt_rebal, extractStats, ...))
+  
+  if(inherits(opt.rebal$portfolio, "regime.portfolios")){
+    return(extractStatsRegime(object, prefix=prefix))
+  } else {
+    return(lapply(object$opt_rebal, extractStats, ...))
+  }
+}
+
+# Helper function for extractStats.optimize.portfolio.rebalancing
+# with regime switching.
+# If I have N different regimes and N different portfolios, then 
+# extractStats should return a list of length N where each element
+# contains the extractStats output for a given regime
+extractStatsRegime <- function(object, prefix=NULL){
+  tmp.regimes <- unlist(lapply(object$opt_rebalancing, function(x) x$regime))
+  unique.regimes <- unique(tmp.regimes)
+  
+  # Initialize a list to hold the optimize.portfolio objects for each regime
+  out.list <- vector("list", length(unique.regimes))
+  names(out.list) <- paste("regime", 1:length(unique.regimes), sep=".")
+  
+  # Outer loop over each regime
+  for(i in 1:length(unique.regimes)){
+    # Get the index for each regime
+    tmp.idx <- which(tmp.regimes == unique.regimes[i])
+    
+    # Initialize a temporary list to store the extractStats output for each 
+    # unique regime
+    tmp <- vector("list", length(tmp.idx))
+    
+    # Nested loop over each optimize.portfolio object of the corresponding regime
+    for(j in 1:length(tmp)){
+      tmp[[j]] <- extractStats(object$opt_rebalancing[[tmp.idx[j]]], prefix=prefix)
+    }
+    out.list[[i]] <- tmp
+  }
+  out.list
 }
 
 #' @method extractStats optimize.portfolio.parallel
@@ -498,7 +534,7 @@ extractObjRegime <- function(object){
     # unique regime
     tmp <- vector("list", length(tmp.idx))
     
-    # Nested loop over each optimize.portfolio object of the corresoponding regime
+    # Nested loop over each optimize.portfolio object of the corresponding regime
     for(j in 1:length(tmp)){
       tmp[[j]] <- unlist(object$opt_rebalancing[[tmp.idx[j]]]$objective_measures)
     }
