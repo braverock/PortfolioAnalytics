@@ -476,6 +476,23 @@ optimize.portfolio_v2 <- function(
     return(out)
   }
   
+  # Detect regime switching portfolio
+  if(inherits(portfolio, "regime.portfolios")){
+    regime.switching <- TRUE
+    regime <- portfolio$regime
+    if(index(last(R)) %in% index(regime)){
+      regime.idx <- as.numeric(regime[index(last(R))])[1]
+      portfolio <- portfolio$portfolio.list[[regime.idx]]
+      #cat("regime: ", regime.idx, "\n")
+    } else {
+      warning("Dates in regime and R do not match, defaulting to first portfolio")
+      regime.idx <- 1
+      portfolio <- portfolio$portfolio.list[[regime.idx]]
+    }
+  } else {
+    regime.switching <- FALSE
+  }
+  
   optimize_method <- optimize_method[1]
   tmptrace <- NULL
   start_t <- Sys.time()
@@ -515,6 +532,7 @@ optimize.portfolio_v2 <- function(
   }
   T <- nrow(R)
   
+  # Initialize an empty list used as the return object
   out <- list()
   
   weights <- NULL 
@@ -1072,6 +1090,12 @@ optimize.portfolio_v2 <- function(
   out$data_summary <- list(first=first(R), last=last(R))
   out$elapsed_time <- end_t - start_t
   out$end_t <- as.character(Sys.time())
+  # return a $regime element to indicate what regime portfolio used for
+  # optimize.portfolio. The regime information is used in extractStats and
+  # extractObjectiveMeasures
+  if(regime.switching){
+    out$regime <- regime.idx
+  }
   class(out) <- c(paste("optimize.portfolio", optimize_method, sep='.'), "optimize.portfolio")
   return(out)
 }

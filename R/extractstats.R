@@ -387,21 +387,58 @@ extractObjectiveMeasures.optimize.portfolio <- function(object){
 extractObjectiveMeasures.optimize.portfolio.rebalancing <- function(object){
   if(!inherits(object, "optimize.portfolio.rebalancing")) stop("object must be of class 'optimize.portfolio.rebalancing'")
   
-  rebal_object <- object$opt_rebal
-  
-  num.columns <- length(unlist(extractObjectiveMeasures(rebal_object[[1]])))
-  num.rows <- length(rebal_object)
-  
-  result <- matrix(nrow=num.rows, ncol=num.columns)
-  
-  for(i in 1:num.rows){
-    result[i,] <- unlist(extractObjectiveMeasures(rebal_object[[i]]))
+  if(inherits(opt.rebal$portfolio, "regime.portfolios")){
+    result <- extractObjRegime(object)
+  } else {
+    rebal_object <- object$opt_rebal
+    num.columns <- length(unlist(extractObjectiveMeasures(rebal_object[[1]])))
+    num.rows <- length(rebal_object)
+    result <- matrix(nrow=num.rows, ncol=num.columns)
+    for(i in 1:num.rows){
+      result[i,] <- unlist(extractObjectiveMeasures(rebal_object[[i]]))
+    }
+    colnames(result) <- name.replace(names(unlist(extractObjectiveMeasures(rebal_object[[1]]))))
+    rownames(result) <- names(rebal_object)
+    result <- as.xts(result)
   }
-  
-  colnames(result) <- name.replace(names(unlist(extractObjectiveMeasures(rebal_object[[1]]))))
-  rownames(result) <- names(rebal_object)
-  result <- as.xts(result)
   return(result)
+}
+
+# Helper function for extractObjectiveMeasures.optimize.portfolio.rebalancing
+# with regime switching.
+# If I have N different regimes and N different portfolios, then 
+# extractObjectiveMeasures should return a list of length N where each element
+# contains the objective measures for a given regime
+extractObjRegime <- function(object){
+  tmp.regimes <- unlist(lapply(object$opt_rebalancing, function(x) x$regime))
+  unique.regimes <- unique(tmp.regimes)
+  
+  # Initialize a list to hold the objective measures for each regime
+  out.list <- vector("list", length(unique.regimes))
+  names(out.list) <- paste("regime", 1:length(unique.regimes), sep=".")
+  
+  # Outer loop over each regime
+  for(i in 1:length(unique.regimes)){
+    # Get the index for each regime
+    tmp.idx <- which(tmp.regimes == unique.regimes[i])
+    
+    # Initialize a temporary list to store the objective measures for each 
+    # unique regime
+    tmp <- vector("list", length(tmp.idx))
+    
+    # Nested loop over each optimize.portfolio object of the corresoponding regime
+    for(j in 1:length(tmp)){
+      tmp[[j]] <- unlist(object$opt_rebalancing[[tmp.idx[j]]]$objective_measures)
+    }
+    # rbind the objective measures and convert to an xts object
+    #obj <- xts(do.call(rbind, tmp), as.Date(names(tmp.idx)))
+    obj <- do.call(rbind, tmp)
+    colnames(obj) <- PortfolioAnalytics:::name.replace(colnames(obj))
+    obj <- xts(obj, as.Date(names(tmp.idx)))
+    # insert the objective measures into the list
+    out.list[[i]] <- obj
+  }
+  out.list
 }
 
 #' @method extractObjectiveMeasures summary.optimize.portfolio.rebalancing

@@ -119,3 +119,38 @@ portfolio.spec <- function(assets=NULL, category_labels=NULL, weight_seq=NULL, m
 is.portfolio <- function( x ) {
   inherits( x, "portfolio" )
 }
+
+#' Regime Portfolios
+#' 
+#' Construct a \code{regime.portfolios} object that contains a time series of 
+#' regimes and portfolios corresponding to the regimes.
+#' 
+#' Create a \code{regime.portfolios} object to support regime switching
+#' optimization. This object is then passed in as the \code{portfolio}
+#' argument in \code{optimize.portfolio}. The regime is detected and the
+#' corresponding portfolio is selected. For example, if the current
+#' regime is 1, then portfolio 1 will be selected and used in the 
+#' optimization.
+#' 
+#' @param regime xts or zoo object specifying the regime
+#' @param portfolios list of portfolios created by
+#' \code{combine.portfolios} with corresponding regimes
+#' @return a \code{regime.portfolios} object with the following elements
+#' \itemize{
+#'     \item{regime: }{An xts object of the regime}
+#'     \item{portfolio: }{List of portfolios corresponding to the regime}
+#'   }
+#' @author Ross Bennett
+#' @export
+regime.portfolios <- function(regime, portfolios){
+  if(!inherits(regime, c("xts", "zoo"))) stop("regime object must be an xts or zoo object")
+  if(!inherits(portfolios, "portfolio.list")) stop("portfolios object must be a portfolio.list object")
+  
+  n.regimes <- length(unique(regime))
+  n.portfolios <- length(portfolios)
+  if(n.regimes != n.portfolios) stop("Number of portfolios must match the number of regimes")
+  
+  # structure and return
+  return(structure(list(regime=regime, portfolio.list=portfolios), 
+                   class=c("regime.portfolios", "portfolio")))
+}

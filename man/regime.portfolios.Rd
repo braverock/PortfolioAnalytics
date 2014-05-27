@@ -1,0 +1,36 @@
+\name{regime.portfolios}
+\alias{regime.portfolios}
+\title{Regime Portfolios}
+\usage{
+  regime.portfolios(regime, portfolios)
+}
+\arguments{
+  \item{regime}{xts or zoo object specifying the regime}
+
+  \item{portfolios}{list of portfolios created by
+  \code{combine.portfolios} with corresponding regimes}
+}
+\value{
+  a \code{regime.portfolios} object with the following
+  elements \itemize{ \item{regime: }{An xts object of the
+  regime} \item{portfolio: }{List of portfolios
+  corresponding to the regime} }
+}
+\description{
+  Construct a \code{regime.portfolios} object that contains
+  a time series of regimes and portfolios corresponding to
+  the regimes.
+}
+\details{
+  Create a \code{regime.portfolios} object to support
+  regime switching optimization. This object is then passed
+  in as the \code{portfolio} argument in
+  \code{optimize.portfolio}. The regime is detected and the
+  corresponding portfolio is selected. For example, if the
+  current regime is 1, then portfolio 1 will be selected
+  and used in the optimization.
+}
+\author{
+  Ross Bennett
+}
+
