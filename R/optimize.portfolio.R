@@ -532,9 +532,22 @@ optimize.portfolio_v2 <- function(
   if(!is.function(momentFUN)){
     momentFUN <- match.fun(momentFUN)
   }
+  
+  # **
+  # When an ES/ETL/CVaR problem is being solved by a linear solver, the higher
+  # moments do not need to be calculated. The moments are very compute 
+  # intensive and slow down the optimization problem.
+  
   # match the args for momentFUN
   .formals <- formals(momentFUN)
   .formals <- modify.args(formals=.formals, arglist=NULL, ..., dots=FALSE)
+  # ** pass ROI=TRUE to set.portfolio.moments so the moments are not calculated
+  if(optimize_method %in% c("ROI", "quadprog", "glpk", "symphony", "ipop", "cplex")){
+    obj_names <- unlist(lapply(portfolio$objectives, function(x) x$name))
+    if(any(obj_names %in% c("CVaR", "ES", "ETL"))){
+      .formals <- modify.args(formals=.formals, arglist=list(ROI=TRUE), dots=TRUE)
+    }
+  }
   if("R" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=FALSE)
   if("portfolio" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=FALSE)
   .formals$... <- NULL

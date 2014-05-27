@@ -220,10 +220,15 @@ set.portfolio.moments_v2 <- function(R, portfolio, momentargs=NULL,...){
              ETL=,
              mETL=,
              ES = {
-               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
-               if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
-               if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
-               if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+               # We don't want to calculate these moments if we have an ES 
+               # objective and are solving as an LP problem.
+               if(hasArg(ROI)) ROI=match.call(expand.dots=TRUE)$ROI else ROI=FALSE
+               if(!ROI){
+                 if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+                 if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
+                 if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
+                 if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+               }
              }
       ) # end switch on objectives    
     }    
