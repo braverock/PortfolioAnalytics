@@ -150,6 +150,13 @@ regime.portfolios <- function(regime, portfolios){
   n.portfolios <- length(portfolios)
   if(n.regimes != n.portfolios) stop("Number of portfolios must match the number of regimes")
   
+  # Check to ensure the assets in each portfolio are equal
+  for(i in 2:length(portfolios)){
+    if(!identical(portfolios[[1]]$assets, portfolios[[i]]$assets)){
+      stop("The assets in each portfolio must be identical")
+    }
+  }
+  
   # structure and return
   return(structure(list(regime=regime, portfolio.list=portfolios), 
                    class=c("regime.portfolios", "portfolio")))

@@ -992,3 +992,20 @@ print.opt.rebal.list <- function(x, ...){
   }
 }
 
+#' @method print regime.portfolios
+#' @S3method print regime.portfolios
+#' @export
+print.regime.portfolios <- function(x, ...){
+  
+  cat(rep("*", 50) ,"\n", sep="")
+  cat("PortfolioAnalytics Regime Switching Specification", "\n")
+  cat(rep("*", 50) ,"\n\n", sep="")
+  
+  # Should we print the regime object information?
+  
+  portf <- x$portfolio.list
+  for(i in 1:length(portf)){
+    cat("Regime ", i, " Portfolio", "\n", sep="")
+    print(portf[[i]])
+  }
+}
