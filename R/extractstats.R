@@ -519,11 +519,13 @@ extractObjectiveMeasures.optimize.portfolio.rebalancing <- function(object){
 # contains the objective measures for a given regime
 extractObjRegime <- function(object){
   tmp.regimes <- unlist(lapply(object$opt_rebalancing, function(x) x$regime))
-  unique.regimes <- unique(tmp.regimes)
+  unique.regimes <- sort(unique(tmp.regimes))
+  #print(tmp.regimes)
+  #print(unique.regimes)
   
   # Initialize a list to hold the objective measures for each regime
   out.list <- vector("list", length(unique.regimes))
-  names(out.list) <- paste("regime", 1:length(unique.regimes), sep=".")
+  names(out.list) <- paste("regime", unique.regimes, sep=".")
   
   # Outer loop over each regime
   for(i in 1:length(unique.regimes)){
@@ -544,7 +546,7 @@ extractObjRegime <- function(object){
     colnames(obj) <- PortfolioAnalytics:::name.replace(colnames(obj))
     obj <- xts(obj, as.Date(names(tmp.idx)))
     # insert the objective measures into the list
-    out.list[[i]] <- obj
+    out.list[[unique.regimes[i]]] <- obj
   }
   out.list
 }

@@ -21,12 +21,15 @@
 #' should contain properly named contribution and pct_contrib columns. 
 #' 
 #' @param object optimal portfolio object created by \code{\link{optimize.portfolio}}
+#' or \code{\link{optimize.portfolio.rebalancing}}
 #' @param \dots any other passthru parameters to \code{\link{plot}}
 #' @param neighbors risk contribution or pct_contrib of neighbor portfolios to be plotted, see Details.
 #' @param match.col string of risk column to match. The \code{opt.list} object 
 #' may contain risk budgets for ES or StdDev and this will match the proper 
 #' column names of the objectives list outp (e.g. ES.contribution).
 #' @param risk.type "absolute" or "percentage" to plot risk contribution in absolute terms or percentage contribution.
+#' @param regime integer of the regime number. For use with 
+#' \code{\link{optimize.portfolio.rebalancing}} run with regime switching portfolios.
 #' @param main main title for the chart.
 #' @param plot.type "line" or "barplot".
 #' @param ylab label for the y-axis.
@@ -212,10 +215,19 @@ chart.RiskBudget.optimize.portfolio <- function(object, ..., neighbors=NULL, ris
 #' @rdname chart.RiskBudget
 #' @method chart.RiskBudget optimize.portfolio.rebalancing
 #' @S3method chart.RiskBudget optimize.portfolio.rebalancing
-chart.RiskBudget.optimize.portfolio.rebalancing <- function(object, ..., match.col="ES", risk.type="absolute", main="Risk Contribution"){
+chart.RiskBudget.optimize.portfolio.rebalancing <- function(object, ..., match.col="ES", risk.type="absolute", regime=NULL, main="Risk Contribution"){
   
   # Get the objective measures at each rebalance period
   rebal.obj <- extractObjectiveMeasures(object)
+  
+  if(inherits(opt.rebal$portfolio, "regime.portfolios")){
+    # If the optimize.portfolio.rebalancing object is run with regime switching,
+    # the output of extractObjectiveMeasures is a list of length N where each
+    # element is the objective measures of the corresponding regime. (i.e.
+    # rebal.obj[[1]] is the objective measures for portfolio 1 with regime 1)
+    if(is.null(regime)) regime=1
+    rebal.obj <- rebal.obj[[regime]]
+  }
   
   if(risk.type == "absolute"){
     rbcols <- grep(paste(match.col, "contribution", sep="."), colnames(rebal.obj))
