@@ -608,6 +608,21 @@ rp_grid <- function(portfolio, permutations=2000, normalize=TRUE){
   if(normalize) return(out) else return(rp)
 }
 
+# function to generate a set of random portfolios for each portfolio and return the superset
+# this is primarily for use in optimize.portfolio.rebalancing
+rp.regime.portfolios <- function(regime, permutations=100, rp_method="sample", eliminate=TRUE, ...){
+  if(!inherits(regime, "regime.portfolios")) stop("regime must be an object of class 'regime.portfolios'")
+  portf <- regime$portfolio.list
+  nportf <- length(portf)
+  rp.list <- vector("list", nportf)
+  for(i in 1:nportf){
+    rp.list[[i]] <- random_portfolios(portf[[i]], permutations=permutations, rp_method=rp_method, eliminate=eliminate, ...=...)
+  }
+  # rbind the list of matrices together and remove any duplicates
+  out <- unique(do.call("rbind", rp.list))
+  return(out)
+}
+
 # EXAMPLE: start_t<- Sys.time(); x=random_walk_portfolios(rep(1/5,5), generatesequence(min=0.01, max=0.30, by=0.01), max_permutations=500, permutations=5000, min_sum=.99, max_sum=1.01); end_t<-Sys.time(); end_t-start_t;
 # > nrow(unique(x))
 # [1] 4906

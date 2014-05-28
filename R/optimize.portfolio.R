@@ -1441,12 +1441,22 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   #store the call for later
   call <- match.call()
   if(optimize_method=="random"){
+    # get any rp related arguments passed in through dots
+    if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
+    if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
+    if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
+    
     #' call random_portfolios() with constraints and search_size to create matrix of portfolios
     if(is.null(rp))
-      rp<-random_portfolios(portfolio=portfolio, permutations=search_size)
+      if(inherits(portfolio, "regime.portfolios")){
+        rp <- rp.regime.portfolios(regime=portfolio, permutations=search_size, rp_method=rp_method, eliminate=eliminate, fev=fev)
+      } else {
+        rp <- random_portfolios(portfolio=portfolio, permutations=search_size, rp_method=rp_method, eliminate=eliminate, fev=fev)
+      }
   } else {
-    rp=NULL
-  }    
+    rp = NULL
+  }
+  print(dim(rp))
   
   if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
   if (is.null(trailing_periods)){

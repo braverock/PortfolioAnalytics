@@ -48,16 +48,9 @@ opt2 <- optimize.portfolio(R[1:(nrow(R)-1)], regime.port,
 opt2
 opt2$regime
 
-# For optimize_method="random", which portfolio do we use and how do we 
-# generate random portfolios
-# - prompt the user to generate random portfolios?
-# - use the first portfolio?
-# - specify which portfolio?
-# This is important because the constraints may be very different
-# This only impacts optimize.portfolio.rebalancing because we do not know
-# the portfolio specification at the time we generate the random portfolios
+# Run optimization with rebalancing for regime switching
 opt.rebal <- optimize.portfolio.rebalancing(R, regime.port,
-                                            optimize_method="DEoptim", 
+                                            optimize_method="random", 
                                             rebalance_on="quarters", 
                                             training_period=130,
                                             search_size=2000, 
