@@ -28,3 +28,4 @@ demo_roi_solvers Demonstrate specifying a solver using ROI.
 risk_budget_backtesting Demonstrate optimize.portfolio.rebalancing with standard deviation risk budget objective.
 chart_concentration Demonstrate chart.Concentration
 multiple_portfolio_optimization Demonstrate passing a list of portfolios to optimize.portfolio and optimize.portfolio.rebalancing
+regime_switching       Demonstrate optimization with support for regime switching to switch portfolios based on the regime.
