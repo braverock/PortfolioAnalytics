@@ -63,7 +63,8 @@ SEXP  residualcokurtosisSF(SEXP NN, SEXP sstockM2, SEXP sstockM4, SEXP mfactorM2
             if( (i==j) || (i==k) || (i==l) || (j==k) || (j==l) || (k==l) ) {
               if( (i==j) && (i==k) && (i==l) ) { 
                 // These are the kurtosis estimates of the individual assets: E[u^4]
-                kijkl = 6*pow(beta[i],2)*factorM2*stockM2[i]+stockM4[i]; 
+                // kijkl = 6*R_pow_di(beta[i],2)*factorM2*stockM2[i]+stockM4[i];
+                kijkl = 6*beta[i]*beta[i]*factorM2*stockM2[i]+stockM4[i];
               } else {
                 if( ((i==j) && (i==k)) || ((i==j) && (i==l)) || ((i==k) && (i==l)) || ((j==k) && (j==l)) ) {
                   // kiij E[ U[,i]^3*U[,j] ] = r3*sqrt( vm6[i]*vm2[j] )
@@ -83,13 +84,16 @@ SEXP  residualcokurtosisSF(SEXP NN, SEXP sstockM2, SEXP sstockM4, SEXP mfactorM2
                   if( ((i==j) && (k==l)) || ((i==k) && (j==l)) || ((i==l) && (j==k)) ) { 
                     // kiijj = E[ U[,i]^2*U[,j]^2 ] = r5*sqrt( vm4[i]*vm4[j]  )
                     if( (i==j) && (k==l) ) {
-                      kijkl = pow(beta[i],2)*factorM2*stockM2[k] + pow(beta[k],2)*factorM2*stockM2[i]+stockM2[i]*stockM2[k];
+                      //kijkl = R_pow_di(beta[i],2)*factorM2*stockM2[k] + R_pow_di(beta[k],2)*factorM2*stockM2[i]+stockM2[i]*stockM2[k];
+                      kijkl = beta[i]*beta[i]*factorM2*stockM2[k] + beta[k]*beta[k]*factorM2*stockM2[i]+stockM2[i]*stockM2[k];
                     } else
                       if( (i==k) && (j==l) ) {
-                        kijkl = pow(beta[i],2)*factorM2*stockM2[j] + pow(beta[j],2)*factorM2*stockM2[i]+stockM2[i]*stockM2[j];
+                        //kijkl = R_pow_di(beta[i],2)*factorM2*stockM2[j] + R_pow_di(beta[j],2)*factorM2*stockM2[i]+stockM2[i]*stockM2[j];
+                        kijkl = beta[i]*beta[i]*factorM2*stockM2[j] + beta[j]*beta[j]*factorM2*stockM2[i]+stockM2[i]*stockM2[j];
                       } else
                         if( (i==l) && (j==k) ) {
-                          kijkl = pow(beta[i],2)*factorM2*stockM2[j] + pow(beta[j],2)*factorM2*stockM2[i]+stockM2[i]*stockM2[j];
+                          //kijkl = R_pow_di(beta[i],2)*factorM2*stockM2[j] + R_pow_di(beta[j],2)*factorM2*stockM2[i]+stockM2[i]*stockM2[j];
+                          kijkl = beta[i]*beta[i]*factorM2*stockM2[j] + beta[j]*beta[j]*factorM2*stockM2[i]+stockM2[i]*stockM2[j];
                         } 
                   } else {
                     // kiijk = E[ U[,i]^2*U[,j]*U[,k] ] = r6*sqrt( vm4[i]*r5*sqrt( vm4[j]*vm4[k] ) )

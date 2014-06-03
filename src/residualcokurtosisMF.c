@@ -2,7 +2,7 @@
 #include <R.h>
 #include <Rinternals.h>
 
-SEXP  residualcokurtosisMF_C(SEXP NN, SEXP sstockM2, SEXP sstockM4, SEXP bbetacov){
+SEXP  residualcokurtosisMF(SEXP NN, SEXP sstockM2, SEXP sstockM4, SEXP bbetacov){
     /*
      arguments
      NN       : integer, number of assets

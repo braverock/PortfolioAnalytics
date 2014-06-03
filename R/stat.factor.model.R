@@ -212,7 +212,7 @@ coskewnessSF <- function(beta, stockM3, factorM3){
 cokurtosisSF <- function(beta, stockM2, stockM4, factorM2, factorM4){
   # Beta of the stock with the factor index
   beta = as.numeric(beta)
-  N = length(beta)
+  N = as.integer(length(beta))
   
   # Idiosyncratic second moment of the stock
   stockM2 = as.numeric(stockM2)
@@ -250,7 +250,7 @@ cokurtosisSF <- function(beta, stockM2, stockM4, factorM2, factorM4){
   # bbeta     : vector of length NN
   
   # Should I add checks here? These are passed from cokurtosisSF which already has checks
- .Call('residualcokurtosisSF', NN, sstockM2, sstockM4, bbeta, PACKAGE="PortfolioAnalytics")
+ .Call('residualcokurtosisSF', NN, sstockM2, sstockM4, mfactorM2, bbeta, PACKAGE="PortfolioAnalytics")
 }
 
 ##### Multiple Factor Model Comoments #####
