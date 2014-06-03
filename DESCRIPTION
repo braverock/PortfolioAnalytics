@@ -66,3 +66,4 @@ Collate:
     'inverse.volatility.weight.R'
     'utils.R'
     'chart.concentration.R'
+    'stat.factor.model.R'

@@ -1,0 +1,38 @@
+\name{cokurtosisSF}
+\alias{cokurtosisSF}
+\title{Cokurtosis Matrix Estimate}
+\usage{
+  cokurtosisSF(beta, stockM2, stockM4, factorM2, factorM4)
+}
+\arguments{
+  \item{beta}{vector of length N or (N x 1) matrix of
+  factor loadings (i.e. the betas) from a single factor
+  statistical factor model}
+
+  \item{stockM2}{vector of length N of the 2nd moment of
+  the model residuals}
+
+  \item{stockM4}{vector of length N of the 4th moment of
+  the model residuals}
+
+  \item{factorM2}{scalar of the 2nd moment of the factor
+  realizations from a single factor statistical factor
+  model}
+
+  \item{factorM4}{scalar of the 4th moment of the factor
+  realizations from a single factor statistical factor
+  model}
+}
+\value{
+  (N x N^3) cokurtosis matrix
+}
+\description{
+  Estimate cokurtosis matrix using a single factor
+  statistical factor model
+}
+\details{
+  This function estimates an (N x N^3) cokurtosis matrix
+  from a statistical factor model with k factors, where N
+  is the number of assets.
+}
+

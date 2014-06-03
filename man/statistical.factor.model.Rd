@@ -1,0 +1,33 @@
+\name{statistical.factor.model}
+\alias{statistical.factor.model}
+\title{Statistical Factor Model}
+\usage{
+  statistical.factor.model(R, k = 1, ...)
+}
+\arguments{
+  \item{R}{xts of asset returns}
+
+  \item{k}{number of factors to use}
+
+  \item{\dots}{additional arguments passed to
+  \code{prcomp}}
+}
+\value{
+  #' \itemize{ \item{factor_loadings}{ N x k matrix of
+  factor loadings (i.e. betas)} \item{factor_realizations}{
+  m x k matrix of factor realizations} \item{residuals}{ m
+  x N matrix of model residuals representing idiosyncratic
+  risk factors} } Where N is the number of assets, k is the
+  number of factors, and m is the number of observations.
+}
+\description{
+  Fit a statistical factor model using Principal Component
+  Analysis (PCA)
+}
+\details{
+  The statistical factor model is fitted using
+  \code{prcomp}. The factor loadings, factor realizations,
+  and residuals are computed and returned given the number
+  of factors used for the model.
+}
+

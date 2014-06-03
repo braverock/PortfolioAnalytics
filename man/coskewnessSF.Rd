@@ -1,0 +1,31 @@
+\name{coskewnessSF}
+\alias{coskewnessSF}
+\title{Coskewness Matrix Estimate}
+\usage{
+  coskewnessSF(beta, stockM3, factorM3)
+}
+\arguments{
+  \item{beta}{vector of length N or (N x 1) matrix of
+  factor loadings (i.e. the betas) from a single factor
+  statistical factor model}
+
+  \item{stockM3}{vector of length N of the 3rd moment of
+  the model residuals}
+
+  \item{factorM3}{scalar of the 3rd moment of the factor
+  realizations from a single factor statistical factor
+  model}
+}
+\value{
+  (N x N^2) coskewness matrix
+}
+\description{
+  Estimate coskewness matrix using a single factor
+  statistical factor model
+}
+\details{
+  This function estimates an (N x N^2) coskewness matrix
+  from a single factor statistical factor model with k=1
+  factors, where N is the number of assets.
+}
+
