@@ -241,6 +241,7 @@ cokurtosisSF <- function(beta, stockM2, stockM4, factorM2, factorM4){
 # factor model with k = 1.
 # Note that this function was orignally written in C++ (using Rcpp) by
 # Joshua Ulrich and re-written using the C API by Ross Bennett
+#' @useDynLib "PortfolioAnalytics"
 .residualcokurtosisSF <- function(NN, sstockM2, sstockM4, mfactorM2, bbeta){
   # NN        : integer
   # sstockM2  : vector of length NN
@@ -420,6 +421,7 @@ cokurtosisMF <- function(beta , stockM2 , stockM4 , factorM2 , factorM4){
 # factor model with k > 1.
 # Note that this function was orignally written in C++ (using Rcpp) by
 # Joshua Ulrich and re-written using the C API by Ross Bennett
+#' @useDynLib "PortfolioAnalytics"
 .residualcokurtosisMF <- function(NN, sstockM2, sstockM4, bbetacov){
   # NN        : integer, number of assets
   # sstockM2  : numeric vector of length NN

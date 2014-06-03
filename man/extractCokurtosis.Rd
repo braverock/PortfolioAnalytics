@@ -1,8 +1,8 @@
-\name{extract.cokurtosis}
-\alias{extract.cokurtosis}
+\name{extractCokurtosis}
+\alias{extractCokurtosis}
 \title{Cokurtosis Estimate}
 \usage{
-  extract.cokurtosis(model, ...)
+  extractCokurtosis(model, ...)
 }
 \arguments{
   \item{model}{statistical factor model estimated via

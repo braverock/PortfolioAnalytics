@@ -1,8 +1,8 @@
-\name{extract.coskewness}
-\alias{extract.coskewness}
-\title{Coskewness Estimate}
+\name{extractCovariance}
+\alias{extractCovariance}
+\title{Covariance Estimate}
 \usage{
-  extract.coskewness(model, ...)
+  extractCovariance(model, ...)
 }
 \arguments{
   \item{model}{statistical factor model estimated via
@@ -11,10 +11,10 @@
   \item{\dots}{not currently used}
 }
 \value{
-  coskewness matrix estimate
+  covariance matrix estimate
 }
 \description{
-  Extract the coskewness matrix estimate from a statistical
+  Extract the covariance matrix estimate from a statistical
   factor model
 }
 \author{
