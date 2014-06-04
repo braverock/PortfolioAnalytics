@@ -250,6 +250,73 @@ garch.mm <- function(R,mu_ts, covlist,momentargs=list(),...) {
     if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
     return(momentargs)
 }
+
+#' Portfolio Moments
+#' 
+#' Set portfolio moments for use by lower level optimization functions using
+#' a statistical factor model based on the work of Kris Boudt.
+#' 
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of 
+#' asset returns
+#' @param portfolio an object of type \code{portfolio} specifying the 
+#' constraints and objectives for the optimization, see 
+#' \code{\link{portfolio.spec}}
+#' @param momentargs list containing arguments to be passed down to lower level 
+#' functions, default NULL
+#' @param k number of factors used for fitting statistical factor model
+#' @param \dots any other passthru parameters
+#' @export
+portfolio.moments.boudt <- function(R, portfolio, momentargs=NULL, k=1, ...){
+  
+  # Fit the statistical factor model
+  fit <- statistical.factor.model(R=R, k=k)
+  
+  if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
+  if(is.null(portfolio$objectives)) {
+    warning("no objectives specified in portfolio")
+    next()
+  } else {
+    for (objective in portfolio$objectives){
+      switch(objective$name,
+             mean = {
+               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean', na.rm=TRUE)),ncol=1)
+             },
+             var =,
+             sd =,
+             StdDev = { 
+               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean', na.rm=TRUE)),ncol=1);
+               if(is.null(momentargs$sigma)) momentargs$sigma = extractCovariance(fit)
+             },
+             mVaR =,
+             VaR = {
+               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+               if(is.null(momentargs$sigma)) momentargs$sigma = extractCovariance(fit)
+               if(is.null(momentargs$m3)) momentargs$m3 = extractCoskewness(fit)
+               if(is.null(momentargs$m4)) momentargs$m4 = extractCokurtosis(fit)
+             },
+             es =,
+             mES =,
+             CVaR =,
+             cVaR =,
+             ETL=,
+             mETL=,
+             ES = {
+               # We don't want to calculate these moments if we have an ES 
+               # objective and are solving as an LP problem.
+               if(hasArg(ROI)) ROI=match.call(expand.dots=TRUE)$ROI else ROI=FALSE
+               if(!ROI){
+                 if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+                 if(is.null(momentargs$sigma)) momentargs$sigma = extractCovariance(fit)
+                 if(is.null(momentargs$m3)) momentargs$m3 = extractCoskewness(fit)
+                 if(is.null(momentargs$m4)) momentargs$m4 = extractCokurtosis(fit)
+               }
+             }
+      ) # end switch on objectives    
+    }    
+  }    
+  return(momentargs)
+}
+
 ###############################################################################
 # $Id$
 ###############################################################################
