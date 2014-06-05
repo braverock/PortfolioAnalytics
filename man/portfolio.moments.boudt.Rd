@@ -26,4 +26,9 @@
   functions using a statistical factor model based on the
   work of Kris Boudt.
 }
+\note{
+  If any of the objectives in the \code{portfolio} object
+  have \code{clean} as an argument, the cleaned returns are
+  used to fit the model.
+}
 

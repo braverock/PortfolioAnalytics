@@ -256,6 +256,9 @@ garch.mm <- function(R,mu_ts, covlist,momentargs=list(),...) {
 #' Set portfolio moments for use by lower level optimization functions using
 #' a statistical factor model based on the work of Kris Boudt.
 #' 
+#' @note If any of the objectives in the \code{portfolio} object have 
+#' \code{clean} as an argument, the cleaned returns are used to fit the model. 
+#' 
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of 
 #' asset returns
 #' @param portfolio an object of type \code{portfolio} specifying the 
@@ -269,6 +272,18 @@ garch.mm <- function(R,mu_ts, covlist,momentargs=list(),...) {
 portfolio.moments.boudt <- function(R, portfolio, momentargs=NULL, k=1, ...){
   
   # Fit the statistical factor model
+  # If any of the objectives have clean as an argument, we fit the factor
+  # model with cleaned returns. Is this the desired behavior we want?
+  clean <- unlist(lapply(portfolio$objectives, function(x) x$arguments$clean))
+  if(!is.null(clean)){
+    if(length(unique(clean)) > 1){
+      warning(paste("Multiple methods detected for cleaning returns, default to use clean =", tmp[1]))
+    }
+    # This sets R as the cleaned returns for the rest of the function
+    # This is proably fine since the only other place R is used is for the 
+    # mu estimate
+    R <- Return.clean(R, method=clean[1])
+  }
   fit <- statistical.factor.model(R=R, k=k)
   
   if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
@@ -284,12 +299,12 @@ portfolio.moments.boudt <- function(R, portfolio, momentargs=NULL, k=1, ...){
              var =,
              sd =,
              StdDev = { 
-               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean', na.rm=TRUE)),ncol=1);
+               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean', na.rm=TRUE)),ncol=1)
                if(is.null(momentargs$sigma)) momentargs$sigma = extractCovariance(fit)
              },
              mVaR =,
              VaR = {
-               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+               if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1)
                if(is.null(momentargs$sigma)) momentargs$sigma = extractCovariance(fit)
                if(is.null(momentargs$m3)) momentargs$m3 = extractCoskewness(fit)
                if(is.null(momentargs$m4)) momentargs$m4 = extractCokurtosis(fit)
@@ -305,7 +320,7 @@ portfolio.moments.boudt <- function(R, portfolio, momentargs=NULL, k=1, ...){
                # objective and are solving as an LP problem.
                if(hasArg(ROI)) ROI=match.call(expand.dots=TRUE)$ROI else ROI=FALSE
                if(!ROI){
-                 if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
+                 if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1)
                  if(is.null(momentargs$sigma)) momentargs$sigma = extractCovariance(fit)
                  if(is.null(momentargs$m3)) momentargs$m3 = extractCoskewness(fit)
                  if(is.null(momentargs$m4)) momentargs$m4 = extractCokurtosis(fit)

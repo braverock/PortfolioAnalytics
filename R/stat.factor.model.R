@@ -249,7 +249,12 @@ cokurtosisSF <- function(beta, stockM2, stockM4, factorM2, factorM4){
   # mfactorM2 : double
   # bbeta     : vector of length NN
   
-  # Should I add checks here? These are passed from cokurtosisSF which already has checks
+  if(!is.integer(NN)) NN <- as.integer(NN)
+  if(length(sstockM2) != NN) stop("sstockM2 must be a vector of length NN")
+  if(length(sstockM4) != NN) stop("sstockM4 must be a vector of length NN")
+  if(!is.double(mfactorM2)) mfactorM2 <- as.double(mfactorM2)
+  if(length(bbeta) != NN) stop("bbeta must be a vector of length NN")
+  
  .Call('residualcokurtosisSF', NN, sstockM2, sstockM4, mfactorM2, bbeta, PACKAGE="PortfolioAnalytics")
 }
 
@@ -428,7 +433,11 @@ cokurtosisMF <- function(beta , stockM2 , stockM4 , factorM2 , factorM4){
   # ssstockM4 : numeric vector of length NN
   # bbetacov  : numeric vector of length NN * NN
   
-  # Should I add checks here? These are passed from cokurtosisSF which already has checks
+  if(!is.integer(NN)) NN <- as.integer(NN)
+  if(length(sstockM2) != NN) stop("sstockM2 must be a vector of length NN")
+  if(length(sstockM4) != NN) stop("sstockM4 must be a vector of length NN")
+  if(length(bbetacov) != NN*NN) stop("bbetacov must be a vector of length NN*NN")
+  
  .Call('residualcokurtosisMF', NN, sstockM2, sstockM4, bbetacov, PACKAGE="PortfolioAnalytics")
 }
 
