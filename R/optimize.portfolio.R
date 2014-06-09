@@ -1456,7 +1456,6 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   } else {
     rp = NULL
   }
-  print(dim(rp))
   
   if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
   if (is.null(trailing_periods)){

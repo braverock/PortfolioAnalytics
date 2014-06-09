@@ -495,7 +495,7 @@ extractObjectiveMeasures.optimize.portfolio <- function(object){
 extractObjectiveMeasures.optimize.portfolio.rebalancing <- function(object){
   if(!inherits(object, "optimize.portfolio.rebalancing")) stop("object must be of class 'optimize.portfolio.rebalancing'")
   
-  if(inherits(opt.rebal$portfolio, "regime.portfolios")){
+  if(inherits(object$portfolio, "regime.portfolios")){
     result <- extractObjRegime(object)
   } else {
     rebal_object <- object$opt_rebal

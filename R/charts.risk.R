@@ -220,7 +220,7 @@ chart.RiskBudget.optimize.portfolio.rebalancing <- function(object, ..., match.c
   # Get the objective measures at each rebalance period
   rebal.obj <- extractObjectiveMeasures(object)
   
-  if(inherits(opt.rebal$portfolio, "regime.portfolios")){
+  if(inherits(object$portfolio, "regime.portfolios")){
     # If the optimize.portfolio.rebalancing object is run with regime switching,
     # the output of extractObjectiveMeasures is a list of length N where each
     # element is the objective measures of the corresponding regime. (i.e.
