@@ -493,6 +493,19 @@ optimize.portfolio_v2 <- function(
     regime.switching <- FALSE
   }
   
+  # This is the case where the user has passed in a mult.portfolio.spec
+  # object for multiple layer portfolio optimization.
+  if(inherits(portfolio, "mult.portfolio.spec")){
+    # This function calls optimize.portfolio.rebalancing on each sub portfolio
+    # according to the given optimization parameters and returns an xts object
+    # representing the proxy returns of each sub portfolio.
+    R <- proxy.mult.portfolio(R=R, mult.portfolio=portfolio)
+    
+    # The optimization is controlled by the constraints and objectives in the
+    # top level portfolio so now set the 'portfolio' to the top level portfolio
+    portfolio <- portfolio$top.portfolio
+  }
+  
   optimize_method <- optimize_method[1]
   tmptrace <- NULL
   start_t <- Sys.time()
@@ -1404,6 +1417,18 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
     ##### return here for portfolio.list because this is a recursive call
     ##### for optimize.portfolio.rebalancing
     return(out)
+  }
+  
+  # This is the case where the user has passed in a mult.portfolio.spec
+  # object for multiple layer portfolio optimization.
+  if(inherits(portfolio, "mult.portfolio.spec")){
+    # The optimization is controlled by the constraints and objectives in the
+    # top level portfolio
+    portfolio <- portfolio$top.portfolio
+    # This function calls optimize.portfolio.rebalancing on each sub portfolio
+    # according to the given optimization parameters and returns an xts object
+    # representing the proxy returns of each sub portfolio.
+    R <- proxy.mult.portfolio(R=R, mult.portfolio=portfolio)
   }
   
   # Store the call to return later

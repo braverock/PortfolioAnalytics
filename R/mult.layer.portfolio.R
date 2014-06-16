@@ -51,8 +51,8 @@ sub.portfolio <- function(portfolio,
                            search_size = search_size,
                            rp = rp,
                            rebalance_on = rebalance_on,
-                           training_period = NULL,
-                           trailing_periods= NULL),
+                           training_period = training_period,
+                           trailing_periods = trailing_periods),
                       list(...)),
                     class="sub.portfolio"
   ) # end structure
@@ -81,7 +81,7 @@ sub.portfolio <- function(portfolio,
 #' sub portfolios in the \code{mult.portfolio} object. If \code{indexnum} is 
 #' specified, the portfolio in that index number is overwritten.
 #' @seealso \code{\link{mult.portfolio.spec}} \code{\link{portfolio.spec}} \code{\link{optimize.portfolio}} \code{\link{optimize.portfolio.rebalancing}}
-#' @author
+#' @author Ross Bennett
 #' @export
 add.sub.portfolio <- function(mult.portfolio, 
                               portfolio, 
@@ -115,5 +115,51 @@ add.sub.portfolio <- function(mult.portfolio,
   return(mult.portfolio)
 }
 
+# This function calls optimize.portfolio.rebalancing on each sub portfolio
+# according to the given optimization parameters and returns an xts object
+# representing the proxy returns of each sub portfolio
+proxy.mult.portfolio <- function(R, mult.portfolio, ...){
+  # Check to make sure that the mult.portfolio passed in is a 
+  # mult.portfolio.spec object
+  if(!inherits(mult.portfolio, "mult.portfolio.spec")){
+    stop("mult.portfolio must be of class 'mult.portfolio.spec'")
+  }
+  
+  n.sub.portfolios <- length(mult.portfolio$sub.portfolios)
+  ret <- vector("list", n.sub.portfolios)
+  
+  # Loop through the sub portfolios and call optimize.portfolio.rebalancing
+  # on each sub portfolio and its optimization parameters
+  for(i in 1:n.sub.portfolios){
+    #print(paste("sub portfolio", i))
+    tmp <- mult.portfolio$sub.portfolios[[i]]
+    
+    # We need to subset the R object based on the names of portfolio$assets in 
+    # the sub portfolio
+    # This requires that asset names match colnames(R)
+    R.tmp <- R[,names(tmp$portfolio$assets)]
+    if(ncol(R.tmp) != length(tmp$portfolio$assets)){
+      stop("R object of returns not subset correctly. Make sure the names of 
+           the assets in the sub portfolio match the column names of the R object") 
+    }
+    # This needs to support 
+    .formals <- formals(optimize.portfolio.rebalancing)
+    .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, R=R, dots=TRUE)
+    .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=tmp, dots=TRUE)
+    .formals$... <- NULL
+    #print(.formals)
+    opt <- try(do.call(optimize.portfolio.rebalancing, .formals), silent=TRUE)
+    if(inherits(opt, "try-error")) { 
+      message(paste("optimize.portfolio.rebalancing for sub portfolio", i, "generated an error or warning:", opt))
+      next()  
+    } 
+    ret.tmp <- Return.rebalancing(R.tmp, extractWeights(opt))
+    colnames(ret.tmp) <- paste("proxy", i, sep=".")
+    ret[[i]] <- ret.tmp
+    #print(ret[[i]])
+  }
+  proxy.ret <- na.omit(do.call(cbind, ret))
+  return(proxy.ret)
+}
 
 
