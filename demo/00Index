@@ -30,3 +30,4 @@ chart_concentration Demonstrate chart.Concentration
 multiple_portfolio_optimization Demonstrate passing a list of portfolios to optimize.portfolio and optimize.portfolio.rebalancing
 regime_switching       Demonstrate optimization with support for regime switching to switch portfolios based on the regime.
 higher_moments_boudt     Demonstrate using a statistical factor model to estimate moments based on work by Kris Boudt.
+multi_layer_optimization    Demonstrate multi layer optimization of optimization problem with two layers and two sub portfolios in the lower layer.

@@ -126,6 +126,9 @@ proxy.mult.portfolio <- function(R, mult.portfolio, ...){
   }
   
   n.sub.portfolios <- length(mult.portfolio$sub.portfolios)
+  if(n.sub.portfolios <= 1) stop("Must have more than 1 sub portfolio")
+  
+  # Initialize list to store the returns for each sub portfolio
   ret <- vector("list", n.sub.portfolios)
   
   # Loop through the sub portfolios and call optimize.portfolio.rebalancing
@@ -142,21 +145,21 @@ proxy.mult.portfolio <- function(R, mult.portfolio, ...){
       stop("R object of returns not subset correctly. Make sure the names of 
            the assets in the sub portfolio match the column names of the R object") 
     }
-    # This needs to support 
+    # This needs to support anything in ... that could be passed to optimize.portfolio
     .formals <- formals(optimize.portfolio.rebalancing)
     .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, R=R, dots=TRUE)
     .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=tmp, dots=TRUE)
     .formals$... <- NULL
     #print(.formals)
     opt <- try(do.call(optimize.portfolio.rebalancing, .formals), silent=TRUE)
-    if(inherits(opt, "try-error")) { 
-      message(paste("optimize.portfolio.rebalancing for sub portfolio", i, "generated an error or warning:", opt))
-      next()  
-    } 
-    ret.tmp <- Return.rebalancing(R.tmp, extractWeights(opt))
-    colnames(ret.tmp) <- paste("proxy", i, sep=".")
-    ret[[i]] <- ret.tmp
-    #print(ret[[i]])
+    if(!inherits(opt, "try-error")) {
+      ret.tmp <- Return.rebalancing(R.tmp, extractWeights(opt))
+      colnames(ret.tmp) <- paste("proxy", i, sep=".")
+      ret[[i]] <- ret.tmp
+      #print(ret[[i]])
+    } else {
+      stop(paste("optimize.portfolio.rebalancing for sub portfolio", i, "generated an error or warning:", opt))
+    }
   }
   proxy.ret <- na.omit(do.call(cbind, ret))
   return(proxy.ret)
