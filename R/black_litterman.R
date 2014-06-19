@@ -38,9 +38,9 @@ BlackLittermanFormula = function( Mu, Sigma, P, v, Omega)
 #' @param R returns
 #' @param P a K x N pick matrix
 #' @param Mu vector of length N of the prior expected values. The sample mean
-#' is used if \code{mu} is not provided as an argument.
-#' @param Sigma an N x N matrix of the prior covariance matrix. The sample covariance
-#' is used if \code{Sigma} is not provided as an argument.
+#' is used if \code{Mu=NULL}.
+#' @param Sigma an N x N matrix of the prior covariance matrix. The sample 
+#' covariance is used if \code{Sigma=NULL}.
 #' @return \itemize{
 #'   \item{BLMu:}{ posterior expected values}
 #'   \item{BLSigma:}{ posterior covariance matrix}
@@ -50,21 +50,19 @@ BlackLittermanFormula = function( Mu, Sigma, P, v, Omega)
 #' A. Meucci - "Exercises in Advanced Risk and Portfolio Management" \url{http://symmys.com/node/170}.
 #' @seealso \code{\link{BlackLittermanFormula}}
 #' @export
-black.litterman <- function(R, P, Mu, Sigma){
+black.litterman <- function(R, P, Mu=NULL, Sigma=NULL){
   
   # Compute the sample estimate if mu is null
-  if(hasArg(Mu)){
-    if(length(Mu) != NCOL(R)) stop("length of Mu must equal number of columns of R")
-  } else {
-    Mu <- colMeans(R)
+  if(is.null(Mu)){
+    Mu <- colMeans(R) 
   }
+  if(length(Mu) != NCOL(R)) stop("length of Mu must equal number of columns of R")
   
   # Compute the sample estimate if sigma is null
-  if(hasArg(Sigma)){
-    if(!all(dim(Sigma) == NCOL(R))) stop("dimensions of Sigma must equal number of columns of R")
-  } else {
+  if(is.null(Sigma)){
     Sigma <- cov(R)
   }
+  if(!all(dim(Sigma) == NCOL(R))) stop("dimensions of Sigma must equal number of columns of R")
   
   # Compute the Omega matrix and views value
   Omega = tcrossprod(P %*% Sigma, P)

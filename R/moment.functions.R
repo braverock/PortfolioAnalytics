@@ -332,6 +332,94 @@ portfolio.moments.boudt <- function(R, portfolio, momentargs=NULL, k=1, ...){
   return(momentargs)
 }
 
+#' Portfolio Moments
+#' 
+#' Set portfolio moments for use by lower level optimization functions using
+#' a basic Black Litterman model.
+#' 
+#' @note If any of the objectives in the \code{portfolio} object have 
+#' \code{clean} as an argument, the cleaned returns are used to fit the model. 
+#' 
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of 
+#' asset returns
+#' @param portfolio an object of type \code{portfolio} specifying the 
+#' constraints and objectives for the optimization, see 
+#' \code{\link{portfolio.spec}}
+#' @param momentargs list containing arguments to be passed down to lower level 
+#' functions, default NULL
+#' @param P a K x N pick matrix representing views
+#' @param Mu vector of length N of the prior expected values. The sample mean
+#' is used if \code{Mu=NULL}.
+#' @param Sigma an N x N matrix of the prior covariance matrix. The sample 
+#' covariance is used if \code{Sigma=NULL}.
+#' @param \dots any other passthru parameters
+#' @export
+portfolio.moments.bl <- function(R, portfolio, momentargs=NULL, P, Mu=NULL, Sigma=NULL, ...){
+  
+  
+  # If any of the objectives have clean as an argument, we fit the factor
+  # model with cleaned returns. Is this the desired behavior we want?
+  clean <- unlist(lapply(portfolio$objectives, function(x) x$arguments$clean))
+  if(!is.null(clean)){
+    if(length(unique(clean)) > 1){
+      warning(paste("Multiple methods detected for cleaning returns, default to use clean =", tmp[1]))
+    }
+    # This sets R as the cleaned returns for the rest of the function
+    # This is proably fine since the only other place R is used is for the 
+    # mu estimate
+    R <- Return.clean(R, method=clean[1])
+  }
+  
+  # Compute the Black Litterman estimates
+  B <- black.litterman(R=R, P=P, Mu=Mu, Sigma=Sigma)
+  
+  if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
+  if(is.null(portfolio$objectives)) {
+    warning("no objectives specified in portfolio")
+    next()
+  } else {
+    for (objective in portfolio$objectives){
+      switch(objective$name,
+             mean = {
+               if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
+             },
+             var =,
+             sd =,
+             StdDev = { 
+               if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
+               if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
+             },
+             mVaR =,
+             VaR = {
+               if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
+               if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
+               if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
+               if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+             },
+             es =,
+             mES =,
+             CVaR =,
+             cVaR =,
+             ETL=,
+             mETL=,
+             ES = {
+               # We don't want to calculate these moments if we have an ES 
+               # objective and are solving as an LP problem.
+               if(hasArg(ROI)) ROI=match.call(expand.dots=TRUE)$ROI else ROI=FALSE
+               if(!ROI){
+                 if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
+                 if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
+                 if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
+                 if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+               }
+             }
+      ) # end switch on objectives    
+    }    
+  }    
+  return(momentargs)
+}
+
+
 ###############################################################################
 # $Id$
 ###############################################################################
