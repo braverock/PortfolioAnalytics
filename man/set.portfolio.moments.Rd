@@ -2,9 +2,10 @@
 \name{set.portfolio.moments_v2}
 \alias{set.portfolio.moments}
 \alias{set.portfolio.moments_v2}
-\title{set portfolio moments for use by lower level optimization functions}
+\title{Portfolio Moments}
 \usage{
-set.portfolio.moments_v2(R, portfolio, momentargs = NULL, ...)
+set.portfolio.moments_v2(R, portfolio, momentargs = NULL,
+  method = c("sample", "boudt", "black_litterman"), ...)
 }
 \arguments{
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}
@@ -13,9 +14,22 @@ set.portfolio.moments_v2(R, portfolio, momentargs = NULL, ...)
 
 \item{momentargs}{list containing arguments to be passed down to lower level functions, default NULL}
 
+\item{method}{the method used to estimate portfolio moments. Valid choices include "sample", "boudt", and "black_litterman".}
+
 \item{\dots}{any other passthru parameters}
 }
 \description{
-set portfolio moments for use by lower level optimization functions
+Set portfolio moments for use by lower level optimization functions. Currently
+three methods for setting the moments are available
+}
+\details{
+\itemize{
+  \item{sample: }{sample estimates are used for the moments}
+  \item{boudt: }{estimate the second, third, and fourth moments using a
+  statistical factor model based on the work of Kris Boudt.}
+  See \code{\link{fit.statistical.factor.model}}
+  \item{black_litterman: }{estimate the first and second moments using the
+  Black Litterman Formula. See \code{\link{black.litterman}}}.
+}
 }
 

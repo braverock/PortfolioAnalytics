@@ -3,7 +3,7 @@
 \alias{black.litterman}
 \title{Black Litterman Estimates}
 \usage{
-black.litterman(R, P, Mu, Sigma)
+black.litterman(R, P, Mu = NULL, Sigma = NULL)
 }
 \arguments{
 \item{R}{returns}
@@ -11,10 +11,10 @@ black.litterman(R, P, Mu, Sigma)
 \item{P}{a K x N pick matrix}
 
 \item{Mu}{vector of length N of the prior expected values. The sample mean
-is used if \code{mu} is not provided as an argument.}
+is used if \code{Mu=NULL}.}
 
-\item{Sigma}{an N x N matrix of the prior covariance matrix. The sample covariance
-is used if \code{Sigma} is not provided as an argument.}
+\item{Sigma}{an N x N matrix of the prior covariance matrix. The sample
+covariance is used if \code{Sigma=NULL}.}
 }
 \value{
 \itemize{
