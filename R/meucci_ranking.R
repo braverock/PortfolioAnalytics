@@ -21,7 +21,7 @@
 #' @references 
 #' A. Meucci, "Fully Flexible Views: Theory and Practice" \url{http://www.symmys.com/node/158}
 #' See Meucci script for "RankingInformation/ViewRanking.m"
-#' @example
+#' @examples
 #' data(edhec)
 #' R <- edhec[,1:4]
 #' p <- rep(1 / nrow(R), nrow(R))
@@ -38,7 +38,7 @@ meucci.ranking <- function(R, p, order){
   # Equality constraints
   # constrain probabilities to sum to one across all scenarios...
   # Aeq = ones( 1 , J )
-  Aeq = matrix(rep(1, J), nrow=J)
+  Aeq = matrix(rep(1, J), ncol=J)
   beq = matrix(1, 1)
   
   # Inequality constraints
@@ -49,7 +49,7 @@ meucci.ranking <- function(R, p, order){
   b = matrix(rep(0, nrow(A)), ncol=1)
   
   # ...compute posterior probabilities
-  p_ = EntropyProg( p , A , b , Aeq , beq )
+  p_ = EntropyProg( p , A , b , Aeq , beq )$p_
   
   # compute the moments
   out <- meucci.moments(R, p_)

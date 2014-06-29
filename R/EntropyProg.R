@@ -75,11 +75,11 @@ EntropyProg = function( p , A = NULL , b = NULL , Aeq , beq, verbose=FALSE )
   
   # set up print arguments for verbose
   if(verbose){
-    check_derivatives_print = "none"
-    print_level = 0
-  } else {
     check_derivatives_print = "all"
     print_level = 2
+  } else {
+    check_derivatives_print = "none"
+    print_level = 0
   }
   
   if ( !K_ ) # equality constraints only    
