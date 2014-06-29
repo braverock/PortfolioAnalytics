@@ -47,5 +47,6 @@ Covs
 cov(R)
 
 
-all.equal(coredata(R[,1] - R[,2]), A, check.attributes=FALSE)
+
+
 
