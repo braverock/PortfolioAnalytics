@@ -164,7 +164,7 @@ set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
 set.portfolio.moments_v2 <- function(R, 
                                      portfolio, 
                                      momentargs=NULL, 
-                                     method=c("sample", "boudt", "black_litterman"), 
+                                     method=c("sample", "boudt", "black_litterman", "meucci"), 
                                      ...){
   
   if(!hasArg(momentargs) | is.null(momentargs)) momentargs <- list()
@@ -197,6 +197,7 @@ set.portfolio.moments_v2 <- function(R,
     switch(method,
            boudt = {
              if(hasArg(k)) k=match.call(expand.dots=TRUE)$k else k=1
+             print(k)
              fit <- statistical.factor.model(R=tmpR, k=k)
            },
            black_litterman = {
@@ -204,6 +205,12 @@ set.portfolio.moments_v2 <- function(R,
              if(hasArg(Mu)) Mu=match.call(expand.dots=TRUE)$Mu else Mu=NULL
              if(hasArg(Sigma)) Sigma=match.call(expand.dots=TRUE)$Sigma else Sigma=NULL
              B <- black.litterman(R=tmpR, P=P, Mu=Mu, Sigma=Sigma)
+           },
+           meucci = {
+             if(hasArg(posterior_p)) posterior_p=match.call(expand.dots=TRUE)$posterior_p else posterior_p=rep(1 / nrow(R), nrow(R))
+             print(match.call(expand.dots=TRUE))
+             print(posterior_p)
+             meucci.model <- meucci.moments(R=tmpR, posterior_p=posterior_p)
            }
     ) # end switch for fitting models based on method
     
@@ -247,6 +254,9 @@ set.portfolio.moments_v2 <- function(R,
                       },
                       black_litterman = {
                         if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
+                      },
+                      meucci = {
+                        if(is.null(momentargs$mu)) momentargs$mu = meucci.model$mu
                       }
                ) # end nested switch on method
              }, # end switch on mean
@@ -265,6 +275,10 @@ set.portfolio.moments_v2 <- function(R,
                       black_litterman = {
                         if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
                         if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
+                      },
+                      meucci = {
+                        if(is.null(momentargs$mu)) momentargs$mu = meucci.model$mu
+                        if(is.null(momentargs$sigma)) momentargs$sigma = meucci.model$sigma
                       }
                ) # end nested switch on method 
              }, # end switch on var, sd, StdDev
@@ -286,6 +300,12 @@ set.portfolio.moments_v2 <- function(R,
                       black_litterman = {
                         if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
                         if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
+                        if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(tmpR)
+                        if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(tmpR)
+                      },
+                      meucci = {
+                        if(is.null(momentargs$mu)) momentargs$mu = meucci.model$mu
+                        if(is.null(momentargs$sigma)) momentargs$sigma = meucci.model$sigma
                         if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(tmpR)
                         if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(tmpR)
                       }
@@ -320,13 +340,19 @@ set.portfolio.moments_v2 <- function(R,
                           if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
                           if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(tmpR)
                           if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(tmpR)
+                        },
+                        meucci = {
+                          if(is.null(momentargs$mu)) momentargs$mu = meucci.model$mu
+                          if(is.null(momentargs$sigma)) momentargs$sigma = meucci.model$sigma
+                          if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(tmpR)
+                          if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(tmpR)
                         }
                  ) # end nested switch on method
                }
              } # end switch on es, mES, CVaR, cVaR, ETL, mETL, ES
       ) # end switch on objectives    
     }    
-  }    
+  }
   return(momentargs)
 }
 

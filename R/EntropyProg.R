@@ -51,6 +51,9 @@ EntropyProg = function( p , A = NULL , b = NULL , Aeq , beq, verbose=FALSE )
 {
   stopifnot("package:nloptr" %in% search()  ||  require("nloptr",quietly = TRUE) )
   
+  if( is.vector(b) ) b = matrix(b, nrow=length(b))
+  if( is.vector(beq) ) beq = matrix(beq, nrow=length(beq))
+  
   if( !length(b) ) A = matrix( ,nrow = 0, ncol = 0)
   if( !length(b) ) b = matrix( ,nrow = 0, ncol = 0)
   

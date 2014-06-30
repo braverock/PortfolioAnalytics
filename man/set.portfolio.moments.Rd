@@ -5,7 +5,7 @@
 \title{Portfolio Moments}
 \usage{
 set.portfolio.moments_v2(R, portfolio, momentargs = NULL,
-  method = c("sample", "boudt", "black_litterman"), ...)
+  method = c("sample", "boudt", "black_litterman", "meucci"), ...)
 }
 \arguments{
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}

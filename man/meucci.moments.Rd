@@ -3,12 +3,12 @@
 \alias{meucci.moments}
 \title{Compute moments}
 \usage{
-meucci.moments(R, p)
+meucci.moments(R, posterior_p)
 }
 \arguments{
 \item{R}{xts object of asset returns}
 
-\item{p}{vector of posterior probabilities}
+\item{posterior_p}{vector of posterior probabilities}
 }
 \value{
 a list with the first and second moments
