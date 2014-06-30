@@ -197,19 +197,17 @@ set.portfolio.moments_v2 <- function(R,
     switch(method,
            boudt = {
              if(hasArg(k)) k=match.call(expand.dots=TRUE)$k else k=1
-             print(k)
              fit <- statistical.factor.model(R=tmpR, k=k)
            },
            black_litterman = {
              if(hasArg(P)) P=match.call(expand.dots=TRUE)$P else P=matrix(rep(1, ncol(R)), nrow=1)
              if(hasArg(Mu)) Mu=match.call(expand.dots=TRUE)$Mu else Mu=NULL
              if(hasArg(Sigma)) Sigma=match.call(expand.dots=TRUE)$Sigma else Sigma=NULL
-             B <- black.litterman(R=tmpR, P=P, Mu=Mu, Sigma=Sigma)
+             if(hasArg(Views)) Views=match.call(expand.dots=TRUE)$Views else Views=NULL
+             B <- black.litterman(R=tmpR, P=P, Mu=Mu, Sigma=Sigma, Views=Views)
            },
            meucci = {
              if(hasArg(posterior_p)) posterior_p=match.call(expand.dots=TRUE)$posterior_p else posterior_p=rep(1 / nrow(R), nrow(R))
-             print(match.call(expand.dots=TRUE))
-             print(posterior_p)
              meucci.model <- meucci.moments(R=tmpR, posterior_p=posterior_p)
            }
     ) # end switch for fitting models based on method

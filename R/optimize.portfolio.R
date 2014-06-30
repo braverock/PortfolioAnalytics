@@ -571,7 +571,7 @@ optimize.portfolio_v2 <- function(
   
   # match the args for momentFUN
   .formals <- formals(momentFUN)
-  .formals <- modify.args(formals=.formals, arglist=NULL, ..., dots=FALSE)
+  .formals <- modify.args(formals=.formals, arglist=list(...), dots=TRUE)
   # ** pass ROI=TRUE to set.portfolio.moments so the moments are not calculated
   if(optimize_method %in% c("ROI", "quadprog", "glpk", "symphony", "ipop", "cplex")){
     obj_names <- unlist(lapply(portfolio$objectives, function(x) x$name))

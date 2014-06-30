@@ -41,6 +41,7 @@ BlackLittermanFormula = function( Mu, Sigma, P, v, Omega)
 #' is used if \code{Mu=NULL}.
 #' @param Sigma an N x N matrix of the prior covariance matrix. The sample 
 #' covariance is used if \code{Sigma=NULL}.
+#' @param Views a vector of length K of the views
 #' @return \itemize{
 #'   \item{BLMu:}{ posterior expected values}
 #'   \item{BLSigma:}{ posterior covariance matrix}
@@ -50,7 +51,7 @@ BlackLittermanFormula = function( Mu, Sigma, P, v, Omega)
 #' A. Meucci - "Exercises in Advanced Risk and Portfolio Management" \url{http://symmys.com/node/170}.
 #' @seealso \code{\link{BlackLittermanFormula}}
 #' @export
-black.litterman <- function(R, P, Mu=NULL, Sigma=NULL){
+black.litterman <- function(R, P, Mu=NULL, Sigma=NULL, Views=NULL){
   
   # Compute the sample estimate if mu is null
   if(is.null(Mu)){
@@ -66,7 +67,7 @@ black.litterman <- function(R, P, Mu=NULL, Sigma=NULL){
   
   # Compute the Omega matrix and views value
   Omega = tcrossprod(P %*% Sigma, P)
-  Views = as.numeric(sqrt( diag( Omega ) ))
+  if(is.null(Views)) Views = as.numeric(sqrt( diag( Omega ) ))
   B = BlackLittermanFormula( Mu, Sigma, P, Views, Omega )
   return(B)
 }

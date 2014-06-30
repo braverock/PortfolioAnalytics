@@ -3,7 +3,7 @@
 \alias{black.litterman}
 \title{Black Litterman Estimates}
 \usage{
-black.litterman(R, P, Mu = NULL, Sigma = NULL)
+black.litterman(R, P, Mu = NULL, Sigma = NULL, Views = NULL)
 }
 \arguments{
 \item{R}{returns}
@@ -15,6 +15,8 @@ is used if \code{Mu=NULL}.}
 
 \item{Sigma}{an N x N matrix of the prior covariance matrix. The sample
 covariance is used if \code{Sigma=NULL}.}
+
+\item{Views}{a vector of length K of the views}
 }
 \value{
 \itemize{

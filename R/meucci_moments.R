@@ -19,8 +19,6 @@
 meucci.moments <- function(R, posterior_p){
   R = coredata(R)
   # expected return vector
-  print(dim(t(R)))
-  print(dim(posterior_p))
   mu = t(R) %*% posterior_p
   
   # covariance matrix
