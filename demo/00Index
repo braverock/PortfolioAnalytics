@@ -32,4 +32,4 @@ regime_switching       Demonstrate optimization with support for regime switchin
 higher_moments_boudt     Demonstrate using a statistical factor model to estimate moments based on work by Kris Boudt.
 multi_layer_optimization    Demonstrate multi layer optimization of optimization problem with two layers and two sub portfolios in the lower layer.
 meucci_ffv    Demonstrate Meucci's Fully Flexible Views framework to estimate moments and use as inputs for  minimum variance optimization.
-meucci_relative_ranking   Demonstrate Meucci's Fully Flexible Views framework to express views on relative ranking and  estimate moments used as inputs for mean-variance optimization.
+relative_ranking   Demonstrate expressing views on the relative ranking of expected returns based on two methods; 1) R. Almgren and N. Chriss, "Portfolios from Sorts" and 2) A. Meucci, "Fully Flexible Views: Theory and Practice".
