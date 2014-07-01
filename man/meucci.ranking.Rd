@@ -10,9 +10,9 @@ meucci.ranking(R, p, order)
 
 \item{p}{a vector of the prior probability values}
 
-\item{order}{a vector of indexes of the relative of expected asset returns in
-ascending order. For example, \code{order = c(2, 3, 1, 4)} means that the
-expected returns of \code{R[,2] < R[,3], < R[,1] < R[,4]}.}
+\item{order}{a vector of indexes of the relative ranking of expected asset
+returns in ascending order. For example, \code{order = c(2, 3, 1, 4)} means
+that the expected returns of \code{R[,2] < R[,3], < R[,1] < R[,4]}.}
 }
 \value{
 The estimated moments based on ranking views

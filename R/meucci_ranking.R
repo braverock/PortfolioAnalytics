@@ -10,9 +10,9 @@
 #' 
 #' @param R xts object of asset returns
 #' @param p a vector of the prior probability values
-#' @param order a vector of indexes of the relative of expected asset returns in
-#' ascending order. For example, \code{order = c(2, 3, 1, 4)} means that the 
-#' expected returns of \code{R[,2] < R[,3], < R[,1] < R[,4]}.
+#' @param order a vector of indexes of the relative ranking of expected asset 
+#' returns in ascending order. For example, \code{order = c(2, 3, 1, 4)} means 
+#' that the expected returns of \code{R[,2] < R[,3], < R[,1] < R[,4]}.
 #' 
 #' @return The estimated moments based on ranking views
 #' 
