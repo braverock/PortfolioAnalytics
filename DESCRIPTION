@@ -29,6 +29,7 @@ Suggests:
     pso,
     GenSA,
     corpcor,
-    testthat
+    testthat,
+    nloptr (>= 1.0.0)
 License: GPL
 Copyright: (c) 2004-2014
