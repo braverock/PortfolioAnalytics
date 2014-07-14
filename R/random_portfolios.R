@@ -390,11 +390,19 @@ random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample
   )
   if(eliminate){
     # eliminate portfolios that do not satisfy constraints
-    stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
-    check <- foreach(i=1:nrow(rp), .combine=c) %dopar% {
-      # check_constraint returns TRUE if all constraints are satisfied
-      check_constraints(weights=rp[i,], portfolio=portfolio)
+    check <- vector("numeric", nrow(rp))
+    for(i in 1:nrow(rp)){
+      check[i] <- check_constraints(weights=rp[i,], portfolio=portfolio)
     }
+    # We probably don't need or want to do this part in parallel. It could
+    # also interfere with optimize.portfolio.parallel since this function 
+    # will likely be called. Not sure how foreach handles nested loops 
+    # in parallel so it is best to avoid that altogether.
+    #stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+    #check <- foreach(i=1:nrow(rp), .combine=c) %dopar% {
+    #  # check_constraint returns TRUE if all constraints are satisfied
+    #  check_constraints(weights=rp[i,], portfolio=portfolio)
+    #}
     rp <- rp[which(check==TRUE),]
   }
   return(rp)

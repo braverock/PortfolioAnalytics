@@ -1009,3 +1009,49 @@ print.regime.portfolios <- function(x, ...){
     print(portf[[i]])
   }
 }
+
+#' @method summary optimize.portfolio.parallel
+#' @S3method summary optimize.portfolio.parallel
+#' @export
+summary.optimize.portfolio.parallel <- function(object, ...){
+  out <- list()
+  out$call <- object$call
+  out$elapsed_time <- object$elapsed_time
+  out$n_optimizations <- length(object$optimizations)
+  xx <- lapply(object$optimizations, function(x) {
+    tmp <- extractStats(x)
+    out <- tmp[which.min(tmp[,"out"]),]
+    out})
+  stats <- do.call(rbind, xx)
+  out$stats <- stats
+  out$obj_val <- stats[,"out"]
+  class(out) <- "summary.optimize.portfolio.parallel"
+  return(out)
+}
+
+#' @method print optimize.portfolio.parallel
+#' @S3method print optimize.portfolio.parallel
+#' @export
+print.optimize.portfolio.parallel <- function(x, ..., probs = c(0.025, 0.975)){
+  cat(rep("*", 35) ,"\n", sep="")
+  cat("PortfolioAnalytics Optimization\n")
+  cat(rep("*", 35) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  # call the summary method
+  xx <- summary(x)
+  
+  cat("Number of Optimizations:\n")
+  print(xx$n_optimizations)
+  
+  cat("Objective Value Estimate:\n")
+  print(mean(xx$obj_val))
+  
+  cat("Objective Value Estimate Percentiles:\n")
+  print(quantile(xx$obj_val, probs = probs))
+  
+  cat("Elapsed Time:\n")
+  print(xx$elapsed_time)
+}

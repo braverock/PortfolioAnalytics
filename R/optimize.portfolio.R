@@ -1518,9 +1518,7 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   return(out)
 }
 
-#'execute multiple optimize.portfolio calls, presumably in parallel
-#' 
-#' TODO write function to check sensitivity of optimal results by using optimize.portfolio.parallel results
+#' Execute multiple optimize.portfolio calls, presumably in parallel
 #' 
 #' This function will not speed up optimization!
 #' 
@@ -1536,33 +1534,56 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
 #' this function.
 #' 
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param constraints an object of type "constraints" specifying the constraints for the optimization, see \code{\link{constraint}}
-#' @param optimize_method one of "DEoptim" or "random"
+#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
+#' @param optimize_method one of "DEoptim", "random", "pso", "GenSA".
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
+#' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
+#' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments_v2}}
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param nodes how many processes to run in the foreach loop, default 4
 #' 
 #' @return a list containing the optimal weights, some summary statistics, the function call, and optionally trace information 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @export
-optimize.portfolio.parallel <- function(R,constraints,optimize_method=c("DEoptim","random"), search_size=20000, trace=FALSE, ..., nodes=4)
+optimize.portfolio.parallel <- function(R,
+                                        portfolio,
+                                        optimize_method=c("DEoptim","random","ROI","pso","GenSA"),
+                                        search_size=20000,
+                                        trace=FALSE, ...,
+                                        rp=NULL,
+                                        momentFUN='set.portfolio.moments',
+                                        message=FALSE,
+                                        nodes=4)
 {
     stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
     optimize_method=optimize_method[1]  
     
-    start_t<-Sys.time()
+    start_t <- Sys.time()
     
     #store the call for later
     call <- match.call()
     
-    opt_out_list<-foreach(1:nodes, packages='PortfolioAnalytics') %dopar% optimize.portfolio(R=R,constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, ...)    
+    opt_out_list <- foreach(1:nodes, .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+      optimize.portfolio(R=R, portfolio=portfolio, 
+                         optimize_method=optimize_method, 
+                         search_size=search_size, trace=trace, 
+                         rp=rp, momentFUN=momentFUN, parallel=FALSE, 
+                         ...=...)
+    }
 
-    end_t<-Sys.time()
-    message(c("overall elapsed time:",end_t-start_t))
-    class(opt_out_list)<-c("optimize.portfolio.parallel")
-    return(opt_out_list)
+    end_t <- Sys.time()
+    elapsed_t <- end_t - start_t
+    if(message) message(c("overall elapsed time:", elapsed_t))
     
+    out <- list()
+    out$optimizations <- opt_out_list
+    out$call <- call
+    out$elapsed_time <- elapsed_t
+    
+    class(out) <- c("optimize.portfolio.parallel")
+    return(out)
 }
 
 
