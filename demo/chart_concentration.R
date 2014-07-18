@@ -1,3 +1,12 @@
+#' ---
+#' title: "chart.Concentration Demo"
+#' author: "Ross Bennett"
+#' date: "7/17/2014"
+#' ---
+
+#' This script demonstrates how to use chart.Concentration to visualize
+#' the concentration of the portfolio.
+
 
 library(PortfolioAnalytics)
 
@@ -5,7 +14,7 @@ data(edhec)
 R <- edhec[, 1:8]
 funds <- colnames(R)
 
-# Construct initial portfolio
+#' Construct initial portfolio
 init.portf <- portfolio.spec(assets=funds)
 init.portf <- add.constraint(portfolio=init.portf, 
                              type="leverage", 
@@ -26,13 +35,14 @@ init.portf <- add.objective(portfolio=init.portf,
                             type="risk", 
                             name="ES")
 
+#' Construct a risk budget portfolio.
 rb.portf <- add.objective(portfolio=init.portf, 
                           type="risk_budget", 
                           name="ES",
                           max_prisk=0.4, 
                           arguments=list(p=0.92))
 
-# Use DEoptim for optimization
+#' Use random portfolios for optimization.
 opt <- optimize.portfolio(R=R, 
                           portfolio=init.portf, 
                           optimize_method="random", 
@@ -45,19 +55,19 @@ opt_rb <- optimize.portfolio(R=R,
                              search_size=2000, 
                              trace=TRUE)
 
-# This won't work because opt is not a risk budget optimization
-# This should result in an error and not plot anything
-chart.Concentration(opt, conc.type="pct_contrib")
+#' This won't work because opt is not a risk budget optimization.
+#' This should result in an error and not plot anything.
+#chart.Concentration(opt, conc.type="pct_contrib")
 
-# opt is minimum ES optimization so we can still chart it using weights as
-# the measure of concentration
+#' `opt` is minimum ES optimization so we can still chart it using weights as
+#' the measure of concentration.
 chart.Concentration(opt, conc.type="weights", chart.assets=TRUE, col=heat.colors(10))
 chart.Concentration(opt, conc.type="weights", chart.assets=TRUE, col=bluemono)
 
-# The concentration is based on the HHI of the percentage component 
-# contribution to risk
+#' Here we plot the concentration based on the HHI of the percentage component 
+#' contribution to risk.
 chart.Concentration(opt_rb, conc.type="pct_contrib")
 
-# The concentration is based on the HHI of the weights
+#' Here we plot the concentration is based on the HHI of the weights.
 chart.Concentration(opt_rb, conc.type="weights")
 
