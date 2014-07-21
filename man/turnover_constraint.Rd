@@ -23,7 +23,9 @@ an object of class 'turnover_constraint'
 \description{
 The turnover constraint specifies a target turnover value.
 This function is called by add.constraint when type="turnover" is specified, see \code{\link{add.constraint}}.
-Turnover is calculated from a set of initial weights.
+Turnover is calculated from a set of initial weights. Turnover is
+computed as \code{sum(abs(initial_weights - weights)) / N} where \code{N} is
+the number of assets.
 }
 \details{
 Note that with the ROI solvers, turnover constraint is currently only

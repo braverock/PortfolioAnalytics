@@ -9,7 +9,7 @@ add.constraint(portfolio, type, enabled = TRUE, message = FALSE, ...,
 \arguments{
 \item{portfolio}{an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}}
 
-\item{type}{character type of the constraint to add or update, currently 'weight_sum' (also 'leverage' or 'weight'), 'box', 'group', 'turnover', 'diversification', 'position_limit', 'return', or 'factor_exposure'}
+\item{type}{character type of the constraint to add or update, currently 'weight_sum' (also 'leverage' or 'weight'), 'box', 'group', 'turnover', 'diversification', 'position_limit', 'return', 'factor_exposure', or 'leverage_exposure'}
 
 \item{enabled}{TRUE/FALSE. The default is enabled=TRUE.}
 
@@ -36,6 +36,7 @@ The following constraint types may be specified:
 \item{\code{position_limit}}{ Specify the number of non-zero, long, and/or short positions, see \code{\link{position_limit_constraint}} }
 \item{\code{return}}{ Specify the target mean return, see \code{\link{return_constraint}}}
 \item{\code{factor_exposure}}{ Specify risk factor exposures, see \code{\link{factor_exposure_constraint}}}
+\item{\code{leverage_exposure}}{ Specify a maximum leverage exposure, see \code{\link{leverage_exposure_constraint}}}
 }
 }
 \examples{
@@ -113,6 +114,7 @@ Ross Bennett
 \code{\link{diversification_constraint}},
 \code{\link{position_limit_constraint}},
 \code{\link{return_constraint}},
-\code{\link{factor_exposure_constraint}}
+\code{\link{factor_exposure_constraint}},
+\code{\link{leverage_exposure_constraint}}
 }
 

@@ -20,7 +20,9 @@ an object of class 'diversification_constraint'}
 }
 \description{
 The diversification constraint specifies a target diversification value.
-This function is called by add.constraint when type="diversification" is specified, see \code{\link{add.constraint}}.
+This function is called by add.constraint when type="diversification" is
+specified, see \code{\link{add.constraint}}. Diversification is computed
+as \code{1 - sum(weights^2)}.
 }
 \examples{
 data(edhec)

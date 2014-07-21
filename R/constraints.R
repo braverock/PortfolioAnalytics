@@ -197,10 +197,11 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' \item{\code{position_limit}}{ Specify the number of non-zero, long, and/or short positions, see \code{\link{position_limit_constraint}} }
 #' \item{\code{return}}{ Specify the target mean return, see \code{\link{return_constraint}}}
 #' \item{\code{factor_exposure}}{ Specify risk factor exposures, see \code{\link{factor_exposure_constraint}}}
+#' \item{\code{leverage_exposure}}{ Specify a maximum leverage exposure, see \code{\link{leverage_exposure_constraint}}}
 #' }
 #' 
 #' @param portfolio an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}
-#' @param type character type of the constraint to add or update, currently 'weight_sum' (also 'leverage' or 'weight'), 'box', 'group', 'turnover', 'diversification', 'position_limit', 'return', or 'factor_exposure'
+#' @param type character type of the constraint to add or update, currently 'weight_sum' (also 'leverage' or 'weight'), 'box', 'group', 'turnover', 'diversification', 'position_limit', 'return', 'factor_exposure', or 'leverage_exposure'
 #' @param enabled TRUE/FALSE. The default is enabled=TRUE.
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify constraints
@@ -215,7 +216,8 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' \code{\link{diversification_constraint}}, 
 #' \code{\link{position_limit_constraint}}, 
 #' \code{\link{return_constraint}}, 
-#' \code{\link{factor_exposure_constraint}}
+#' \code{\link{factor_exposure_constraint}},
+#' \code{\link{leverage_exposure_constraint}}
 #' @examples
 #' data(edhec)
 #' returns <- edhec[, 1:4]
@@ -791,7 +793,9 @@ get_constraints <- function(portfolio){
 #' 
 #' The turnover constraint specifies a target turnover value. 
 #' This function is called by add.constraint when type="turnover" is specified, see \code{\link{add.constraint}}.
-#' Turnover is calculated from a set of initial weights.
+#' Turnover is calculated from a set of initial weights. Turnover is 
+#' computed as \code{sum(abs(initial_weights - weights)) / N} where \code{N} is
+#' the number of assets.
 #' 
 #' Note that with the ROI solvers, turnover constraint is currently only 
 #' supported for the global minimum variance and quadratic utility problems 
@@ -822,7 +826,9 @@ turnover_constraint <- function(type="turnover", turnover_target, enabled=TRUE, 
 #' constructor for diversification_constraint
 #' 
 #' The diversification constraint specifies a target diversification value. 
-#' This function is called by add.constraint when type="diversification" is specified, see \code{\link{add.constraint}}.
+#' This function is called by add.constraint when type="diversification" is 
+#' specified, see \code{\link{add.constraint}}. Diversification is computed
+#' as \code{1 - sum(weights^2)}.
 #' 
 #' @param type character type of the constraint
 #' @param div_target diversification target value
@@ -1049,11 +1055,16 @@ transaction_cost_constraint <- function(type="transaction_cost", assets, ptc, en
 
 #' constructor for leverage_exposure_constraint
 #' 
-#' The leverage_exposure constraint specifies a maximum leverage. This should
-#' be used for constructing, for example, 130/30 portfolios or dollar neutral
-#' portfolios with 2:1 leverage. For the ROI solvers, this is implemented
-#' as a MILP problem and is not supported for problems formulated as a 
-#' quadratic programming problem. This ma changed in the future if a MIQP
+#' The leverage_exposure constraint specifies a maximum leverage where 
+#' leverage is defined as the sum of the absolute value of the weights. 
+#' Leverage exposure is computed as the sum of the absolute value of the
+#' weights, \code{sum(abs(weights))}.
+#' 
+#' 
+#' This should be used for constructing, for example, 130/30 portfolios or 
+#' dollar neutral portfolios with 2:1 leverage. For the ROI solvers, this is 
+#' implemented as a MILP problem and is not supported for problems formulated 
+#' as a quadratic programming problem. This may change in the future if a MIQP
 #' solver is added.
 #' 
 #' This function is called by add.constraint when type="leverage_exposure" 

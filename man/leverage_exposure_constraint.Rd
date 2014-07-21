@@ -19,14 +19,18 @@ leverage_exposure_constraint(type = "leverage_exposure", leverage = NULL,
 an object of class 'diversification_constraint'}
 }
 \description{
-The leverage_exposure constraint specifies a maximum leverage. This should
-be used for constructing, for example, 130/30 portfolios or dollar neutral
-portfolios with 2:1 leverage. For the ROI solvers, this is implemented
-as a MILP problem and is not supported for problems formulated as a
-quadratic programming problem. This ma changed in the future if a MIQP
-solver is added.
+The leverage_exposure constraint specifies a maximum leverage where
+leverage is defined as the sum of the absolute value of the weights.
+Leverage exposure is computed as the sum of the absolute value of the
+weights, \code{sum(abs(weights))}.
 }
 \details{
+This should be used for constructing, for example, 130/30 portfolios or
+dollar neutral portfolios with 2:1 leverage. For the ROI solvers, this is
+implemented as a MILP problem and is not supported for problems formulated
+as a quadratic programming problem. This may change in the future if a MIQP
+solver is added.
+
 This function is called by add.constraint when type="leverage_exposure"
 is specified, see \code{\link{add.constraint}}.
 }
