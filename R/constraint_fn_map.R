@@ -58,6 +58,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   max_pos <- constraints$max_pos
   max_pos_long <- constraints$max_pos_long
   max_pos_short <- constraints$max_pos_short
+  leverage <- constraints$leverage
   tolerance <- .Machine$double.eps^0.5
   
   # We will modify the weights vector so create a temporary copy
@@ -70,6 +71,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
   tmp_max_pos <- max_pos
   tmp_max_pos_long <- max_pos_long
   tmp_max_pos_short <- max_pos_short
+  tmp_leverage <- leverage
   
   # step 2: check that the vector of weights satisfies the constraints, 
   # transform weights if constraint is violated
@@ -86,7 +88,8 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                       groups=NULL, cLO=NULL, cUP=NULL, 
                                       max_pos=NULL, group_pos=NULL, 
                                       max_pos_long=NULL, max_pos_short=NULL, 
-                                      max_permutations=500), silent=TRUE) # FALSE for testing
+                                      leverage=tmp_leverage, max_permutations=500), 
+                         silent=TRUE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -104,7 +107,8 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                       groups=NULL, cLO=NULL, cUP=NULL, 
                                       max_pos=NULL, group_pos=NULL, 
                                       max_pos_long=NULL, max_pos_short=NULL, 
-                                      max_permutations=500), silent=TRUE) # FALSE for testing
+                                      leverage=tmp_leverage, max_permutations=500), 
+                         silent=TRUE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -132,7 +136,8 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                             groups=NULL, cLO=NULL, cUP=NULL, 
                                             max_pos=NULL, group_pos=NULL, 
                                             max_pos_long=NULL, max_pos_short=NULL, 
-                                            max_permutations=500), silent=TRUE) # FALSE for testing
+                                            leverage=tmp_leverage, max_permutations=500), 
+                               silent=TRUE) # FALSE for testing
             # Default to original weights if this fails again
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
@@ -159,7 +164,8 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                       groups=groups, cLO=tmp_cLO, cUP=tmp_cUP, 
                                       max_pos=NULL, group_pos=group_pos, 
                                       max_pos_long=NULL, max_pos_short=NULL, 
-                                      max_permutations=500), silent=TRUE) # FALSE for testing
+                                      leverage=tmp_leverage, max_permutations=500), 
+                         silent=TRUE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -183,7 +189,8 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                             groups=groups, cLO=tmp_cLO, cUP=tmp_cUP, 
                                             max_pos=NULL, group_pos=group_pos, 
                                             max_pos_long=NULL, max_pos_short=NULL, 
-                                            max_permutations=500), silent=TRUE) # FALSE for testing
+                                            leverage=tmp_leverage, max_permutations=500), 
+                               silent=TRUE) # FALSE for testing
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
           }
@@ -209,7 +216,8 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                       groups=groups, cLO=tmp_cLO, cUP=tmp_cUP, 
                                       max_pos=tmp_max_pos, group_pos=group_pos, 
                                       max_pos_long=tmp_max_pos_long, max_pos_short=tmp_max_pos_short, 
-                                      max_permutations=500), silent=TRUE) # FALSE for testing
+                                      leverage=tmp_leverage, max_permutations=500), 
+                         silent=TRUE) # FALSE for testing
       if(inherits(tmp_weights, "try-error")){
         # Default to initial weights
         tmp_weights <- weights
@@ -227,13 +235,51 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
                                             groups=groups, cLO=tmp_cLO, cUP=tmp_cUP, 
                                             max_pos=tmp_max_pos, group_pos=group_pos, 
                                             max_pos_long=tmp_max_pos_long, max_pos_short=tmp_max_pos_short, 
-                                            max_permutations=500), silent=TRUE) # FALSE for testing
+                                            leverage=tmp_leverage, max_permutations=500), 
+                               silent=TRUE) # FALSE for testing
             if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
             i <- i + 1
           }
         } # end if(relax) statement
       } # end try-error recovery
     } # end check for position limit constraint violation
+  } # end check for NULL arguments
+  
+  # check leverage constraints
+  if(!is.null(tmp_leverage)){
+    if(sum(abs(tmp_weights)) > tmp_leverage){
+      # Try to transform only considering weight_sum, box, group, position_limit, and leverage exposure constraints
+      tmp_weights <- try(rp_transform(w=tmp_weights, 
+                                      min_sum=min_sum, max_sum=max_sum, 
+                                      min=tmp_min, max=tmp_max, 
+                                      groups=groups, cLO=tmp_cLO, cUP=tmp_cUP, 
+                                      max_pos=tmp_max_pos, group_pos=group_pos, 
+                                      max_pos_long=tmp_max_pos_long, max_pos_short=tmp_max_pos_short, 
+                                      leverage=tmp_leverage, max_permutations=500), 
+                         silent=TRUE) # FALSE for testing
+      if(inherits(tmp_weights, "try-error")){
+        # Default to initial weights
+        tmp_weights <- weights
+        if(relax){
+          i <- 1
+          while(sum(abs(tmp_weights)) > tmp_leverage & (i <= 5)){
+            # increment tmp_leverage by 1%
+            tmp_leverage <- tmp_leverage * 1.01
+            # Now try the transformation again
+            tmp_weights <- try(rp_transform(w=tmp_weights, 
+                                            min_sum=min_sum, max_sum=max_sum, 
+                                            min=tmp_min, max=tmp_max, 
+                                            groups=groups, cLO=tmp_cLO, cUP=tmp_cUP, 
+                                            max_pos=tmp_max_pos, group_pos=group_pos, 
+                                            max_pos_long=tmp_max_pos_long, max_pos_short=tmp_max_pos_short, 
+                                            leverage=tmp_leverage, max_permutations=500), 
+                               silent=TRUE) # FALSE for testing
+            if(inherits(tmp_weights, "try-error")) tmp_weights <- weights
+            i <- i + 1
+          }
+        } # end if(relax) statement
+      } # end try-error recovery
+    } # end check for leverage exposure violation
   } # end check for NULL arguments
 
   names(tmp_weights) <- names(weights)
@@ -244,16 +290,20 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
               cUP=tmp_cUP, 
               max_pos=tmp_max_pos,
               max_pos_long=tmp_max_pos_long,
-              max_pos_short=tmp_max_pos_short))
+              max_pos_short=tmp_max_pos_short,
+              leverage=tmp_leverage))
 }
 
 
 
-#' Transform a weights vector to satisfy leverage, box, group, and position_limit constraints using logic from \code{randomize_portfolio}
+#' Transform a weights vector to satisfy constraints
 #' 
 #' This function uses a block of code from \code{\link{randomize_portfolio}} 
 #' to transform the weight vector if either the weight_sum (leverage) 
-#' constraints, box constraints, group constraints, or position_limit constraints are violated.
+#' constraints, box constraints, group constraints, position_limit constraints,
+#' or leverage exposure constraints are violated. The logic from 
+#' \code{randomize_portfolio} is heavily utilized here with some modifications
+#' to handle more complex constraints.
 #' The resulting weights vector might be quite different from the original weights vector.
 #' 
 #' @param w weights vector to be transformed
@@ -268,11 +318,25 @@ fn_map <- function(weights, portfolio, relax=FALSE, ...){
 #' @param group_pos vector specifying maximum number assets with non-zero weights per group
 #' @param max_pos_long maximum number of assets with long (i.e. buy) positions
 #' @param max_pos_short maximum number of assets with short (i.e. sell) positions
+#' @param leverage maximum leverage exposure where leverage is defined as \code{sum(abs(weights))}
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, Ross Bennett (based on an idea by Pat Burns)
 #' @export
-rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, cUP, max_pos=NULL, group_pos=NULL, max_pos_long=NULL, max_pos_short=NULL, max_permutations=200){
+rp_transform <- function(w, 
+                         min_sum=0.99, 
+                         max_sum=1.01, 
+                         min, 
+                         max, 
+                         groups, 
+                         cLO, 
+                         cUP, 
+                         max_pos=NULL, 
+                         group_pos=NULL, 
+                         max_pos_long=NULL, 
+                         max_pos_short=NULL, 
+                         leverage=NULL, 
+                         max_permutations=200){
   # Uses logic from randomize_portfolio to "normalize" a weights vector to 
   # satisfy min_sum and max_sum while accounting for box and group constraints
   # Modified from randomize_portfolio to trigger the while loops if any weights 
@@ -285,6 +349,9 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   
   # Set value for max_pos if it is not specified
   if(is.null(max_pos)) max_pos <- length(w)
+  
+  # Set value for leverage if it is not specified
+  if(is.null(leverage)) leverage <- Inf
   
   # Determine maximum number of non-zero weights
   if(!is.null(group_pos)) {
@@ -315,7 +382,8 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   if((sum(w) >= min_sum & sum(w) <= max_sum) & 
        (all(w >= tmp_min) & all(w <= max)) & 
        (all(!group_fail(w, groups, cLO, cUP, group_pos))) &
-       !pos_limit_fail(w, max_pos, max_pos_long, max_pos_short)){
+       !pos_limit_fail(w, max_pos, max_pos_long, max_pos_short) &
+       (sum(abs(w)) <= leverage)){
     return(w)
   }
   
@@ -330,8 +398,15 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
   # create a temporary weights vector that will be modified in the while loops
   tmp_w <- w
   
-  # while portfolio is outside min_sum/max_sum or tmp_min/max or group or postion_limit constraints and we have not reached max_permutations
-  while ((sum(tmp_w) < min_sum | sum(tmp_w) > max_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP, group_pos)) | (pos_limit_fail(tmp_w, max_pos, max_pos_long, max_pos_short))) & permutations <= max_permutations) {
+  # while any constraint is violated and we have not reached max_permutations
+  while ((sum(tmp_w) < min_sum | 
+          sum(tmp_w) > max_sum | 
+          any(tmp_w < tmp_min) | 
+          any(tmp_w > max) | 
+          any(group_fail(tmp_w, groups, cLO, cUP, group_pos)) | 
+          pos_limit_fail(tmp_w, max_pos, max_pos_long, max_pos_short) |
+          sum(abs(w)) > leverage) & 
+          permutations <= max_permutations) {
     permutations = permutations + 1
     # check our box constraints on total portfolio weight
     # reduce(increase) total portfolio size till you get a match
@@ -399,8 +474,15 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
     }
     
     i = 1
-    # while sum of weights is less than min_sum or tmp_min/max box or group constraint is violated
-    while ((sum(tmp_w) < min_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP, group_pos)) | (pos_limit_fail(tmp_w, max_pos, max_pos_long, max_pos_short))) & i <= length(tmp_w)) {
+    # We increase elements here if the sum of the weights exceeds max_sum or
+    # any of the other constraints are violated
+    while ((sum(tmp_w) < min_sum | 
+            any(tmp_w < tmp_min) | 
+            any(tmp_w > max) | 
+            any(group_fail(tmp_w, groups, cLO, cUP, group_pos)) | 
+            pos_limit_fail(tmp_w, max_pos, max_pos_long, max_pos_short) |
+            sum(abs(tmp_w)) > leverage) & 
+            i <= length(tmp_w)) {
       # randomly permute and increase a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tmp_w[cur_index]
@@ -422,8 +504,15 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
     # need to reset i here otherwise the decreasing loop will be ignored
     # group_fail does not test for direction of violation, just that group constraints were violated
     i = 1 
-    # while sum of weights is greater than max_sum or tmp_min/max box or group constraint is violated
-    while ((sum(tmp_w) > max_sum | any(tmp_w < tmp_min) | any(tmp_w > max) | any(group_fail(tmp_w, groups, cLO, cUP, group_pos)) | (pos_limit_fail(tmp_w, max_pos, max_pos_long, max_pos_short))) & i <= length(tmp_w)) {
+    # We decrease elements here if the sum of the weights exceeds max_sum or
+    # any of the other constraints are violated
+    while ((sum(tmp_w) > max_sum | 
+            any(tmp_w < tmp_min) | 
+            any(tmp_w > max) | 
+            any(group_fail(tmp_w, groups, cLO, cUP, group_pos)) | 
+            pos_limit_fail(tmp_w, max_pos, max_pos_long, max_pos_short) |
+            sum(abs(tmp_w)) > leverage) & 
+            i <= length(tmp_w)) {
       # randomly permute and decrease a random portfolio element
       cur_index <- random_index[i]
       cur_val <- tmp_w[cur_index]
@@ -441,6 +530,10 @@ rp_transform <- function(w, min_sum=0.99, max_sum=1.01, min, max, groups, cLO, c
       }
       i=i+1 # increment our counter
     } # end decrease loop
+    #cat("permutations:", permutations, "\n")
+    #cat("weights:", tmp_w, "\n")
+    #cat("sum(weights):", sum(tmp_w), "\n")
+    #cat("sum(abs(weights)):", sum(abs(tmp_w)), "\n")
   } # end final walk towards the edges
   
   portfolio <- tmp_w
@@ -539,6 +632,30 @@ pos_limit_fail <- function(weights, max_pos, max_pos_long, max_pos_short){
   }
   # Return FALSE if nothing is violated
   return(FALSE)
+}
+
+min_sum_fail <- function(weights, min_sum){
+  # return FALSE if min_sum is null
+  if(is.null(min_sum)) return(FALSE)
+  
+  # sum of weights violate min_sum constraint
+  return(sum(weights) < min_sum)
+}
+
+max_sum_fail <- function(weights, max_sum){
+  # return FALSE if max_sum is null
+  if(is.null(max_sum)) return(FALSE)
+  
+  # sum of weights violate max_sum constraint
+  return(sum(weights) > max_sum)
+}
+
+leverage_fail <- function(weights, leverage){
+  # return FALSE if leverage is null
+  if(is.null(leverage)) return(FALSE)
+  
+  # sum of absolute value of weight violates leverage constraint
+  return(sum(abs(weights)) > leverage)
 }
 
 # test
