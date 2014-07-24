@@ -249,9 +249,9 @@ rp_transform2 <- function(weights,
         }
         
         # treat this as if max_sum were violated
-        if(sum(tmp_group_w) > cup[j]){
+        if(sum(tmp_group_w) > cUP[j]){
           tmp_w[j_idx] <-  rp_decrease(weights=tmp_group_w, 
-                                       max_sum=cUp[j], 
+                                       max_sum=cUP[j], 
                                        min_box=min_box[j_idx], 
                                        weight_seq=weight_seq)
         }
@@ -399,12 +399,12 @@ rp_position_limit <- function(weights, max_pos=NULL, max_pos_long=NULL, max_pos_
         if(cur_val > tolerance){
           # subset such that min_box_i <= weight_i <= 0
           tmp_seq <- weight_seq[(weight_seq <= 0) & (weight_seq >= min_box[cur_index])]
-        }
-        n_tmp_seq <- length(tmp_seq)
-        if(n_tmp_seq > 1){
-          tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-        } else if(n_tmp_seq == 1){
-          tmp_w[cur_index] <- tmp_seq
+          n_tmp_seq <- length(tmp_seq)
+          if(n_tmp_seq > 1){
+            tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
+          } else if(n_tmp_seq == 1){
+            tmp_w[cur_index] <- tmp_seq
+          }
         }
       } # end max_pos_long violation loop
     }
@@ -417,12 +417,12 @@ rp_position_limit <- function(weights, max_pos=NULL, max_pos_long=NULL, max_pos_
         if(cur_val < tolerance){
           # subset such that 0 <= weight_i <= max_box_i
           tmp_seq <- weight_seq[(weight_seq >= 0) & (weight_seq <= max_box[cur_index])]
-        }
-        n_tmp_seq <- length(tmp_seq)
-        if(n_tmp_seq > 1){
-          tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-        } else if(n_tmp_seq == 1){
-          tmp_w[cur_index] <- tmp_seq
+          n_tmp_seq <- length(tmp_seq)
+          if(n_tmp_seq > 1){
+            tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
+          } else if(n_tmp_seq == 1){
+            tmp_w[cur_index] <- tmp_seq
+          }
         }
       } # end max_pos_short violation loop
     }
