@@ -240,21 +240,30 @@ rp_transform2 <- function(weights,
         # weights of the jth group
         tmp_group_w <- tmp_w[j_idx]
         
-        # treat this as if min_sum were violated
-        if(sum(tmp_group_w) < cLO[j]){
-          tmp_w[j_idx] <- rp_increase(weights=tmp_group_w, 
+        # May be easier to just make a recursive call and treat each group
+        # as a portfolio of weight vectors
+        tmp_w[j_idx] <- rp_transform2(weights=tmp_group_w, 
                                       min_sum=cLO[j], 
-                                      max_box=max_box[j_idx], 
-                                      weight_seq=weight_seq)
-        }
+                                      max_sum=cUP[j], 
+                                      min_box=min_box[j_idx], 
+                                      max_box=max_box[j_idx],
+                                      group_pos=group_pos[j])
+        
+        # treat this as if min_sum were violated
+        #         if(sum(tmp_group_w) < cLO[j]){
+        #           tmp_w[j_idx] <- rp_increase(weights=tmp_group_w, 
+        #                                       min_sum=cLO[j], 
+        #                                       max_box=max_box[j_idx], 
+        #                                       weight_seq=weight_seq)
+        #         }
         
         # treat this as if max_sum were violated
-        if(sum(tmp_group_w) > cUP[j]){
-          tmp_w[j_idx] <-  rp_decrease(weights=tmp_group_w, 
-                                       max_sum=cUP[j], 
-                                       min_box=min_box[j_idx], 
-                                       weight_seq=weight_seq)
-        }
+        #         if(sum(tmp_group_w) > cUP[j]){
+        #           tmp_w[j_idx] <-  rp_decrease(weights=tmp_group_w, 
+        #                                        max_sum=cUP[j], 
+        #                                        min_box=min_box[j_idx], 
+        #                                        weight_seq=weight_seq)
+        #         }
       }
     } # end group violation loop
     
@@ -353,6 +362,7 @@ rp_decrease_leverage <- function(weights, max_box, min_box, leverage, weight_seq
     cur_index <- random_index[i]
     cur_val <- tmp_w[cur_index]
     
+    tmp_seq <- NULL
     # check the sign of the current value
     if(cur_val < 0){
       # if the current value is negative, we want to increase to lower 
@@ -363,7 +373,10 @@ rp_decrease_leverage <- function(weights, max_box, min_box, leverage, weight_seq
       # sum(abs(weights)) while respecting lower bound box constraint
       tmp_seq <- weight_seq[(weight_seq < cur_val) & (weight_seq >= min_box[cur_index])]
     }
-    n_tmp_seq <- length(tmp_seq)
+    # tmp_seq can be NULL if cur_val is zero 
+    if(!is.null(tmp_seq))
+      n_tmp_seq <- length(tmp_seq)
+    
     if(n_tmp_seq > 1) {
       # randomly sample one of the weights
       tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]

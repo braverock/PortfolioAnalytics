@@ -98,7 +98,7 @@ rp_transform2(weights=weights,
               max_pos_long=max_pos_long,
               max_pos_short=max_pos_short)
 
-# violate position limit constraint
+# violate position limit and leverage constraint
 weights <- c(-0.25, -0.15, 0.4, 0.7)
 sum(weights)
 sum(abs(weights))
