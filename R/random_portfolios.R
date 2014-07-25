@@ -237,8 +237,28 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
     weight_seq <- generatesequence(min=min(constraints$min), max=max(constraints$max), by=0.002)
   }
   weight_seq <- as.vector(weight_seq)
+  
+  # box constraints
   max <- constraints$max
   min <- constraints$min
+  
+  # If any of the constraints below do not exist in the constraints object,
+  # then they are NULL values which rp_transform can handle in its checks.
+  
+  # group constraints
+  groups <- constraints$groups
+  cLO <- constraints$cLO
+  cUP <- constraints$cUP
+  group_pos <- constraints$group_pos
+  
+  # position limit constraints
+  max_pos <- constraints$max_pos
+  max_pos_long <- constraints$max_pos_long
+  max_pos_short <- constraints$max_pos_short
+  
+  # leverage constraint
+  leverage <- constraints$leverage
+  
   # initial portfolio
   iportfolio <- as.vector(seed)
   rownames(iportfolio) <- NULL
@@ -257,53 +277,69 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
     tportfolio[cur_index] <- sample(weight_seq[(weight_seq >= cur_val * min_mult[cur_index]) & (weight_seq <= cur_val * max_mult[cur_index]) & (weight_seq <= max[cur_index]) & (weight_seq >= min[cur_index])], 1)
   }
   
-  #while portfolio is outside min/max sum and we have not reached max_permutations
-  while ((sum(tportfolio) <= min_sum | sum(tportfolio) >= max_sum) & permutations <= max_permutations) {
-    permutations <- permutations+1
-    # check our box constraints on total portfolio weight
-    # reduce(increase) total portfolio size till you get a match
-    # 1> check to see which bound you've failed on, brobably set this as a pair of while loops
-    # 2> randomly select a column and move only in the direction *towards the bound*, maybe call a function inside a function
-    # 3> check and repeat
-    random_index <- sample(1:length(tportfolio), length(tportfolio))
-    i <- 1
-    while (sum(tportfolio) <= min_sum & i <= length(tportfolio)) {
-      # randomly permute and increase a random portfolio element
-      cur_index <- random_index[i]
-      cur_val <- tportfolio[cur_index]
-      tmp_seq <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]
-      n_tmp_seq <- length(tmp_seq)
-      if(n_tmp_seq > 1){
-        # randomly sample one of the larger weights
-        tportfolio[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-        # print(paste("new val:",tportfolio[cur_index]))
-      } else {
-        if(n_tmp_seq == 1){
-          tportfolio[cur_index] <- tmp_seq
-        }
-      }
-      i <- i + 1 # increment our counter
-    } # end increase loop
-    while (sum(tportfolio) >= max_sum & i <= length(tportfolio)) {
-      # randomly permute and decrease a random portfolio element
-      cur_index <- random_index[i]
-      cur_val <- tportfolio[cur_index]
-      tmp_seq <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index])]
-      n_tmp_seq <- length(tmp_seq)
-      if(n_tmp_seq > 1) {
-        # randomly sample one of the smaller weights
-        tportfolio[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-      } else {
-        if(n_tmp_seq == 1){
-          tportfolio[cur_index] <- tmp_seq
-        }
-      }
-      i <- i + 1 # increment our counter
-    } # end decrease loop
-  } # end final walk towards the edges
+  # random portfolios algorithm designed to handle multiple constraint types
+  fportfolio <- rp_transform(w=tportfolio, 
+                             min_sum=min_sum, 
+                             max_sum=max_sum, 
+                             min_box=min, 
+                             max_box=max, 
+                             groups=groups, 
+                             cLO=cLO, 
+                             cUP=cUP, 
+                             max_pos=max_pos, 
+                             group_pos=group_pos, 
+                             max_pos_long=max_pos_long, 
+                             max_pos_short=max_pos_short, 
+                             leverage=leverage, 
+                             weight_seq=weight_seq, 
+                             max_permutations=max_permutations)
   
-  # final portfolio
-  fportfolio <- fn_map(weights=tportfolio, portfolio=portfolio, relax=FALSE)$weights
+#   #while portfolio is outside min/max sum and we have not reached max_permutations
+#   while ((sum(tportfolio) <= min_sum | sum(tportfolio) >= max_sum) & permutations <= max_permutations) {
+#     permutations <- permutations+1
+#     # check our box constraints on total portfolio weight
+#     # reduce(increase) total portfolio size till you get a match
+#     # 1> check to see which bound you've failed on, brobably set this as a pair of while loops
+#     # 2> randomly select a column and move only in the direction *towards the bound*, maybe call a function inside a function
+#     # 3> check and repeat
+#     random_index <- sample(1:length(tportfolio), length(tportfolio))
+#     i <- 1
+#     while (sum(tportfolio) <= min_sum & i <= length(tportfolio)) {
+#       # randomly permute and increase a random portfolio element
+#       cur_index <- random_index[i]
+#       cur_val <- tportfolio[cur_index]
+#       tmp_seq <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max[cur_index])]
+#       n_tmp_seq <- length(tmp_seq)
+#       if(n_tmp_seq > 1){
+#         # randomly sample one of the larger weights
+#         tportfolio[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
+#         # print(paste("new val:",tportfolio[cur_index]))
+#       } else {
+#         if(n_tmp_seq == 1){
+#           tportfolio[cur_index] <- tmp_seq
+#         }
+#       }
+#       i <- i + 1 # increment our counter
+#     } # end increase loop
+#     while (sum(tportfolio) >= max_sum & i <= length(tportfolio)) {
+#       # randomly permute and decrease a random portfolio element
+#       cur_index <- random_index[i]
+#       cur_val <- tportfolio[cur_index]
+#       tmp_seq <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= min[cur_index])]
+#       n_tmp_seq <- length(tmp_seq)
+#       if(n_tmp_seq > 1) {
+#         # randomly sample one of the smaller weights
+#         tportfolio[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
+#       } else {
+#         if(n_tmp_seq == 1){
+#           tportfolio[cur_index] <- tmp_seq
+#         }
+#       }
+#       i <- i + 1 # increment our counter
+#     } # end decrease loop
+#   } # end final walk towards the edges
+#   # final portfolio
+#   fportfolio <- fn_map(weights=tportfolio, portfolio=portfolio, relax=FALSE)$weights
   
   colnames(fportfolio) <- colnames(seed)
   if (sum(fportfolio) < min_sum | sum(fportfolio) > max_sum){
@@ -333,7 +369,7 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #'   \item{sample: }{The 'sample' method to generate random portfolios is based
 #'   on an idea pioneerd by Pat Burns. This is the most flexible method, but 
 #'   also the slowest, and can generate portfolios to satisfy leverage, box, 
-#'   group, and position limit constraints.}
+#'   group, position limit, and leverage exposure constraints.}
 #'   \item{simplex: }{The 'simplex' method to generate random portfolios is 
 #'   based on a paper by W. T. Shaw. The simplex method is useful to generate 
 #'   random portfolios with the full investment constraint, where the sum of the 
@@ -351,7 +387,8 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #'   penalized in \code{constrained_objective}.}
 #' }
 #' 
-#' The constraint types checked are leverage, box, group, and position limit. Any
+#' The constraint types checked are leverage, box, group, position limit, and 
+#' leverage exposure. Any
 #' portfolio that does not satisfy all these constraints will be eliminated. This
 #' function is particularly sensitive to \code{min_sum} and \code{max_sum} 
 #' leverage constraints. For the sample method, there should be some 

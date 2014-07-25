@@ -31,7 +31,7 @@ Random portfolios can be generate using one of three methods.
   \item{sample: }{The 'sample' method to generate random portfolios is based
   on an idea pioneerd by Pat Burns. This is the most flexible method, but
   also the slowest, and can generate portfolios to satisfy leverage, box,
-  group, and position limit constraints.}
+  group, position limit, and leverage exposure constraints.}
   \item{simplex: }{The 'simplex' method to generate random portfolios is
   based on a paper by W. T. Shaw. The simplex method is useful to generate
   random portfolios with the full investment constraint, where the sum of the
@@ -49,7 +49,8 @@ Random portfolios can be generate using one of three methods.
   penalized in \code{constrained_objective}.}
 }
 
-The constraint types checked are leverage, box, group, and position limit. Any
+The constraint types checked are leverage, box, group, position limit, and
+leverage exposure. Any
 portfolio that does not satisfy all these constraints will be eliminated. This
 function is particularly sensitive to \code{min_sum} and \code{max_sum}
 leverage constraints. For the sample method, there should be some
