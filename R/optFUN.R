@@ -1177,13 +1177,13 @@ max_sr_opt <- function(R, constraints, moments, lambda_hhi, conc_groups, solver,
   
   # Find the maximum return
   max_ret <- maxret_opt(R=R, moments=moments, constraints=constraints, 
-                        target=NA, solver=solver, control=control)
+                        target=NA, solver="glpk", control=control)
   max_mean <- as.numeric(-max_ret$out)
   
   # Find the minimum return
   tmp_moments$mean <- -1 * moments$mean
   min_ret <- maxret_opt(R=R, moments=tmp_moments, constraints=constraints, 
-                        target=NA, solver=solver, control=control)
+                        target=NA, solver="glpk", control=control)
   min_mean <- as.numeric(min_ret$out)
   
   # use optimize() to find the target return value that maximizes sharpe ratio
