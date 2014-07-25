@@ -13,6 +13,7 @@ rp_transform2 <- function(weights,
                           max_pos_long=NULL, 
                           max_pos_short=NULL, 
                           leverage=NULL, 
+                          weight_seq=NULL,
                           max_permutations=200){
   tmp_w <- weights
   
@@ -29,7 +30,11 @@ rp_transform2 <- function(weights,
   #if(is.null(leverage)) leverage <- Inf
   
   # Generate a weight sequence, we should check for portfolio$weight_seq
-  weight_seq <- generatesequence(min=min(min_box), max=max(max_box), by=0.002)
+  if(is.null(weight_seq))
+    weight_seq <- generatesequence(min=min(min_box), max=max(max_box), by=0.002)
+  
+  # make sure there is a 0 in weight_seq if we have a position limit constraint
+  if((!is.null(max_pos) | !is.null(group_pos) | !is.null(max_pos_long) | !is.null(max_pos_short)) & !is.element(0, weight_seq)) weight_seq <- c(0, weight_seq)
   
   # Tolerance for "non-zero" definition for position limit constraints
   tolerance <- .Machine$double.eps^0.5
@@ -48,7 +53,7 @@ rp_transform2 <- function(weights,
   # Do we want to check all constraints in here?
   # Box constraints should be satisfied by construction so we should not need 
   # to check those here
-  while ((  min_sum_fail(tmp_w, min_sum) | 
+  while ((    min_sum_fail(tmp_w, min_sum) | 
               max_sum_fail(tmp_w, max_sum) | 
               leverage_fail(tmp_w, leverage) | 
               pos_limit_fail(tmp_w, max_pos, max_pos_long, max_pos_short) | 
@@ -73,29 +78,6 @@ rp_transform2 <- function(weights,
     not_index <- setdiff(full_index, random_index)
     tmp_w[not_index] <- 0
     
-    # randomly permute and increase a random portfolio element if the sum of
-    # the weights is less than min_sum
-    # set counter to 1 for increase loop
-    #     i <- 1
-    #     while (sum(tmp_w) < min_sum & i <= length(tmp_w)) {
-    #       print("min_sum violation loop")
-    #       
-    #       cur_index <- random_index[i]
-    #       cur_val <- tmp_w[cur_index]
-    #       tmp_seq <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max_box[cur_index])]
-    #       n_tmp_seq <- length(tmp_seq)
-    #       if(n_tmp_seq > 1){
-    #         # randomly sample one of the larger weights
-    #         tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-    #         # print(paste("new val:",tmp_w[cur_index]))
-    #       } else {
-    #         if(n_tmp_seq == 1){
-    #           tmp_w[cur_index] <- tmp_seq
-    #         }
-    #       }
-    #       i <- i + 1 # increment our counter
-    #     } # end increase loop
-    
     # min_sum violation
     if(min_sum_fail(tmp_w, min_sum)){
       tmp_w <- rp_increase(weights=tmp_w, 
@@ -103,28 +85,6 @@ rp_transform2 <- function(weights,
                            max_box=max_box, 
                            weight_seq=weight_seq)
     }
-    
-    # randomly permute and decrease a random portfolio element if the sum of
-    # the weights is greater than max_sum
-    # set counter to 1 for decrease loop
-    #     i <- 1
-    #     while (sum(tmp_w) > max_sum & i <= length(tmp_w)) {
-    #       print("max_sum violation loop")
-    #       
-    #       cur_index <- random_index[i]
-    #       cur_val <- tmp_w[cur_index]
-    #       tmp_seq <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= min_box[cur_index])]
-    #       n_tmp_seq <- length(tmp_seq)
-    #       if(n_tmp_seq > 1) {
-    #         # randomly sample one of the smaller weights
-    #         tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-    #       } else {
-    #         if(n_tmp_seq == 1){
-    #           tmp_w[cur_index] <- tmp_seq
-    #         }
-    #       }
-    #       i <- i + 1 # increment our counter
-    #     } # end decrease loop
     
     # max_sum violation
     if(max_sum_fail(tmp_w, max_sum)){
@@ -134,36 +94,6 @@ rp_transform2 <- function(weights,
                            weight_seq=weight_seq)
     }
     
-    # set counter to 1 for leverage violation loop
-    #     i <- 1
-    #     while (sum(abs(tmp_w)) > leverage & i <= length(tmp_w)) {
-    #       print("leverage violation loop")
-    #       # randomly permute and increae decrease a random portfolio element
-    #       # according to leverage exposure
-    #       cur_index <- random_index[i]
-    #       cur_val <- tmp_w[cur_index]
-    #       
-    #       # check the sign of the current value
-    #       if(cur_val < 0){
-    #         # if the current value is negative, we want to increase to lower 
-    #         # sum(abs(weights)) while respecting uppper bound box constraint
-    #         tmp_seq <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max_box[cur_index])]
-    #       } else if(cur_val > 0){
-    #         # if the current value is positive, we want to decrease to lower 
-    #         # sum(abs(weights)) while respecting lower bound box constraint
-    #         tmp_seq <- weight_seq[(weight_seq <= cur_val) & (weight_seq >= min_box[cur_index])]
-    #       }
-    #       n_tmp_seq <- length(tmp_seq)
-    #       if(n_tmp_seq > 1) {
-    #         # randomly sample one of the weights
-    #         tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-    #       } else {
-    #         if(n_tmp_seq == 1){
-    #           tmp_w[cur_index] <- tmp_seq
-    #         }
-    #       }
-    #       i <- i + 1 # increment our counter
-    #     } # end leverage violation loop
     
     # leverage violation
     if(leverage_fail(tmp_w, leverage)){
@@ -173,52 +103,6 @@ rp_transform2 <- function(weights,
                                     leverage=leverage, 
                                     weight_seq=weight_seq)
     }
-    
-    # set counter to 1 for position limit violation loop
-    #     i <- 1
-    #     while (((sum(abs(tmp_w) > tolerance) > max_pos) |
-    #               (sum(tmp_w >= 0) > max_pos_long) | 
-    #               (sum(tmp_w >= 0) > max_pos_long)) & 
-    #              i <= length(tmp_w)) {
-    #       print("position limit violation loop")
-    #       
-    #       cur_index <- random_index[i]
-    #       cur_val <- tmp_w[cur_index]
-    #       
-    #       # Check if max_pos_long is violated
-    #       # If max_pos_long is violated, we we grab a positive weight and set it
-    #       # to be between min_box and 0
-    #       if(sum(tmp_w > tolerance) > max_pos_long){
-    #         if(cur_val > tolerance){
-    #           # subset such that min_box_i <= weight_i <= 0
-    #           tmp_seq <- weight_seq[(weight_seq <= 0) & (weight_seq >= min_box[cur_index])]
-    #         }
-    #         n_tmp_seq <- length(tmp_seq)
-    #         if(n_tmp_seq > 1){
-    #           tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-    #         } else if(n_tmp_seq == 1){
-    #           tmp_w[cur_index] <- tmp_seq
-    #         }
-    #       } # end max_pos_long violation loop
-    #       
-    #       # Check if max_pos_short is violated
-    #       # If max_pos_short is violated, we grab a negative weight and set it
-    #       # to be between 0 and max_box
-    #       if(sum(tmp_w < tolerance) > max_pos_short){
-    #         if(cur_val < tolerance){
-    #           # subset such that 0 <= weight_i <= max_box_i
-    #           tmp_seq <- weight_seq[(weight_seq >= 0) & (weight_seq <= max_box[cur_index])]
-    #         }
-    #         n_tmp_seq <- length(tmp_seq)
-    #         if(n_tmp_seq > 1){
-    #           tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-    #         } else if(n_tmp_seq == 1){
-    #           tmp_w[cur_index] <- tmp_seq
-    #         }
-    #       } # end max_pos_short violation loop
-    #       
-    #       i <- i + 1 # increment our counter
-    #     } # end position limit violation loop
     
     # position limit violation
     if(pos_limit_fail(tmp_w, max_pos, max_pos_long, max_pos_short)){
@@ -266,10 +150,6 @@ rp_transform2 <- function(weights,
         #         }
       }
     } # end group violation loop
-    
-    cat("weights:", tmp_w, "\n")
-    #cat("sum(weights):", sum(tmp_w), "\n")
-    #cat("sum(abs(weights)):", sum(abs(tmp_w)), "\n")
   } # end final walk towards the edges
   portfolio <- tmp_w
   
@@ -374,14 +254,15 @@ rp_decrease_leverage <- function(weights, max_box, min_box, leverage, weight_seq
       tmp_seq <- weight_seq[(weight_seq < cur_val) & (weight_seq >= min_box[cur_index])]
     }
     # tmp_seq can be NULL if cur_val is zero 
-    if(!is.null(tmp_seq))
+    if(!is.null(tmp_seq)){
       n_tmp_seq <- length(tmp_seq)
-    
-    if(n_tmp_seq > 1) {
-      # randomly sample one of the weights
-      tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-    } else if(n_tmp_seq == 1){
-      tmp_w[cur_index] <- tmp_seq
+      
+      if(n_tmp_seq > 1) {
+        # randomly sample one of the weights
+        tmp_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
+      } else if(n_tmp_seq == 1){
+        tmp_w[cur_index] <- tmp_seq
+      }
     }
     i <- i + 1 # increment our counter
   } # end leverage violation loop
@@ -439,28 +320,8 @@ rp_position_limit <- function(weights, max_pos=NULL, max_pos_long=NULL, max_pos_
         }
       } # end max_pos_short violation loop
     }
-    
     i <- i + 1 # increment our counter
   } # end position limit violation loop
   return(tmp_w)
 }
 
-# grp_random_index <- sample(1:length(tmp_group_w), length(tmp_group_w))
-# k <- 1
-# while (sum(tmp_group_w) < cLO[j] & k <= length(tmp_group_w)) {
-#   print("group cLO violation loop")
-#   
-#   cur_index <- grp_random_index[k]
-#   cur_val <- tmp_group_w[cur_index]
-#   tmp_seq <- weight_seq[(weight_seq >= cur_val) & (weight_seq <= max_box[cur_index])]
-#   n_tmp_seq <- length(tmp_seq)
-#   if(n_tmp_seq > 1){
-#     # randomly sample one of the larger weights
-#     tmp_group_w[cur_index] <- tmp_seq[sample.int(n=n_tmp_seq, size=1L, replace=FALSE, prob=NULL)]
-#   } else {
-#     if(n_tmp_seq == 1){
-#       tmp_group_w[cur_index] <- tmp_seq
-#     }
-#   }
-#   i <- i + 1 # increment our counter
-# } # end increase loop

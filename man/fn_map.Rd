@@ -3,7 +3,7 @@
 \alias{fn_map}
 \title{mapping function to transform or penalize weights that violate constraints}
 \usage{
-fn_map(weights, portfolio, relax = FALSE, ...)
+fn_map(weights, portfolio, relax = FALSE, verbose = FALSE, ...)
 }
 \arguments{
 \item{weights}{vector of weights}
@@ -11,6 +11,8 @@ fn_map(weights, portfolio, relax = FALSE, ...)
 \item{portfolio}{object of class \code{portfolio}}
 
 \item{relax}{TRUE/FALSE, default FALSE. Enable constraints to be relaxed.}
+
+\item{verbose}{print error messages for debuggin purposes}
 
 \item{\dots}{any other passthru parameters}
 }

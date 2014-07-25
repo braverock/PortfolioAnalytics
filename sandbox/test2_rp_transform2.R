@@ -8,18 +8,18 @@ max_box <- rep(0.6, length(weights))
 weights <- c(0.2, -0.2, 0.4, 0.5)
 sum(weights)
 
-rp_transform2(weights=weights,
-              min_sum=min_sum,
-              max_sum=max_sum,
-              min_box=min_box,
-              max_box=max_box)
+rp_transform(w=weights,
+             min_sum=min_sum,
+             max_sum=max_sum,
+             min_box=min_box,
+             max_box=max_box)
 
 
 # violate max_sum and box constraints
 weights <- c(0.35, 0.05, 0.7, 0.1)
 sum(weights)
 
-rp_transform2(weights=weights,
+rp_transform(w=weights,
               min_sum=min_sum,
               max_sum=max_sum,
               min_box=min_box,
@@ -32,7 +32,7 @@ sum(weights)
 sum(abs(weights))
 leverage <- 1.6
 
-rp_transform2(weights=weights,
+rp_transform(w=weights,
               min_sum=min_sum,
               max_sum=max_sum,
               min_box=min_box,
@@ -45,7 +45,7 @@ weights <- c(0.15, 0.25, 0.4, 0.2)
 sum(weights)
 max_pos <- 3
 
-rp_transform2(weights=weights,
+rp_transform(w=weights,
               min_sum=min_sum,
               max_sum=max_sum,
               min_box=min_box,
@@ -58,7 +58,7 @@ sum(weights)
 
 max_pos_short <- 1
 
-rp_transform2(weights=weights,
+rp_transform(w=weights,
               min_sum=min_sum,
               max_sum=max_sum,
               min_box=min_box,
@@ -72,7 +72,7 @@ sum(weights)
 max_pos_long <- 3
 max_pos_short <- 1
 
-rp_transform2(weights=weights,
+rp_transform(w=weights,
               min_sum=min_sum,
               max_sum=max_sum,
               min_box=min_box,
@@ -89,7 +89,7 @@ max_pos_long <- 3
 max_pos_short <- 1
 max_pos <- 3
 
-rp_transform2(weights=weights,
+rp_transform(w=weights,
               min_sum=min_sum,
               max_sum=max_sum,
               min_box=min_box,
@@ -108,7 +108,7 @@ max_pos_short <- 1
 max_pos <- 3
 leverage <- 1.3
 
-rp_transform2(weights=weights,
+rp_transform(w=weights,
               min_sum=min_sum,
               max_sum=max_sum,
               min_box=min_box,
@@ -141,8 +141,8 @@ max_box <- rep(0.65, length(weights))
 
 group_fail(weights, groups, cLO, cUP, group_pos)
 
-rp_transform2(weights, min_sum, max_sum, min_box, max_box, groups, cLO, cUP)
-
+w <- rp_transform(weights, min_sum, max_sum, min_box, max_box, groups, cLO, cUP)
+PortfolioAnalytics:::group_fail(w, groups, cLO, cUP, group_pos)
 
 
 # Note that this was typically not working with max_permutations=200
