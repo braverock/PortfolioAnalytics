@@ -965,6 +965,162 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, s
   return(out)
 }
 
+##### minimize variance or maximize quadratic utility with leverage constraints #####
+#' GMV/QU QP Optimization with Turnover Constraint
+#' 
+#' This function is called by optimize.portfolio to solve minimum variance or 
+#' maximum quadratic utility problems with a leverage constraint
+#' 
+#' @param R xts object of asset returns
+#' @param constraints object of constraints in the portfolio object extracted with \code{get_constraints}
+#' @param moments object of moments computed based on objective functions
+#' @param lambda risk_aversion parameter
+#' @param target target return value
+#' @param solver solver to use
+#' @param control list of solver control parameters
+#' @author Ross Bennett
+gmv_opt_leverage <- function(R, constraints, moments, lambda, target, solver="quadprog", control=NULL){
+  # function for minimum variance or max quadratic utility problems
+  stopifnot("package:corpcor" %in% search() || require("corpcor",quietly = TRUE))
+  stopifnot("package:ROI" %in% search() || require("ROI", quietly = TRUE))
+  plugin <- paste0("ROI.plugin.", solver)
+  stopifnot(paste0("package:", plugin) %in% search() || require(plugin, quietly=TRUE, character.only=TRUE))
+  
+  # Check for cleaned returns in moments
+  if(!is.null(moments$cleanR)) R <- moments$cleanR
+  
+  # Modify the returns matrix. This is done because there are 3 sets of
+  # variables 1) w.initial, 2) w.buy, and 3) w.sell
+  R0 <- matrix(0, ncol=ncol(R), nrow=nrow(R))
+  returns <- cbind(R, R0, R0)
+  V <- cov(returns)
+  
+  # number of assets
+  N <- ncol(R)
+  
+  # check for a target return constraint
+  if(!is.na(target)) {
+    # If var is the only objective specified, then moments$mean won't be calculated
+    if(all(moments$mean==0)){
+      tmp_means <- colMeans(R)
+    } else {
+      tmp_means <- moments$mean
+    }
+  } else {
+    tmp_means <- rep(0, N)
+    target <- 0
+  }
+  Amat <- c(tmp_means, rep(0, 2*N))
+  dir <- "=="
+  rhs <- target
+  meq <- N + 1
+  
+  # separate the weights into w, w+, and w-
+  # w - w+ + w- = 0
+  Amat <- rbind(Amat, cbind(diag(N), -1*diag(N), diag(N)))
+  rhs <- c(rhs, rep(0, N))
+  dir <- c(dir, rep("==", N))
+  
+  # Amat for leverage constraints
+  Amat <- rbind(Amat, c(rep(0, N), rep(-1, N), rep(-1, N)))
+  rhs <- c(rhs, -constraints$leverage)
+  dir <- c(dir, ">=")
+  
+  # Amat for positive weights
+  Amat <- rbind(Amat, cbind(matrix(0, nrow=N, ncol=N), diag(N), matrix(0, nrow=N, ncol=N)))
+  rhs <- c(rhs, rep(0, N))
+  dir <- c(dir, rep(">=", N))
+  
+  # Amat for negative weights
+  Amat <- rbind(Amat, cbind(matrix(0, nrow=N, ncol=2*N), diag(N)))
+  rhs <- c(rhs, rep(0, N))
+  dir <- c(dir, rep(">=", N))
+  
+  # Amat for full investment constraint
+  Amat <- rbind(Amat, rbind(c(rep(1, N), rep(0,2*N)), 
+                            c(rep(-1, N), rep(0,2*N))))
+  rhs <- c(rhs, constraints$min_sum, -constraints$max_sum)
+  dir <- c(dir, ">=", ">=")
+  
+  # Amat for lower box constraints
+  Amat <- rbind(Amat, cbind(diag(N), diag(0, N), diag(0, N)))
+  rhs <- c(rhs, constraints$min)
+  dir <- c(dir, rep(">=", N))
+  
+  # Amat for upper box constraints
+  Amat <- rbind(Amat, cbind(-diag(N), diag(0, N), diag(0, N)))
+  rhs <- c(rhs, -constraints$max)
+  dir <- c(dir, rep(">=", N))
+  
+  # include group constraints
+  if(try(!is.null(constraints$groups), silent=TRUE)){
+    n.groups <- length(constraints$groups)
+    Amat.group <- matrix(0, nrow=n.groups, ncol=N)
+    zeros <- matrix(0, nrow=n.groups, ncol=N)
+    for(i in 1:n.groups){
+      Amat.group[i, constraints$groups[[i]]] <- 1
+    }
+    if(is.null(constraints$cLO)) cLO <- rep(-Inf, n.groups)
+    if(is.null(constraints$cUP)) cUP <- rep(Inf, n.groups)
+    Amat <- rbind(Amat, cbind(Amat.group, zeros, zeros))
+    Amat <- rbind(Amat, cbind(-Amat.group, zeros, zeros))
+    dir <- c(dir, rep(">=", (n.groups + n.groups)))
+    rhs <- c(rhs, constraints$cLO, -constraints$cUP)
+  }
+  
+  # Add the factor exposures to Amat, dir, and rhs
+  if(!is.null(constraints$B)){
+    t.B <- t(constraints$B)
+    zeros <- matrix(0, nrow=nrow(t.B), ncol=ncol(t.B))
+    Amat <- rbind(Amat, cbind(t.B, zeros, zeros))
+    Amat <- rbind(Amat, cbind(-t.B, zeros, zeros))
+    dir <- c(dir, rep(">=", 2 * nrow(t.B)))
+    rhs <- c(rhs, constraints$lower, -constraints$upper)
+  }
+  
+  # Remove the rows of Amat and elements of rhs.vec where rhs is Inf or -Inf
+  Amat <- Amat[!is.infinite(rhs), ]
+  rhs <- rhs[!is.infinite(rhs)]
+  dir <- dir[!is.infinite(rhs)]
+  
+  ROI_objective <- Q_objective(Q=make.positive.definite(2*lambda*V), 
+                               L=rep(-tmp_means, 3))
+  
+  opt.prob <- OP(objective=ROI_objective, 
+                 constraints=L_constraint(L=Amat, dir=dir, rhs=rhs))
+  
+  roi.result <- try(ROI_solve(x=opt.prob, solver=solver, control=control), silent=TRUE)
+  if(inherits(roi.result, "try-error")) stop(paste("No solution found:", roi.result))
+  
+  wts <- roi.result$solution
+  wts.final <- wts[1:N]
+  
+  weights <- wts.final
+  names(weights) <- colnames(R)
+  out <- list()
+  out$weights <- weights
+  out$out <- roi.result$objval
+  obj_vals <- list()
+  # Calculate the objective values here so that we can use the moments$mean
+  # and moments$var that might be passed in by the user.
+  if(!all(moments$mean == 0)){
+    port.mean <- as.numeric(sum(weights * moments$mean))
+    names(port.mean) <- "mean"
+    obj_vals[["mean"]] <- port.mean
+    # faster and more efficient way to compute t(w) %*% Sigma %*% w
+    port.sd <- sqrt(sum(crossprod(weights, moments$var) * weights))
+    names(port.sd) <- "StdDev"
+    obj_vals[["StdDev"]] <- port.sd
+  } else {
+    # faster and more efficient way to compute t(w) %*% Sigma %*% w
+    port.sd <- sqrt(sum(crossprod(weights, moments$var) * weights))
+    names(port.sd) <- "StdDev"
+    obj_vals[["StdDev"]] <- port.sd
+  }
+  out$obj_vals <- obj_vals
+  return(out)
+}
+
 # This function uses optimize() to find the target return value that 
 # results in the maximum starr ratio (mean / ES).
 # returns the target return value

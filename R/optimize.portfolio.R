@@ -887,11 +887,12 @@ optimize.portfolio_v2 <- function(
       }
       # Minimize variance if the only objective specified is variance
       # Maximize Quadratic Utility if var and mean are specified as objectives
-      if(!is.null(constraints$turnover_target) | !is.null(constraints$ptc)){
+      if(!is.null(constraints$turnover_target) | !is.null(constraints$ptc) | !is.null(constraints$leverage)){
         if(!is.null(constraints$turnover_target) & !is.null(constraints$ptc)){
           warning("Turnover and proportional transaction cost constraints detected, only running optimization for turnover constraint.")
           constraints$ptc <- NULL
         }
+        # turnover constraint
         if(!is.null(constraints$turnover_target) & is.null(constraints$ptc)){
           qp_result <- gmv_opt_toc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets, solver=solver, control=control)
           weights <- qp_result$weights
@@ -899,8 +900,17 @@ optimize.portfolio_v2 <- function(
           obj_vals <- qp_result$obj_vals
           out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=qp_result$out, call=call)
         }
+        # proportional transaction costs constraint
         if(!is.null(constraints$ptc) & is.null(constraints$turnover_target)){
           qp_result <- gmv_opt_ptc(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, init_weights=portfolio$assets, solver=solver, control=control)
+          weights <- qp_result$weights
+          # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
+          obj_vals <- qp_result$obj_vals
+          out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=qp_result$out, call=call)
+        }
+        # leverage constraint
+        if(!is.null(constraints$leverage)){
+          qp_result <- gmv_opt_leverage(R=R, constraints=constraints, moments=moments, lambda=lambda, target=target, solver=solver, control=control)
           weights <- qp_result$weights
           # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
           obj_vals <- qp_result$obj_vals
