@@ -1318,7 +1318,7 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' 
 #' This function is a essentially a wrapper around \code{optimize.portfolio} 
 #' and thus the discussion in the Details section of the 
-#' \code{optimize.portfolio} help file is valid here as well.
+#' \code{\link{optimize.portfolio}} help file is valid here as well.
 #' 
 #' This function is massively parallel and requires the 'foreach' package. It
 #' is suggested to register a parallel backend.
@@ -1338,9 +1338,9 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' \code{\link[xts]{endpoints}} for valid names.
 #' @param training_period an integer of the number of periods to use as 
 #' a training data in the front of the returns data
-#' @param trailing_periods an integer with the number of periods to roll over
-#' (i.e. width of the moving or rolling window), the default is NULL will 
-#' run using the returns data from inception 
+#' @param rolling_window an integer of the width (i.e. number of periods)
+#' of the rolling window, the default of NULL will run the optimization 
+#' using the data from inception.
 #' @return a list containing the following elements
 #' \itemize{
 #'   \item{\code{portfolio}:}{ The portfolio object.}
@@ -1372,15 +1372,15 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' rebalance_on="quarters",
 #' training_period=60)
 #' 
-#' # Monthly rebalancing with 5 year training period and 4 year trailing (moving window)
+#' # Monthly rebalancing with 5 year training period and 4 year rolling window
 #' bt.opt2 <- optimize.portfolio.rebalancing(R, portf,
 #' optimize_method="ROI",
 #' rebalance_on="months",
 #' training_period=60,
-#' trailing_period=48)
+#' rolling_window=48)
 #' }
 #' @export
-optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, objectives=NULL, optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
+optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, objectives=NULL, optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, rolling_window=NULL)
 {
   stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
   stopifnot("package:iterators" %in% search() || require("iterators",quietly=TRUE))
@@ -1410,7 +1410,7 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
                                                       rp=rp, 
                                                       rebalance_on=rebalance_on, 
                                                       training_period=training_period, 
-                                                      trailing_periods=trailing_periods)
+                                                      rolling_window=rolling_window)
     }
     out <- combine.optimizations(opt.list)
     class(out) <- "opt.rebal.list"
@@ -1441,6 +1441,14 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   }
   
   if(hasArg(message)) message=match.call(expand.dots=TRUE)$message else message=FALSE
+  
+  # check for trailing_periods argument and set rolling_window equal to 
+  # trailing_periods for backwards compatibility
+  if(hasArg(trailing_periods)) {
+    trailing_periods=match.call(expand.dots=TRUE)$trailing_periods
+    rolling_window <- trailing_periods
+  }
+  
   
   # Check for constraints and objectives passed in separately outside of the portfolio object
   if(!is.null(constraints)){
@@ -1483,7 +1491,7 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   }
   
   if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
-  if (is.null(trailing_periods)){
+  if (is.null(rolling_window)){
     # define the index endpoints of our periods
     ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
     # now apply optimize.portfolio to the periods, in parallel if available
@@ -1495,7 +1503,7 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
     ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
     # now apply optimize.portfolio to the periods, in parallel if available
     out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
-      optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
+      optimize.portfolio(R[(ifelse(ep-rolling_window>=1,ep-rolling_window,1)):ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
     }
   }
   # out_list is a list where each element is an optimize.portfolio object

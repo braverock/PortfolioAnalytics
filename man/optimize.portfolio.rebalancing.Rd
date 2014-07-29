@@ -12,7 +12,7 @@ optimize.portfolio.rebalancing_v1(R, constraints,
 optimize.portfolio.rebalancing(R, portfolio = NULL, constraints = NULL,
   objectives = NULL, optimize_method = c("DEoptim", "random", "ROI"),
   search_size = 20000, trace = FALSE, ..., rp = NULL,
-  rebalance_on = NULL, training_period = NULL, trailing_periods = NULL)
+  rebalance_on = NULL, training_period = NULL, rolling_window = NULL)
 }
 \arguments{
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}
@@ -41,9 +41,9 @@ information on the path or portfolios searched}
 \item{training_period}{an integer of the number of periods to use as
 a training data in the front of the returns data}
 
-\item{trailing_periods}{an integer with the number of periods to roll over
-(i.e. width of the moving or rolling window), the default is NULL will
-run using the returns data from inception}
+\item{rolling_window}{an integer of the width (i.e. number of periods)
+of the rolling window, the default of NULL will run the optimization
+using the data from inception.}
 }
 \value{
 a list containing the following elements
@@ -69,7 +69,7 @@ performance of the portfolio based on historical data
 
 This function is a essentially a wrapper around \code{optimize.portfolio}
 and thus the discussion in the Details section of the
-\code{optimize.portfolio} help file is valid here as well.
+\code{\link{optimize.portfolio}} help file is valid here as well.
 
 This function is massively parallel and requires the 'foreach' package. It
 is suggested to register a parallel backend.
@@ -91,12 +91,12 @@ optimize_method="ROI",
 rebalance_on="quarters",
 training_period=60)
 
-# Monthly rebalancing with 5 year training period and 4 year trailing (moving window)
+# Monthly rebalancing with 5 year training period and 4 year rolling window
 bt.opt2 <- optimize.portfolio.rebalancing(R, portf,
 optimize_method="ROI",
 rebalance_on="months",
 training_period=60,
-trailing_period=48)
+rolling_window=48)
 }
 }
 \author{
