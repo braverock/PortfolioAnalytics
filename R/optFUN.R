@@ -1013,7 +1013,7 @@ gmv_opt_leverage <- function(R, constraints, moments, lambda, target, solver="qu
   Amat <- c(tmp_means, rep(0, 2*N))
   dir <- "=="
   rhs <- target
-  meq <- N + 1
+  # meq <- N + 1
   
   # separate the weights into w, w+, and w-
   # w - w+ + w- = 0
