@@ -135,6 +135,105 @@ extractObjectiveMeasures(opt.sd)$StdDev
 \section{Custom Objective Functions}
 A key feature of \verb"PortfolioAnalytics" is that the name for an objective can be any valid \R function. \verb"PortfolioAnalytics" was designed to be flexible and modular, and custom objective functions are a key example of this.
 
-TODO: add content and example code
+Here we define a very simple function to compute annualized standard deviation for monthly data that we will use as an objective function.
+<<>>=
+pasd <- function(R, weights, sigma, N=36){
+  R <- tail(R, N)
+  tmp.sd <- sqrt(as.numeric(t(weights) %*% sigma %*% weights))
+  sqrt(12) * tmp.sd
+}
+@
+
+The objective function must return a single value for the optimizer to minimize. It is strongly encouraged to use the following argument names in the objective function:
+\begin{description}
+  \item[\code{R}] {for the asset returns}
+  \item[\code{weights}] {for the portfolio weights}
+\end{description}
+
+These argument names are detected automatically and handled in an efficient manner. Any other arguments for the objective function can be for the moments or passed in through the \code{arguments} list in the objective.
+
+For our \code{pasd} function, we need custom moments function to return a named list with \code{sigma} as an element. We can use the \code{sigma.robust} function we defined in the previous section. Here we construct a portfolio with our \code{pasd} function as an objective to minimize.
+
+<<tidy=FALSE>>=
+# Construct initial portfolio with basic constraints.
+pasd.portf <- portfolio.spec(assets=funds)
+pasd.portf <- add.constraint(portfolio=pasd.portf, type="full_investment")
+pasd.portf <- add.constraint(portfolio=pasd.portf, type="long_only")
+
+# Portfolio with pasd as an objective
+# Note how we can specify N as an argument
+pasd.portf <- add.objective(portfolio=pasd.portf, type="risk", name="pasd", 
+                            arguments=list(N=48))
+@
+
+
+Now we can run the optimization to estimate a solution to our optimization problem.
+<<>>=
+opt.pasd <- optimize.portfolio(R, pa.portf, 
+                               optimize_method="ROI", 
+                               momentFUN="sigma.robust")
+opt.pasd
+@
+
+We now consider an example with a more complicated objective function. Our objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in the Boudt paper and Martellini paper (NEED REFERENCE).
+
+\begin{equation*}
+EU_{\lambda}(w) = - \frac{\lambda}{2} m_{(2)}(w) +
+\frac{\lambda (\lambda + 1)}{6} m_{(3)}(w) -
+\frac{\lambda (\lambda + 1) (\lambda + 2)}{24} m_{(4)}(w)
+\end{equation*}
+
+Define a function to compute CRRA estimate. Note how we define the function to use \code{sigma}, \code{m3}, and \code{m4} as arguments that will use the output from a custom moment function. We could compute the moments inside this function, but re-computing the moments thousands of times (i.e. at each iteration) can be very compute intensive.
+
+<<>>=
+CRRA <- function(R, weights, lambda, sigma, m3, m4){
+  weights <- matrix(weights, ncol=1)
+  M2.w <- t(weights) %*% sigma %*% weights
+  M3.w <- t(weights) %*% m3 %*% (weights %x% weights)
+  M4.w <- t(weights) %*% m4 %*% (weights %x% weights %x% weights)
+  term1 <- (1 / 2) * lambda * M2.w
+  term2 <- (1 / 6) * lambda * (lambda + 1) * M3.w
+  term3 <- (1 / 24) * lambda * (lambda + 1) * (lambda + 2) * M4.w
+  out <- -term1 + term2 - term3
+  out
+}
+@
+
+We now define the custom moment function to compute the moments for the objective function.
+<<>>=
+crra.moments <- function(R, ...){
+  out <- list()
+  out$sigma <- cov(R)
+  out$m3 <- PerformanceAnalytics:::M3.MM(R)
+  out$m4 <- PerformanceAnalytics:::M4.MM(R)
+  out
+}
+@
+
+We now set up the portfolio and run the optimization using our custom moments and objective function to maximize CRRA. Note that \code{type="return"} is used to maximize an objective function.
+<<tidy=FALSE>>=
+# Construct initial portfolio with basic constraints.
+crra.portf <- portfolio.spec(assets=funds)
+crra.portf <- add.constraint(portfolio=crra.portf, type="weight_sum", 
+                             min_sum=0.99, max_sum=1.01)
+crra.portf <- add.constraint(portfolio=crra.portf, type="box",
+                             min=0.05, max=0.4)
+
+# Portfolio with crra as an objective
+# Note how we can specify lambda as an argument
+crra.portf <- add.objective(portfolio=crra.portf, type="return", name="CRRA", 
+                            arguments=list(lambda=10))
+@
+
+<<>>=
+opt.crra <- optimize.portfolio(R, portf.crra, optimize_method="DEoptim",
+                                 search_size=5000, trace=TRUE, traceDE=0,
+                                 momentFUN="crra.moments")
+opt.crra
+@
+
+The modular framework of \verb"PortfolioAnalytics" allows one to easily define custom moment functions and objective functions as valid \R functions.
+
+TODO: add content to concluding paragraph
 
 \end{document}
