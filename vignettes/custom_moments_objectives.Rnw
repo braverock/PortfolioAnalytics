@@ -1,0 +1,140 @@
+\documentclass[a4paper]{article}
+\usepackage[OT1]{fontenc}
+\usepackage{Rd}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\usepackage[round]{natbib}
+\usepackage{bm}
+\usepackage{verbatim}
+\usepackage[latin1]{inputenc}
+\bibliographystyle{abbrvnat}
+
+\usepackage{url}
+
+\let\proglang=\textsf
+%\newcommand{\pkg}[1]{{\fontseries{b}\selectfont #1}}
+%\newcommand{\R}[1]{{\fontseries{b}\selectfont #1}}
+%\newcommand{\email}[1]{\href{mailto:#1}{\normalfont\texttt{#1}}}
+%\newcommand{\E}{\mathsf{E}}
+%\newcommand{\VAR}{\mathsf{VAR}}
+%\newcommand{\COV}{\mathsf{COV}}
+%\newcommand{\Prob}{\mathsf{P}}
+
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\baselinestretch}{1.5}
+\setlength{\textwidth}{15cm} \setlength{\textheight}{22cm} \topmargin-1cm \evensidemargin0.5cm \oddsidemargin0.5cm
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+
+% \VignetteIndexEntry{Custom Moment and Objective Functions}
+
+\begin{document}
+
+\title{Custom Moment and Objective Functions}
+\author{Ross Bennett}
+
+\maketitle
+
+\begin{abstract}
+The purpose of this vignette is to demonstrate how to write and use custom moment functions and custom objective functions.
+\end{abstract}
+
+\tableofcontents
+
+\section{Getting Started}
+\subsection{Load Packages}
+Load the necessary packages.
+
+<<>>=
+library(PortfolioAnalytics)
+@
+
+\subsection{Data}
+The edhec data set from the PerformanceAnalytics package will be used as example data.
+<<>>=
+data(edhec)
+
+# Use the first 4 columns in edhec for a returns object
+R <- edhec[, 1:4]
+colnames(R) <- c("CA", "CTAG", "DS", "EM")
+head(R, 5)
+
+# Get a character vector of the fund names
+funds <- colnames(R)
+@
+
+\section{Setting the Portfolio Moments}
+The PortfolioAnalytics framework to estimate solutions to constrained optimization problems is implemented in such a way that the moments of the returns are calculated only once. The \code{set.portfolio.moments} function computes the first, second, third, and fourth moments depending on the objective function(s) in the \code{portfolio} object. The moments are then used by lower level optimization functions. \code{set.portfolio.moments} implements methods to compute moments based on sample estimates, higher moments from fitting a statistical factor model based on the work of Kris Boudt (NEED REFERENCE HERE), the Black Litterman model, and the Fully Flexible Framework based on the work of Attilio Meucci.
+
+The moments of the returns are computed based on the objective(s) in the \code{portfolio} object and return a list where each element is the respective moment estimate.
+<<>>=
+args(set.portfolio.moments)
+@
+
+
+<<tidy=FALSE>>=
+# Construct initial portfolio with basic constraints.
+init.portf <- portfolio.spec(assets=funds)
+init.portf <- add.constraint(portfolio=init.portf, type="full_investment")
+init.portf <- add.constraint(portfolio=init.portf, type="long_only")
+
+# Portfolio with standard deviation as an objective
+SD.portf <- add.objective(portfolio=init.portf, type="risk", name="StdDev")
+
+# Portfolio with expected shortfall as an objective
+ES.portf <- add.objective(portfolio=init.portf, type="risk", name="ES")
+@
+
+Here we see the names of the object that is returned.
+<<>>=
+sd.moments <- set.portfolio.moments(R, SD.portf)
+names(sd.moments)
+
+es.moments <- set.portfolio.moments(R, ES.portf)
+names(es.moments)
+@
+
+\section{Custom Moment Functions}
+In many cases for constrained optimization problems, one may want to estimate moments for a specific use case or further extend the idea of \code{set.portfolio.moments}. A user defined custom moment function can have any arbitrary named arguments, however the argument names \verb"R" and \verb"portfolio" will be detected and matched in an efficient manner.
+
+Here we define a function to compute the covariance matrix using a robust estimate.
+<<>>=
+sigma.robust <- function(R, ...){
+  out <- list()
+  set.seed(1234)
+  out$sigma <- MASS::cov.rob(R, method="mcd", ...)$cov
+  return(out)
+}
+@
+
+Now we can use the custom moment function in \code{optimize.portfolio} to estimate the solution to the minimum standard deviation portfolio.
+<<tidy=FALSE>>=
+opt.sd <- optimize.portfolio(R, SD.portf, 
+                             optimize_method="ROI", 
+                             momentFUN="sigma.robust")
+opt.sd
+@
+
+Here we extract the weights and compute the portfolio standard deviation to verify.
+<<tidy=FALSE>>=
+weights <- extractWeights(opt.sd)
+sigma <- sigma.robust(R)$sigma
+
+sqrt(t(weights) %*% sigma %*% weights)
+extractObjectiveMeasures(opt.sd)$StdDev
+@
+
+\section{Custom Objective Functions}
+A key feature of \verb"PortfolioAnalytics" is that the name for an objective can be any valid \R function. \verb"PortfolioAnalytics" was designed to be flexible and modular, and custom objective functions are a key example of this.
+
+TODO: add content and example code
+
+\end{document}
