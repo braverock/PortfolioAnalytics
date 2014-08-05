@@ -72,7 +72,7 @@ funds <- colnames(R)
 @
 
 \section{Setting the Portfolio Moments}
-The PortfolioAnalytics framework to estimate solutions to constrained optimization problems is implemented in such a way that the moments of the returns are calculated only once. The \code{set.portfolio.moments} function computes the first, second, third, and fourth moments depending on the objective function(s) in the \code{portfolio} object. The moments are then used by lower level optimization functions. \code{set.portfolio.moments} implements methods to compute moments based on sample estimates, higher moments from fitting a statistical factor model based on the work of Kris Boudt (NEED REFERENCE HERE), the Black Litterman model, and the Fully Flexible Framework based on the work of Attilio Meucci.
+The PortfolioAnalytics framework to estimate solutions to constrained optimization problems is implemented in such a way that the moments of the returns are calculated only once and then used in lower level optimization functions. The \code{set.portfolio.moments} function computes the first, second, third, and fourth moments depending on the objective function(s) in the \code{portfolio} object. \code{set.portfolio.moments} implements methods to compute moments based on sample estimates, higher moments from fitting a statistical factor model based on the work of Kris Boudt (NEED REFERENCE HERE), the Black Litterman model, and the Fully Flexible Framework based on the work of Attilio Meucci.
 
 The moments of the returns are computed based on the objective(s) in the \code{portfolio} object and return a list where each element is the respective moment estimate.
 <<>>=
@@ -93,7 +93,7 @@ SD.portf <- add.objective(portfolio=init.portf, type="risk", name="StdDev")
 ES.portf <- add.objective(portfolio=init.portf, type="risk", name="ES")
 @
 
-Here we see the names of the object that is returned.
+Here we see the names of the list object that is returned by \code{set.portfolio.moments}.  
 <<>>=
 sd.moments <- set.portfolio.moments(R, SD.portf)
 names(sd.moments)
@@ -103,9 +103,19 @@ names(es.moments)
 @
 
 \section{Custom Moment Functions}
-In many cases for constrained optimization problems, one may want to estimate moments for a specific use case or further extend the idea of \code{set.portfolio.moments}. A user defined custom moment function can have any arbitrary named arguments, however the argument names \verb"R" and \verb"portfolio" will be detected and matched in an efficient manner.
+In many cases for constrained optimization problems, one may want to estimate moments for a specific use case or further extend the idea of \code{set.portfolio.moments}. A user defined custom moment function can have any arbitrary named arguments. However, arguments named \code{R} for the asset returns and \code{portfolio} for the portfolio object will be detected automatically and handled in an efficient manner. Because of this, it is strongly encouraged to use \code{R} for the asset returns object and \code{portfolio} for the portfolio object.
 
-Here we define a function to compute the covariance matrix using a robust estimate.
+The moment function should return a named list object where the elements represent the moments:
+\begin{description}
+  \item[\code{\$mu}]{ first moment; expected returns vector}
+  \item[\code{\$sigma}]{ second moment; covariance matrix}
+  \item[\code{\$m3}]{ third moment; coskewness matrix}
+  \item[\code{\$m4}]{ fourth moment; cokurtosis matrix}
+\end{description}
+
+The lower level optimization functions expect an object with the structure described above. List elements with the names \code{mu}, \code{sigma}, \code{m3}, and\code{m4} are matched automatically and handled in an efficient manner.
+
+Here we define a function to estimate the covariance matrix using a robust method.
 <<>>=
 sigma.robust <- function(R, ...){
   out <- list()
@@ -123,7 +133,7 @@ opt.sd <- optimize.portfolio(R, SD.portf,
 opt.sd
 @
 
-Here we extract the weights and compute the portfolio standard deviation to verify.
+Here we extract the weights and compute the portfolio standard deviation to verify that the the robust estimate of the covariance matrix was used in the optimization.
 <<tidy=FALSE>>=
 weights <- extractWeights(opt.sd)
 sigma <- sigma.robust(R)$sigma
@@ -133,7 +143,7 @@ extractObjectiveMeasures(opt.sd)$StdDev
 @
 
 \section{Custom Objective Functions}
-A key feature of \verb"PortfolioAnalytics" is that the name for an objective can be any valid \R function. \verb"PortfolioAnalytics" was designed to be flexible and modular, and custom objective functions are a key example of this.
+A key feature of \verb"PortfolioAnalytics" is that the name for an objective can be any valid \verb"R" function. \verb"PortfolioAnalytics" was designed to be flexible and modular, and custom objective functions are a key example of this.
 
 Here we define a very simple function to compute annualized standard deviation for monthly data that we will use as an objective function.
 <<>>=
@@ -144,11 +154,16 @@ pasd <- function(R, weights, sigma, N=36){
 }
 @
 
-The objective function must return a single value for the optimizer to minimize. It is strongly encouraged to use the following argument names in the objective function:
+A few guidelines should be followed for defining a custom objective function.
+
+\begin{itemize}
+  \item The objective function must return a single value for the optimizer to minimize.
+  \item It is strongly encouraged to use the following argument names in the objective function:
 \begin{description}
   \item[\code{R}] {for the asset returns}
   \item[\code{weights}] {for the portfolio weights}
 \end{description}
+\end{itemize}
 
 These argument names are detected automatically and handled in an efficient manner. Any other arguments for the objective function can be for the moments or passed in through the \code{arguments} list in the objective.
 
@@ -226,7 +241,7 @@ crra.portf <- add.objective(portfolio=crra.portf, type="return", name="CRRA",
 @
 
 <<>>=
-opt.crra <- optimize.portfolio(R, portf.crra, optimize_method="DEoptim",
+opt.crra <- optimize.portfolio(R, crra.portf, optimize_method="DEoptim",
                                  search_size=5000, trace=TRUE, traceDE=0,
                                  momentFUN="crra.moments")
 opt.crra

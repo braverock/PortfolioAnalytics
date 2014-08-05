@@ -93,7 +93,6 @@ fn_map <- function(weights, portfolio, relax=FALSE, verbose=FALSE, ...){
   # check leverage constraints
   if(!is.null(min_sum) & !is.null(max_sum)){
     if(!(sum(tmp_weights) >= min_sum & sum(tmp_weights) <= max_sum)){
-      print("foo")
       # Try to transform only considering leverage and box constraints
       tmp_weights <- try(rp_transform(w=tmp_weights, 
                                       min_sum=min_sum, 
