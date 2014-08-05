@@ -840,9 +840,13 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, s
   # Check for cleaned returns in moments
   if(!is.null(moments$cleanR)) R <- moments$cleanR
   
+  # proportional transaction costs
+  ptc <- constraints$ptc
+  
   # Modify the returns matrix. This is done because there are 3 sets of
   # variables 1) w.initial, 2) w.buy, and 3) w.sell
-  returns <- cbind(R, R, R)
+  R0 <- matrix(0, ncol=ncol(R), nrow=nrow(R))
+  returns <- cbind(R, R0, R0)
   V <- cov(returns)
   
   # number of assets
@@ -851,13 +855,7 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, s
   # initial weights for solver
   if(is.null(init_weights)) init_weights <- rep(1/ N, N)
   
-  # Amat for initial weights
-  Amat <- cbind(diag(N), matrix(0, nrow=N, ncol=N*2))
-  rhs <- init_weights
-  dir <- rep("==", N)
-  meq <- N
-  
-  # check for a target return constraint
+  # Check for a target return constraint
   if(!is.na(target)) {
     # If var is the only objective specified, then moments$mean won't be calculated
     if(all(moments$mean==0)){
@@ -865,24 +863,46 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, s
     } else {
       tmp_means <- moments$mean
     }
-    Amat <- rbind(Amat, rep((1+tmp_means), 3))
-    dir <- c(dir, "==")
-    rhs <- c(rhs, (1+target))
-    meq <- N + 1
+  } else {
+    tmp_means <- rep(0, N)
+    target <- 0
   }
+  Amat <- c(tmp_means, rep(0, 2 * N))
+  dir <- "=="
+  rhs <- 1 + target
+  meq <- 1
   
-  # Amat for positive weights for w.buy and w.sell
-  weights.positive <- rbind(matrix(0,ncol=2*N,nrow=N),diag(2*N))
-  temp.index <- (N*3-N+1):(N*3)
-  weights.positive[temp.index,] <- -1*weights.positive[temp.index,]
-  Amat <- rbind(Amat, t(weights.positive))
-  rhs <- c(rhs, rep(0, 2*N))
+  # separate the weights into w, w^+, and w^-
+  # w - w^+ + w^- = 0
+  Amat <- rbind(Amat, cbind(diag(N), -diag(N), diag(N)))
+  rhs <- c(rhs, init_weights)
+  dir <- c(dir, rep("==", N))
+  meq <- N + 1
   
-  # Amat for full investment constraint
-  ptc <- constraints$ptc
-  Amat <- rbind(Amat, rbind(c(rep(1, N), (1+ptc), (1-ptc)), -c(rep(1, N), (1+ptc), (1-ptc))))
-  rhs <- c(rhs, constraints$min_sum, -constraints$max_sum)
-  dir <- c(dir, ">=", ">=")
+  # w+ >= 0
+  Amat <- rbind(Amat, cbind(diag(0, N), diag(N), diag(0, N)))
+  rhs <- c(rhs, rep(0, N))
+  dir <- c(dir, rep(">=", N))
+  
+  # w- >= 0
+  Amat <- rbind(Amat, cbind(diag(0, N), diag(0, N), diag(N)))
+  rhs <- c(rhs, rep(0, N))
+  dir <- c(dir, rep(">=", N))
+  
+  # 1^T w + tcb^T w^+ + tcs^T w^- >= min_sum
+  Amat <- rbind(Amat, c(rep(1, N), ptc, ptc))
+  rhs <- c(rhs, constraints$min_sum)
+  dir <- c(dir, ">=")
+  
+  # 1^T w + tcb^T w^+ + tcs^T w^- <= max_sum
+  Amat <- rbind(Amat, c(rep(-1, N), -ptc, -ptc))
+  rhs <- c(rhs, -constraints$max_sum)
+  dir <- c(dir, ">=")
+  
+  # -(1 + tcb)^T w^+ + (1 - tcs)^T w^- >= 0
+  Amat <- rbind(Amat, c(rep(0, N), -(1 + ptc), (1 - ptc)))
+  rhs <- c(rhs, 0)
+  dir <- c(dir, ">=")
   
   # Amat for lower box constraints
   Amat <- rbind(Amat, cbind(diag(N), diag(N), diag(N)))
@@ -917,16 +937,14 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, s
     dir <- c(dir, rep(">=", 2 * nrow(t.B)))
     rhs <- c(rhs, constraints$lower, -constraints$upper)
   }
+  d <- c(-tmp_means, rep(0, 2 * N))
   
-  d <- rep(-moments$mean, 3)
-  
-  # Remove the rows of Amat and elements of rhs.vec where rhs is Inf or -Inf
+  # Remove the rows of Amat and elements of rhs where rhs is Inf or -Inf
   Amat <- Amat[!is.infinite(rhs), ]
   rhs <- rhs[!is.infinite(rhs)]
   dir <- dir[!is.infinite(rhs)]
   
-  ROI_objective <- Q_objective(Q=make.positive.definite(2*lambda*V), 
-                               L=rep(-moments$mean, 3))
+  ROI_objective <- Q_objective(Q=make.positive.definite(2*lambda*V), L=d)
   
   opt.prob <- OP(objective=ROI_objective, 
                  constraints=L_constraint(L=Amat, dir=dir, rhs=rhs))
@@ -934,12 +952,7 @@ gmv_opt_ptc <- function(R, constraints, moments, lambda, target, init_weights, s
   if(inherits(roi.result, "try-error")) stop(paste("No solution found:", roi.result))
   
   wts <- roi.result$solution
-  w.buy <- roi.result$solution[(N+1):(2*N)]
-  w.sell <- roi.result$solution[(2*N+1):(3*N)]
-  w.total <- init_weights + w.buy + w.sell
-  wts.final <- wts[(1:N)] + wts[(1+N):(2*N)] + wts[(2*N+1):(3*N)]
-  
-  weights <- wts.final
+  weights <- wts[1:N]
   names(weights) <- colnames(R)
   out <- list()
   out$weights <- weights
