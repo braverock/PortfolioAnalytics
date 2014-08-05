@@ -296,47 +296,43 @@ print.portfolio <- function(x, ...){
 #' @method summary portfolio
 #' @export
 summary.portfolio <- function(object, ...){
-  if(!is.portfolio(object)) stop("object passed in is not of class 'portfolio'")
+  if(!is.portfolio(x)) stop("object passed in is not of class 'portfolio'")
   
-  cat(rep("*", 50) ,"\n", sep="")
-  cat("PortfolioAnalytics Portfolio Specification Summary", "\n")
-  cat(rep("*", 50) ,"\n", sep="")
+  out <- list()
   
-  cat("Assets and Initial Weights:\n")
-  print(object$assets)
-  cat("\n")
+  out$category_labels <- object$category_labels
+  out$weight_seq <- object$weight_seq
+  out$assets <- object$assets
   
-  if(!is.null(object$category_labels)) {
-    cat("Category Labels:\n")
-    print(object$category_labels)
-  }
-  
-  if(!is.null(object$weight_seq)) {
-    cat("weight_seq:\n")
-    print(summary(object$weight_seq))
-  }
-  
-  cat("Constraints:\n\n")
-  for(constraint in object$constraints){
-    if(constraint$enabled) {
-      cat(rep("*", 40), "\n", sep="")
-      cat(constraint$type, "constraint\n")
-      cat(rep("*", 40), "\n", sep="")
-      print(constraint)
-      cat("\n\n")
+  # constraints
+  out$enabled_constraints <- list()
+  out$disabled_constraints <- list()
+  constraints <- object$constraints
+  for(i in 1:length(constraints)){
+    if(constraints[[i]]$enabled){
+      tmp <- length(out$enabled_constraints)
+      out$enabled_constraints[[tmp+1]] <- constraints[[i]]
+    } else {
+      tmp <- length(out$disabled_constraints)
+      out$disabled_constraints[[tmp+1]] <- constraints[[i]]
     }
   }
   
-  cat("Objectives:\n\n")
-  for(objective in object$objectives){
-    if(objective$enabled) {
-      cat(rep("*", 40), "\n", sep="")
-      cat(class(objective)[1], "\n")
-      cat(rep("*", 40), "\n", sep="")
-      print(objective)
-      cat("\n\n")
+  # objectives
+  out$enabled_objectives <- list()
+  out$disabled_objectives <- list()
+  objectives <- object$objectives
+  for(i in 1:length(objectives)){
+    if(objectives[[i]]$enabled){
+      tmp <- length(out$enabled_objectives)
+      out$enabled_objectives[[tmp+1]] <- objectives[[i]]
+    } else {
+      tmp <- length(out$disabled_objectives)
+      out$disabled_objectives[[tmp+1]] <- objectives[[i]]
     }
   }
+  class(out) <- "summary.portfolio"
+  return(out)
 }
 
 #' print method for constraint objects
