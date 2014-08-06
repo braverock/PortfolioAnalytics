@@ -37,6 +37,7 @@
 % \VignetteIndexEntry{Custom Moment and Objective Functions}
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 \title{Custom Moment and Objective Functions}
 \author{Ross Bennett}
@@ -72,13 +73,7 @@ funds <- colnames(R)
 @
 
 \section{Setting the Portfolio Moments}
-The PortfolioAnalytics framework to estimate solutions to constrained optimization problems is implemented in such a way that the moments of the returns are calculated only once and then used in lower level optimization functions. The \code{set.portfolio.moments} function computes the first, second, third, and fourth moments depending on the objective function(s) in the \code{portfolio} object. \code{set.portfolio.moments} implements methods to compute moments based on sample estimates, higher moments from fitting a statistical factor model based on the work of Kris Boudt (NEED REFERENCE HERE), the Black Litterman model, and the Fully Flexible Framework based on the work of Attilio Meucci.
-
-The moments of the returns are computed based on the objective(s) in the \code{portfolio} object and return a list where each element is the respective moment estimate.
-<<>>=
-args(set.portfolio.moments)
-@
-
+The PortfolioAnalytics framework to estimate solutions to constrained optimization problems is implemented in such a way that the moments of the returns are calculated only once and then used in lower level optimization functions. The \code{set.portfolio.moments} function computes the first, second, third, and fourth moments depending on the objective function(s) in the \code{portfolio} object. For example, if the third and fourth moments do not need to be calculated for a given objective, then \code{set.portfolio.moments} will try to detect this and not compute those moments. Currently, \code{set.portfolio.moments} implements methods to compute moments based on sample estimates, higher moments from fitting a statistical factor model based on the work of Kris Boudt, the Black Litterman model, and the Fully Flexible Framework based on the work of Attilio Meucci (NEED REFERENCE HERE).
 
 <<tidy=FALSE>>=
 # Construct initial portfolio with basic constraints.
@@ -117,10 +112,10 @@ The lower level optimization functions expect an object with the structure descr
 
 Here we define a function to estimate the covariance matrix using a robust method.
 <<>>=
-sigma.robust <- function(R, ...){
+sigma.robust <- function(R){
   out <- list()
   set.seed(1234)
-  out$sigma <- MASS::cov.rob(R, method="mcd", ...)$cov
+  out$sigma <- MASS::cov.rob(R, method="mcd")$cov
   return(out)
 }
 @
@@ -184,8 +179,9 @@ pasd.portf <- add.objective(portfolio=pasd.portf, type="risk", name="pasd",
 
 Now we can run the optimization to estimate a solution to our optimization problem.
 <<>>=
-opt.pasd <- optimize.portfolio(R, pa.portf, 
-                               optimize_method="ROI", 
+opt.pasd <- optimize.portfolio(R, pasd.portf, 
+                               optimize_method="DEoptim", 
+                               search_size=5000, trace=TRUE, traceDE=0,
                                momentFUN="sigma.robust")
 opt.pasd
 @
@@ -225,7 +221,7 @@ crra.moments <- function(R, ...){
 }
 @
 
-We now set up the portfolio and run the optimization using our custom moments and objective function to maximize CRRA. Note that \code{type="return"} is used to maximize an objective function.
+Finally, we set up the portfolio and run the optimization using our custom moment function and objective function to maximize CRRA. Note that \code{type="return"} is used to maximize an objective function.
 <<tidy=FALSE>>=
 # Construct initial portfolio with basic constraints.
 crra.portf <- portfolio.spec(assets=funds)
