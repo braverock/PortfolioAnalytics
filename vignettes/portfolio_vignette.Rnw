@@ -87,9 +87,9 @@ print.default(pspec)
 \section{Adding Constraints to the Portfolio Object}
 Adding constraints to the portfolio object is done with \code{add.constraint}. The \code{add.constraint} function is the main interface for adding and/or updating constraints to the portfolio object. This function allows the user to specify the portfolio to add the constraints to, the type of constraints, arguments for the constraint, and whether or not to enable the constraint (\code{enabled=TRUE} is the default). If updating an existing constraint, the indexnum argument can be specified.
 
-\subsection{Leverage Constraint}
+\subsection{Sum of Weights Constraint}
 
-The \code{leverage} constraint specifies the constraint on the sum of the weights. Aliases for the \code{leverage} constraint type include \code{weight\_sum}, \code{weight}, and \code{leverage}. Here we add a constraint that the weights must sum to 1, or the full investment constraint.
+The \code{weight_sum} constraint specifies the constraint on the sum of the weights. Aliases for the \code{weight\_sum} constraint type include \code{weight} and \code{leverage}. Here we add a constraint that the weights must sum to 1, or the full investment constraint.
 <<tidy=FALSE>>=
 # Add the full investment constraint that specifies the weights must sum to 1.
 pspec <- add.constraint(portfolio=pspec, 
@@ -198,7 +198,7 @@ The print method for the portfolio object shows a concise view of the portfolio 
 print(pspec)
 @
 
-The \code{summary} function gives a more detailed view of the constraints.
+The summary method gives a more detailed view of the constraints.
 <<>>=
 summary(pspec)
 @

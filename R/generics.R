@@ -296,7 +296,7 @@ print.portfolio <- function(x, ...){
 #' @method summary portfolio
 #' @export
 summary.portfolio <- function(object, ...){
-  if(!is.portfolio(x)) stop("object passed in is not of class 'portfolio'")
+  if(!is.portfolio(object)) stop("object passed in is not of class 'portfolio'")
   
   out <- list()
   
@@ -308,13 +308,15 @@ summary.portfolio <- function(object, ...){
   out$enabled_constraints <- list()
   out$disabled_constraints <- list()
   constraints <- object$constraints
-  for(i in 1:length(constraints)){
-    if(constraints[[i]]$enabled){
-      tmp <- length(out$enabled_constraints)
-      out$enabled_constraints[[tmp+1]] <- constraints[[i]]
-    } else {
-      tmp <- length(out$disabled_constraints)
-      out$disabled_constraints[[tmp+1]] <- constraints[[i]]
+  if(length(constraints) >= 1){
+    for(i in 1:length(constraints)){
+      if(constraints[[i]]$enabled){
+        tmp <- length(out$enabled_constraints)
+        out$enabled_constraints[[tmp+1]] <- constraints[[i]]
+      } else {
+        tmp <- length(out$disabled_constraints)
+        out$disabled_constraints[[tmp+1]] <- constraints[[i]]
+      }
     }
   }
   
@@ -322,13 +324,15 @@ summary.portfolio <- function(object, ...){
   out$enabled_objectives <- list()
   out$disabled_objectives <- list()
   objectives <- object$objectives
-  for(i in 1:length(objectives)){
-    if(objectives[[i]]$enabled){
-      tmp <- length(out$enabled_objectives)
-      out$enabled_objectives[[tmp+1]] <- objectives[[i]]
-    } else {
-      tmp <- length(out$disabled_objectives)
-      out$disabled_objectives[[tmp+1]] <- objectives[[i]]
+  if(length(objectives) >= 1){
+    for(i in 1:length(objectives)){
+      if(objectives[[i]]$enabled){
+        tmp <- length(out$enabled_objectives)
+        out$enabled_objectives[[tmp+1]] <- objectives[[i]]
+      } else {
+        tmp <- length(out$disabled_objectives)
+        out$disabled_objectives[[tmp+1]] <- objectives[[i]]
+      }
     }
   }
   class(out) <- "summary.portfolio"

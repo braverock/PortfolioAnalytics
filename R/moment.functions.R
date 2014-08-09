@@ -149,7 +149,7 @@ set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
 #'   \item{sample: }{sample estimates are used for the moments}
 #'   \item{boudt: }{estimate the second, third, and fourth moments using a 
 #'   statistical factor model based on the work of Kris Boudt.}
-#'   See \code{\link{fit.statistical.factor.model}}
+#'   See \code{\link{statistical.factor.model}}
 #'   \item{black_litterman: }{estimate the first and second moments using the 
 #'   Black Litterman Formula. See \code{\link{black.litterman}}}.
 #' }

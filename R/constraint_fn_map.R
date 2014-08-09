@@ -408,6 +408,7 @@ fn_map <- function(weights, portfolio, relax=FALSE, verbose=FALSE, ...){
 #' @param max_pos_short maximum number of assets with short (i.e. sell) positions
 #' @param leverage maximum leverage exposure where leverage is defined as \code{sum(abs(weights))}
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
+#' @param weight_seq vector of seed sequence of weights
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, Ross Bennett (based on an idea by Pat Burns)
 #' @export

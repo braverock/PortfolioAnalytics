@@ -36,6 +36,8 @@ rp_transform(w, min_sum, max_sum, min_box, max_box, groups = NULL,
 \item{leverage}{maximum leverage exposure where leverage is defined as \code{sum(abs(weights))}}
 
 \item{max_permutations}{integer: maximum number of iterations to try for a valid portfolio, default 200}
+
+\item{weight_seq}{vector of seed sequence of weights}
 }
 \value{
 named weighting vector
