@@ -47,7 +47,7 @@ Many real-world portfolio optimization problems are global optimization problems
 
 \kbd{PortfolioAnalytics} supports three methods of generating random portfolios.
 \itemize{
-  \item The sample method to generate random portfolios is based on an idea by Pat Burns. This is the most flexible method, but also the slowest, and can generate portfolios to satisfy leverage, box, group, and position limit constraints.
+  \item The sample method to generate random portfolios is based on an idea by Pat Burns. This is the most flexible method, but also the slowest, and can generate portfolios to satisfy leverage, box, group, position limit, and leverage constraints.
   \item The simplex method to generate random portfolios is based on a paper by W. T. Shaw. The simplex method is useful to generate random portfolios with the full investment constraint (where the sum of the weights is equal to 1) and min box constraints. Values for min_sum and max_sum of the leverage constraint will be ignored, the sum of weights will equal 1. All other constraints such as the box constraint max, group and position limit constraints will be handled by elimination. If the constraints are very restrictive, this may result in very few feasible portfolios remaining. Another key point to note is that the solution may not be along the vertexes depending on the objective. For example, a risk budget objective will likely place the portfolio somewhere on the interior.
   \item The grid method to generate random portfolios is based on the \code{gridSearch} function in package \kbd{NMOF}. The grid search method only satisfies the min and max box constraints. The min_sum and max_sum leverage constraint will likely be violated and the weights in the random portfolios should be normalized. Normalization may cause the box constraints to be violated and will be penalized in \code{constrained_objective}.
 }
@@ -67,6 +67,18 @@ Objectives can be added to the portfolio object with \code{\link{add.objective}}
 With the constraints and objectives specified in the portfolio object, the portfolio object can be passed to \code{\link{optimize.portfolio}} or \code{\link{optimize.portfolio.rebalancing}} to run the optimization. Arguments to \code{\link{optimize.portfolio}} include asset returns, the portfolio obect specifying constraints and objectives, optimization method, and other parameters specific to the solver. \code{\link{optimize.portfolio.rebalancing}} adds support for backtesting portfolio optimization through time with rebalancing or rolling periods.
 }
 
+\section{Advanced Optimization}{
+In addition to the more standard optimizations described above, \kdb{PortfolioAnalytics} also supports multi-layer optimization and regime switching optimization. 
+
+Support for multi-layer optimization allows one to construct a top level portfolio and several sub-portfolios with potentially different assets, constraints, and objectives. First, each sub-portfolio is optimized out-of-sample which creates a time series of returns. One can think of the out of sample returns for each sub-portfolio as the returns for a synthetic instrument. Finally, the out-of-sample returns of each sub-portfolio are then used as inputs for the top level optimization. The top level portfolio and sub-portfolios are created as normal using \code{portfolio.spec}, \code{add.constraint}, and \code{add.objective}. The multi-layer portfolio specification object is first initialized by passing the top level portfolio to \code{mult.portfolio.spec}. Sub-portfolios are then added with \code{add.sub.portfolio}. The multi-layer portfolio specification object can then be passed to \code{optimize.portfolio} and \code{optimize.portfolio.rebalancing}. See \code{demo(multi_layer_optimization)}.
+
+Support for regime switching models allows one to change constraints and objectives depending on the current regime. Portfolios are created as normal with \code{portfolio.spec}, \code{add.constraint}, and \code{add.objective}. The portfolios are then combined with a regime object using \code{regime.portfolios} to create a regime portfolio specification which can then be passed to \code{optimize.portfolio} and \code{optimize.portfolio.rebalancing}. Regime switching optimization is implemented in such a way that any arbitrary regime model can be used. See \code{demo(regime_switching)}.
+}
+
+\section{Portfolio Moments}{
+The \kdb{PortfolioAnalytics} framework to estimate solutions to constrained optimization problems is implemented in such a way that the moments of the returns are set once for use in lower level optimization functions. The \code{set.portfolio.moments} function computes the first, second, third, and fourth moments depending on the objective function(s) in the \code{portfolio} object. For example, if the third and fourth moments do not need to be calculated for a given objective, then \code{set.portfolio.moments} will try to detect this and not compute those moments. Currently, \code{set.portfolio.moments} implements methods to compute moments based on sample estimates, higher moments from fitting a statistical factor model based on the work of Kris Boudt, the Black Litterman model, and the Fully Flexible Framework based on the work of Attilio Meucci (NEED REFERENCE HERE). See the Custom Moment and Objective Functions vignette for a more detailed description and examples. 
+}
+
 \section{Charts and Graphs}{
 Intuition into the optimization can be aided through visualization. The goal of creating the charts is to provide visualization tools for optimal portfolios regardless of the chosen optimization method.
 
@@ -75,6 +87,14 @@ Intuition into the optimization can be aided through visualization. The goal of 
 Efficient frontiers can be extracted from \code{optimize.portfolio} objects or created from a \code{portfolio} object. The efficient frontier can be charted in risk-reward space with \code{\link{chart.EfficientFrontier}}. The weights along the efficient frontier can be charted with \code{\link{chart.Weights.EF}}.
 
 Multiple objects created via \code{\link{optimize.portfolio}} can be combined with \code{\link{combine.optimizations}} for visual comparison. The weights of the optimal portfolios can be plotted with \code{\link{chart.Weights}}. The optimal portfolios can be compared in risk-reward space with \code{\link{chart.RiskReward}}. The portfolio component risk contributions of the multiple optimal portfolios can be plotted with \code{\link{chart.RiskBudget}}.
+}
+
+\section{Demos}{
+\kdb{PortfolioAnalytics} contains a comprehensive collection of demos to demonstrate the functionality from very basic optimization problems such as estimating the solution to a minimum variance portfolio to more complex optimization problems with custom moment and objective functions.
+}
+
+\section{Vignettes}{
+TODO
 }
 
 \section{Package Dependencies}{
@@ -98,6 +118,7 @@ Comments, suggestions, and/or code patches are welcome.
 }
 
 \author{
+Ross Bennett \cr
 Kris Boudt \cr
 Peter Carl \cr
 Brian G. Peterson \cr
@@ -106,9 +127,17 @@ Maintainer: Brian G. Peterson \email{brian@braverock.com}
 }
 
 \references{
-Shaw, William Thornton, \emph{Portfolio Optimization for VAR, CVaR, Omega and Utility with General Return Distributions: A Monte Carlo Approach for Long-Only and Bounded Short Portfolios with Optional Robustness and a Simplified Approach to Covariance Matching} (June 1, 2011). Available at SSRN: http://ssrn.com/abstract=1856476 or http://dx.doi.org/10.2139/ssrn.1856476 \cr
+Boudt, Kris and Lu, Wanbo and Peeters, Benedict, \emph{Higher Order Comoments of Multifactor Models and Asset Allocation} (June 16, 2014). Available at SSRN: http://ssrn.com/abstract=2409603 or http://dx.doi.org/10.2139/ssrn.2409603
 
-Scherer, B. and Martin, D. \emph{Modern Portfolio Optimization}. Springer. 2005. \cr
+Chriss, Neil A and Almgren, Robert, \emph{Portfolios from Sorts} (April 27, 2005). Available at SSRN: http://ssrn.com/abstract=720041 or http://dx.doi.org/10.2139/ssrn.720041 \cr
+
+Meucci, Attilio, \emph{The Black-Litterman Approach: Original Model and Extensions} (August 1, 2008). Shorter version in, THE ENCYCLOPEDIA OF QUANTITATIVE FINANCE, Wiley, 2010. Available at SSRN: http://ssrn.com/abstract=1117574 or http://dx.doi.org/10.2139/ssrn.1117574 \cr
+
+Meucci, Attilio, \emph{Fully Flexible Views: Theory and Practice} (August 8, 2008). Fully Flexible Views: Theory and Practice, Risk, Vol. 21, No. 10, pp. 97-102, October 2008. Available at SSRN: http://ssrn.com/abstract=1213325
+
+Scherer, Bernd and Martin, Doug, \emph{Modern Portfolio Optimization}. Springer. 2005. \cr
+
+Shaw, William Thornton, \emph{Portfolio Optimization for VAR, CVaR, Omega and Utility with General Return Distributions: A Monte Carlo Approach for Long-Only and Bounded Short Portfolios with Optional Robustness and a Simplified Approach to Covariance Matching} (June 1, 2011). Available at SSRN: http://ssrn.com/abstract=1856476 or http://dx.doi.org/10.2139/ssrn.1856476 \cr
 
 }
 
