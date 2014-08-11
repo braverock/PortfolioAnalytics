@@ -37,7 +37,6 @@
 % \VignetteIndexEntry{Custom Moment and Objective Functions}
 
 \begin{document}
-\SweaveOpts{concordance=TRUE}
 
 \title{Custom Moment and Objective Functions}
 \author{Ross Bennett}
@@ -73,7 +72,7 @@ funds <- colnames(R)
 @
 
 \section{Setting the Portfolio Moments}
-The PortfolioAnalytics framework to estimate solutions to constrained optimization problems is implemented in such a way that the moments of the returns are calculated only once and then used in lower level optimization functions. The \code{set.portfolio.moments} function computes the first, second, third, and fourth moments depending on the objective function(s) in the \code{portfolio} object. For example, if the third and fourth moments do not need to be calculated for a given objective, then \code{set.portfolio.moments} will try to detect this and not compute those moments. Currently, \code{set.portfolio.moments} implements methods to compute moments based on sample estimates, higher moments from fitting a statistical factor model based on the work of Kris Boudt, the Black Litterman model, and the Fully Flexible Framework based on the work of Attilio Meucci (NEED REFERENCE HERE).
+The PortfolioAnalytics framework to estimate solutions to constrained optimization problems is implemented in such a way that the moments of the returns are calculated only once and then used in lower level optimization functions. The \code{set.portfolio.moments} function computes the first, second, third, and fourth moments depending on the objective function(s) in the \code{portfolio} object. For example, if the third and fourth moments do not need to be calculated for a given objective, then \code{set.portfolio.moments} will try to detect this and not compute those moments. Currently, \code{set.portfolio.moments} implements methods to compute moments based on sample estimates, higher moments from fitting a statistical factor model based on the work of Kris Boudt \citep{Boudt2014}, the Black Litterman model \citep{MeucciBL2008}, and the Fully Flexible Framework based on the work of Attilio Meucci \citep{Meucci2008}.
 
 <<tidy=FALSE>>=
 # Construct initial portfolio with basic constraints.
@@ -186,7 +185,7 @@ opt.pasd <- optimize.portfolio(R, pasd.portf,
 opt.pasd
 @
 
-We now consider an example with a more complicated objective function. Our objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in the Boudt paper and Martellini paper (NEED REFERENCE).
+We now consider an example with a more complicated objective function. Our objective to maximize the fourth order expansion of the Constant Relative Risk Aversion (CRRA) expected utility function as in \citep{Boudt2014}.
 
 \begin{equation*}
 EU_{\lambda}(w) = - \frac{\lambda}{2} m_{(2)}(w) +
@@ -246,5 +245,7 @@ opt.crra
 The modular framework of \verb"PortfolioAnalytics" allows one to easily define custom moment functions and objective functions as valid \R functions.
 
 TODO: add content to concluding paragraph
+
+\bibliography{PA}
 
 \end{document}
