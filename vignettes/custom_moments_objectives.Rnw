@@ -44,7 +44,7 @@
 \maketitle
 
 \begin{abstract}
-The purpose of this vignette is to demonstrate how to write and use custom moment functions and custom objective functions.
+The purpose of this vignette is to demonstrate how to write and use custom moment functions and custom objective functions to solve complex optimization problems.
 \end{abstract}
 
 \tableofcontents
@@ -58,7 +58,7 @@ library(PortfolioAnalytics)
 @
 
 \subsection{Data}
-The edhec data set from the PerformanceAnalytics package will be used as example data.
+The edhec data set from the PerformanceAnalytics package will be used as data for the following examples.
 <<>>=
 data(edhec)
 
@@ -107,7 +107,7 @@ The moment function should return a named list object where the elements represe
   \item[\code{\$m4}]{ fourth moment; cokurtosis matrix}
 \end{description}
 
-The lower level optimization functions expect an object with the structure described above. List elements with the names \code{mu}, \code{sigma}, \code{m3}, and\code{m4} are matched automatically and handled in an efficient manner.
+The lower level optimization functions expect an object with the structure described above. List elements with the names \code{mu}, \code{sigma}, \code{m3}, and \code{m4} are matched automatically and handled in an efficient manner.
 
 Here we define a function to estimate the covariance matrix using a robust method.
 <<>>=
@@ -137,7 +137,7 @@ extractObjectiveMeasures(opt.sd)$StdDev
 @
 
 \section{Custom Objective Functions}
-A key feature of \verb"PortfolioAnalytics" is that the name for an objective can be any valid \verb"R" function. \verb"PortfolioAnalytics" was designed to be flexible and modular, and custom objective functions are a key example of this.
+A key feature of \verb"PortfolioAnalytics" is that the name for an objective can be any valid \R function. \verb"PortfolioAnalytics" was designed to be flexible and modular, and custom objective functions are a key example of this.
 
 Here we define a very simple function to compute annualized standard deviation for monthly data that we will use as an objective function.
 <<>>=
@@ -193,7 +193,7 @@ EU_{\lambda}(w) = - \frac{\lambda}{2} m_{(2)}(w) +
 \frac{\lambda (\lambda + 1) (\lambda + 2)}{24} m_{(4)}(w)
 \end{equation*}
 
-Define a function to compute CRRA estimate. Note how we define the function to use \code{sigma}, \code{m3}, and \code{m4} as arguments that will use the output from a custom moment function. We could compute the moments inside this function, but re-computing the moments thousands of times (i.e. at each iteration) can be very compute intensive.
+Here we define a function to compute CRRA estimate. Note how we define the function to use \code{sigma}, \code{m3}, and \code{m4} as arguments that will use the output from a custom moment function. We could compute the moments inside this function, but re-computing the moments potentially tens of thousands of times (i.e. at each iteration) can be very compute intensive.
 
 <<>>=
 CRRA <- function(R, weights, lambda, sigma, m3, m4){
@@ -242,9 +242,7 @@ opt.crra <- optimize.portfolio(R, crra.portf, optimize_method="DEoptim",
 opt.crra
 @
 
-The modular framework of \verb"PortfolioAnalytics" allows one to easily define custom moment functions and objective functions as valid \R functions.
-
-TODO: add content to concluding paragraph
+\verb"PortfolioAnalytics" supports several methods to estimate moments as well as user defined moment functions. The name of the objective must be the name of a valid \R function and \verb"PortfolioAnalytics" integrates well with \kbd{PerformanceAnalytics} to utilize several of the risk measure functions such as \code{StdDev} and \code{ES}. Because an objective function can be a valid \R function, user defined objective functions are supported. The modular framework of \verb"PortfolioAnalytics" allows one to easily define custom moment functions and objective functions as valid \R functions to solve complex and specialized objective functions.
 
 \bibliography{PA}
 
