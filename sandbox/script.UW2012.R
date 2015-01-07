@@ -557,12 +557,9 @@ x.obj<-NULL
 for(result in names(results)[grep('.t',names(results),fixed=TRUE)]){
   print(result)
     x=get('results')[[result]]
-    x.obj=rbind(x.obj, data.frame(mean=x$"2012-02-29"$objective_measures[[1]],pasd=x$"2012-02-29"$objective_measures[[2]],CVaR=as.numeric(x$"2012-02-29"$objective_measures[[3]][1])))
-    
-  print(x.obj)
-  
-    #RND.objectives = rbind(RND.objectives,x.obj)
+    x.obj=rbind(x.obj, data.frame(mean=x[[evalDate]]$objective_measures[[1]],pasd=x[[evalDate]]$objective_measures[[2]],CVaR=as.numeric(x[[evalDate]]$objective_measures[[3]][1])))
 }
+print(x.obj)
 rownames(x.obj)=names(results)[grep('.t',names(results),fixed=TRUE)] # @TODO: add prettier labels
 
 

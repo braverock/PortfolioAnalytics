@@ -49,7 +49,7 @@ SortinoRebalance <- optimize.portfolio.rebalancing(R=indexes[,1:4], constraints=
 ###############################################################################
 # R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2010 Kris Boudt, Peter Carl and Brian G. Peterson
+# Copyright (c) 2004-2014 Kris Boudt, Peter Carl and Brian G. Peterson
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
