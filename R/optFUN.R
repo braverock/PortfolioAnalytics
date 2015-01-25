@@ -356,7 +356,7 @@ maxret_milp_opt <- function(R, constraints, moments, target, solver="glpk", cont
   
   # Add the factor exposures to Amat, dir, and rhs
   if(!is.null(constraints$B)){
-    t.B <- t(B)
+    t.B <- t(constraints$B)
     zeros <- matrix(data=0, nrow=nrow(t.B), ncol=ncol(t.B))
     Amat <- rbind(Amat, cbind(t.B, zeros), cbind(-t.B, zeros))
     dir <- c(dir, rep(">=", 2 * nrow(t.B)))

@@ -540,6 +540,8 @@ rp_simplex <- function(portfolio, permutations, fev=0:5){
   
   # do the transformation to the set of weights to satisfy lower bounds
   stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+  j <- 1
+  i <- 1
   out <- foreach(j = 1:length(fev), .combine=c) %:% foreach(i=1:nrow(Umat)) %dopar% {
     q <- 2^fev[j]
     tmp <- L + (1 - sum(L)) * log(Umat[i,])^q / sum(log(Umat[i,])^q)

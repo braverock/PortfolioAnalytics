@@ -115,14 +115,41 @@ optimize.portfolio_v1 <- function(
         DEcformals$NP <- NP
         DEcformals$itermax <- itermax
         DEcformals[pm] <- dotargs[pm > 0L]
-		if(!hasArg(strategy)) DEcformals$strategy=6 # use DE/current-to-p-best/1
-		if(!hasArg(reltol)) DEcformals$reltol=.000001 # 1/1000 of 1% change in objective is significant
-		if(!hasArg(steptol)) DEcformals$steptol=round(N*1.5) # number of assets times 1.5 tries to improve
-		if(!hasArg(c)) DEcformals$c=.4 # JADE mutation parameter, this could maybe use some adjustment
-        if(!hasArg(storepopfrom)) DEcformals$storepopfrom=1
+		if(!hasArg(strategy)) {
+		  # use DE/current-to-p-best/1
+		  strategy=6
+      DEcformals$strategy=strategy
+      }
+		if(!hasArg(reltol)) {
+		  # 1/1000 of 1% change in objective is significant
+		  reltol=.000001
+      DEcformals$reltol=reltol
+      }
+		if(!hasArg(steptol)) {
+		  # number of assets times 1.5 tries to improve
+		  steptol=round(N*1.5)
+      DEcformals$steptol=steptol
+      }
+		if(!hasArg(c)) {
+		  # JADE mutation parameter, this could maybe use some adjustment
+		  tmp.c=.4
+      DEcformals$c=tmp.c
+      }
+        if(!hasArg(storepopfrom)) {
+          storepopfrom=1
+          DEcformals$storepopfrom=storepopfrom
+        }
         if(isTRUE(parallel) && 'package:foreach' %in% search()){
-            if(!hasArg(parallelType) ) DEcformals$parallelType='auto' #use all cores
-            if(!hasArg(packages) ) DEcformals$packages <- names(sessionInfo()$otherPkgs) #use all packages
+            if(!hasArg(parallelType)) {
+              #use all cores
+              parallelType='auto'
+              DEcformals$parallelType=parallelType
+              }
+            if(!hasArg(packages)) {
+              #use all packages
+              packages <- names(sessionInfo()$otherPkgs)
+              DEcformals$packages <- packages
+              }
         }
 		 
         #TODO FIXME also check for a passed in controlDE list, including checking its class, and match formals
@@ -190,6 +217,7 @@ optimize.portfolio_v1 <- function(
       if (isTRUE(trace)) out$random_portfolios<-rp
       #' write foreach loop to call constrained_objective() with each portfolio
       if ("package:foreach" %in% search() & !hasArg(parallel)){
+          ii <- 1
           rp_objective_results<-foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective_v1(w=rp[ii,],R,constraints,trace=trace,...=dotargs)
       } else {
           rp_objective_results<-apply(rp, 1, constrained_objective_v1, R=R, constraints=constraints, trace=trace, ...=dotargs)
@@ -337,8 +365,15 @@ optimize.portfolio_v1 <- function(
       #NOTE reltol has a different meaning for pso than it has for DEoptim.  for DEoptim, reltol is a stopping criteria, for pso, 
       #     it is a restart criteria.
         
-      if(!hasArg(s)) controlPSO$s<-N*10 #swarm size
-      if(!hasArg(maxit.stagnate)) controlPSO$maxit.stagnate <- controlPSO$s #stopping criteria      
+      if(!hasArg(s)) {
+        s <- N*10
+        controlPSO$s<-s
+        } #swarm size
+      if(!hasArg(maxit.stagnate)) {
+        #stopping criteria 
+        maxit.stagnate <- controlPSO$s
+        controlPSO$maxit.stagnate <- maxit.stagnate
+        }     
       if(hasArg(trace) && try(trace==TRUE,silent=TRUE)) controlPSO$trace <- TRUE
       if(hasArg(trace) && isTRUE(trace)) {
           controlPSO$trace <- TRUE
@@ -652,14 +687,41 @@ optimize.portfolio_v2 <- function(
       DEcformals$NP <- NP
       DEcformals$itermax <- itermax
       DEcformals[pm] <- dotargs[pm > 0L]
-      if(!hasArg(strategy)) DEcformals$strategy=6 # use DE/current-to-p-best/1
-      if(!hasArg(reltol)) DEcformals$reltol=.000001 # 1/1000 of 1% change in objective is significant
-      if(!hasArg(steptol)) DEcformals$steptol=round(N*1.5) # number of assets times 1.5 tries to improve
-      if(!hasArg(c)) DEcformals$c=.4 # JADE mutation parameter, this could maybe use some adjustment
-      if(!hasArg(storepopfrom)) DEcformals$storepopfrom=1
+      if(!hasArg(strategy)) {
+        # use DE/current-to-p-best/1
+        strategy=6
+        DEcformals$strategy=strategy
+        }
+      if(!hasArg(reltol)) {
+        # 1/1000 of 1% change in objective is significant
+        reltol=0.000001
+        DEcformals$reltol=reltol
+        } 
+      if(!hasArg(steptol)) {
+        # number of assets times 1.5 tries to improve
+        steptol=round(N*1.5)
+        DEcformals$steptol=steptol
+        } 
+      if(!hasArg(c)) {
+        # JADE mutation parameter, this could maybe use some adjustment
+        tmp.c=0.4
+        DEcformals$c=tmp.c
+        }
+      if(!hasArg(storepopfrom)) {
+        storepopfrom=1
+        DEcformals$storepopfrom=storepopfrom
+      }
       if(isTRUE(parallel) && 'package:foreach' %in% search()){
-        if(!hasArg(parallelType) ) DEcformals$parallelType='auto' #use all cores
-        if(!hasArg(packages) ) DEcformals$packages <- names(sessionInfo()$otherPkgs) #use all packages
+        if(!hasArg(parallelType)) {
+          #use all cores
+          parallelType='auto'
+          DEcformals$parallelType=parallelType
+          }
+        if(!hasArg(packages)) {
+          #use all packages
+          packages <- names(sessionInfo()$otherPkgs)
+          DEcformals$packages <- packages
+          }
       }
       #TODO FIXME also check for a passed in controlDE list, including checking its class, and match formals
     }
@@ -765,6 +827,7 @@ optimize.portfolio_v2 <- function(
     # rp is already being generated with a call to fn_map so set normalize=FALSE in the call to constrained_objective
     #' write foreach loop to call constrained_objective() with each portfolio
     if ("package:foreach" %in% search() & !hasArg(parallel)){
+      ii <- 1
       rp_objective_results <- foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,], R=R, portfolio=portfolio, trace=trace, env=dotargs, normalize=FALSE)
     } else {
       rp_objective_results <- apply(rp, 1, constrained_objective, R=R, portfolio=portfolio, trace=trace, normalize=FALSE, env=dotargs)
@@ -1276,7 +1339,7 @@ optimize.portfolio <- optimize.portfolio_v2
 #' @rdname optimize.portfolio.rebalancing
 #' @name optimize.portfolio.rebalancing
 #' @export
-optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, trailing_periods=NULL)
+optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, rolling_window=NULL)
 {
     stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
     start_t<-Sys.time()
@@ -1289,13 +1352,21 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
             rp<-random_portfolios(rpconstraints=constraints,permutations=search_size)
     } else {
         rp=NULL
-    }    
+    }
+    
+    # check for trailing_periods argument and set rolling_window equal to 
+    # trailing_periods for backwards compatibility
+    if(hasArg(trailing_periods)) {
+      trailing_periods=match.call(expand.dots=TRUE)$trailing_periods
+      rolling_window <- trailing_periods
+    }
     
     if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
-    if (is.null(trailing_periods)){
+    if (is.null(rolling_window)){
         # define the index endpoints of our periods
         ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
         # now apply optimize.portfolio to the periods, in parallel if available
+        ep <- ep.i[1]
         out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
                     optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
                   }
@@ -1304,7 +1375,7 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
         ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
         # now apply optimize.portfolio to the periods, in parallel if available
         out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
-                    optimize.portfolio(R[(ifelse(ep-trailing_periods>=1,ep-trailing_periods,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
+                    optimize.portfolio(R[(ifelse(ep-rolling_window>=1,ep-rolling_window,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
                   }
     }
     names(out_list)<-index(R[ep.i])
@@ -1505,6 +1576,7 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
     # define the index endpoints of our periods
     ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
     # now apply optimize.portfolio to the periods, in parallel if available
+    ep <- ep.i[1]
     out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
       optimize.portfolio(R[1:ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
     }

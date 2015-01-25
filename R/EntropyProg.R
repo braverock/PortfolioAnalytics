@@ -260,8 +260,8 @@ pHist = function( X , p , nBins, freq = FALSE )
   D = x[2] - x[1]
   
   N = length(x)
-  np = zeros(N , 1)
-  
+  # np = zeros(N , 1)
+  np = matrix(0, nrow=N, ncol=1)
   for (s in 1:N)
   {
     # The boolean Index is true is X is within the interval centered at x(s) and within a half-break distance

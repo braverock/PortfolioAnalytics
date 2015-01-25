@@ -191,6 +191,7 @@ extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
   
   # run constrained_objective on the weights to get the objective measures in a matrix
   stopifnot("package:foreach" %in% search() || suppressMessages(require("foreach",quietly = TRUE)))
+  i <- 1
   obj <- foreach(i=1:nrow(psoweights), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
     unlist(constrained_objective(w=psoweights[i,], R=R, portfolio=portfolio, trace=TRUE)$objective_measures)
   }
@@ -255,7 +256,7 @@ extractStats.optimize.portfolio.eqwt <- function(object, prefix=NULL, ...) {
 extractStats.optimize.portfolio.rebalancing <- function(object, prefix=NULL, ...) {
   if(!inherits(object, "optimize.portfolio.rebalancing")) stop("object must be of class optimize.portfolio.rebalancing")
   
-  if(inherits(opt.rebal$portfolio, "regime.portfolios")){
+  if(inherits(object$portfolio, "regime.portfolios")){
     return(extractStatsRegime(object, prefix=prefix))
   } else {
     return(lapply(object$opt_rebal, extractStats, ...))

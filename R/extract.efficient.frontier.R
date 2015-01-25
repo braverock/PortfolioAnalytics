@@ -60,6 +60,7 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=NULL, 
   }
   
   set<-cbind(quantmod::Lag(set,1),as.matrix(set))[-1,]
+  i <- 1
   result <- foreach(i=1:nrow(set),.inorder=TRUE, .combine=rbind, .errorhandling='remove') %do% {
     tmp<-xtract[which(xtract[,mtc]>=set[i,1] & xtract[,mtc]<set[i,2]),]
     #tmp<-tmp[which.min(tmp[,'out']),]
@@ -174,6 +175,7 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   if(!is.null(risk_aversion)){
     # Enable the return objective so we are doing quadratic utility
     portfolio$objectives[[mean_idx]]$enabled <- TRUE
+    lambda <- risk_aversion[1]
     out <- foreach(lambda=iter(risk_aversion), .inorder=TRUE, .combine=rbind, .errorhandling='remove', .packages='PortfolioAnalytics') %dopar% {
       portfolio$objectives[[var_idx]]$risk_aversion <- lambda
       extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI", ...=...))
@@ -183,6 +185,7 @@ meanvar.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_avers
   } else {
     # Enable the return constraint
     portfolio$constraints[[ret_constr_idx]]$enabled <- TRUE
+    ret <- ret_seq[1]
     out <- foreach(ret=iter(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove', .packages='PortfolioAnalytics') %dopar% {
       portfolio$constraints[[ret_constr_idx]]$return_target <- ret
       opt <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI", ...=...)
@@ -270,6 +273,7 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
   #   }
   stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
   stopifnot("package:iterators" %in% search() || require("iterators",quietly = TRUE))
+  ret <- ret_seq[1]
   out <- foreach(ret=iter(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove', .packages='PortfolioAnalytics') %dopar% {
     portfolio$objectives[[mean_idx]]$target <- ret
     extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI", ef=TRUE, ...=...))

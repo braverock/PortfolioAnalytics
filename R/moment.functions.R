@@ -179,7 +179,7 @@ set.portfolio.moments_v2 <- function(R,
     clean <- unlist(lapply(portfolio$objectives, function(x) x$arguments$clean))
     if(!is.null(clean)){
       if(length(unique(clean)) > 1){
-        warning(paste("Multiple methods detected for cleaning returns, default to use clean =", tmp[1]))
+        warning(paste("Multiple methods detected for cleaning returns, default to use clean =", clean[1]))
       }
       cleanR <- Return.clean(R, method=clean[1])
       cleaned <- TRUE
@@ -394,7 +394,7 @@ portfolio.moments.boudt <- function(R, portfolio, momentargs=NULL, k=1, ...){
   clean <- unlist(lapply(portfolio$objectives, function(x) x$arguments$clean))
   if(!is.null(clean)){
     if(length(unique(clean)) > 1){
-      warning(paste("Multiple methods detected for cleaning returns, default to use clean =", tmp[1]))
+      warning(paste("Multiple methods detected for cleaning returns, default to use clean =", clean[1]))
     }
     # This sets R as the cleaned returns for the rest of the function
     # This is proably fine since the only other place R is used is for the 
@@ -478,7 +478,7 @@ portfolio.moments.bl <- function(R, portfolio, momentargs=NULL, P, Mu=NULL, Sigm
   clean <- unlist(lapply(portfolio$objectives, function(x) x$arguments$clean))
   if(!is.null(clean)){
     if(length(unique(clean)) > 1){
-      warning(paste("Multiple methods detected for cleaning returns, default to use clean =", tmp[1]))
+      warning(paste("Multiple methods detected for cleaning returns, default to use clean =", clean[1]))
     }
     # This sets R as the cleaned returns for the rest of the function
     # This is proably fine since the only other place R is used is for the 

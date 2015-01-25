@@ -51,6 +51,7 @@ chart.Concentration <- function(object,
   conc.type <- match.arg(conc.type)
   
   columnnames <- colnames(xtract)
+  R <- object$R
   
   # Get the return and risk columns from xtract
   return.column <- pmatch(return.col, columnnames)
@@ -136,7 +137,7 @@ chart.Concentration <- function(object,
   y <- (x.hhi - min(x.hhi)) / (max(x.hhi) - min(x.hhi))
   
   op <- par(no.readonly=TRUE)
-  layout(matrix(c(1,2)),height=c(4,1.25),width=1)
+  layout(matrix(c(1,2)),heights=c(4,1.25),widths=1)
   par(mar=c(5,4,1,2)+.1, cex=1) # c(bottom, left, top, right)
   
   # plot the asset in risk-return space ordered based on degree of concentration
