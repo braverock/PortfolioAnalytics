@@ -2,10 +2,17 @@ Package: PortfolioAnalytics
 Type: Package
 Title: Portfolio Analysis, including Numerical Methods for Optimization
     of Portfolios
-Version: 0.9.3581
+Authors@R: c(
+  person(given=c("Brian","G."),family="Peterson",role=c("cre","aut","cph"), email="brian@braverock.com")
+  , person(given="Peter",family="Carl",role=c("aut","cph"), email="peter@braverock.com")
+  , person(given="Kris",family="Boudt",role=c("ctb","cph"))
+  , person(given="Ross",family="Bennett",role=c("ctb","cph"))
+  , person(given="Hezky",family="Varon",role="ctb")
+  , person(given="Guy",family="Yollin",role="ctb")
+  , person(given="R. Douglas",family="Martin",role="ctb")
+  )
+Version: 0.9.3585
 Date: $Date$
-Author: Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
-Contributors: R. Douglas Martin, Guy Yollin, Hezky Varon
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
