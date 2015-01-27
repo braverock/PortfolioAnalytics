@@ -236,7 +236,7 @@ chart.Scatter.DE <- function(object, ..., neighbors = NULL, return.col='mean', r
         
         w = w.traj[i,]
         x = unlist(constrained_objective(w=w, R=R, portfolio=portfolio, trace=TRUE))
-        names(x)<-PortfolioAnalytics:::name.replace(names(x))
+        names(x)<-name.replace(names(x))
         if(is.null(trajnames)) trajnames<-names(x)
         if(is.null(rsc)){
           rtc = pmatch(return.col,trajnames)
@@ -273,7 +273,7 @@ chart.Scatter.DE <- function(object, ..., neighbors = NULL, return.col='mean', r
     result.slot<-'objective_measures'
   }
   objcols<-unlist(object[[result.slot]])
-  names(objcols)<-PortfolioAnalytics:::name.replace(names(objcols))
+  names(objcols)<-name.replace(names(objcols))
   return.column = pmatch(return.col,names(objcols))
   if(is.na(return.column)) {
     return.col = paste(return.col,return.col,sep='.')

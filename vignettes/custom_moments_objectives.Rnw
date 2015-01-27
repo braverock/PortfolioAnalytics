@@ -112,9 +112,10 @@ The lower level optimization functions expect an object with the structure descr
 Here we define a function to estimate the covariance matrix using a robust method.
 <<>>=
 sigma.robust <- function(R){
+  require(MASS)
   out <- list()
   set.seed(1234)
-  out$sigma <- MASS::cov.rob(R, method="mcd")$cov
+  out$sigma <- cov.rob(R, method="mcd")$cov
   return(out)
 }
 @

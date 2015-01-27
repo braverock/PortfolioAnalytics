@@ -427,11 +427,11 @@ chart.Weights.EF.optimize.portfolio <- function(object, ..., colorset=NULL, n.po
   if(!inherits(object, "optimize.portfolio")) stop("object must be of class optimize.portfolio")
   
   frontier <- extractEfficientFrontier(object=object, match.col=match.col, n.portfolios=n.portfolios)
-  PortfolioAnalytics:::chart.Weights.EF(object=frontier, colorset=colorset, ..., 
-                                        match.col=match.col, by.groups=by.groups, main=main, cex.lab=cex.lab, 
-                                        cex.axis=cex.axis, cex.legend=cex.legend, 
-                                        legend.labels=legend.labels, element.color=element.color,
-                                        legend.loc=legend.loc)
+  chart.Weights.EF(object=frontier, colorset=colorset, ..., 
+                   match.col=match.col, by.groups=by.groups, main=main, cex.lab=cex.lab, 
+                   cex.axis=cex.axis, cex.legend=cex.legend, 
+                   legend.labels=legend.labels, element.color=element.color,
+                   legend.loc=legend.loc)
 }
 
 #' @rdname chart.EfficientFrontier

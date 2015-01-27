@@ -147,8 +147,8 @@ proxy.mult.portfolio <- function(R, mult.portfolio, ...){
     }
     # This needs to support anything in ... that could be passed to optimize.portfolio
     .formals <- formals(optimize.portfolio.rebalancing)
-    .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, R=R, dots=TRUE)
-    .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=tmp, dots=TRUE)
+    .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=TRUE)
+    .formals <- modify.args(formals=.formals, arglist=tmp, dots=TRUE)
     .formals$... <- NULL
     #print(.formals)
     opt <- try(do.call(optimize.portfolio.rebalancing, .formals), silent=TRUE)

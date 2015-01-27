@@ -165,7 +165,7 @@ chart.Scatter.pso <- function(object, ..., neighbors=NULL, return.col="mean", ri
     result.slot<-'objective_measures'
   }
   objcols<-unlist(object[[result.slot]])
-  names(objcols)<-PortfolioAnalytics:::name.replace(names(objcols))
+  names(objcols)<-name.replace(names(objcols))
   return.column = pmatch(return.col,names(objcols))
   if(is.na(return.column)) {
     return.col = paste(return.col,return.col,sep='.')

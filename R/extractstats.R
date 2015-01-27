@@ -544,7 +544,7 @@ extractObjRegime <- function(object){
     # rbind the objective measures and convert to an xts object
     #obj <- xts(do.call(rbind, tmp), as.Date(names(tmp.idx)))
     obj <- do.call(rbind, tmp)
-    colnames(obj) <- PortfolioAnalytics:::name.replace(colnames(obj))
+    colnames(obj) <- name.replace(colnames(obj))
     obj <- xts(obj, as.Date(names(tmp.idx)))
     # insert the objective measures into the list
     out.list[[unique.regimes[i]]] <- obj
@@ -590,7 +590,7 @@ extractObjectiveMeasures.opt.list <- function(object){
     # Get the objective_measures from each element
     for(i in 1:length(object)){
       tmp <- unlist(object[[i]]$objective_measures)
-      names(tmp) <- PortfolioAnalytics:::name.replace(names(tmp))
+      names(tmp) <- name.replace(names(tmp))
       obj_list[[opt.names[i]]] <- tmp
     }
     obj_names <- unique(unlist(lapply(obj_list, names)))
@@ -651,7 +651,7 @@ extractObjectiveMeasures.opt.list <- function(object){
       tmp.R <- object[[i]]$R
       tmp.portf <- object[[i]]$portfolio
       tmp <- unlist(constrained_objective(w=tmp.weights, R=tmp.R, portfolio=tmp.portf, trace=TRUE)$objective_measures)
-      names(tmp) <- PortfolioAnalytics:::name.replace(names(tmp))
+      names(tmp) <- name.replace(names(tmp))
       out[[opt.names[i]]] <- tmp
     }
     out <- do.call(rbind, out)

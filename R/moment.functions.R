@@ -55,8 +55,8 @@ CCCgarch.MM = function(R, momentargs = NULL , ... )
   # set volatility of all U to last observation, such that cov(rescaled U)=sigma 
   uncS = sqrt(diag( cov(U) ))
   U = U*matrix( rep(nextS/uncS,T  ) , ncol = cAssets , byrow = T )
-  momentargs$m3 = PerformanceAnalytics:::M3.MM(U)
-  momentargs$m4 = PerformanceAnalytics:::M4.MM(U)
+  momentargs$m3 = PerformanceAnalytics::M3.MM(U)
+  momentargs$m4 = PerformanceAnalytics::M4.MM(U)
   return(momentargs)
 } 
 
@@ -101,8 +101,8 @@ set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
             if(!inherits(cleanR,"try-error")) {
               momentargs$mu = matrix( as.vector(apply(cleanR,2,'mean')),ncol=1);
               momentargs$sigma = cov(cleanR);
-              momentargs$m3 = PerformanceAnalytics:::M3.MM(cleanR)
-              momentargs$m4 = PerformanceAnalytics:::M4.MM(cleanR)
+              momentargs$m3 = PerformanceAnalytics::M3.MM(cleanR)
+              momentargs$m4 = PerformanceAnalytics::M4.MM(cleanR)
               #' FIXME NOTE: this isn't perfect as it overwrites the moments for all objectives, not just one with clean='boudt'
             }
           }
@@ -121,8 +121,8 @@ set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
              VaR = {
                if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
                if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
-               if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
-               if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+               if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(R)
+               if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(R)
              },
              es =,
              mES =,
@@ -131,8 +131,8 @@ set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
              ES = {
                if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1);
                if(is.null(momentargs$sigma)) momentargs$sigma = cov(R)
-               if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
-               if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+               if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(R)
+               if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(R)
              }
       ) # end switch on objectives    
     }    
@@ -286,8 +286,8 @@ set.portfolio.moments_v2 <- function(R,
                       sample = {
                         if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(tmpR, 2, 'mean')), ncol=1);
                         if(is.null(momentargs$sigma)) momentargs$sigma = cov(tmpR)
-                        if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(tmpR)
-                        if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(tmpR)
+                        if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(tmpR)
+                        if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(tmpR)
                       },
                       boudt = {
                         if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(tmpR, 2, 'mean')), ncol=1);
@@ -298,14 +298,14 @@ set.portfolio.moments_v2 <- function(R,
                       black_litterman = {
                         if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
                         if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
-                        if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(tmpR)
-                        if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(tmpR)
+                        if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(tmpR)
+                        if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(tmpR)
                       },
                       meucci = {
                         if(is.null(momentargs$mu)) momentargs$mu = meucci.model$mu
                         if(is.null(momentargs$sigma)) momentargs$sigma = meucci.model$sigma
-                        if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(tmpR)
-                        if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(tmpR)
+                        if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(tmpR)
+                        if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(tmpR)
                       }
                ) # end nested switch on method
              }, # end switch on mVaR, VaR
@@ -324,8 +324,8 @@ set.portfolio.moments_v2 <- function(R,
                         sample = {
                           if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(tmpR, 2, 'mean')), ncol=1);
                           if(is.null(momentargs$sigma)) momentargs$sigma = cov(tmpR)
-                          if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(tmpR)
-                          if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(tmpR)
+                          if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(tmpR)
+                          if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(tmpR)
                         },
                         boudt = {
                           if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(tmpR, 2, 'mean')), ncol=1);
@@ -336,14 +336,14 @@ set.portfolio.moments_v2 <- function(R,
                         black_litterman = {
                           if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
                           if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
-                          if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(tmpR)
-                          if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(tmpR)
+                          if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(tmpR)
+                          if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(tmpR)
                         },
                         meucci = {
                           if(is.null(momentargs$mu)) momentargs$mu = meucci.model$mu
                           if(is.null(momentargs$sigma)) momentargs$sigma = meucci.model$sigma
-                          if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(tmpR)
-                          if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(tmpR)
+                          if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(tmpR)
+                          if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(tmpR)
                         }
                  ) # end nested switch on method
                }
@@ -364,8 +364,8 @@ garch.mm <- function(R,mu_ts, covlist,momentargs=list(),...) {
   momentargs$mu<-mu_ts[last(index(R)),]
   
   momentargs$sigma<-covlist[as.character(last(index(R)))]
-  if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
-  if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+  if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(R)
+  if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(R)
   return(momentargs)
 }
 
@@ -509,8 +509,8 @@ portfolio.moments.bl <- function(R, portfolio, momentargs=NULL, P, Mu=NULL, Sigm
              VaR = {
                if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
                if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
-               if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
-               if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+               if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(R)
+               if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(R)
              },
              es =,
              mES =,
@@ -525,8 +525,8 @@ portfolio.moments.bl <- function(R, portfolio, momentargs=NULL, P, Mu=NULL, Sigm
                if(!ROI){
                  if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
                  if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
-                 if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics:::M3.MM(R)
-                 if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics:::M4.MM(R)
+                 if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(R)
+                 if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(R)
                }
              }
       ) # end switch on objectives    

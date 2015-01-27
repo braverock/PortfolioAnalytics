@@ -514,7 +514,7 @@ extractCoskewness <- function(model, ...){
   # Factor moments
   # f.centered <- center(f)
   # factorM3 <- M3.MM(f.centered)
-  factorM3 <- PerformanceAnalytics:::M3.MM(f)
+  factorM3 <- PerformanceAnalytics::M3.MM(f)
   
   # Compute covariance estimate
   if(k == 1){
@@ -562,7 +562,7 @@ extractCokurtosis <- function(model, ...){
   factorM2 <- cov(f)
   # f.centered <- center(f)
   # factorM4 <- M4.MM(f.centered)
-  factorM4 <- PerformanceAnalytics:::M4.MM(f)
+  factorM4 <- PerformanceAnalytics::M4.MM(f)
   
   # Compute covariance estimate
   if(k == 1){

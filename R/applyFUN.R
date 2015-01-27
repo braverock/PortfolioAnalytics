@@ -16,8 +16,8 @@ applyFUN <- function(R, weights, FUN="mean", arguments){
     momentargs <- list()
     momentargs$mu <- matrix(as.vector(apply(R, 2, "mean")), ncol = 1)
     momentargs$sigma <- cov(R)
-    momentargs$m3 <- PerformanceAnalytics:::M3.MM(R)
-    momentargs$m4 <- PerformanceAnalytics:::M4.MM(R)
+    momentargs$m3 <- PerformanceAnalytics::M3.MM(R)
+    momentargs$m4 <- PerformanceAnalytics::M4.MM(R)
     return(momentargs)
   }
   
