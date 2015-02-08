@@ -45,7 +45,7 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
     out=0
 
     # do the get here
-    store_output <- try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
+    store_output <- try(get('.objectivestorage',envir=.storage),silent=TRUE)
     if(inherits(store_output,"try-error")) storage=FALSE else storage=TRUE        
     
     if(isTRUE(normalize)){
@@ -283,7 +283,7 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
         #add the new objective results
         store_output[[length(store_output)+1]]<-list(out=as.numeric(out),weights=w,objective_measures=tmp_return)
         # do the assign here
-        assign('.objectivestorage', store_output, pos='.GlobalEnv')
+        assign('.objectivestorage', store_output, envir=.storage)
     }
     if(!isTRUE(trace)){
         return(out)
@@ -379,8 +379,13 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   out <- 0
   
   # do the get here
-  store_output <- try(get('.objectivestorage',pos='.GlobalEnv'), silent=TRUE)
-  if(inherits(store_output,"try-error")) storage <- FALSE else storage <- TRUE        
+  store_output <- try(get('.objectivestorage',envir=.storage), silent=TRUE)
+  if(inherits(store_output,"try-error")) {
+    storage <- FALSE
+    warning("could not get .objectivestorage")
+  } else {
+    storage <- TRUE
+  }
   
   # use fn_map to normalize the weights
   if(isTRUE(normalize)){
@@ -763,7 +768,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     #add the new objective results
     store_output[[length(store_output)+1]] <- list(out=as.numeric(out), weights=w, init_weights=init_weights, objective_measures=tmp_return)
     # do the assign here
-    assign('.objectivestorage', store_output, pos='.GlobalEnv')
+    assign('.objectivestorage', store_output, envir=.storage)
   }
   if(!isTRUE(trace)){
     return(out)

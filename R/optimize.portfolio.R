@@ -158,7 +158,7 @@ optimize.portfolio_v1 <- function(
     if(isTRUE(trace)) { 
         #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
         tmptrace=trace 
-        assign('.objectivestorage', list(), pos='.GlobalEnv')
+        assign('.objectivestorage', list(), as.environment(.storage))
         trace=FALSE
     } 
     
@@ -201,8 +201,8 @@ optimize.portfolio_v1 <- function(
     out = list(weights=weights, objective_measures=constrained_objective_v1(w=weights,R=R,constraints,trace=TRUE)$objective_measures,out=minw$optim$bestval, call=call)
     if (isTRUE(trace)){
         out$DEoutput=minw
-        out$DEoptim_objective_results<-try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
-        rm('.objectivestorage',pos='.GlobalEnv')
+        out$DEoptim_objective_results<-try(get('.objectivestorage',envir=.storage),silent=TRUE)
+        rm('.objectivestorage',envir=.storage)
     }
     
   } ## end case for DEoptim
@@ -463,6 +463,11 @@ optimize.portfolio_v1 <- function(
     out$end_t<-as.character(Sys.time())
     class(out)<-c(paste("optimize.portfolio",optimize_method,sep='.'),"optimize.portfolio")
     return(out)
+}
+
+.onLoad <- function(lib, pkg) {
+  if(!exists('.storage'))
+    .storage <<- new.env()
 }
 
 ##### version 2 of optimize.portfolio #####
@@ -731,7 +736,7 @@ optimize.portfolio_v2 <- function(
     if(isTRUE(trace)) { 
       #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
       tmptrace <- trace 
-      assign('.objectivestorage', list(), pos='.GlobalEnv')
+      assign('.objectivestorage', list(), envir=as.environment(.storage))
       trace=FALSE
     } 
     
@@ -801,8 +806,10 @@ optimize.portfolio_v2 <- function(
     out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=minw$optim$bestval, call=call)
     if (isTRUE(trace)){
       out$DEoutput <- minw
-      out$DEoptim_objective_results <- try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
-      rm('.objectivestorage',pos='.GlobalEnv')
+      out$DEoptim_objective_results <- try(get('.objectivestorage',envir=.storage),silent=TRUE)
+      rm('.objectivestorage',envir=.storage)
+      #out$DEoptim_objective_results <- try(get('.objectivestorage',pos='.GlobalEnv'),silent=TRUE)
+      #rm('.objectivestorage',pos='.GlobalEnv')
     }
     
   } ## end case for DEoptim
