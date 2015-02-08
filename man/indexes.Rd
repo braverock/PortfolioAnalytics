@@ -6,9 +6,6 @@
 The indexes are: US Bonds, US Equities, International Equities, Commodities, US T-Bills, and Inflation}
 \usage{data(indexes)}
 \format{CSV converted into xts object with montly observations}
-\details{ }
-\source{ }
-\references{ }
 \examples{
 data(indexes)
 

@@ -11,7 +11,7 @@ Authors@R: c(
   , person(given="Guy",family="Yollin",role="ctb")
   , person(given="R. Douglas",family="Martin",role="ctb")
   )
-Version: 0.9.3598
+Version: 0.9.3599
 Date: $Date$
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
