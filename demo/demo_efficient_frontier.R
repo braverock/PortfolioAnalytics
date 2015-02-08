@@ -70,19 +70,19 @@ chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l",
                         tangent.line=FALSE, labels.assets=FALSE, pch.assets=1)
 
 #' Chart the asset weights along the efficient frontier.
-chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="StdDev")
+chart.EF.Weights(meanvar.ef, colorset=bluemono, match.col="StdDev")
 
 #' Chart the group weights along the efficient frontier.
-chart.Weights.EF(meanvar.ef, colorset=bluemono, by.groups=TRUE, match.col="StdDev")
+chart.EF.Weights(meanvar.ef, colorset=bluemono, by.groups=TRUE, match.col="StdDev")
 
 #' The labels for Mean, Weight, and StdDev can be increased or decreased with
 #' the cex.lab argument. The default is cex.lab=0.8.
-chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="StdDev", main="", cex.lab=1)
+chart.EF.Weights(meanvar.ef, colorset=bluemono, match.col="StdDev", main="", cex.lab=1)
 
 #' If you have a lot of assets and they don't fit with the default legend, you
 #' can set legend.loc=NULL and customize the plot.
 par(mar=c(8, 4, 4, 2)+0.1, xpd=TRUE)
-chart.Weights.EF(meanvar.ef, colorset=bluemono, match.col="StdDev", legend.loc=NULL)
+chart.EF.Weights(meanvar.ef, colorset=bluemono, match.col="StdDev", legend.loc=NULL)
 legend("bottom", legend=colnames(R), inset=-1, fill=bluemono, bty="n", ncol=3, cex=0.8)
 par(mar=c(5, 4, 4, 2)+0.1, xpd=FALSE)
 
@@ -105,9 +105,9 @@ chart.EfficientFrontier(opt_meanvar, match.col="StdDev", n.portfolios=25, type="
 
 #' The weights along the efficient frontier can be plotted by passing in the
 #' optimize.portfolio output object.
-chart.Weights.EF(opt_meanvar, match.col="StdDev")
+chart.EF.Weights(opt_meanvar, match.col="StdDev")
 
-chart.Weights.EF(opt_meanvar, match.col="StdDev", by.groups=TRUE)
+chart.EF.Weights(opt_meanvar, match.col="StdDev", by.groups=TRUE)
 
 #' Extract the efficient frontier and then plot it.
 #' Note that if you want to do multiple charts of the efficient frontier from
@@ -116,8 +116,8 @@ chart.Weights.EF(opt_meanvar, match.col="StdDev", by.groups=TRUE)
 ef <- extractEfficientFrontier(object=opt_meanvar, match.col="StdDev", n.portfolios=15)
 ef
 summary(ef, digits=5)
-chart.Weights.EF(ef, match.col="StdDev", colorset=bluemono)
-chart.Weights.EF(ef, match.col="StdDev", colorset=bluemono, by.groups=TRUE)
+chart.EF.Weights(ef, match.col="StdDev", colorset=bluemono)
+chart.EF.Weights(ef, match.col="StdDev", colorset=bluemono, by.groups=TRUE)
 
 #' Compute the mean-ES efficient frontier.
 meanetl.ef <- create.EfficientFrontier(R=R, portfolio=init, type="mean-ES")
@@ -127,14 +127,14 @@ meanetl.ef$frontier
 
 #' Chart the mean-ES efficient frontier.
 chart.EfficientFrontier(meanetl.ef, match.col="ES", main="mean-ETL Efficient Frontier", type="l", col="blue", RAR.text="STARR")
-chart.Weights.EF(meanetl.ef, colorset=bluemono, match.col="ES")
-chart.Weights.EF(meanetl.ef, by.groups=TRUE, colorset=bluemono, match.col="ES")
+chart.EF.Weights(meanetl.ef, colorset=bluemono, match.col="ES")
+chart.EF.Weights(meanetl.ef, by.groups=TRUE, colorset=bluemono, match.col="ES")
 
 #' Compute the mean-ES efficient frontier using random portfolios to solve
 #' the optimization problem.
 meanetl.rp.ef <- create.EfficientFrontier(R=R, portfolio=meanetl.portf, type="random", match.col="ES")
 chart.EfficientFrontier(meanetl.rp.ef, match.col="ES", main="mean-ETL RP Efficient Frontier", type="l", col="blue", rf=0)
-chart.Weights.EF(meanetl.rp.ef, colorset=bluemono, match.col="ES")
+chart.EF.Weights(meanetl.rp.ef, colorset=bluemono, match.col="ES")
 
 # mean-etl efficient frontier with optimize.portfolio output
 opt_meanetl <- optimize.portfolio(R=R, portfolio=meanetl.portf, optimize_method="random", search_size=2000, trace=TRUE)

@@ -286,17 +286,17 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, ..., match.col="E
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.
 #' @param legend.loc NULL, "topright", "right", or "bottomright". If legend.loc is NULL, the legend will not be plotted.
 #' @author Ross Bennett
-#' @rdname chart.Weights.EF
+#' @rdname chart.EF.Weights
 #' @export
-chart.Weights.EF <- function(object, ...){
-  UseMethod("chart.Weights.EF")
+chart.EF.Weights <- function(object, ...){
+  UseMethod("chart.EF.Weights")
 }
 
 
-#' @rdname chart.Weights.EF
-#' @method chart.Weights.EF efficient.frontier
-#' @S3method chart.Weights.EF efficient.frontier
-chart.Weights.EF.efficient.frontier <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
+#' @rdname chart.EF.Weights
+#' @method chart.EF.Weights efficient.frontier
+#' @S3method chart.EF.Weights efficient.frontier
+chart.EF.Weights.efficient.frontier <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
   # using ideas from weightsPlot.R in fPortfolio package
   
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
@@ -418,16 +418,16 @@ chart.Weights.EF.efficient.frontier <- function(object, ..., colorset=NULL, n.po
   box(col=element.color)
 }
 
-#' @rdname chart.Weights.EF
-#' @method chart.Weights.EF optimize.portfolio
-#' @S3method chart.Weights.EF optimize.portfolio
-chart.Weights.EF.optimize.portfolio <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
+#' @rdname chart.EF.Weights
+#' @method chart.EF.Weights optimize.portfolio
+#' @S3method chart.EF.Weights optimize.portfolio
+chart.EF.Weights.optimize.portfolio <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
   # chart the weights along the efficient frontier of an objected created by optimize.portfolio
   
   if(!inherits(object, "optimize.portfolio")) stop("object must be of class optimize.portfolio")
   
   frontier <- extractEfficientFrontier(object=object, match.col=match.col, n.portfolios=n.portfolios)
-  chart.Weights.EF(object=frontier, colorset=colorset, ..., 
+  chart.EF.Weights(object=frontier, colorset=colorset, ..., 
                    match.col=match.col, by.groups=by.groups, main=main, cex.lab=cex.lab, 
                    cex.axis=cex.axis, cex.legend=cex.legend, 
                    legend.labels=legend.labels, element.color=element.color,
