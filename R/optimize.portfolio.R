@@ -613,7 +613,7 @@ optimize.portfolio_v2 <- function(
   .formals <- formals(momentFUN)
   .formals <- modify.args(formals=.formals, arglist=list(...), dots=TRUE)
   # ** pass ROI=TRUE to set.portfolio.moments so the moments are not calculated
-  if(optimize_method %in% c("ROI", "quadprog", "glpk", "symphony", "ipop", "cplex")){
+  if(optimize_method %in% c("ROI", "quadprog", "glpk", "symphony", "ipop")){
     obj_names <- unlist(lapply(portfolio$objectives, function(x) x$name))
     if(any(obj_names %in% c("CVaR", "ES", "ETL"))){
       .formals <- modify.args(formals=.formals, arglist=list(ROI=TRUE), dots=TRUE)
@@ -869,7 +869,7 @@ optimize.portfolio_v2 <- function(
     
   } ## end case for random
   
-  roi_solvers <- c("ROI", "quadprog", "glpk", "symphony", "ipop", "cplex")
+  roi_solvers <- c("ROI", "quadprog", "glpk", "symphony", "ipop")
   if(optimize_method %in% roi_solvers){
     # check for a control argument for list of solver control arguments
     if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=NULL

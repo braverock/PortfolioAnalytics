@@ -11,7 +11,7 @@ Authors@R: c(
   , person(given="Guy",family="Yollin",role="ctb")
   , person(given="R. Douglas",family="Martin",role="ctb")
   )
-Version: 0.9.3599
+Version: 0.9.3606
 Date: $Date$
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
@@ -32,7 +32,6 @@ Suggests:
     ROI.plugin.glpk (>= 0.0.2),
     ROI.plugin.quadprog (>= 0.0.2),
     ROI.plugin.symphony (>= 0.0.2),
-    ROI.plugin.cplex (>= 0.0.2),
     pso,
     GenSA,
     corpcor,
