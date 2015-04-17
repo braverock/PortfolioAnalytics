@@ -190,9 +190,9 @@ extractStats.optimize.portfolio.pso <- function(object, prefix=NULL, ...){
   tmpout <- c(object$out, tmpout)
   
   # run constrained_objective on the weights to get the objective measures in a matrix
-  stopifnot("package:foreach" %in% search() || suppressMessages(require("foreach",quietly = TRUE)))
+  stopifnot("package:foreach" %in% search() || suppressMessages(requireNamespace("foreach",quietly = TRUE)))
   i <- 1
-  obj <- foreach(i=1:nrow(psoweights), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
+  obj <- foreach::foreach(i=1:nrow(psoweights), .inorder=TRUE, .combine=rbind, .errorhandling='remove') %dopar% {
     unlist(constrained_objective(w=psoweights[i,], R=R, portfolio=portfolio, trace=TRUE)$objective_measures)
   }
   objnames <- name.replace(colnames(obj))

@@ -88,6 +88,9 @@ options(width=80)
 
 <<echo=TRUE>>=
 library(PortfolioAnalytics)
+library(DEoptim)
+library(fGarch)
+library(robustbase)
 data(indexes)
 class(indexes)
 indexes <- indexes[,1:4]

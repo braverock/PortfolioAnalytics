@@ -14,7 +14,7 @@
 
 # this code may be made obsolete by the advanced (non-linear, MIP) fPortfolio or roi optimizers, but for now, they are beta code at best
 
-# require(LSPM) # for the un-exported .nPri functions
+# requireNamespace(LSPM) # for the un-exported .nPri functions
 # generate all feasible portfolios
 #LSPM:::.nPri(n=13,r=45,i=n^r,replace=TRUE)
 # not likely to actually BE feasible for any portfolio of real size, but I'll write the grid generator anyway that will generate all the permutations, and kick out only the feasible portfolios
@@ -435,7 +435,7 @@ random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample
     # also interfere with optimize.portfolio.parallel since this function 
     # will likely be called. Not sure how foreach handles nested loops 
     # in parallel so it is best to avoid that altogether.
-    #stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+    #stopifnot("package:foreach" %in% search() || requireNamespace("foreach",quietly = TRUE))
     #check <- foreach(i=1:nrow(rp), .combine=c) %dopar% {
     #  # check_constraint returns TRUE if all constraints are satisfied
     #  check_constraints(weights=rp[i,], portfolio=portfolio)
@@ -539,10 +539,10 @@ rp_simplex <- function(portfolio, permutations, fev=0:5){
   Umat <- matrix(data=U, nrow=k, ncol=nassets)
   
   # do the transformation to the set of weights to satisfy lower bounds
-  stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
+  stopifnot("package:foreach" %in% search() || requireNamespace("foreach",quietly = TRUE))
   j <- 1
   i <- 1
-  out <- foreach(j = 1:length(fev), .combine=c) %:% foreach(i=1:nrow(Umat)) %dopar% {
+  out <- foreach::foreach(j = 1:length(fev), .combine=c) %:% foreach::foreach(i=1:nrow(Umat)) %dopar% {
     q <- 2^fev[j]
     tmp <- L + (1 - sum(L)) * log(Umat[i,])^q / sum(log(Umat[i,])^q)
     tmp
@@ -644,8 +644,8 @@ rp_grid <- function(portfolio, permutations=2000, normalize=TRUE){
       return(weights)
     }
     
-    stopifnot("package:foreach" %in% search() || require("foreach",quietly = TRUE))
-    out <- foreach(i=1:nrow(rp)) %dopar% {
+    stopifnot("package:foreach" %in% search() || requireNamespace("foreach",quietly = TRUE))
+    out <- foreach::foreach(i=1:nrow(rp)) %dopar% {
       tmp <- normalize_weights(weights=rp[i,])
       tmp
     }

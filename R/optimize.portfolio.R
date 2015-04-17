@@ -90,7 +90,7 @@ optimize.portfolio_v1 <- function(
   }
   
   if(optimize_method=="DEoptim"){
-    stopifnot("package:DEoptim" %in% search()  ||  require("DEoptim",quietly = TRUE) )
+    stopifnot("package:DEoptim" %in% search()  ||  requireNamespace("DEoptim",quietly = TRUE) )
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
     if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=N*50
     NP = round(search_size/itermax)
@@ -104,10 +104,10 @@ optimize.portfolio_v1 <- function(
     #check to see whether we need to disable foreach for parallel optimization, esp if called from inside foreach
     if(hasArg(parallel)) parallel=match.call(expand.dots=TRUE)$parallel else parallel=TRUE
     if(!isTRUE(parallel) && 'package:foreach' %in% search()){
-        registerDoSEQ()
+        foreach::registerDoSEQ()
     }
     
-    DEcformals  <- formals(DEoptim.control)
+    DEcformals  <- formals(DEoptim::DEoptim.control)
     DEcargs <- names(DEcformals)
     if( is.list(dotargs) ){
         pm <- pmatch(names(dotargs), DEcargs, nomatch = 0L)
@@ -181,10 +181,10 @@ optimize.portfolio_v1 <- function(
     	rp <- random_portfolios_v1(rpconstraints=rpconstraint,permutations=NP)
     	DEcformals$initialpop=rp
     }
-    controlDE <- do.call(DEoptim.control,DEcformals)
+    controlDE <- do.call(DEoptim::DEoptim.control,DEcformals)
 
     # minw = try(DEoptim( constrained_objective ,  lower = lower[1:N] , upper = upper[1:N] , control = controlDE, R=R, constraints=constraints, ...=...)) # add ,silent=TRUE here?
-    minw = try(DEoptim( constrained_objective_v1 ,  lower = lower[1:N] , upper = upper[1:N] , control = controlDE, R=R, constraints=constraints, nargs = dotargs , ...=...)) # add ,silent=TRUE here?
+    minw = try(DEoptim::DEoptim( constrained_objective_v1 ,  lower = lower[1:N] , upper = upper[1:N] , control = controlDE, R=R, constraints=constraints, nargs = dotargs , ...=...)) # add ,silent=TRUE here?
  
     if(inherits(minw,"try-error")) { minw=NULL }
     if(is.null(minw)){
@@ -218,7 +218,7 @@ optimize.portfolio_v1 <- function(
       #' write foreach loop to call constrained_objective() with each portfolio
       if ("package:foreach" %in% search() & !hasArg(parallel)){
           ii <- 1
-          rp_objective_results<-foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective_v1(w=rp[ii,],R,constraints,trace=trace,...=dotargs)
+          rp_objective_results<-foreach::foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective_v1(w=rp[ii,],R,constraints,trace=trace,...=dotargs)
       } else {
           rp_objective_results<-apply(rp, 1, constrained_objective_v1, R=R, constraints=constraints, trace=trace, ...=dotargs)
       }
@@ -351,7 +351,7 @@ optimize.portfolio_v1 <- function(
   
   ## case if method=pso---particle swarm
   if(optimize_method=="pso"){
-    stopifnot("package:pso" %in% search()  ||  require("pso",quietly = TRUE) )
+    stopifnot("package:pso" %in% search()  ||  requireNamespace("pso",quietly = TRUE) )
     if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
     controlPSO <- list(trace=FALSE, fnscale=1, maxit=1000, maxf=Inf, abstol=-Inf, reltol=0)
     PSOcargs <- names(controlPSO)
@@ -385,7 +385,7 @@ optimize.portfolio_v1 <- function(
     upper <- constraints$max
     lower <- constraints$min
     
-    minw = try(psoptim( par = rep(NA, N), fn = constrained_objective_v1 ,  R=R, constraints=constraints,
+    minw = try(pso::psoptim( par = rep(NA, N), fn = constrained_objective_v1 ,  R=R, constraints=constraints,
                         lower = lower[1:N] , upper = upper[1:N] , control = controlPSO)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
@@ -411,7 +411,7 @@ optimize.portfolio_v1 <- function(
   
   ## case if method=GenSA---Generalized Simulated Annealing
   if(optimize_method=="GenSA"){
-    stopifnot("package:GenSA" %in% search()  ||  require("GenSA",quietly = TRUE) )
+    stopifnot("package:GenSA" %in% search()  ||  requireNamespace("GenSA",quietly = TRUE) )
     if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
     controlGenSA <- list(maxit = 5000, threshold.stop = NULL, temp = 5230, 
                           visiting.param = 2.62, acceptance.param = -5, max.time = NULL, 
@@ -430,7 +430,7 @@ optimize.portfolio_v1 <- function(
     upper <- constraints$max
     lower <- constraints$min
     
-    minw = try(GenSA( par = rep(1/N, N), lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
+    minw = try(GenSA::GenSA( par = rep(1/N, N), lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
                       fn = constrained_objective_v1 ,  R=R, constraints=constraints)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
@@ -667,7 +667,7 @@ optimize.portfolio_v2 <- function(
   
   # DEoptim optimization method
   if(optimize_method == "DEoptim"){
-    stopifnot("package:DEoptim" %in% search()  ||  require("DEoptim",quietly = TRUE))
+    stopifnot("package:DEoptim" %in% search()  ||  requireNamespace("DEoptim",quietly = TRUE))
     # DEoptim does 200 generations by default, so lets set the size of each generation to search_size/200)
     if(hasArg(itermax)) itermax=match.call(expand.dots=TRUE)$itermax else itermax=N*50
     NP <- round(search_size/itermax)
@@ -681,10 +681,10 @@ optimize.portfolio_v2 <- function(
     #check to see whether we need to disable foreach for parallel optimization, esp if called from inside foreach
     if(hasArg(parallel)) parallel <- match.call(expand.dots=TRUE)$parallel else parallel <- TRUE
     if(!isTRUE(parallel) && 'package:foreach' %in% search()){
-      registerDoSEQ()
+      foreach::registerDoSEQ()
     }
     
-    DEcformals <- formals(DEoptim.control)
+    DEcformals <- formals(DEoptim::DEoptim.control)
     DEcargs <- names(DEcformals)
     if( is.list(dotargs) ){
       pm <- pmatch(names(dotargs), DEcargs, nomatch = 0L)
@@ -781,10 +781,10 @@ optimize.portfolio_v2 <- function(
       DEcformals$initialpop <- rp
     }
     
-    controlDE <- do.call(DEoptim.control, DEcformals)
+    controlDE <- do.call(DEoptim::DEoptim.control, DEcformals)
     # We are passing fn_map to the optional fnMap function to do the 
     # transformation so we need to force normalize=FALSE in call to constrained_objective
-    minw = try(DEoptim( constrained_objective,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, env=dotargs, normalize=FALSE, fnMap=function(x) fn_map(x, portfolio=portfolio)$weights), silent=TRUE)
+    minw = try(DEoptim::DEoptim( constrained_objective,  lower=lower[1:N], upper=upper[1:N], control=controlDE, R=R, portfolio=portfolio, env=dotargs, normalize=FALSE, fnMap=function(x) fn_map(x, portfolio=portfolio)$weights), silent=TRUE)
     
     if(inherits(minw, "try-error")) { 
       message(minw)
@@ -835,7 +835,7 @@ optimize.portfolio_v2 <- function(
     #' write foreach loop to call constrained_objective() with each portfolio
     if ("package:foreach" %in% search() & !hasArg(parallel)){
       ii <- 1
-      rp_objective_results <- foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,], R=R, portfolio=portfolio, trace=trace, env=dotargs, normalize=FALSE)
+      rp_objective_results <- foreach::foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,], R=R, portfolio=portfolio, trace=trace, env=dotargs, normalize=FALSE)
     } else {
       rp_objective_results <- apply(rp, 1, constrained_objective, R=R, portfolio=portfolio, trace=trace, normalize=FALSE, env=dotargs)
     }
@@ -1083,7 +1083,7 @@ optimize.portfolio_v2 <- function(
   
   ## case if method=pso---particle swarm
   if(optimize_method=="pso"){
-    stopifnot("package:pso" %in% search()  ||  require("pso",quietly = TRUE) )
+    stopifnot("package:pso" %in% search()  ||  requireNamespace("pso",quietly = TRUE) )
     if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
     controlPSO <- list(trace=FALSE, fnscale=1, maxit=1000, maxf=Inf, abstol=-Inf, reltol=0)
     PSOcargs <- names(controlPSO)
@@ -1105,7 +1105,7 @@ optimize.portfolio_v2 <- function(
     upper <- constraints$max
     lower <- constraints$min
     
-    minw <- try(psoptim( par = rep(NA, N), fn = constrained_objective,  R=R, portfolio=portfolio, env=dotargs,
+    minw <- try(pso::psoptim( par = rep(NA, N), fn = constrained_objective,  R=R, portfolio=portfolio, env=dotargs,
                          lower = lower[1:N] , upper = upper[1:N] , control = controlPSO)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
@@ -1131,7 +1131,7 @@ optimize.portfolio_v2 <- function(
   
   ## case if method=GenSA---Generalized Simulated Annealing
   if(optimize_method=="GenSA"){
-    stopifnot("package:GenSA" %in% search()  ||  require("GenSA",quietly = TRUE) )
+    stopifnot("package:GenSA" %in% search()  ||  requireNamespace("GenSA",quietly = TRUE) )
     if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
     controlGenSA <- list(maxit = 5000, threshold.stop = NULL, temp = 5230, 
                          visiting.param = 2.62, acceptance.param = -5, max.time = NULL, 
@@ -1150,7 +1150,7 @@ optimize.portfolio_v2 <- function(
     upper <- constraints$max
     lower <- constraints$min
     
-    minw = try(GenSA( par = rep(1/N, N), lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
+    minw = try(GenSA::GenSA( par = rep(1/N, N), lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
                       fn = constrained_objective ,  R=R, portfolio=portfolio, env=dotargs)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
@@ -1348,7 +1348,7 @@ optimize.portfolio <- optimize.portfolio_v2
 #' @export
 optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, rolling_window=NULL)
 {
-    stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
+    stopifnot("package:foreach" %in% search() || requireNamespace("foreach",quietly=TRUE))
     start_t<-Sys.time()
       
     #store the call for later
@@ -1374,14 +1374,14 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
         ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
         # now apply optimize.portfolio to the periods, in parallel if available
         ep <- ep.i[1]
-        out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+        out_list<-foreach::foreach(ep=iterators::iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
                     optimize.portfolio(R[1:ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
                   }
     } else {
         # define the index endpoints of our periods
         ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
         # now apply optimize.portfolio to the periods, in parallel if available
-        out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+        out_list<-foreach::foreach(ep=iterators::iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
                     optimize.portfolio(R[(ifelse(ep-rolling_window>=1,ep-rolling_window,1)):ep,],constraints=constraints,optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
                   }
     }
@@ -1470,8 +1470,8 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' @export
 optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, objectives=NULL, optimize_method=c("DEoptim","random","ROI"), search_size=20000, trace=FALSE, ..., rp=NULL, rebalance_on=NULL, training_period=NULL, rolling_window=NULL)
 {
-  stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
-  stopifnot("package:iterators" %in% search() || require("iterators",quietly=TRUE))
+  stopifnot("package:foreach" %in% search() || requireNamespace("foreach",quietly=TRUE))
+  stopifnot("package:iterators" %in% search() || requireNamespace("iterators",quietly=TRUE))
   
   # This is the case where the user has passed in a list of portfolio objects
   # for the portfolio argument.
@@ -1584,14 +1584,14 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
     ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
     # now apply optimize.portfolio to the periods, in parallel if available
     ep <- ep.i[1]
-    out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+    out_list<-foreach::foreach(ep=iterators::iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
       optimize.portfolio(R[1:ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
     }
   } else {
     # define the index endpoints of our periods
     ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
     # now apply optimize.portfolio to the periods, in parallel if available
-    out_list<-foreach(ep=iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+    out_list<-foreach::foreach(ep=iterators::iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
       optimize.portfolio(R[(ifelse(ep-rolling_window>=1,ep-rolling_window,1)):ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
     }
   }
@@ -1654,7 +1654,7 @@ optimize.portfolio.parallel <- function(R,
                                         message=FALSE,
                                         nodes=4)
 {
-    stopifnot("package:foreach" %in% search() || require("foreach",quietly=TRUE))
+    stopifnot("package:foreach" %in% search() || requireNamespace("foreach",quietly=TRUE))
     optimize_method=optimize_method[1]  
     
     start_t <- Sys.time()
@@ -1662,7 +1662,7 @@ optimize.portfolio.parallel <- function(R,
     #store the call for later
     call <- match.call()
     
-    opt_out_list <- foreach(1:nodes, .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+    opt_out_list <- foreach::foreach(1:nodes, .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
       optimize.portfolio(R=R, portfolio=portfolio, 
                          optimize_method=optimize_method, 
                          search_size=search_size, trace=trace, 

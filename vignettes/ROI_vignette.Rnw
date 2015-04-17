@@ -27,6 +27,9 @@ Load the necessary packages.
 suppressMessages(library(PortfolioAnalytics))
 suppressMessages(library(foreach))
 suppressMessages(library(iterators))
+suppressMessages(library(ROI))
+suppressMessages(library(ROI.plugin.quadprog))
+suppressMessages(library(ROI.plugin.glpk))
 @
 
 \subsection{Data}

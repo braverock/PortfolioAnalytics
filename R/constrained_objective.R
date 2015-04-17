@@ -382,7 +382,7 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
   store_output <- try(get('.objectivestorage',envir=.storage), silent=TRUE)
   if(inherits(store_output,"try-error")) {
     storage <- FALSE
-    warning("could not get .objectivestorage")
+    # warning("could not get .objectivestorage")
   } else {
     storage <- TRUE
   }

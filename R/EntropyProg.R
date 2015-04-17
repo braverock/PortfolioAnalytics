@@ -49,7 +49,7 @@
 #' @export
 EntropyProg = function( p , A = NULL , b = NULL , Aeq , beq, verbose=FALSE )
 {
-  stopifnot("package:nloptr" %in% search()  ||  require("nloptr",quietly = TRUE) )
+  stopifnot("package:nloptr" %in% search()  ||  requireNamespace("nloptr",quietly = TRUE) )
   
   if( is.vector(b) ) b = matrix(b, nrow=length(b))
   if( is.vector(beq) ) beq = matrix(beq, nrow=length(beq))
@@ -119,7 +119,7 @@ EntropyProg = function( p , A = NULL , b = NULL , Aeq , beq, verbose=FALSE )
                  check_derivatives_print = check_derivatives_print , 
                  print_level = print_level , 
                  maxeval = 1000 )    
-    optimResult = nloptr(x0 = x0, eval_f = eval_f_list , opts = opts )    
+    optimResult = nloptr::nloptr(x0 = x0, eval_f = eval_f_list , opts = opts )    
     end = Sys.time()
     
     if(verbose){
@@ -189,7 +189,7 @@ EntropyProg = function( p , A = NULL , b = NULL , Aeq , beq, verbose=FALSE )
                         eval_f = nestedfunC , 
                         eval_g_ineq = InqConstraint , 
                         eval_jac_g_ineq = jacobian_constraint )
-    optimResult = nloptr( x0 = x0 , 
+    optimResult = nloptr::nloptr( x0 = x0 , 
                           eval_f = nestedfunC , 
                           eval_g_ineq = InqConstraint , 
                           eval_jac_g_ineq = jacobian_constraint ,

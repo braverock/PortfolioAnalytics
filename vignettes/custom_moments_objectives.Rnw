@@ -55,6 +55,7 @@ Load the necessary packages.
 
 <<>>=
 library(PortfolioAnalytics)
+library(DEoptim)
 @
 
 \subsection{Data}
