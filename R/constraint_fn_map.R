@@ -564,7 +564,7 @@ rp_transform <- function(w,
   } # end final walk towards the edges
   portfolio <- tmp_w
   
-  colnames(portfolio) <- colnames(weights)
+  colnames(portfolio) <- colnames(w)
   
   # checks for infeasible portfolio
   # Stop execution and return an error if an infeasible portfolio is created
@@ -572,7 +572,7 @@ rp_transform <- function(w,
   # action (try again with more permutations, relax constraints, different
   # method to normalize, etc.)
   if (sum(portfolio) < min_sum | sum(portfolio) > max_sum){
-    portfolio <- weights
+    portfolio <- w
     stop("Infeasible portfolio created, perhaps increase max_permutations and/or adjust your parameters.")
   }
   return(portfolio)

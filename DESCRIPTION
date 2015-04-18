@@ -12,7 +12,7 @@ Authors@R: c(
     person(given="Hezky",family="Varon",role="ctb") ,
     person(given="Guy",family="Yollin",role="ctb") ,
     person(given="R. Douglas",family="Martin",role="ctb") )
-Version: 0.9.3633
+Version: 0.9.3635
 Date: $Date$
 Maintainer: Ross Bennett <rossbennett34@gmail.com>
 Description: Portfolio optimization and analysis routines and graphics.
