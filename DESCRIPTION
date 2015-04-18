@@ -12,9 +12,9 @@ Authors@R: c(
     person(given="Hezky",family="Varon",role="ctb") ,
     person(given="Guy",family="Yollin",role="ctb") ,
     person(given="R. Douglas",family="Martin",role="ctb") )
-Version: 0.9.3635
-Date: $Date$
-Maintainer: Ross Bennett <rossbennett34@gmail.com>
+Version: 1.0.3636
+Date: 2015-04-18
+Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
     R (>= 2.14.0),
