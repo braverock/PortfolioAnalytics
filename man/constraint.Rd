@@ -29,7 +29,8 @@ constraint(assets = NULL, ..., min, max, min_mult, max_mult, min_sum = 0.99,
 This function is the constructor for the \code{v1_constraint} object for backwards compatibility.
 }
 \examples{
-exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, weight_seq=generatesequence())
+exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, 
+weight_seq=generatesequence())
 }
 \author{
 Peter Carl, Brian G. Peterson

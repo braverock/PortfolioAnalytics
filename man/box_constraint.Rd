@@ -45,7 +45,8 @@ pspec <- add.constraint(pspec, type="box")
 pspec <- add.constraint(pspec, type="box", min=0.05, max=0.45)
 
 # specify box constraints per asset
-pspec <- add.constraint(pspec, type="box", min=c(0.05, 0.10, 0.08, 0.06), max=c(0.45, 0.55, 0.35, 0.65))
+pspec <- add.constraint(pspec, type="box", min=c(0.05, 0.10, 0.08, 0.06), 
+max=c(0.45, 0.55, 0.35, 0.65))
 }
 \author{
 Ross Bennett

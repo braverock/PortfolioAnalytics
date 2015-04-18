@@ -1,6 +1,6 @@
 Package: PortfolioAnalytics
 Type: Package
-Title: Portfolio Analysis, including Numerical Methods for Optimization
+Title: Portfolio Analysis, Including Numerical Methods for Optimization
     of Portfolios
 Authors@R: c(
     person(given=c("Brian","G."),family="Peterson",role=c("cre","aut","cph"),
@@ -12,7 +12,7 @@ Authors@R: c(
     person(given="Hezky",family="Varon",role="ctb") ,
     person(given="Guy",family="Yollin",role="ctb") ,
     person(given="R. Douglas",family="Martin",role="ctb") )
-Version: 0.9.3625
+Version: 0.9.3633
 Date: $Date$
 Maintainer: Ross Bennett <rossbennett34@gmail.com>
 Description: Portfolio optimization and analysis routines and graphics.
