@@ -686,7 +686,6 @@ optimize.portfolio_v2 <- function(
     
     DEcformals <- formals(DEoptim::DEoptim.control)
     DEcargs <- names(DEcformals)
-    print(names(dotargs))
     if( is.list(dotargs) ){
       pm <- pmatch(names(dotargs), DEcargs, nomatch = 0L)
       names(dotargs[pm > 0L]) <- DEcargs[pm]
@@ -733,7 +732,6 @@ optimize.portfolio_v2 <- function(
     }
     if(hasArg(traceDE)) traceDE=match.call(expand.dots=TRUE)$traceDE else traceDE=TRUE
     DEcformals$trace <- traceDE
-    print(DEcformals)
     if(isTRUE(trace)) { 
       #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
       tmptrace <- trace 
