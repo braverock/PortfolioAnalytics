@@ -686,6 +686,7 @@ optimize.portfolio_v2 <- function(
     
     DEcformals <- formals(DEoptim::DEoptim.control)
     DEcargs <- names(DEcformals)
+    print(names(dotargs))
     if( is.list(dotargs) ){
       pm <- pmatch(names(dotargs), DEcargs, nomatch = 0L)
       names(dotargs[pm > 0L]) <- DEcargs[pm]
@@ -732,7 +733,7 @@ optimize.portfolio_v2 <- function(
     }
     if(hasArg(traceDE)) traceDE=match.call(expand.dots=TRUE)$traceDE else traceDE=TRUE
     DEcformals$trace <- traceDE
-    
+    print(DEcformals)
     if(isTRUE(trace)) { 
       #we can't pass trace=TRUE into constrained objective with DEoptim, because it expects a single numeric return
       tmptrace <- trace 
@@ -1402,7 +1403,41 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' Run portfolio optimization with periodic rebalancing at specified time periods. 
 #' Running the portfolio optimization with periodic rebalancing can help 
 #' refine the constraints and objectives by evaluating the out of sample
-#' performance of the portfolio based on historical data
+#' performance of the portfolio based on historical data.
+#' 
+#' If both \code{training_period} and \code{rolling_window} are \code{NULL}, 
+#' then \code{training_period} is set to a default value of 36. 
+#' 
+#' If \code{training_period} is \code{NULL} and a \code{rolling_window} is 
+#' specified, then \code{training_period} is set to the value of 
+#' \code{rolling_window}.
+#' 
+#' The user should be aware of the following behavior when both 
+#' \code{training_period} and \code{rolling_window} are specified and have 
+#' different values
+#' \itemize{
+#'   \item{\code{training_period < rolling_window}: }{For example, if you have 
+#'   \code{rolling_window=60}, \code{training_period=50}, and the periodicity 
+#'   of the data is the same as the rebalance frequency (i.e. monthly data with 
+#'   \code{rebalance_on="months")} then the returns data used in the optimization 
+#'   at each iteration are as follows:
+#'   \itemize{
+#'   \item{1: R[1:50,]}
+#'   \item{2: R[1:51,]}
+#'   \item{...}
+#'   \item{11: R[1:60,]}
+#'   \item{12: R[1:61,]}
+#'   \item{13: R[2:62,]}
+#'   \item{...}
+#'   }
+#'   This results in a growing window for several optimizations initially while
+#'   the endpoint iterator (i.e. \code{[50, 51, ...]}) is less than the 
+#'   rolling window width.}
+#'   \item{\code{training_period > rolling_window}: }{The data used in the initial 
+#'   optimization is \code{R[(training_period - rolling_window):training_period,]}. 
+#'   This results in some of the data being "thrown away", i.e. periods 1 to 
+#'   \code{(training_period - rolling_window - 1)} are not used in the optimization.}
+#' }
 #' 
 #' This function is a essentially a wrapper around \code{optimize.portfolio} 
 #' and thus the discussion in the Details section of the 
@@ -1577,6 +1612,10 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   } else {
     rp = NULL
   }
+  # set training_period equal to rolling_window if training_period is null
+  # and rolling_window is not null
+  if(is.null(training_period) & !is.null(rolling_window))
+    training_period <- rolling_window
   
   if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
   if (is.null(rolling_window)){
