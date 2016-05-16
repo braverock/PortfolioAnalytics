@@ -153,7 +153,10 @@ proxy.mult.portfolio <- function(R, mult.portfolio, ...){
     #print(.formals)
     opt <- try(do.call(optimize.portfolio.rebalancing, .formals), silent=TRUE)
     if(!inherits(opt, "try-error")) {
-      ret.tmp <- Return.rebalancing(R.tmp, extractWeights(opt))
+      w <- extractWeights(opt)
+      # geometric chaining TRUE/FALSE, should be FALSE if any weights are negative
+      g <- ifelse(any(w < 0), FALSE, TRUE)
+      ret.tmp <- Return.portfolio(R.tmp, weights = w, geometric = g)
       colnames(ret.tmp) <- paste("proxy", i, sep=".")
       ret[[i]] <- ret.tmp
       #print(ret[[i]])
