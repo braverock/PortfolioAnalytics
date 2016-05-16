@@ -156,8 +156,12 @@ regime.portfolios <- function(regime, portfolios){
       stop("The assets in each portfolio must be identical")
     }
   }
-  
+  # get the unique asset names of each portfolio
+  # asset names matter in hierarchical optimization
+  asset.names <- unique(unlist(lapply(portfolios, function(x) names(x$assets))))
+  assets <- rep(1 / length(asset.names), length(asset.names))
+  names(assets) <- asset.names
   # structure and return
-  return(structure(list(regime=regime, portfolio.list=portfolios), 
+  return(structure(list(regime=regime, portfolio.list=portfolios, assets=assets), 
                    class=c("regime.portfolios", "portfolio")))
 }
