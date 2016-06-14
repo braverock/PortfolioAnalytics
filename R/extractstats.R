@@ -412,7 +412,7 @@ extractWeights.optimize.portfolio.rebalancing <- function(object, ...){
 
   colnames(result) = names(unlist(rebal_object[[1]]$weights))
   rownames(result) = names(rebal_object)
-  result = as.xts(result)
+  result = as.xts(result, dateFormat="Date")
   return(result)
 }
 
