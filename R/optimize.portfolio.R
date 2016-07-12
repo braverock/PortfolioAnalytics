@@ -142,7 +142,7 @@ optimize.portfolio_v1 <- function(
         if(isTRUE(parallel) && 'package:foreach' %in% search()){
             if(!hasArg(parallelType)) {
               #use all cores
-              parallelType='auto'
+              parallelType=2
               DEcformals$parallelType=parallelType
               }
             if(!hasArg(packages)) {
@@ -719,7 +719,7 @@ optimize.portfolio_v2 <- function(
       if(isTRUE(parallel) && 'package:foreach' %in% search()){
         if(!hasArg(parallelType)) {
           #use all cores
-          parallelType='auto'
+          parallelType=2
           DEcformals$parallelType=parallelType
           }
         if(!hasArg(packages)) {
