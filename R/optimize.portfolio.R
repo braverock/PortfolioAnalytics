@@ -430,7 +430,9 @@ optimize.portfolio_v1 <- function(
     upper <- constraints$max
     lower <- constraints$min
     
-    minw = try(GenSA::GenSA( par = rep(1/N, N), lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
+    if(!is.null(rp)) par = rp[,1] else par = rep(1/N, N)
+    
+    minw = try(GenSA::GenSA( par=par, lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
                       fn = constrained_objective_v1 ,  R=R, constraints=constraints)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
@@ -1148,8 +1150,10 @@ optimize.portfolio_v2 <- function(
     
     upper <- constraints$max
     lower <- constraints$min
-    
-    minw = try(GenSA::GenSA( par = rep(1/N, N), lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
+
+    if(!is.null(rp)) par = rp[,1] else par = rep(1/N, N)
+      
+    minw = try(GenSA::GenSA( par=par, lower = lower[1:N] , upper = upper[1:N], control = controlGenSA, 
                       fn = constrained_objective ,  R=R, portfolio=portfolio, env=dotargs)) # add ,silent=TRUE here?
     
     if(inherits(minw,"try-error")) { minw=NULL }
