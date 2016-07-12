@@ -413,7 +413,7 @@ optimize.portfolio_v1 <- function(
   if(optimize_method=="GenSA"){
     stopifnot("package:GenSA" %in% search()  ||  requireNamespace("GenSA",quietly = TRUE) )
     if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
-    controlGenSA <- list(maxit = 5000, threshold.stop = NULL, temp = 5230, 
+    controlGenSA <- list(maxit = 5000, threshold.stop = NULL, temperature = 5230, 
                           visiting.param = 2.62, acceptance.param = -5, max.time = NULL, 
                           nb.stop.improvement = 1e+06, smooth = TRUE, max.call = 1e+07, 
                           verbose = FALSE)
@@ -1132,7 +1132,7 @@ optimize.portfolio_v2 <- function(
   if(optimize_method=="GenSA"){
     stopifnot("package:GenSA" %in% search()  ||  requireNamespace("GenSA",quietly = TRUE) )
     if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=N*50
-    controlGenSA <- list(maxit = 5000, threshold.stop = NULL, temp = 5230, 
+    controlGenSA <- list(maxit = 5000, threshold.stop = NULL, temperature = 5230, 
                          visiting.param = 2.62, acceptance.param = -5, max.time = NULL, 
                          nb.stop.improvement = 1e+06, smooth = TRUE, max.call = 1e+07, 
                          verbose = FALSE)
