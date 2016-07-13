@@ -1177,6 +1177,45 @@ optimize.portfolio_v2 <- function(
     
   } ## end case for GenSA
   
+    ## case if method=FRAPO---use solvers from FRAPO 
+  if(optimize_method=="FRAPO"){
+    # FIXME: this is a simple prototype for the specific case of using the
+    # FRAPO package to solve for the equal risk contribution portfolio where
+    # risk is defined as standard deviation
+    
+    # TODO: get permission to use functions from the package directly and
+    # generalize to solve other objectives
+    stopifnot("package:FRAPO" %in% search()  ||  requireNamespace("FRAPO",quietly = TRUE))
+    
+    
+    # FRAPO PERC and PERC2 only support long only constraints
+    pc <- get_constraints(portfolio)
+    if(any(pc$min > 0) | any(pc$max < 1)){
+      warning("box constraints not supported... normalizing weights")
+    }
+    
+    # only risk_budget_objective with min_concentration = TRUE and name = StdDev
+    # currently supported
+    # FIXME: more intelligent check of the objectives, just want to get the prototype working
+    for(obj in portfolio$objectives){
+      if(inherits(obj,"risk_budget_objective")){
+        if(obj$name %in% c("sd", "StdDev") & (isTRUE(obj$min_concentration) | isTRUE(obj$min_difference))){
+          minw <- try(FRAPO::PERC(Sigma = dotargs$sigma), silent = TRUE)
+          if(inherits(minw,"try-error")){
+            message(paste("Optimizer was unable to find a solution for target", minw))
+            return (paste("Optimizer was unable to find a solution for target"))
+          }
+          weights <- normalize_weights(minw@weights)
+          names(weights) <- colnames(R)
+          obj_vals <- constrained_objective(w = weights, R = R, portfolio, trace = TRUE, normalize = FALSE, env = dotargs)$objective_measures
+          out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = as.numeric(minw@opt$objective), call = call)
+          if (isTRUE(trace)) out$FRAPOoutput <- minw
+        }
+      }
+    }
+    
+  } ## end case for FRAPO
+  
   # Prepare for final object to return
   end_t <- Sys.time()
   # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
