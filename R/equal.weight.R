@@ -19,11 +19,13 @@
 equal.weight <- function(R, portfolio, ...){
   # Check for portfolio object passed in
   if(!is.portfolio(portfolio)) stop("portfolio object passed in must be of class 'portfolio'")
+
+  max_sum <- get_constraints(portfolio)$max_sum
   
   # get asset information for equal weight portfolio
   assets <- portfolio$assets
   nassets <- length(assets)
-  weights <- rep(1 / nassets, nassets)
+  weights <- rep(max_sum / nassets, nassets)
   names(weights) <- names(assets)
   
   # make sure the number of columns in R matches the number of assets
