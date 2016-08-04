@@ -33,8 +33,12 @@ inverse.volatility.weight <- function(R, portfolio, ...){
       stop("number of assets is greater than number of columns in returns object")
     }
   }
-  
-  weights <- as.vector((1/StdDev(R))/sum(1/StdDev(R)))
+
+  # Here, max_sum will be 1.0 if not explicitly set by caller
+  max_sum <- get_constraints(portfolio)$max_sum
+
+  invVol <- 1 / StdDev(R)
+  weights <- max_sum * as.vector(invVol / sum(invVol))
   names(weights) <- names(assets)
   
   tmpout <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, ...)
