@@ -1,7 +1,7 @@
 ###############################################################################
-# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+# R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2015 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
+# Copyright (c) 2004-2018 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
@@ -124,10 +124,82 @@ add.objective_v1 <- function(constraints, type, name, arguments=NULL, enabled=TR
     return(constraints)
 }
 
+#' General interface for adding optimization objectives, including risk, return, and risk budget
+#' 
+#' This function is the main function for adding and updating business objectives in an object of type \code{\link{portfolio.spec}}.
+#' 
+#' In general, you will define your objective as one of the following types: 'return', 'risk', 'risk_budget', 'quadratic utility', or 'weight_concentration'.  
+#' These have special handling and intelligent defaults for dealing with the function most likely to be 
+#' used as objectives, including mean, median, VaR, ES, etc.
+#' 
+#' Objectives of type 'turnover' and 'minmax' are also supported.
+#' 
+#' @param portfolio an object of type 'portfolio' to add the objective to, specifying the portfolio for the optimization, see \code{\link{portfolio}}
+#' @param constraints a 'v1_constraint' object for backwards compatibility, see \code{\link{constraint}}
+#' @param type character type of the objective to add or update, currently 'return','risk', 'risk_budget', 'quadratic_utility', or 'weight_concentration'
+#' @param name name of the objective, should correspond to a function, though we will try to make allowances
+#' @param arguments default arguments to be passed to an objective function when executed
+#' @param enabled TRUE/FALSE
+#' @param \dots any other passthru parameters 
+#' @param indexnum if you are updating a specific objective, the index number in the $objectives list to update
+#' @author Brian G. Peterson and Ross Bennett
+#' @aliases add.objective_v2 add.objective_v1
+#' @seealso \code{\link{objective}}, \code{\link{portfolio.spec}}
 #' @rdname add.objective
 #' @name add.objective
-#' @export
-add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=NULL, enabled=TRUE, ..., indexnum=NULL){
+#' @examples
+#' data(edhec)
+#' returns <- edhec[,1:4]
+#' fund.names <- colnames(returns)
+#' portf <- portfolio.spec(assets=fund.names)
+#' # Add some basic constraints
+#' portf <- add.constraint(portf, type="full_investment")
+#' portf <- add.constraint(portf, type="long_only")
+#' 
+#' # Creates a new portfolio object using portf and adds a quadratic utility
+#' # objective. This will add two objectives to the portfolio object; 1) mean and
+#' # 2) var. The risk aversion parameter is commonly referred to as lambda in the
+#' # quadratic utility formulation that controls how much the portfolio variance 
+#' # is penalized.
+#' portf.maxQU <- add.objective(portf, type="quadratic_utility", 
+#'                              risk_aversion=0.25)
+#' 
+#' # Creates a new portfolio object using portf and adds mean as an objective
+#' portf.maxMean <- add.objective(portf, type="return", name="mean")
+#' 
+#' # Creates a new portfolio object using portf and adds StdDev as an objective
+#' portf.minStdDev <- add.objective(portf, type="risk", name="StdDev")
+#' 
+#' # Creates a new portfolio object using portf and adds ES as an objective. 
+#' # Note that arguments to ES are passed in as a named list.
+#' portf.minES <- add.objective(portf, type="risk", name="ES", 
+#'                              arguments=list(p=0.925, clean="boudt"))
+#' 
+#' # Creates a new portfolio object using portf.minES and adds a risk budget 
+#' # objective with limits on component risk contribution. 
+#' # Note that arguments to ES are passed in as a named list.
+#' portf.RiskBudgetES <- add.objective(portf.minES, type="risk_budget", name="ES", 
+#'                              arguments=list(p=0.925, clean="boudt"),
+#'                              min_prisk=0, max_prisk=0.6)
+#' 
+#' # Creates a new portfolio object using portf.minES and adds a risk budget 
+#' # objective with equal component risk contribution. 
+#' # Note that arguments to ES are passed in as a named list.
+#' portf.EqRiskES <- add.objective(portf.minES, type="risk_budget", name="ES", 
+#'                                     arguments=list(p=0.925, clean="boudt"),
+#'                                     min_concentration=TRUE)
+#' 
+#' # Creates a new portfolio object using portf and adds a weight_concentration 
+#' # objective. The conc_aversion parameter controls how much concentration is
+#' # penalized. The portfolio concentration is defined as the Herfindahl Hirschman
+#' # Index of the weights.
+#' portf.conc <- add.objective(portf, type="weight_concentration", 
+#'                             name="HHI", conc_aversion=0.01)
+#' @rdname add.objective
+#' @name add.objective
+#' @export add.objective 
+#' @export add.objective_v2
+add.objective <- add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=NULL, enabled=TRUE, ..., indexnum=NULL){
   if(!is.null(constraints) & inherits(constraints, "v1_constraint")){
     return(add.objective_v1(constraints=constraints, type=type, name=name, arguments=arguments, enabled=enabled, ...=..., indexnum=indexnum))
   }
@@ -206,79 +278,6 @@ add.objective_v2 <- function(portfolio, constraints=NULL, type, name, arguments=
   return(portfolio)
 }
 
-#' General interface for adding optimization objectives, including risk, return, and risk budget
-#' 
-#' This function is the main function for adding and updating business objectives in an object of type \code{\link{portfolio.spec}}.
-#' 
-#' In general, you will define your objective as one of the following types: 'return', 'risk', 'risk_budget', 'quadratic utility', or 'weight_concentration'.  
-#' These have special handling and intelligent defaults for dealing with the function most likely to be 
-#' used as objectives, including mean, median, VaR, ES, etc.
-#' 
-#' Objectives of type 'turnover' and 'minmax' are also supported.
-#' 
-#' @param portfolio an object of type 'portfolio' to add the objective to, specifying the portfolio for the optimization, see \code{\link{portfolio}}
-#' @param constraints a 'v1_constraint' object for backwards compatibility, see \code{\link{constraint}}
-#' @param type character type of the objective to add or update, currently 'return','risk', 'risk_budget', 'quadratic_utility', or 'weight_concentration'
-#' @param name name of the objective, should correspond to a function, though we will try to make allowances
-#' @param arguments default arguments to be passed to an objective function when executed
-#' @param enabled TRUE/FALSE
-#' @param \dots any other passthru parameters 
-#' @param indexnum if you are updating a specific objective, the index number in the $objectives list to update
-#' @author Brian G. Peterson and Ross Bennett
-#' @aliases add.objective_v2 add.objective_v1
-#' @seealso \code{\link{objective}}, \code{\link{portfolio.spec}}
-#' @rdname add.objective
-#' @name add.objective
-#' @examples
-#' data(edhec)
-#' returns <- edhec[,1:4]
-#' fund.names <- colnames(returns)
-#' portf <- portfolio.spec(assets=fund.names)
-#' # Add some basic constraints
-#' portf <- add.constraint(portf, type="full_investment")
-#' portf <- add.constraint(portf, type="long_only")
-#' 
-#' # Creates a new portfolio object using portf and adds a quadratic utility
-#' # objective. This will add two objectives to the portfolio object; 1) mean and
-#' # 2) var. The risk aversion parameter is commonly referred to as lambda in the
-#' # quadratic utility formulation that controls how much the portfolio variance 
-#' # is penalized.
-#' portf.maxQU <- add.objective(portf, type="quadratic_utility", 
-#'                              risk_aversion=0.25)
-#' 
-#' # Creates a new portfolio object using portf and adds mean as an objective
-#' portf.maxMean <- add.objective(portf, type="return", name="mean")
-#' 
-#' # Creates a new portfolio object using portf and adds StdDev as an objective
-#' portf.minStdDev <- add.objective(portf, type="risk", name="StdDev")
-#' 
-#' # Creates a new portfolio object using portf and adds ES as an objective. 
-#' # Note that arguments to ES are passed in as a named list.
-#' portf.minES <- add.objective(portf, type="risk", name="ES", 
-#'                              arguments=list(p=0.925, clean="boudt"))
-#' 
-#' # Creates a new portfolio object using portf.minES and adds a risk budget 
-#' # objective with limits on component risk contribution. 
-#' # Note that arguments to ES are passed in as a named list.
-#' portf.RiskBudgetES <- add.objective(portf.minES, type="risk_budget", name="ES", 
-#'                              arguments=list(p=0.925, clean="boudt"),
-#'                              min_prisk=0, max_prisk=0.6)
-#' 
-#' # Creates a new portfolio object using portf.minES and adds a risk budget 
-#' # objective with equal component risk contribution. 
-#' # Note that arguments to ES are passed in as a named list.
-#' portf.EqRiskES <- add.objective(portf.minES, type="risk_budget", name="ES", 
-#'                                     arguments=list(p=0.925, clean="boudt"),
-#'                                     min_concentration=TRUE)
-#' 
-#' # Creates a new portfolio object using portf and adds a weight_concentration 
-#' # objective. The conc_aversion parameter controls how much concentration is
-#' # penalized. The portfolio concentration is defined as the Herfindahl Hirschman
-#' # Index of the weights.
-#' portf.conc <- add.objective(portf, type="weight_concentration", 
-#'                             name="HHI", conc_aversion=0.01)
-#' @export
-add.objective <- add.objective_v2
 
 # update.objective <- function(object, ...) {
 #   # here we do a bunch of magic to update the correct index'd objective
@@ -311,7 +310,7 @@ add.objective <- add.objective_v2
 return_objective <- function(name, target=NULL, arguments=NULL, multiplier=-1, enabled=TRUE, ... )
 {
   if(!hasArg(target)) target = NULL
-  ##' if target is null, we'll try to maximize the return metric
+  ## if target is null, we'll try to maximize the return metric
   if(!hasArg(multiplier)) multiplier=-1
   return(objective(name=name, target=target, arguments=arguments, enabled=enabled, multiplier=multiplier,objclass=c("return_objective","objective"), ... ))
 } # end return_objective constructor
@@ -409,7 +408,7 @@ risk_budget_objective <- function(assets, name, target=NULL, arguments=NULL, mul
 turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=TRUE, ... )
 {
   if(!hasArg(target)) target = NULL
-  ##' if target is null, we'll try to minimize the turnover metric
+  ## if target is null, we'll try to minimize the turnover metric
   if(!hasArg(multiplier)) multiplier=1
   return(objective(name=name, target=target, arguments=arguments, enabled=enabled, multiplier=multiplier,objclass=c("turnover_objective","objective"), ... ))
 } # end turnover_objective constructor
@@ -440,7 +439,7 @@ turnover_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, 
 minmax_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, enabled=TRUE, ..., min, max )
 {
   if(!hasArg(target)) target = NULL
-  ##' if target is null, we'll try to minimize the metric
+  ## if target is null, we'll try to minimize the metric
   if(!hasArg(multiplier)) multiplier=1
   Objective <- objective(name=name, target=target, arguments=arguments, enabled=enabled, multiplier=multiplier,objclass=c("minmax_objective","objective"), ... )
   Objective$min <- min

@@ -1,7 +1,7 @@
 ###############################################################################
-# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+# R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2015 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
+# Copyright (c) 2004-2018 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
@@ -37,7 +37,7 @@ CCCgarch.MM = function(R, momentargs = NULL , ... )
     if( as.vector(gout@fit$coef["alpha1"]) < 0.01 ){
       sigmat = rep( sd( as.vector(R[,i])), length(R[,i]) ); nextSt = sd( as.vector(R[,i]))
     }else{
-      sigmat = gout@sigma.t; nextSt = predict(gout)[1,3]
+      sigmat = gout@sigma.t; nextSt = fGarch::predict(gout)[1,3]
     }
     S = cbind( S , sigmat); nextS = c(nextS,nextSt)
   }
@@ -70,7 +70,6 @@ set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
   if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
   if(is.null(constraints$objectives)) {
     warning("no objectives specified in constraints")
-    next()
   } else {
     
     lcl <- grep('garch', constraints)
@@ -159,9 +158,10 @@ set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
 #' @param momentargs list containing arguments to be passed down to lower level functions, default NULL
 #' @param method the method used to estimate portfolio moments. Valid choices include "sample", "boudt", and "black_litterman".
 #' @param \dots any other passthru parameters
-#' @aliases set.portfolio.moments
+#' @aliases set.portfolio.moments set.portfolio.moments_v2
 #' @rdname set.portfolio.moments
-set.portfolio.moments_v2 <- function(R, 
+#' @export set.portfolio.moments
+set.portfolio.moments <- set.portfolio.moments_v2 <- function(R, 
                                      portfolio, 
                                      momentargs=NULL, 
                                      method=c("sample", "boudt", "black_litterman", "meucci"), 
@@ -170,7 +170,6 @@ set.portfolio.moments_v2 <- function(R,
   if(!hasArg(momentargs) | is.null(momentargs)) momentargs <- list()
   if(is.null(portfolio$objectives)) {
     warning("no objectives specified in portfolio")
-    next()
   } else {
     method <- match.arg(method)
     
@@ -354,10 +353,6 @@ set.portfolio.moments_v2 <- function(R,
   return(momentargs)
 }
 
-# Alias for set.portfolio.moments
-#' @export
-set.portfolio.moments <- set.portfolio.moments_v2
-
 garch.mm <- function(R,mu_ts, covlist,momentargs=list(),...) {
   #momentargs<-list()
   #momentargs$mu<-mu_ts[last(index(R)),]
@@ -406,7 +401,6 @@ portfolio.moments.boudt <- function(R, portfolio, momentargs=NULL, k=1, ...){
   if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
   if(is.null(portfolio$objectives)) {
     warning("no objectives specified in portfolio")
-    next()
   } else {
     for (objective in portfolio$objectives){
       switch(objective$name,
@@ -481,7 +475,7 @@ portfolio.moments.bl <- function(R, portfolio, momentargs=NULL, P, Mu=NULL, Sigm
       warning(paste("Multiple methods detected for cleaning returns, default to use clean =", clean[1]))
     }
     # This sets R as the cleaned returns for the rest of the function
-    # This is proably fine since the only other place R is used is for the 
+    # This is probably fine since the only other place R is used is for the 
     # mu estimate
     R <- Return.clean(R, method=clean[1])
   }
@@ -492,7 +486,6 @@ portfolio.moments.bl <- function(R, portfolio, momentargs=NULL, P, Mu=NULL, Sigm
   if(!hasArg(momentargs) | is.null(momentargs)) momentargs<-list()
   if(is.null(portfolio$objectives)) {
     warning("no objectives specified in portfolio")
-    next()
   } else {
     for (objective in portfolio$objectives){
       switch(objective$name,

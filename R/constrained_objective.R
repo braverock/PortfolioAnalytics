@@ -1,7 +1,7 @@
 ###############################################################################
-# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+# R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2015 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
+# Copyright (c) 2004-2018 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
@@ -17,7 +17,7 @@
 
 #' @rdname constrained_objective
 #' @name constrained_objective
-#' @export
+#' @export 
 constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normalize=TRUE, storage=FALSE)
 { 
     if (ncol(R)>length(w)) {
@@ -56,10 +56,10 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
             # might violate your constraints, so you'd need to renormalize them after optimizing
             # we'll create functions for that so the user is less likely to mess it up.
             
-            #' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
-            #' In Kris' original function, this was manifested as a full investment constraint
-            #' the normalization process produces much faster convergence, 
-            #' and then we penalize parameters outside the constraints in the next block
+            # NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
+            # In Kris' original function, this was manifested as a full investment constraint
+            # the normalization process produces much faster convergence, 
+            # and then we penalize parameters outside the constraints in the next block
             if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
                 max_sum=constraints$max_sum
                 if(sum(w)>max_sum) { w<-(max_sum/sum(w))*w } # normalize to max_sum
@@ -83,7 +83,7 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
         }
     }
 
-    #' penalize weights outside my constraints (can be caused by normalization)
+    # penalize weights outside my constraints (can be caused by normalization)
     if (!is.null(constraints$max)){
       max = constraints$max
       out = out + sum(w[which(w>max[1:N])]- constraints$max[which(w>max[1:N])])*penalty
@@ -180,7 +180,6 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
           
           if(inherits(tmp_measure,"try-error")) { 
               message(paste("objective name",objective$name,"generated an error or warning:",tmp_measure))
-              next()  
           } 
           
           # now set the new value of the objective output
@@ -343,10 +342,11 @@ constrained_objective_v1 <- function(w, R, constraints, ..., trace=FALSE, normal
 #' @param env environment of moments calculated in \code{optimize.portfolio}
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link[DEoptim]{DEoptim.control}} 
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
-#' @aliases constrained_objective constrained_objective_v1
+#' @aliases constrained_objective constrained_objective_v1 constrained_objective_v2
 #' @rdname constrained_objective
-#' @export
-constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normalize=TRUE, storage=FALSE, env=NULL)
+#' @export constrained_objective
+#' @export constrained_objective_v2
+constrained_objective <- constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normalize=TRUE, storage=FALSE, env=NULL)
 { 
   if (ncol(R) > length(w)) {
     R <- R[ ,1:length(w)]
@@ -641,7 +641,6 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
         
         if(inherits(tmp_measure, "try-error")) { 
           message(paste("objective name", objective$name, "generated an error or warning:", tmp_measure))
-          next()  
         } 
         
         # now set the new value of the objective output
@@ -776,9 +775,3 @@ constrained_objective_v2 <- function(w, R, portfolio, ..., trace=FALSE, normaliz
     return(list(out=as.numeric(out), weights=w, objective_measures=tmp_return))
   }
 }
-
-# Alias constrained_objective_v2 to constrained_objective
-#' @rdname constrained_objective
-#' @name constrained_objective
-#' @export
-constrained_objective <- constrained_objective_v2

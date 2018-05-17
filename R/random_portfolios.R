@@ -1,7 +1,7 @@
 ###############################################################################
-# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+# R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2015 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
+# Copyright (c) 2004-2018 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
@@ -44,7 +44,6 @@ generatesequence <- function (min=.01, max=1, by=min/max, rounding=3 )
   return(ret)
 }
 
-#randomize_portfolio <- function (seed, weight_seq, min_mult=-Inf,max_mult=Inf, min_sum=.99, max_sum=1.01, max_permutations=100,rounding=3)
 #' Random portfolio sample method
 #' 
 #' This function generates random permutations of a portfolio seed meeting 
@@ -174,11 +173,19 @@ random_walk_portfolios <-function(...) {
 #' @return matrix of random portfolio weights
 #' @seealso \code{\link{constraint}}, \code{\link{objective}}, \code{\link{randomize_portfolio}}
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
-#' @export
 #' @examples
-#' rpconstraint<-constraint(assets=10, min_mult=-Inf, max_mult=Inf, min_sum=.99, max_sum=1.01, min=.01, max=.4, weight_seq=generatesequence())
+#' rpconstraint<-constraint_v1(assets=10, 
+#'                          min_mult=-Inf, 
+#'                          max_mult=Inf, 
+#'                          min_sum=.99, 
+#'                          max_sum=1.01, 
+#'                          min=.01, 
+#'                          max=.4, 
+#'                          weight_seq=generatesequence())
+#'                          
 #' rp<- random_portfolios_v1(rpconstraints=rpconstraint,permutations=1000)
 #' head(rp)
+#' @export
 random_portfolios_v1 <- function (rpconstraints,permutations=100,...)
 { # 
   # this function generates a series of portfolios that are a "random walk" from the current portfolio
@@ -208,10 +215,11 @@ random_portfolios_v1 <- function (rpconstraints,permutations=100,...)
 #' @param max_permutations integer: maximum number of iterations to try for a valid portfolio, default 200
 #' @return named weighting vector
 #' @author Peter Carl, Brian G. Peterson, (based on an idea by Pat Burns)
-#' @aliases randomize_portfolio
+#' @aliases randomize_portfolio randomize_portfolio_v2
 #' @rdname randomize_portfolio
-#' @export
-randomize_portfolio_v2 <- function (portfolio, max_permutations=200) { 
+#' @export randomize_portfolio
+#' @export randomize_portfolio_v2
+randomize_portfolio <- randomize_portfolio_v2 <- function (portfolio, max_permutations=200) { 
   # generate random permutations of a portfolio seed meeting your constraints on the weights of each asset
   # set the portfolio to the seed
   seed <- portfolio$assets
@@ -411,10 +419,11 @@ randomize_portfolio_v2 <- function (portfolio, max_permutations=200) {
 #' \code{\link{rp_simplex}},
 #' \code{\link{rp_grid}}
 #' @author Peter Carl, Brian G. Peterson, Ross Bennett
-#' @aliases random_portfolios
+#' @aliases random_portfolios random_portfolios_v2 
 #' @rdname random_portfolios
-#' @export
-random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample", eliminate=TRUE, ...){
+#' @export random_portfolios
+#' @export random_portfolios_v2
+random_portfolios <- random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample", eliminate=TRUE, ...){
   if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
   if(hasArg(normalize)) normalize=match.call(expand.dots=TRUE)$normalize else normalize=TRUE
   switch(rp_method,
@@ -444,14 +453,6 @@ random_portfolios_v2 <- function( portfolio, permutations=100, rp_method="sample
   }
   return(rp)
 }
-
-# Alias randomize_portfolio_v2 to randomize_portfolio
-#' @export
-randomize_portfolio <- randomize_portfolio_v2
-
-# Alias random_portfolios_v2 to random_portfolios
-#' @export
-random_portfolios <- random_portfolios_v2
 
 #' Generate random portfolios using the sample method
 #' 
@@ -628,8 +629,8 @@ rp_grid <- function(portfolio, permutations=2000, normalize=TRUE){
         # might violate your constraints, so you'd need to renormalize them after optimizing
         # we'll create functions for that so the user is less likely to mess it up.
         
-        ##' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
-        ##' In Kris' original function, this was manifested as a full investment constraint
+        # NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
+        # In Kris' original function, this was manifested as a full investment constraint
         if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
           max_sum=constraints$max_sum
           if(sum(weights)>max_sum) { weights<-(max_sum/sum(weights))*weights } # normalize to max_sum

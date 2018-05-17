@@ -1,7 +1,7 @@
 ###############################################################################
-# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+# R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2015 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
+# Copyright (c) 2004-2018 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
@@ -13,7 +13,7 @@
 
 #' @rdname optimize.portfolio
 #' @name optimize.portfolio
-#' @export
+#' @export optimize.portfolio_v1
 optimize.portfolio_v1 <- function(
 		R,
 		constraints,
@@ -73,8 +73,8 @@ optimize.portfolio_v1 <- function(
           # might violate your constraints, so you'd need to renormalize them after optimizing
           # we'll create functions for that so the user is less likely to mess it up.
           
-          ##' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
-          ##' In Kris' original function, this was manifested as a full investment constraint
+          # NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
+          # In Kris' original function, this was manifested as a full investment constraint
           if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
               max_sum=constraints$max_sum
               if(sum(weights)>max_sum) { weights<-(max_sum/sum(weights))*weights } # normalize to max_sum
@@ -209,22 +209,22 @@ optimize.portfolio_v1 <- function(
   
   
   if(optimize_method=="random"){
-      #' call random_portfolios() with constraints and search_size to create matrix of portfolios
+      # call random_portfolios() with constraints and search_size to create matrix of portfolios
       if(missing(rp) | is.null(rp)){
           rp<-random_portfolios_v1(rpconstraints=constraints,permutations=search_size)
       }
-      #' store matrix in out if trace=TRUE
+      # store matrix in out if trace=TRUE
       if (isTRUE(trace)) out$random_portfolios<-rp
-      #' write foreach loop to call constrained_objective() with each portfolio
+      # write foreach loop to call constrained_objective() with each portfolio
       if ("package:foreach" %in% search() & !hasArg(parallel)){
           ii <- 1
           rp_objective_results<-foreach::foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective_v1(w=rp[ii,],R,constraints,trace=trace,...=dotargs)
       } else {
           rp_objective_results<-apply(rp, 1, constrained_objective_v1, R=R, constraints=constraints, trace=trace, ...=dotargs)
       }
-      #' if trace=TRUE , store results of foreach in out$random_results
+      # if trace=TRUE , store results of foreach in out$random_results
       if(isTRUE(trace)) out$random_portfolio_objective_results<-rp_objective_results
-      #' loop through results keeping track of the minimum value of rp_objective_results[[objective]]$out
+      # loop through results keeping track of the minimum value of rp_objective_results[[objective]]$out
       search<-vector(length=length(rp_objective_results))
       # first we construct the vector of results
       for (i in 1:length(search)) {
@@ -241,11 +241,11 @@ optimize.portfolio_v1 <- function(
       } else {
           min_objective_weights<- try(normalize_weights(rp[which.min(search),]))
       }
-      #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
+      # re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
       out$weights<-min_objective_weights
       out$objective_measures<-try(constrained_objective_v1(w=min_objective_weights,R=R,constraints,trace=TRUE)$objective_measures)
       out$call<-call
-      #' construct out list to be as similar as possible to DEoptim list, within reason
+      # construct out list to be as similar as possible to DEoptim list, within reason
 
   } ## end case for random
   
@@ -472,10 +472,156 @@ optimize.portfolio_v1 <- function(
     .storage <<- new.env()
 }
 
-##### version 2 of optimize.portfolio #####
+#' Constrained optimization of portfolios
+#' 
+#' This function aims to provide a wrapper for constrained optimization of 
+#' portfolios that specify constraints and objectives.
+#' 
+#' @details
+#' This function currently supports DEoptim, random portfolios, pso, GenSA, and ROI as back ends.
+#' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
+#'
+#' When using random portfolios, search_size is precisely that, how many 
+#' portfolios to test.  You need to make sure to set your feasible weights 
+#' in generatesequence to make sure you have search_size unique 
+#' portfolios to test, typically by manipulating the 'by' parameter 
+#' to select something smaller than .01 
+#' (I often use .002, as .001 seems like overkill)
+#' 
+#' When using DE, search_size is decomposed into two other parameters 
+#' which it interacts with, NP and itermax.
+#' 
+#' NP, the number of members in each population, is set to cap at 2000 in 
+#' DEoptim, and by default is the number of parameters (assets/weights) * 10.
+#' 
+#' itermax, if not passed in dots, defaults to the number of parameters (assets/weights) * 50.
+#' 
+#' When using GenSA and want to set \code{verbose=TRUE}, instead use \code{trace}. 
+#' 
+#' If \code{optimize_method="ROI"} is specified, a default solver will be 
+#' selected based on the optimization problem. The \code{glpk} solver is the
+#' default solver for LP and MILP optimization problems. The \code{quadprog} 
+#' solver is the default solver for QP optimization problems. For example,
+#' \code{optimize_method = "quadprog"} can be specified and the optimization
+#' problem will be solved via ROI using the quadprog solver.
+#' 
+#' The extension to ROI solves a limited type of convex optimization problems:
+#' \itemize{
+#' \item{Maxmimize portfolio return subject leverage, box, group, position limit, target mean return, and/or factor exposure constraints on weights.}
+#' \item{Minimize portfolio variance subject to leverage, box, group, turnover, and/or factor exposure constraints (otherwise known as global minimum variance portfolio).}
+#' \item{Minimize portfolio variance subject to leverage, box, group, and/or factor exposure constraints and a desired portfolio return.}
+#' \item{Maximize quadratic utility subject to leverage, box, group, target mean return, turnover, and/or factor exposure constraints and risk aversion parameter.
+#' (The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object).}
+#' \item{Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) can be done by specifying \code{maxSR=TRUE} in \code{optimize.portfolio}. 
+#' If both mean and StdDev are specified as objective names, the default action is to maximize quadratic utility, therefore \code{maxSR=TRUE} must be specified to maximize Sharpe Ratio.}
+#' \item{Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, position limit, target mean return, and/or factor exposure constraints and target portfolio return.}
+#' \item{Maximize portfolio mean return per unit ES/ETL/CVaR (i.e. the STARR Ratio) can be done by specifying \code{maxSTARR=TRUE} in \code{optimize.portfolio}. 
+#' If both mean and ES/ETL/CVaR are specified as objective names, the default action is to maximize mean return per unit ES/ETL/CVaR.}
+#' }
+#' These problems also support a weight_concentration objective where concentration
+#' of weights as measured by HHI is added as a penalty term to the quadratic objective.
+#' 
+#' Because these convex optimization problem are standardized, there is no need for a penalty term. 
+#' The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the ROI solver.
+#'
+#' @note
+#' An object of class \code{v1_constraint} can be passed in for the \code{constraints} argument.
+#' The \code{v1_constraint} object was used in the previous 'v1' specification to specify the 
+#' constraints and objectives for the optimization problem, see \code{\link{constraint}}. 
+#' We will attempt to detect if the object passed into the constraints argument 
+#' is a \code{v1_constraint} object and update to the 'v2' specification by adding the 
+#' constraints and objectives to the \code{portfolio} object.
+#'
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
+#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
+#' @param constraints default=NULL, a list of constraint objects. An object of class 'v1_constraint' can be passed in here.
+#' @param objectives default=NULL, a list of objective objects.
+#' @param optimize_method one of "DEoptim", "random", "ROI", "pso", "GenSA". A solver
+#' for ROI can also be specified and will be solved using ROI. See Details.
+#' @param search_size integer, how many portfolios to test, default 20,000
+#' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
+#' @param \dots any other passthru parameters
+#' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
+#' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments_v2}}
+#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
+#' 
+#' @return a list containing the following elements
+#' \itemize{
+#'   \item{\code{weights}:}{ The optimal set weights.}
+#'   \item{\code{objective_measures}:}{ A list containing the value of each objective corresponding to the optimal weights.}
+#'   \item{\code{opt_values}:}{ A list containing the value of each objective corresponding to the optimal weights.}
+#'   \item{\code{out}:}{ The output of the solver.}
+#'   \item{\code{call}:}{ The function call.}
+#'   \item{\code{portfolio}:}{ The portfolio object.}
+#'   \item{\code{R}:}{ The asset returns.}
+#'   \item{\code{data summary:}}{ The first row and last row of \code{R}.}
+#'   \item{\code{elapsed_time:}}{ The amount of time that elapses while the optimization is run.}
+#'   \item{\code{end_t:}}{ The date and time the optimization completed.}
+#' }
+#' When Trace=TRUE is specified, the following elements will be returned in 
+#' addition to the elements above. The output depends on the optimization 
+#' method and is specific to each solver. Refer to the documentation of the
+#' desired solver for more information.
+#' 
+#' \code{optimize_method="random"}
+#' \itemize{
+#'   \item{\code{random_portfolios}:}{ A matrix of the random portfolios.}
+#'   \item{\code{random_portfolio_objective_results}:}{ A list of the following elements for each random portfolio.}
+#'   \itemize{
+#'     \item{\code{out}:}{ The output value of the solver corresponding to the random portfolio weights.}
+#'     \item{\code{weights}:}{ The weights of the random portfolio.}
+#'     \item{\code{objective_measures}:}{ A list of each objective measure corresponding to the random portfolio weights.}
+#'   }
+#' }
+#' 
+#' \code{optimize_method="DEoptim"}
+#' \itemize{
+#'   \item{\code{DEoutput:}}{ A list (of length 2) containing the following elements:}
+#'   \itemize{
+#'     \item{\code{optim}}
+#'     \item{\code{member}}
+#'   }
+#'   \item{\code{DEoptim_objective_results}:}{ A list containing the following elements for each intermediate population.}
+#'   \itemize{
+#'     \item{\code{out}:}{ The output of the solver.}
+#'     \item{\code{weights}:}{ Population weights.}
+#'     \item{\code{init_weights}:}{ Initial population weights.}
+#'     \item{\code{objective_measures}:}{ A list of each objective measure corresponding to the weights}
+#'   }
+#' }
+#' 
+#' \code{optimize_method="pso"}
+#' \itemize{
+#'   \item{\code{PSOoutput}:}{ A list containing the following elements:}
+#'   \itemize{
+#'     \item{par}
+#'     \item{value}
+#'     \item{counts}
+#'     \item{convergence}
+#'     \item{message}
+#'     \item{stats}
+#'   }
+#' }
+#' 
+#' \code{optimize_method="GenSA"}
+#' \itemize{
+#'   \item{\code{GenSAoutput:}}{ A list containing the following elements:}
+#'   \itemize{
+#'     \item{value}
+#'     \item{par}
+#'     \item{trace.mat}
+#'     \item{counts}
+#'   }
+#' }
+#' 
+#' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
+#' @aliases optimize.portfolio_v2 optimize.portfolio_v1
+#' @seealso \code{\link{portfolio.spec}}
 #' @rdname optimize.portfolio
-#' @export
-optimize.portfolio_v2 <- function(
+#' @name optimize.portfolio
+#' @export optimize.portfolio
+#' @export optimize.portfolio_v2
+optimize.portfolio <- optimize.portfolio_v2 <- function(
   R,
   portfolio=NULL,
   constraints=NULL,
@@ -651,8 +797,8 @@ optimize.portfolio_v2 <- function(
       # might violate your constraints, so you'd need to renormalize them after optimizing
       # we'll create functions for that so the user is less likely to mess it up.
       
-      ##' NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
-      ##' In Kris' original function, this was manifested as a full investment constraint
+      # NOTE: need to normalize in the optimization wrapper too before we return, since we've normalized in here
+      # In Kris' original function, this was manifested as a full investment constraint
       if(!is.null(constraints$max_sum) & constraints$max_sum != Inf ) {
         max_sum=constraints$max_sum
         if(sum(weights)>max_sum) { weights<-(max_sum/sum(weights))*weights } # normalize to max_sum
@@ -823,26 +969,26 @@ optimize.portfolio_v2 <- function(
               consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01")
     }
     
-    #' call random_portfolios() with portfolio and search_size to create matrix of portfolios
+    # call random_portfolios() with portfolio and search_size to create matrix of portfolios
     if(missing(rp) | is.null(rp)){
       if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
       if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
       if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
       rp <- random_portfolios(portfolio=portfolio, permutations=search_size, rp_method=rp_method, eliminate=eliminate, fev=fev)
     }
-    #' store matrix in out if trace=TRUE
+    # store matrix in out if trace=TRUE
     if (isTRUE(trace)) out$random_portfolios <- rp
     # rp is already being generated with a call to fn_map so set normalize=FALSE in the call to constrained_objective
-    #' write foreach loop to call constrained_objective() with each portfolio
+    # write foreach loop to call constrained_objective() with each portfolio
     if ("package:foreach" %in% search() & !hasArg(parallel)){
       ii <- 1
       rp_objective_results <- foreach::foreach(ii=1:nrow(rp), .errorhandling='pass') %dopar% constrained_objective(w=rp[ii,], R=R, portfolio=portfolio, trace=trace, env=dotargs, normalize=FALSE)
     } else {
       rp_objective_results <- apply(rp, 1, constrained_objective, R=R, portfolio=portfolio, trace=trace, normalize=FALSE, env=dotargs)
     }
-    #' if trace=TRUE , store results of foreach in out$random_results
+    # if trace=TRUE , store results of foreach in out$random_results
     if(isTRUE(trace)) out$random_portfolio_objective_results <- rp_objective_results
-    #' loop through results keeping track of the minimum value of rp_objective_results[[objective]]$out
+    # loop through results keeping track of the minimum value of rp_objective_results[[objective]]$out
     search <- vector(length=length(rp_objective_results))
     # first we construct the vector of results
     for (i in 1:length(search)) {
@@ -860,13 +1006,13 @@ optimize.portfolio_v2 <- function(
     } else {
       min_objective_weights <- try(normalize_weights(rp[which.min(search),]))
     }
-    #' re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
+    # re-call constrained_objective on the best portfolio, as above in DEoptim, with trace=TRUE to get results for out list
     out$weights <- min_objective_weights
     obj_vals <- try(constrained_objective(w=min_objective_weights, R=R, portfolio=portfolio, trace=TRUE, normalize=FALSE, env=dotargs)$objective_measures)
     out$objective_measures <- obj_vals
     out$opt_values <- obj_vals
     out$call <- call
-    #' construct out list to be as similar as possible to DEoptim list, within reason
+    # construct out list to be as similar as possible to DEoptim list, within reason
     
   } ## end case for random
   
@@ -1196,156 +1342,6 @@ optimize.portfolio_v2 <- function(
   return(out)
 }
 
-#' Constrained optimization of portfolios
-#' 
-#' This function aims to provide a wrapper for constrained optimization of 
-#' portfolios that specify constraints and objectives.
-#' 
-#' @details
-#' This function currently supports DEoptim, random portfolios, pso, GenSA, and ROI as back ends.
-#' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
-#'
-#' When using random portfolios, search_size is precisely that, how many 
-#' portfolios to test.  You need to make sure to set your feasible weights 
-#' in generatesequence to make sure you have search_size unique 
-#' portfolios to test, typically by manipulating the 'by' parameter 
-#' to select something smaller than .01 
-#' (I often use .002, as .001 seems like overkill)
-#' 
-#' When using DE, search_size is decomposed into two other parameters 
-#' which it interacts with, NP and itermax.
-#' 
-#' NP, the number of members in each population, is set to cap at 2000 in 
-#' DEoptim, and by default is the number of parameters (assets/weights) * 10.
-#' 
-#' itermax, if not passed in dots, defaults to the number of parameters (assets/weights) * 50.
-#' 
-#' When using GenSA and want to set \code{verbose=TRUE}, instead use \code{trace}. 
-#' 
-#' If \code{optimize_method="ROI"} is specified, a default solver will be 
-#' selected based on the optimization problem. The \code{glpk} solver is the
-#' default solver for LP and MILP optimization problems. The \code{quadprog} 
-#' solver is the default solver for QP optimization problems. For example,
-#' \code{optimize_method = "quadprog"} can be specified and the optimization
-#' problem will be solved via ROI using the quadprog solver.
-#' 
-#' The extension to ROI solves a limited type of convex optimization problems:
-#' \itemize{
-#' \item{Maxmimize portfolio return subject leverage, box, group, position limit, target mean return, and/or factor exposure constraints on weights.}
-#' \item{Minimize portfolio variance subject to leverage, box, group, turnover, and/or factor exposure constraints (otherwise known as global minimum variance portfolio).}
-#' \item{Minimize portfolio variance subject to leverage, box, group, and/or factor exposure constraints and a desired portfolio return.}
-#' \item{Maximize quadratic utility subject to leverage, box, group, target mean return, turnover, and/or factor exposure constraints and risk aversion parameter.
-#' (The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object).}
-#' \item{Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) can be done by specifying \code{maxSR=TRUE} in \code{optimize.portfolio}. 
-#' If both mean and StdDev are specified as objective names, the default action is to maximize quadratic utility, therefore \code{maxSR=TRUE} must be specified to maximize Sharpe Ratio.}
-#' \item{Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, position limit, target mean return, and/or factor exposure constraints and target portfolio return.}
-#' \item{Maximize portfolio mean return per unit ES/ETL/CVaR (i.e. the STARR Ratio) can be done by specifying \code{maxSTARR=TRUE} in \code{optimize.portfolio}. 
-#' If both mean and ES/ETL/CVaR are specified as objective names, the default action is to maximize mean return per unit ES/ETL/CVaR.}
-#' }
-#' These problems also support a weight_concentration objective where concentration
-#' of weights as measured by HHI is added as a penalty term to the quadratic objective.
-#' 
-#' Because these convex optimization problem are standardized, there is no need for a penalty term. 
-#' The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the ROI solver.
-#'
-#' @note
-#' An object of class \code{v1_constraint} can be passed in for the \code{constraints} argument.
-#' The \code{v1_constraint} object was used in the previous 'v1' specification to specify the 
-#' constraints and objectives for the optimization problem, see \code{\link{constraint}}. 
-#' We will attempt to detect if the object passed into the constraints argument 
-#' is a \code{v1_constraint} object and update to the 'v2' specification by adding the 
-#' constraints and objectives to the \code{portfolio} object.
-#'
-#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
-#' @param constraints default=NULL, a list of constraint objects. An object of class 'v1_constraint' can be passed in here.
-#' @param objectives default=NULL, a list of objective objects.
-#' @param optimize_method one of "DEoptim", "random", "ROI", "pso", "GenSA". A solver
-#' for ROI can also be specified and will be solved using ROI. See Details.
-#' @param search_size integer, how many portfolios to test, default 20,000
-#' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
-#' @param \dots any other passthru parameters
-#' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
-#' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments_v2}}
-#' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
-#' 
-#' @return a list containing the following elements
-#' \itemize{
-#'   \item{\code{weights}:}{ The optimal set weights.}
-#'   \item{\code{objective_measures}:}{ A list containing the value of each objective corresponding to the optimal weights.}
-#'   \item{\code{opt_values}:}{ A list containing the value of each objective corresponding to the optimal weights.}
-#'   \item{\code{out}:}{ The output of the solver.}
-#'   \item{\code{call}:}{ The function call.}
-#'   \item{\code{portfolio}:}{ The portfolio object.}
-#'   \item{\code{R}:}{ The asset returns.}
-#'   \item{\code{data summary:}}{ The first row and last row of \code{R}.}
-#'   \item{\code{elapsed_time:}}{ The amount of time that elapses while the optimization is run.}
-#'   \item{\code{end_t:}}{ The date and time the optimization completed.}
-#' }
-#' When Trace=TRUE is specified, the following elements will be returned in 
-#' addition to the elements above. The output depends on the optimization 
-#' method and is specific to each solver. Refer to the documentation of the
-#' desired solver for more information.
-#' 
-#' \code{optimize_method="random"}
-#' \itemize{
-#'   \item{\code{random_portfolios}:}{ A matrix of the random portfolios.}
-#'   \item{\code{random_portfolio_objective_results}:}{ A list of the following elements for each random portfolio.}
-#'   \itemize{
-#'     \item{\code{out}:}{ The output value of the solver corresponding to the random portfolio weights.}
-#'     \item{\code{weights}:}{ The weights of the random portfolio.}
-#'     \item{\code{objective_measures}:}{ A list of each objective measure corresponding to the random portfolio weights.}
-#'   }
-#' }
-#' 
-#' \code{optimize_method="DEoptim"}
-#' \itemize{
-#'   \item{\code{DEoutput:}}{ A list (of length 2) containing the following elements:}
-#'   \itemize{
-#'     \item{\code{optim}}
-#'     \item{\code{member}}
-#'   }
-#'   \item{\code{DEoptim_objective_results}:}{ A list containing the following elements for each intermediate population.}
-#'   \itemize{
-#'     \item{\code{out}:}{ The output of the solver.}
-#'     \item{\code{weights}:}{ Population weights.}
-#'     \item{\code{init_weights}:}{ Initial population weights.}
-#'     \item{\code{objective_measures}:}{ A list of each objective measure corresponding to the weights}
-#'   }
-#' }
-#' 
-#' \code{optimize_method="pso"}
-#' \itemize{
-#'   \item{\code{PSOoutput}:}{ A list containing the following elements:}
-#'   \itemize{
-#'     \item{par}
-#'     \item{value}
-#'     \item{counts}
-#'     \item{convergence}
-#'     \item{message}
-#'     \item{stats}
-#'   }
-#' }
-#' 
-#' \code{optimize_method="GenSA"}
-#' \itemize{
-#'   \item{\code{GenSAoutput:}}{ A list containing the following elements:}
-#'   \itemize{
-#'     \item{value}
-#'     \item{par}
-#'     \item{trace.mat}
-#'     \item{counts}
-#'   }
-#' }
-#' 
-#' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
-#' @aliases optimize.portfolio_v2 optimize.portfolio_v1
-#' @seealso \code{\link{portfolio.spec}}
-#' @name optimize.portfolio
-#' @export
-optimize.portfolio <- optimize.portfolio_v2
-
-
 #' @rdname optimize.portfolio.rebalancing
 #' @name optimize.portfolio.rebalancing
 #' @export
@@ -1357,7 +1353,7 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
     #store the call for later
     call <- match.call()
     if(optimize_method=="random"){
-        #' call random_portfolios() with constraints and search_size to create matrix of portfolios
+        # call random_portfolios() with constraints and search_size to create matrix of portfolios
         if(is.null(rp))
             rp<-random_portfolios(rpconstraints=constraints,permutations=search_size)
     } else {
@@ -1604,7 +1600,7 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
     if(hasArg(eliminate)) eliminate=match.call(expand.dots=TRUE)$eliminate else eliminate=TRUE
     if(hasArg(fev)) fev=match.call(expand.dots=TRUE)$fev else fev=0:5
     
-    #' call random_portfolios() with constraints and search_size to create matrix of portfolios
+    # call random_portfolios() with constraints and search_size to create matrix of portfolios
     if(is.null(rp))
       if(inherits(portfolio, "regime.portfolios")){
         rp <- rp.regime.portfolios(regime=portfolio, permutations=search_size, rp_method=rp_method, eliminate=eliminate, fev=fev)

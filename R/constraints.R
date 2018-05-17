@@ -1,7 +1,7 @@
 ###############################################################################
-# R (http://r-project.org/) Numeric Methods for Optimization of Portfolios
+# R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2015 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
+# Copyright (c) 2004-2018 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
@@ -10,25 +10,9 @@
 #
 ###############################################################################
 
-#' constructor for class constraint
-#' 
-#' This function is the constructor for the \code{v1_constraint} object for backwards compatibility.
-#' 
-#' @param assets number of assets, or optionally a named vector of assets specifying initial weights
-#' @param ... any other passthru parameters
-#' @param min numeric or named vector specifying minimum weight box constraints
-#' @param max numeric or named vector specifying minimum weight box constraints
-#' @param min_mult numeric or named vector specifying minimum multiplier box constraint from initial weight in \code{assets}
-#' @param max_mult numeric or named vector specifying maximum multiplier box constraint from initial weight in \code{assets}
-#' @param min_sum minimum sum of all asset weights, default .99
-#' @param max_sum maximum sum of all asset weights, default 1.01
-#' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
-#' @author Peter Carl, Brian G. Peterson
-#' @seealso \code{\link{add.constraint}}
-#' @examples 
-#' exconstr <- constraint(assets=10, min_sum=1, max_sum=1, min=.01, max=.35, weight_seq=generatesequence())
+#' @rdname constraint
 #' @export
-constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,max_sum=1.01,weight_seq=NULL)
+constraint_v1 <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,max_sum=1.01,weight_seq=NULL)
 { # based on GPL R-Forge pkg roi by Stefan Thuessel,Kurt Hornik,David Meyer
   if (hasArg(min) & hasArg(max)) {
     if (is.null(assets) & (!length(min)>1) & (!length(max)>1)) {
@@ -155,15 +139,31 @@ constraint <- function(assets=NULL, ... ,min,max,min_mult,max_mult,min_sum=.99,m
 }
 
 
-#' constructor for v2 constraint specification
-#' 
+#' constructors for class constraint
+#'
 #' See main documentation entry in \code{\link{add.constraint}}.
 #' 
+#' This includes the deprecated constructor for the \code{v1_constraint} object for backwards compatibility.
+#' 
+#' @param assets number of assets, or optionally a named vector of assets specifying initial weights
+#' @param min numeric or named vector specifying minimum weight box constraints
+#' @param max numeric or named vector specifying minimum weight box constraints
+#' @param min_mult numeric or named vector specifying minimum multiplier box constraint from initial weight in \code{assets}
+#' @param max_mult numeric or named vector specifying maximum multiplier box constraint from initial weight in \code{assets}
+#' @param min_sum minimum sum of all asset weights, default .99
+#' @param max_sum maximum sum of all asset weights, default 1.01
+#' @param weight_seq seed sequence of weights, see \code{\link{generatesequence}}
 #' @param type character type of the constraint to add or update
 #' @param enabled TRUE/FALSE to enabled the constraint
 #' @param \dots any other passthru parameters
 #' @param constrclass name of class for the constraint
-constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
+#' @author Peter Carl, Brian G. Peterson, Ross Bennett
+#' @seealso \code{\link{add.constraint}}
+#' @aliases constraint constraint_v2
+#' @rdname constraint
+#' @export constraint
+#' @export constraint_v2
+constraint <- constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
   if(!hasArg(type)) stop("you must specify a constraint type")
   if (hasArg(type)) if(is.null(type)) stop("you must specify a constraint type")
   
@@ -175,10 +175,6 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
   ) # end structure
   )
 }
-
-# Alias constraint_v2 to constraint
-# @export
-# constraint <- constraint_v2
 
 #' General interface for adding and/or updating optimization constraints.
 #' 
@@ -223,8 +219,10 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' returns <- edhec[, 1:4]
 #' fund.names <- colnames(returns)
 #' pspec <- portfolio.spec(assets=fund.names)
+#' 
 #' # Add the full investment constraint that specifies the weights must sum to 1.
 #' pspec <- add.constraint(portfolio=pspec, type="weight_sum", min_sum=1, max_sum=1)
+#' 
 #' # The full investment constraint can also be specified with type="full_investment"
 #' pspec <- add.constraint(portfolio=pspec, type="full_investment")
 #' 
@@ -237,16 +235,27 @@ constraint_v2 <- function(type, enabled=TRUE, ..., constrclass="v2_constraint"){
 #' pspec <- add.constraint(portfolio=pspec, type="box", min=0.05, max=0.4)
 #' 
 #' # min and max can also be specified per asset
-#' pspec <- add.constraint(portfolio=pspec, type="box", min=c(0.05, 0, 0.08, 0.1), max=c(0.4, 0.3, 0.7, 0.55))
+#' pspec <- add.constraint(portfolio=pspec, 
+#'                         type="box", 
+#'                         min=c(0.05, 0, 0.08, 0.1), 
+#'                         max=c(0.4, 0.3, 0.7, 0.55))
+#'                         
 #' # A special case of box constraints is long only where min=0 and max=1
 #' # The default action is long only if min and max are not specified
 #' pspec <- add.constraint(portfolio=pspec, type="box")
 #' pspec <- add.constraint(portfolio=pspec, type="long_only")
 #' 
 #' # Add group constraints
-#' pspec <- add.constraint(portfolio=pspec, type="group", groups=list(c(1, 2, 1), 4), group_min=c(0.1, 0.15), group_max=c(0.85, 0.55), group_labels=c("GroupA", "GroupB"), group_pos=c(2, 1))
+#' pspec <- add.constraint(portfolio=pspec, 
+#'                         type="group", 
+#'                         groups=list(c(1, 2, 1), 4), 
+#'                         group_min=c(0.1, 0.15), 
+#'                         group_max=c(0.85, 0.55), 
+#'                         group_labels=c("GroupA", "GroupB"), 
+#'                         group_pos=c(2, 1))
 #' 
-#' # Add position limit constraint such that we have a maximum number of three assets with non-zero weights.
+#' # Add position limit constraint such that we have a maximum number 
+#' # of three assets with non-zero weights.
 #' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
 #' 
 #' # Add diversification constraint
@@ -424,7 +433,11 @@ add.constraint <- function(portfolio, type, enabled=TRUE, message=FALSE, ..., in
 #' pspec <- add.constraint(pspec, type="box", min=0.05, max=0.45)
 #' 
 #' # specify box constraints per asset
-#' pspec <- add.constraint(pspec, type="box", min=c(0.05, 0.10, 0.08, 0.06), max=c(0.45, 0.55, 0.35, 0.65))
+#' pspec <- add.constraint(pspec, 
+#'                         type="box", 
+#'                         min=c(0.05, 0.10, 0.08, 0.06), 
+#'                         max=c(0.45, 0.55, 0.35, 0.65))
+#'                         
 #' @export
 box_constraint <- function(type="box", assets, min, max, min_mult, max_mult, enabled=TRUE, message=FALSE, ...){
   # Based on the constraint function for object of class constraint_v1 that
@@ -686,7 +699,7 @@ weight_sum_constraint <- function(type="weight_sum", min_sum=0.99, max_sum=1.01,
 #' check function for constraints
 #' 
 #' @param x object to test for type \code{constraint}
-#' @author bpeterson
+#' @author Brian G. Peterson
 #' @export
 is.constraint <- function( x ) {
   inherits( x, "constraint" )
@@ -706,10 +719,10 @@ is.constraint <- function( x ) {
 #'  functions to extract the constraints from the portfolio object. We Use the 
 #'  same naming as the v1_constraint object.
 #'  
-#'  @param portfolio an object of class 'portfolio'
-#'  @return an object of class 'constraint' which is a flattened list of enabled constraints
-#'  @author Ross Bennett
-#'  @seealso \code{\link{portfolio.spec}}
+#' @param portfolio an object of class 'portfolio'
+#' @return an object of class 'constraint' which is a flattened list of enabled constraints
+#' @author Ross Bennett
+#' @seealso \code{\link{portfolio.spec}}
 get_constraints <- function(portfolio){
   if(!is.portfolio(portfolio)) stop("portfolio passed in is not of class portfolio")
   

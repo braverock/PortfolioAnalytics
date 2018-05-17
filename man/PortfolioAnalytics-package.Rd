@@ -146,9 +146,9 @@ TODO
 }
 
 \seealso{
-CRAN task view on Empirical Finance \cr \url{http://cran.r-project.org/src/contrib/Views/Econometrics.html}
+CRAN task view on Empirical Finance \cr \url{https://cran.r-project.org/view=Econometrics}
 
-CRAN task view on Optimization \cr \url{http://cran.r-project.org/web/views/Optimization.html}
+CRAN task view on Optimization \cr \url{https://cran.r-project.org/view=Optimization}
 
-Large-scale portfolio optimization with DEoptim \cr \url{http://cran.r-project.org/web/packages/DEoptim/vignettes/DEoptimPortfolioOptimization.pdf}
+Large-scale portfolio optimization with DEoptim \cr \url{https://cran.r-project.org/package=DEoptim}
 }
