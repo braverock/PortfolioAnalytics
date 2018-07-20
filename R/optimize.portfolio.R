@@ -626,7 +626,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   portfolio=NULL,
   constraints=NULL,
   objectives=NULL,
-  optimize_method=c("DEoptim","random","ROI","pso","GenSA"),
+  optimize_method=c("DEoptim","random","ROI","pso","GenSA","mco"),
   search_size=20000,
   trace=FALSE, ...,
   rp=NULL,
@@ -960,6 +960,100 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     
   } ## end case for DEoptim
+  
+  ###Multiple Criteria Optimization
+   if(optimize_method=="mco"){
+    stopifnot(requireNamespace("mco", quietly = TRUE))
+    
+    ###Generates multi objective function for the NSGA2 optimizer  
+    GenerateMultiObjectiveFunction <- function(PortfolioObject, ...) {
+        objectives <- PortfolioObject$objectives
+        if (is.null(objectives))
+            stop("Cannot create multi-objective function; portfolio has no objective function(s)")
+
+        constraints <- get_constraints(PortfolioObject,...)
+
+        # list of calls to objective functions
+        ObjectiveFunctionCalls <- lapply(objectives, function(obj) {
+                objFun <- as.name(obj$name)
+                objCall <- as.call(c(list(objFun, weights=quote(weights), R=quote(R)), obj$arguments))
+                call("*", objCall, obj$multiplier)
+            })
+
+        # objective function without body
+        MultiObjectiveFunction <- function(weights, R, ...) { }
+
+        # set objective function body
+        if (!is.null(constraints$min_sum) || !is.null(constraints$max_sum)) {
+            callVector <- as.call(c(as.name("c"), ObjectiveFunctionCalls))
+            body(MultiObjectiveFunction) <- substitute({
+                if (!is.null(max_sum) && is.finite(max_sum)) {
+                    if (sum(weights) > max_sum) {
+                        weights <- (max_sum/sum(weights))*weights
+                    }
+                }
+                if (!is.null(min_sum) && is.finite(min_sum)) {
+                    if (sum(weights) < min_sum) {
+                        weights <- (min_sum/sum(weights))*weights
+                    }
+                }
+                callObjectiveFunctions
+            }, list(min_sum = constraints$min_sum, max_sum = constraints$max_sum,
+                    callObjectiveFunctions = callVector))
+        } else {
+            body(MultiObjectiveFunction) <- call("{", ObjectiveFunctionCalls[[1]])
+        }
+        return(MultiObjectiveFunction)
+    }
+    MultiObjectiveFunction <- GenerateMultiObjectiveFunction(portfolio)
+    
+    ###Compile the function
+    if (requireNamespace("compiler")) {
+        MultiObjectiveFunction <- compiler::cmpfun(MultiObjectiveFunction)
+    }
+    
+    ###for debugging
+    #print(MultiObjectiveFunction)
+
+    ###@TODO Generate a multi contraint function. Currently box, min_sum,max_sum,long_only are supported without it
+
+    ###Bounds from constraints
+    if(is.null(constraints$min)){
+      lower.bounds=rep(-Inf,ncol(R))
+    }else{
+      lower.bounds=constraints$min}
+    if(is.null(constraints$max)){
+      upper.bounds=rep(Inf,ncol(R))
+    }else{  upper.bounds=constraints$max}
+    
+    minw = nsga2(MultiObjectiveFunction,idim=ncol(R),odim=length(portfolio$objectives),upper.bounds = upper.bounds,lower.bounds = lower.bounds,vectorized = FALSE, R, ...)
+    
+    #For Testing
+    #print(minw)
+    
+    if(inherits(minw,"try-error")) { minw=NULL }
+    if(is.null(minw)){
+      message(paste("Optimizer was unable to find a solution for target"))
+      return (paste("Optimizer was unable to find a solution for target"))
+    }
+    
+    ###Double check this
+    ###It's pareto optimal so it should not actually matter
+   
+    value=minw$value[which.min(minw$value[minw$pareto.optimal,1]),]
+    weights=minw$par[which.min(minw$value[minw$pareto.optimal,1]),]
+
+    out <- list(weights=weights, objective_measures=last(minw$value),out=value)
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   # case for random portfolios optimization method
   if(optimize_method=="random"){
