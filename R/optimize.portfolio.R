@@ -1325,19 +1325,117 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   ## case if method=Rglpk--- R/GNU Linear Programming Kit Interface
   if(optimize_method=="Rglpk"){
-    alpha <- list(...)$alpha
-    rmin <- list(...)$rmin
+    # Rglpk is a linear programming solver which has many restrictions
+    # warning for constraints
+    valid_constraints <- c("min_sum", "max_sum", "min", "max", "return_target", "groups", "group_labels", "cLO", "cUP")
+    for (i in names(constraints)) {
+      if (!i %in% valid_constraints) {
+        stop("Rglpk can only solve box and return_target constraints, please choose a different optimize_method.")
+      }
+    }
+  
+    # optimization type
+    Rglpk.return <- 0
+    Rglpk.risk <- 0
+    
+    valid_risk = c("CVaR", "ES", "AVaR", "ETL")
+    valid_return = c("mean")
+    
+    # warning for objectives
+    for (i in portfolio$objectives) {
+      if ((i$enabled)&(i$name %in% valid_return)) Rglpk.return <- 1
+      else if ((i$enabled)&(i$name %in% valid_risk)) Rglpk.risk <- 1
+      else stop("Rglpk only solves mean and CVaR type business objectives, choose a different optimize_method.")
+    }
+    
+    if(!is.null(constraints$return_target)){
+      target <- constraints$return_target
+    } else {
+      target <- NA
+    }
+    
+    arguments <- objective$arguments
+    if(!is.null(arguments[["p"]])) alpha <- arguments$p else alpha <- 0.05
+    if(alpha > 0.5) alpha <- (1 - alpha)
+    
     mu <- apply(R, 2, mean)
+    
     Amat <- cbind(rbind(matrix(1, 2, N), mu, as.matrix(R)), rbind(matrix(0, 3, T), diag(1, T)), c(0,0,0,rep(1,T)))
     objL <- c(rep(0, N), rep(-1/(alpha*T), T), -1)
-    bev <- c(constraints$max_sum, constraints$min_sum, rmin, rep(0,T))
-    
     dir.vec <- c("<=", ">=", "==", rep(">=", T))
-    
     bounds <- list(lower = list(ind = 1:N, val = constraints$min),
-                  upper = list(ind = 1:N, val = constraints$max))
-    result <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
-                             types = rep("C",length(objL)), max = TRUE, bound = bounds)
+                   upper = list(ind = 1:N, val = constraints$max))
+    
+    CVaRatio <- function(r){
+      bev <- c(constraints$max_sum, constraints$min_sum, r, rep(0,T))
+      w <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
+                           types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution
+      mean <- mean(R %*% w)
+      CVaR <- mean((R %*% w)[which(mean(R %*% w) > quantile(mean(R %*% w), alpha))])
+      return(mean / -CVaR)
+    }
+    
+    bev <- c(constraints$max_sum, constraints$min_sum, Inf, rep(0,T))
+    max <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
+                             types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution
+    max <- mean(R %*% max)
+    
+    bev <- c(constraints$max_sum, constraints$min_sum, - Inf, rep(0,T))
+    min <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
+                          types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution
+    min_return <- mean(R %*% min)
+    
+    if (!is.null(target)) {
+      bev <- c(constraints$max_sum, constraints$min_sum, target, rep(0,T))
+      result <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
+                               types = rep("C",length(objL)), max = TRUE, bound = bounds)
+    } else {
+      max <- -Inf
+      repeat {
+        return_list <- seq(from = min_return, to = max_return, length.out = 4)
+        CVaRatio_list <- c()
+        for (i in return_list) {
+          CVaRatio_list <- c(CVaRatio_list, CVaRatio(i))
+        }
+        if (CVaRatio_list[2] == max(CVaRatio_list)) {
+          max_return <- return_list[3]
+          min_return <- return_list[1]
+        }
+        if (CVaRatio_list[3] == max(CVaRatio_list)) {
+          max_return <- return_list[4]
+          min_return <- return_list[2]
+        }
+        if (CVaRatio_list[1] == max(CVaRatio_list)) {
+          if (abs(CVaRatio_list[1] - max) < 0.01) {
+            target_return <- return_list[1]
+            break
+          }
+          max <- CVaRatio_list[1]
+          max_return <- return_list[2]
+          min_return <- return_list[1]
+        }
+        if (CVaRatio_list[4] == max(CVaRatio_list)) {
+          if (abs(CVaRatio_list[4] - max) < 0.01) {
+            target_return <- return_list[4]
+            break
+          }
+          max <- CVaRatio_list[4]
+          max_return <- return_list[4]
+          min_return <- return_list[3]
+        }
+      }
+      bev <- c(constraints$max_sum, constraints$min_sum, target_return, rep(0,T))
+      result <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
+                               types = rep("C",length(objL)), max = TRUE, bound = bounds)
+    }
+    
+    if (Rglpk.risk&!Rglpk.return) {
+      result <- min
+    }
+    if (!Rglpk.risk&Rglpk.return) {
+      result <- max
+    }
+    
     w <- as.numeric(result$solution)
     CVaR <- as.numeric(result$solution[length(objL)])
     
