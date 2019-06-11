@@ -739,7 +739,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   weights <- NULL 
   
   # Get the constraints from the portfolio object
-  constraints <- get_constraints(portfolio)
+  constraints <- PortfolioAnalytics:::get_constraints(portfolio)
   
   # set portfolio moments only once
   # For set.portfolio.moments, we are passing the returns,
@@ -759,16 +759,16 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   # match the args for momentFUN
   .formals <- formals(momentFUN)
-  .formals <- modify.args(formals=.formals, arglist=list(...), dots=TRUE)
+  .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=list(...), dots=TRUE)
   # ** pass ROI=TRUE to set.portfolio.moments so the moments are not calculated
   if(optimize_method %in% c("ROI", "quadprog", "glpk", "symphony", "ipop")){
     obj_names <- unlist(lapply(portfolio$objectives, function(x) x$name))
     if(any(obj_names %in% c("CVaR", "ES", "ETL"))){
-      .formals <- modify.args(formals=.formals, arglist=list(ROI=TRUE), dots=TRUE)
+      .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=list(ROI=TRUE), dots=TRUE)
     }
   }
-  if("R" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=FALSE)
-  if("portfolio" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=FALSE)
+  if("R" %in% names(.formals)) .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, R=R, dots=FALSE)
+  if("portfolio" %in% names(.formals)) .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=FALSE)
   .formals$... <- NULL
   
   # call momentFUN
@@ -1322,6 +1322,30 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     
   } ## end case for GenSA
+  
+  ## case if method=mco---Multiple Criteria Optimization Algorithms
+  if(optimize_method=="mco"){
+    alpha <- 0.05
+    ESlist <- c("ES", "AVaR", "CVaR")
+    if (objectives$return == "mean") {
+      fn <- function(w) mean(R %*% w)
+    } else if (objectives$return == "median") {
+      fn <- function(w) median(R %*% w)
+    } else if (objectives$return == "VaR") {
+      fn <- function(w) quantile(R %*% w, alpha)
+    } else if (objectives$return %in% ESlist) {
+      fn <- function(w) {
+        temp <- R %*% w
+        return(mean(temp[which(temp < quantile(temp, alpha))]))
+      }
+    }
+    
+    weight_sum <- function(w){
+      if (max_sum %in% names()) {
+        
+      }
+    }
+  }
   
   # Prepare for final object to return
   end_t <- Sys.time()
