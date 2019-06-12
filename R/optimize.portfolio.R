@@ -1354,9 +1354,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       target <- NA
     }
     
-    arguments <- objective$arguments
-    if(!is.null(arguments[["p"]])) alpha <- arguments$p else alpha <- 0.05
-    if(alpha > 0.5) alpha <- (1 - alpha)
+    dotargs <- list(...)
+    
+    if (!is.null(dotargs$alpha)) {
+      alpha <- dotargs$alpha
+    }
     
     mu <- apply(R, 2, mean)
     
@@ -1370,33 +1372,48 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       bev <- c(constraints$max_sum, constraints$min_sum, r, rep(0,T))
       w <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
                            types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution
-      mean <- mean(R %*% w)
-      CVaR <- mean((R %*% w)[which(mean(R %*% w) > quantile(mean(R %*% w), alpha))])
-      return(mean / -CVaR)
+      portfolio <- R %*% w[1:N]
+      mu <- mean(portfolio)
+      CVaR <- mean(portfolio[which(portfolio < quantile(portfolio, alpha))])
+      return(mu / - CVaR)
     }
     
-    bev <- c(constraints$max_sum, constraints$min_sum, Inf, rep(0,T))
-    max <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
-                             types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution
-    max <- mean(R %*% max)
     
-    bev <- c(constraints$max_sum, constraints$min_sum, - Inf, rep(0,T))
+    bev <- c(constraints$max_sum, constraints$min_sum, 999, rep(0,T))
+    max <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
+                             types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution[1:N]
+    
+    max_return <- mean(R %*% max)
+    
+    bev <- c(constraints$max_sum, constraints$min_sum, - 999, rep(0,T))
     min <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
-                          types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution
+                          types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution[1:N]
     min_return <- mean(R %*% min)
     
-    if (!is.null(target)) {
+    if (!is.na(target)) {
       bev <- c(constraints$max_sum, constraints$min_sum, target, rep(0,T))
       result <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
                                types = rep("C",length(objL)), max = TRUE, bound = bounds)
     } else {
       max <- -Inf
+      return_list <- c()
+      CVaRatio_list <- c()
       repeat {
         return_list <- seq(from = min_return, to = max_return, length.out = 4)
         CVaRatio_list <- c()
         for (i in return_list) {
-          CVaRatio_list <- c(CVaRatio_list, CVaRatio(i))
+          te <- CVaRatio(i)
+          while (is.na(te)) {
+            te <- CVaRatio(i*1.0001)
+          }
+          CVaRatio_list <- c(CVaRatio_list, te)
         }
+        
+        if (sd(CVaRatio_list) < 10^-8) {
+          target_return <- mean(return_list)
+          break
+        }
+        
         if (CVaRatio_list[2] == max(CVaRatio_list)) {
           max_return <- return_list[3]
           min_return <- return_list[1]
@@ -1423,6 +1440,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           max_return <- return_list[4]
           min_return <- return_list[3]
         }
+        
       }
       bev <- c(constraints$max_sum, constraints$min_sum, target_return, rep(0,T))
       result <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
@@ -1438,10 +1456,14 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     w <- as.numeric(result$solution)
     CVaR <- as.numeric(result$solution[length(objL)])
+    por <- R %*% w[1:N]
     
     out = list(weights=w[1:N], 
-               CVaR= sum(objL * w),
-               VaR = w[length(w)],
+               mean=mean(por),
+               CVaR= mean(por[which(por < quantile(por, alpha))]),
+               FakeCVaR = sum(objL * w),
+               VaR = as.numeric(quantile(por, alpha)),
+               FakseVaR = - w[length(w)],
                call=call)
   }
   
