@@ -1327,22 +1327,52 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   if(optimize_method=="mco"){
     alpha <- 0.05
     ESlist <- c("ES", "AVaR", "CVaR")
+    
     if (objectives$return == "mean") {
-      fn <- function(w) mean(R %*% w)
+      returnfn <- function(w) mean(R %*% w)
     } else if (objectives$return == "median") {
-      fn <- function(w) median(R %*% w)
-    } else if (objectives$return == "VaR") {
-      fn <- function(w) quantile(R %*% w, alpha)
+      returnfn <- function(w) median(R %*% w)
+    } else {
+      returnfn <- function(w) 1
+    }
+    
+    if (objectives$return == "VaR") {
+      riskfn <- function(w) quantile(R %*% w, alpha)
     } else if (objectives$return %in% ESlist) {
-      fn <- function(w) {
+      riskfn <- function(w) {
         temp <- R %*% w
         return(mean(temp[which(temp < quantile(temp, alpha))]))
       }
+    } else if (objectives$return == "var") {
+      riskfn <- function(w) quantile(R %*% w, alpha)
+    } else {
+      riskfn <- function(w) 1
     }
     
-    weight_sum <- function(w){
-      if (max_sum %in% names()) {
-        
+    fn <- function(w) returnfn(w)/riskfn(w)
+    
+    idim <- T
+    odim <- T
+    
+    gn <- function(w){
+      result <- 1
+      if (!is.na(constraints$min_sum)) {
+        result <- result * (sum(w) >= constraints$min_sum)
+      }
+      if (!is.na(constraints$max_sum)) {
+        result <- result * (sum(w) <= constraints$max_sum)
+      }
+      if (!is.na(constraints$max_pos)) {
+        result <- result * (sum(between(w, -0.001, 0.001, incbounds=TRUE)) <= constraints$max_pos)
+      }
+      if (!is.na(constraints$min_sum)) {
+        result <- result * (sum(w) > min_sum)
+      }
+      if (!is.na(constraints$min_sum)) {
+        result <- result * (sum(w) > min_sum)
+      }
+      if (!is.na(constraints$min_sum)) {
+        result <- result * (sum(w) > min_sum)
       }
     }
   }
