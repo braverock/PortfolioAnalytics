@@ -1366,16 +1366,35 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         result <- result * (sum(between(w, -0.001, 0.001, incbounds=TRUE)) <= constraints$max_pos)
       }
       if (!is.na(constraints$min)) {
-        result <- result * prod(w >= min)
+        result <- result * prod(w >= constraints$min)
       }
       if (!is.na(constraints$min_sum)) {
-        result <- result * prod(w <= max)
+        result <- result * prod(w <= constraints$max)
       }
-      if (!is.na(constraints$group)) {
-        
+      if (!is.na(constraints$groups)) {
+          for (i in constraints$groups) {
+            t <- rep(0, N)
+            t[i] <- 1
+            A0 <- rbind(A0, t)
+          }
+          for (i in constraints$cUP) {
+            u0 <- c(u0, i)
+          }
+          for (i in constraints$cLO) {
+            l0 <- c(l0, i)
+          }
+          result <- result * prod(between(A0 %*% w, l0, u0, incbounds=TRUE))
+      }
+      if (!is.na(constraints$div_target)) {
+        result <- result * (sum(w^2) >= (1-constraints$div_target))
+      }
+      if (!is.na(constraints$return_target)) {
+        result <- result * (mean(R %*% w) >= constraints$return_target)
       }
       return(result)
     }
+    
+    
   }
   
   # Prepare for final object to return
