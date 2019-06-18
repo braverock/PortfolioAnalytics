@@ -1336,14 +1336,14 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       returnfn <- function(w) 1
     }
     
-    if (objectives$return == "VaR") {
+    if (objectives$risk == "VaR") {
       riskfn <- function(w) quantile(R %*% w, alpha)
     } else if (objectives$return %in% ESlist) {
       riskfn <- function(w) {
         temp <- R %*% w
         return(mean(temp[which(temp < quantile(temp, alpha))]))
       }
-    } else if (objectives$return == "var") {
+    } else if (objectives$risk == "var") {
       riskfn <- function(w) quantile(R %*% w, alpha)
     } else {
       riskfn <- function(w) 1
@@ -1365,15 +1365,16 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if (!is.na(constraints$max_pos)) {
         result <- result * (sum(between(w, -0.001, 0.001, incbounds=TRUE)) <= constraints$max_pos)
       }
-      if (!is.na(constraints$min_sum)) {
-        result <- result * (sum(w) > min_sum)
+      if (!is.na(constraints$min)) {
+        result <- result * prod(w >= min)
       }
       if (!is.na(constraints$min_sum)) {
-        result <- result * (sum(w) > min_sum)
+        result <- result * prod(w <= max)
       }
-      if (!is.na(constraints$min_sum)) {
-        result <- result * (sum(w) > min_sum)
+      if (!is.na(constraints$group)) {
+        
       }
+      return(result)
     }
   }
   
