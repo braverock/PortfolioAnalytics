@@ -1354,6 +1354,24 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       target <- NA
     }
     
+    A0 <- c()
+    u0 <- c()
+    l0 <- c()
+    
+    if ("groups" %in% names(constraints)) {
+      for (i in constraints$groups) {
+        t <- rep(0, N)
+        t[i] <- 1
+        A0 <- rbind(A0, t)
+      }
+      for (i in constraints$cUP) {
+        u0 <- c(u0, i)
+      }
+      for (i in constraints$cLO) {
+        l0 <- c(l0, i)
+      }
+    }
+    
     dotargs <- list(...)
     
     if (!is.null(dotargs$alpha)) {
@@ -1362,9 +1380,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     mu <- apply(R, 2, mean)
     
-    Amat <- cbind(rbind(matrix(1, 2, N), mu, as.matrix(R)), rbind(matrix(0, 3, T), diag(1, T)), c(0,0,0,rep(1,T)))
-    objL <- c(rep(0, N), rep(-1/(alpha*T), T), -1)
-    dir.vec <- c("<=", ">=", "==", rep(">=", T))
+    Amat <- cbind(rbind(A0, matrix(1, 2, N), mu, as.matrix(R)), rbind(matrix(0, 3, T), diag(1, T)), c(0,0,0,rep(1,T)))
+    objL <- c(u0, l0, rep(0, N), rep(-1/(alpha*T), T), -1)
+    dir.vec <- c(rep("<=", length(u0)), rep(">=", length(l0)) ,"<=", ">=", "==", rep(">=", T))
     bounds <- list(lower = list(ind = 1:N, val = constraints$min),
                    upper = list(ind = 1:N, val = constraints$max))
     
