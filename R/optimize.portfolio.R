@@ -1328,6 +1328,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     alpha <- 0.05
     ESlist <- c("ES", "AVaR", "CVaR")
     
+    print(objectives)
+    
     if (objectives$return == "mean") {
       returnfn <- function(w) mean(R %*% w)
     } else if (objectives$return == "median") {
