@@ -1365,12 +1365,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if (!is.na(constraints$max_pos)) {
         result <- result * (sum(between(w, -0.001, 0.001, incbounds=TRUE)) <= constraints$max_pos)
       }
-      if (!is.na(constraints$min)) {
-        result <- result * prod(w >= constraints$min)
-      }
-      if (!is.na(constraints$min_sum)) {
-        result <- result * prod(w <= constraints$max)
-      }
       if (!is.na(constraints$groups)) {
           for (i in constraints$groups) {
             t <- rep(0, N)
@@ -1394,6 +1388,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       return(result)
     }
     
+    result <- nsga2(fn, idim, odim, constraints, lower.bounds = constraints$min, upper.bounds = constraints$max)
+    print(result)
+    stop()
     
   }
   
