@@ -1359,6 +1359,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     idim <- N
     odim <- 1
     
+    print(constraints$min_sum)
+    print(constraints$max_sum)
+    
     gn <- function(w){
       result <- 1
       if (!is.null(constraints$min_sum)) {
