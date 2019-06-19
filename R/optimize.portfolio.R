@@ -1401,6 +1401,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     out = list(weights=result$par[which(result$value == min(result$value)),], 
                objective_measures=min(result$value),
                call=call)
+    print(gn(result$par[which(result$value == min(result$value))))
+    stop()
   }
   
   # Prepare for final object to return
