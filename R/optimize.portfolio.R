@@ -1328,46 +1328,52 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     alpha <- 0.05
     ESlist <- c("ES", "AVaR", "CVaR")
     
-    print(portfolio$objectives)
+    returnfn <- function(w) 1
+    riskfn <- function(w) 1
     
-    if (objectives$return == "mean") {
-      returnfn <- function(w) mean(R %*% w)
-    } else if (objectives$return == "median") {
-      returnfn <- function(w) median(R %*% w)
-    } else {
-      returnfn <- function(w) 1
-    }
-    
-    if (objectives$risk == "VaR") {
-      riskfn <- function(w) quantile(R %*% w, alpha)
-    } else if (objectives$return %in% ESlist) {
-      riskfn <- function(w) {
-        temp <- R %*% w
-        return(mean(temp[which(temp < quantile(temp, alpha))]))
+    for (i in portfolio$objectives) {
+      if (i$enabled) {
+        if (i$name == "mean") {
+          returnfn <- function(w) mean(R %*% w)
+        } 
+        if (i$name == "median") {
+          returnfn <- function(w) median(R %*% w)
+        } 
+        if (i$name == "VaR") {
+          riskfn <- function(w) quantile(R %*% w, alpha)
+        } 
+        if (i$name %in% ESlist) {
+          riskfn <- function(w) {
+            temp <- R %*% w
+            return(mean(temp[which(temp < quantile(temp, alpha))]))
+          }
+        }
+        if (i$name == "StdDev") {
+          riskfn <- function(w) sd(R %*% w)
+        } 
       }
-    } else if (objectives$risk == "var") {
-      riskfn <- function(w) quantile(R %*% w, alpha)
-    } else {
-      riskfn <- function(w) 1
     }
     
-    fn <- function(w) returnfn(w)/riskfn(w)
+    fn <- function(w) -returnfn(w)/riskfn(w)
     
-    idim <- T
-    odim <- T
+    idim <- N
+    odim <- 1
     
     gn <- function(w){
       result <- 1
-      if (!is.na(constraints$min_sum)) {
+      if (!is.null(constraints$min_sum)) {
         result <- result * (sum(w) >= constraints$min_sum)
       }
-      if (!is.na(constraints$max_sum)) {
+      if (!is.null(constraints$max_sum)) {
         result <- result * (sum(w) <= constraints$max_sum)
       }
-      if (!is.na(constraints$max_pos)) {
+      if (!is.null(constraints$max_pos)) {
         result <- result * (sum(between(w, -0.001, 0.001, incbounds=TRUE)) <= constraints$max_pos)
       }
-      if (!is.na(constraints$groups)) {
+      if (!is.null(constraints$groups)) {
+        A0 <- c()
+        u0 <- c()
+        l0 <- c()
           for (i in constraints$groups) {
             t <- rep(0, N)
             t[i] <- 1
@@ -1381,19 +1387,20 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           }
           result <- result * prod(between(A0 %*% w, l0, u0, incbounds=TRUE))
       }
-      if (!is.na(constraints$div_target)) {
+      if (!is.null(constraints$div_target)) {
         result <- result * (sum(w^2) >= (1-constraints$div_target))
       }
-      if (!is.na(constraints$return_target)) {
+      if (!is.null(constraints$return_target)) {
         result <- result * (mean(R %*% w) >= constraints$return_target)
       }
-      return(result)
+      return(result-1)
     }
     
-    result <- nsga2(fn, idim, odim, constraints, lower.bounds = constraints$min, upper.bounds = constraints$max)
-    print(result)
-    stop()
+    result <- nsga2(fn, idim, odim, constraints = gn, lower.bounds = constraints$min, upper.bounds = constraints$max)
     
+    out = list(weights=result$par[which(result$value == min(result$value)),], 
+               objective_measures=min(result$value),
+               call=call)
   }
   
   # Prepare for final object to return
