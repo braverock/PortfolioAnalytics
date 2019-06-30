@@ -1399,7 +1399,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       return(result-1)
     }
     
-    result <- nsga2(fn, idim, odim, constraints = gn, lower.bounds = constraints$min, upper.bounds = constraints$max, popsize = 200, generations = 200)
+    result <- nsga2(fn, idim, odim, constraints = gn, cdim = 1, lower.bounds = constraints$min, upper.bounds = constraints$max, popsize = 200, generations = 200)
     
     out = list(weights=result$par[which(result$value == min(result$value)),], 
                objective_measures=min(result$value),
