@@ -1359,8 +1359,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     idim <- N
     odim <- 1
     
-    print(constraints)
-    
     gn <- function(w){
       result <- c()
       if (!is.null(constraints$min_sum)) {
@@ -1388,15 +1386,17 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       return(result)
     }
     
-    cdim <- sum()
+    cdim <- !is.null(constraints$min_sum) + !is.null(constraints$max_sum) + !is.null(constraints$max_pos) +
+      length(constraints$cLO) * 2 + !is.null(constraints$div_target) + !is.null(constraints$return_target)
     
-    result <- nsga2(fn, idim, odim, constraints = gn, cdim = 11, 
+    result <- nsga2(fn, idim, odim, constraints = gn, cdim = cdim, 
                     lower.bounds = constraints$min, 
                     upper.bounds = constraints$max, 
-                    popsize = 1000, generations = 1000)
-    out = list(weights=result$par[which(result$value == min(result$value)),][1,], 
-               objective_measures=min(result$value),
-               call=call)
+                    popsize = 10000, generations = 1000)
+    print(result)
+    out = list(weights = result$par, 
+               objective_measures = -result$value,
+               call = call)
   }
   
   # Prepare for final object to return
