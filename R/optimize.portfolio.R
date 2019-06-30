@@ -739,7 +739,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   weights <- NULL 
   
   # Get the constraints from the portfolio object
-  constraints <-PortfolioAnalytics:::get_constraints(portfolio)
+  constraints <-get_constraints(portfolio)
   
   # set portfolio moments only once
   # For set.portfolio.moments, we are passing the returns,
@@ -759,7 +759,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   # match the args for momentFUN
   .formals <- formals(momentFUN)
-  .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=list(...), dots=TRUE)
+  .formals <- modify.args(formals=.formals, arglist=list(...), dots=TRUE)
   # ** pass ROI=TRUE to set.portfolio.moments so the moments are not calculated
   if(optimize_method %in% c("ROI", "quadprog", "glpk", "symphony", "ipop")){
     obj_names <- unlist(lapply(portfolio$objectives, function(x) x$name))
@@ -767,8 +767,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       .formals <- modify.args(formals=.formals, arglist=list(ROI=TRUE), dots=TRUE)
     }
   }
-  if("R" %in% names(.formals)) .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, R=R, dots=FALSE)
-  if("portfolio" %in% names(.formals)) .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=FALSE)
+  if("R" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=FALSE)
+  if("portfolio" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=FALSE)
   .formals$... <- NULL
   
   # call momentFUN
@@ -1396,7 +1396,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       return(mu / - CVaR)
     }
     
-    
     bev <- c(constraints$max_sum, constraints$min_sum, 999, rep(0,T))
     max <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
                              types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution[1:N]
@@ -1479,9 +1478,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     out = list(weights=w[1:N], 
                mean=mean(por),
                CVaR= mean(por[which(por < quantile(por, alpha))]),
-               FakeCVaR = sum(objL * w),
                VaR = as.numeric(quantile(por, alpha)),
-               FakseVaR = - w[length(w)],
                call=call)
   }
   
