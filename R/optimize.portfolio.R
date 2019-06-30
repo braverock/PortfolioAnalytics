@@ -1401,12 +1401,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     result <- nsga2(fn, idim, odim, constraints = gn, cdim = 1, 
                     lower.bounds = constraints$min, 
                     upper.bounds = constraints$max, 
-                    popsize = 200, generations = 200)
+                    popsize = 20000, generations = 20000)
     
     out = list(weights=result$par[which(result$value == min(result$value)),], 
                objective_measures=min(result$value),
                call=call)
-    print(gn(result$par[which(result$value == min(result$value)),]))
   }
   
   # Prepare for final object to return
