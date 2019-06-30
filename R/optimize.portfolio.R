@@ -1362,15 +1362,15 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     print(constraints)
     
     gn <- function(w){
-      result <- 1
+      result <- c()
       if (!is.null(constraints$min_sum)) {
-        result <- result * (sum(w) >= constraints$min_sum)
+        result <- c(result, sum(w)- constraints$min_sum)
       }
       if (!is.null(constraints$max_sum)) {
-        result <- result * (sum(w) <= constraints$max_sum)
+        result <- c(result, constraints$max_sum - sum(w))
       }
       if (!is.null(constraints$max_pos)) {
-        result <- result * (sum(between(w, -0.05, 0.05, incbounds=TRUE)) <= constraints$max_pos)
+        result <- c(constraints$max_pos - sum(between(w, -0.05, 0.05, incbounds=TRUE)))
       }
       if (!is.null(constraints$groups)) {
         A0 <- c()
@@ -1395,14 +1395,14 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if (!is.null(constraints$return_target)) {
         result <- result * (mean(R %*% w) >= constraints$return_target)
       }
-      return(result-1)
+      return(result)
     }
     
-    result <- nsga2(fn, idim, odim, constraints = gn, cdim = 1, 
+    result <- nsga2(fn, idim, odim, constraints = gn, cdim = 2, 
                     lower.bounds = constraints$min, 
                     upper.bounds = constraints$max, 
-                    popsize = 20000, generations = 20000)
-    
+                    popsize = 1000, generations = 1000)
+    print(result)
     out = list(weights=result$par[which(result$value == min(result$value)),], 
                objective_measures=min(result$value),
                call=call)
