@@ -1369,9 +1369,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if (!is.null(constraints$max_sum)) {
         result <- result * (sum(w) <= constraints$max_sum)
       }
-      # if (!is.null(constraints$max_pos)) {
-      #   result <- result * (sum(between(w, -0.001, 0.001, incbounds=TRUE)) <= constraints$max_pos)
-      # }
+      if (!is.null(constraints$max_pos)) {
+        result <- result * (sum(between(w, -0.05, 0.05, incbounds=TRUE)) <= constraints$max_pos)
+      }
       if (!is.null(constraints$groups)) {
         A0 <- c()
         u0 <- c()
