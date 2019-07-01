@@ -1392,7 +1392,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     result <- nsga2(fn, idim, odim, constraints = gn, cdim = cdim, 
                     lower.bounds = constraints$min, 
                     upper.bounds = constraints$max, 
-                    popsize = 1000, generations = 1000)
+                    popsize = 400, generations = 400)
     out = list(weights = result$par[1,], 
                objective_measures = -result$value[1],
                call = call)
