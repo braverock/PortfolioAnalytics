@@ -1378,7 +1378,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         }
       }
       if (!is.null(constraints$div_target)) {
-        result <- c(result, sum(w^2) - (1-constraints$div_target))
+        result <- c(result, constraints$div_target - sum(w^2))
       }
       if (!is.null(constraints$return_target)) {
         result <- c(result, mean(R %*% w) - constraints$return_target)
