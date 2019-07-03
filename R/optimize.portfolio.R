@@ -1332,6 +1332,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
               consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01")
     }
     
+    ESlist <- c("ES", "AVaR", "CVaR")
+    
+    returnfn <- function(w) 1
+    riskfn <- function(w) 1
+    
     for (i in portfolio$objectives) {
       if (i$enabled) {
         if (i$name == "mean") {
@@ -1391,33 +1396,78 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       return(result)
     }
     
-    cdim <- sum(c(!is.null(constraints$min_sum), !is.null(constraints$max_sum), !is.null(constraints$max_pos), 
-                  length(constraints$cLO) * 2, !is.null(constraints$div_target), !is.null(constraints$return_target)))
+    cdim <- sum(c(!is.null(constraints$min_sum), !is.null(constraints$max_sum),
+                  !is.null(constraints$max_pos), !is.null(constarints$turnover_target),
+                  length(constraints$cLO) * 2,
+                  !is.null(constraints$div_target), !is.null(constraints$return_target)))
     
     lower.bounds  <- constraints$min
     upper.bounds <- constraints$max
     
+    dotargs <- list(...)
     
+    popsize <- 100
+    generations <- 100
+    cprob <- 0.7
+    cdist <- 5
+    mprob <- 0.2
+    mdist <- 10
+    vectorized <- FALSE
     
-    ESlist <- c("ES", "AVaR", "CVaR")
+    if (is.list(dotargs)) {
+      if (hatvalues(dotargs$popsize)) {
+        popsize <- dotargs$popsize
+      }
+      if (hatvalues(dotargs$generations)) {
+        generations <- dotargs$generations
+      }
+      if (hatvalues(dotargs$cprob)) {
+        cprob <- dotargs$cprob
+      }
+      if (hatvalues(dotargs$cdist)) {
+        cdist <- dotargs$cdist
+      }
+      if (hatvalues(dotargs$mprob)) {
+        mprob <- dotargs$mprob
+      }
+      if (hatvalues(dotargs$mdist)) {
+        mdist <- dotargs$mdist
+      }
+      if (hatvalues(dotargs$popsize)) {
+        vectorized <- dotargs$vectorized
+      }
+    }
     
-    returnfn <- function(w) 1
-    riskfn <- function(w) 1
+    minw <- try(mco::nsga2(fn, idim, odim, constraints = gn, cdim = cdim,
+                           lower.bounds = constraints$min, 
+                           upper.bounds = constraints$max,
+                           popsize = popsize, generations = generations,
+                           cprob = cprob, cdist = cdist,
+                           mprob = mprob, mdist = mdist,
+                           vectorized = vectorized))
     
+    weights <- as.vector(minw$par[1,])
     
+    if(inherits(minw, "try-error")) { minw <- NULL }
     
+    if(is.null(minw)){
+      message(paste("Optimizer was unable to find a solution for target"))
+      return (paste("Optimizer was unable to find a solution for target"))
+    }
     
+    obj_vals <- constrained_objective(w = weights, R = R, portfolio, 
+                                      trace = TRUE, env=dotargs)$objective_measures
     
-    
-    
-    result <- nsga2(fn, idim, odim, constraints = gn, cdim = cdim, 
-                    lower.bounds = constraints$min, 
-                    upper.bounds = constraints$max, 
-                    popsize = 400, generations = 400)
-    out = list(weights = result$par[1,], 
-               objective_measures = -result$value[1],
+    out = list(weights = weights, 
+               objective_measures = obj_vals,
+               opt_values = obj_vals,
+               out = -minw$value[1], 
                call = call)
-  }
+    
+    if (isTRUE(trace)){
+      out$MCOoutput = minw
+    }
+  } ## end case for mco
   
   # Prepare for final object to return
   end_t <- Sys.time()
