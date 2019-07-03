@@ -1324,12 +1324,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   } ## end case for GenSA
   
   ## case if method=mco---Multiple Criteria Optimization Algorithms
-  if(optimize_method=="mco"){
-    alpha <- 0.05
-    ESlist <- c("ES", "AVaR", "CVaR")
+  if(optimize_method == "mco"){
+    stopifnot("package:mco" %in% search() || requireNamespace("mco",quietly = TRUE))
     
-    returnfn <- function(w) 1
-    riskfn <- function(w) 1
+    if((constraints$max_sum - constraints$min_sum) < 0.02){
+      message("Leverage constraint min_sum and max_sum are restrictive, 
+              consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01")
+    }
     
     for (i in portfolio$objectives) {
       if (i$enabled) {
@@ -1359,6 +1360,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     idim <- N
     odim <- 1
     
+    alpha <- 0.05
     gn <- function(w){
       result <- c()
       if (!is.null(constraints$min_sum)) {
@@ -1367,9 +1369,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if (!is.null(constraints$max_sum)) {
         result <- c(result, constraints$max_sum - sum(w))
       }
-      if (!is.null(constraints$max_pos)) {
-        result <- c(result, constraints$max_pos - sum(w^2 > 0.0025))
-      }
       if (!is.null(constraints$groups)) {
         for (i in 1:length(constraints$cLO)) {
           temp <- sum(w[constraints$groups[[i]]])
@@ -1377,8 +1376,14 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           result <- c(result, constraints$cUP[i] - temp)
         }
       }
+      if (!is.null(constarints$turnover_target)) {
+        result <- c(result, turnover_target - sum(abs(initial_weights - w)) / N)
+      }
       if (!is.null(constraints$div_target)) {
         result <- c(result, (1 - sum(w^2)) - constraints$div_target)
+      }
+      if (!is.null(constraints$max_pos)) {
+        result <- c(result, constraints$max_pos - sum(w^2 > 0.0025))
       }
       if (!is.null(constraints$return_target)) {
         result <- c(result, mean(R %*% w) - constraints$return_target)
@@ -1387,7 +1392,23 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     
     cdim <- sum(c(!is.null(constraints$min_sum), !is.null(constraints$max_sum), !is.null(constraints$max_pos), 
-      length(constraints$cLO) * 2, !is.null(constraints$div_target), !is.null(constraints$return_target)))
+                  length(constraints$cLO) * 2, !is.null(constraints$div_target), !is.null(constraints$return_target)))
+    
+    lower.bounds  <- constraints$min
+    upper.bounds <- constraints$max
+    
+    
+    
+    ESlist <- c("ES", "AVaR", "CVaR")
+    
+    returnfn <- function(w) 1
+    riskfn <- function(w) 1
+    
+    
+    
+    
+    
+    
     
     result <- nsga2(fn, idim, odim, constraints = gn, cdim = cdim, 
                     lower.bounds = constraints$min, 
