@@ -1324,29 +1324,26 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   } ## end case for GenSA
   
   ## case if method=Rglpk--- R/GNU Linear Programming Kit Interface
-  if(optimize_method=="Rglpk"){
-    # Rglpk is a linear programming solver which has many restrictions
-    # warning for constraints
-    valid_constraints <- c("min_sum", "max_sum", "min", "max", "return_target", "groups", "group_labels", "cLO", "cUP")
+  if(optimize_method=="Rglpk") {
+    valid_risk <- c("CVaR", "ES", "AVaR", "ETL")
+    valid_return <- c("mean")
+    
+    for (i in portfolio$objectives) {
+      if ((i$enabled)&(i$name %in% valid_return)) Rglpk.return <- 1
+      else if ((i$enabled)&(i$name %in% valid_risk)) Rglpk.risk <- 1
+      else stop("Rglpk only solves mean and CVaR type business objectives, choose a different optimize_method.")
+    }
+    
+    valid_constraints <- c("min_sum", "max_sum", "min", "max", 
+                           "return_target", "groups", "group_labels", "cLO", "cUP")
     for (i in names(constraints)) {
       if (!i %in% valid_constraints) {
         stop("Rglpk can only solve box and return_target constraints, please choose a different optimize_method.")
       }
     }
   
-    # optimization type
     Rglpk.return <- 0
     Rglpk.risk <- 0
-    
-    valid_risk = c("CVaR", "ES", "AVaR", "ETL")
-    valid_return = c("mean")
-    
-    # warning for objectives
-    for (i in portfolio$objectives) {
-      if ((i$enabled)&(i$name %in% valid_return)) Rglpk.return <- 1
-      else if ((i$enabled)&(i$name %in% valid_risk)) Rglpk.risk <- 1
-      else stop("Rglpk only solves mean and CVaR type business objectives, choose a different optimize_method.")
-    }
     
     if(!is.null(constraints$return_target)){
       target <- constraints$return_target
@@ -1372,11 +1369,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     }
     
+    alpha <- 0.05
+    
     dotargs <- list(...)
     
     if (!is.null(dotargs$alpha)) {
       alpha <- dotargs$alpha
-    }
+    } 
     
     mu <- apply(R, 2, mean)
     
