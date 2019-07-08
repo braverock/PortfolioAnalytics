@@ -1379,6 +1379,66 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     mu <- apply(R, 2, mean)
     
+    bounds <- list(lower = list(ind = 1:N, val = constraints$min),
+                   upper = list(ind = 1:N, val = constraints$max))
+    
+    # max return
+    wmax <- max_return
+    
+    if (wmax < constraints$target_return) {
+      stop("Target return is impossible")
+    }
+    
+    # min return
+    wmin <- min_return
+    
+    if (wmin < target_return) {
+      wmin <- target_return
+    }
+    
+    if (Rglpk.return&!Rglpk.risk) {
+      weights <- as.vector(wmax)
+      names(weights) <- colnames(R)
+      obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+      out = list(weights=weights, 
+                 objective_measures=obj_vals,
+                 opt_values=obj_vals,
+                 out=minw$value, 
+                 call=call)
+      if (isTRUE(trace)) out$Rglpkoutput=wmax
+    } 
+    if (!Rglpk.return&Rglpk.risk) {
+      weights <- as.vector(wmin)
+      names(weights) <- colnames(R)
+      obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+      out = list(weights=weights, 
+                 objective_measures=obj_vals,
+                 opt_values=obj_vals,
+                 out=minw$value, 
+                 call=call)
+      if (isTRUE(trace)) out$Rglpkoutput = wmin
+    }
+    if (Rglpk.return&Rglpk.risk)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     Amat <- cbind(rbind(A0, matrix(1, 2, N), mu, as.matrix(R)), rbind(matrix(0, 3, T), diag(1, T)), c(0,0,0,rep(1,T)))
     objL <- c(u0, l0, rep(0, N), rep(-1/(alpha*T), T), -1)
     dir.vec <- c(rep("<=", length(u0)), rep(">=", length(l0)) ,"<=", ">=", "==", rep(">=", T))
@@ -1394,17 +1454,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       CVaR <- mean(portfolio[which(portfolio < quantile(portfolio, alpha))])
       return(mu / - CVaR)
     }
-    
-    bev <- c(constraints$max_sum, constraints$min_sum, 999, rep(0,T))
-    max <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
-                             types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution[1:N]
-    
-    max_return <- mean(R %*% max)
-    
-    bev <- c(constraints$max_sum, constraints$min_sum, - 999, rep(0,T))
-    min <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
-                          types = rep("C",length(objL)), max = TRUE, bound = bounds)$solution[1:N]
-    min_return <- mean(R %*% min)
     
     if (!is.na(target)) {
       bev <- c(constraints$max_sum, constraints$min_sum, target, rep(0,T))
@@ -1462,23 +1511,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       result <- Rglpk_solve_LP(obj = objL, mat = Amat, dir = dir.vec, rhs = bev, 
                                types = rep("C",length(objL)), max = TRUE, bound = bounds)
     }
-    
-    if (Rglpk.risk&!Rglpk.return) {
-      result <- min
-    }
-    if (!Rglpk.risk&Rglpk.return) {
-      result <- max
-    }
-    
-    w <- as.numeric(result$solution)
-    CVaR <- as.numeric(result$solution[length(objL)])
-    por <- R %*% w[1:N]
-    
-    out = list(weights=w[1:N], 
-               mean=mean(por),
-               CVaR= mean(por[which(por < quantile(por, alpha))]),
-               VaR = as.numeric(quantile(por, alpha)),
-               call=call)
   }
   
   # Prepare for final object to return
