@@ -1348,7 +1348,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     if(!is.null(constraints$return_target)){
       target <- constraints$return_target
     } else {
-      target <- NA
+      target <- - Inf
     }
     
     A0 <- c()
@@ -1387,7 +1387,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     maxReturn <- Rglpk_solve_LP(mu, rbind(rep(1, T), rep(1, T), A0, A0), dir, c(constraints$min_sum, constraints$max_sum, l0, u0), bounds, max = 1)
     rmax <- maxReturn$objval
     
-    if (rmax < constraints$target_return) {
+    if (rmax < target) {
       stop("Target return is impossible")
     }
     
@@ -1403,8 +1403,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     minReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
     rmin <- minReturn$objval
     
-    if (rmin < target_return) {
-      rmin <- target_return
+    if (rmin < target) {
+      rmin <- target
     }
     
     if (Rglpk.return&!Rglpk.risk) {
@@ -1451,8 +1451,57 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                        upper = list(ind = 1:N, val = constraints$max))
         result <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
         port <- R %*% result$solution
-        return(mean(port)/mean(port[which(port < quantile(port, alpha)))]
+        return(mean(port)/ - mean(port[which(port < quantile(port, alpha)))]
       }
+      
+      maxRatio <- -Inf
+    
+      repeat {
+        returnList <- seq(from = rmin, to = rmax, length.out = 4)
+        ratioList <- apply(returnList, 1, ratioOnReturn)
+        
+        if ((max(ratioList) - maxRatio)/(max(ratioList) >0.01) {
+          maxRatio <- max(ratioList)
+          
+          if (maxRatio == ratioList[1]) {
+            rmin <- returnList[1]
+            rmax <- returnList[2]
+          } else if (maxRatio == ratioList[2]) {
+            rmin <- returnList[1]
+            rmax <- returnList[3]
+          } else if (maxRatio == ratioList[3]) {
+            rmin <- returnList[2]
+            rmax <- returnList[4]
+          } else {
+            rmin <- returnList[3]
+            rmax <- returnList[4]
+          }
+          
+        } else {
+          target <- returnList[which(ratioList == max(ratioList))]
+          break
+        }
+      }
+      
+      objL <- c(rep(0, N), rep(-1/(alpha*T), T), -1)
+      Amat <- cbind(rbind(mu, A0, A0, matrix(1, 2, N), as.matrix(R)), 
+                    rbind(matrix(0, 3 + 2 * length(u0), T), diag(1, T)), 
+                    c(rep(0, 3 + 2 * length(u0)), rep(1,T)))
+      dir <- c("==", rep("<=", length(u0)), rep(">=", length(l0)) ,"<=", ">=", rep(">=", T))
+      rhs <- (target, u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
+      bounds <- list(lower = list(ind = 1:N, val = constraints$min),
+                     upper = list(ind = 1:N, val = constraints$max))
+      ratioReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
+      weights <- as.vector(ratioReturn$solution)
+      names(weights) <- colnames(R)
+      obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+      
+      out = list(weights=weights, 
+                 objective_measures=obj_vals,
+                 opt_values=obj_vals,
+                 out=ratioReturn$value, 
+                 call=call)
+      if (isTRUE(trace)) out$Rglpkoutput=ratioReturn
     }
   }
   
