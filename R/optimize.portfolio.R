@@ -1440,7 +1440,19 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if (isTRUE(trace)) out$Rglpkoutput=minReturn
     }
     if (Rglpk.return&Rglpk.risk) {
-      
+      ratioOnReturn <- function(r) {
+        objL <- c(rep(0, N), rep(-1/(alpha*T), T), -1)
+        Amat <- cbind(rbind(mu, A0, A0, matrix(1, 2, N), as.matrix(R)), 
+                      rbind(matrix(0, 3 + 2 * length(u0), T), diag(1, T)), 
+                      c(rep(0, 3 + 2 * length(u0)), rep(1,T)))
+        dir <- c("==", rep("<=", length(u0)), rep(">=", length(l0)) ,"<=", ">=", rep(">=", T))
+        rhs <- (r, u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
+        bounds <- list(lower = list(ind = 1:N, val = constraints$min),
+                       upper = list(ind = 1:N, val = constraints$max))
+        result <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
+        port <- R %*% result$solution
+        return(mean(port)/mean(port[which(port < quantile(port, alpha)))]
+      }
     }
   }
   
