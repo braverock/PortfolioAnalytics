@@ -1328,6 +1328,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     valid_risk <- c("CVaR", "ES", "AVaR", "ETL")
     valid_return <- c("mean")
     
+    Rglpk.return <- 0
+    Rglpk.risk <- 0
+    
     for (i in portfolio$objectives) {
       if ((i$enabled)&(i$name %in% valid_return)) Rglpk.return <- 1
       else if ((i$enabled)&(i$name %in% valid_risk)) Rglpk.risk <- 1
@@ -1341,9 +1344,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         stop("Rglpk can only solve box and return_target constraints, please choose a different optimize_method.")
       }
     }
-    
-    Rglpk.return <- 0
-    Rglpk.risk <- 0
     
     if(!is.null(constraints$return_target)){
       target <- constraints$return_target
@@ -1403,7 +1403,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     bounds <- list(lower = list(ind = 1:N, val = constraints$min),
                    upper = list(ind = 1:N, val = constraints$max))
     minReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = TRUE)
-    rmin <- minReturn$objval
+    rmin <- minReturn$optimum
     
     if (rmin < target) {
       rmin <- target
@@ -1420,7 +1420,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                  call=call)
       if (isTRUE(trace)) out$Rglpkoutput=maxReturn
     } 
-    if (!Rglpk.return&Rglpk.risk) {
+    else if (!Rglpk.return&Rglpk.risk) {
       objL <- c(rep(0, N), rep(-1/(alpha*T), T), -1)
       Amat <- cbind(rbind(mu, A0, A0, matrix(1, 2, N), as.matrix(R)), 
                     rbind(matrix(0, 3 + 2 * length(u0), T), diag(1, T)), 
@@ -1432,16 +1432,16 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       minReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = TRUE)
       weights <- as.vector(minReturn$solution)
       names(weights) <- colnames(R)
-      obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+      # obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
       
       out = list(weights=weights, 
-                 objective_measures=obj_vals,
-                 opt_values=obj_vals,
-                 out=minReturn$value, 
+                 # objective_measures=obj_vals,
+                 # opt_values=obj_vals,
+                 out=minReturn$optimum, 
                  call=call)
       if (isTRUE(trace)) out$Rglpkoutput=minReturn
     }
-    if (Rglpk.return&Rglpk.risk) {
+    else if (Rglpk.return&Rglpk.risk) {
       ratioOnReturn <- function(r) {
         objL <- c(rep(0, N), rep(-1/(alpha*T), T), -1)
         Amat <- cbind(rbind(mu, A0, A0, matrix(1, 2, N), as.matrix(R)), 
@@ -1452,7 +1452,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         bounds <- list(lower = list(ind = 1:N, val = constraints$min),
                        upper = list(ind = 1:N, val = constraints$max))
         result <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = TRUE)
-        port <- R %*% result$solution
+        port <- R %*% result$solution[1:N]
         return(mean(port)/ - mean(port[which(port < quantile(port, alpha))]))
       }
       
@@ -1460,7 +1460,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       
       repeat {
         returnList <- seq(from = rmin, to = rmax, length.out = 4)
-        ratioList <- apply(returnList, 1, ratioOnReturn)
+        ratioList <- sapply(returnList, ratioOnReturn)
         
         if ((max(ratioList) - maxRatio)/(max(ratioList) >0.01)) {
           maxRatio <- max(ratioList)
@@ -1494,14 +1494,14 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       bounds <- list(lower = list(ind = 1:N, val = constraints$min),
                      upper = list(ind = 1:N, val = constraints$max))
       ratioReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = TRUE)
-      weights <- as.vector(ratioReturn$solution)
+      weights <- as.vector(ratioReturn$solution)[1:N]
       names(weights) <- colnames(R)
-      obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+      # obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
       
       out = list(weights=weights, 
-                 objective_measures=obj_vals,
-                 opt_values=obj_vals,
-                 out=ratioReturn$value, 
+                 # objective_measures=obj_vals,
+                 # opt_values=obj_vals,
+                 out=ratioReturn$optimum, 
                  call=call)
       if (isTRUE(trace)) out$Rglpkoutput=ratioReturn
     }
@@ -1535,7 +1535,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         if (i$name %in% ESlist) {
           riskfn <- function(w) {
             temp <- R %*% w
-            return(mean(temp[which(temp < quantile(temp, alpha))]))
+            return(- mean(temp[which(temp < quantile(temp, alpha))]))
           }
         }
         if (i$name == "StdDev") {
