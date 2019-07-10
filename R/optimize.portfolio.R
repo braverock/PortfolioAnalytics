@@ -1656,7 +1656,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   ## case if method=osqp---Operator Splitting Solver for Quadratic Programs
   if(optimize_method=="osqp"){
-    
+  
     stopifnot("package:osqp" %in% search()  ||  require("osqp",quietly = TRUE) )
     
     valid_constraints <- c("min_sum", "max_sum", "min", "max", 
@@ -1685,7 +1685,14 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     }
     
+    if(!is.null(constraints$return_target)){
+      target <- constraints$return_target
+    } else {
+      target <- - Inf
+    }
+    
     mu <- apply(R, 2, mean)
+    alpha <- 0.05
     
     # A is the constraint matrix
     A0 <- rbind(rep(1, N), diag(1, N))
@@ -1708,29 +1715,31 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     }
     
-    P <- matrix(rep(0, N^2), N)
-    maxReturn <- solve_osqp(P, mu, A0, l0, u0)
-    rmax <- maxReturn$info$obj_val
+    pars <- osqpSettings(verbose = FALSE)
+    
+    P <- matrix(0, N, N)
+    maxReturn <- solve_osqp(P, - mu, A0, l0, u0, pars = pars)
+    rmax <- - maxReturn$info$obj_val
     
     if (rmax < target) {
       stop("Target return is impossible")
     }
     
-    if (osqp.risk == NULL) {
+    if (is.null(osqp.risk)) {
       weights <- as.vector(maxReturn$x)
       names(weights) <- colnames(R)
-      obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+      # obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
       
       out = list(weights=weights, 
-                 objective_measures=obj_vals,
-                 opt_values=obj_vals,
+                 # objective_measures=obj_vals,
+                 # opt_values=obj_vals,
                  out=maxReturn$info$obj_val, 
                  call=call)
       if (isTRUE(trace)) out$OSQPoutput=maxReturn
     } 
     else if (osqp.risk == "Sigma") {
       P <- cov(R)
-      minReturn <- solve_osqp(P, rep(0, N), A0, l0, u0)
+      minReturn <- solve_osqp(P, rep(0, N), A0, l0, u0, pars = pars)
       rmin <- sum(minReturn$x * mu)
       
       if (is.null(osqp.return)) {
@@ -1739,8 +1748,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
       
         out = list(weights=weights, 
-                   objective_measures=obj_vals,
-                   opt_values=obj_vals,
+                   # objective_measures=obj_vals,
+                   # opt_values=obj_vals,
                    out=minReturn$info$obj_val, 
                    call=call)
         if (isTRUE(trace)) out$OSQPoutput=minReturn
@@ -1751,7 +1760,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         }
         
         SharpeOnReturn <- function(r) {
-          result <- solve_osqp(P, rep(0, N), rbind(A0, mu), c(l0, r), c(u0, r))
+          result <- solve_osqp(P, rep(0, N), rbind(A0, mu), c(l0, r), c(u0, r), pars = pars)
           sigma <- R %*% result$x
           return <- mean(R %*% result$x)
           return(return/sigma)
@@ -1785,7 +1794,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           }
         }
         
-        ratioPortfolio <- solve_osqp(P, rep(0, N), rbind(A0, mu), c(l0, target), c(u0, target))
+        ratioPortfolio <- solve_osqp(P, rep(0, N), rbind(A0, mu), c(l0, target), c(u0, target), pars = pars)
         
         weights <- as.vector(ratioPortfolio$x)
         names(weights) <- colnames(R)
@@ -1800,17 +1809,26 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     } 
     else {
-      P <- matrix(rep(0, N^2), N)
       q <- - c(rep(0, N), rep(-1/(alpha*T), T), -1)
+      P <- matrix(0, length(q), length(q))
       
-      A <- cbind(rbind(A0,R),
-                 rbind(matrix(0, N*nrow(A0), N), diag(1, N)),
-                 c(rep(0, nrow(A0)), rep(1,N)))
+      A <- cbind(rbind(A0, as.matrix(R)),
+                 rbind(matrix(0, nrow(A0), T), diag(1, T)),
+                 c(rep(0, nrow(A0)), rep(1,T)))
       
-      u <- c(u0, rep(Inf, N))
-      l <- c(l0, rep(0, N))
+      u <- c(u0, rep(99999, T))
+      l <- c(l0, rep(0, T))
       
-      minReturn <- solve_osqp(P, q, A, l, u)
+      View(q)
+      View(P)
+      View(A)
+      View(u)
+      View(l)
+      
+      minReturn <- solve_osqp(P, q, A, l, u, pars = pars)
+      print(minReturn)
+      stop()
+      rmin <- mean(R %*% minReturn$x[1:N])
       
       if (is.null(osqp.return)) {
         weights <- as.vector(minReturn$x)
@@ -1830,12 +1848,12 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         }
         
         RatioOnReturn <- function(r) {
-          A <- rbind(A, c(mu, rep(0, N+1)))
+          A <- rbind(A, c(mu, rep(0, T+1)))
           l <- c(l, r)
           u <- c(u, r)
-          result <- solve_osqp(P, q, A, l, u)
+          result <- solve_osqp(P, q, A, l, u, pars = pars)
           
-          port <- R %*% result$x
+          port <- R %*% result$x[1:N]
           return(mean(port)/ - mean(port[which(port < quantile(port, alpha))]))
         }
         
@@ -1843,7 +1861,10 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         
         repeat {
           returnList <- seq(from = rmin, to = rmax, length.out = 4)
-          ratioList <- apply(returnList, 1, RatioOnReturn)
+          ratioList <- sapply(returnList, RatioOnReturn)
+          
+          print(returnList)
+          print(ratioList)
           
           if ((max(ratioList) - maxRatio)/max(ratioList) >0.01) {
             maxRatio <- max(ratioList)
@@ -1868,9 +1889,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           }
         }
         
-        ratioPortfolio <- solve_osqp(P, rep(0, N), rbind(A0, mu), c(l0, target), c(u0, target))
+        View(target)
         
-        weights <- as.vector(ratioPortfolio$x)
+        ratioPortfolio <- solve_osqp(P, q, rbind(A, c(mu, rep(0, T+1))), c(l, target), c(u, target), pars = pars)
+        
+        weights <- as.vector(ratioPortfolio$x[1:N])
         names(weights) <- colnames(R)
         obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
         
