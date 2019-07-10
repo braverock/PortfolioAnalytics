@@ -1800,17 +1800,84 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       P <- matrix(rep(0, N^2), N)
       q <- - c(rep(0, N), rep(-1/(alpha*T), T), -1)
       
-      minReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
-      weights <- as.vector(minReturn$solution)
-      names(weights) <- colnames(R)
-      obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+      A <- cbind(rbind(A0,R),
+                 rbind(matrix(0, N*nrow(A0), N), diag(1, N)),
+                 c(rep(0, nrow(A0)), rep(1,N)))
       
-      out = list(weights=weights, 
-                 objective_measures=obj_vals,
-                 opt_values=obj_vals,
-                 out=minReturn$value, 
-                 call=call)
-      if (isTRUE(trace)) out$Rglpkoutput=minReturn
+      u <- c(u0, rep(Inf, N))
+      l <- c(l0, rep(0, N))
+      
+      minReturn <- solve_osqp(P, q, A, l, u)
+      
+      if (is.null(osqp.return)) {
+        weights <- as.vector(minReturn$x)
+        names(weights) <- colnames(R)
+        obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+        
+        out = list(weights=weights, 
+                   objective_measures=obj_vals,
+                   opt_values=obj_vals,
+                   out=minReturn$info$obj_val, 
+                   call=call)
+        if (isTRUE(trace)) out$OSQPoutput=minReturn
+      } 
+      else {
+        if (rmin < target) {
+          rmin <- target
+        }
+        
+        RatioOnReturn <- function(r) {
+          A <- rbind(A, c(mu, rep(0, N+1)))
+          l <- c(l, r)
+          u <- c(u, r)
+          result <- solve_osqp(P, q, A, l, u)
+          
+          port <- R %*% result$x
+          return(mean(port)/ - mean(port[which(port < quantile(port, alpha)))]
+        }
+        
+        maxRatio <- -Inf
+        
+        repeat {
+          returnList <- seq(from = rmin, to = rmax, length.out = 4)
+          ratioList <- apply(returnList, 1, RatioOnReturn)
+          
+          if ((max(ratioList) - maxRatio)/(max(ratioList) >0.01) {
+            maxRatio <- max(ratioList)
+            
+            if (maxRatio == ratioList[1]) {
+              rmin <- returnList[1]
+              rmax <- returnList[2]
+            } else if (maxRatio == ratioList[2]) {
+              rmin <- returnList[1]
+              rmax <- returnList[3]
+            } else if (maxRatio == ratioList[3]) {
+              rmin <- returnList[2]
+              rmax <- returnList[4]
+            } else {
+              rmin <- returnList[3]
+              rmax <- returnList[4]
+            }
+            
+          } else {
+            target <- returnList[which(ratioList == max(ratioList))]
+            break
+          }
+        }
+        
+        ratioPortfolio <- solve_osqp(P, rep(0, N), rbind(A0, mu), c(l0, target), c(u0, target))
+        
+        weights <- as.vector(ratioPortfolio$x)
+        names(weights) <- colnames(R)
+        obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+        
+        out = list(weights=weights, 
+                   objective_measures=obj_vals,
+                   opt_values=obj_vals,
+                   out=ratioPortfolio$info$obj_val, 
+                   call=call)
+        if (isTRUE(trace)) out$OSQPoutput=ratioPortfolio
+      }
     }
   } ## end case for osqp
   
