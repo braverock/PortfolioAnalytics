@@ -1674,10 +1674,12 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     valid_return <- c("mean")
     
     for (i in portfolio$objectives) {
-      if ((i$enabled)&(i$name %in% valid_return)) osqp.return <- 1
-      else if ((i$enabled)&(i$name %in% sigma_risk)) osqp.risk <- "Sigma"
-      else if ((i$enabled)&(i$name %in% ES_risk)) osqp.risk <- "ES"
-      else stop("osqp only solves mean, sd, expected shortfall or Sharpe Ratio type business objectives, choose a different optimize_method.")
+      if (i$enabled) {
+        if (i$name %in% valid_return)) osqp.return <- 1
+        else if ((i$name %in% sigma_risk)) osqp.risk <- "Sigma"
+        else if ((i$name %in% ES_risk)) osqp.risk <- "ES"
+        else stop("osqp only solves mean, sd, expected shortfall or Sharpe Ratio type business objectives, choose a different optimize_method.")
+      }
     }
     
     mu <- apply(R, 2, mean)
@@ -1722,7 +1724,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                  out=maxReturn$info$obj_val, 
                  call=call)
       if (isTRUE(trace)) out$OSQPoutput=maxReturn
-    } else if (osqp.risk == "Sigma") {
+    } 
+    else if (osqp.risk == "Sigma") {
       P <- cov(R)
       minReturn <- solve_osqp(P, rep(0, N), A0, l0, u0)
       rmin <- sum(minReturn$x * mu)
@@ -1738,7 +1741,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                    out=minReturn$info$obj_val, 
                    call=call)
         if (isTRUE(trace)) out$OSQPoutput=minReturn
-      } else {
+      } 
+      else {
         if (rmin < target) {
           rmin <- target
         }
@@ -1755,7 +1759,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           returnList <- seq(from = rmin, to = rmax, length.out = 4)
           ratioList <- apply(returnList, 1, SharpeOnReturn)
           
-          if (diff(max(ratioList), maxRatio)/(max(ratioList) >0.01) {
+          if ((max(ratioList) - maxRatio)/(max(ratioList) >0.01) {
             maxRatio <- max(ratioList)
             
             if (maxRatio == ratioList[1]) {
@@ -1778,128 +1782,41 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           }
         }
         
+        ratioPortfolio <- solve_osqp(P, rep(0, N), rbind(A0, mu), c(l0, target), c(u0, target))
         
+        weights <- as.vector(ratioPortfolio$x)
+        names(weights) <- colnames(R)
+        obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
         
-        
-        
-        
-        
-        
+        out = list(weights=weights, 
+                   objective_measures=obj_vals,
+                   opt_values=obj_vals,
+                   out=ratioPortfolio$info$obj_val, 
+                   call=call)
+        if (isTRUE(trace)) out$OSQPoutput=ratioPortfolio
       }
-    } else {
+    } 
+    else {
+      objL <- c(rep(0, N), rep(-1/(alpha*T), T), -1)
+      Amat <- cbind(rbind(mu, A0, A0, matrix(1, 2, N), as.matrix(R)), 
+                    rbind(matrix(0, 3 + 2 * length(u0), T), diag(1, T)), 
+                    c(rep(0, 3 + 2 * length(u0)), rep(1,T)))
+      dir <- c("==", rep("<=", length(u0)), rep(">=", length(l0)) ,"<=", ">=", rep(">=", T))
+      rhs <- (rmin, u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
+      bounds <- list(lower = list(ind = 1:N, val = constraints$min),
+                     upper = list(ind = 1:N, val = constraints$max))
+      minReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
+      weights <- as.vector(minReturn$solution)
+      names(weights) <- colnames(R)
+      obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
       
+      out = list(weights=weights, 
+                 objective_measures=obj_vals,
+                 opt_values=obj_vals,
+                 out=minReturn$value, 
+                 call=call)
+      if (isTRUE(trace)) out$Rglpkoutput=minReturn
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    if (!is.null(constraints$return_target)) {
-      if (!osqp.risk) {
-        stop("For targeted return, you need a specific risk level to process.")
-      } else {
-        P <- 2 * cov(R)
-        q <- rep(0, N)
-        A <- rbind(A0, mu)
-        u <- c(u0, constraints$return_target)
-        l <- c(l0, constraints$return_target)
-        result <- solve_osqp(P, q, A, l, u)
-      }
-    } else {
-      if (osqp.return) {
-        P <- matrix(rep(0, N * N), N)
-        q <- -1 * mu
-        max <- solve_osqp(P, q, A0, l0, u0)
-      }
-      
-      if (osqp.risk) {
-        P <- 2 * cov(R)
-        q <- rep(0, N)
-        min <- solve_osqp(P, q, A0, l0, u0) 
-      }
-      
-      sr <- function(r) {
-        u <- c(u0, r)
-        l <- c(l0, r)
-        temp <- R %*% solve_osqp(P, q, A, l, u)$x
-        return(mean(temp) / sd(temp))
-      }
-      
-      # max Sharpe ratio
-      if(osqp.return & osqp.risk) {
-        if(!is.null(constraints$risk_averion)) {
-          P <- 2 * cov(R)
-          q <- -1 * constraints$risk_averion * mu
-          result <- solve_osqp(P, q, A, l, u, param)
-        } else {
-          A <- rbind(A0, mu)
-          max_return <- mean(R %*% max$x)
-          min_return <- max(0.000001, mean(R %*% min$x))
-          max <- -Inf
-          repeat {
-            return_list <- seq(from = min_return, to = max_return, length.out = 4)
-            sharpe_list <- c()
-            for (i in return_list) {
-              sharpe_list <- c(sharpe_list, sr(i))
-            }
-            if (sharpe_list[2] == max(sharpe_list)) {
-              max_return <- return_list[3]
-              min_return <- return_list[1]
-            }
-            if (sharpe_list[3] == max(sharpe_list)) {
-              max_return <- return_list[4]
-              min_return <- return_list[2]
-            }
-            if (sharpe_list[1] == max(sharpe_list)) {
-              if (abs(sharpe_list[1] - max) < 0.01) {
-                target_return <- return_list[1]
-                break
-              }
-              max <- sharpe_list[1]
-              max_return <- return_list[2]
-              min_return <- return_list[1]
-            }
-            if (sharpe_list[4] == max(sharpe_list)) {
-              if (abs(sharpe_list[4] - max) < 0.01) {
-                target_return <- return_list[4]
-                break
-              }
-              max <- sharpe_list[4]
-              max_return <- return_list[4]
-              min_return <- return_list[3]
-            }
-          }
-          u <- c(u0, target_return)
-          l <- c(l0, target_return)
-          result <- solve_osqp(P, q, A, l, u, param)
-        }
-      }
-    }
-    if (osqp.risk&!osqp.return) {
-      result <- min
-    }
-    if (!osqp.risk&osqp.return) {
-      result <- max
-    }
-    
-    out = list(weights=result$x,
-               call=call)
-    
   } ## end case for osqp
   
   # Prepare for final object to return
