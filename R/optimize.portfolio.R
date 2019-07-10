@@ -739,7 +739,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   weights <- NULL 
   
   # Get the constraints from the portfolio object
-  constraints <- get_constraints(portfolio)
+  constraints <- PortfolioAnalytics:::get_constraints(portfolio)
   
   # set portfolio moments only once
   # For set.portfolio.moments, we are passing the returns,
@@ -759,16 +759,16 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   # match the args for momentFUN
   .formals <- formals(momentFUN)
-  .formals <- modify.args(formals=.formals, arglist=list(...), dots=TRUE)
+  .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=list(...), dots=TRUE)
   # ** pass ROI=TRUE to set.portfolio.moments so the moments are not calculated
   if(optimize_method %in% c("ROI", "quadprog", "glpk", "symphony", "ipop")){
     obj_names <- unlist(lapply(portfolio$objectives, function(x) x$name))
     if(any(obj_names %in% c("CVaR", "ES", "ETL"))){
-      .formals <- modify.args(formals=.formals, arglist=list(ROI=TRUE), dots=TRUE)
+      .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=list(ROI=TRUE), dots=TRUE)
     }
   }
-  if("R" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=FALSE)
-  if("portfolio" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=FALSE)
+  if("R" %in% names(.formals)) .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, R=R, dots=FALSE)
+  if("portfolio" %in% names(.formals)) .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=FALSE)
   .formals$... <- NULL
   
   # call momentFUN
@@ -1367,7 +1367,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       for (i in constraints$cLO) {
         l0 <- c(l0, i)
       }
+      rownames(A0) <- names(constraints$groups)
     }
+    
     
     alpha <- 0.05
     
@@ -1384,8 +1386,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     # max return
     dir <- c(">=", "<=", rep(">=", length(l0)), rep("<=", length(u0)))
-    maxReturn <- Rglpk_solve_LP(mu, rbind(rep(1, T), rep(1, T), A0, A0), dir, c(constraints$min_sum, constraints$max_sum, l0, u0), bounds, max = 1)
-    rmax <- maxReturn$objval
+    maxReturn <- Rglpk_solve_LP(mu, rbind(matrix(1, 2, 12), A0, A0), dir, c(constraints$min_sum, constraints$max_sum, l0, u0), bounds, max = TRUE)
+    rmax <- maxReturn$optimum
     
     if (rmax < target) {
       stop("Target return is impossible")
@@ -1396,11 +1398,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     Amat <- cbind(rbind(A0, A0, matrix(1, 2, N), as.matrix(R)), 
                   rbind(matrix(0, 2 + 2 * length(u0), T), diag(1, T)), 
                   c(rep(0, 2 + 2 * length(u0)), rep(1,T)))
-    dir <- c(rep("<=", length(u0)), rep(">=", length(l0)) ,"<=", ">=", rep(">=", T))
-    rhs <- (u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
+    dir <- c(rep("<=", length(u0)), rep(">=", length(l0)), "<=", ">=", rep(">=", T))
+    rhs <- c(u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
     bounds <- list(lower = list(ind = 1:N, val = constraints$min),
                    upper = list(ind = 1:N, val = constraints$max))
-    minReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
+    minReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = TRUE)
     rmin <- minReturn$objval
     
     if (rmin < target) {
@@ -1424,10 +1426,10 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                     rbind(matrix(0, 3 + 2 * length(u0), T), diag(1, T)), 
                     c(rep(0, 3 + 2 * length(u0)), rep(1,T)))
       dir <- c("==", rep("<=", length(u0)), rep(">=", length(l0)) ,"<=", ">=", rep(">=", T))
-      rhs <- (rmin, u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
+      rhs <- c(rmin, u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
       bounds <- list(lower = list(ind = 1:N, val = constraints$min),
                      upper = list(ind = 1:N, val = constraints$max))
-      minReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
+      minReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = TRUE)
       weights <- as.vector(minReturn$solution)
       names(weights) <- colnames(R)
       obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
@@ -1446,12 +1448,12 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                       rbind(matrix(0, 3 + 2 * length(u0), T), diag(1, T)), 
                       c(rep(0, 3 + 2 * length(u0)), rep(1,T)))
         dir <- c("==", rep("<=", length(u0)), rep(">=", length(l0)) ,"<=", ">=", rep(">=", T))
-        rhs <- (r, u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
+        rhs <- c(r, u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
         bounds <- list(lower = list(ind = 1:N, val = constraints$min),
                        upper = list(ind = 1:N, val = constraints$max))
-        result <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
+        result <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = TRUE)
         port <- R %*% result$solution
-        return(mean(port)/ - mean(port[which(port < quantile(port, alpha)))]
+        return(mean(port)/ - mean(port[which(port < quantile(port, alpha))]))
       }
       
       maxRatio <- -Inf
@@ -1460,7 +1462,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         returnList <- seq(from = rmin, to = rmax, length.out = 4)
         ratioList <- apply(returnList, 1, ratioOnReturn)
         
-        if ((max(ratioList) - maxRatio)/(max(ratioList) >0.01) {
+        if ((max(ratioList) - maxRatio)/(max(ratioList) >0.01)) {
           maxRatio <- max(ratioList)
           
           if (maxRatio == ratioList[1]) {
@@ -1488,10 +1490,10 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                     rbind(matrix(0, 3 + 2 * length(u0), T), diag(1, T)), 
                     c(rep(0, 3 + 2 * length(u0)), rep(1,T)))
       dir <- c("==", rep("<=", length(u0)), rep(">=", length(l0)) ,"<=", ">=", rep(">=", T))
-      rhs <- (target, u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
+      rhs <- c(target, u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
       bounds <- list(lower = list(ind = 1:N, val = constraints$min),
                      upper = list(ind = 1:N, val = constraints$max))
-      ratioReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
+      ratioReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = TRUE)
       weights <- as.vector(ratioReturn$solution)
       names(weights) <- colnames(R)
       obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
@@ -1563,7 +1565,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           result <- c(result, constraints$cUP[i] - temp)
         }
       }
-      if (!is.null(constarints$turnover_target)) {
+      if (!is.null(constraints$turnover_target)) {
         result <- c(result, turnover_target - sum(abs(initial_weights - w)) / N)
       }
       if (!is.null(constraints$div_target)) {
@@ -1579,7 +1581,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     
     cdim <- sum(c(!is.null(constraints$min_sum), !is.null(constraints$max_sum),
-                  !is.null(constraints$max_pos), !is.null(constarints$turnover_target),
+                  !is.null(constraints$max_pos), !is.null(constraints$turnover_target),
                   length(constraints$cLO) * 2,
                   !is.null(constraints$div_target), !is.null(constraints$return_target)))
     
@@ -1597,25 +1599,25 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     vectorized <- FALSE
     
     if (is.list(dotargs)) {
-      if (hatvalues(dotargs$popsize)) {
+      if (!is.null(dotargs$popsize)) {
         popsize <- dotargs$popsize
       }
-      if (hatvalues(dotargs$generations)) {
+      if (!is.null(dotargs$generations)) {
         generations <- dotargs$generations
       }
-      if (hatvalues(dotargs$cprob)) {
+      if (!is.null(dotargs$cprob)) {
         cprob <- dotargs$cprob
       }
-      if (hatvalues(dotargs$cdist)) {
+      if (!is.null(dotargs$cdist)) {
         cdist <- dotargs$cdist
       }
-      if (hatvalues(dotargs$mprob)) {
+      if (!is.null(dotargs$mprob)) {
         mprob <- dotargs$mprob
       }
-      if (hatvalues(dotargs$mdist)) {
+      if (!is.null(dotargs$mdist)) {
         mdist <- dotargs$mdist
       }
-      if (hatvalues(dotargs$popsize)) {
+      if (!is.null(dotargs$popsize)) {
         vectorized <- dotargs$vectorized
       }
     }
@@ -1637,12 +1639,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       return (paste("Optimizer was unable to find a solution for target"))
     }
     
-    obj_vals <- constrained_objective(w = weights, R = R, portfolio, 
-                                      trace = TRUE, env=dotargs)$objective_measures
+    
+    # obj_vals <- constrained_objective(w = weights, R = R, portfolio, 
+    #                                   trace = TRUE, env=dotargs)$objective_measures
     
     out = list(weights = weights, 
-               objective_measures = obj_vals,
-               opt_values = obj_vals,
+               #objective_measures = obj_vals,
+               #opt_values = obj_vals,
                out = -minw$value[1], 
                call = call)
     
@@ -1675,9 +1678,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     for (i in portfolio$objectives) {
       if (i$enabled) {
-        if (i$name %in% valid_return)) osqp.return <- 1
-        else if ((i$name %in% sigma_risk)) osqp.risk <- "Sigma"
-        else if ((i$name %in% ES_risk)) osqp.risk <- "ES"
+        if (i$name %in% valid_return) osqp.return <- 1
+        else if (i$name %in% sigma_risk) osqp.risk <- "Sigma"
+        else if (i$name %in% ES_risk) osqp.risk <- "ES"
         else stop("osqp only solves mean, sd, expected shortfall or Sharpe Ratio type business objectives, choose a different optimize_method.")
       }
     }
@@ -1759,7 +1762,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           returnList <- seq(from = rmin, to = rmax, length.out = 4)
           ratioList <- apply(returnList, 1, SharpeOnReturn)
           
-          if ((max(ratioList) - maxRatio)/(max(ratioList) >0.01) {
+          if ((max(ratioList) - maxRatio)/max(ratioList) >0.01) {
             maxRatio <- max(ratioList)
             
             if (maxRatio == ratioList[1]) {
@@ -1833,7 +1836,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           result <- solve_osqp(P, q, A, l, u)
           
           port <- R %*% result$x
-          return(mean(port)/ - mean(port[which(port < quantile(port, alpha)))]
+          return(mean(port)/ - mean(port[which(port < quantile(port, alpha))]))
         }
         
         maxRatio <- -Inf
@@ -1842,7 +1845,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           returnList <- seq(from = rmin, to = rmax, length.out = 4)
           ratioList <- apply(returnList, 1, RatioOnReturn)
           
-          if ((max(ratioList) - maxRatio)/(max(ratioList) >0.01) {
+          if ((max(ratioList) - maxRatio)/max(ratioList) >0.01) {
             maxRatio <- max(ratioList)
             
             if (maxRatio == ratioList[1]) {
