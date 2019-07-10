@@ -1797,14 +1797,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     } 
     else {
-      objL <- c(rep(0, N), rep(-1/(alpha*T), T), -1)
-      Amat <- cbind(rbind(mu, A0, A0, matrix(1, 2, N), as.matrix(R)), 
-                    rbind(matrix(0, 3 + 2 * length(u0), T), diag(1, T)), 
-                    c(rep(0, 3 + 2 * length(u0)), rep(1,T)))
-      dir <- c("==", rep("<=", length(u0)), rep(">=", length(l0)) ,"<=", ">=", rep(">=", T))
-      rhs <- (rmin, u0, l0, constraints$max_sum, constraints$min_sum, rep(0, T))
-      bounds <- list(lower = list(ind = 1:N, val = constraints$min),
-                     upper = list(ind = 1:N, val = constraints$max))
+      P <- matrix(rep(0, N^2), N)
+      q <- - c(rep(0, N), rep(-1/(alpha*T), T), -1)
+      
       minReturn <- Rglpk_solve_LP(objL, Amat, dir, rhs, bounds, max = 1)
       weights <- as.vector(minReturn$solution)
       names(weights) <- colnames(R)
