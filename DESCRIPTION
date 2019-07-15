@@ -39,7 +39,10 @@ Suggests:
     testthat,
     nloptr (>= 1.0.0),
     MASS,
-    robustbase
+    robustbase, 
+    osqp, 
+    Rglpk, 
+    mco
 Imports:
     methods
 License: GPL-2 | GPL-3
