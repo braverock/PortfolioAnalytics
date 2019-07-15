@@ -626,7 +626,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   portfolio=NULL,
   constraints=NULL,
   objectives=NULL,
-  optimize_method=c("DEoptim","random","ROI","pso","GenSA"),
+  optimize_method=c("DEoptim","random","ROI","pso","GenSA", "osqp", "mco", "Rglpk"),
   search_size=20000,
   trace=FALSE, ...,
   rp=NULL,
@@ -1370,14 +1370,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       rownames(A0) <- names(constraints$groups)
     }
     
-    
     alpha <- 0.05
-    
-    dotargs <- list(...)
-    
-    if (!is.null(dotargs$alpha)) {
-      alpha <- dotargs$alpha
-    } 
     
     mu <- apply(R, 2, mean)
     
@@ -1550,6 +1543,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     odim <- 1
     
     alpha <- 0.05
+    
     gn <- function(w){
       result <- c()
       if (!is.null(constraints$min_sum)) {
@@ -1631,6 +1625,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                            vectorized = vectorized))
     
     weights <- as.vector(minw$par[1,])
+    names(weights) <- colnames(R)
     
     if(inherits(minw, "try-error")) { minw <- NULL }
     
@@ -1642,6 +1637,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     # obj_vals <- constrained_objective(w = weights, R = R, portfolio, 
     #                                   trace = TRUE, env=dotargs)$objective_measures
+    
     
     out = list(weights = weights, 
                #objective_measures = obj_vals,
@@ -1718,7 +1714,15 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     pars <- osqpSettings(verbose = FALSE)
     
     P <- matrix(0, N, N)
-    maxReturn <- solve_osqp(P, - mu, A0, l0, u0, pars = pars)
+    maxReturn <- try(osqp::solve_osqp(P, - mu, A0, l0, u0, pars = pars))
+    
+    if(inherits(maxReturn, "try-error")) {maxReturn <- NULL}
+    
+    if (is.null(maxReturn)) {
+      message(paste("Optimizer was unable to find a solution for target"))
+      return(paste("Optimizer was unable to find a solution for target"))
+    }
+    
     rmax <- - maxReturn$info$obj_val
     
     if (rmax < target) {
@@ -1739,7 +1743,15 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     } 
     else if (osqp.risk == "Sigma") {
       P <- cov(R)
-      minReturn <- solve_osqp(P, rep(0, N), A0, l0, u0, pars = pars)
+      minReturn <- try(osqp::solve_osqp(P, rep(0, N), A0, l0, u0, pars = pars))
+      
+      if(inherits(minReturn, "try-error")) {minReturn <- NULL}
+      
+      if (is.null(minReturn)) {
+        message(paste("Optimizer was unable to find a solution for target"))
+        return(paste("Optimizer was unable to find a solution for target"))
+      }
+      
       rmin <- sum(minReturn$x * mu)
       
       if (is.null(osqp.return)) {
@@ -1761,7 +1773,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         
         SharpeOnReturn <- function(r) {
           result <- solve_osqp(P, rep(0, N), rbind(A0, mu), c(l0, r), c(u0, r), pars = pars)
-          sigma <- R %*% result$x
+          sigma <- sd(R %*% result$x)
           return <- mean(R %*% result$x)
           return(return/sigma)
         }
@@ -1769,7 +1781,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         
         repeat {
           returnList <- seq(from = rmin, to = rmax, length.out = 4)
-          ratioList <- apply(returnList, 1, SharpeOnReturn)
+          ratioList <- sapply(returnList, SharpeOnReturn)
           
           if ((max(ratioList) - maxRatio)/max(ratioList) >0.01) {
             maxRatio <- max(ratioList)
@@ -1794,15 +1806,22 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           }
         }
         
-        ratioPortfolio <- solve_osqp(P, rep(0, N), rbind(A0, mu), c(l0, target), c(u0, target), pars = pars)
+        ratioPortfolio <- try(osqp::solve_osqp(P, rep(0, N), rbind(A0, mu), c(l0, target), c(u0, target), pars = pars))
+        
+        if(inherits(ratioPortfolio, "try-error")) {ratioPortfolio <- NULL}
+        
+        if (is.null(ratioPortfolio)) {
+          message(paste("Optimizer was unable to find a solution for target"))
+          return(paste("Optimizer was unable to find a solution for target"))
+        }
         
         weights <- as.vector(ratioPortfolio$x)
         names(weights) <- colnames(R)
-        obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+        # obj_vals <- constrained_objective(w=weights, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
         
         out = list(weights=weights, 
-                   objective_measures=obj_vals,
-                   opt_values=obj_vals,
+                   # objective_measures=obj_vals,
+                   # opt_values=obj_vals,
                    out=ratioPortfolio$info$obj_val, 
                    call=call)
         if (isTRUE(trace)) out$OSQPoutput=ratioPortfolio
@@ -1819,15 +1838,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       u <- c(u0, rep(99999, T))
       l <- c(l0, rep(0, T))
       
-      View(q)
-      View(P)
-      View(A)
-      View(u)
-      View(l)
-      
       minReturn <- solve_osqp(P, q, A, l, u, pars = pars)
-      print(minReturn)
-      stop()
+      
       rmin <- mean(R %*% minReturn$x[1:N])
       
       if (is.null(osqp.return)) {
@@ -1888,8 +1900,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
             break
           }
         }
-        
-        View(target)
         
         ratioPortfolio <- solve_osqp(P, q, rbind(A, c(mu, rep(0, T+1))), c(l, target), c(u, target), pars = pars)
         
