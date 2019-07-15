@@ -1,7 +1,7 @@
 ###############################################################################
 # R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2018 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt
+# Copyright (c) 2004-2018 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt, Xiaokang Feng
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
@@ -614,7 +614,7 @@ optimize.portfolio_v1 <- function(
 #'   }
 #' }
 #' 
-#' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
+#' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett, Xiaokang Feng
 #' @aliases optimize.portfolio_v2 optimize.portfolio_v1
 #' @seealso \code{\link{portfolio.spec}}
 #' @rdname optimize.portfolio
