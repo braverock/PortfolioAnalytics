@@ -478,7 +478,7 @@ optimize.portfolio_v1 <- function(
 #' portfolios that specify constraints and objectives.
 #' 
 #' @details
-#' This function currently supports DEoptim, random portfolios, pso, GenSA, and ROI as back ends.
+#' This function currently supports DEoptim, random portfolios, pso, GenSA, ROI, osqp, Rglpk, and mco as back ends.
 #' Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
 #'
 #' When using random portfolios, search_size is precisely that, how many 
@@ -536,7 +536,7 @@ optimize.portfolio_v1 <- function(
 #' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
 #' @param constraints default=NULL, a list of constraint objects. An object of class 'v1_constraint' can be passed in here.
 #' @param objectives default=NULL, a list of objective objects.
-#' @param optimize_method one of "DEoptim", "random", "ROI", "pso", "GenSA". A solver
+#' @param optimize_method one of "DEoptim", "random", "ROI", "pso", "GenSA", "osqp", "Rglpk", and "mco". A solver
 #' for ROI can also be specified and will be solved using ROI. See Details.
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
@@ -606,6 +606,41 @@ optimize.portfolio_v1 <- function(
 #' \code{optimize_method="GenSA"}
 #' \itemize{
 #'   \item{\code{GenSAoutput:}}{ A list containing the following elements:}
+#'   \itemize{
+#'     \item{value}
+#'     \item{par}
+#'     \item{trace.mat}
+#'     \item{counts}
+#'   }
+#' }
+#' 
+#' \code{optimize_method="osqp"}
+#' \itemize{
+#'   \item{\code{OSQPoutput:}}{ A list containing the following elements:}
+#'   \itemize{
+#'     \item{x}
+#'     \item{y}
+#'     \item{prim_inf_cert}
+#'     \item{dual_inf_cert}
+#'     \item{info}
+#'   }
+#' }
+#' 
+#' \code{optimize_method="Rglpk"}
+#' \itemize{
+#'   \item{\code{Rglpkoutput:}}{ A list containing the following elements:}
+#'   \itemize{
+#'     \item{solution}
+#'     \item{objval}
+#'     \item{status}
+#'     \item{solution_dual}
+#'     \item{auxiliary}
+#'   }
+#' }
+#' 
+#' \code{optimize_method="mco"}
+#' \itemize{
+#'   \item{\code{mcooutput:}}{ A list containing the following elements:}
 #'   \itemize{
 #'     \item{value}
 #'     \item{par}
