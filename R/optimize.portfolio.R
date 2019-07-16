@@ -1383,8 +1383,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if (i$enabled) {
         if (i$name %in% valid_return) osqp.return <- 1
         else if (i$name %in% sigma_risk) osqp.risk <- "Sigma"
-        else if (i$name %in% ES_risk) osqp.risk <- "ES"
-        else stop("osqp only solves mean, sd, expected shortfall or Sharpe Ratio type business objectives, choose a different optimize_method.")
+        # else if (i$name %in% ES_risk) osqp.risk <- "ES"
+        else stop("osqp only solves mean, sd, or Sharpe Ratio type business objectives, choose a different optimize_method.")
       }
     }
     
@@ -1819,6 +1819,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     
     ESlist <- c("ES", "AVaR", "CVaR")
+    sigmalist <- c("sd", "SD", "StdDev", "sigma", "volatility")
     
     returnfn <- function(w) 1
     riskfn <- function(w) 1
@@ -1840,7 +1841,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
             return(- mean(temp[which(temp < quantile(temp, alpha))]))
           }
         }
-        if (i$name == "StdDev") {
+        if (i$name %in% sigmalist) {
           riskfn <- function(w) sd(R %*% w)
         } 
       }
@@ -1944,13 +1945,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     
     
-    # obj_vals <- constrained_objective(w = weights, R = R, portfolio, 
-    #                                   trace = TRUE, env=dotargs)$objective_measures
+    obj_vals <- constrained_objective(w = weights, R = R, portfolio,
+                                      trace = TRUE, env=...)$objective_measures
     
     
     out = list(weights = weights, 
-               #objective_measures = obj_vals,
-               #opt_values = obj_vals,
+               objective_measures = obj_vals,
+               opt_values = obj_vals,
                out = -minw$value[1], 
                call = call)
     
