@@ -1811,6 +1811,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   ## case if method=mco---Multiple Criteria Optimization Algorithms
   if(optimize_method == "mco"){
+    
     stopifnot("package:mco" %in% search() || requireNamespace("mco",quietly = TRUE))
     
     if((constraints$max_sum - constraints$min_sum) < 0.02){
@@ -1833,7 +1834,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           returnfn <- function(w) median(R %*% w)
         } 
         if (i$name == "VaR") {
-          riskfn <- function(w) quantile(R %*% w, alpha)
+          riskfn <- function(w) -quantile(R %*% w, alpha)
         } 
         if (i$name %in% ESlist) {
           riskfn <- function(w) {
@@ -1934,9 +1935,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                            mprob = mprob, mdist = mdist,
                            vectorized = vectorized))
     
-    weights <- as.vector(minw$par[1,])
-    names(weights) <- colnames(R)
-    
     if(inherits(minw, "try-error")) { minw <- NULL }
     
     if(is.null(minw)){
@@ -1944,10 +1942,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       return (paste("Optimizer was unable to find a solution for target"))
     }
     
+    weights <- as.vector(minw$par[1,])
+    names(weights) <- colnames(R)
     
     obj_vals <- constrained_objective(w = weights, R = R, portfolio,
                                       trace = TRUE, env=...)$objective_measures
-    
     
     out = list(weights = weights, 
                objective_measures = obj_vals,
