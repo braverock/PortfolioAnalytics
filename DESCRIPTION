@@ -11,7 +11,8 @@ Authors@R: c(
     person(given="Ross",family="Bennett",role=c("ctb","cph")) ,
     person(given="Hezky",family="Varon",role="ctb") ,
     person(given="Guy",family="Yollin",role="ctb") ,
-    person(given="R. Douglas",family="Martin",role="ctb") )
+    person(given="R. Douglas",family="Martin",role="ctb") ,
+    person(given="Xiaokang",family="Feng",role="ctb") )
 Version: 1.1.0
 Date: 2018-05-17
 Maintainer: Brian G. Peterson <brian@braverock.com>
