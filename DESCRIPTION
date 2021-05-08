@@ -11,13 +11,14 @@ Authors@R: c(
     person(given="Ross",family="Bennett",role=c("ctb","cph")) ,
     person(given="Hezky",family="Varon",role="ctb") ,
     person(given="Guy",family="Yollin",role="ctb") ,
-    person(given="R. Douglas",family="Martin",role="ctb") )
-Version: 1.1.0
-Date: 2018-05-17
+    person(given="R. Douglas",family="Martin",role="ctb") ,
+    person(given="Xiaokang",family="Feng",role="ctb") )
+Version: 2.0.0
+Date: 2021-05-08
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
-    R (>= 3.3.0),
+    R (>= 4.0.0),
     zoo,
     xts (>= 0.10-1),
     foreach,
@@ -39,7 +40,10 @@ Suggests:
     testthat,
     nloptr (>= 1.0.0),
     MASS,
-    robustbase
+    robustbase, 
+    osqp, 
+    Rglpk, 
+    mco
 Imports:
     methods
 License: GPL-2 | GPL-3
