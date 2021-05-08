@@ -739,7 +739,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   weights <- NULL 
   
   # Get the constraints from the portfolio object
-  constraints <- PortfolioAnalytics:::get_constraints(portfolio)
+  constraints <- get_constraints(portfolio)
   
   # set portfolio moments only once
   # For set.portfolio.moments, we are passing the returns,
@@ -759,16 +759,16 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   # match the args for momentFUN
   .formals <- formals(momentFUN)
-  .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=list(...), dots=TRUE)
+  .formals <- modify.args(formals=.formals, arglist=list(...), dots=TRUE)
   # ** pass ROI=TRUE to set.portfolio.moments so the moments are not calculated
   if(optimize_method %in% c("ROI", "quadprog", "glpk", "symphony", "ipop")){
     obj_names <- unlist(lapply(portfolio$objectives, function(x) x$name))
     if(any(obj_names %in% c("CVaR", "ES", "ETL"))){
-      .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=list(ROI=TRUE), dots=TRUE)
+      .formals <- modify.args(formals=.formals, arglist=list(ROI=TRUE), dots=TRUE)
     }
   }
-  if("R" %in% names(.formals)) .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, R=R, dots=FALSE)
-  if("portfolio" %in% names(.formals)) .formals <- PortfolioAnalytics:::modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=FALSE)
+  if("R" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, R=R, dots=FALSE)
+  if("portfolio" %in% names(.formals)) .formals <- modify.args(formals=.formals, arglist=NULL, portfolio=portfolio, dots=FALSE)
   .formals$... <- NULL
   
   # call momentFUN
