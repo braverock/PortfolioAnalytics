@@ -13,12 +13,12 @@ Authors@R: c(
     person(given="Guy",family="Yollin",role="ctb") ,
     person(given="R. Douglas",family="Martin",role="ctb") ,
     person(given="Xiaokang",family="Feng",role="ctb") )
-Version: 1.1.0
-Date: 2018-05-17
+Version: 2.0.0
+Date: 2021-05-08
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
-    R (>= 3.3.0),
+    R (>= 4.0.0),
     zoo,
     xts (>= 0.10-1),
     foreach,
