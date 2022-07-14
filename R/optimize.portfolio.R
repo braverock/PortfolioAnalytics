@@ -2794,10 +2794,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     if(r_measure & !socp){
       zeta <- Variable(1)
-      obj <- zeta + (1/(t*alpha)) * sum(z)
+      obj <- zeta + (1/(T*alpha)) * sum(z)
       constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
-    }
-    else if(!r_measure & socp){
+    } else if(!r_measure & socp){
       zeta <- Variable(1)
       obj <- zeta + (1/alpha) * p_norm(z, p=2)
       constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
@@ -2810,8 +2809,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     ## }
     if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum == constraints$min_sum){
       constraints_cvxr = append(constraints_cvxr, sum(wts) == constraints$max_sum)
-    }
-    else{
+    } else{
       if(!is.null(constraints$max_sum)){
         max_sum <- ifelse(is.infinite(constraints$max_sum), 9999.0, constraints$max_sum)
         constraints_cvxr = append(constraints_cvxr, sum(wts) <= max_sum)
@@ -2842,11 +2840,12 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     # xinran TODO
     # obj_vals <- constrained_objective(w=cvxr_wts, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+    obj_vals <- constrained_objective(w=cvxr_wts, R=R, portfolio, trace=TRUE, normalize=FALSE, env=dotargs)$objective_measures
     out = list(weights=cvxr_wts, 
-               # objective_measures=obj_vals,
-               # opt_values=obj_vals,
-               objective_measures = "EQS",
-               opt_values = result_cvxr$value,
+               objective_measures=obj_vals,
+               opt_values=obj_vals,
+               # objective_measures = "EQS",
+               # opt_values = result_cvxr$value,
                out=result_cvxr$value,
                call=call)
   }## end case for CVXR
