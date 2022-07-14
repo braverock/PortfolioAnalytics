@@ -2754,36 +2754,72 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     cvxr_solver = ifelse(optimize_method == "CVXR", "SCS", optimize_method)
     
-    # Focusing on EQS first
-    valid_objnames <- c("HHI", "mean", "var", "sd", "StdDev", "CVaR", "ES", "ETL", "EQS")
+    # objective type
+    reward <- FALSE
+    risk <- FALSE
+    r_measure <- FALSE
+    socp <- FALSE
+    alpha <- 0.05
     
-    
-    ## parameters
-    alpha <- 0.95
+    valid_objnames <- c("mean", "var", "sd", "StdDev", "CVaR", "ES", "ETL", "EQS") ## xinran "HHI", 
+    for (objective in portfolio$objectives) {
+      if (objective$enabled) {
+        if (!(objective$name %in% valid_objnames)) {
+          stop("CVXR only solves mean, var/sd/StdDev and ETL/ES/CVaR/EQS type business objectives, 
+                 choose a different optimize_method.")
+        }
+        
+        # alpha
+        alpha <- ifelse(!is.null(objective$arguments[["p"]]),
+                        objective$arguments[["p"]], alpha
+        )
+        
+        # return target
+        target <- ifelse(!is.null(objective$target), objective$target, target)
+        
+        # optimization objective function
+        reward <- ifelse(objective$name == "mean", TRUE, reward)
+        risk <- ifelse(objective$name %in% valid_objnames[2:4], TRUE, risk)
+        r_measure <- ifelse(objective$name %in% valid_objnames[2:7], TRUE, r_measure)
+        socp <- ifelse(objective$name == "EQS", TRUE, socp)
+        arguments <- objective$arguments
+      }
+    }
+    if(alpha > 0.5) alpha <- (1 - alpha)
     
     ## variables
     X <- as.matrix(R)
-    eqs_wts <- Variable(N)
+    wts <- Variable(N)
     z <- Variable(T)
-    zeta <- Variable(1)
     
-    ## Objective
-    objective_eqs <- zeta + (1/(1-alpha)) * p_norm(z, p=2)
+    if(r_measure & !socp){
+      zeta <- Variable(1)
+      obj <- zeta + (1/(t*alpha)) * sum(z)
+      constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
+    }
+    else if(!r_measure & socp){
+      zeta <- Variable(1)
+      obj <- zeta + (1/alpha) * p_norm(z, p=2)
+      constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
+    }
     
     ## Constraints
     ## if((constraints$max_sum - constraints$min_sum) < 0.02){
     ##   message("Leverage constraint min_sum and max_sum are restrictive, 
     ##           consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01")
     ## }
-    constraints_cvxr = list(z >= 0, z >= -X %*% eqs_wts - zeta)
-    
-    if(!is.null(constraints$max_sum)){
-      max_sum <- ifelse(is.infinite(constraints$max_sum), 9999.0, constraints$max_sum)
-      constraints_cvxr = append(constraints_cvxr, sum(eqs_wts) <= max_sum)
+    if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum == constraints$min_sum){
+      constraints_cvxr = append(constraints_cvxr, sum(wts) == constraints$max_sum)
     }
-    if(!is.null(constraints$min_sum)){
-      min_sum <- ifelse(is.infinite(constraints$min_sum), -9999.0, constraints$min_sum)
-      constraints_cvxr = append(constraints_cvxr, sum(eqs_wts) >= min_sum)
+    else{
+      if(!is.null(constraints$max_sum)){
+        max_sum <- ifelse(is.infinite(constraints$max_sum), 9999.0, constraints$max_sum)
+        constraints_cvxr = append(constraints_cvxr, sum(wts) <= max_sum)
+      }
+      if(!is.null(constraints$min_sum)){
+        min_sum <- ifelse(is.infinite(constraints$min_sum), -9999.0, constraints$min_sum)
+        constraints_cvxr = append(constraints_cvxr, sum(wts) >= min_sum)
+      }
     }
     
     upper <- constraints$max
@@ -2791,27 +2827,27 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     upper[which(is.infinite(upper))] <- 9999.0
     lower[which(is.infinite(lower))] <- -9999.0
     
-    constraints_cvxr = append(constraints_cvxr, eqs_wts >= lower)
-    constraints_cvxr = append(constraints_cvxr, eqs_wts <= upper)
+    constraints_cvxr = append(constraints_cvxr, wts >= lower)
+    constraints_cvxr = append(constraints_cvxr, wts <= upper)
     
     ## problem
-    prob_eqs <- Problem(Minimize(objective_eqs),
+    prob_cvxr <- Problem(Minimize(obj),
                         constraints = constraints_cvxr)
     
-    result_eqs <- solve(prob_eqs, solver = cvxr_solver)
+    result_cvxr <- solve(prob_cvxr, solver = cvxr_solver)
     
-    cvxr_eqs_wts <- result_eqs$getValue(eqs_wts)
-    cvxr_eqs_wts <- t(cvxr_eqs_wts)
-    colnames(cvxr_eqs_wts) <- colnames(R)
+    cvxr_wts <- result_cvxr$getValue(wts)
+    cvxr_wts <- t(cvxr_wts)
+    colnames(cvxr_wts) <- colnames(R)
     
     # xinran TODO
-    # obj_vals <- constrained_objective(w=cvxr_eqs_wts, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
-    out = list(weights=cvxr_eqs_wts, 
+    # obj_vals <- constrained_objective(w=cvxr_wts, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+    out = list(weights=cvxr_wts, 
                # objective_measures=obj_vals,
                # opt_values=obj_vals,
                objective_measures = "EQS",
-               opt_values = result_eqs$value,
-               out=result_eqs$value,
+               opt_values = result_cvxr$value,
+               out=result_cvxr$value,
                call=call)
   }## end case for CVXR
   
