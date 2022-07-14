@@ -210,9 +210,9 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
              meucci.model <- meucci.moments(R=tmpR, posterior_p=posterior_p)
            },
            robust = {
-             if(hasArg(type)) Mu=match.call(expand.dots=TRUE)$type else type="auto"
-             if(hasArg(tol)) Sigma=match.call(expand.dots=TRUE)$tol else tol=1e-4
-             if(hasArg(maxit)) Views=match.call(expand.dots=TRUE)$maxit else maxit=50
+             if(hasArg(type)) type=match.call(expand.dots=TRUE)$type else type="auto"
+             if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
+             if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=50
              rb <- robust.moments(R=tmpR, type=type, maxit=maxit, tol=tol)
            }
     ) # end switch for fitting models based on method
