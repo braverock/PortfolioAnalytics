@@ -164,7 +164,7 @@ set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
 set.portfolio.moments <- set.portfolio.moments_v2 <- function(R, 
                                      portfolio, 
                                      momentargs=NULL, 
-                                     method=c("sample", "boudt", "black_litterman", "meucci", "robust"), 
+                                     method=c("sample", "boudt", "black_litterman", "meucci", "robust"),
                                      ...){
   
   if(!hasArg(momentargs) | is.null(momentargs)) momentargs <- list()
@@ -210,10 +210,10 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
              meucci.model <- meucci.moments(R=tmpR, posterior_p=posterior_p)
            },
            robust = {
-             if(hasArg(type)) Mu=match.call(expand.dots=TRUE)$type else type='auto'
+             if(hasArg(type)) Mu=match.call(expand.dots=TRUE)$type else type="auto"
              if(hasArg(tol)) Sigma=match.call(expand.dots=TRUE)$tol else tol=1e-4
              if(hasArg(maxit)) Views=match.call(expand.dots=TRUE)$maxit else maxit=50
-             rb <- robust.moments(R=tmpR. type=type, maxit=maxit, tol=tol)
+             rb <- robust.moments(R=tmpR, type=type, maxit=maxit, tol=tol)
            }
     ) # end switch for fitting models based on method
     
@@ -263,7 +263,6 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
                       },
                       robust = {
                         if(is.null(momentargs$mu)) momentargs$mu = rb$rbMu
-                        
                       }
                ) # end nested switch on method
              }, # end switch on mean
@@ -374,7 +373,7 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
                }
              } # end switch on es, mES, CVaR, cVaR, ETL, mETL, ES
       ) # end switch on objectives    
-    }    
+    }
   }
   return(momentargs)
 }
