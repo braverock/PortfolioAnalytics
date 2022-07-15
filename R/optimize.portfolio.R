@@ -2834,16 +2834,19 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     result_cvxr <- solve(prob_cvxr, solver = cvxr_solver)
     
-    cvxr_wts <- result_cvxr$getValue(wts)
-    cvxr_wts <- t(cvxr_wts)
-    colnames(cvxr_wts) <- colnames(R)
+    cvxr_wts <- as.numeric(result_cvxr$getValue(wts))
+    cvxr_wts <- as.vector(cvxr_wts)
+    names(cvxr_wts) <- colnames(R)
     
     # xinran TODO
     # obj_vals <- constrained_objective(w=cvxr_wts, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
-    obj_vals <- constrained_objective(w=cvxr_wts, R=R, portfolio, trace=TRUE, normalize=FALSE, env=dotargs)$objective_measures
-    out = list(weights=cvxr_wts, 
-               objective_measures=obj_vals,
-               opt_values=obj_vals,
+    # obj_vals <- constrained_objective(w=cvxr_wts, R=R, portfolio, trace=TRUE, normalize=FALSE, env=dotargs)$objective_measures
+    opt_value = as.matrix(result_cvxr$value)
+    obj_cvxr = list(EQS = opt_value)
+    attr(obj_cvxr$EQS, "names") = c("EQS")
+    out_cvxr = list(weights=cvxr_wts, 
+               objective_measures=obj_cvxr,
+               opt_values=obj_cvxr,
                # objective_measures = "EQS",
                # opt_values = result_cvxr$value,
                out=result_cvxr$value,
@@ -2852,13 +2855,15 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   # Prepare for final object to return
   end_t <- Sys.time()
+  if (length(out) == 0){
+    out$portfolio <- portfolio
+    out$data_summary <- list(first=first(R), last=last(R))
+    out$elapsed_time <- end_t - start_t
+    out$end_t <- as.character(Sys.time())
+  }
   # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
   if(message) message(c("elapsed time:", end_t-start_t))
-  out$portfolio <- portfolio
   if(trace) out$R <- R
-  out$data_summary <- list(first=first(R), last=last(R))
-  out$elapsed_time <- end_t - start_t
-  out$end_t <- as.character(Sys.time())
   # return a $regime element to indicate what regime portfolio used for
   # optimize.portfolio. The regime information is used in extractStats and
   # extractObjectiveMeasures
