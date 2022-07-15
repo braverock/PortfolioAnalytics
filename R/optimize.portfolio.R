@@ -2755,6 +2755,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     cvxr_solver = ifelse(optimize_method == "CVXR", "SCS", optimize_method)
     
     # objective type
+    target = -Inf
     reward <- FALSE
     risk <- FALSE
     r_measure <- FALSE
