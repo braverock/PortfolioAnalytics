@@ -2840,16 +2840,16 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     names(cvxr_wts) <- colnames(R)
     
     # xinran TODO
-    obj_cvxr <- constrained_objective(w=cvxr_wts, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
-    # obj_vals <- constrained_objective(w=cvxr_wts, R=R, portfolio, trace=TRUE, normalize=FALSE, env=dotargs)$objective_measures
-    # opt_value = as.matrix(result_cvxr$value)
-    # obj_cvxr = list(EQS = opt_value)
-    # attr(obj_cvxr$EQS, "names") = c("EQS")
+    # if obj == mean/var
+    # obj_cvxr <- constrained_objective(w=cvxr_wts, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
+    
+    # if obj == CVaR/ES/EQS
+    obj_cvxr <- list()
+    tmpnames <- "EQS"
+    obj_cvxr[[tmpnames]] <- result_cvxr$value
     out_cvxr = list(weights=cvxr_wts, 
                objective_measures=obj_cvxr,
                opt_values=obj_cvxr,
-               # objective_measures = "EQS",
-               # opt_values = result_cvxr$value,
                out=result_cvxr$value,
                call=call)
   }## end case for CVXR
