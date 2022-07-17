@@ -2856,15 +2856,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   # Prepare for final object to return
   end_t <- Sys.time()
-  if (length(out) == 0){
-    out$portfolio <- portfolio
-    out$data_summary <- list(first=first(R), last=last(R))
-    out$elapsed_time <- end_t - start_t
-    out$end_t <- as.character(Sys.time())
-  }
   # print(c("elapsed time:",round(end_t-start_t,2),":diff:",round(diff,2), ":stats: ", round(out$stats,4), ":targets:",out$targets))
   if(message) message(c("elapsed time:", end_t-start_t))
+  out$portfolio <- portfolio
   if(trace) out$R <- R
+  out$data_summary <- list(first=first(R), last=last(R))
+  out$elapsed_time <- end_t - start_t
+  out$end_t <- as.character(Sys.time())
   # return a $regime element to indicate what regime portfolio used for
   # optimize.portfolio. The regime information is used in extractStats and
   # extractObjectiveMeasures
