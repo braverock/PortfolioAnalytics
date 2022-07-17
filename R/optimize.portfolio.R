@@ -2835,7 +2835,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     result_cvxr <- solve(prob_cvxr, solver = cvxr_solver)
     
-    cvxr_wts <- as.numeric(result_cvxr$getValue(wts))
+    #cvxr_eqs_wts <- result_cvxr$getValue(wts)
+    #cvxr_eqs_wts <- t(cvxr_wts)
+    #colnames(cvxr_eqs_wts) <- colnames(R)
+    
+    cvxr_wts <- result_cvxr$getValue(wts)
     cvxr_wts <- as.vector(cvxr_wts)
     names(cvxr_wts) <- colnames(R)
     
