@@ -2857,9 +2857,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                #out=result_cvxr$value,
                #call=call)
     
-    out = list(call = call,
-               weights = cvxr_wts,
-               objective_measures = obj_cvxr)
+    out = list(weights = cvxr_wts,
+               objective_measures = obj_cvxr,
+               opt_values=obj_cvxr,
+               out = result_cvxr$value,
+               call = call)
   }## end case for CVXR
   
   # Prepare for final object to return
