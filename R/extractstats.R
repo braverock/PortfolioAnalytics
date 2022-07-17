@@ -131,6 +131,23 @@ extractStats.optimize.portfolio.ROI <- function(object, prefix=NULL, ...) {
   return(result)
 }
 
+#' @method extractStats optimize.portfolio.CVXR
+#' @S3method extractStats optimize.portfolio.CVXR
+#' @export 
+extractStats.optimize.portfolio.CVXR <- function(object, prefix=NULL, ...) {
+  if(!inherits(object, "optimize.portfolio.CVXR")) stop("object must be of class optimize.portfolio.CVXR")
+  trow <- c(object$out, object$weights)
+  objmeas <- extractObjectiveMeasures(object)
+  objnames <- names(objmeas)
+  obj <- unlist(objmeas)
+  result <- c(obj, trow)
+  rnames<-c(objnames, 'out', paste('w', names(object$weights), sep='.'))
+  #print(result)
+  #print(rnames)
+  names(result)<-rnames
+  return(result)
+}
+
 #' @method extractStats optimize.portfolio.pso
 #' @S3method extractStats optimize.portfolio.pso
 #' @export 

@@ -401,6 +401,47 @@ print.optimize.portfolio.ROI <- function(x, ..., digits=4){
 
 
 #' @rdname print.optimize.portfolio
+#' @method print optimize.portfolio.CVXR
+#' @S3method print optimize.portfolio.CVXR
+print.optimize.portfolio.CVXR <- function(x, ..., digits=4){
+  cat(rep("*", 35) ,"\n", sep="")
+  cat("PortfolioAnalytics Optimization\n")
+  cat(rep("*", 35) ,"\n", sep="")
+  
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  # get optimal weights
+  cat("Optimal Weights:\n")
+  print.default(round(x$weights, digits=digits), digits=digits)
+  cat("\n")
+  
+  # get objective measures
+  objective_measures <- x$objective_measures
+  tmp_obj <- as.numeric(unlist(objective_measures))
+  names(tmp_obj) <- names(objective_measures)
+  cat("Objective Measures:\n")
+  for(i in 1:length(objective_measures)){
+    print(tmp_obj[i], digits=4)
+    cat("\n")
+    if(length(objective_measures[[i]]) > 1){
+      # This will be the case for any objective measures with risk budgets
+      for(j in 2:length(objective_measures[[i]])){
+        tmpl <- objective_measures[[i]][j]
+        cat(names(tmpl), ":\n")
+        tmpv <- unlist(tmpl)
+        names(tmpv) <- names(x$weights)
+        print(tmpv, digits=digits)
+        cat("\n")
+      }
+    }
+    cat("\n")
+  }
+  cat("\n")
+}
+
+
+#' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.random
 #' @S3method print optimize.portfolio.random
 print.optimize.portfolio.random <- function(x, ..., digits=4){
