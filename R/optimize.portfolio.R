@@ -2803,11 +2803,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
     }
     
-    ## Constraints
-    ## if((constraints$max_sum - constraints$min_sum) < 0.02){
-    ##   message("Leverage constraint min_sum and max_sum are restrictive, 
-    ##           consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01")
-    ## }
     if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum == constraints$min_sum){
       constraints_cvxr = append(constraints_cvxr, sum(wts) == constraints$max_sum)
     } else{
@@ -2833,7 +2828,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     prob_cvxr <- Problem(Minimize(obj),
                         constraints = constraints_cvxr)
     
-    result_cvxr <- solve(prob_cvxr, solver = cvxr_solver)
+    result_cvxr <- CVXR::solve(prob_cvxr, solver = cvxr_solver)
     
     #cvxr_eqs_wts <- result_cvxr$getValue(wts)
     #cvxr_eqs_wts <- t(cvxr_wts)
@@ -2848,14 +2843,16 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     # obj_cvxr <- constrained_objective(w=cvxr_wts, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
     
     # if obj == CVaR/ES/EQS
-    obj_cvxr <- list()
-    tmpnames <- "EQS"
-    obj_cvxr[[tmpnames]] <- result_cvxr$value
-    out = list(weights=result_cvxr$getValue(wts), 
-               objective_measures=obj_cvxr,
-               opt_values=obj_cvxr,
-               out=result_cvxr$value,
-               call=call)
+    #obj_cvxr <- list()
+    #tmpnames <- "EQS"
+    #obj_cvxr[[tmpnames]] <- result_cvxr$value
+    #out = list(weights=result_cvxr$getValue(wts), 
+               #objective_measures=obj_cvxr,
+               #opt_values=obj_cvxr,
+               #out=result_cvxr$value,
+               #call=call)
+    
+    out = list(EQS = result_cvxr$value, weights = result_cvxr$getValue(wts))
   }## end case for CVXR
   
   # Prepare for final object to return
