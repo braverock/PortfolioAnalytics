@@ -2834,6 +2834,10 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     #cvxr_eqs_wts <- t(cvxr_wts)
     #colnames(cvxr_eqs_wts) <- colnames(R)
     
+    cvxr_wts <- result_cvxr$getValue(wts)
+    cvxr_wts <- t(cvxr_wts)
+    colnames(cvxr_wts) <- colnames(R)
+    
     #cvxr_wts <- result_cvxr$getValue(wts)
     #cvxr_wts <- t(cvxr_wts)
     #names(cvxr_wts) <- colnames(R)
@@ -2843,16 +2847,19 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     # obj_cvxr <- constrained_objective(w=cvxr_wts, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
     
     # if obj == CVaR/ES/EQS
-    #obj_cvxr <- list()
-    #tmpnames <- "EQS"
-    #obj_cvxr[[tmpnames]] <- result_cvxr$value
+    obj_cvxr <- list()
+    tmpnames <- "EQS"
+    obj_cvxr[[tmpnames]] <- result_cvxr$value
+    
     #out = list(weights=result_cvxr$getValue(wts), 
                #objective_measures=obj_cvxr,
                #opt_values=obj_cvxr,
                #out=result_cvxr$value,
                #call=call)
     
-    out = list(EQS = result_cvxr$value, weights = result_cvxr$getValue(wts))
+    out = list(call = call,
+               weights = cvxr_wts,
+               objective_measures = obj_cvxr)
   }## end case for CVXR
   
   # Prepare for final object to return
