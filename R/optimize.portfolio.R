@@ -2794,13 +2794,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     z <- Variable(T)
     
     if(reward){
-      obj <- -t(mout$mu) %*% eqs_wts
+      obj <- -t(mout$mu) %*% wts
       constraints_cvxr = list()
       tmpname = "mean"
     } else if(risk){
       obj <- quad_form(wts, mout$sigma)
       constraints_cvxr = list()
-      tmpname = "var"
+      tmpname = "StdDev"
     } else if(r_measure & !socp){
       zeta <- Variable(1)
       obj <- zeta + (1/(T*alpha)) * sum(z)
@@ -2813,6 +2813,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       tmpname = "EQS"
     }
     
+    # weight sum constraint
     if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum == constraints$min_sum){
       constraints_cvxr = append(constraints_cvxr, sum(wts) == constraints$max_sum)
     } else{
@@ -2826,6 +2827,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     }
     
+    # box constraint
     upper <- constraints$max
     lower <- constraints$min
     upper[which(is.infinite(upper))] <- 9999.0
@@ -2848,7 +2850,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     obj_cvxr <- list()
     if(reward){
       obj_cvxr[[tmpname]] <- -result_cvxr$value
-    }else{
+    } else if (risk){
+      obj_cvxr[[tmpname]] <- sqrt(result_cvxr$value)
+    } else {
       obj_cvxr[[tmpname]] <- result_cvxr$value
     }
     
