@@ -626,7 +626,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   portfolio=NULL,
   constraints=NULL,
   objectives=NULL,
-  optimize_method=c("DEoptim","random","ROI","pso","GenSA", "Rglpk", "osqp", "mco", "CVXR"),
+  optimize_method=c("DEoptim","random","ROI","pso","GenSA", "Rglpk", "osqp", "mco", "CVXR", "SCS", "ECOS"),
   search_size=20000,
   trace=FALSE, ...,
   rp=NULL,
@@ -2781,7 +2781,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         # optimization objective function
         reward <- ifelse(objective$name == "mean", TRUE, reward)
         risk <- ifelse(objective$name %in% valid_objnames[2:4], TRUE, risk)
-        r_measure <- ifelse(objective$name %in% valid_objnames[2:7], TRUE, r_measure)
+        r_measure <- ifelse(objective$name %in% valid_objnames[5:7], TRUE, r_measure)
         socp <- ifelse(objective$name == "EQS", TRUE, socp)
         arguments <- objective$arguments
       }
@@ -2793,14 +2793,24 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     wts <- Variable(N)
     z <- Variable(T)
     
-    if(r_measure & !socp){
+    if(reward){
+      obj <- -t(mout$mu) %*% eqs_wts
+      constraints_cvxr = list()
+      tmpname = "mean"
+    } else if(risk){
+      obj <- quad_form(wts, mout$sigma)
+      constraints_cvxr = list()
+      tmpname = "var"
+    } else if(r_measure & !socp){
       zeta <- Variable(1)
       obj <- zeta + (1/(T*alpha)) * sum(z)
       constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
+      tmpname = "ES"
     } else if(!r_measure & socp){
       zeta <- Variable(1)
       obj <- zeta + (1/alpha) * p_norm(z, p=2)
       constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
+      tmpname = "EQS"
     }
     
     if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum == constraints$min_sum){
@@ -2830,26 +2840,17 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     result_cvxr <- CVXR::solve(prob_cvxr, solver = cvxr_solver)
     
-    #cvxr_eqs_wts <- result_cvxr$getValue(wts)
-    #cvxr_eqs_wts <- t(cvxr_wts)
-    #colnames(cvxr_eqs_wts) <- colnames(R)
-    
     cvxr_wts <- result_cvxr$getValue(wts)
     cvxr_wts <- t(cvxr_wts)
     colnames(cvxr_wts) <- colnames(R)
     
-    #cvxr_wts <- result_cvxr$getValue(wts)
-    #cvxr_wts <- t(cvxr_wts)
-    #names(cvxr_wts) <- colnames(R)
-    
     # xinran TODO
-    # if obj == mean/var
-    # obj_cvxr <- constrained_objective(w=cvxr_wts, R=R, portfolio=portfolio, trace=TRUE, env=dotargs)$objective_measures
-    
-    # if obj == CVaR/ES/EQS
     obj_cvxr <- list()
-    tmpnames <- "EQS"
-    obj_cvxr[[tmpnames]] <- result_cvxr$value
+    if(reward){
+      obj_cvxr[[tmpname]] <- -result_cvxr$value
+    }else{
+      obj_cvxr[[tmpname]] <- result_cvxr$value
+    }
     
     #out = list(weights=result_cvxr$getValue(wts), 
                #objective_measures=obj_cvxr,
@@ -2860,8 +2861,10 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     out = list(weights = cvxr_wts,
                objective_measures = obj_cvxr,
                opt_values=obj_cvxr,
-               out = result_cvxr$value,
+               out = obj_cvxr[[tmpname]],
                call = call)
+    
+    optimize_method = "CVXR"
   }## end case for CVXR
   
   # Prepare for final object to return
