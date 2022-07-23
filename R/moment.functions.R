@@ -212,7 +212,7 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
            robust = {
              if(hasArg(type)) type=match.call(expand.dots=TRUE)$type else type="auto"
              if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
-             if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=50
+             if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=100
              rb <- robust.moments(R=tmpR, type=type, maxit=maxit, tol=tol)
            },
            robustMCD = {
