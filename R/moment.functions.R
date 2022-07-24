@@ -164,7 +164,8 @@ set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
 set.portfolio.moments <- set.portfolio.moments_v2 <- function(R, 
                                      portfolio, 
                                      momentargs=NULL, 
-                                     method=c("sample", "boudt", "black_litterman", "meucci", "robust", "robustMCD"),
+                                     method=c("sample", "boudt", "black_litterman", "meucci", 
+                                              "robust", "robustMCD", "TSGS"),
                                      ...){
   
   if(!hasArg(momentargs) | is.null(momentargs)) momentargs <- list()
@@ -212,7 +213,7 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
            robust = {
              if(hasArg(type)) type=match.call(expand.dots=TRUE)$type else type="auto"
              if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
-             if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=100
+             if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=50
              rb <- robust.moments(R=tmpR, type=type, maxit=maxit, tol=tol)
            },
            robustMCD = {
@@ -234,7 +235,25 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
                                          initHsets=NULL, seed=seed, tolSolve=tolSolve,
                                          wgtFUN=wgtFUN, control=control)
              
+           },
+           
+           TSGS = {
+             if(hasArg(filter)) filter=match.call(expand.dots=TRUE)$filter else filter="UBF-DDC"
+             if(hasArg(partial.impute)) partial.impute=match.call(expand.dots=TRUE)$partial.impute else partial.impute=FALSE
+             if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
+             if(hasArg(maxiter)) maxiter=match.call(expand.dots=TRUE)$maxiter else maxiter=150
+             if(hasArg(method)) method=match.call(expand.dots=TRUE)$method else method="bisquare"
+             if(hasArg(init)) init=match.call(expand.dots=TRUE)$init else init="emve_c"
+             if(hasArg(mu0)) mu0=match.call(expand.dots=TRUE)$mu0 else mu0=NULL
+             if(hasArg(S0)) S0=match.call(expand.dots=TRUE)$S0 else S0=NULL
+             
+             
+             rbTSGS <- tsgs.moments(R=tmpR, filter=filter,
+                                    partial.impute=partial.impute, 
+                                    tol=tol, maxiter=maxiter, method=method,
+                                    init=init, mu0=NULL, S0=NULL)
            }
+        
     ) # end switch for fitting models based on method
     
     lcl <- grep('garch', portfolio)
@@ -286,7 +305,11 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
                       },
                       robustMCD = {
                         if(is.null(momentargs$mu)) momentargs$mu = rbMCD$rbMCD.Mu
+                      },
+                      TSGS = {
+                        if(is.null(momentargs$mu)) momentargs$mu = rbTSGS$mu
                       }
+                      
                ) # end nested switch on method
              }, # end switch on mean
              var =,
@@ -316,6 +339,10 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
                       robustMCD = {
                         if(is.null(momentargs$mu)) momentargs$mu = rbMCD$rbMCD.Mu
                         if(is.null(momentargs$sigma)) momentargs$sigma = rbMCD$rbMCD.Sig
+                      },
+                      TSGS = {
+                        if(is.null(momentargs$mu)) momentargs$mu = rbTSGS$mu
+                        if(is.null(momentargs$mu)) momentargs$sigma = rbTSGS$sig
                       }
                ) # end nested switch on method 
              }, # end switch on var, sd, StdDev
@@ -355,6 +382,12 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
                       robustMCD = {
                         if(is.null(momentargs$mu)) momentargs$mu = rbMCD$rbMCD.Mu
                         if(is.null(momentargs$sigma)) momentargs$sigma = rbMCD$rbMCD.Sig
+                        if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(tmpR)
+                        if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(tmpR)
+                      },
+                      TSGS = {
+                        if(is.null(momentargs$mu)) momentargs$mu = rbTSGS$mu
+                        if(is.null(momentargs$mu)) momentargs$sigma = rbTSGS$sig
                         if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(tmpR)
                         if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(tmpR)
                       }
@@ -405,6 +438,12 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
                         robustMCD = {
                           if(is.null(momentargs$mu)) momentargs$mu = rbMCD$rbMCD.Mu
                           if(is.null(momentargs$sigma)) momentargs$sigma = rbMCD$rbMCD.Sig
+                          if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(tmpR)
+                          if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(tmpR)
+                        },
+                        TSGS = {
+                          if(is.null(momentargs$mu)) momentargs$mu = rbTSGS$mu
+                          if(is.null(momentargs$mu)) momentargs$sigma = rbTSGS$sig
                           if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(tmpR)
                           if(is.null(momentargs$m4)) momentargs$m4 = PerformanceAnalytics::M4.MM(tmpR)
                         }
