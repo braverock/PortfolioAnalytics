@@ -244,14 +244,13 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
              if(hasArg(maxiter)) maxiter=match.call(expand.dots=TRUE)$maxiter else maxiter=150
              if(hasArg(method)) loss=match.call(expand.dots=TRUE)$loss else loss="bisquare"
              if(hasArg(init)) init=match.call(expand.dots=TRUE)$init else init="emve_c"
-             if(hasArg(mu0)) mu0=match.call(expand.dots=TRUE)$mu0 else mu0=NULL
-             if(hasArg(S0)) S0=match.call(expand.dots=TRUE)$S0 else S0=NULL
+
              
              
              rbTSGS <- tsgs.moments(R=tmpR, filter=filter,
                                     partial.impute=partial.impute, 
                                     tol=tol, maxiter=maxiter, method=loss,
-                                    init=init, mu0=NULL, S0=NULL)
+                                    init=init)
            }
         
     ) # end switch for fitting models based on method
