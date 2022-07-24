@@ -17,10 +17,10 @@
 tsgs.moments <- function(R, filter="UBF-DDC", 
                          partial.impute=FALSE, tol=1e-4, maxiter=150, 
                          method="bisquare",
-                         init="emve_c", mu0=NULL, S0=NULL){
+                         init="emve_c"){
   tsgsRob <- GSE::TSGS(x=R, filter=filter,
                        partial.impute=partial.impute, tol=tol, maxiter=maxiter, method=method,
-                       init=init, mu0=NULL, S0=NULL)
+                       init=init)
   return(list(mu=tsgsRob@mu, sig=tsgsRob@S))
   
 }

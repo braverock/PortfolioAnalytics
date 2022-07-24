@@ -341,7 +341,7 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
                       },
                       TSGS = {
                         if(is.null(momentargs$mu)) momentargs$mu = rbTSGS$mu
-                        if(is.null(momentargs$mu)) momentargs$sigma = rbTSGS$sig
+                        if(is.null(momentargs$sigma)) momentargs$sigma = rbTSGS$sig
                       }
                ) # end nested switch on method 
              }, # end switch on var, sd, StdDev
