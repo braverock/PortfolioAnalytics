@@ -16,7 +16,11 @@
 #' @param init type of initial estimator. Options include "emve", "qc", "huber","imputed","emve_c"
 #'
 #' @return estimators of first and second moments
-#' @export
+#' 
+#' @references Claudio Agostinelli, Andy Leung, "Robust estimation of multivariate 
+#'             location and scatter in the presence of cellwise and casewise contamination",
+#'             2014.
+
 #'
 #' @examples
 tsgs.moments <- function(R, filter="UBF-DDC", 
