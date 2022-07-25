@@ -1,4 +1,3 @@
-
 #'
 #'
 #'
@@ -17,7 +16,7 @@
 #' @param tol tolerance for convergence
 #'
 #' @return estimators of moments
-#'
+#' @export
 robust.moments <- function(R, type="auto", maxit=50, tol=1e-4){
   
   robustCov <- RobStatTM::covRob(X=R, type=type, maxit=maxit, tol=tol)

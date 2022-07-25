@@ -21,7 +21,7 @@
 #'             location and scatter in the presence of cellwise and casewise contamination",
 #'             2014.
 
-#'
+#' @export
 #' @examples
 tsgs.moments <- function(R, filter="UBF-DDC", 
                          partial.impute=FALSE, tol=1e-4, maxiter=150, 
