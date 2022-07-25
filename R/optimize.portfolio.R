@@ -2749,10 +2749,14 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   ## case if method = CVXR xinran
   cvxr_solvers <- c("SCS", "OSQP", "ECOS")
   if (optimize_method == "CVXR" || optimize_method %in% cvxr_solvers) {
-    # search for required package
+    ## search for required package
     stopifnot("package:CVXR" %in% search() || requireNamespace("CVXR", quietly = TRUE))
-    
     cvxr_solver = ifelse(optimize_method == "CVXR", "SCS", optimize_method)
+    
+    ## variables
+    X <- as.matrix(R)
+    wts <- Variable(N)
+    z <- Variable(T)
     
     # objective type
     target = -Inf
@@ -2788,11 +2792,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     if(alpha > 0.5) alpha <- (1 - alpha)
     
-    ## variables
-    X <- as.matrix(R)
-    wts <- Variable(N)
-    z <- Variable(T)
-    
     if(reward){
       obj <- -t(mout$mu) %*% wts
       constraints_cvxr = list()
@@ -2813,7 +2812,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       tmpname = "EQS"
     }
     
-    # weight sum constraint
+    # constraint type
+    ## weight sum constraint
     if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum == constraints$min_sum){
       constraints_cvxr = append(constraints_cvxr, sum(wts) == constraints$max_sum)
     } else{
@@ -2827,7 +2827,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     }
     
-    # box constraint
+    ## box constraint
     upper <- constraints$max
     lower <- constraints$min
     upper[which(is.infinite(upper))] <- 9999.0
@@ -2836,7 +2836,29 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     constraints_cvxr = append(constraints_cvxr, wts >= lower)
     constraints_cvxr = append(constraints_cvxr, wts <= upper)
     
-    ## problem
+    ## group constraint
+    i = 1
+    for(g in constraints$groups){
+      constraints_cvxr = append(constraints_cvxr, sum(wts[g]) >= constraints$cLO[i])
+      constraints_cvxr = append(constraints_cvxr, sum(wts[g]) <= constraints$cUP[i])
+      i = i + 1
+    }
+    
+    ## diversification constraint HHI
+    ## constraints_cvxr = append(constraints_cvxr, quad_form(wts, diag(N)) >= 0.02)
+    
+    ## turnover constraint ROI cannot
+    
+    ## target return constraint
+    constraints_cvxr = append(constraints_cvxr, t(mout$mu) %*% wts >= constraints$return_target)
+    
+    ## factor exposure constraint
+    # constraints_cvxr = append(constraints_cvxr, wts >= constraints$B - constraints$lower)
+    # constraints_cvxr = append(constraints_cvxr, wts <= constraints$B + constraints$upper)
+    
+    ## transaction cost constraint ROI cannot
+    
+    # problem
     prob_cvxr <- Problem(Minimize(obj),
                         constraints = constraints_cvxr)
     
@@ -2846,7 +2868,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     cvxr_wts <- t(cvxr_wts)
     colnames(cvxr_wts) <- colnames(R)
     
-    # xinran TODO
+    # output xinran TODO
     obj_cvxr <- list()
     if(reward){
       obj_cvxr[[tmpname]] <- -result_cvxr$value
