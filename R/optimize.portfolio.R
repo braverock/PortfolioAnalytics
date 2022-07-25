@@ -2814,7 +2814,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     # constraint type
     ## weight sum constraint
-    if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum == constraints$min_sum){
+    if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum - constraints$min_sum <= 0.001){
       constraints_cvxr = append(constraints_cvxr, sum(wts) == constraints$max_sum)
     } else{
       if(!is.null(constraints$max_sum)){
