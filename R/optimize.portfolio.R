@@ -2879,8 +2879,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       obj_cvxr[[tmpname]] <- sqrt(result_cvxr$value)
     } else if (reward & risk){
       obj_cvxr[[tmpname]] <- result_cvxr$value
-      obj_cvxr[["StdDev"]] <- sqrt(quad_form(wts, mout$sigma))
-      obj_cvxr[["mean"]] <- t(mout$mu) %*% wts
+      obj_cvxr[["mean"]] <- t(mout$mu) %*% cvxr_wts
+      obj_cvxr[["StdDev"]] <- sqrt(cvxr_wts %*% mout$sigma %*% t(cvxr_wts))
     } else {
       obj_cvxr[[tmpname]] <- result_cvxr$value
     }
