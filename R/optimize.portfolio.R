@@ -2765,6 +2765,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     r_measure <- FALSE
     socp <- FALSE
     alpha <- 0.05
+    lambda <- 1
     
     valid_objnames <- c("mean", "var", "sd", "StdDev", "CVaR", "ES", "ETL", "EQS") ## xinran "HHI", 
     for (objective in portfolio$objectives) {
@@ -2773,11 +2774,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           stop("CVXR only solves mean, var/sd/StdDev and ETL/ES/CVaR/EQS type business objectives, 
                  choose a different optimize_method.")
         }
-        
         # alpha
-        alpha <- ifelse(!is.null(objective$arguments[["p"]]),
-                        objective$arguments[["p"]], alpha
-        )
+        alpha <- ifelse(!is.null(objective$arguments[["p"]]), objective$arguments[["p"]], alpha)
+        lambda <- ifelse(!is.null(objective$risk_aversion), objective$risk_aversion, lambda)
         
         # return target
         target <- ifelse(!is.null(objective$target), objective$target, target)
@@ -2792,14 +2791,18 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     if(alpha > 0.5) alpha <- (1 - alpha)
     
-    if(reward){
+    if(reward & !risk){
       obj <- -t(mout$mu) %*% wts
       constraints_cvxr = list()
       tmpname = "mean"
-    } else if(risk){
+    } else if(risk & !reward){
       obj <- quad_form(wts, mout$sigma)
       constraints_cvxr = list()
       tmpname = "StdDev"
+    } else if(reward & risk){
+      obj <- quad_form(wts, mout$sigma) - lambda * (t(mout$mu) %*% wts)
+      constraints_cvxt = list()
+      tmpname = "optimal value"
     } else if(r_measure & !socp){
       zeta <- Variable(1)
       obj <- zeta + (1/(T*alpha)) * sum(z)
@@ -2870,10 +2873,14 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     # output xinran TODO
     obj_cvxr <- list()
-    if(reward){
+    if(reward & !risk){
       obj_cvxr[[tmpname]] <- -result_cvxr$value
-    } else if (risk){
+    } else if (risk & !reward){
       obj_cvxr[[tmpname]] <- sqrt(result_cvxr$value)
+    } else if (reward & risk){
+      obj_cvxr[[tmpname]] <- result_cvxr$value
+      obj_cvxr[["StdDev"]] <- sqrt(quad_form(wts, mout$sigma))
+      obj_cvxr[["mean"]] <- t(mout$mu) %*% wts
     } else {
       obj_cvxr[[tmpname]] <- result_cvxr$value
     }
