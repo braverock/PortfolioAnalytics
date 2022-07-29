@@ -2805,7 +2805,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       constraints_cvxr = list()
       tmpname = "StdDev"
     } else if(reward & risk){
-      obj <- quad_form(wts, sigma_value) - lambda * (t(mean_value) %*% wts)
+      obj <- quad_form(wts, sigma_value) - (t(mean_value) %*% wts) / lambda
       constraints_cvxr = list()
       tmpname = "optimal value"
     } else if(r_measure & !socp){
