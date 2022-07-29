@@ -2795,12 +2795,12 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     if(!is.null(mout$mu)){
       mean_value <- as.vector(mout$mu)
     } else {
-      mean_value <- try(as.vector(apply(Return.clean(R=R, method=clean), 2, "mean", na.rm=TRUE)), silent=TRUE)
+      mean_value <- apply(R, 2, "mean")
     }
     if(!is.null(mout$sigma)){
       sigma_valude <- mout$sigma
     } else {
-      sigma_value <- try(cov(x=Return.clean(R=R, method=clean), na.rm=TRUE), silent=TRUE)
+      sigma_value <- cov(R)
     }
     # end for mu, sigma
     
