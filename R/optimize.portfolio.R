@@ -2858,7 +2858,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     ## turnover constraint ROI cannot
     
     ## target return constraint
-    constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target)
+    if(!is.null(constraints$return_target)){
+      constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target)
+    }
     
     ## factor exposure constraint
     # constraints_cvxr = append(constraints_cvxr, wts >= constraints$B - constraints$lower)
