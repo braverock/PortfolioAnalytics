@@ -3267,7 +3267,7 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
 #' @export
 optimize.portfolio.parallel <- function(R,
                                         portfolio,
-                                        optimize_method=c("DEoptim","random","ROI","pso","GenSA"),
+                                        optimize_method=c("DEoptim","random","ROI","pso","GenSA","CVXR"),
                                         search_size=20000,
                                         trace=FALSE, ...,
                                         rp=NULL,
