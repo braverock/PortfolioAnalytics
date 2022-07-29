@@ -2791,16 +2791,29 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     if(alpha > 0.5) alpha <- (1 - alpha)
     
+    # better to use mout$... instead
+    if(!is.null(mout$mu)){
+      mean_value <- as.vector(mout$mu)
+    } else {
+      mean_value <- try(as.vector(apply(Return.clean(R=R, method=clean), 2, "mean", na.rm=TRUE)), silent=TRUE)
+    }
+    if(!is.null(mout$sigma)){
+      sigma_valude <- mout$sigma
+    } else {
+      sigma_value <- try(cov(x=Return.clean(R=R, method=clean), na.rm=TRUE), silent=TRUE)
+    }
+    # end for mu, sigma
+    
     if(reward & !risk){
-      obj <- -t(mout$mu) %*% wts
+      obj <- -t(mean_value) %*% wts
       constraints_cvxr = list()
       tmpname = "mean"
     } else if(risk & !reward){
-      obj <- quad_form(wts, mout$sigma)
+      obj <- quad_form(wts, sigma_value)
       constraints_cvxr = list()
       tmpname = "StdDev"
     } else if(reward & risk){
-      obj <- quad_form(wts, mout$sigma) - lambda * (t(mout$mu) %*% wts)
+      obj <- quad_form(wts, sigma_value) - lambda * (t(mean_value) %*% wts)
       constraints_cvxr = list()
       tmpname = "optimal value"
     } else if(r_measure & !socp){
@@ -2852,8 +2865,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     ## turnover constraint ROI cannot
     
-    ## target return constraint add mout$mu xinran
-    # constraints_cvxr = append(constraints_cvxr, t(mout$mu) %*% wts >= constraints$return_target)
+    ## target return constraint
+    constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target)
     
     ## factor exposure constraint
     # constraints_cvxr = append(constraints_cvxr, wts >= constraints$B - constraints$lower)
@@ -2879,8 +2892,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       obj_cvxr[[tmpname]] <- sqrt(result_cvxr$value)
     } else if (reward & risk){
       obj_cvxr[[tmpname]] <- result_cvxr$value
-      obj_cvxr[["mean"]] <- t(mout$mu) %*% cvxr_wts
-      obj_cvxr[["StdDev"]] <- sqrt(cvxr_wts %*% mout$sigma %*% t(cvxr_wts))
+      obj_cvxr[["mean"]] <- t(mean_value) %*% cvxr_wts
+      obj_cvxr[["StdDev"]] <- sqrt(cvxr_wts %*% sigma_value %*% t(cvxr_wts))
     } else {
       obj_cvxr[[tmpname]] <- result_cvxr$value
     }
