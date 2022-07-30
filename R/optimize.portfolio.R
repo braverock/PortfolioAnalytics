@@ -2791,11 +2791,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     if(alpha > 0.5) alpha <- (1 - alpha)
     
-    # better to use mout$... instead
-    #mean_value <- apply(R, 2, "mean")
     mean_value <- mout$mu
-    sigma_value <- cov(R)
-    # end for mu, sigma
+    sigma_value <- mout$sigma
     
     if(reward & !risk){
       obj <- -t(mean_value) %*% wts
