@@ -403,6 +403,7 @@ print.optimize.portfolio.ROI <- function(x, ..., digits=4){
 #' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.CVXR
 #' @S3method print optimize.portfolio.CVXR
+#' @export
 print.optimize.portfolio.CVXR <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
   cat("PortfolioAnalytics Optimization\n")
