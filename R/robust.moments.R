@@ -1,23 +1,25 @@
+
+#' @title Compute moments using robust methods
 #'
-#'
-#'
-#'
+#' @description 
 #' This is a function that makes use of covRob from package RobStatTM to calculate
 #' robust estimators of moments, including mean and variance.
 #'
 #' @param R xts object of asset returns
 #' @param type a string indicating which estimator to compute.
-#' Valid options are "Rocke" for Rocke’s S-estimator, 
-#' "MM" for an MM-estimator with a SHR rho function, 
-#' or "auto" (default) which selects "Rocke" if the 
-#' number of variables is greater than or equal to 10, 
-#' and "MM" otherwise.
+#'             Valid options are "Rocke" for Rocke's S-estimator,
+#'             "MM" for an MM-estimator with a SHR rho function,
+#'             or "auto" which selects "Rocke" if the number of variables 
+#'             is greater than or equal to 10, and "MM" otherwise. 
+#'             The default one is "auto".
+#' 
 #' @param maxit maximum number of iterations
 #' @param tol tolerance for convergence
 #'
 #' @return estimators of moments
 #' @export
 #' 
+#' @example 
 #' 
 robust.moments <- function(R, type="auto", maxit=50, tol=1e-4){
   
