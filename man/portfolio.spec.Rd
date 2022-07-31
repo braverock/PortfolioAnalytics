@@ -5,8 +5,12 @@
 \alias{portfolio}
 \title{constructor for class portfolio}
 \usage{
-portfolio.spec(assets = NULL, category_labels = NULL, weight_seq = NULL,
-  message = FALSE)
+portfolio.spec(
+  assets = NULL,
+  category_labels = NULL,
+  weight_seq = NULL,
+  message = FALSE
+)
 }
 \arguments{
 \item{assets}{number of assets, or optionally a named vector of assets specifying seed weights. If seed weights are not specified, an equal weight portfolio will be assumed.}

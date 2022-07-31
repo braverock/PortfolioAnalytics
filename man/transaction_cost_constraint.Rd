@@ -4,8 +4,14 @@
 \alias{transaction_cost_constraint}
 \title{constructor for transaction_cost_constraint}
 \usage{
-transaction_cost_constraint(type = "transaction_cost", assets, ptc,
-  enabled = TRUE, message = FALSE, ...)
+transaction_cost_constraint(
+  type = "transaction_cost",
+  assets,
+  ptc,
+  enabled = TRUE,
+  message = FALSE,
+  ...
+)
 }
 \arguments{
 \item{type}{character type of the constraint}

@@ -4,8 +4,17 @@
 \alias{gmv_opt}
 \title{GMV/QU QP Optimization}
 \usage{
-gmv_opt(R, constraints, moments, lambda, target, lambda_hhi, conc_groups,
-  solver = "quadprog", control = NULL)
+gmv_opt(
+  R,
+  constraints,
+  moments,
+  lambda,
+  target,
+  lambda_hhi,
+  conc_groups,
+  solver = "quadprog",
+  control = NULL
+)
 }
 \arguments{
 \item{R}{xts object of asset returns}

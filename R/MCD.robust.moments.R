@@ -1,3 +1,4 @@
+#' 
 #' This is  a function that makes use of covMcd function from robustbase package. 
 #' For more details of the parameters and function please refer to the manual of 
 #' robustbase on cran.
@@ -25,7 +26,8 @@
 #'                specifying a rule determining such a function for the deterministic MCD.
 #'                The default is "hrv2012" . Another option value is "v2014".
 #' @param maxcsteps maximal number of concentration steps in the deterministic MCD
-#' @param initHsets NULL or a Kxh integer matrix of initial subsets of observations of size h
+#' @param initHsets NULL or a Kxh integer matrix of initial subsets of observations of 
+#'                  size h.
 #' @param seed initial seed for random generator
 #' @param tolSolve numeric tolerance to be used for inversion of the covariance matrix
 #' @param wgtFUN a character string or function, specifying how the weights for 

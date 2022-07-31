@@ -4,8 +4,14 @@
 \alias{maxret_milp_opt}
 \title{Maximum Return MILP Optimization}
 \usage{
-maxret_milp_opt(R, constraints, moments, target, solver = "glpk",
-  control = NULL)
+maxret_milp_opt(
+  R,
+  constraints,
+  moments,
+  target,
+  solver = "glpk",
+  control = NULL
+)
 }
 \arguments{
 \item{R}{xts object of asset returns}

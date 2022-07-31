@@ -4,12 +4,30 @@
 \alias{chart.EfficientFrontierOverlay}
 \title{Plot multiple efficient frontiers}
 \usage{
-chart.EfficientFrontierOverlay(R, portfolio_list, type, n.portfolios = 25,
-  match.col = "ES", search_size = 2000, main = "Efficient Frontiers",
-  cex.axis = 0.8, element.color = "darkgray", legend.loc = NULL,
-  legend.labels = NULL, cex.legend = 0.8, xlim = NULL, ylim = NULL, ...,
-  chart.assets = TRUE, labels.assets = TRUE, pch.assets = 21,
-  cex.assets = 0.8, col = NULL, lty = NULL, lwd = NULL)
+chart.EfficientFrontierOverlay(
+  R,
+  portfolio_list,
+  type,
+  n.portfolios = 25,
+  match.col = "ES",
+  search_size = 2000,
+  main = "Efficient Frontiers",
+  cex.axis = 0.8,
+  element.color = "darkgray",
+  legend.loc = NULL,
+  legend.labels = NULL,
+  cex.legend = 0.8,
+  xlim = NULL,
+  ylim = NULL,
+  ...,
+  chart.assets = TRUE,
+  labels.assets = TRUE,
+  pch.assets = 21,
+  cex.assets = 0.8,
+  col = NULL,
+  lty = NULL,
+  lwd = NULL
+)
 }
 \arguments{
 \item{R}{an xts object of asset returns}

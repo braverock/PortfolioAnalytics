@@ -3,16 +3,29 @@
 \name{constrained_objective}
 \alias{constrained_objective}
 \alias{constrained_objective_v1}
-\alias{constrained_objective}
-\alias{constrained_objective_v1}
 \alias{constrained_objective_v2}
 \title{calculate a numeric return value for a portfolio based on a set of constraints and objectives}
 \usage{
-constrained_objective_v1(w, R, constraints, ..., trace = FALSE,
-  normalize = TRUE, storage = FALSE)
+constrained_objective_v1(
+  w,
+  R,
+  constraints,
+  ...,
+  trace = FALSE,
+  normalize = TRUE,
+  storage = FALSE
+)
 
-constrained_objective(w, R, portfolio, ..., trace = FALSE, normalize = TRUE,
-  storage = FALSE, env = NULL)
+constrained_objective(
+  w,
+  R,
+  portfolio,
+  ...,
+  trace = FALSE,
+  normalize = TRUE,
+  storage = FALSE,
+  env = NULL
+)
 }
 \arguments{
 \item{w}{a vector of weights to test.}

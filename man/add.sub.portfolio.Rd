@@ -4,10 +4,18 @@
 \alias{add.sub.portfolio}
 \title{Add sub-portfolio}
 \usage{
-add.sub.portfolio(mult.portfolio, portfolio, optimize_method = c("DEoptim",
-  "random", "ROI", "pso", "GenSA"), search_size = 20000, rp = NULL,
-  rebalance_on = NULL, training_period = NULL, trailing_periods = NULL,
-  ..., indexnum = NULL)
+add.sub.portfolio(
+  mult.portfolio,
+  portfolio,
+  optimize_method = c("DEoptim", "random", "ROI", "pso", "GenSA"),
+  search_size = 20000,
+  rp = NULL,
+  rebalance_on = NULL,
+  training_period = NULL,
+  trailing_periods = NULL,
+  ...,
+  indexnum = NULL
+)
 }
 \arguments{
 \item{mult.portfolio}{a \code{mult.portfolio.spec} object}

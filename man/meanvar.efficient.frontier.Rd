@@ -4,8 +4,13 @@
 \alias{meanvar.efficient.frontier}
 \title{Generate the efficient frontier for a mean-variance portfolio}
 \usage{
-meanvar.efficient.frontier(portfolio, R, n.portfolios = 25,
-  risk_aversion = NULL, ...)
+meanvar.efficient.frontier(
+  portfolio,
+  R,
+  n.portfolios = 25,
+  risk_aversion = NULL,
+  ...
+)
 }
 \arguments{
 \item{portfolio}{a portfolio object with constraints created via \code{\link{portfolio.spec}}}

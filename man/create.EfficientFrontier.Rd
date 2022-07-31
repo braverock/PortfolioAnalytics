@@ -4,8 +4,16 @@
 \alias{create.EfficientFrontier}
 \title{create an efficient frontier}
 \usage{
-create.EfficientFrontier(R, portfolio, type, n.portfolios = 25,
-  risk_aversion = NULL, match.col = "ES", search_size = 2000, ...)
+create.EfficientFrontier(
+  R,
+  portfolio,
+  type,
+  n.portfolios = 25,
+  risk_aversion = NULL,
+  match.col = "ES",
+  search_size = 2000,
+  ...
+)
 }
 \arguments{
 \item{R}{xts object of asset returns}

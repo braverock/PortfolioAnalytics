@@ -6,8 +6,17 @@
 \alias{constraint_v2}
 \title{constructors for class constraint}
 \usage{
-constraint_v1(assets = NULL, ..., min, max, min_mult, max_mult,
-  min_sum = 0.99, max_sum = 1.01, weight_seq = NULL)
+constraint_v1(
+  assets = NULL,
+  ...,
+  min,
+  max,
+  min_mult,
+  max_mult,
+  min_sum = 0.99,
+  max_sum = 1.01,
+  weight_seq = NULL
+)
 
 constraint(type, enabled = TRUE, ..., constrclass = "v2_constraint")
 }

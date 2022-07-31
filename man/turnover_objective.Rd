@@ -4,8 +4,14 @@
 \alias{turnover_objective}
 \title{constructor for class turnover_objective}
 \usage{
-turnover_objective(name, target = NULL, arguments = NULL, multiplier = 1,
-  enabled = TRUE, ...)
+turnover_objective(
+  name,
+  target = NULL,
+  arguments = NULL,
+  multiplier = 1,
+  enabled = TRUE,
+  ...
+)
 }
 \arguments{
 \item{name}{name of the objective, should correspond to a function, though we will try to make allowances}

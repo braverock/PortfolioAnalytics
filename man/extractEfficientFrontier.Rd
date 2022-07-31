@@ -4,8 +4,12 @@
 \alias{extractEfficientFrontier}
 \title{Extract the efficient frontier data points}
 \usage{
-extractEfficientFrontier(object, match.col = "ES", n.portfolios = 25,
-  risk_aversion = NULL)
+extractEfficientFrontier(
+  object,
+  match.col = "ES",
+  n.portfolios = 25,
+  risk_aversion = NULL
+)
 }
 \arguments{
 \item{object}{an optimal portfolio object created by \code{optimize.portfolio}}
@@ -31,7 +35,7 @@ This function extracts the efficient frontier from an object created by
 \details{
 If the object is an \code{optimize.portfolio.ROI} object and \code{match.col}
  is "ES", "ETL", or "CVaR", then the mean-ETL efficient frontier will be 
- created via \code{meanetl.efficient.frontier}.
+ created via \code{meanetl.efficient.frontier}. 
 
 If the object is an \code{optimize.portfolio.ROI} object and \code{match.col}
  is "StdDev", then the mean-StdDev efficient frontier will be created via 

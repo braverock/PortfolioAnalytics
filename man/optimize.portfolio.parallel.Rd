@@ -4,10 +4,18 @@
 \alias{optimize.portfolio.parallel}
 \title{Execute multiple optimize.portfolio calls, presumably in parallel}
 \usage{
-optimize.portfolio.parallel(R, portfolio, optimize_method = c("DEoptim",
-  "random", "ROI", "pso", "GenSA"), search_size = 20000, trace = FALSE, ...,
-  rp = NULL, momentFUN = "set.portfolio.moments", message = FALSE,
-  nodes = 4)
+optimize.portfolio.parallel(
+  R,
+  portfolio,
+  optimize_method = c("DEoptim", "random", "ROI", "pso", "GenSA"),
+  search_size = 20000,
+  trace = FALSE,
+  ...,
+  rp = NULL,
+  momentFUN = "set.portfolio.moments",
+  message = FALSE,
+  nodes = 4
+)
 }
 \arguments{
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}

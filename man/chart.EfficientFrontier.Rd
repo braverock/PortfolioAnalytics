@@ -9,26 +9,65 @@
 \usage{
 chart.EfficientFrontier(object, ...)
 
-\method{chart.EfficientFrontier}{optimize.portfolio.ROI}(object, ...,
-  match.col = "ES", n.portfolios = 25, xlim = NULL, ylim = NULL,
-  cex.axis = 0.8, element.color = "darkgray", main = "Efficient Frontier",
-  RAR.text = "SR", rf = 0, tangent.line = TRUE, cex.legend = 0.8,
-  chart.assets = TRUE, labels.assets = TRUE, pch.assets = 21,
-  cex.assets = 0.8)
+\method{chart.EfficientFrontier}{optimize.portfolio.ROI}(
+  object,
+  ...,
+  match.col = "ES",
+  n.portfolios = 25,
+  xlim = NULL,
+  ylim = NULL,
+  cex.axis = 0.8,
+  element.color = "darkgray",
+  main = "Efficient Frontier",
+  RAR.text = "SR",
+  rf = 0,
+  tangent.line = TRUE,
+  cex.legend = 0.8,
+  chart.assets = TRUE,
+  labels.assets = TRUE,
+  pch.assets = 21,
+  cex.assets = 0.8
+)
 
-\method{chart.EfficientFrontier}{optimize.portfolio}(object, ...,
-  match.col = "ES", n.portfolios = 25, xlim = NULL, ylim = NULL,
-  cex.axis = 0.8, element.color = "darkgray", main = "Efficient Frontier",
-  RAR.text = "SR", rf = 0, tangent.line = TRUE, cex.legend = 0.8,
-  chart.assets = TRUE, labels.assets = TRUE, pch.assets = 21,
-  cex.assets = 0.8)
+\method{chart.EfficientFrontier}{optimize.portfolio}(
+  object,
+  ...,
+  match.col = "ES",
+  n.portfolios = 25,
+  xlim = NULL,
+  ylim = NULL,
+  cex.axis = 0.8,
+  element.color = "darkgray",
+  main = "Efficient Frontier",
+  RAR.text = "SR",
+  rf = 0,
+  tangent.line = TRUE,
+  cex.legend = 0.8,
+  chart.assets = TRUE,
+  labels.assets = TRUE,
+  pch.assets = 21,
+  cex.assets = 0.8
+)
 
-\method{chart.EfficientFrontier}{efficient.frontier}(object, ...,
-  match.col = "ES", n.portfolios = NULL, xlim = NULL, ylim = NULL,
-  cex.axis = 0.8, element.color = "darkgray", main = "Efficient Frontier",
-  RAR.text = "SR", rf = 0, tangent.line = TRUE, cex.legend = 0.8,
-  chart.assets = TRUE, labels.assets = TRUE, pch.assets = 21,
-  cex.assets = 0.8)
+\method{chart.EfficientFrontier}{efficient.frontier}(
+  object,
+  ...,
+  match.col = "ES",
+  n.portfolios = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  cex.axis = 0.8,
+  element.color = "darkgray",
+  main = "Efficient Frontier",
+  RAR.text = "SR",
+  rf = 0,
+  tangent.line = TRUE,
+  cex.legend = 0.8,
+  chart.assets = TRUE,
+  labels.assets = TRUE,
+  pch.assets = 21,
+  cex.assets = 0.8
+)
 }
 \arguments{
 \item{object}{object to chart.}

@@ -4,8 +4,7 @@
 \alias{quadratic_utility_objective}
 \title{constructor for quadratic utility objective}
 \usage{
-quadratic_utility_objective(risk_aversion = 1, target = NULL,
-  enabled = TRUE)
+quadratic_utility_objective(risk_aversion = 1, target = NULL, enabled = TRUE)
 }
 \arguments{
 \item{risk_aversion}{risk_aversion (i.e. lambda) parameter to penalize variance}

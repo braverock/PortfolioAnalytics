@@ -3,26 +3,41 @@
 \name{optimize.portfolio}
 \alias{optimize.portfolio}
 \alias{optimize.portfolio_v1}
-\alias{optimize.portfolio}
 \alias{optimize.portfolio_v2}
-\alias{optimize.portfolio_v1}
 \title{Constrained optimization of portfolios}
 \usage{
-optimize.portfolio_v1(R, constraints, optimize_method = c("DEoptim", "random",
-  "ROI", "ROI_old", "pso", "GenSA"), search_size = 20000, trace = FALSE,
-  ..., rp = NULL, momentFUN = "set.portfolio.moments_v1")
+optimize.portfolio_v1(
+  R,
+  constraints,
+  optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
+  search_size = 20000,
+  trace = FALSE,
+  ...,
+  rp = NULL,
+  momentFUN = "set.portfolio.moments_v1"
+)
 
-optimize.portfolio(R, portfolio = NULL, constraints = NULL,
-  objectives = NULL, optimize_method = c("DEoptim", "random", "ROI", "pso",
-  "GenSA"), search_size = 20000, trace = FALSE, ..., rp = NULL,
-  momentFUN = "set.portfolio.moments", message = FALSE)
+optimize.portfolio(
+  R,
+  portfolio = NULL,
+  constraints = NULL,
+  objectives = NULL,
+  optimize_method = c("DEoptim", "random", "ROI", "pso", "GenSA", "Rglpk", "osqp",
+    "mco"),
+  search_size = 20000,
+  trace = FALSE,
+  ...,
+  rp = NULL,
+  momentFUN = "set.portfolio.moments",
+  message = FALSE
+)
 }
 \arguments{
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}
 
 \item{constraints}{default=NULL, a list of constraint objects. An object of class 'v1_constraint' can be passed in here.}
 
-\item{optimize_method}{one of "DEoptim", "random", "ROI", "pso", "GenSA". A solver
+\item{optimize_method}{one of "DEoptim", "random", "ROI", "pso", "GenSA", "osqp", "Rglpk", and "mco". A solver
 for ROI can also be specified and will be solved using ROI. See Details.}
 
 \item{search_size}{integer, how many portfolios to test, default 20,000}
@@ -116,7 +131,7 @@ This function aims to provide a wrapper for constrained optimization of
 portfolios that specify constraints and objectives.
 }
 \details{
-This function currently supports DEoptim, random portfolios, pso, GenSA, and ROI as back ends.
+This function currently supports DEoptim, random portfolios, pso, GenSA, ROI, osqp, Rglpk, and mco as back ends.
 Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
 
 When using random portfolios, search_size is precisely that, how many 
@@ -174,5 +189,5 @@ constraints and objectives to the \code{portfolio} object.
 \code{\link{portfolio.spec}}
 }
 \author{
-Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
+Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett, Xiaokang Feng
 }
