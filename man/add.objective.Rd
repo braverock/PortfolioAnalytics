@@ -3,16 +3,29 @@
 \name{add.objective}
 \alias{add.objective}
 \alias{add.objective_v1}
-\alias{add.objective}
 \alias{add.objective_v2}
-\alias{add.objective_v1}
 \title{General interface for adding optimization objectives, including risk, return, and risk budget}
 \usage{
-add.objective_v1(constraints, type, name, arguments = NULL, enabled = TRUE,
-  ..., indexnum = NULL)
+add.objective_v1(
+  constraints,
+  type,
+  name,
+  arguments = NULL,
+  enabled = TRUE,
+  ...,
+  indexnum = NULL
+)
 
-add.objective(portfolio, constraints = NULL, type, name, arguments = NULL,
-  enabled = TRUE, ..., indexnum = NULL)
+add.objective(
+  portfolio,
+  constraints = NULL,
+  type,
+  name,
+  arguments = NULL,
+  enabled = TRUE,
+  ...,
+  indexnum = NULL
+)
 }
 \arguments{
 \item{constraints}{a 'v1_constraint' object for backwards compatibility, see \code{\link{constraint}}}

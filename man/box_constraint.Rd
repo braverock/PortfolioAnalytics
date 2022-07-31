@@ -4,8 +4,17 @@
 \alias{box_constraint}
 \title{constructor for box_constraint.}
 \usage{
-box_constraint(type = "box", assets, min, max, min_mult, max_mult,
-  enabled = TRUE, message = FALSE, ...)
+box_constraint(
+  type = "box",
+  assets,
+  min,
+  max,
+  min_mult,
+  max_mult,
+  enabled = TRUE,
+  message = FALSE,
+  ...
+)
 }
 \arguments{
 \item{type}{character type of the constraint}

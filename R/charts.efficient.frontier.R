@@ -64,6 +64,7 @@ chart.EfficientFrontier <- function(object, ...){
 #' @rdname chart.EfficientFrontier
 #' @method chart.EfficientFrontier optimize.portfolio.ROI
 #' @S3method chart.EfficientFrontier optimize.portfolio.ROI
+#' @export
 chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, ..., match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class optimize.portfolio.ROI")
   
@@ -170,6 +171,7 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, ..., match.co
 #' @rdname chart.EfficientFrontier
 #' @method chart.EfficientFrontier optimize.portfolio
 #' @S3method chart.EfficientFrontier optimize.portfolio
+#' @export
 chart.EfficientFrontier.optimize.portfolio <- function(object, ..., match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   # This function will work with objects of class optimize.portfolio.DEoptim,
   # optimize.portfolio.random, and optimize.portfolio.pso
@@ -296,6 +298,7 @@ chart.EF.Weights <- function(object, ...){
 #' @rdname chart.EF.Weights
 #' @method chart.EF.Weights efficient.frontier
 #' @S3method chart.EF.Weights efficient.frontier
+#' @export
 chart.EF.Weights.efficient.frontier <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
   # using ideas from weightsPlot.R in fPortfolio package
   
@@ -421,6 +424,7 @@ chart.EF.Weights.efficient.frontier <- function(object, ..., colorset=NULL, n.po
 #' @rdname chart.EF.Weights
 #' @method chart.EF.Weights optimize.portfolio
 #' @S3method chart.EF.Weights optimize.portfolio
+#' @export
 chart.EF.Weights.optimize.portfolio <- function(object, ..., colorset=NULL, n.portfolios=25, by.groups=FALSE, match.col="ES", main="", cex.lab=0.8, cex.axis=0.8, cex.legend=0.8, legend.labels=NULL, element.color="darkgray", legend.loc="topright"){
   # chart the weights along the efficient frontier of an objected created by optimize.portfolio
   
@@ -437,6 +441,7 @@ chart.EF.Weights.optimize.portfolio <- function(object, ..., colorset=NULL, n.po
 #' @rdname chart.EfficientFrontier
 #' @method chart.EfficientFrontier efficient.frontier
 #' @S3method chart.EfficientFrontier efficient.frontier
+#' @export
 chart.EfficientFrontier.efficient.frontier <- function(object, ..., match.col="ES", n.portfolios=NULL, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   if(!inherits(object, "efficient.frontier")) stop("object must be of class 'efficient.frontier'")
   

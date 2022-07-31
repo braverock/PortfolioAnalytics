@@ -4,8 +4,15 @@
 \alias{portfolio.moments.bl}
 \title{Portfolio Moments}
 \usage{
-portfolio.moments.bl(R, portfolio, momentargs = NULL, P, Mu = NULL,
-  Sigma = NULL, ...)
+portfolio.moments.bl(
+  R,
+  portfolio,
+  momentargs = NULL,
+  P,
+  Mu = NULL,
+  Sigma = NULL,
+  ...
+)
 }
 \arguments{
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of 

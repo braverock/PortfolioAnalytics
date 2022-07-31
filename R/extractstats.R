@@ -501,6 +501,7 @@ extractObjectiveMeasures <- function(object){
 
 #' @method extractObjectiveMeasures optimize.portfolio
 #' @S3method extractObjectiveMeasures optimize.portfolio
+#' @export
 extractObjectiveMeasures.optimize.portfolio <- function(object){
   if(!inherits(object, "optimize.portfolio")) stop("object must be of class 'optimize.portfolio'")
   # objective measures returned as $objective_measures for all other solvers
@@ -510,6 +511,7 @@ extractObjectiveMeasures.optimize.portfolio <- function(object){
 
 #' @method extractObjectiveMeasures optimize.portfolio.rebalancing
 #' @S3method extractObjectiveMeasures optimize.portfolio.rebalancing
+#' @export
 extractObjectiveMeasures.optimize.portfolio.rebalancing <- function(object){
   if(!inherits(object, "optimize.portfolio.rebalancing")) stop("object must be of class 'optimize.portfolio.rebalancing'")
   
@@ -571,12 +573,14 @@ extractObjRegime <- function(object){
 
 #' @method extractObjectiveMeasures summary.optimize.portfolio.rebalancing
 #' @S3method extractObjectiveMeasures summary.optimize.portfolio.rebalancing
+#' @export
 extractObjectiveMeasures.summary.optimize.portfolio.rebalancing <- function(object){
   object$objective_measures
 }
 
 #' @method extractObjectiveMeasures opt.list
 #' @S3method extractObjectiveMeasures opt.list
+#' @export
 extractObjectiveMeasures.opt.list <- function(object){
   # The idea is that these portfolios opt.list may have different objectives.
   # Need a function to evaluate *all* objective measures for each portfolio.

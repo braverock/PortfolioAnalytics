@@ -4,8 +4,16 @@
 \alias{gmv_opt_ptc}
 \title{GMV/QU QP Optimization with Proportional Transaction Cost Constraint}
 \usage{
-gmv_opt_ptc(R, constraints, moments, lambda, target, init_weights,
-  solver = "quadprog", control = NULL)
+gmv_opt_ptc(
+  R,
+  constraints,
+  moments,
+  lambda,
+  target,
+  init_weights,
+  solver = "quadprog",
+  control = NULL
+)
 }
 \arguments{
 \item{R}{xts object of asset returns}

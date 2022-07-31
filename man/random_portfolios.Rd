@@ -5,8 +5,13 @@
 \alias{random_portfolios_v2}
 \title{version 2 generate an arbitary number of constrained random portfolios}
 \usage{
-random_portfolios(portfolio, permutations = 100, rp_method = "sample",
-  eliminate = TRUE, ...)
+random_portfolios(
+  portfolio,
+  permutations = 100,
+  rp_method = "sample",
+  eliminate = TRUE,
+  ...
+)
 }
 \arguments{
 \item{portfolio}{an object of class 'portfolio' specifying the constraints for the optimization, see \code{\link{portfolio.spec}}}

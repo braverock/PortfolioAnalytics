@@ -4,8 +4,16 @@
 \alias{minmax_objective}
 \title{constructor for class tmp_minmax_objective}
 \usage{
-minmax_objective(name, target = NULL, arguments = NULL, multiplier = 1,
-  enabled = TRUE, ..., min, max)
+minmax_objective(
+  name,
+  target = NULL,
+  arguments = NULL,
+  multiplier = 1,
+  enabled = TRUE,
+  ...,
+  min,
+  max
+)
 }
 \arguments{
 \item{name}{name of the objective, should correspond to a function, though we will try to make allowances}

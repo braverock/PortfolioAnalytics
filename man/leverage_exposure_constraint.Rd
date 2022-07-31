@@ -4,8 +4,13 @@
 \alias{leverage_exposure_constraint}
 \title{constructor for leverage_exposure_constraint}
 \usage{
-leverage_exposure_constraint(type = "leverage_exposure", leverage = NULL,
-  enabled = TRUE, message = FALSE, ...)
+leverage_exposure_constraint(
+  type = "leverage_exposure",
+  leverage = NULL,
+  enabled = TRUE,
+  message = FALSE,
+  ...
+)
 }
 \arguments{
 \item{type}{character type of the constraint}

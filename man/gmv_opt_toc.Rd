@@ -4,8 +4,16 @@
 \alias{gmv_opt_toc}
 \title{GMV/QU QP Optimization with Turnover Constraint}
 \usage{
-gmv_opt_toc(R, constraints, moments, lambda, target, init_weights,
-  solver = "quadprog", control = NULL)
+gmv_opt_toc(
+  R,
+  constraints,
+  moments,
+  lambda,
+  target,
+  init_weights,
+  solver = "quadprog",
+  control = NULL
+)
 }
 \arguments{
 \item{R}{xts object of asset returns}

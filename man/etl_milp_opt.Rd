@@ -4,8 +4,15 @@
 \alias{etl_milp_opt}
 \title{Minimum ETL MILP Optimization}
 \usage{
-etl_milp_opt(R, constraints, moments, target, alpha, solver = "glpk",
-  control = NULL)
+etl_milp_opt(
+  R,
+  constraints,
+  moments,
+  target,
+  alpha,
+  solver = "glpk",
+  control = NULL
+)
 }
 \arguments{
 \item{R}{xts object of asset returns}

@@ -4,8 +4,14 @@
 \alias{weight_concentration_objective}
 \title{Constructor for weight concentration objective}
 \usage{
-weight_concentration_objective(name, conc_aversion, conc_groups = NULL,
-  arguments = NULL, enabled = TRUE, ...)
+weight_concentration_objective(
+  name,
+  conc_aversion,
+  conc_groups = NULL,
+  arguments = NULL,
+  enabled = TRUE,
+  ...
+)
 }
 \arguments{
 \item{name}{name of concentration measure, currently only "HHI" is supported.}

@@ -8,15 +8,37 @@
 \usage{
 chart.EF.Weights(object, ...)
 
-\method{chart.EF.Weights}{efficient.frontier}(object, ..., colorset = NULL,
-  n.portfolios = 25, by.groups = FALSE, match.col = "ES", main = "",
-  cex.lab = 0.8, cex.axis = 0.8, cex.legend = 0.8, legend.labels = NULL,
-  element.color = "darkgray", legend.loc = "topright")
+\method{chart.EF.Weights}{efficient.frontier}(
+  object,
+  ...,
+  colorset = NULL,
+  n.portfolios = 25,
+  by.groups = FALSE,
+  match.col = "ES",
+  main = "",
+  cex.lab = 0.8,
+  cex.axis = 0.8,
+  cex.legend = 0.8,
+  legend.labels = NULL,
+  element.color = "darkgray",
+  legend.loc = "topright"
+)
 
-\method{chart.EF.Weights}{optimize.portfolio}(object, ..., colorset = NULL,
-  n.portfolios = 25, by.groups = FALSE, match.col = "ES", main = "",
-  cex.lab = 0.8, cex.axis = 0.8, cex.legend = 0.8, legend.labels = NULL,
-  element.color = "darkgray", legend.loc = "topright")
+\method{chart.EF.Weights}{optimize.portfolio}(
+  object,
+  ...,
+  colorset = NULL,
+  n.portfolios = 25,
+  by.groups = FALSE,
+  match.col = "ES",
+  main = "",
+  cex.lab = 0.8,
+  cex.axis = 0.8,
+  cex.legend = 0.8,
+  legend.labels = NULL,
+  element.color = "darkgray",
+  legend.loc = "topright"
+)
 }
 \arguments{
 \item{object}{object of class \code{efficient.frontier} or \code{optimize.portfolio}.}

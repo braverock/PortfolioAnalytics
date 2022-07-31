@@ -4,8 +4,13 @@
 \alias{return_constraint}
 \title{constructor for return_constraint}
 \usage{
-return_constraint(type = "return", return_target, enabled = TRUE,
-  message = FALSE, ...)
+return_constraint(
+  type = "return",
+  return_target,
+  enabled = TRUE,
+  message = FALSE,
+  ...
+)
 }
 \arguments{
 \item{type}{character type of the constraint}

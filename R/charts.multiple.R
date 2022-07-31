@@ -3,6 +3,7 @@
 #' @rdname chart.Weights
 #' @method chart.Weights opt.list
 #' @S3method chart.Weights opt.list
+#' @export
 chart.Weights.opt.list <- function(object, neighbors=NULL, ..., main="Weights", las=3, xlab=NULL, cex.lab=1, element.color="darkgray", cex.axis=0.8, colorset=NULL, legend.loc="topright", cex.legend=0.8, plot.type="line"){
   if(!inherits(object, "opt.list")) stop("object must be of class 'opt.list'")
   
@@ -67,6 +68,7 @@ barplotOptWeights <- function(object, ..., main="Weights", las=3, xlab=NULL, cex
 #' @rdname chart.RiskReward
 #' @method chart.RiskReward opt.list
 #' @S3method chart.RiskReward opt.list
+#' @export
 chart.RiskReward.opt.list <- function(object, ..., risk.col="ES", return.col="mean", main="", ylim=NULL, xlim=NULL, labels.assets=TRUE, chart.assets=FALSE, pch.assets=1, cex.assets=0.8, cex.axis=0.8, cex.lab=0.8, colorset=NULL, element.color="darkgray"){
   if(!inherits(object, "opt.list")) stop("object must be of class 'opt.list'")
   # Get the objective measures

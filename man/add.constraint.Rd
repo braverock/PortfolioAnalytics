@@ -4,8 +4,14 @@
 \alias{add.constraint}
 \title{General interface for adding and/or updating optimization constraints.}
 \usage{
-add.constraint(portfolio, type, enabled = TRUE, message = FALSE, ...,
-  indexnum = NULL)
+add.constraint(
+  portfolio,
+  type,
+  enabled = TRUE,
+  message = FALSE,
+  ...,
+  indexnum = NULL
+)
 }
 \arguments{
 \item{portfolio}{an object of class 'portfolio' to add the constraint to, specifying the constraints for the optimization, see \code{\link{portfolio.spec}}}
