@@ -2746,7 +2746,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
   } ## end case for mco
   
-  ## case if method = CVXR xinran
+  ## case if method = CVXR
   cvxr_solvers <- c("SCS", "OSQP", "ECOS")
   if (optimize_method == "CVXR" || optimize_method %in% cvxr_solvers) {
     ## search for required package
@@ -2850,21 +2850,20 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       i = i + 1
     }
     
-    ## diversification constraint HHI
-    ## constraints_cvxr = append(constraints_cvxr, quad_form(wts, diag(N)) >= 0.02)
-    
-    ## turnover constraint ROI cannot
-    
     ## target return constraint
     if(!is.null(constraints$return_target)){
       constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target)
     }
     
-    ## factor exposure constraint
+    ## diversification constraint HHI
+    ## constraints_cvxr = append(constraints_cvxr, quad_form(wts, diag(N)) >= 0.02)
+    
+    ## turnover constraint ROI cannot
+    ## transaction cost constraint ROI cannot
+    
+    ## factor exposure constraint is not realized in PA
     # constraints_cvxr = append(constraints_cvxr, wts >= constraints$B - constraints$lower)
     # constraints_cvxr = append(constraints_cvxr, wts <= constraints$B + constraints$upper)
-    
-    ## transaction cost constraint ROI cannot
     
     # problem
     prob_cvxr <- Problem(Minimize(obj),
@@ -2873,10 +2872,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     result_cvxr <- CVXR::solve(prob_cvxr, solver = cvxr_solver)
     
     cvxr_wts <- result_cvxr$getValue(wts)
-    cvxr_wts <- t(cvxr_wts)
-    colnames(cvxr_wts) <- colnames(R)
+    cvxr_wts <- as.vector(cvxr_wts)
+    names(cvxr_wts) <- colnames(R)
     
-    # output xinran TODO
     obj_cvxr <- list()
     if(reward & !risk){
       obj_cvxr[[tmpname]] <- -result_cvxr$value
@@ -2890,13 +2888,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       obj_cvxr[[tmpname]] <- result_cvxr$value
     }
     
-    #out = list(weights=result_cvxr$getValue(wts), 
-               #objective_measures=obj_cvxr,
-               #opt_values=obj_cvxr,
-               #out=result_cvxr$value,
-               #call=call)
-    
-    out = list(weights = cvxr_wts,
+    out = list(weights = as.numeric(cvxr_wts),
                objective_measures = obj_cvxr,
                opt_values=obj_cvxr,
                out = obj_cvxr[[tmpname]],
