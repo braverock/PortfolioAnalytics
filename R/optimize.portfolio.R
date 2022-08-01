@@ -534,9 +534,14 @@ optimize.portfolio_v1 <- function(
 #' \item{Maxmimize portfolio return subject leverage, box, group, and/or target mean return constraints}
 #' \item{Minimize portfolio variance subject to leverage, box, group, and/or target mean return constraints (otherwise known as global minimum variance portfolio).}
 #' \item{Maximize quadratic utility subject to leverage, box, group, and/or target mean return constraints and risk aversion parameter.
-#' (The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object).}
-#' \item{Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, and/or target mean return constraints}
-#' \item{Minimize portfolio EQS optimization subject to leverage, box, group, and/or target mean return constraints}
+#' (The default risk aversion is 1, and specified risk aversion could be given by \code{risk_aversion = 1}. 
+#' The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)}
+#' \item{Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
+#' (The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
+#' The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)}
+#' \item{Minimize portfolio EQS optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
+#' (The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
+#' The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)}
 #' }
 #' 
 #' Because these convex optimization problem are standardized, there is no need for a penalty term. 
