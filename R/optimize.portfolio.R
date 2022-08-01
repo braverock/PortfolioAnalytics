@@ -2889,7 +2889,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       obj_cvxr[[tmpname]] <- result_cvxr$value
     }
     
-    out = list(weights = as.numeric(cvxr_wts),
+    out = list(weights = cvxr_wts,
                objective_measures = obj_cvxr,
                opt_values=obj_cvxr,
                out = obj_cvxr[[tmpname]],
