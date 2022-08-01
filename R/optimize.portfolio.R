@@ -2873,6 +2873,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     cvxr_wts <- result_cvxr$getValue(wts)
     cvxr_wts <- as.vector(cvxr_wts)
+    cvxr_wts <- round(cvxr_wts, 4)
     names(cvxr_wts) <- colnames(R)
     
     obj_cvxr <- list()
@@ -2883,7 +2884,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     } else if (reward & risk){
       obj_cvxr[[tmpname]] <- result_cvxr$value
       obj_cvxr[["mean"]] <- cvxr_wts %*% mean_value
-      obj_cvxr[["StdDev"]] <- sqrt(cvxr_wts %*% sigma_value %*% t(cvxr_wts))
+      obj_cvxr[["StdDev"]] <- sqrt(t(cvxr_wts) %*% sigma_value %*% cvxr_wts)
     } else {
       obj_cvxr[[tmpname]] <- result_cvxr$value
     }
