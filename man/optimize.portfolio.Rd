@@ -176,6 +176,24 @@ of weights as measured by HHI is added as a penalty term to the quadratic object
 
 Because these convex optimization problem are standardized, there is no need for a penalty term. 
 The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the ROI solver.
+
+If \code{optimize_method="CVXR"} is specified, the default solver will be \code{SCS}.
+The CVXR solvers includes SCS and ECOS and can be specified.
+For example, \code{optimize_method = "ECOS"} can be specified and the optimization
+problem will be solved via CVXR using the ECOS solver.
+
+The extension to CVXR solves a limited type of convex optimization problems:
+\itemize{
+\item{Maxmimize portfolio return subject leverage, box, group, and/or target mean return constraints}
+\item{Minimize portfolio variance subject to leverage, box, group, and/or target mean return constraints (otherwise known as global minimum variance portfolio).}
+\item{Maximize quadratic utility subject to leverage, box, group, and/or target mean return constraints and risk aversion parameter.
+(The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object).}
+\item{Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, and/or target mean return constraints}
+\item{Minimize portfolio EQS optimization subject to leverage, box, group, and/or target mean return constraints}
+}
+
+Because these convex optimization problem are standardized, there is no need for a penalty term. 
+The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the CVXR solver.
 }
 \note{
 An object of class \code{v1_constraint} can be passed in for the \code{constraints} argument.
