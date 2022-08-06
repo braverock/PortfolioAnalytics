@@ -437,7 +437,7 @@ print.optimize.portfolio.CVXR <- function(x, ..., digits=4){
         cat(names(tmpl), ":\n")
         tmpv <- unlist(tmpl)
         names(tmpv) <- names(x$weights)
-        print(tmpv, digits=digits)
+        print.default(round(tmpv, digits=digits), digits=digits)
         cat("\n")
       }
     }
