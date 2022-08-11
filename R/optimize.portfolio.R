@@ -2786,8 +2786,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     target = -Inf
     reward <- FALSE
     risk <- FALSE
-    r_measure <- FALSE
-    socp <- FALSE
+    risk_ES <- FALSE
+    risk_EQS <- FALSE
     alpha <- 0.05
     lambda <- 1
     
@@ -2808,8 +2808,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         # optimization objective function
         reward <- ifelse(objective$name == "mean", TRUE, reward)
         risk <- ifelse(objective$name %in% valid_objnames[2:4], TRUE, risk)
-        r_measure <- ifelse(objective$name %in% valid_objnames[5:7], TRUE, r_measure)
-        socp <- ifelse(objective$name == "EQS", TRUE, socp)
+        risk_ES <- ifelse(objective$name %in% valid_objnames[5:7], TRUE, risk_ES)
+        risk_EQS <- ifelse(objective$name == "EQS", TRUE, risk_EQS)
         arguments <- objective$arguments
       }
     }
@@ -2818,42 +2818,70 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     mean_value <- mout$mu
     sigma_value <- mout$sigma
     
-    if(reward & !risk){
+    if(hasArg(maxSR)) maxSR=match.call(expand.dots=TRUE)$maxSR else maxSR=FALSE
+    if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
+    if(hasArg(EQSratio)) EQSratio=match.call(expand.dots=TRUE)$EQSratio else EQSratio=TRUE
+    
+    if(reward & !risk & !risk_ES & !risk_EQS){ # max return
       obj <- -t(mean_value) %*% wts
       constraints_cvxr = list()
       tmpname = "mean"
-    } else if(risk & !reward){
+    } else if(!reward & risk & !risk_ES & !risk_EQS){ # min var/std
       obj <- quad_form(wts, sigma_value)
       constraints_cvxr = list()
       tmpname = "StdDev"
-    } else if(reward & risk){
+    } else if(reward & risk & !risk_ES & !risk_EQS & !maxSR){ # min mean-variance
       obj <- quad_form(wts, sigma_value) - (t(mean_value) %*% wts) / lambda
       constraints_cvxr = list()
       tmpname = "optimal value"
-    } else if(r_measure & !socp){
+    } else if(reward & risk & !risk_ES & !risk_EQS & maxSR){ # max Sharpe ratio
+      obj <- quad_form(wts, sigma_value)
+      constraints_cvxr = list(t(mean_value) %*% wts == 1, sum(wts) >= 0)
+      tmpname = "Sharpe Ratio"
+    } else if(!reward & !risk & risk_ES & !risk_EQS){ # min ES
       zeta <- Variable(1)
       obj <- zeta + (1/(T*alpha)) * sum(z)
       constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
       tmpname = "ES"
-    } else if(!r_measure & socp){
+    } else if(!reward & !risk & !risk_ES & risk_EQS){ # min EQS
       zeta <- Variable(1)
       obj <- zeta + (1/alpha) * p_norm(z, p=2)
       constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
       tmpname = "EQS"
+    } else if(reward & !risk & risk_ES & !risk_EQS & maxSTARR){ # max ES ratio
+      obj <- zeta + (1/(T*alpha)) * sum(z)
+      constraints_cvxr = list(z >= 0, 
+                              z >= -X %*% wts - zeta, 
+                              t(mean_value) %*% wts == 1,
+                              sum(wts) >= 0)
+      tmpname = "ES ratio"
+    } else if(reward & !risk & !risk_ES & risk_EQS & EQSratio){ # max EQS ratio
+      obj <- zeta + (1/alpha) * p_norm(z, p=2)
+      constraints_cvxr = list(z >= 0, 
+                              z >= -X %*% wts - zeta, 
+                              t(mean_value) %*% wts == 1,
+                              sum(wts) >= 0)
+      tmpname = "EQS ratio"
+    } else { # wrong objective
+      stop("Wrong multiple objectives. CVXR only solves mean, var, or single ES/EQS type business objectives, please reorganize the objectives.")
     }
     
     # constraint type
     ## weight sum constraint
-    if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum - constraints$min_sum <= 0.001){
-      constraints_cvxr = append(constraints_cvxr, sum(wts) == constraints$max_sum)
-    } else{
-      if(!is.null(constraints$max_sum)){
-        max_sum <- ifelse(is.infinite(constraints$max_sum), 9999.0, constraints$max_sum)
-        constraints_cvxr = append(constraints_cvxr, sum(wts) <= max_sum)
-      }
-      if(!is.null(constraints$min_sum)){
-        min_sum <- ifelse(is.infinite(constraints$min_sum), -9999.0, constraints$min_sum)
-        constraints_cvxr = append(constraints_cvxr, sum(wts) >= min_sum)
+    ### Problem of maximizing return per unit risk doesn't need weight sum constraint, 
+    ### because weights could be scaled proportionally.
+    if(!maxSR & !maxSTARR & !EQSratio){
+      if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum - constraints$min_sum <= 0.001){
+        constraints_cvxr = append(constraints_cvxr, sum(wts) == constraints$max_sum)
+      } else{
+        if(!is.null(constraints$max_sum)){
+          max_sum <- ifelse(is.infinite(constraints$max_sum), 9999.0, constraints$max_sum)
+          constraints_cvxr = append(constraints_cvxr, sum(wts) <= max_sum)
+        }
+        if(!is.null(constraints$min_sum)){
+          min_sum <- ifelse(is.infinite(constraints$min_sum), -9999.0, constraints$min_sum)
+          constraints_cvxr = append(constraints_cvxr, sum(wts) >= min_sum)
+        }
       }
     }
     
@@ -2862,32 +2890,38 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     lower <- constraints$min
     upper[which(is.infinite(upper))] <- 9999.0
     lower[which(is.infinite(lower))] <- -9999.0
-    
-    constraints_cvxr = append(constraints_cvxr, wts >= lower)
-    constraints_cvxr = append(constraints_cvxr, wts <= upper)
+    if(!maxSR & !maxSTARR & !EQSratio){
+      constraints_cvxr = append(constraints_cvxr, wts >= lower)
+      constraints_cvxr = append(constraints_cvxr, wts <= upper)
+    } else {
+      constraints_cvxr = append(constraints_cvxr, wts >= lower * sum(wts))
+      constraints_cvxr = append(constraints_cvxr, wts <= upper * sum(wts))
+    }
     
     ## group constraint
     i = 1
-    for(g in constraints$groups){
-      constraints_cvxr = append(constraints_cvxr, sum(wts[g]) >= constraints$cLO[i])
-      constraints_cvxr = append(constraints_cvxr, sum(wts[g]) <= constraints$cUP[i])
-      i = i + 1
+    if(!maxSR & !maxSTARR & !EQSratio){
+      for(g in constraints$groups){
+        constraints_cvxr = append(constraints_cvxr, sum(wts[g]) >= constraints$cLO[i])
+        constraints_cvxr = append(constraints_cvxr, sum(wts[g]) <= constraints$cUP[i])
+        i = i + 1
+      }
+    } else {
+      for(g in constraints$groups){
+        constraints_cvxr = append(constraints_cvxr, sum(wts[g]) >= constraints$cLO[i] * sum(wts))
+        constraints_cvxr = append(constraints_cvxr, sum(wts[g]) <= constraints$cUP[i] * sum(wts))
+        i = i + 1
+      }
     }
     
     ## target return constraint
     if(!is.null(constraints$return_target)){
-      constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target)
+      if(!maxSR & !maxSTARR & !EQSratio){
+        constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target)
+      } else {
+        constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target * sum(wts))
+      }
     }
-    
-    ## diversification constraint HHI
-    ## constraints_cvxr = append(constraints_cvxr, quad_form(wts, diag(N)) >= 0.02)
-    
-    ## turnover constraint ROI cannot
-    ## transaction cost constraint ROI cannot
-    
-    ## factor exposure constraint is not realized in PA
-    # constraints_cvxr = append(constraints_cvxr, wts >= constraints$B - constraints$lower)
-    # constraints_cvxr = append(constraints_cvxr, wts <= constraints$B + constraints$upper)
     
     # problem
     prob_cvxr <- Problem(Minimize(obj),
@@ -2901,16 +2935,28 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     names(cvxr_wts) <- colnames(R)
     
     obj_cvxr <- list()
-    if(reward & !risk){
+    if(reward & !risk & !risk_ES & !risk_EQS){ # max return
       obj_cvxr[[tmpname]] <- -result_cvxr$value
-    } else if (risk & !reward){
+    } else if(!reward & risk & !risk_ES & !risk_EQS){ # min var/std
       obj_cvxr[[tmpname]] <- sqrt(result_cvxr$value)
-    } else if (reward & risk){
+    } else if(!maxSR & !maxSTARR & !EQSratio){ # mean-var/ES/EQS
       obj_cvxr[[tmpname]] <- result_cvxr$value
+      if(reward & risk){
+        obj_cvxr[["mean"]] <- cvxr_wts %*% mean_value
+        obj_cvxr[["StdDev"]] <- sqrt(t(cvxr_wts) %*% sigma_value %*% cvxr_wts)
+      }
+    } else { # max return per unit risk
       obj_cvxr[["mean"]] <- cvxr_wts %*% mean_value
-      obj_cvxr[["StdDev"]] <- sqrt(t(cvxr_wts) %*% sigma_value %*% cvxr_wts)
-    } else {
-      obj_cvxr[[tmpname]] <- result_cvxr$value
+      if(maxSR){
+        obj_cvxr[["StdDev"]] <- sqrt(t(cvxr_wts) %*% sigma_value %*% cvxr_wts)
+        obj_cvxr[[tmpname]] <- obj_cvxr[["mean"]] / obj_cvxr[["StdDev"]]
+      } else if(maxSTARR){
+        obj_cvxr[["ES"]] <- result_cvxr$value / sum(result_cvxr$getValue(wts))
+        obj_cvxr[[tmpname]] <- obj_cvxr[["mean"]] / obj_cvxr[["ES"]]
+      } else if(EQSratio){
+        obj_cvxr[["EQS"]] <- result_cvxr$value / sum(result_cvxr$getValue(wts))
+        obj_cvxr[[tmpname]] <- obj_cvxr[["mean"]] / obj_cvxr[["EQS"]]
+      }
     }
     
     out = list(weights = cvxr_wts,
