@@ -2789,6 +2789,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     risk <- FALSE
     risk_ES <- FALSE
     risk_EQS <- FALSE
+    maxSR <- FALSE
+    maxSTARR <- FALSE
+    EQSratio <- FALSE
     alpha <- 0.05
     lambda <- 1
     
@@ -2831,7 +2834,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       tmpname = "StdDev"
     } else if(reward & risk & !risk_ES & !risk_EQS){
       # mean-var/sharpe ratio
-      if(hasArg(maxSR)) maxSR=match.call(expand.dots=TRUE)$maxSR else maxSR=FALSE
+      if(hasArg(maxSR)) maxSR=match.call(expand.dots=TRUE)$maxSR
       
       if(!maxSR){
         # min mean-variance
@@ -2846,9 +2849,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     } else if(risk_ES & !risk_EQS){
       # ES objectives
-      if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
-      if(hasArg(ESratio)) maxSTARR=match.call(expand.dots=TRUE)$ESratio else maxSTARR=maxSTARR
-      if(reward & maxSTARR){
+      if(reward){
+        if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
+        if(hasArg(ESratio)) maxSTARR=match.call(expand.dots=TRUE)$ESratio else maxSTARR=maxSTARR
+      }
+      if(maxSTARR){
         # max ES ratio
         obj <- zeta + (1/(T*alpha)) * sum(z)
         constraints_cvxr = list(z >= 0, 
@@ -2864,8 +2869,10 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     } else if(!risk_ES & risk_EQS){
       # EQS objectives
-      if(hasArg(EQSratio)) EQSratio=match.call(expand.dots=TRUE)$EQSratio else EQSratio=TRUE
-      if(reward & EQSratio){
+      if(reward){
+        if(hasArg(EQSratio)) EQSratio=match.call(expand.dots=TRUE)$EQSratio else EQSratio=TRUE
+      }
+      if(EQSratio){
         # max EQS ratio
         obj <- zeta + (1/alpha) * p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, 
