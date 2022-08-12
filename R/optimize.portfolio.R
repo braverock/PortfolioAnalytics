@@ -2781,6 +2781,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     X <- as.matrix(R)
     wts <- Variable(N)
     z <- Variable(T)
+    zeta <- Variable(1)
     
     # objective type
     target = -Inf
@@ -2839,12 +2840,10 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       constraints_cvxr = list(t(mean_value) %*% wts == 1, sum(wts) >= 0)
       tmpname = "Sharpe Ratio"
     } else if(!reward & !risk & risk_ES & !risk_EQS){ # min ES
-      zeta <- Variable(1)
       obj <- zeta + (1/(T*alpha)) * sum(z)
       constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
       tmpname = "ES"
     } else if(!reward & !risk & !risk_ES & risk_EQS){ # min EQS
-      zeta <- Variable(1)
       obj <- zeta + (1/alpha) * p_norm(z, p=2)
       constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
       tmpname = "EQS"
