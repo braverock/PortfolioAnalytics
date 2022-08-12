@@ -2955,6 +2955,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     result_cvxr <- CVXR::solve(prob_cvxr, solver = cvxr_solver)
     
     cvxr_wts <- result_cvxr$getValue(wts)
+    if(maxSR | maxSTARR | EQSratio) cvxr_wts <- cvxr_wts / sum(cvxr_wts)
     cvxr_wts <- as.vector(cvxr_wts)
     cvxr_wts <- normalize_weights(cvxr_wts)
     names(cvxr_wts) <- colnames(R)
