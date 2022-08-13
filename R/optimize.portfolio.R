@@ -2891,6 +2891,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       stop("Wrong multiple objectives. CVXR only solves mean, var, or simple ES/EQS type business objectives, please reorganize the objectives.")
     }
     
+    # weight scale for maximizing return per unit risk
+    if(!maxSR & !maxSTARR & !EQSratio) weight_scale=1 else weight_scale=sum(wts)
+    
     # constraint type
     ## weight sum constraint
     ### Problem of maximizing return per unit risk doesn't need weight sum constraint, 
@@ -2913,44 +2916,30 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     ## box constraint
     upper <- constraints$max
     lower <- constraints$min
-    upper[which(is.infinite(upper))] <- 9999.0
-    lower[which(is.infinite(lower))] <- -9999.0
-    if(!maxSR & !maxSTARR & !EQSratio){
-      constraints_cvxr = append(constraints_cvxr, wts >= lower)
-      constraints_cvxr = append(constraints_cvxr, wts <= upper)
-    } else {
-      constraints_cvxr = append(constraints_cvxr, wts >= lower * sum(wts))
-      constraints_cvxr = append(constraints_cvxr, wts <= upper * sum(wts))
+    if(!all(is.infinite(upper))){
+      upper[which(is.infinite(upper))] <- 9999.0
+      constraints_cvxr = append(constraints_cvxr, wts <= upper * weight_scale)
+    }
+    if(!all(is.infinite(lower))){
+      lower[which(is.infinite(lower))] <- -9999.0
+      constraints_cvxr = append(constraints_cvxr, wts >= lower * weight_scale)
     }
     
     ## group constraint
     i = 1
-    if(!maxSR & !maxSTARR & !EQSratio){
-      for(g in constraints$groups){
-        constraints_cvxr = append(constraints_cvxr, sum(wts[g]) >= constraints$cLO[i])
-        constraints_cvxr = append(constraints_cvxr, sum(wts[g]) <= constraints$cUP[i])
-        i = i + 1
-      }
-    } else {
-      for(g in constraints$groups){
-        constraints_cvxr = append(constraints_cvxr, sum(wts[g]) >= constraints$cLO[i] * sum(wts))
-        constraints_cvxr = append(constraints_cvxr, sum(wts[g]) <= constraints$cUP[i] * sum(wts))
-        i = i + 1
-      }
+    for(g in constraints$groups){
+      constraints_cvxr = append(constraints_cvxr, sum(wts[g]) >= constraints$cLO[i] * weight_scale)
+      constraints_cvxr = append(constraints_cvxr, sum(wts[g]) <= constraints$cUP[i] * weight_scale)
+      i = i + 1
     }
     
     ## target return constraint
     if(!is.null(constraints$return_target)){
-      if(!maxSR & !maxSTARR & !EQSratio){
-        constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target)
-      } else {
-        constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target * sum(wts))
-      }
+      constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target * weight_scale)
     }
     
     # problem
-    prob_cvxr <- Problem(Minimize(obj),
-                        constraints = constraints_cvxr)
+    prob_cvxr <- Problem(Minimize(obj), constraints = constraints_cvxr)
     
     result_cvxr <- CVXR::solve(prob_cvxr, solver = cvxr_solver)
     
