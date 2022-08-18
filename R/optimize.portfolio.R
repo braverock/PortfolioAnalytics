@@ -650,7 +650,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   portfolio=NULL,
   constraints=NULL,
   objectives=NULL,
-  optimize_method=c("DEoptim","random","ROI","pso","GenSA", "Rglpk", "osqp", "mco", "CVXR", "SCS", "ECOS"),
+  optimize_method=c("DEoptim","random","ROI","pso","GenSA", "Rglpk", "osqp", "mco", "CVXR", "SCS", "ECOS", ...),
+  OML=NULL,
   search_size=20000,
   trace=FALSE, ...,
   rp=NULL,
@@ -718,7 +719,15 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     portfolio <- portfolio$top.portfolio
   }
   
-  optimize_method <- optimize_method[1]
+  # Optimization Model Language
+  cvxr_default=TRUE
+  cvxr_solvers <- c("SCS", "ECOS", "GUROBI", "OSQP", "GLPK")
+  if(is.null(OML)){
+    optimize_method <- optimize_method[1]
+  } else if(OML == "CVXR"){
+    if(optimize_method %in% cvxr_solvers) cvxr_default=FALSE
+  }
+  
   tmptrace <- NULL
   start_t <- Sys.time()
   
@@ -2771,7 +2780,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   } ## end case for mco
   
   ## case if method = CVXR
-  cvxr_solvers <- c("SCS", "OSQP", "ECOS")
   if (optimize_method == "CVXR" || optimize_method %in% cvxr_solvers) {
     ## search for required package
     stopifnot("package:CVXR" %in% search() || requireNamespace("CVXR", quietly = TRUE))
