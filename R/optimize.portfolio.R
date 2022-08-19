@@ -650,7 +650,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   portfolio=NULL,
   constraints=NULL,
   objectives=NULL,
-  optimize_method=c("DEoptim","random","ROI","pso","GenSA", "Rglpk", "osqp", "mco", "CVXR", "SCS", "ECOS", ...),
+  optimize_method=c("DEoptim","random","ROI","pso","GenSA", "Rglpk", "osqp", "mco", ...),
   OML=NULL,
   search_size=20000,
   trace=FALSE, ...,
@@ -720,12 +720,23 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   }
   
   # Optimization Model Language
-  cvxr_default=TRUE
+  cvxr_default=FALSE
   cvxr_solvers <- c("SCS", "ECOS", "GUROBI", "OSQP", "GLPK")
+  optimize_method <- optimize_method[1]
   if(is.null(OML)){
-    optimize_method <- optimize_method[1]
+    if(optimize_method == "CVXR"){
+      cvxr_default=TRUE
+      optimize_method = "CVXR"
+    } else {
+      cvxr_default=FALSE
+    }
   } else if(OML == "CVXR"){
-    if(optimize_method %in% cvxr_solvers) cvxr_default=FALSE
+    if(optimize_method %in% cvxr_solvers){
+      cvxr_default=FALSE
+    } else {
+      cvxr_default=TRUE
+      optimize_method = "CVXR"
+    }
   }
   
   tmptrace <- NULL
@@ -2783,7 +2794,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   if (optimize_method == "CVXR" || optimize_method %in% cvxr_solvers) {
     ## search for required package
     stopifnot("package:CVXR" %in% search() || requireNamespace("CVXR", quietly = TRUE))
-    cvxr_solver = ifelse(optimize_method == "CVXR", "SCS", optimize_method)
+    # cvxr_solver = ifelse(optimize_method == "CVXR", "SCS", optimize_method)
     
     ## variables
     X <- as.matrix(R)
@@ -2949,7 +2960,15 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     # problem
     prob_cvxr <- Problem(Minimize(obj), constraints = constraints_cvxr)
     
-    result_cvxr <- CVXR::solve(prob_cvxr, solver = cvxr_solver)
+    if(cvxr_default){
+      if(risk_ES || risk_EQS || maxSTARR || EQSratio){
+        result_cvxr <- CVXR::solve(prob_cvxr, solver = "SCS")
+      } else {
+        result_cvxr <- CVXR::solve(prob_cvxr)
+      }
+    } else {
+      result_cvxr <- CVXR::solve(prob_cvxr, solver = optimize_method)
+    }
     
     cvxr_wts <- result_cvxr$getValue(wts)
     if(maxSR | maxSTARR | EQSratio) cvxr_wts <- cvxr_wts / sum(cvxr_wts)
@@ -2986,7 +3005,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                objective_measures = obj_cvxr,
                opt_values=obj_cvxr,
                out = obj_cvxr[[tmpname]],
-               call = call)
+               call = call,
+               solver = result_cvxr$solver)
     
     optimize_method = "CVXR"
   }## end case for CVXR
