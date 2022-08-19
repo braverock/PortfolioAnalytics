@@ -134,7 +134,7 @@ This function aims to provide a wrapper for constrained optimization of
 portfolios that specify constraints and objectives.
 }
 \details{
-This function currently supports DEoptim, random portfolios, pso, GenSA, ROI, osqp, Rglpk, and mco as back ends.
+This function currently supports DEoptim, random portfolios, pso, GenSA, ROI, osqp, Rglpk, mco, and CVXR solvers as back ends.
 Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
 
 When using random portfolios, search_size is precisely that, how many 
