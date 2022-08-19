@@ -522,16 +522,16 @@ optimize.portfolio_v1 <- function(
 #' of weights as measured by HHI is added as a penalty term to the quadratic objective.
 #' 
 #' Because these convex optimization problem are standardized, there is no need for a penalty term. 
-#' The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the ROI solver.
+#' The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ignored by the ROI solver.
 #'
-#' If \code{optimize_method="CVXR"} is specified, the default solver will be \code{SCS}.
-#' The CVXR solvers includes SCS and ECOS and can be specified.
-#' For example, \code{optimize_method = "ECOS"} can be specified and the optimization
-#' problem will be solved via CVXR using the ECOS solver.
+#' If \code{optimize_method="CVXR"} or \code{OML="CVXR"} is specified, the default solver will be CVXR solvers. 
+#' The default solver for Linear Problem and Quadratic Problem will be \code{OSQP}, and the default solver for Second-Order Cone Problem will be \code{SCS}.
+#' The CVXR solvers includes SCS, ECOS, GUROBI, OSQP and GLPK, which can be specified by \code{optimize_method=}.
+#' For example, \code{optimize_method = "ECOS"} can be specified and the optimization problem will be solved via CVXR using the ECOS solver.
 #' 
 #' The extension to CVXR solves a limited type of convex optimization problems:
 #' \itemize{
-#' \item{Maxmimize portfolio return subject leverage, box, group, and/or target mean return constraints}
+#' \item{Maxmimize portfolio mean return subject leverage, box, group, and/or target mean return constraints}
 #' \item{Minimize portfolio variance subject to leverage, box, group, and/or target mean return constraints (otherwise known as global minimum variance portfolio).}
 #' \item{Maximize quadratic utility subject to leverage, box, group, and/or target mean return constraints and risk aversion parameter.
 #' (The default risk aversion is 1, and specified risk aversion could be given by \code{risk_aversion = 1}. 
@@ -542,6 +542,15 @@ optimize.portfolio_v1 <- function(
 #' \item{Minimize portfolio EQS optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
 #' (The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
 #' The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)}
+#' \item{Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) subject to leverage, box, group, and/or target mean return constraints.
+#' It should be specified by \code{maxSR=TRUE} in \code{optimize.portfolio} with both mean and var/StdDev objectives.
+#' Otherwise, the default action is to maximize quadratic utility.}
+#' \item{Maximize portfolio mean return per unit ES (i.e. the ES ratio/STARR) subject to leverage, box, group, and/or target mean return constraints.
+#' It could be specified by \code{maxSTARR=TRUE} or \code{ESratio=TRUE} in \code{optimize.portfolio} with both mean and ES objectives.
+#' The default action is to maximize ES ratio. If \code{maxSTARR=FALSE} or \code{ESratio=FALSE} is given, the action will be minimizing ES.}
+#' \item{Maximize portfolio mean return per unit EQS (i.e. the EQS ratio) subject to leverage, box, group, and/or target mean return constraints.
+#' It could be specified by \code{EQSratio=TRUE} in \code{optimize.portfolio} with both mean and EQS objectives.
+#' The default action is to maximize EQS ratio. If \code{EQSratio=FALSE} is given, the action will be minimizing EQS.}
 #' }
 #' 
 #' Because these convex optimization problem are standardized, there is no need for a penalty term. 
@@ -560,8 +569,9 @@ optimize.portfolio_v1 <- function(
 #' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
 #' @param constraints default=NULL, a list of constraint objects. An object of class 'v1_constraint' can be passed in here.
 #' @param objectives default=NULL, a list of objective objects.
-#' @param optimize_method one of "DEoptim", "random", "ROI", "pso", "GenSA", "osqp", "Rglpk", and "mco". A solver
-#' for ROI can also be specified and will be solved using ROI. See Details.
+#' @param optimize_method one of "DEoptim", "random", "ROI", "pso", "GenSA", "osqp", "Rglpk", "mco". 
+#' A solver of ROI or CVXR can also be specified and will be solved via ROI or CVXR. See Details.
+#' @param OML default=NULL, optimization model language, which could be "CVXR".
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
@@ -638,7 +648,7 @@ optimize.portfolio_v1 <- function(
 #'   }
 #' }
 #' 
-#' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett, Xiaokang Feng
+#' @author Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett, Xiaokang Feng, Xinran Zhao
 #' @aliases optimize.portfolio_v2 optimize.portfolio_v1
 #' @seealso \code{\link{portfolio.spec}}
 #' @rdname optimize.portfolio
