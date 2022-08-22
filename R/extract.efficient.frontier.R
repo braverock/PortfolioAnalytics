@@ -283,6 +283,88 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
   return(structure(out, class="frontier"))
 }
 
+#' Generate the efficient frontier for a mean-EQS portfolio xinran
+#'
+#' @param portfolio 
+#' @param R 
+#' @param n.portfolios 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+meaneqs.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
+  if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
+  # step 1: find the minimum return given the constraints
+  # step 2: find the maximum return given the constraints
+  # step 3: 'step' along the returns and run the optimization to calculate
+  # the weights and objective measures along the efficient frontier
+  
+  # Use the portfolio_risk_objective from the portfolio if they have it
+  # check for a ETL, ES, or cVaR objective
+  eqs_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "EQS")
+  if(length(eqs_idx) >= 1){
+    # the portfolio object has a ETL, ES, CVaR objective
+    eqs_obj <- portfolio$objectives[[eqs_idx[1]]]
+  } else {
+    eqs_obj <- portfolio_risk_objective(name="EQS", arguments=list(p=0.95))
+  }
+  
+  # Clear out the objectives in portfolio and add them here to simplify checks
+  # and so we can control the optimization along the efficient frontier.
+  portfolio$objectives <- list()
+  portfolio$objectives[[1]] <- eqs_obj
+  portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
+  
+  # get the objective names from the portfolio object
+  objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
+  
+  # If the user has passed in a portfolio object with return_constraint, we need to disable it
+  for(i in 1:length(portfolio$constraints)){
+    if(inherits(portfolio$constraints[[i]], "return_constraint")){
+      portfolio$constraints[[i]]$enabled <- FALSE
+    }
+  }
+  
+  # get the index number of the EQS objective
+  eqs_idx <- which(objnames == "EQS")
+  # get the index number of the mean objective
+  mean_idx <- which(objnames == "mean")
+  
+  # create a temporary portfolio to find the max mean return
+  ret_obj <- return_objective(name="mean")
+  tportf <- insert_objectives(portfolio, list(ret_obj))
+  
+  # run the optimization to get the maximum return
+  tmp <- optimize.portfolio(R=R, portfolio=tportf, optimize_method="CVXR", ...)
+  maxret <- extractObjectiveMeasures(tmp)$mean
+  
+  # run the optimization to get the return at the min ETL portfolio
+  tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="CVXR", ef=TRUE, ...)
+  stats <- extractStats(tmp)
+  minret <- stats["mean"]
+  
+  # length.out is the number of portfolios to create
+  ret_seq <- seq(from=minret, to=maxret, length.out=n.portfolios)
+  
+  #   out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))
+  #   for(i in 1:length(ret_seq)){
+  #     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
+  #     out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+  #   }
+  stopifnot("package:foreach" %in% search() || requireNamespace("foreach",quietly = TRUE))
+  stopifnot("package:iterators" %in% search() || requireNamespace("iterators",quietly = TRUE))
+  ret <- ret_seq[1]
+  out <- foreach::foreach(ret=iterators::iter(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove', .packages='PortfolioAnalytics') %dopar% {
+    portfolio$objectives[[mean_idx]]$target <- ret
+    extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="CVXR", ef=TRUE, ...=...))
+  }
+  colnames(out) <- names(stats)
+  out <- na.omit(out)
+  return(structure(out, class="frontier"))
+}
+
 #' create an efficient frontier
 #' 
 #' @details Currently there are 4 'types' supported to create an efficient frontier:
@@ -354,6 +436,11 @@ create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_a
                                                               n.portfolios=n.portfolios,
                                                               ...=...)
          },
+         "mean-EQS" = {frontier <- meaneqs.efficient.frontier(portfolio=portfolio,
+                                                              R=R,
+                                                              n.portfolios=n.portfolios,
+                                                              ...=...)
+         }
          "random" = {tmp <- optimize.portfolio(R=R, 
                                                portfolio=portfolio, 
                                                optimize_method=type, 

@@ -2900,8 +2900,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       # EQS objectives
       if(reward){
         if(hasArg(EQSratio)) EQSratio=match.call(expand.dots=TRUE)$EQSratio else EQSratio=TRUE
+        if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
       }
-      if(EQSratio){
+      if(EQSratio & !ef){
         # max EQS ratio
         obj <- zeta + (1/alpha) * p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, 
@@ -2909,10 +2910,20 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                                 t(mean_value) %*% wts == 1,
                                 sum(wts) >= 0)
         tmpname = "EQS ratio"
-      } else {
+      } else if(!EQSratio & !ef){
         # min EQS
         obj <- zeta + (1/alpha) * p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
+        tmpname = "EQS"
+      } else {
+        # min EQS with target return
+        # This is called by meaneqs.efficient.frontier. If we do not want that for efficient frontiers, need to have ef==FALSE
+        mean_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "mean")
+        return_target <- portfolio$objectives[[mean_idx]]$target
+        
+        obj <- zeta + (1/alpha) * p_norm(z, p=2)
+        constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
+        constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= return_target)
         tmpname = "EQS"
       }
     } else { 
