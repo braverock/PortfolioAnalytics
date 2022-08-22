@@ -440,7 +440,7 @@ create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_a
                                                               R=R,
                                                               n.portfolios=n.portfolios,
                                                               ...=...)
-         }
+         },
          "random" = {tmp <- optimize.portfolio(R=R, 
                                                portfolio=portfolio, 
                                                optimize_method=type, 
