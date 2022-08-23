@@ -141,7 +141,7 @@ extractStats.optimize.portfolio.CVXR <- function(object, prefix=NULL, ...) {
   objnames <- names(objmeas)
   obj <- unlist(objmeas)
   result <- c(obj, trow)
-  rnames<-c(objnames, 'out', paste('w', colnames(object$weights), sep='.'))
+  rnames<-c(objnames, 'out', paste('w', names(object$weights), sep='.'))
   #print(result)
   #print(rnames)
   names(result)<-rnames
