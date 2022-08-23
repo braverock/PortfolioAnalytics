@@ -2923,7 +2923,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         
         obj <- zeta + (1/alpha) * p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
-        constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= return_target)
+        if(!is.null(return_target)) constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= return_target)
         tmpname = "EQS"
       }
     } else { 
