@@ -2847,6 +2847,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     }
     if(alpha > 0.5) alpha <- (1 - alpha)
+    if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
     
     mean_value <- mout$mu
     sigma_value <- mout$sigma
@@ -2881,7 +2882,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if(reward){
         if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
         if(hasArg(ESratio)) maxSTARR=match.call(expand.dots=TRUE)$ESratio else maxSTARR=maxSTARR
-        if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
       }
       if(maxSTARR & !ef){
         # max ES ratio
@@ -2909,7 +2909,6 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       # EQS objectives
       if(reward){
         if(hasArg(EQSratio)) EQSratio=match.call(expand.dots=TRUE)$EQSratio else EQSratio=TRUE
-        if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
       }
       if(EQSratio & !ef){
         # max EQS ratio
