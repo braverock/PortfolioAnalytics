@@ -2881,8 +2881,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if(reward){
         if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
         if(hasArg(ESratio)) maxSTARR=match.call(expand.dots=TRUE)$ESratio else maxSTARR=maxSTARR
+        if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
       }
-      if(maxSTARR){
+      if(maxSTARR & !ef){
         # max ES ratio
         obj <- zeta + (1/(T*alpha)) * sum(z)
         constraints_cvxr = list(z >= 0, 
@@ -2890,10 +2891,18 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                                 t(mean_value) %*% wts == 1,
                                 sum(wts) >= 0)
         tmpname = "ES ratio"
-      } else {
+      } else if(!maxSTARR & !ef){
         # min ES
         obj <- zeta + (1/(T*alpha)) * sum(z)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
+        tmpname = "ES"
+      } else {
+        mean_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "mean")
+        return_target <- portfolio$objectives[[mean_idx]]$target
+        
+        obj <- zeta + (1/(T*alpha)) * sum(z)
+        constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
+        if(!is.null(return_target)) constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= return_target)
         tmpname = "ES"
       }
     } else if(!risk_ES & risk_EQS){
