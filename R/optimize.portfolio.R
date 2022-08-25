@@ -2847,10 +2847,17 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
     }
     if(alpha > 0.5) alpha <- (1 - alpha)
-    if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
     
     mean_value <- mout$mu
     sigma_value <- mout$sigma
+    
+    # ef will be called while generating efficient frontier
+    if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
+    if(ef){
+      reward=FALSE
+      mean_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "mean")
+      return_target <- portfolio$objectives[[mean_idx]]$target
+    } else return_target=NULL
     
     if(reward & !risk & !risk_ES & !risk_EQS){
       # max return
@@ -2897,13 +2904,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
         tmpname = "ES"
       } else {
-        mean_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "mean")
-        return_target <- portfolio$objectives[[mean_idx]]$target
         
-        obj <- zeta + (1/(T*alpha)) * sum(z)
-        constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
-        if(!is.null(return_target)) constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= return_target)
-        tmpname = "ES"
       }
     } else if(!risk_ES & risk_EQS){
       # EQS objectives
@@ -2924,15 +2925,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
         tmpname = "EQS"
       } else {
-        # min EQS with target return
-        # This is called by meaneqs.efficient.frontier. If we do not want that for efficient frontiers, need to have ef==FALSE
-        mean_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "mean")
-        return_target <- portfolio$objectives[[mean_idx]]$target
         
-        obj <- zeta + (1/alpha) * p_norm(z, p=2)
-        constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
-        if(!is.null(return_target)) constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= return_target)
-        tmpname = "EQS"
       }
     } else { 
       # wrong objective
@@ -2982,8 +2975,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     
     ## target return constraint
+    ### target return in constraint
     if(!is.null(constraints$return_target)){
       constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= constraints$return_target * weight_scale)
+    }
+    ### target return in objective, which is called by ef functions.
+    if(!is.null(return_target)){
+      constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= return_target)
     }
     
     # problem

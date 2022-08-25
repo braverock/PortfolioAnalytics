@@ -348,11 +348,6 @@ meaneqs.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
   # length.out is the number of portfolios to create
   ret_seq <- seq(from=minret, to=maxret, length.out=n.portfolios)
   
-  #   out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))
-  #   for(i in 1:length(ret_seq)){
-  #     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
-  #     out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
-  #   }
   stopifnot("package:foreach" %in% search() || requireNamespace("foreach",quietly = TRUE))
   stopifnot("package:iterators" %in% search() || requireNamespace("iterators",quietly = TRUE))
   ret <- ret_seq[1]
