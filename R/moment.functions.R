@@ -280,7 +280,8 @@ set.portfolio.moments <- set.portfolio.moments_v2 <- function(R,
                ) # end nested switch on method 
              }, # end switch on var, sd, StdDev
              mVaR =,
-             VaR = {
+             VaR = ,
+             EQS = {
                switch(method,
                       sample = {
                         if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(tmpR, 2, 'mean')), ncol=1);
@@ -414,7 +415,8 @@ portfolio.moments.boudt <- function(R, portfolio, momentargs=NULL, k=1, ...){
                if(is.null(momentargs$sigma)) momentargs$sigma = extractCovariance(fit)
              },
              mVaR =,
-             VaR = {
+             VaR = ,
+             EQS = {
                if(is.null(momentargs$mu)) momentargs$mu = matrix( as.vector(apply(R,2,'mean')),ncol=1)
                if(is.null(momentargs$sigma)) momentargs$sigma = extractCovariance(fit)
                if(is.null(momentargs$m3)) momentargs$m3 = extractCoskewness(fit)
@@ -499,7 +501,8 @@ portfolio.moments.bl <- function(R, portfolio, momentargs=NULL, P, Mu=NULL, Sigm
                if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
              },
              mVaR =,
-             VaR = {
+             VaR = ,
+             EQS = {
                if(is.null(momentargs$mu)) momentargs$mu = B$BLMu
                if(is.null(momentargs$sigma)) momentargs$sigma = B$BLSigma
                if(is.null(momentargs$m3)) momentargs$m3 = PerformanceAnalytics::M3.MM(R)
