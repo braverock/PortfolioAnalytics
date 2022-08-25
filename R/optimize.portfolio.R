@@ -2890,7 +2890,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
         if(hasArg(ESratio)) maxSTARR=match.call(expand.dots=TRUE)$ESratio else maxSTARR=maxSTARR
       }
-      if(maxSTARR & !ef){
+      if(maxSTARR){
         # max ES ratio
         obj <- zeta + (1/(T*alpha)) * sum(z)
         constraints_cvxr = list(z >= 0, 
@@ -2898,20 +2898,18 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                                 t(mean_value) %*% wts == 1,
                                 sum(wts) >= 0)
         tmpname = "ES ratio"
-      } else if(!maxSTARR & !ef){
+      } else {
         # min ES
         obj <- zeta + (1/(T*alpha)) * sum(z)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
         tmpname = "ES"
-      } else {
-        
       }
     } else if(!risk_ES & risk_EQS){
       # EQS objectives
       if(reward){
         if(hasArg(EQSratio)) EQSratio=match.call(expand.dots=TRUE)$EQSratio else EQSratio=TRUE
       }
-      if(EQSratio & !ef){
+      if(EQSratio){
         # max EQS ratio
         obj <- zeta + (1/alpha) * p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, 
@@ -2919,13 +2917,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                                 t(mean_value) %*% wts == 1,
                                 sum(wts) >= 0)
         tmpname = "EQS ratio"
-      } else if(!EQSratio & !ef){
+      } else {
         # min EQS
         obj <- zeta + (1/alpha) * p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
         tmpname = "EQS"
-      } else {
-        
       }
     } else { 
       # wrong objective
