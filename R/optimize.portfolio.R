@@ -3023,6 +3023,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         obj_cvxr[[tmpname]] <- obj_cvxr[["mean"]] / obj_cvxr[["EQS"]]
       }
     }
+    if(ef) obj_cvxr[["mean"]] <- cvxr_wts %*% mean_value
     
     out = list(weights = cvxr_wts,
                objective_measures = obj_cvxr,
