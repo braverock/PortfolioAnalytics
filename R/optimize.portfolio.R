@@ -2883,7 +2883,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
         if(hasArg(ESratio)) maxSTARR=match.call(expand.dots=TRUE)$ESratio else maxSTARR=maxSTARR
       }
-      if(maxSTARR & !ef){
+      if(maxSTARR){
         # max ES ratio
         obj <- zeta + (1/(T*alpha)) * sum(z)
         constraints_cvxr = list(z >= 0, 
@@ -2891,18 +2891,10 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                                 t(mean_value) %*% wts == 1,
                                 sum(wts) >= 0)
         tmpname = "ES ratio"
-      } else if(!maxSTARR & !ef){
+      } else {
         # min ES
         obj <- zeta + (1/(T*alpha)) * sum(z)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
-        tmpname = "ES"
-      } else {
-        mean_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "mean")
-        return_target <- portfolio$objectives[[mean_idx]]$target
-        
-        obj <- zeta + (1/(T*alpha)) * sum(z)
-        constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
-        if(!is.null(return_target)) constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= return_target)
         tmpname = "ES"
       }
     } else if(!risk_ES & risk_EQS){
@@ -2910,7 +2902,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if(reward){
         if(hasArg(EQSratio)) EQSratio=match.call(expand.dots=TRUE)$EQSratio else EQSratio=TRUE
       }
-      if(EQSratio & !ef){
+      if(EQSratio){
         # max EQS ratio
         obj <- zeta + (1/alpha) * p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, 
@@ -2918,20 +2910,10 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                                 t(mean_value) %*% wts == 1,
                                 sum(wts) >= 0)
         tmpname = "EQS ratio"
-      } else if(!EQSratio & !ef){
+      } else {
         # min EQS
         obj <- zeta + (1/alpha) * p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
-        tmpname = "EQS"
-      } else {
-        # min EQS with target return
-        # This is called by meaneqs.efficient.frontier. If we do not want that for efficient frontiers, need to have ef==FALSE
-        mean_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "mean")
-        return_target <- portfolio$objectives[[mean_idx]]$target
-        
-        obj <- zeta + (1/alpha) * p_norm(z, p=2)
-        constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
-        if(!is.null(return_target)) constraints_cvxr = append(constraints_cvxr, t(mean_value) %*% wts >= return_target)
         tmpname = "EQS"
       }
     } else { 
