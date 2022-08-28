@@ -524,10 +524,12 @@ optimize.portfolio_v1 <- function(
 #' Because these convex optimization problem are standardized, there is no need for a penalty term. 
 #' The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ignored by the ROI solver.
 #'
-#' If \code{optimize_method="CVXR"} or \code{OML="CVXR"} is specified, the default solver will be CVXR solvers. 
-#' The default solver for Linear Problem and Quadratic Problem will be \code{OSQP}, and the default solver for Second-Order Cone Problem will be \code{SCS}.
-#' The CVXR solvers includes SCS, ECOS, GUROBI, OSQP and GLPK, which can be specified by \code{optimize_method=}.
-#' For example, \code{optimize_method = "ECOS"} can be specified and the optimization problem will be solved via CVXR using the ECOS solver.
+#' If \code{optimize_method="CVXR"} is specified, a default solver will be selected based on the optimization problem.
+#' The default solver for Linear Problem and Quadratic Programming will be \code{OSQP}, 
+#' and the default solver for Second-Order Cone Programming will be \code{SCS}.
+#' Specified CVXR solver can be given by using \code{optimize_method=c("CVXR", "CVXRsolver")}.
+#' The CVXR solvers includes SCS, ECOS, GUROBI, OSQP and GLPK.
+#' For example, \code{optimize_method = c("CVXR", "ECOS")} can be specified and the optimization problem will be solved via CVXR using the ECOS solver.
 #' 
 #' The extension to CVXR solves a limited type of convex optimization problems:
 #' \itemize{
@@ -554,7 +556,7 @@ optimize.portfolio_v1 <- function(
 #' }
 #' 
 #' Because these convex optimization problem are standardized, there is no need for a penalty term. 
-#' The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the CVXR solver.
+#' The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ignored by the CVXR solver.
 #'
 #'
 #' @note
@@ -569,9 +571,8 @@ optimize.portfolio_v1 <- function(
 #' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
 #' @param constraints default=NULL, a list of constraint objects. An object of class 'v1_constraint' can be passed in here.
 #' @param objectives default=NULL, a list of objective objects.
-#' @param optimize_method one of "DEoptim", "random", "ROI", "pso", "GenSA", "osqp", "Rglpk", "mco". 
-#' A solver of ROI or CVXR can also be specified and will be solved via ROI or CVXR. See Details.
-#' @param OML default=NULL, optimization model language, which could be "CVXR".
+#' @param optimize_method one of "DEoptim", "random", "ROI", "pso", "GenSA", "osqp", "Rglpk", "mco", "CVXR", or a vector to specify CVXR solver.
+#' A solver of ROI or CVXR can also be specified and will be solved via ROI or CVXR. See details.
 #' @param search_size integer, how many portfolios to test, default 20,000
 #' @param trace TRUE/FALSE if TRUE will attempt to return additional information on the path or portfolios searched
 #' @param \dots any other passthru parameters
@@ -2807,7 +2808,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     alpha <- 0.05
     lambda <- 1
     
-    valid_objnames <- c("mean", "var", "sd", "StdDev", "CVaR", "ES", "ETL", "EQS") ## xinran "HHI", 
+    valid_objnames <- c("mean", "var", "sd", "StdDev", "CVaR", "ES", "ETL", "EQS")
     for (objective in portfolio$objectives) {
       if (objective$enabled) {
         if (!(objective$name %in% valid_objnames)) {

@@ -23,8 +23,7 @@ optimize.portfolio(
   constraints = NULL,
   objectives = NULL,
   optimize_method = c("DEoptim", "random", "ROI", "pso", "GenSA", "Rglpk", "osqp",
-    "mco", ...),
-  OML = NULL,
+    "mco", "CVXR", ...),
   search_size = 20000,
   trace = FALSE,
   ...,
@@ -38,8 +37,8 @@ optimize.portfolio(
 
 \item{constraints}{default=NULL, a list of constraint objects. An object of class 'v1_constraint' can be passed in here.}
 
-\item{optimize_method}{one of "DEoptim", "random", "ROI", "pso", "GenSA", "osqp", "Rglpk", "mco". 
-A solver of ROI or CVXR can also be specified and will be solved via ROI or CVXR. See Details.}
+\item{optimize_method}{one of "DEoptim", "random", "ROI", "pso", "GenSA", "osqp", "Rglpk", "mco", "CVXR", or a vector to specify CVXR solver.
+A solver of ROI or CVXR can also be specified and will be solved via ROI or CVXR. See details.}
 
 \item{search_size}{integer, how many portfolios to test, default 20,000}
 
@@ -54,8 +53,6 @@ A solver of ROI or CVXR can also be specified and will be solved via ROI or CVXR
 \item{portfolio}{an object of type "portfolio" specifying the constraints and objectives for the optimization}
 
 \item{objectives}{default=NULL, a list of objective objects.}
-
-\item{OML}{default=NULL, optimization model language, which could be "CVXR".}
 
 \item{message}{TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.}
 }
@@ -180,10 +177,12 @@ of weights as measured by HHI is added as a penalty term to the quadratic object
 Because these convex optimization problem are standardized, there is no need for a penalty term. 
 The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ignored by the ROI solver.
 
-If \code{optimize_method="CVXR"} or \code{OML="CVXR"} is specified, the default solver will be CVXR solvers. 
-The default solver for Linear Problem and Quadratic Problem will be \code{OSQP}, and the default solver for Second-Order Cone Problem will be \code{SCS}.
-The CVXR solvers includes SCS, ECOS, GUROBI, OSQP and GLPK, which can be specified by \code{optimize_method=}.
-For example, \code{optimize_method = "ECOS"} can be specified and the optimization problem will be solved via CVXR using the ECOS solver.
+If \code{optimize_method="CVXR"} is specified, a default solver will be selected based on the optimization problem.
+The default solver for Linear Problem and Quadratic Programming will be \code{OSQP}, 
+and the default solver for Second-Order Cone Programming will be \code{SCS}.
+Specified CVXR solver can be given by using \code{optimize_method=c("CVXR", "CVXRsolver")}.
+The CVXR solvers includes SCS, ECOS, GUROBI, OSQP and GLPK.
+For example, \code{optimize_method = c("CVXR", "ECOS")} can be specified and the optimization problem will be solved via CVXR using the ECOS solver.
 
 The extension to CVXR solves a limited type of convex optimization problems:
 \itemize{
@@ -210,7 +209,7 @@ The default action is to maximize EQS ratio. If \code{EQSratio=FALSE} is given, 
 }
 
 Because these convex optimization problem are standardized, there is no need for a penalty term. 
-The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the CVXR solver.
+The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ignored by the CVXR solver.
 }
 \note{
 An object of class \code{v1_constraint} can be passed in for the \code{constraints} argument.
