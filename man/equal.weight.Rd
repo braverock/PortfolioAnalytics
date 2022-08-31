@@ -4,7 +4,7 @@
 \alias{equal.weight}
 \title{Create an equal weight portfolio}
 \usage{
-equal.weight(R, portfolio, ...)
+\method{equal}{weight}(R, portfolio, ...)
 }
 \arguments{
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}

@@ -528,7 +528,7 @@ optimize.portfolio_v1 <- function(
 #' The default solver for Linear Problem and Quadratic Programming will be \code{OSQP}, 
 #' and the default solver for Second-Order Cone Programming will be \code{SCS}.
 #' Specified CVXR solver can be given by using \code{optimize_method=c("CVXR", "CVXRsolver")}.
-#' The CVXR solvers includes SCS, ECOS, GUROBI, OSQP and GLPK.
+#' CVXR supports some commercial solvers, including CBC, CPLEX, GUROBI and MOSEK, and some open source solvers, including GLPK, GLPK_MI, OSQP, SCS and ECOS.
 #' For example, \code{optimize_method = c("CVXR", "ECOS")} can be specified and the optimization problem will be solved via CVXR using the ECOS solver.
 #' 
 #' The extension to CVXR solves a limited type of convex optimization problems:
@@ -2784,7 +2784,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   } ## end case for mco
   
   ## case if method = CVXR
-  cvxr_solvers <- c("SCS", "ECOS", "GUROBI", "OSQP", "GLPK")
+  cvxr_solvers <- c("CBC", "GLPK", "GLPK_MI", "OSQP", "CPLEX", "SCS", "ECOS", "GUROBI", "MOSEK")
   if (optimize_method == "CVXR" || optimize_method %in% cvxr_solvers) {
     ## search for required package
     stopifnot("package:CVXR" %in% search() || requireNamespace("CVXR", quietly = TRUE))
