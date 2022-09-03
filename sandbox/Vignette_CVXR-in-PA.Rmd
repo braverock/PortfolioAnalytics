@@ -1,7 +1,7 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "2022/8/26"
+date: "2022/9/1"
 output: pdf_document
 ---
 
@@ -15,6 +15,7 @@ Sys.setlocale("LC_TIME", "English")
 The purpose of this vignette is to demonstrate examples of optimization problems that can be solved in PortfolioAnalytics with CVXR and its many supported solvers. The problem types covered include not only Linear Programming(LP), Quadratic Programming(QP) but also Second-Order Cone Programming(SOCP). Multiple solvers supported by CVXR can be selected according to optimization types. SCS and ECOS can completely cover the types of problems that ROI can deal with, such as mean-variance and ES problem. In order to better understand the functions of PortfolioAnalytics, users are recommended to read the Vignette [*Introduction to PortfolioAnalytics*](https://cran.r-project.org/web/packages/PortfolioAnalytics/vignettes/portfolio_vignette.pdf) first.
 
 \tableofcontents
+\newpage
 
 # 1 Getting Started
 ## 1.1 Load Packages
@@ -22,23 +23,29 @@ Load the necessary packages.
 ```{r, message=FALSE}
 library(PortfolioAnalytics)
 library(CVXR)
+library(data.table)
+library(xts)
 ```
 
 ## 1.2 Solvers
-There are many solvers supported by the CVXR. Different solvers could support different types of problems. Users could use `optimize_method=c("CVXR", {CVXRsolver})` in the function `optimize.portfolio` to specify the solver. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP will be OSQP, and the default solver for SOCP will be SCS.
+The website https://cvxr.rbind.io/ shows that CVXR currently supports us to use 9 solvers, some of which are commercial (CBC, CPLEX, GUROBI, MOSEK) and the others are open source(GLPK, GLPK_MI, OSQP, SCS, ECOS). 
+
+Different solvers support different types of portfolio optimization problems. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP type portfolio optimization problems such as maximum mean return and minimum variance portfolio optimization, will be OSQP, and the default solver for SOCP type portfolio optimizations, such as "robust portfolio optimization" to control for alpha uncertainty, and Expected Quadratic Shortfall (EQS) portfolio optimization, will be SCS.
 
 | Solver | LP | QP | SOCP |
 | :-- | :----: | :----: | :----: |
+|CBC|$\checkmark$| | |
 |GLPK|$\checkmark$| | |
+|GLPK_MI|$\checkmark$| | |
 |OSQP|$\colorbox{gray}{\checkmark}$|$\colorbox{gray}{\checkmark}$| |
-|GUROBI|$\checkmark$|$\checkmark$|$\checkmark$|
 |SCS|$\checkmark$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
 |ECOS|$\checkmark$|$\checkmark$|$\checkmark$|
-
-For more information about CVXR, please refer to the website https://cvxr.rbind.io/.
+|CPLEX|$\checkmark$|$\checkmark$|$\checkmark$|
+|GUROBI|$\checkmark$|$\checkmark$|$\checkmark$|
+|MOSEK|$\checkmark$|$\checkmark$|$\checkmark$|
 
 ## 1.3 Data
-The edhec data set from the PerformanceAnalytics package will be used as example data. It contains monthly returns for 13 assets from 1997-1 to 2019-11.
+The edhec data set from the PerformanceAnalytics package is used as example data for most, but not all, of the examples to follow. The edhec data contains monthly returns for 13 assets from 1997-01 to 2019-11. We use the first 4 assets as the example data to mainly show how to use the code.
 ```{r}
 data(edhec)
 # Use the first 4 columns in edhec for a returns object
@@ -49,13 +56,35 @@ print(head(returns, 5))
 funds <- colnames(returns)
 ```
 
+The CRSP data set is the daily log returns of 30 small cap stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP). We use this larger and more frequent data set to show more meaningful and interesting results, such as the performance of portfolios and the Efficient Frontiers. We don't want to use the large data set everywhere to slow down the code or distract the main point.
+
+```{r}
+load("stocksCRSPdaily.rda")
+
+stocks = stocksCRSPdaily[CapGroup == "SmallCap"]
+returnMat = tapply(stocks[, ReturnD], list(stocks$Date, stocks$TickerLast), I)
+smallcapD = xts(returnMat, as.Date(rownames(returnMat)))
+sc_30 = c("TGNA", "AVP", "PBI", "THC", "AVY", "HAS", "TSS", "SPXC", "R", "HP", "J", 
+          "DBD", "HAR", "BIG", "HSC", "MLHR", "AXE", "MATX", "KBH", "BGG", "CRS", 
+          "UVV", "MENT", "HTLD", "BRC", "FUL", "ESND", "BOBE", "PIR", "WTS")
+returns_sc = smallcapD[, sc_30]
+print(head(returns_sc, 3))
+funds_sc = colnames(returns_sc)
+```
+
 ## 1.4 Optimization Problems
-All optimization problems treated will use linear constraints unless otherwise stated. The types of constraints can be queried from [*Introduction to PortfolioAnalytics*](https://cran.r-project.org/web/packages/PortfolioAnalytics/vignettes/portfolio_vignette.pdf). This Vignette will be organized by objective type and provide some visual examples.
+All optimization problems treated will use linear constraints unless stated otherwise. There will be one equality constraint, i.e., the full-investment constraint, and one or more inequality constraints such as the long-only and box constraints. More comprehensive constraint types can be queried from [*Introduction to PortfolioAnalytics*](https://cran.r-project.org/web/packages/PortfolioAnalytics/vignettes/portfolio_vignette.pdf). This vignette will be organized by objective type and provide some visual examples.
 
 # 2 Maximizing Mean Return
 The objective to maximize mean return is a linear problem of the form:
 $$\max\limits_{w} \quad \hat{\boldsymbol{\mu}}'\boldsymbol{w}$$
-$$s.t. \quad A\boldsymbol{w} \ge b$$
+\begin{equation*}
+\begin{aligned}
+s.t. \quad & A\boldsymbol{w} \ge b\\
+& B\boldsymbol{w} = c
+\end{aligned}
+\end{equation*}
+
 Where $\hat{\boldsymbol{\mu}}$ is the estimated asset returns mean vector and $\boldsymbol{w}$ is the vector of portfolio weights.
 
 ## 2.1 Portfolio Object
@@ -75,12 +104,18 @@ pspec_maxret
 ```
 
 ## 2.2 Optimization
-The next step is to run the optimization. Note that `optimize_method=c("CVXR", {CVXRsolver})` should be specified in the function `optimize.portfolio` to use CVXR solvers for the optimization, or use the default solver by giving `optimize_method="CVXR"`.
+The next step is to run the optimization. Note that `optimize_method=c("CVXR", {CVXRsolver})` should be specified in the function `optimize.portfolio` to use CVXR solvers for the optimization, or use the default solver by giving `optimize_method="CVXR"`. For maximizing mean return problem, which is a linear programming, the default solver is `OSQP`.
 ```{r}
-# Run the optimization
+# Run the optimization with default solver
 opt_maxret <- optimize.portfolio(R=returns, portfolio=pspec_maxret, 
                                  optimize_method="CVXR", trace=TRUE)
 opt_maxret
+opt_maxret$solver
+
+# Run the optimization with specific solver
+opt_maxret_glpk <- optimize.portfolio(R=returns, portfolio=pspec_maxret, 
+                                 optimize_method=c("CVXR", "GLPK"), trace=TRUE)
+opt_maxret_glpk$solver
 ```
 
 ## 2.3 Backtesting
@@ -103,8 +138,7 @@ names(bt_maxret)
 # 3 Minimizing Variance
 The objective to minimize variance is a quadratic problem of the form:
 $$\min\limits_{w} \quad \boldsymbol{w}'\Sigma \boldsymbol{w}$$
-$$s.t. \quad A\boldsymbol{w} \ge b$$
-Where $\Sigma$ is the estimated covariance matrix of asset returns and w is the set of weights. It is a quadratic problem.
+subject to only the full-investment constraint, where $\Sigma$ is the estimated covariance matrix of asset returns and $\boldsymbol{w}$ is the set of weights. It is a quadratic problem.
 
 ## 3.1 Global Minimum Variance Portfolio
 ### 3.1.1 Portfolio Object
@@ -123,17 +157,10 @@ pspec_gmv <- add.objective(portfolio = pspec_gmv, type = "risk", name = "var")
 opt_gmv <- optimize.portfolio(returns, pspec_gmv, optimize_method = "CVXR")
 opt_gmv
 ```
+The optimal portfolio may have short position when there is only a full-investment constraint.
 
-### 3.1.3 Backtesting
-```{r}
-bt_gmv <- optimize.portfolio.rebalancing(R=returns, portfolio=pspec_gmv,
-                                            optimize_method="CVXR",
-                                            rebalance_on="quarters",
-                                            training_period=36)
-```
-
-## 3.2 Linearly Constrained Global Minimum Variance Portfolio 
-Various linear inequality constraint, such as box constraints and group box constraints can be used with GMV portfolio construction. Here we demonstrate the case of group box constraints.
+## 3.2 Linearly Constrained Minimum Variance Portfolio 
+Various linear inequality constraint, such as box constraints, group constraints and a target mean return constraint, can be used with GMV portfolio construction. Here we demonstrate the case of linearly constrained minimum variance portfolio.
 ```{r}
 # portfolio object
 pspec_mv <- add.constraint(pspec_gmv, type = "long_only")
@@ -156,9 +183,18 @@ bt_mv <- optimize.portfolio.rebalancing(R=returns, portfolio=pspec_mv,
                                             rebalance_on="quarters",
                                             training_period=36)
 ```
+The use of an alternative to the CVXR default solver will get the same result to many significant digits. In this example we use `optimize_method=c("CVXR", "SCS")`, since `OSQP` is the default solver, and get the same results.
+```{r}
+opt_mv_scs <- optimize.portfolio(returns, pspec_mv, 
+                                 optimize_method = c("CVXR", "SCS"))
+opt_mv_scs
+
+opt_mv$solver
+opt_mv_scs$solver
+```
 
 # 4 Maximizing Quadratic Utility
-Next we demonstrate the classical form of Markowitz's mean-variance model to maximize quadratic utility $\rm QU(\boldsymbol{w}) = \mu_p - \lambda \sigma_p^2 = \boldsymbol{\mu'w}-\lambda \boldsymbol{w'}\Sigma \boldsymbol{w}$:
+Next we demonstrate the classical quadratic utility form of Markowitz's mean-variance model, where the quadratic utility function is $\rm QU(\boldsymbol{w}) = \mu_p - \lambda \sigma_p^2 = \boldsymbol{\mu'w}-\lambda \boldsymbol{w'}\Sigma \boldsymbol{w}$:
 $$\max\limits_{w} \quad \hat{\boldsymbol{\mu}}'\boldsymbol{w} - \lambda\boldsymbol{w}'\Sigma\boldsymbol{w}$$
 $$s.t. \quad A\boldsymbol{w} \ge b$$
 Where $\hat{\boldsymbol{\mu}}$ is the estimated mean asset returns, $0 \le \lambda < \inf$ is the risk aversion parameter, $\Sigma$ is the estimated covariance matrix of asset returns and $\boldsymbol{w}$ is the set of weights. Quadratic utility maximizes return while penalizing variance. The risk aversion parameter $\lambda$ controls how much portfolio variance is penalized, and when $\lambda=0$ it becomes a maximum mean return problem of Section 2, and as $\lambda \rightarrow \inf$, it becomes the minimum variance problem of Section 3.
@@ -184,55 +220,36 @@ opt_mvo
 
 # 5 Minimizing Expected Shortfall
 Expected Shortfall(ES) is also called Conditional Value-at-Risk(CVaR) and Expected Tail Loss(ETL). The ES of a portfolio is
-$$ES_\gamma(w) = -E(r_P|r_P \le q_\gamma(\boldsymbol{w}))=-E(\boldsymbol{w'r}|\boldsymbol{w'r} \le q_\gamma(\boldsymbol{w}))$$
-where $q_\gamma$ is $\gamma$-quantile.
+\begin{equation*}
+\begin{aligned}
+ES_\gamma(w) &= -E(r_P|r_P \le q_\gamma(\boldsymbol{w}))\\
+&=-E(\boldsymbol{w'r}|\boldsymbol{w'r} \le q_\gamma(\boldsymbol{w}))
+\end{aligned}
+\end{equation*}
 
-Consider the conditional expectation $E(r|r \le q_{r,\gamma})$ for a random variable $r$ whose $\gamma$-quantile is $q_\gamma=q_{r, \gamma}$. $R$ is defined as a continuous random variable, and $r$ is the realized value of $R$, $f$ is the probability density function of $R$. Then
-$$E(R|R \le q_\gamma) = \int_{-\infty}^\infty r \cdot f(r|R \le q_\gamma)dr$$
-The conditional distribution function is
-\begin{equation}
-\begin{aligned}
-F(r|R \le q_\gamma) &= P(R \le r| R \le q_\gamma)\\
-&=\frac{P(R \le r \cap R \le q_\gamma)}{P(R\le q_\gamma)}\\
-&=\left\{
-\begin{aligned}
-1,& r>q_\gamma\\
-\frac{1}{\gamma}F(r),& r \le q_\gamma
-\end{aligned}
-\right.
-\end{aligned}
-\end{equation}
+where $r_P$ is a random return of a portfolio $P$, and $\boldsymbol{r}$ is the loss return which is negative, and $q_\gamma$ is $\gamma$-quantile and $1-\gamma$ is the tail probability. $\gamma$ is typically greater than 0.5 and the default value is 0.95, but one could also choose $\gamma<0.5$ and the problem will take it as tail probability and use $1-\gamma$ as the quantile value.
 
-Then,
-$$E(R|R \le q_\gamma) = \frac{1}{\gamma}\int_{r\le q_\gamma} r \cdot f(r)dr$$
-Hence,
-\begin{equation}
-\begin{aligned}
-E(\boldsymbol{w'r}|\boldsymbol{w'r} \le q_\gamma) 
-&= \frac{1}{\gamma}\int_{\boldsymbol{w'r}\le q_\gamma} \boldsymbol{w'r} \cdot f(\boldsymbol{r})d\boldsymbol{r}\\
-&= q_\gamma - \frac{1}{\gamma}\int[q_\gamma - \boldsymbol{w'r}]^+ \cdot f(\boldsymbol{r})d\boldsymbol{r}
-\end{aligned}
-\end{equation}
-Replacing $q_\gamma$ with the free variable $t$, then the $ES_{\gamma}(\boldsymbol{w})$ will be:
-$$F_\gamma(\boldsymbol{w},t)=-t+\frac{1}{\gamma} \int[t-\boldsymbol{w'r}]^+ \cdot f(\boldsymbol{r})d\boldsymbol{r}$$
-It was shown by Rockafellar and Uryasev (2000) that:
+It was shown by Rockafellar and Uryasev (2000) that the optimal minimum ES portfolio is the result of the minimization:
 $$\min \limits_{\boldsymbol{w}} ES_\gamma(\boldsymbol{w}) = \min \limits_{\boldsymbol{w}, t} F_\gamma(\boldsymbol{w}, t)$$
-Because
-$$F_\gamma(\boldsymbol{w}, t) \rightarrow \hat{F}_\gamma(\boldsymbol{w}, t) = -t + \frac{1}{n \cdot \gamma} \sum_{i=1}^n[t-\boldsymbol{w'r_i}]^+$$
-the problem minimizing ES is equivalent to solving a linear programming problem
-$$\max \limits_{w_i, \{e_i\},t} \quad t-\frac{1}{n \cdot r}\sum_{i=1}^n e_i$$
+where
+$$F_\gamma(\boldsymbol{w},t)=-t+\frac{1}{1-\gamma} \int[t-\boldsymbol{w'r}]^+ \cdot f(\boldsymbol{r})d\boldsymbol{r}$$
+by replacing $q_\gamma$ with the free variable $t$, and with the discrete data the formula is:
+$$\hat{F}_\gamma(\boldsymbol{w}, t) = -t + \frac{1}{n \cdot (1-\gamma)} \sum_{i=1}^n[t-\boldsymbol{w'r_i}]^+$$
+Hence, the minimization of ES is equivalent to solving a linear programming problem.
 
-Therefore, the objective goal is to minimize ES, and it is in the form of:
-$$\min\limits_{\eta} \quad \eta + (1 - \alpha)^{-1}E(X - \eta)^+$$
-Where $0<\alpha<1$ is the confidence parameter, and $\eta$ is the value from which shortfalls are measured in the optimal solution.
+The ES objective is in the form of:
+$$\min\limits_{\boldsymbol{w}, t} \quad -t + (1-\gamma)^{-1}E(t-\boldsymbol{w'r_i})^+$$
+where $0<\gamma<1$ is the quantile value, and $t$ is the value from which shortfalls are measured in the optimal solution. Many authors also use $p$ or $\alpha$ as the quantile, e.g., in Rockafellar and Uryasev (2000) and other vignettes of PortfolioAnalytics, and use $\eta$ as the risk measure variable, e.g., in Krokhmal (2007).
 
 ## 5.1 Portfolio Object
-The default probability is $\alpha = 95\%$. Specified probability could be given by `arguments`.
+The default probability is $\gamma = 95\%$. Specific probability could be given by `arguments`.
 ```{r}
 pspec_es <- portfolio.spec(assets=funds)
 pspec_es <- add.constraint(pspec_es, type="full_investment")
-# Add objective of minimizing ES
-pspec_es <- add.objective(portfolio = pspec_es, type = "risk", name = "ES",
+# Add objective of minimizing ES by using the default gamma
+pspec_es <- add.objective(portfolio = pspec_es, type = "risk", name = "ES")
+# Add objective of minimizing ES by using the specific gamma
+pspec_es_85 <- add.objective(portfolio = pspec_es, type = "risk", name = "ES",
                           arguments = list(p=0.85))
 ```
 
@@ -240,22 +257,23 @@ pspec_es <- add.objective(portfolio = pspec_es, type = "risk", name = "ES",
 ```{r}
 opt_es <- optimize.portfolio(returns, pspec_es, optimize_method = "CVXR")
 opt_es
+opt_es_85 <- optimize.portfolio(returns, pspec_es_85, optimize_method = "CVXR")
+opt_es_85
 ```
-
 
 # 6 Minimizing Expected Quadratic Shortfall
 Expected Quadratic Shortfall(EQS) is also called Second-Moment Coherent Risk Measure(SMCR). The objective to minimize EQS is in the form of:
-$$\mathop{minimize}\limits_{\eta} \quad \eta + (1 - \alpha)^{-1}||(X - \eta)^+||_2$$
-Where $\alpha$ is the confidence parameter and $0<\alpha<1$, $\eta$ is the value from which quadratic shortfalls are measured in the optimal solution. The default probability is $\alpha = 95\%$. Minimizing EQS could be incorporated into a convex problem as a second-order cone constraints. For Second-Order Cone Optimization(SOCopt), PortfolioAnalytics uses the CVXR package with SCS or ECOS solvers.
+$$\min\limits_{\boldsymbol{w}, t} \quad -t + (1-\gamma)^{-1}||(t-\boldsymbol{w'r_i})^+||_2$$
+where $\gamma$ is the quantile value and $0<\gamma<1$, $t$ is the value from which quadratic shortfalls are measured in the optimal solution. The default probability is $\gamma = 95\%$. Minimizing EQS could be incorporated into a convex problem as a second-order cone constraints, and PortfolioAnalytics uses SCS in CVXR as the default solver for Second-Order Cone Optimization(SOCopt).
 
 ## 6.1 Portfolio Object
-The default probability is $\alpha = 95\%$. Specified probability could be given by `arguments`.
+The default probability is $\gamma = 95\%$. Specified probability could be given by `arguments`.
 ```{r}
 pspec_eqs <- portfolio.spec(assets=funds)
 pspec_eqs <- add.constraint(pspec_eqs, type="full_investment")
 # Add objective of minimizing EQS
 pspec_eqs <- add.objective(portfolio = pspec_eqs, type = "risk", name = "EQS",
-                          arguments = list(p=0.85))
+                          arguments = list(p=0.95))
 ```
 
 ## 6.2 Optimization
@@ -265,38 +283,56 @@ opt_eqs
 ```
 
 ## 6.3 Backtesting
-In this example, a comparative backtesting among GMV, ES and EQS portfolio is generated.
-```{r}
-# Optimize Portfolio at Quarterly Rebalancing and 36-Month Training
-bt_es <- optimize.portfolio.rebalancing(R=returns, portfolio=pspec_es,
-                                        optimize_method="CVXR",
-                                        rebalance_on="quarters",
-                                        training_period=36)
-bt_eqs <- optimize.portfolio.rebalancing(R=returns, portfolio=pspec_eqs,
-                                         optimize_method="CVXR",
-                                         rebalance_on="quarters",
-                                         training_period=36)
-```
+In this example, we use CRSP data set to generate a comparative backtesting among GMV, ES and EQS portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
+```{r, warning=FALSE}
+## generate GMV, ES and EQS Portfolio with default gamma=0.05
+pspec_sc <- portfolio.spec(assets=funds_sc)
+pspec_sc <- add.constraint(pspec_sc, type="full_investment")
+pspec_sc <- add.constraint(pspec_sc, type="long_only")
 
-The performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
-```{r}
-# Extract time series of portfolio weights
-wts_gmv <- extractWeights(bt_gmv)
-wts_gmv <- wts_gmv[complete.cases(wts_gmv),]
+pspec_GMV <- add.objective(pspec_sc, type="risk", name="var")
+pspec_ES <- add.objective(pspec_sc, type="risk", name="ES")
+pspec_EQS <- add.objective(pspec_sc, type="risk", name="EQS")
 
-wts_es <- extractWeights(bt_es)
-wts_es <- wts_es[complete.cases(wts_es),]
+## Optimize Portfolio at Monthly Rebalancing and 500-Day Training
+bt.GMV <- optimize.portfolio.rebalancing(returns_sc, pspec_GMV,
+                                           optimize_method="CVXR",
+                                           rebalance_on="months",
+                                           training_period=30,
+                                           rolling_window=500)
+bt.ES <- optimize.portfolio.rebalancing(returns_sc, pspec_ES,
+                                           optimize_method="CVXR",
+                                           rebalance_on="months",
+                                           training_period=30,
+                                           rolling_window=500)
+bt.EQS <- optimize.portfolio.rebalancing(returns_sc, pspec_EQS,
+                                           optimize_method="CVXR",
+                                           rebalance_on="months",
+                                           training_period=30,
+                                           rolling_window=500)
 
-wts_eqs <- extractWeights(bt_eqs)
-wts_eqs <- wts_eqs[complete.cases(wts_eqs),]
+## Extract time series of portfolio weights
+wts.GMV = extractWeights(bt.GMV)
+wts.GMV <- wts.GMV[complete.cases(wts.GMV),]
 
-# Compute cumulative returns of portfolios
-port_gmv <- Return.rebalancing(returns, wts_gmv)
-port_es <- Return.rebalancing(returns, wts_es)
-port_eqs <- Return.rebalancing(returns, wts_eqs)
+wts.ES = extractWeights(bt.ES)
+wts.ES <- wts.ES[complete.cases(wts.ES),]
 
-# Combine cumulative returns
-ret.comb <- na.omit(merge(port_gmv, port_es, port_eqs, all=F))
+wts.EQS = extractWeights(bt.EQS)
+wts.EQS <- wts.EQS[complete.cases(wts.EQS),]
+
+## Generate monthly return
+ep = endpoints(returns_sc, on= "months", k=1)
+sum1 = function(x){apply(x, 2, sum)}
+returnM = period.apply(returns_sc, INDEX = ep, FUN = sum1)
+
+## Compute cumulative returns of three portfolios
+GMV = Return.rebalancing(returnM, wts.GMV)
+ES = Return.rebalancing(returnM, wts.ES)
+EQS = Return.rebalancing(returnM, wts.EQS)
+
+# Combine GMV, ES and EQS portfolio cumulative returns
+ret.comb <- na.omit(merge(GMV, ES, EQS, all=F))
 names(ret.comb) = c("GMV", "ES", "EQS")
 
 # Compute cumulative geometric portfolios returns
@@ -312,13 +348,13 @@ c.xts <- if ( geometric ) {
 p <- xts::plot.xts(c.xts[,1], col="black", main = "Cumulative returns",
                    grid.ticks.lwd=1, grid.ticks.lty = "solid", grid.ticks.on = "years",
                    labels.col="grey20", cex.axis=0.8, format.labels = "%b\n%Y",
-                   ylim = c(min(c.xts), max(c.xts)))
-p <- xts::addSeries(c.xts[,2], on=1, lwd=2, col="dark green", lty="dashed")
-p <- xts::addSeries(c.xts[,3], on=1, lwd=2, col="dark blue", lty="dotted")
+                   lty = "dotted", ylim = c(min(c.xts), max(c.xts)))
+p <- xts::addSeries(c.xts[,2], on=1, lwd=2, col="dark blue", lty="dashed")
+p <- xts::addSeries(c.xts[,3], on=1, lwd=2, col="dark green", lty="solid")
 p <- xts::addLegend("topleft", on = 1,
                     legend.names = names(c.xts),
-                    lty = c(1, 2, 3), lwd = rep(2, NCOL(c.xts)),
-                    col = c("black", "dark green", "dark blue"),
+                    lty = c(3, 2, 1), lwd = rep(2, NCOL(c.xts)),
+                    col = c("black", "dark blue", "dark green"),
                     bty = "o", box.col = "white",
                     bg=rgb(t(col2rgb("white")), alpha = 200,
                            maxColorValue = 255) )
@@ -326,9 +362,9 @@ p <- xts::addLegend("topleft", on = 1,
 ## Drawdowns panel(Peter Carl)
 d.xts <- PerformanceAnalytics::Drawdowns(R)
 p <- xts::addSeries(d.xts[,1], col="black", lwd=2, main="Drawdown",
-                    ylim = c(min(d.xts), 0), lty="solid")
-p <- xts::addSeries(d.xts[,2], on=2, lwd=2, col="dark green", lty="dashed")
-p <- xts::addSeries(d.xts[,3], on=2, lwd=2, col="dark blue", lty="dotted")
+                    ylim = c(min(d.xts), 0), lty=3)
+p <- xts::addSeries(d.xts[,2], on=2, lwd=2, col="dark blue", lty=2)
+p <- xts::addSeries(d.xts[,3], on=2, lwd=2, col="dark green", lty=1)
 
 ## panel 1 and 2 ylim
 ylim1 <- c(p$Env$ylim[[2]][1], p$Env$ylim[[2]][2])
@@ -345,26 +381,28 @@ p <- xts::addPolygon(y[i:(i+1),3:4], on=-2, col="lightgrey") # lower panel
 
 p
 ```
-
+\begin{center}
+Fig 6.1
+\end{center}
 
 # 7 Maximizing Mean Return Per Unit Risk
-There are three kinds of risk measurements: variance or standard deviation, ES and EQS. The problem maximizing mean return per unit risk could be transferred into minimizing risk with a target return constraint. For these types of problems, both return and risk objectives should be given. Then an argument should be given to the `optimize.portfolio` to specify the type of problem.
+There are three basic types of risk measures: variance or standard deviation, ES and EQS. The problem of maximizing mean return per unit risk can be solved in a clever way by minimizing risk with a target return constraint, as is described below. For all three of these types of problems, both return and risk objectives should be used in PortfolioAnalytics. Then for each of these three optimization problems an appropriate argument needs to be given to the `optimize.portfolio` to specify the type of problem.
 
 ## 7.1 Maximum Sharpe Ratio Portfolios
 The Sharpe Ratio of a random return $r_P$ of a portfolio $P$ is defined as:
-$$\frac{E(r_P) - r_f}{\sqrt{Var(r_P)}}$$
-The problem of maximizing the Sharpe Ratio can be formulated as a quadratic problem with a budget normalization constraint. It is shown in Cornuejols, Pena and Tutuncu, that the problem is:
-\begin{equation}
+$$\frac{E(r_P) - r_f}{\sqrt{Var(r_P)}}_.$$
+The problem of maximizing the Sharpe Ratio can be formulated as a quadratic problem with a budget normalization constraint. It is shown in Cornuéjols, G., Peña, J., & Tütüncü, R. (2018), that this optimization problem is:
+\begin{equation*}
 \begin{aligned}
 \mathop{minimize}\limits_{w} \quad w'\Sigma w\\
 s.t. \quad (\hat{\mu} - r_f\textbf{1})^Tw &= 1\\
 \textbf{1}^Tw &= \kappa\\
 \kappa &> 0
 \end{aligned}
-\end{equation}
-with the maximized Sharpe ratio given by $\tilde{w}^* = w^*/\kappa^*$.
+\end{equation*}
+which has a solution$(w^*,\kappa^*)$ with $k^* \ne 0$, and the maximized Sharpe ratio given by $\tilde{w}^* = w^*/\kappa^*$.
 
-When creating the portfolio, both return and risk objectives should be given. Then the argument `maxSR = TRUE` should be specified in the function `optimize.portfolio` to distinguish from the mean-variance optimization. The default argument is `maxSR = FALSE` and the default action for dealing with both mean and var/StdDev objectives is to maximize quadratic utility.
+When creating the portfolio, the argument `maxSR = TRUE` should be specified in the function `optimize.portfolio` to distinguish from the mean-variance optimization. NOTE: The default argument is `maxSR = FALSE` since the default action for dealing with both mean and var/StdDev objectives is to maximize quadratic utility.
 ```{r}
 # Create portfolio object
 pspec_sr <- portfolio.spec(assets=funds)
@@ -384,7 +422,7 @@ The ES ratio(ESratio), which is also called STARR in PortfolioAnalytics, is defi
 $$\frac{E(r_P) - r_f}{ES_{\alpha}(r_P)}$$
 Similar to maximizing Sharpe Ratio, the problem maximizing the ES ratio can be formulated as a minimizing ES problem with a budget normalization constraint.
 
-When creating the portfolio, both return and ES objectives should be given. When solving the problem, the default argument `ESratio=TRUE` in the function `optimize.portfolio` specify the problem type. Besides, this argument is equivalent to `maxSTARR=TRUE`, which is used in other Vignettes. If one of these two arguments specified as FALSE, the action will be to minimize ES ignoring the return objective.
+When creating the portfolio, both return and ES objectives should be given. When solving the problem, the default argument `ESratio=TRUE` in the function `optimize.portfolio` specify the problem type. We note that this argument is equivalent to `maxSTARR=TRUE`, which is used in other vignettes. If one of these two arguments is specified as FALSE, the action will be to minimize ES ignoring the return objective.
 ```{r}
 # Create portfolio object
 pspec_ESratio <- portfolio.spec(assets=funds)
@@ -421,33 +459,52 @@ optimize.portfolio(returns, pspec_EQSratio, optimize_method = "CVXR", EQSratio=T
 ```
 
 # 8 Efficient Frontier
-Generate efficient frontiers with MVO, mean-ES and mean-EQS portfolios.
+We generate efficient frontiers with MVO, mean-ES and mean-EQS portfolios by using 30 small cap stocks from CRSP data set. We can use `create.EfficientFrontier` to calculate the mean value and risk value for the frontier, then use `chart.EfficientFrontier` to draw the frontier.
 ```{r warning=FALSE}
-init <- portfolio.spec(assets=funds)
-init <- add.constraint(portfolio=init, type="full_investment")
-init <- add.constraint(portfolio=init, type="long_only")
-
-# MVO
-meanvar.ef <- create.EfficientFrontier(R=returns, portfolio=init, type="mean-StdDev")
+meanvar.ef <- create.EfficientFrontier(R=returns_sc, portfolio=pspec_sc, type="mean-StdDev")
 meanvar.ef
-chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l",
-                        main="MVO Efficient Frontier",
+meanvar.ef$frontier[, 1:2]
+```
+Then the Sharpe ratio could be calculated and the maximum Sharpe ratio could be found.
+```{r}
+sr = meanvar.ef$frontier[, 1]/meanvar.ef$frontier[, 2]
+cat("maximum Sharpe ratio:", max(sr))
+cat("mean of the maximum SR portfolio:", meanvar.ef$frontier[, 1][sr == max(sr)])
+cat("StdDev of the maximum SR portfolio:", meanvar.ef$frontier[, 2][sr == max(sr)])
+```
+
+Then generate a plot of mean-StdDev efficient frontier and identify the GMV portfolio in blue point.
+```{r, warning=FALSE}
+# MVO
+## Add mean return objective
+pspec_GMV <- add.objective(portfolio=pspec_GMV, type="return", name="mean")
+opt_GMV <- optimize.portfolio(returns_sc, pspec_GMV, optimize_method = "CVXR", trace = TRUE)
+chart.EfficientFrontier(opt_GMV, match.col="StdDev", type="l", 
+                        chart.assets = FALSE, main="Mean-StdDev Efficient Frontier",
                         RAR.text="Sharpe Ratio", pch=4)
 ```
+\begin{center}
+Fig 8.1
+\end{center}
 \newpage
-```{r warning=FALSE}
+```{r, warning=FALSE}
 # mean-ES
-meanetl.ef <- create.EfficientFrontier(R=returns, portfolio=init, type="mean-ES")
-chart.EfficientFrontier(meanetl.ef, match.col="ES",
-                        main="mean-ES Efficient Frontier",
-                        type="l", col="blue", RAR.text="ES Ratio")
+meanetl.ef <- create.EfficientFrontier(R=returns_sc, portfolio=pspec_sc, type="mean-ES")
+chart.EfficientFrontier(meanetl.ef, match.col="ES", type="l", col="blue",
+                        chart.assets = FALSE, main="Mean-ES Efficient Frontier",
+                        RAR.text="ES ratio", pch=4)
 ```
+\begin{center}
+Fig 8.2
+\end{center}
 \newpage
-```{r}
+```{r, warning=FALSE}
 # mean-EQS
-meaneqs.ef <- create.EfficientFrontier(R=returns, portfolio=init, type="mean-EQS")
-chart.EfficientFrontier(meaneqs.ef, match.col="EQS", chart.assets = FALSE, 
-                        main="mean-EQS Efficient Frontier", 
-                        type="l", col="red", RAR.text="EQS Ratio")
+meaneqs.ef <- create.EfficientFrontier(R=returns_sc, portfolio=pspec_sc, type="mean-EQS")
+chart.EfficientFrontier(meaneqs.ef, match.col="EQS", type="l", col="blue",
+                        chart.assets = FALSE, main="Mean-EQS Efficient Frontier",
+                        RAR.text="EQS ratio", pch=4)
 ```
-
+\begin{center}
+Fig 8.3
+\end{center}
