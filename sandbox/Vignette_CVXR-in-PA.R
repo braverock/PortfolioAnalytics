@@ -128,12 +128,11 @@ bt_mv <- optimize.portfolio.rebalancing(R=ret_edhec, portfolio=pspec_mv,
 
 
 ## ------------------------------------------------------------------------------------------------------
-opt_mv_scs <- optimize.portfolio(ret_edhec, pspec_mv, 
-                                 optimize_method = c("CVXR", "SCS"))
-opt_mv_scs
+opt_mv_ecos <- optimize.portfolio(ret_edhec, pspec_mv, optimize_method = c("CVXR", "ECOS"))
+opt_mv_ecos
 
 opt_mv$solver
-opt_mv_scs$solver
+opt_mv_ecos$solver
 
 
 ## ------------------------------------------------------------------------------------------------------
