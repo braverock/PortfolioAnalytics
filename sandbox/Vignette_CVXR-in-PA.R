@@ -325,7 +325,7 @@ pspec_ESr <- add.objective(pspec_sc_ratio, type="risk", name="ES")
 pspec_EQSr <- add.objective(pspec_sc_ratio, type="risk", name="EQS")
 
 ## Optimize Portfolio at Monthly Rebalancing and 500-Day Training
-bt.Sr <- optimize.portfolio.rebalancing(ret_CRSP, pspec_Sr,
+bt.Sr <- optimize.portfolio.rebalancing(ret_CRSP, pspec_Sr, maxSR=TRUE,
                                            optimize_method="CVXR",
                                            rebalance_on="months",
                                            training_period=30,
