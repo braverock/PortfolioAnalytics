@@ -1,7 +1,7 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "2022/9/10"
+date: "2022/9/16"
 output: pdf_document
 ---
 
@@ -96,11 +96,13 @@ tsPlotMP(retM_CRSP_5[, 1:10])
 Fig 2.2
 \end{center}
 ## 2.4 Optimization Problems
-All optimization problems treated will use linear constraints unless stated otherwise. There will be one equality constraint, i.e., the full-investment constraint, and one or more inequality constraints such as the long-only and box constraints. More comprehensive constraint types can be found in the vignette Ross (2018) [*Introduction to PortfolioAnalytics*](https://cran.r-project.org/web/packages/PortfolioAnalytics/vignettes/portfolio_vignette.pdf). This vignette will be organized by objective type and provide some visual examples.
+In this Vignette, all mean vectors and covariance matrices in the optimization formula will use standard sample based estimates. All optimization problems treated will use linear constraints unless stated otherwise. There will be one equality constraint, i.e., the full-investment constraint, and one or more inequality constraints such as the long-only and box constraints. More comprehensive constraint types can be found in the vignette Ross (2018) [*Introduction to PortfolioAnalytics*](https://cran.r-project.org/web/packages/PortfolioAnalytics/vignettes/portfolio_vignette.pdf). 
+
+This vignette will be organized by objective type and provide some visual examples.
 
 # 3 Maximizing Mean Return
 The objective to maximize mean return is a linear problem of the form:
-$$\max\limits_{w} \quad \hat{\boldsymbol{\mu}}'\boldsymbol{w}$$
+$$\max\limits_{w} \quad \boldsymbol{\mu}'\boldsymbol{w}$$
 \begin{equation*}
 \begin{aligned}
 s.t. \quad & A\boldsymbol{w} \ge b\\
@@ -108,7 +110,7 @@ s.t. \quad & A\boldsymbol{w} \ge b\\
 \end{aligned}
 \end{equation*}
 
-Where $\hat{\boldsymbol{\mu}}$ is the estimated asset returns mean vector and $\boldsymbol{w}$ is the vector of portfolio weights.
+Where $\boldsymbol{\mu}$ is the estimated asset returns mean vector and $\boldsymbol{w}$ is the vector of portfolio weights.
 
 ## 3.1 Portfolio Object
 The first step in setting up a model is to create the portfolio object. Then add constraints and a return objective.
@@ -218,12 +220,12 @@ opt_mv_ecos$solver
 
 # 5 Maximizing Quadratic Utility
 Next we demonstrate the classical quadratic utility form of Markowitz's mean-variance model, where the quadratic utility function is $\rm QU(\boldsymbol{w}) = \mu_p - \lambda \sigma_p^2 = \boldsymbol{\mu'w}-\lambda \boldsymbol{w'}\Sigma \boldsymbol{w}$:
-$$\max\limits_{w} \quad \hat{\boldsymbol{\mu}}'\boldsymbol{w} - \lambda\boldsymbol{w}'\Sigma\boldsymbol{w}$$
+$$\max\limits_{w} \quad \boldsymbol{\mu}'\boldsymbol{w} - \lambda\boldsymbol{w}'\Sigma\boldsymbol{w}$$
 $$s.t. \quad A\boldsymbol{w} \ge b$$
-Where $\hat{\boldsymbol{\mu}}$ is the estimated mean asset returns, $0 \le \lambda < \inf$ is the risk aversion parameter, $\Sigma$ is the estimated covariance matrix of asset returns and $\boldsymbol{w}$ is the set of weights. Quadratic utility maximizes return while penalizing variance. The risk aversion parameter $\lambda$ controls how much portfolio variance is penalized, and when $\lambda=0$ it becomes a maximum mean return problem of Section 3, and as $\lambda \rightarrow \inf$, it becomes the minimum variance problem of Section 4.
+Where $\boldsymbol{\mu}$ is the estimated mean asset returns, $0 \le \lambda < \inf$ is the risk aversion parameter, $\Sigma$ is the estimated covariance matrix of asset returns and $\boldsymbol{w}$ is the set of weights. Quadratic utility maximizes return while penalizing variance. The risk aversion parameter $\lambda$ controls how much portfolio variance is penalized, and when $\lambda=0$ it becomes a maximum mean return problem of Section 3, and as $\lambda \rightarrow \inf$, it becomes the minimum variance problem of Section 4.
 
 ## 5.1 Portfolio Object
-In this case the objectives of the portfolio should be both return and risk, and for this example we will use a risk aversion parameter $\lambda$ to be 10 by setting `risk_aversion = 10`.
+In this case the objectives of the portfolio should be both return and risk, and for this example we will use a risk aversion parameter $\lambda$ to be 20 by setting `risk_aversion = 20`.
 ```{r}
 pspec_mvo <- portfolio.spec(assets=fund_edhec)
 pspec_mvo <- add.constraint(pspec_mvo, type="full_investment")
@@ -231,7 +233,7 @@ pspec_mvo <- add.constraint(pspec_mvo, type="long_only")
 # Add objectives
 pspec_mvo <- add.objective(portfolio = pspec_mvo, type = "return", name = "mean")
 pspec_mvo <- add.objective(portfolio = pspec_mvo, type = "risk", name = "var",
-                           risk_aversion = 10)
+                           risk_aversion = 20)
 ```
 
 ## 5.2 Optimization
@@ -245,7 +247,9 @@ opt_mvo
 Expected Shortfall(ES) is also called Conditional Value-at-Risk(CVaR) and Expected Tail Loss(ETL). The ES of a portfolio is
 \begin{equation*}
 \begin{aligned}
-ES_\gamma(w) &= -E(r_P|r_P \le q_\gamma(\boldsymbol{w}))\\
+ES_\gamma(r_P) 
+= ES_\gamma(\boldsymbol{w}) 
+&= -E(r_P|r_P \le q_\gamma(\boldsymbol{w}))\\
 &=-E(\boldsymbol{w'r}|\boldsymbol{w'r} \le q_\gamma(\boldsymbol{w}))
 \end{aligned}
 \end{equation*}
@@ -258,7 +262,7 @@ where
 $$F_\gamma(\boldsymbol{w},t)=-t+\frac{1}{\gamma} \int[t-\boldsymbol{w'r}]^+ \cdot f(\boldsymbol{r})d\boldsymbol{r}$$
 by replacing $q_\gamma$ with the free variable $t$, and with the discrete data the formula is:
 $$\hat{F}_\gamma(\boldsymbol{w}, t) = -t + \frac{1}{n \cdot \gamma} \sum_{i=1}^n[t-\boldsymbol{w'r_i}]^+$$
-Hence, the minimization of ES is equivalent to solving a linear programming problem.
+The positive part function, $[t-\boldsymbol{w'r_i}]^+$, can easily be converted to a collection of linear constraints, hence, the minimization of ES is equivalent to solving a linear programming problem.
 
 The ES objective is in the form of:
 $$\min\limits_{\boldsymbol{w}, t} \quad -t + \gamma^{-1}E(t-\boldsymbol{w'r_i})^+$$
@@ -271,15 +275,17 @@ pspec_es <- portfolio.spec(assets=fund_edhec)
 pspec_es <- add.constraint(pspec_es, type="full_investment")
 # Add objective of minimizing ES by using the default gamma
 pspec_es <- add.objective(portfolio = pspec_es, type = "risk", name = "ES")
-# Add objective of minimizing ES by using the specific gamma
+# Add objective of minimizing ES by using the specific gamma=0.1
 pspec_es_1 <- add.objective(portfolio = pspec_es, type = "risk", name = "ES",
                           arguments = list(p=0.1))
 ```
 
 ## 6.2 Optimization
 ```{r}
+# GMES with default gamma=0.05
 opt_es <- optimize.portfolio(ret_edhec, pspec_es, optimize_method = "CVXR")
 opt_es
+# GMES with specific gamma=0.1
 opt_es_1 <- optimize.portfolio(ret_edhec, pspec_es_1, optimize_method = "CVXR")
 opt_es_1
 ```
@@ -434,11 +440,11 @@ names(ret.comb) = c("GMV", "GMES", "GMEQS")
 
 # Compute cumulative geometric portfolios returns
 R <- ret.comb
-geometric = TRUE
+geometric = FALSE
 c.xts <- if ( geometric ) {
   cumprod(1+R)
 } else {
-  1 + cumsum(R)
+  exp(cumsum(R))
 }
 
 # Cumulative returns panel (Peter Carl)
@@ -529,11 +535,11 @@ names(ret.comb) = c("Sharpe ratio", "ES ratio", "EQS ratio")
 
 # Compute cumulative geometric portfolios returns
 R <- ret.comb
-geometric = TRUE
+geometric = FALSE
 c.xts <- if ( geometric ) {
   cumprod(1+R)
 } else {
-  1 + cumsum(R)
+  exp(cumsum(R))
 }
 
 # Cumulative returns panel (Peter Carl)
@@ -601,7 +607,9 @@ cat("mean of the maximum SR portfolio:", meanvar.ef$frontier[, 1][sr == max(sr)]
 cat("StdDev of the maximum SR portfolio:", meanvar.ef$frontier[, 2][sr == max(sr)])
 ```
 
-Note that we have introduced the method of finding the maximum Sharpe ratio portfolio in Section 8.1, which may be different from the "maximum" Sharpe ratio calculated from the discrete efficient frontier value. We can identify the maximum Sharpe ratio portfolio in blue point on the mean-StdDev efficient frontier.
+Note that we have introduced the method of finding the theoretical maximum Sharpe ratio portfolio in Section 8.1, which may be a little different from the estimated maximum Sharpe ratio calculated by the discrete efficient frontier value. It is because the function of efficient frontier uses the mean value of the maximum mean return portfolio and the minimum variance portfolio as boundary values, then divides the mean interval equally and calculates the corresponding StdDev value, and then gives discrete mean-StdDev points to fit the efficient frontier curve. The "maximum" Sharpe ratio found by the efficient frontier function is the maximum value calculated by limited number of discrete points. The default number of points is 25, and the specific number could be given by `n.portfolios = {number}`.
+
+We can identify the maximum Sharpe ratio portfolio in blue point on the mean-StdDev efficient frontier.
 ```{r, warning=FALSE}
 # Mean-StdDev Efficient Frontier
 pspec_MV <- add.objective(pspec_sc, type="risk", name="var")
@@ -616,7 +624,7 @@ chart.EfficientFrontier(opt_MV, match.col="StdDev", chart.assets = FALSE,
 \begin{center}
 Fig 9.4
 \end{center}
-The theoretical maximum Sharpe ratio portfolio is very close to the result generated by the efficient frontier, and the Sharpe ratio value is almost the same but the mean and StdDev value are slightly different. That is because efficient frontier uses a discrete mean value.
+The theoretical maximum Sharpe ratio portfolio is very close to the result generated by the efficient frontier, and the Sharpe ratio value is almost the same but the mean and StdDev value are slightly different.
 
 With different constraint types, we can create mean-StdDev efficient frontiers for multiple portfolios and overlay the plots.
 ```{r}
@@ -649,7 +657,7 @@ chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_list,
 \begin{center}
 Fig 9.5
 \end{center}
-The plot clearly show that the portfolio under the long-short box constraints has the best performance.
+The plot clearly show that the portfolio under the long-short box constraints has the best performance, though it also requires shorting which may not be possible for many real-world portfolios.
 
 ### 9.3.2 Mean-ES Efficient Frontier
 Generate the mean-ES efficient frontier:

@@ -142,7 +142,7 @@ pspec_mvo <- add.constraint(pspec_mvo, type="long_only")
 # Add objectives
 pspec_mvo <- add.objective(portfolio = pspec_mvo, type = "return", name = "mean")
 pspec_mvo <- add.objective(portfolio = pspec_mvo, type = "risk", name = "var",
-                           risk_aversion = 10)
+                           risk_aversion = 20)
 
 
 ## ------------------------------------------------------------------------------------------------------
@@ -155,14 +155,16 @@ pspec_es <- portfolio.spec(assets=fund_edhec)
 pspec_es <- add.constraint(pspec_es, type="full_investment")
 # Add objective of minimizing ES by using the default gamma
 pspec_es <- add.objective(portfolio = pspec_es, type = "risk", name = "ES")
-# Add objective of minimizing ES by using the specific gamma
+# Add objective of minimizing ES by using the specific gamma=0.1
 pspec_es_1 <- add.objective(portfolio = pspec_es, type = "risk", name = "ES",
                           arguments = list(p=0.1))
 
 
 ## ------------------------------------------------------------------------------------------------------
+# GMES with default gamma=0.05
 opt_es <- optimize.portfolio(ret_edhec, pspec_es, optimize_method = "CVXR")
 opt_es
+# GMES with specific gamma=0.1
 opt_es_1 <- optimize.portfolio(ret_edhec, pspec_es_1, optimize_method = "CVXR")
 opt_es_1
 
@@ -272,11 +274,11 @@ names(ret.comb) = c("GMV", "GMES", "GMEQS")
 
 # Compute cumulative geometric portfolios returns
 R <- ret.comb
-geometric = TRUE
+geometric = FALSE
 c.xts <- if ( geometric ) {
   cumprod(1+R)
 } else {
-  1 + cumsum(R)
+  exp(cumsum(R))
 }
 
 # Cumulative returns panel (Peter Carl)
@@ -362,11 +364,11 @@ names(ret.comb) = c("Sharpe ratio", "ES ratio", "EQS ratio")
 
 # Compute cumulative geometric portfolios returns
 R <- ret.comb
-geometric = TRUE
+geometric = FALSE
 c.xts <- if ( geometric ) {
   cumprod(1+R)
 } else {
-  1 + cumsum(R)
+  exp(cumsum(R))
 }
 
 # Cumulative returns panel (Peter Carl)
