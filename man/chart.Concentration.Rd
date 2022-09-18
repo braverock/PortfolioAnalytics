@@ -4,10 +4,19 @@
 \alias{chart.Concentration}
 \title{Classic risk reward scatter and concentration}
 \usage{
-chart.Concentration(object, ..., return.col = "mean", risk.col = "ES",
-  chart.assets = FALSE, conc.type = c("weights", "pct_contrib"),
-  col = heat.colors(20), element.color = "darkgray", cex.axis = 0.8,
-  xlim = NULL, ylim = NULL)
+chart.Concentration(
+  object,
+  ...,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  conc.type = c("weights", "pct_contrib"),
+  col = heat.colors(20),
+  element.color = "darkgray",
+  cex.axis = 0.8,
+  xlim = NULL,
+  ylim = NULL
+)
 }
 \arguments{
 \item{object}{optimal portfolio created by \code{\link{optimize.portfolio}}.}

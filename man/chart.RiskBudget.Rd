@@ -9,19 +9,46 @@
 \usage{
 chart.RiskBudget(object, ...)
 
-\method{chart.RiskBudget}{optimize.portfolio}(object, ..., neighbors = NULL,
-  risk.type = "absolute", main = "Risk Contribution", ylab = "",
-  xlab = NULL, cex.axis = 0.8, cex.lab = 0.8,
-  element.color = "darkgray", las = 3, ylim = NULL)
+\method{chart.RiskBudget}{optimize.portfolio}(
+  object,
+  ...,
+  neighbors = NULL,
+  risk.type = "absolute",
+  main = "Risk Contribution",
+  ylab = "",
+  xlab = NULL,
+  cex.axis = 0.8,
+  cex.lab = 0.8,
+  element.color = "darkgray",
+  las = 3,
+  ylim = NULL
+)
 
-\method{chart.RiskBudget}{optimize.portfolio.rebalancing}(object, ...,
-  match.col = "ES", risk.type = "absolute", regime = NULL,
-  main = "Risk Contribution")
+\method{chart.RiskBudget}{optimize.portfolio.rebalancing}(
+  object,
+  ...,
+  match.col = "ES",
+  risk.type = "absolute",
+  regime = NULL,
+  main = "Risk Contribution"
+)
 
-\method{chart.RiskBudget}{opt.list}(object, ..., match.col = "ES",
-  risk.type = "absolute", main = "Risk Budget", plot.type = "line",
-  cex.axis = 0.8, cex.lab = 0.8, element.color = "darkgray", las = 3,
-  ylim = NULL, colorset = NULL, legend.loc = NULL, cex.legend = 0.8)
+\method{chart.RiskBudget}{opt.list}(
+  object,
+  ...,
+  match.col = "ES",
+  risk.type = "absolute",
+  main = "Risk Budget",
+  plot.type = "line",
+  cex.axis = 0.8,
+  cex.lab = 0.8,
+  element.color = "darkgray",
+  las = 3,
+  ylim = NULL,
+  colorset = NULL,
+  legend.loc = NULL,
+  cex.legend = 0.8
+)
 }
 \arguments{
 \item{object}{optimal portfolio object created by \code{\link{optimize.portfolio}}

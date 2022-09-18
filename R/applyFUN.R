@@ -51,6 +51,11 @@ applyFUN <- function(R, weights, FUN="mean", arguments){
            if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
            if(is.null(nargs$invert)) nargs$invert = FALSE
          },
+         EQS = {
+           fun = match.fun(EQS)
+           if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+           if(is.null(nargs$invert)) nargs$invert = FALSE
+         },
 {   # see 'S Programming p. 67 for this matching
   fun <- try(match.fun(FUN))
 }
@@ -132,6 +137,11 @@ scatterFUN <- function(R, FUN, arguments=NULL){
          mETL =,
          ES = {
            fun = match.fun(ES)
+           if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+           if(is.null(nargs$invert)) nargs$invert = FALSE
+         },
+         EQS = {
+           fun = match.fun(EQS)
            if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
            if(is.null(nargs$invert)) nargs$invert = FALSE
          },

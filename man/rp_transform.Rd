@@ -4,10 +4,23 @@
 \alias{rp_transform}
 \title{Transform a weights vector to satisfy constraints}
 \usage{
-rp_transform(w, min_sum, max_sum, min_box, max_box, groups = NULL,
-  cLO = NULL, cUP = NULL, max_pos = NULL, group_pos = NULL,
-  max_pos_long = NULL, max_pos_short = NULL, leverage = NULL,
-  weight_seq = NULL, max_permutations = 200)
+rp_transform(
+  w,
+  min_sum,
+  max_sum,
+  min_box,
+  max_box,
+  groups = NULL,
+  cLO = NULL,
+  cUP = NULL,
+  max_pos = NULL,
+  group_pos = NULL,
+  max_pos_long = NULL,
+  max_pos_short = NULL,
+  leverage = NULL,
+  weight_seq = NULL,
+  max_permutations = 200
+)
 }
 \arguments{
 \item{w}{weights vector to be transformed}

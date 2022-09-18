@@ -3,27 +3,42 @@
 \name{optimize.portfolio}
 \alias{optimize.portfolio}
 \alias{optimize.portfolio_v1}
-\alias{optimize.portfolio}
 \alias{optimize.portfolio_v2}
-\alias{optimize.portfolio_v1}
 \title{Constrained optimization of portfolios}
 \usage{
-optimize.portfolio_v1(R, constraints, optimize_method = c("DEoptim", "random",
-  "ROI", "ROI_old", "pso", "GenSA"), search_size = 20000, trace = FALSE,
-  ..., rp = NULL, momentFUN = "set.portfolio.moments_v1")
+optimize.portfolio_v1(
+  R,
+  constraints,
+  optimize_method = c("DEoptim", "random", "ROI", "ROI_old", "pso", "GenSA"),
+  search_size = 20000,
+  trace = FALSE,
+  ...,
+  rp = NULL,
+  momentFUN = "set.portfolio.moments_v1"
+)
 
-optimize.portfolio(R, portfolio = NULL, constraints = NULL,
-  objectives = NULL, optimize_method = c("DEoptim", "random", "ROI", "pso",
-  "GenSA"), search_size = 20000, trace = FALSE, ..., rp = NULL,
-  momentFUN = "set.portfolio.moments", message = FALSE)
+optimize.portfolio(
+  R,
+  portfolio = NULL,
+  constraints = NULL,
+  objectives = NULL,
+  optimize_method = c("DEoptim", "random", "ROI", "pso", "GenSA", "Rglpk", "osqp",
+    "mco", "CVXR", ...),
+  search_size = 20000,
+  trace = FALSE,
+  ...,
+  rp = NULL,
+  momentFUN = "set.portfolio.moments",
+  message = FALSE
+)
 }
 \arguments{
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}
 
 \item{constraints}{default=NULL, a list of constraint objects. An object of class 'v1_constraint' can be passed in here.}
 
-\item{optimize_method}{one of "DEoptim", "random", "ROI", "pso", "GenSA". A solver
-for ROI can also be specified and will be solved using ROI. See Details.}
+\item{optimize_method}{one of "DEoptim", "random", "ROI", "pso", "GenSA", "osqp", "Rglpk", "mco", "CVXR", or a vector to specify CVXR solver.
+A solver of ROI or CVXR can also be specified and will be solved via ROI or CVXR. See details.}
 
 \item{search_size}{integer, how many portfolios to test, default 20,000}
 
@@ -116,7 +131,7 @@ This function aims to provide a wrapper for constrained optimization of
 portfolios that specify constraints and objectives.
 }
 \details{
-This function currently supports DEoptim, random portfolios, pso, GenSA, and ROI as back ends.
+This function currently supports DEoptim, random portfolios, pso, GenSA, ROI, osqp, Rglpk, mco, and CVXR solvers as back ends.
 Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
 
 When using random portfolios, search_size is precisely that, how many 
@@ -160,7 +175,41 @@ These problems also support a weight_concentration objective where concentration
 of weights as measured by HHI is added as a penalty term to the quadratic objective.
 
 Because these convex optimization problem are standardized, there is no need for a penalty term. 
-The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ingnored by the ROI solver.
+The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ignored by the ROI solver.
+
+If \code{optimize_method="CVXR"} is specified, a default solver will be selected based on the optimization problem.
+The default solver for Linear Problem and Quadratic Programming will be \code{OSQP}, 
+and the default solver for Second-Order Cone Programming will be \code{SCS}.
+Specified CVXR solver can be given by using \code{optimize_method=c("CVXR", "CVXRsolver")}.
+CVXR supports some commercial solvers, including CBC, CPLEX, GUROBI and MOSEK, and some open source solvers, including GLPK, GLPK_MI, OSQP, SCS and ECOS.
+For example, \code{optimize_method = c("CVXR", "ECOS")} can be specified and the optimization problem will be solved via CVXR using the ECOS solver.
+
+The extension to CVXR solves a limited type of convex optimization problems:
+\itemize{
+\item{Maxmimize portfolio mean return subject leverage, box, group, and/or target mean return constraints}
+\item{Minimize portfolio variance subject to leverage, box, group, and/or target mean return constraints (otherwise known as global minimum variance portfolio).}
+\item{Maximize quadratic utility subject to leverage, box, group, and/or target mean return constraints and risk aversion parameter.
+(The default risk aversion is 1, and specified risk aversion could be given by \code{risk_aversion = 1}. 
+The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)}
+\item{Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
+(The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
+The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)}
+\item{Minimize portfolio EQS optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
+(The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
+The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)}
+\item{Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) subject to leverage, box, group, and/or target mean return constraints.
+It should be specified by \code{maxSR=TRUE} in \code{optimize.portfolio} with both mean and var/StdDev objectives.
+Otherwise, the default action is to maximize quadratic utility.}
+\item{Maximize portfolio mean return per unit ES (i.e. the ES ratio/STARR) subject to leverage, box, group, and/or target mean return constraints.
+It could be specified by \code{maxSTARR=TRUE} or \code{ESratio=TRUE} in \code{optimize.portfolio} with both mean and ES objectives.
+The default action is to maximize ES ratio. If \code{maxSTARR=FALSE} or \code{ESratio=FALSE} is given, the action will be minimizing ES.}
+\item{Maximize portfolio mean return per unit EQS (i.e. the EQS ratio) subject to leverage, box, group, and/or target mean return constraints.
+It could be specified by \code{EQSratio=TRUE} in \code{optimize.portfolio} with both mean and EQS objectives.
+The default action is to maximize EQS ratio. If \code{EQSratio=FALSE} is given, the action will be minimizing EQS.}
+}
+
+Because these convex optimization problem are standardized, there is no need for a penalty term. 
+The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ignored by the CVXR solver.
 }
 \note{
 An object of class \code{v1_constraint} can be passed in for the \code{constraints} argument.
@@ -174,5 +223,5 @@ constraints and objectives to the \code{portfolio} object.
 \code{\link{portfolio.spec}}
 }
 \author{
-Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett
+Kris Boudt, Peter Carl, Brian G. Peterson, Ross Bennett, Xiaokang Feng, Xinran Zhao
 }

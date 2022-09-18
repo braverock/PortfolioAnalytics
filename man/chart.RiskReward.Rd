@@ -14,36 +14,90 @@
 \usage{
 chart.RiskReward(object, ...)
 
-\method{chart.RiskReward}{optimize.portfolio.DEoptim}(object, ...,
-  neighbors = NULL, return.col = "mean", risk.col = "ES",
-  chart.assets = FALSE, element.color = "darkgray", cex.axis = 0.8,
-  xlim = NULL, ylim = NULL)
+\method{chart.RiskReward}{optimize.portfolio.DEoptim}(
+  object,
+  ...,
+  neighbors = NULL,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  element.color = "darkgray",
+  cex.axis = 0.8,
+  xlim = NULL,
+  ylim = NULL
+)
 
-\method{chart.RiskReward}{optimize.portfolio.GenSA}(object, ...,
-  neighbors = NULL, return.col = "mean", risk.col = "ES",
-  chart.assets = FALSE, element.color = "darkgray", cex.axis = 0.8,
-  ylim = NULL, xlim = NULL, rp = FALSE)
+\method{chart.RiskReward}{optimize.portfolio.GenSA}(
+  object,
+  ...,
+  neighbors = NULL,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  element.color = "darkgray",
+  cex.axis = 0.8,
+  ylim = NULL,
+  xlim = NULL,
+  rp = FALSE
+)
 
-\method{chart.RiskReward}{optimize.portfolio.pso}(object, ...,
-  neighbors = NULL, return.col = "mean", risk.col = "ES",
-  chart.assets = FALSE, element.color = "darkgray", cex.axis = 0.8,
-  xlim = NULL, ylim = NULL)
+\method{chart.RiskReward}{optimize.portfolio.pso}(
+  object,
+  ...,
+  neighbors = NULL,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  element.color = "darkgray",
+  cex.axis = 0.8,
+  xlim = NULL,
+  ylim = NULL
+)
 
-\method{chart.RiskReward}{optimize.portfolio.ROI}(object, ...,
-  neighbors = NULL, return.col = "mean", risk.col = "ES",
-  chart.assets = FALSE, element.color = "darkgray", cex.axis = 0.8,
-  xlim = NULL, ylim = NULL, rp = FALSE)
+\method{chart.RiskReward}{optimize.portfolio.ROI}(
+  object,
+  ...,
+  neighbors = NULL,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  element.color = "darkgray",
+  cex.axis = 0.8,
+  xlim = NULL,
+  ylim = NULL,
+  rp = FALSE
+)
 
-\method{chart.RiskReward}{optimize.portfolio.random}(object, ...,
-  neighbors = NULL, return.col = "mean", risk.col = "ES",
-  chart.assets = FALSE, element.color = "darkgray", cex.axis = 0.8,
-  xlim = NULL, ylim = NULL)
+\method{chart.RiskReward}{optimize.portfolio.random}(
+  object,
+  ...,
+  neighbors = NULL,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  element.color = "darkgray",
+  cex.axis = 0.8,
+  xlim = NULL,
+  ylim = NULL
+)
 
-\method{chart.RiskReward}{opt.list}(object, ..., risk.col = "ES",
-  return.col = "mean", main = "", ylim = NULL, xlim = NULL,
-  labels.assets = TRUE, chart.assets = FALSE, pch.assets = 1,
-  cex.assets = 0.8, cex.axis = 0.8, cex.lab = 0.8, colorset = NULL,
-  element.color = "darkgray")
+\method{chart.RiskReward}{opt.list}(
+  object,
+  ...,
+  risk.col = "ES",
+  return.col = "mean",
+  main = "",
+  ylim = NULL,
+  xlim = NULL,
+  labels.assets = TRUE,
+  chart.assets = FALSE,
+  pch.assets = 1,
+  cex.assets = 0.8,
+  cex.axis = 0.8,
+  cex.lab = 0.8,
+  colorset = NULL,
+  element.color = "darkgray"
+)
 }
 \arguments{
 \item{object}{optimal portfolio created by \code{\link{optimize.portfolio}}.}

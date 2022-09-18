@@ -4,9 +4,17 @@
 \alias{barplotGroupWeights}
 \title{barplot of group weights by group or category}
 \usage{
-barplotGroupWeights(object, ..., grouping = c("groups", "category"),
-  main = "Group Weights", las = 3, xlab = NULL, cex.lab = 0.8,
-  element.color = "darkgray", cex.axis = 0.8)
+barplotGroupWeights(
+  object,
+  ...,
+  grouping = c("groups", "category"),
+  main = "Group Weights",
+  las = 3,
+  xlab = NULL,
+  cex.lab = 0.8,
+  element.color = "darkgray",
+  cex.axis = 0.8
+)
 }
 \arguments{
 \item{object}{object of class \code{optimize.portfolio}}

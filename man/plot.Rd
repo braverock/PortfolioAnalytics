@@ -10,31 +10,84 @@
 \alias{plot.optimize.portfolio}
 \title{plot method for objects of class \code{optimize.portfolio}}
 \usage{
-\method{plot}{optimize.portfolio.DEoptim}(x, ..., return.col = "mean",
-  risk.col = "ES", chart.assets = FALSE, neighbors = NULL,
-  main = "optimized portfolio plot", xlim = NULL, ylim = NULL)
+\method{plot}{optimize.portfolio.DEoptim}(
+  x,
+  ...,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  neighbors = NULL,
+  main = "optimized portfolio plot",
+  xlim = NULL,
+  ylim = NULL
+)
 
-\method{plot}{optimize.portfolio.GenSA}(x, ..., rp = FALSE,
-  return.col = "mean", risk.col = "ES", chart.assets = FALSE,
-  cex.axis = 0.8, element.color = "darkgray", neighbors = NULL,
-  main = "GenSA.Portfolios", xlim = NULL, ylim = NULL)
+\method{plot}{optimize.portfolio.GenSA}(
+  x,
+  ...,
+  rp = FALSE,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  cex.axis = 0.8,
+  element.color = "darkgray",
+  neighbors = NULL,
+  main = "GenSA.Portfolios",
+  xlim = NULL,
+  ylim = NULL
+)
 
-\method{plot}{optimize.portfolio.pso}(x, ..., return.col = "mean",
-  risk.col = "ES", chart.assets = FALSE, cex.axis = 0.8,
-  element.color = "darkgray", neighbors = NULL, main = "PSO.Portfolios",
-  xlim = NULL, ylim = NULL)
+\method{plot}{optimize.portfolio.pso}(
+  x,
+  ...,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  cex.axis = 0.8,
+  element.color = "darkgray",
+  neighbors = NULL,
+  main = "PSO.Portfolios",
+  xlim = NULL,
+  ylim = NULL
+)
 
-\method{plot}{optimize.portfolio.ROI}(x, ..., rp = FALSE, risk.col = "ES",
-  return.col = "mean", chart.assets = FALSE, element.color = "darkgray",
-  neighbors = NULL, main = "ROI.Portfolios", xlim = NULL, ylim = NULL)
+\method{plot}{optimize.portfolio.ROI}(
+  x,
+  ...,
+  rp = FALSE,
+  risk.col = "ES",
+  return.col = "mean",
+  chart.assets = FALSE,
+  element.color = "darkgray",
+  neighbors = NULL,
+  main = "ROI.Portfolios",
+  xlim = NULL,
+  ylim = NULL
+)
 
-\method{plot}{optimize.portfolio.random}(x, ..., return.col = "mean",
-  risk.col = "ES", chart.assets = FALSE, neighbors = NULL, xlim = NULL,
-  ylim = NULL, main = "optimized portfolio plot")
+\method{plot}{optimize.portfolio.random}(
+  x,
+  ...,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  neighbors = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  main = "optimized portfolio plot"
+)
 
-\method{plot}{optimize.portfolio}(x, ..., return.col = "mean",
-  risk.col = "ES", chart.assets = FALSE, neighbors = NULL, xlim = NULL,
-  ylim = NULL, main = "optimized portfolio plot")
+\method{plot}{optimize.portfolio}(
+  x,
+  ...,
+  return.col = "mean",
+  risk.col = "ES",
+  chart.assets = FALSE,
+  neighbors = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  main = "optimized portfolio plot"
+)
 }
 \arguments{
 \item{x}{set of portfolios created by \code{\link{optimize.portfolio}}}

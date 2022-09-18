@@ -2,6 +2,7 @@
 % Please edit documentation in R/generics.R
 \name{print.optimize.portfolio.ROI}
 \alias{print.optimize.portfolio.ROI}
+\alias{print.optimize.portfolio.CVXR}
 \alias{print.optimize.portfolio.random}
 \alias{print.optimize.portfolio.DEoptim}
 \alias{print.optimize.portfolio.GenSA}
@@ -9,6 +10,8 @@
 \title{Printing output of optimize.portfolio}
 \usage{
 \method{print}{optimize.portfolio.ROI}(x, ..., digits = 4)
+
+\method{print}{optimize.portfolio.CVXR}(x, ..., digits = 4)
 
 \method{print}{optimize.portfolio.random}(x, ..., digits = 4)
 

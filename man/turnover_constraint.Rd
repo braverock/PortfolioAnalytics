@@ -4,8 +4,13 @@
 \alias{turnover_constraint}
 \title{constructor for turnover_constraint}
 \usage{
-turnover_constraint(type = "turnover", turnover_target, enabled = TRUE,
-  message = FALSE, ...)
+turnover_constraint(
+  type = "turnover",
+  turnover_target,
+  enabled = TRUE,
+  message = FALSE,
+  ...
+)
 }
 \arguments{
 \item{type}{character type of the constraint}

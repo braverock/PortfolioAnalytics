@@ -28,7 +28,7 @@ This allows, for example, each sub portfolio to have different rebalancing
 frequencies (i.e. monthly or quarterly), optimization methods, etc.
 
 Each sub portfolio is optimized with \code{optimize.portfolio.rebalancing} 
-to create a time series of proxy returns.
+to create a time series of proxy returns. 
 
 The "top level" portfolio is used to specify the constraints and objectives 
 to control the optimization given the proxy returns of each sub portfolio.

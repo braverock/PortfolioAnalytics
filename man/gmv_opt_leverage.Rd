@@ -4,8 +4,15 @@
 \alias{gmv_opt_leverage}
 \title{GMV/QU QP Optimization with Turnover Constraint}
 \usage{
-gmv_opt_leverage(R, constraints, moments, lambda, target, solver = "quadprog",
-  control = NULL)
+gmv_opt_leverage(
+  R,
+  constraints,
+  moments,
+  lambda,
+  target,
+  solver = "quadprog",
+  control = NULL
+)
 }
 \arguments{
 \item{R}{xts object of asset returns}

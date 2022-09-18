@@ -4,8 +4,12 @@
 \alias{constraint_ROI}
 \title{constructor for class constraint_ROI}
 \usage{
-constraint_ROI(assets = NULL, op.problem, solver = c("glpk", "quadprog"),
-  weight_seq = NULL)
+constraint_ROI(
+  assets = NULL,
+  op.problem,
+  solver = c("glpk", "quadprog"),
+  weight_seq = NULL
+)
 }
 \arguments{
 \item{assets}{number of assets, or optionally a named vector of assets specifying seed weights}

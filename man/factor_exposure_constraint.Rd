@@ -4,8 +4,16 @@
 \alias{factor_exposure_constraint}
 \title{Constructor for factor exposure constraint}
 \usage{
-factor_exposure_constraint(type = "factor_exposure", assets, B, lower, upper,
-  enabled = TRUE, message = FALSE, ...)
+factor_exposure_constraint(
+  type = "factor_exposure",
+  assets,
+  B,
+  lower,
+  upper,
+  enabled = TRUE,
+  message = FALSE,
+  ...
+)
 }
 \arguments{
 \item{type}{character type of the constraint}
