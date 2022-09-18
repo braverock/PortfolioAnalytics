@@ -85,8 +85,8 @@ In the following part, we only show the time series of monthly returns of 10 CRS
 ```{r}
 # generate monthly return in last 5 years
 ep <- endpoints(ret_CRSP, on= "months", k=1)
-sum1 <- function(x){apply(x, 2, sum)}
-retM_CRSP <- period.apply(ret_CRSP, INDEX = ep, FUN = sum1)
+prod1 <- function(x){apply(x+1, 2, prod)}
+retM_CRSP <- period.apply(ret_CRSP, INDEX = ep, FUN = prod1) - 1
 retM_CRSP_5 <- tail(retM_CRSP, 60)
 
 # time series plot of 10 stocks
@@ -438,13 +438,13 @@ EQS = Return.rebalancing(retM_CRSP, wts.EQS)
 ret.comb <- na.omit(merge(GMV, ES, EQS, all=F))
 names(ret.comb) = c("GMV", "GMES", "GMEQS")
 
-# Compute cumulative geometric portfolios returns
+# Compute cumulative gross portfolios returns
 R <- ret.comb
-geometric = FALSE
-c.xts <- if ( geometric ) {
+gross_cum <- TRUE
+c.xts <- if ( gross_cum ) {
   cumprod(1+R)
 } else {
-  exp(cumsum(R))
+  cumsum(R)
 }
 
 # Cumulative returns panel (Peter Carl)
@@ -533,13 +533,13 @@ EQSr = Return.rebalancing(retM_CRSP, wts.EQSr)
 ret.comb <- na.omit(merge(Sr, ESr, EQSr, all=F))
 names(ret.comb) = c("Sharpe ratio", "ES ratio", "EQS ratio")
 
-# Compute cumulative geometric portfolios returns
+# Compute cumulative gross portfolios returns
 R <- ret.comb
-geometric = FALSE
-c.xts <- if ( geometric ) {
+gross_cum <- TRUE
+c.xts <- if ( gross_cum ) {
   cumprod(1+R)
 } else {
-  exp(cumsum(R))
+  cumsum(R)
 }
 
 # Cumulative returns panel (Peter Carl)
