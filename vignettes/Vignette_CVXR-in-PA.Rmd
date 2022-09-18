@@ -1,7 +1,7 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "2022/9/16"
+date: "2022/9/18"
 output: pdf_document
 ---
 
@@ -65,7 +65,7 @@ tsPlotMP(ret_edhec, layout = c(2, 7))
 \begin{center}
 Fig 2.1
 \end{center}
-The CRSP data set is the daily log returns of 30 small cap stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP). We use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
+The CRSP data set is the daily returns of 30 small cap stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP). We use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
 
 ```{r}
 load("stocksCRSPdaily.rda")
