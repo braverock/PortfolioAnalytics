@@ -12,9 +12,10 @@ Authors@R: c(
     person(given="Hezky",family="Varon",role="ctb") ,
     person(given="Guy",family="Yollin",role="ctb") ,
     person(given="R. Douglas",family="Martin",role="ctb") ,
-    person(given="Xiaokang",family="Feng",role="ctb") )
+    person(given="Xiaokang",family="Feng",role="ctb") ,
+    person(given="Xinran",family="Zhao",role="ctb") )
 Version: 2.0.0
-Date: 2021-05-08
+Date: 2022-09-20
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
@@ -43,7 +44,8 @@ Suggests:
     robustbase, 
     osqp, 
     Rglpk, 
-    mco
+    mco,
+    CVXR
 Imports:
     methods
 License: GPL-3

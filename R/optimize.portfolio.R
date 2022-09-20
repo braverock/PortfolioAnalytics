@@ -2792,9 +2792,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     ## variables
     X <- as.matrix(R)
-    wts <- Variable(N)
-    z <- Variable(T)
-    zeta <- Variable(1)
+    wts <- CVXR::Variable(N)
+    z <- CVXR::Variable(T)
+    zeta <- CVXR::Variable(1)
     
     # objective type
     target = -Inf
@@ -2850,7 +2850,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       tmpname = "mean"
     } else if(!reward & risk & !risk_ES & !risk_EQS){
       # min var/std
-      obj <- quad_form(wts, sigma_value)
+      obj <- CVXR::quad_form(wts, sigma_value)
       constraints_cvxr = list()
       tmpname = "StdDev"
     } else if(reward & risk & !risk_ES & !risk_EQS){
@@ -2859,12 +2859,12 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       
       if(!maxSR){
         # min mean-variance
-        obj <- quad_form(wts, sigma_value) - (t(mean_value) %*% wts) / lambda
+        obj <- CVXR::quad_form(wts, sigma_value) - (t(mean_value) %*% wts) / lambda
         constraints_cvxr = list()
         tmpname = "optimal value"
       } else {
         # max sharpe ratio
-        obj <- quad_form(wts, sigma_value)
+        obj <- CVXR::quad_form(wts, sigma_value)
         constraints_cvxr = list(t(mean_value) %*% wts == 1, sum(wts) >= 0)
         tmpname = "Sharpe Ratio"
       }
@@ -2895,7 +2895,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
       if(EQSratio){
         # max EQS ratio
-        obj <- zeta + (1/alpha) * p_norm(z, p=2)
+        obj <- zeta + (1/alpha) * CVXR::p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, 
                                 z >= -X %*% wts - zeta, 
                                 t(mean_value) %*% wts == 1,
@@ -2903,7 +2903,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         tmpname = "EQS ratio"
       } else {
         # min EQS
-        obj <- zeta + (1/alpha) * p_norm(z, p=2)
+        obj <- zeta + (1/alpha) * CVXR::p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
         tmpname = "EQS"
       }
@@ -2965,7 +2965,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     
     # problem
-    prob_cvxr <- Problem(Minimize(obj), constraints = constraints_cvxr)
+    prob_cvxr <- CVXR::Problem(CVXR::Minimize(obj), constraints = constraints_cvxr)
     
     if(cvxr_default){
       if(risk_ES || risk_EQS || maxSTARR || EQSratio){

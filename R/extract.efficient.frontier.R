@@ -283,17 +283,21 @@ meanetl.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
   return(structure(out, class="frontier"))
 }
 
-#' Generate the efficient frontier for a mean-EQS portfolio xinran
-#'
-#' @param portfolio 
-#' @param R 
-#' @param n.portfolios 
-#' @param ... 
-#'
-#' @return
+#' Generate the efficient frontier for a mean-EQS portfolio
+#' 
+#' This function generates the mean-EQS efficient frontier of a portfolio
+#' specifying the constraints and objectives. The \code{portfolio} object 
+#' should have two objectives: 1) mean and 2) EQS. If the 
+#' portfolio object does not contain these objectives, they will be added 
+#' using default parameters.
+#' 
+#' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
+#' @param R an xts or matrix of asset returns
+#' @param n.portfolios number of portfolios to generate the efficient frontier
+#' @param \dots passthru parameters to \code{\link{optimize.portfolio}}
+#' @return a matrix of objective measure values and weights along the efficient frontier
+#' @author Xinran Zhao
 #' @export
-#'
-#' @examples
 meaneqs.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
   if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
   # step 1: find the minimum return given the constraints
