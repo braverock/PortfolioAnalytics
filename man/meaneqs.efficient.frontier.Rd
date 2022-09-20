@@ -2,22 +2,29 @@
 % Please edit documentation in R/extract.efficient.frontier.R
 \name{meaneqs.efficient.frontier}
 \alias{meaneqs.efficient.frontier}
-\title{Generate the efficient frontier for a mean-EQS portfolio xinran}
+\title{Generate the efficient frontier for a mean-EQS portfolio}
 \usage{
 meaneqs.efficient.frontier(portfolio, R, n.portfolios = 25, ...)
 }
 \arguments{
-\item{portfolio}{}
+\item{portfolio}{a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}}
 
-\item{R}{}
+\item{R}{an xts or matrix of asset returns}
 
-\item{n.portfolios}{}
+\item{n.portfolios}{number of portfolios to generate the efficient frontier}
 
-\item{...}{}
+\item{\dots}{passthru parameters to \code{\link{optimize.portfolio}}}
 }
 \value{
-
+a matrix of objective measure values and weights along the efficient frontier
 }
 \description{
-Generate the efficient frontier for a mean-EQS portfolio xinran
+This function generates the mean-EQS efficient frontier of a portfolio
+specifying the constraints and objectives. The \code{portfolio} object 
+should have two objectives: 1) mean and 2) EQS. If the 
+portfolio object does not contain these objectives, they will be added 
+using default parameters.
+}
+\author{
+Xinran Zhao
 }
