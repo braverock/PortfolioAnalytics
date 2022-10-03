@@ -49,6 +49,8 @@ Suggests:
     PCRA,
     knitr,
     rmarkdown
+VignetteBuilder:
+    knitr
 Imports:
     methods
 License: GPL-3
