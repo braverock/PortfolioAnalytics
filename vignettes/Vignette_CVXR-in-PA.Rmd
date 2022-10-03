@@ -68,15 +68,16 @@ Fig 2.1
 The CRSP data set is the daily returns of 30 small cap stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP). We use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
 
 ```{r}
-load("stocksCRSPdaily.rda")
+#load("stocksCRSPdaily.rda")
 
 stocks <- stocksCRSPdaily[CapGroup == "SmallCap"]
-returnMat <- tapply(stocks[, ReturnD], list(stocks$Date, stocks$TickerLast), I)
+returnMat <- tapply(stocks[, Return], list(stocks$Date, stocks$TickerLast), I)
 smallcapD <- xts(returnMat, as.Date(rownames(returnMat)))
-sc_30 <- c("TGNA", "AVP", "PBI", "THC", "AVY", "HAS", "TSS", "SPXC", "R", "HP", "J", 
-          "DBD", "HAR", "BIG", "HSC", "MLHR", "AXE", "MATX", "KBH", "BGG", "CRS", 
-          "UVV", "MENT", "HTLD", "BRC", "FUL", "ESND", "BOBE", "PIR", "WTS")
-ret_CRSP <- smallcapD[, sc_30]
+#sc_30 <- c("TGNA", "AVP", "PBI", "THC", "AVY", "HAS", "TSS", "SPXC", "R", "HP", "J", 
+#          "DBD", "HAR", "BIG", "HSC", "MLHR", "AXE", "MATX", "KBH", "BGG", "CRS", 
+#          "UVV", "MENT", "HTLD", "BRC", "FUL", "ESND", "BOBE", "PIR", "WTS")
+#ret_CRSP <- smallcapD[, sc_30]
+ret_CRSP = smallcapD[, apply(smallcapD, 2, function(y) all(!is.na(y)))]
 print(head(ret_CRSP, 3))
 fund_CRSP <- colnames(ret_CRSP)
 ```
@@ -570,7 +571,7 @@ ylim2 <- c(p$Env$ylim[[4]][1], p$Env$ylim[[4]][2])
 ylim <- c(ylim1, ylim2)
 # get longest drawdown dates for xts object
 dt <- table.Drawdowns(R, top = 1) # just want to find the worst drawdown
-dt2 <- t(dt[,c("From", "To")])
+dt2 <- t(dt[,c("From", "Trough")])
 x <- as.vector(dt2[,NCOL(dt2)])
 y <- as.xts(matrix(rep(ylim, length(x)),ncol=length(ylim), byrow=TRUE), order.by=as.Date(x))
 i=1
