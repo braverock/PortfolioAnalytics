@@ -37,4 +37,3 @@ vignettes/*.pdf
 # compiled files
 *.o
 *.so
-inst/doc
