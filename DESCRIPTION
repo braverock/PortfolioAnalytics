@@ -26,7 +26,7 @@ Depends:
     PerformanceAnalytics (>= 1.5.1)
 Suggests:
     quantmod,
-    DEoptim(>= 2.2.1),
+    DEoptim (>= 2.2.1),
     iterators,
     fGarch,
     Rglpk,
@@ -41,11 +41,12 @@ Suggests:
     testthat,
     nloptr (>= 1.0.0),
     MASS,
-    robustbase, 
-    osqp, 
-    Rglpk, 
+    robustbase,
+    osqp,
+    Rglpk,
     mco,
-    CVXR
+    CVXR,
+    PCRA
 Imports:
     methods
 License: GPL-3
