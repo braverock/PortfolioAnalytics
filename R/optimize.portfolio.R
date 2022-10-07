@@ -2968,7 +2968,11 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     prob_cvxr <- CVXR::Problem(CVXR::Minimize(obj), constraints = constraints_cvxr)
     
     if(cvxr_default){
-      result_cvxr <- CVXR::solve(prob_cvxr)
+      if(risk_ES || risk_EQS || maxSTARR || EQSratio){
+        result_cvxr <- CVXR::solve(prob_cvxr, solver = "ECOS")
+      } else {
+        result_cvxr <- CVXR::solve(prob_cvxr, solver = "OSQP")
+      }
     } else {
       result_cvxr <- CVXR::solve(prob_cvxr, solver = optimize_method)
     }
