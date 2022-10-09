@@ -1,9 +1,13 @@
-## ----setup, include=FALSE------------------------------------------------------------------------------------------
-knitr::opts_chunk$set(echo = TRUE)
+## ---- include = FALSE---------------------------------------------------------------------
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>"
+)
 Sys.setlocale("LC_TIME", "English")
 
 
-## ---- message=FALSE------------------------------------------------------------------------------------------------
+## ---- message=FALSE-----------------------------------------------------------------------
 library(PortfolioAnalytics)
 library(CVXR)
 library(data.table)
@@ -11,7 +15,7 @@ library(xts)
 library(PCRA)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 data(edhec)
 # Use edhec for a returns object
 ret_edhec <- tail(edhec, 60)
@@ -22,25 +26,28 @@ print(head(ret_edhec, 5))
 fund_edhec <- colnames(ret_edhec)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 tsPlotMP(ret_edhec, layout = c(2, 7))
 
 
-## ------------------------------------------------------------------------------------------------------------------
-load("stocksCRSPdaily.rda")
+## -----------------------------------------------------------------------------------------
+# use CRSP daily data set
+stocks <- stocksCRSPdaily
+returnMat <- tapply(stocks[, Return], list(stocks$Date, stocks$TickerLast), I)
+stocksCRSP_D <- xts(returnMat, as.Date(rownames(returnMat)))
 
-stocks <- stocksCRSPdaily[CapGroup == "SmallCap"]
-returnMat <- tapply(stocks[, ReturnD], list(stocks$Date, stocks$TickerLast), I)
-smallcapD <- xts(returnMat, as.Date(rownames(returnMat)))
-sc_30 <- c("TGNA", "AVP", "PBI", "THC", "AVY", "HAS", "TSS", "SPXC", "R", "HP", "J", 
-          "DBD", "HAR", "BIG", "HSC", "MLHR", "AXE", "MATX", "KBH", "BGG", "CRS", 
-          "UVV", "MENT", "HTLD", "BRC", "FUL", "ESND", "BOBE", "PIR", "WTS")
-ret_CRSP <- smallcapD[, sc_30]
+# top 30 small cap stocks based on the market capitalization
+small_cap <- factorsSPGMI[CapGroupLast == "SmallCap"]
+sc_cap <- small_cap[,mean(LogMktCap),by="TickerLast"]
+sc_cap <- sc_cap[order(sc_cap$V1, decreasing = TRUE),]
+sc_30 <- sc_cap[,TickerLast][1:30]
+ret_CRSP <- stocksCRSP_D[, sc_30]
+
 print(head(ret_CRSP, 3))
 fund_CRSP <- colnames(ret_CRSP)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # generate monthly return in last 5 years
 ep <- endpoints(ret_CRSP, on= "months", k=1)
 prod1 <- function(x){apply(x+1, 2, prod)}
@@ -51,7 +58,7 @@ retM_CRSP_5 <- tail(retM_CRSP, 60)
 tsPlotMP(retM_CRSP_5[, 1:10])
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # Create portfolio object
 pspec_maxret <- portfolio.spec(assets=fund_edhec)
 # Add constraints to the portfolio object
@@ -65,7 +72,7 @@ pspec_maxret <- add.objective(portfolio = pspec_maxret,
 pspec_maxret
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # Run the optimization with default solver
 opt_maxret <- optimize.portfolio(R=ret_edhec, portfolio=pspec_maxret, 
                                  optimize_method="CVXR", trace=TRUE)
@@ -78,19 +85,19 @@ opt_maxret_glpk <- optimize.portfolio(R=ret_edhec, portfolio=pspec_maxret,
 opt_maxret_glpk$solver
 
 
-## ----warning=FALSE-------------------------------------------------------------------------------------------------
+## ----warning=FALSE------------------------------------------------------------------------
 bt_maxret <- optimize.portfolio.rebalancing(R=ret_edhec, portfolio=pspec_maxret,
                                             optimize_method="CVXR",
                                             rebalance_on="quarters",
                                             training_period=36)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 class(bt_maxret)
 names(bt_maxret)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # Create portfolio object
 pspec_gmv <- portfolio.spec(assets=fund_edhec)
 # Add full-investment constraint
@@ -99,12 +106,12 @@ pspec_gmv <- add.constraint(pspec_gmv, type="full_investment")
 pspec_gmv <- add.objective(portfolio = pspec_gmv, type = "risk", name = "var")
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 opt_gmv <- optimize.portfolio(ret_edhec, pspec_gmv, optimize_method = "CVXR")
 opt_gmv
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # portfolio object
 pspec_mv <- add.constraint(pspec_gmv, type = "long_only")
 pspec_mv <- add.constraint(pspec_mv, type = "group",
@@ -127,7 +134,7 @@ bt_mv <- optimize.portfolio.rebalancing(R=ret_edhec, portfolio=pspec_mv,
                                             training_period=36)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 opt_mv_ecos <- optimize.portfolio(ret_edhec, pspec_mv, optimize_method = c("CVXR", "ECOS"))
 opt_mv_ecos
 
@@ -135,7 +142,7 @@ opt_mv$solver
 opt_mv_ecos$solver
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 pspec_mvo <- portfolio.spec(assets=fund_edhec)
 pspec_mvo <- add.constraint(pspec_mvo, type="full_investment")
 pspec_mvo <- add.constraint(pspec_mvo, type="long_only")
@@ -145,12 +152,12 @@ pspec_mvo <- add.objective(portfolio = pspec_mvo, type = "risk", name = "var",
                            risk_aversion = 20)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 opt_mvo <- optimize.portfolio(ret_edhec, pspec_mvo, optimize_method = "CVXR")
 opt_mvo
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 pspec_es <- portfolio.spec(assets=fund_edhec)
 pspec_es <- add.constraint(pspec_es, type="full_investment")
 # Add objective of minimizing ES by using the default gamma
@@ -160,7 +167,7 @@ pspec_es_1 <- add.objective(portfolio = pspec_es, type = "risk", name = "ES",
                           arguments = list(p=0.1))
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # GMES with default gamma=0.05
 opt_es <- optimize.portfolio(ret_edhec, pspec_es, optimize_method = "CVXR")
 opt_es
@@ -169,7 +176,7 @@ opt_es_1 <- optimize.portfolio(ret_edhec, pspec_es_1, optimize_method = "CVXR")
 opt_es_1
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 pspec_eqs <- portfolio.spec(assets=fund_edhec)
 pspec_eqs <- add.constraint(pspec_eqs, type="full_investment")
 # Add objective of minimizing EQS
@@ -177,12 +184,12 @@ pspec_eqs <- add.objective(portfolio = pspec_eqs, type = "risk", name = "EQS",
                           arguments = list(p=0.05))
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 opt_eqs <- optimize.portfolio(ret_edhec, pspec_eqs, optimize_method = "CVXR")
 opt_eqs
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # Create portfolio object
 pspec_sr <- portfolio.spec(assets=fund_edhec)
 ## Add constraints of maximizing Sharpe Ratio
@@ -196,7 +203,7 @@ pspec_sr <- add.objective(pspec_sr, type="risk", name="var")
 optimize.portfolio(ret_edhec, pspec_sr, optimize_method = "CVXR", maxSR=TRUE)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # Create portfolio object
 pspec_ESratio <- portfolio.spec(assets=fund_edhec)
 ## Add constraints of maximizing return per unit ES
@@ -211,7 +218,7 @@ pspec_ESratio <- add.objective(pspec_ESratio, type="risk", name="ES",
 optimize.portfolio(ret_edhec, pspec_ESratio, optimize_method = "CVXR", ESratio=TRUE)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # Create portfolio object
 pspec_EQSratio <- portfolio.spec(assets=fund_edhec)
 ## Add constraints of maximizing return per unit EQS
@@ -226,7 +233,7 @@ pspec_EQSratio <- add.objective(pspec_EQSratio, type="risk", name="EQS",
 optimize.portfolio(ret_edhec, pspec_EQSratio, optimize_method = "CVXR", EQSratio=TRUE)
 
 
-## ---- warning=FALSE------------------------------------------------------------------------------------------------
+## ---- warning=FALSE-----------------------------------------------------------------------
 ## Generate GMV, GMES and GMEQS portfolios
 pspec_sc <- portfolio.spec(assets=fund_CRSP)
 pspec_sc <- add.constraint(pspec_sc, type="full_investment")
@@ -319,7 +326,7 @@ p <- xts::addPolygon(y[i:(i+1),3:4], on=-2, col="lightgrey") # lower panel
 p
 
 
-## ---- warning=FALSE------------------------------------------------------------------------------------------------
+## ---- warning=FALSE-----------------------------------------------------------------------
 ## Generate GMV, GMES and GMEQS portfolios
 pspec_sc_ratio <- add.objective(pspec_sc, type="return", name="mean")
 pspec_Sr <- add.objective(pspec_sc_ratio, type="risk", name="var")
@@ -409,7 +416,7 @@ p <- xts::addPolygon(y[i:(i+1),3:4], on=-2, col="lightgrey") # lower panel
 p
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # mean-var efficient frontier
 meanvar.ef <- create.EfficientFrontier(R=retM_CRSP_5, portfolio=pspec_sc, type="mean-StdDev")
 meanvar.ef
@@ -418,7 +425,7 @@ chart.EfficientFrontier(meanvar.ef, match.col="StdDev", type="l",
                         RAR.text="Sharpe ratio", pch=1)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 meanvar.ef$frontier[, 1:2]
 sr = meanvar.ef$frontier[, 1]/meanvar.ef$frontier[, 2]
 cat("maximum Sharpe ratio:", max(sr))
@@ -426,7 +433,7 @@ cat("mean of the maximum SR portfolio:", meanvar.ef$frontier[, 1][sr == max(sr)]
 cat("StdDev of the maximum SR portfolio:", meanvar.ef$frontier[, 2][sr == max(sr)])
 
 
-## ---- warning=FALSE------------------------------------------------------------------------------------------------
+## ---- warning=FALSE-----------------------------------------------------------------------
 # Mean-StdDev Efficient Frontier
 pspec_MV <- add.objective(pspec_sc, type="risk", name="var")
 pspec_MV <- add.objective(portfolio=pspec_MV, type="return", name="mean")
@@ -438,7 +445,7 @@ chart.EfficientFrontier(opt_MV, match.col="StdDev", chart.assets = FALSE,
                         RAR.text="Sharpe Ratio", pch=1, xlim = c(0, 0.06))
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 pspec_sc_init <- portfolio.spec(assets=fund_CRSP)
 pspec_sc_init <- add.constraint(pspec_sc_init, type="full_investment")
 
@@ -466,7 +473,7 @@ chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_list,
                                xlim = c(0.03, 0.06), ylim = c(0.005, 0.025))
 
 
-## ---- warning=FALSE------------------------------------------------------------------------------------------------
+## ---- warning=FALSE-----------------------------------------------------------------------
 # Mean-ES Efficient Frontier
 meanetl.ef <- create.EfficientFrontier(R=retM_CRSP_5, portfolio=pspec_sc, type="mean-ES")
 chart.EfficientFrontier(meanetl.ef, match.col="ES", type="l",
@@ -474,7 +481,7 @@ chart.EfficientFrontier(meanetl.ef, match.col="ES", type="l",
                         RAR.text="ES ratio", pch=1)
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_list, 
                                type="mean-ES", match.col="ES", 
                                legend.loc="topleft", chart.assets = FALSE,
@@ -485,7 +492,7 @@ chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_list,
                                xlim = c(0.04, 0.12), ylim = c(0.005, 0.03))
 
 
-## ------------------------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
 # Create long-only ES portfolios with different tail probabilities
 ES_05 <- add.objective(portfolio=pspec_sc_lo, type="risk", name="ES", 
                           arguments=list(p=0.05))
@@ -511,7 +518,7 @@ chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_ES_list,
                                xlim = c(0.03, 0.1), ylim = c(0.005, 0.025))
 
 
-## ---- warning=FALSE------------------------------------------------------------------------------------------------
+## ---- warning=FALSE-----------------------------------------------------------------------
 # Mean-EQS Efficient Frontier
 meaneqs.ef <- create.EfficientFrontier(R=retM_CRSP_5, portfolio=pspec_sc, type="mean-EQS")
 chart.EfficientFrontier(meaneqs.ef, match.col="EQS", type="l",
