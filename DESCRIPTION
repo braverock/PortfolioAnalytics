@@ -47,8 +47,10 @@ Suggests:
     mco,
     CVXR,
     PCRA,
+    data.table,
     knitr,
     rmarkdown
+VignetteBuilder: knitr
 Imports:
     methods
 License: GPL-3

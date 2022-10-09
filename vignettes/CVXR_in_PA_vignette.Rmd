@@ -1,12 +1,20 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "2022/9/18"
-output: pdf_document
+date: "2022/10/7"
+output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{CVXR_in_PA_vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>"
+)
 Sys.setlocale("LC_TIME", "English")
 ```
 
@@ -15,7 +23,7 @@ Sys.setlocale("LC_TIME", "English")
 # 1 Introduction
 CVXR is an R package that provides an object-oriented modeling language for convex optimization, including the Second-Order Cone Optimization(SOCopt) required to minimize Expected Quadratic Shortfall(EQS) problem, which is not supported by other solvers in PortfolioAnalytics. Hence, CVXR is a great extension of PortfolioAnalytics.
 
-The purpose of this vignette is to demonstrate examples of optimization problems that can be solved in PortfolioAnalytics with CVXR and its many supported solvers. The problem types covered include not only Linear Programming(LP), Quadratic Programming(QP) but also Second-Order Cone Programming(SOCP). Multiple solvers supported by CVXR can be selected according to optimization types. For example, SCS and ECOS can completely cover the types of problems that ROI can deal with, such as mean-variance and ES problem. In order to better understand the functions of PortfolioAnalytics, users are recommended to read the Vignette [*Introduction to PortfolioAnalytics*](https://cran.r-project.org/web/packages/PortfolioAnalytics/vignettes/portfolio_vignette.pdf) first.
+The purpose of this vignette is to demonstrate examples of optimization problems that can be solved in PortfolioAnalytics with CVXR and its many supported solvers. The problem types covered include not only Linear Programming(LP), Quadratic Programming(QP) but also Second-Order Cone Programming(SOCP). Multiple solvers supported by CVXR can be selected according to optimization types. For example, SCS and ECOS can completely cover the types of problems that ROI can deal with, such as mean-variance and ES problem. In order to better understand the functionality and use of PortfolioAnalytics, users are recommended to read the Vignette [*Introduction to PortfolioAnalytics*](https://cran.r-project.org/web/packages/PortfolioAnalytics/vignettes/portfolio_vignette.pdf) first.
 
 # 2 Getting Started
 ## 2.1 Load Packages
@@ -29,9 +37,9 @@ library(PCRA)
 ```
 
 ## 2.2 Solvers
-The website https://cvxr.rbind.io/ shows that CVXR currently supports us to use 9 solvers, some of which are commercial (CBC, CPLEX, GUROBI, MOSEK) and the others are open source(GLPK, GLPK_MI, OSQP, SCS, ECOS). 
+The website https://cvxr.rbind.io/ shows that CVXR currently supports the use of 9 solvers, some of which are commercial (CBC, CPLEX, GUROBI, MOSEK) and the others are open source(GLPK, GLPK_MI, OSQP, SCS, ECOS). 
 
-Different solvers support different types of portfolio optimization problems. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP type portfolio optimization problems such as maximum mean return and minimum variance portfolio optimization, will be OSQP, and the default solver for SOCP type portfolio optimizations, such as "robust portfolio optimization" to control for alpha uncertainty, and Expected Quadratic Shortfall (EQS) portfolio optimization, will be SCS.
+Different solvers support different types of portfolio optimization problems. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP type portfolio optimization problems such as maximum mean return and minimum variance portfolio optimization is OSQP, and the default solver for SOCP type portfolio optimizations, such as "robust portfolio optimization" to control for alpha uncertainty, and Expected Quadratic Shortfall (EQS) portfolio optimization, is ECOS.
 
 | Solver | LP | QP | SOCP |
 | :-- | :----: | :----: | :----: |
@@ -39,14 +47,14 @@ Different solvers support different types of portfolio optimization problems. Th
 |GLPK|$\checkmark$| | |
 |GLPK_MI|$\checkmark$| | |
 |OSQP|$\colorbox{gray}{\checkmark}$|$\colorbox{gray}{\checkmark}$| |
-|SCS|$\checkmark$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
-|ECOS|$\checkmark$|$\checkmark$|$\checkmark$|
+|SCS|$\checkmark$|$\checkmark$|$\checkmark$|
+|ECOS|$\checkmark$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
 |CPLEX|$\checkmark$|$\checkmark$|$\checkmark$|
 |GUROBI|$\checkmark$|$\checkmark$|$\checkmark$|
 |MOSEK|$\checkmark$|$\checkmark$|$\checkmark$|
 
 ## 2.3 Data
-The edhec data set from the PerformanceAnalytics package is used as example data for examples from Section 3 to Section 8. The edhec data contains monthly returns for 13 assets from 1997-01 to 2019-11. We use the edhec data of the last 5 years as the example data to mainly show how to use the code.
+The edhec data set from the PerformanceAnalytics package is used as example data for examples in Section 3 to Section 8. The edhec data set is an xts object that contains monthly returns for 13 assets from 1997-01 to 2019-11. We use the edhec data of the last 5 years as the example data to show how to use the code.
 ```{r}
 data(edhec)
 # Use edhec for a returns object
@@ -65,19 +73,21 @@ tsPlotMP(ret_edhec, layout = c(2, 7))
 \begin{center}
 Fig 2.1
 \end{center}
-The CRSP data set is the daily returns of 30 small cap stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP). We use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
+The CRSP data set is an xts object that contains the daily returns of stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP). We select the top 30 small cap stocks based on the market capitalization, and use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
 
 ```{r}
-#load("stocksCRSPdaily.rda")
-
-stocks <- stocksCRSPdaily[CapGroup == "SmallCap"]
+# use CRSP daily data set
+stocks <- stocksCRSPdaily
 returnMat <- tapply(stocks[, Return], list(stocks$Date, stocks$TickerLast), I)
-smallcapD <- xts(returnMat, as.Date(rownames(returnMat)))
-#sc_30 <- c("TGNA", "AVP", "PBI", "THC", "AVY", "HAS", "TSS", "SPXC", "R", "HP", "J", 
-#          "DBD", "HAR", "BIG", "HSC", "MLHR", "AXE", "MATX", "KBH", "BGG", "CRS", 
-#          "UVV", "MENT", "HTLD", "BRC", "FUL", "ESND", "BOBE", "PIR", "WTS")
-#ret_CRSP <- smallcapD[, sc_30]
-ret_CRSP = smallcapD[, apply(smallcapD, 2, function(y) all(!is.na(y)))]
+stocksCRSP_D <- xts(returnMat, as.Date(rownames(returnMat)))
+
+# top 30 small cap stocks based on the market capitalization
+small_cap <- factorsSPGMI[CapGroupLast == "SmallCap"]
+sc_cap <- small_cap[,mean(LogMktCap),by="TickerLast"]
+sc_cap <- sc_cap[order(sc_cap$V1, decreasing = TRUE),]
+sc_30 <- sc_cap[,TickerLast][1:30]
+ret_CRSP <- stocksCRSP_D[, sc_30]
+
 print(head(ret_CRSP, 3))
 fund_CRSP <- colnames(ret_CRSP)
 ```
@@ -114,7 +124,7 @@ s.t. \quad & A\boldsymbol{w} \ge b\\
 Where $\boldsymbol{\mu}$ is the estimated asset returns mean vector and $\boldsymbol{w}$ is the vector of portfolio weights.
 
 ## 3.1 Portfolio Object
-The first step in setting up a model is to create the portfolio object. Then add constraints and a return objective.
+The first step in setting up a model is to create the portfolio object. Portfolio object should be created in the form of constraints and objective specifications. In the following we create full-investment and box constraints specifications, and a maximum return objective specification.
 ```{r}
 # Create portfolio object
 pspec_maxret <- portfolio.spec(assets=fund_edhec)
@@ -185,7 +195,7 @@ opt_gmv
 ```
 As this example illustrates, a global minimum variance portfolio can have short positions.
 
-## 4.2 Linearly Constrained Minimum Variance Portfolio 
+## 4.2 Lone-Only and Group Constrained Minimum Variance Portfolio 
 Various linear inequality constraint, such as box constraints, group constraints and a target mean return constraint, can be used with GMV portfolio construction. Here we demonstrate the case of linearly constrained minimum variance portfolio.
 
 ```{r}
@@ -267,7 +277,7 @@ The positive part function, $[t-\boldsymbol{w'r_i}]^+$, can easily be converted 
 
 The ES objective is in the form of:
 $$\min\limits_{\boldsymbol{w}, t} \quad -t + \gamma^{-1}E(t-\boldsymbol{w'r_i})^+$$
-where $0<\gamma<1$ is the quantile value, and $t$ is the value from which shortfalls are measured in the optimal solution. Many authors also use $p$ or $\alpha$ as the quantile, e.g., in Rockafellar and Uryasev (2000) and other vignettes of PortfolioAnalytics, and use $\eta$ as the risk measure variable, e.g., in Krokhmal (2007).
+where $0<\gamma<1$ is the tail probability value, and $t$ is the value from which shortfalls are measured in the optimal solution. Many authors also use $p$ or $\alpha$ as the quantile, e.g., in Rockafellar and Uryasev (2000) and other vignettes of PortfolioAnalytics, and use $\eta$ as the risk measure variable, e.g., in Krokhmal (2007).
 
 ## 6.1 Portfolio Object
 The default probability is $\gamma = 5\%$. Specific probability could be given by `arguments`.
@@ -294,7 +304,7 @@ opt_es_1
 # 7 Minimizing Expected Quadratic Shortfall
 Expected Quadratic Shortfall(EQS) is also called Second-Moment Coherent Risk Measure(SMCR). The objective to minimize EQS is in the form of:
 $$\min\limits_{\boldsymbol{w}, t} \quad -t + \gamma^{-1}||(t-\boldsymbol{w'r_i})^+||_2$$
-where $\gamma$ is the tail probability and $0<\gamma<1$, $t$ is the value from which quadratic shortfalls are measured in the optimal solution. The default probability is $\gamma = 5\%$. Minimizing EQS could be incorporated into a convex problem as a second-order cone constraints, and PortfolioAnalytics uses SCS in CVXR as the default solver for Second-Order Cone Optimization(SOCopt).
+where $\gamma$ is the tail probability and $0<\gamma<1$, $t$ is the value from which quadratic shortfalls are measured in the optimal solution. The default probability is $\gamma = 5\%$. Minimizing EQS could be incorporated into a convex problem as a second-order cone constraints, and PortfolioAnalytics uses ECOS in CVXR as the default solver for Second-Order Cone Optimization(SOCopt).
 
 ## 7.1 Portfolio Object
 The default probability is $\gamma = 5\%$. Specified probability could be given by `arguments`.
@@ -392,7 +402,7 @@ CVXR solvers provide the Second-Order Cone Optimization (SOCopt) capability requ
 In this section, we use the CRSP data set to generate GMV, ES and EQS portfolios and show their performance by plotting cumulative returns and efficient frontiers. In this process, we would like to show the value of EQS in managing portfolios.
 
 ## 9.1 Backtesting with GMV, GMES, GMEQS portfolios
-In this example, we use daily return of all the CRSP 30 small cap stocks to generate a comparative backtesting among Global Minimum Variance, Global Minimum ES and Global Minimum EQS portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
+In this example, we use daily return of all the CRSP 30 stocks to generate a comparative backtesting among Global Minimum Variance, Global Minimum ES and Global Minimum EQS portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
 ```{r, warning=FALSE}
 ## Generate GMV, GMES and GMEQS portfolios
 pspec_sc <- portfolio.spec(assets=fund_CRSP)
@@ -490,7 +500,7 @@ Fig 9.1
 \end{center}
 
 ## 9.2 Backtesting with SR, ESratio, EQSratio portfolios
-In this example, we use daily return of all the CRSP 30 small cap stocks to generate a comparative backtesting among Maximum Sharpe Ratio, Maximum ES Ratio and Maximum EQS Ratio portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
+In this example, we use daily return of all the CRSP 30 stocks to generate a comparative backtesting among Maximum Sharpe Ratio, Maximum ES Ratio and Maximum EQS Ratio portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
 ```{r, warning=FALSE}
 ## Generate GMV, GMES and GMEQS portfolios
 pspec_sc_ratio <- add.objective(pspec_sc, type="return", name="mean")
@@ -571,7 +581,7 @@ ylim2 <- c(p$Env$ylim[[4]][1], p$Env$ylim[[4]][2])
 ylim <- c(ylim1, ylim2)
 # get longest drawdown dates for xts object
 dt <- table.Drawdowns(R, top = 1) # just want to find the worst drawdown
-dt2 <- t(dt[,c("From", "Trough")])
+dt2 <- t(dt[,c("From", "To")])
 x <- as.vector(dt2[,NCOL(dt2)])
 y <- as.xts(matrix(rep(ylim, length(x)),ncol=length(ylim), byrow=TRUE), order.by=as.Date(x))
 i=1
@@ -585,7 +595,7 @@ Fig 9.2
 \end{center}
 
 ## 9.3 Efficient Frontier
-We generate efficient frontiers with mean-StdDev, mean-ES and mean-EQS portfolios by using 30 small cap stocks from CRSP data set. Considering that the data may show different properties over a long period of time, we only use the monthly return in the last 5 years to generate efficient frontiers, that is from 2011-01 to 2015-12 and defined in Section 2.3 as `retM_CRSP_5`. We can use `create.EfficientFrontier` to calculate the mean value and risk value for the frontier, then use `chart.EfficientFrontier` to draw the frontier.
+We generate efficient frontiers with mean-StdDev, mean-ES and mean-EQS portfolios by using 30 stocks from CRSP data set. Considering that the data may show different properties over a long period of time, we only use the monthly return in the last 5 years to generate efficient frontiers, that is from 2011-01 to 2015-12 and defined in Section 2.3 as `retM_CRSP_5`. We can use `create.EfficientFrontier` to calculate the mean value and risk value for the frontier, then use `chart.EfficientFrontier` to draw the frontier.
 
 ### 9.3.1 Mean-StdDev Efficient Frontier
 ```{r}
