@@ -49,7 +49,9 @@ Suggests:
     PCRA,
     data.table,
     knitr,
-    rmarkdown
+    rmarkdown,
+    GSE,
+    RobStatTM
 VignetteBuilder: knitr
 Imports:
     methods
