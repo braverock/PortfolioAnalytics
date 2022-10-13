@@ -13,7 +13,8 @@ Authors@R: c(
     person(given="Guy",family="Yollin",role="ctb") ,
     person(given="R. Douglas",family="Martin",role="ctb") ,
     person(given="Xiaokang",family="Feng",role="ctb") ,
-    person(given="Xinran",family="Zhao",role="ctb") )
+    person(given="Xinran",family="Zhao",role="ctb") ,
+    person(given="Yifu",family="Kang",role="ctb") )
 Version: 2.0.0
 Date: 2022-09-20
 Maintainer: Brian G. Peterson <brian@braverock.com>
