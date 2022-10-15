@@ -5,6 +5,10 @@ date: '2022-07-24'
 output: pdf_document
 geometry: margin=1.1 in
 bibliography: robustRef.bib
+vignette: >
+  %\VignetteIndexEntry{Using_Robust_Covariance_Maxtrix_Estimators_in_PA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
