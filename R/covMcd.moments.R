@@ -34,7 +34,6 @@ custom.covMcd <- function(R, ...){
                                   tolSolve=tolSolve, scalefn=scalefn, 
                                   maxcsteps=maxcsteps,
                                   initHsets=initHsets, 
-                                  save.hsets=save.hsets,
                                   wgtFUN=wgtFUN, use.correction=use.correction)
   
   return(list(mu = robustMCD$center, sigma = robustMCD$cov))
