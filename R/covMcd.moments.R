@@ -11,7 +11,7 @@
 #' @return a list contains mean and covariance matrix of the stock return matrix
 #' @export
 #'
-#' @examples
+#'
 custom.covMcd <- function(R, ...){
   
   if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MycovMcd()
@@ -78,7 +78,7 @@ custom.covMcd <- function(R, ...){
 #' @return a list of passed parameters
 #' @export
 #'
-#' @examples
+
 MycovMcd <- function(alpha = 1/2,
                      nsamp = 500, nmini = 300, kmini = 5,
                      scalefn = "hrv2012", maxcsteps = 200,

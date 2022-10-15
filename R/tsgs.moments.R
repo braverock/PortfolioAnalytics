@@ -14,7 +14,7 @@
 #' @references Claudio Agostinelli, Andy Leung, "Robust estimation of multivariate 
 #'             location and scatter in the presence of cellwise and casewise contamination",
 #'             2014.
-#' @examples
+
 custom.TSGS <- function(R, ...){
   if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MyTSGS()
   if(hasArg(filter)) filter=match.call(expand.dots=TRUE)$filter else filter=control$filter
@@ -52,7 +52,7 @@ custom.TSGS <- function(R, ...){
 #' @return a list of passed parameters
 #' @export
 #'
-#' @examples
+
 MyTSGS <- function(filter=c("UBF-DDC","UBF","DDC","UF"),
                    partial.impute=FALSE, tol=1e-4, maxiter=150, 
                    loss=c("bisquare","rocke"),

@@ -11,7 +11,6 @@
 #' @return a list contains mean and covariance matrix of the data matrix
 #' @export
 #'
-#' @examples
 custom.covRob <- function(R, ...){
   out <- list()
   if(hasArg(type)) type=match.call(expand.dots=TRUE)$type else type="auto"
