@@ -3,6 +3,8 @@ title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
 date: "2022/10/7"
 output: rmarkdown::pdf_document
+bibliography: PA.bib
+urlcolor: blue
 vignette: >
   %\VignetteIndexEntry{CVXR_in_PA_vignette}
   %\VignetteEngine{knitr::rmarkdown}
@@ -267,7 +269,7 @@ ES_\gamma(r_P)
 
 where $r_P$ is a random return of a portfolio $P$, and $\boldsymbol{r}$ is the loss return which is negative, and $q_\gamma$ is $\gamma$-quantile and $\gamma$ is usually a "tail" probability such as 0.01, 0.05, in which case ES is a tail risk measure. But one could also choose $\gamma=0.25$ or $\gamma=0.5$, in which case ES is just a "downside" risk measure, and if $\gamma>0.5$, the problem will take $1-\gamma$ as the tail probability.
 
-It was shown by Rockafellar and Uryasev (2000) that the optimal minimum ES portfolio is the result of the minimization:
+It was shown by @rockafellar2000optimization that the optimal minimum ES portfolio is the result of the minimization:
 $$\min \limits_{\boldsymbol{w}} ES_\gamma(\boldsymbol{w}) = \min \limits_{\boldsymbol{w}, t} F_\gamma(\boldsymbol{w}, t)$$
 where
 $$F_\gamma(\boldsymbol{w},t)=-t+\frac{1}{\gamma} \int[t-\boldsymbol{w'r}]^+ \cdot f(\boldsymbol{r})d\boldsymbol{r}$$
@@ -277,7 +279,7 @@ The positive part function, $[t-\boldsymbol{w'r_i}]^+$, can easily be converted 
 
 The ES objective is in the form of:
 $$\min\limits_{\boldsymbol{w}, t} \quad -t + \gamma^{-1}E(t-\boldsymbol{w'r_i})^+$$
-where $0<\gamma<1$ is the tail probability value, and $t$ is the value from which shortfalls are measured in the optimal solution. Many authors also use $p$ or $\alpha$ as the quantile, e.g., in Rockafellar and Uryasev (2000) and other vignettes of PortfolioAnalytics, and use $\eta$ as the risk measure variable, e.g., in Krokhmal (2007).
+where $0<\gamma<1$ is the tail probability value, and $t$ is the value from which shortfalls are measured in the optimal solution. Many authors also use $p$ or $\alpha$ as the quantile, e.g., in @rockafellar2000optimization and other vignettes of PortfolioAnalytics, and use $\eta$ as the risk measure variable, e.g., in @krokhmal2007higher.
 
 ## 6.1 Portfolio Object
 The default probability is $\gamma = 5\%$. Specific probability could be given by `arguments`.
@@ -328,7 +330,7 @@ There are three basic types of risk measures: variance or standard deviation, ES
 ## 8.1 Maximum Sharpe Ratio Portfolios
 The Sharpe Ratio of a random return $r_P$ of a portfolio $P$ is defined as:
 $$\frac{E(r_P) - r_f}{\sqrt{Var(r_P)}}_.$$
-The problem of maximizing the Sharpe Ratio can be formulated as a quadratic problem with a budget normalization constraint. It is shown in Cornuéjols, G., Peña, J., & Tütüncü, R. (2018), that this optimization problem is:
+The problem of maximizing the Sharpe Ratio can be formulated as a quadratic problem with a budget normalization constraint. It is shown in @cornuejols2018optimization, that this optimization problem is:
 \begin{equation*}
 \begin{aligned}
 \mathop{minimize}\limits_{w} \quad w'\Sigma w\\
@@ -739,3 +741,6 @@ chart.EfficientFrontier(meaneqs.ef, match.col="EQS", type="l",
 Fig 9.9
 \end{center}
 Mean-EQS efficient frontier is more like a piecewise function rather than a smooth curve.
+
+\newpage
+# Reference
