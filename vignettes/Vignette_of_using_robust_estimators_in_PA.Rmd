@@ -317,7 +317,7 @@ robPlot <- function(GMV, MAERKET, plot=1){
   
   # Combine GMV.LO and MARKET cumulative returns
   ret.comb<- na.omit(merge(GMV, GMV.rob, MARKET, all=F))
-  names(ret.comb) <- c("GmvLo", name, "MARKET")
+  names(ret.comb) <- c(name, "GmvLo", "MARKET")
   
   R <- ret.comb
   geometric = TRUE
@@ -353,7 +353,7 @@ robPlot <- function(GMV, MAERKET, plot=1){
   ylim2 <- c(p$Env$ylim[[4]][1], p$Env$ylim[[4]][2])
   ylim <- c(ylim1, ylim2)
   # get longest drawdown dates for xts object
-  dt <- table.Drawdowns(R, top = 1) # just want to find the worst drawdown
+  dt <- table.Drawdowns(GMV.rob, top = 1) # just want to find the worst drawdown
   
   if(is.na(dt$To) == TRUE){
     dt$To = index(R)[dim(R)[1]]
