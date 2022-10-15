@@ -44,7 +44,6 @@ Suggests:
     MASS,
     robustbase,
     osqp,
-    Rglpk,
     mco,
     CVXR,
     PCRA,
