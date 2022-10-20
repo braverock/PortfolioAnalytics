@@ -340,14 +340,14 @@ robPlot <- function(GMV, MAERKET, plot=1){
   p <- xts::addSeries(c.xts[,3], on=1, lwd=2, col="black", lty="dotted")
   p <- xts::addLegend("topleft", on = 1,
                       legend.names = names(c.xts),
-                      lty = c(2,1,3), lwd = rep(2, NCOL(c.xts)),
-                      col = c("black", "darkgreen", "black"),
+                      lty = c(1,2,3), lwd = rep(2, NCOL(c.xts)),
+                      col = c("darkgreen", "black", "black"),
                       bty = "o", box.col = "white",
                       bg=rgb(t(col2rgb("white")), alpha = 200,
                              maxColorValue = 255) )
   ## Drawdowns panel(Peter Carl)
   d.xts <- PerformanceAnalytics::Drawdowns(R)
-  p <- xts::addSeries(d.xts[,1], col="darkblue", lwd=2, main="Drawdown",
+  p <- xts::addSeries(d.xts[,1], col="black", lwd=2, main="Drawdown",
                       ylim = c(min(d.xts), 0), lty="dashed")
   p <- xts::addSeries(d.xts[,2], on=2, lwd=2, col="darkgreen")
   p <- xts::addSeries(d.xts[,3], on=2, lwd=2, col="black", lty="dotted")
