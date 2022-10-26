@@ -123,14 +123,15 @@ optimize.portfolio(returns, pspec,
 The above code uses default settings to compute robust estimators with the *covRob* function.. The available parameters are      
   1. **type**: which estimator to use. Possible options are **MM**, **Rocke** and **auto**. Default is **auto**.   
   2. **maxiter**: maximum number of iterations. Default is 50.     
-  3. **tol**: tolerance for covergence. Default is 1e-4.       
+  3. **tol**: tolerance for covergence. Default is 1e-4.    
   
+For more usage of *covRob*, please refer to its manual document @covRob.
 
 
-## 3.2 covMCD Robust Estimators
-The second method to compute robust statistics is based on *covMCD* from package **robustbase**. This approach is similiar to *covRob* but has more parameters. MCD method looks for ***h*** observations (out of n) whose classical covariance matrix has the lowest possible determinant. Then the raw MCD estimates of location and scatter are computed based on the average and covariance matrix of these h points.
+## 3.2 covMcd Robust Estimators
+The second method to compute robust statistics is based on *covMcd* from package **robustbase**. This approach is similar to *covRob* but has more parameters. *Mcd* method looks for ***h*** observations (out of ***n***) whose classical covariance matrix has the lowest possible determinant. Then the raw MCD estimates of location and scatter are computed based on the average and covariance matrix of these ***h*** points. For more details of the function and parameters please refer to @covMcd.
 
-Similarly, **PortfolioAnalytics** provides two ways for users to apply Mcd robust estimators. For the first approach, we add two functions in **PortfolioAnalytics**. The first one, *custom.covMcd*, takes advantage of *covMcd* function from package **robustbase** to compute covariance matrix.
+Similarly, **PortfolioAnalytics** provides two ways for users to apply *Mcd* robust estimators. For the first approach, we add two functions in **PortfolioAnalytics**. The first one, *custom.covMcd*, takes advantage of *covMcd* function from package **robustbase** to compute covariance matrix.
 ```{r fig.width=40}
 custom.covMcd <- function(R, ...){
 
@@ -166,7 +167,7 @@ custom.covMcd <- function(R, ...){
 }
 ```
 
-And the second one *MycovMcd* helps with parameter setting. This function returns a list containing possible parameters for *covMcd*.
+And the second one, *MycovMcd*, helps with parameter setting. This function returns a list containing possible parameters for *covMcd*.
 ```{r}
 MycovMcd <- function(alpha = 1/2,
            nsamp = 500, nmini = 300, kmini = 5,
@@ -196,7 +197,7 @@ optimize.portfolio(returns, pspec,
                    momentFUN="custom.covMcd", 
                    alpha=0.75, nsamp=600)
 ```
-Also, users can first create a parameter list using *MycovMcd*. The pass the list into *optimize.portfolio*. 
+Also, users can first create a parameter list using *MycovMcd*. Then pass the list into *optimize.portfolio*. 
 ```{r}
 # use MycovMcd
 covMcd.params <- MycovMcd(alpha=0.75, nsamp=600)
@@ -284,7 +285,7 @@ optimize.portfolio(returns, pspec,
 
 ```
 
-The *TSGS* method inlcudes a parameter to choose the filter in step 1. Possible options are "UBF-DDC","UBF","DDC","UF". The default choice is "UBF-DDC". The *TSGS* method also provides the parameter *init* for users to choose the type of initial estimator. Options include "emve", "qc", "huber","imputed","emve_c".      
+The *TSGS* method inlcudes a parameter to choose the filter in step 1. Possible options are "UBF-DDC","UBF","DDC","UF". The default choice is "UBF-DDC". The *TSGS* method also provides the parameter *init* for users to choose the type of initial estimator. Options include "emve", "qc", "huber","imputed","emve_c". For more details of the parameters please refer to the manual @TSGS.    
 Similar to *covMCD*, users can either directly pass in value or use a control function *MyTSGS*. For more details of above parameters and other parameters please refer to function *MyTSGS* in PA manual.
 
 # 4.Robust Covariance Matrix Estimtors Backtests
