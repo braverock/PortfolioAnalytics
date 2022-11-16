@@ -1,7 +1,7 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "2022/10/7"
+date: "2022/11/9"
 output: rmarkdown::pdf_document
 bibliography: PA.bib
 urlcolor: blue
@@ -49,7 +49,7 @@ Different solvers support different types of portfolio optimization problems. Th
 |GLPK|$\checkmark$| | |
 |GLPK_MI|$\checkmark$| | |
 |OSQP|$\colorbox{gray}{\checkmark}$|$\colorbox{gray}{\checkmark}$| |
-|SCS|$\checkmark$|$\checkmark$|$\checkmark$|
+|SCS|$\checkmark$||$\checkmark$|
 |ECOS|$\checkmark$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
 |CPLEX|$\checkmark$|$\checkmark$|$\checkmark$|
 |GUROBI|$\checkmark$|$\checkmark$|$\checkmark$|
@@ -75,7 +75,7 @@ tsPlotMP(ret_edhec, layout = c(2, 7))
 \begin{center}
 Fig 2.1
 \end{center}
-The CRSP data set is an xts object that contains the daily returns of stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP). We select the top 30 small cap stocks based on the market capitalization, and use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
+The CRSP data set is an xts object that contains the daily returns of stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP)^[CRSP: Center for Research in Security Prices, LLC.]. We select the top 30 small cap stocks based on the market capitalization, and use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
 
 ```{r}
 # use CRSP daily data set
@@ -632,7 +632,7 @@ opt_MV <- optimize.portfolio(retM_CRSP_5, pspec_MV, optimize_method = "CVXR",
 opt_MV
 chart.EfficientFrontier(opt_MV, match.col="StdDev", chart.assets = FALSE, 
                         main="Mean-StdDev Efficient Frontier",
-                        RAR.text="Sharpe Ratio", pch=1, xlim = c(0, 0.06))
+                        RAR.text="Sharpe Ratio", pch=1, xlim = c(0, 0.1))
 ```
 \begin{center}
 Fig 9.4
@@ -660,12 +660,12 @@ portf_list <- combine.portfolios(list(pspec_sc_lo, pspec_sc_lobox, pspec_sc_lsbo
 legend_labels <- c("Long Only", "Long Only Box", "Long Short Box")
 chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_list, 
                                type="mean-StdDev", match.col="StdDev", 
-                               legend.loc="topleft", chart.assets = FALSE,
+                               legend.loc="bottomright", chart.assets = FALSE,
                                legend.labels=legend_labels, cex.legend=1,
                                labels.assets=FALSE, lwd = c(3,3,3),
                                col = c("black", "dark red", "dark green"),
                                main="Overlay Mean-StdDev Efficient Frontiers",
-                               xlim = c(0.03, 0.06), ylim = c(0.005, 0.025))
+                               xlim = c(0.03, 0.11), ylim = c(0.005, 0.035))
 ```
 \begin{center}
 Fig 9.5
@@ -688,12 +688,12 @@ Generate multiple mean-ES efficient frontiers and overlay the plots.
 ```{r}
 chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_list, 
                                type="mean-ES", match.col="ES", 
-                               legend.loc="topleft", chart.assets = FALSE,
+                               legend.loc="bottomright", chart.assets = FALSE,
                                legend.labels=legend_labels, cex.legend=1,
                                labels.assets=FALSE, lwd = c(3,3,3),
                                col = c("black", "dark red", "dark green"),
                                main="Overlay Mean-ES Efficient Frontiers",
-                               xlim = c(0.04, 0.12), ylim = c(0.005, 0.03))
+                               xlim = c(0.03, 0.17), ylim = c(0.005, 0.035))
 ```
 \begin{center}
 Fig 9.7
@@ -717,12 +717,12 @@ portf_ES_list <- combine.portfolios(list(ES_05, ES_10, ES_15))
 legend_ES_labels <- c("ES (p=0.05)", "ES (p=0.1)", "ES (p=0.15)")
 chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_ES_list, 
                                type="mean-ES", match.col="ES", 
-                               legend.loc="topleft", chart.assets = FALSE,
+                               legend.loc="bottomright", chart.assets = FALSE,
                                legend.labels=legend_ES_labels, cex.legend=1,
                                labels.assets=FALSE, lwd = c(3,3,3),
                                col = c("black", "dark red", "dark green"),
                                main="Overlay Mean-ES Efficient Frontiers",
-                               xlim = c(0.03, 0.1), ylim = c(0.005, 0.025))
+                               xlim = c(0.035, 0.165), ylim = c(0.005, 0.03))
 ```
 \begin{center}
 Fig 9.8
