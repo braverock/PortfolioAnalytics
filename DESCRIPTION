@@ -50,8 +50,9 @@ Suggests:
     knitr,
     rmarkdown,
     GSE,
-    RobStatTM,
-    Remotes: git::https://github.com/robustport/PCRA.git
+    RobStatTM
+Remotes:
+    git::https://github.com/robustport/PCRA.git
 VignetteBuilder: knitr
 Imports:
     methods
