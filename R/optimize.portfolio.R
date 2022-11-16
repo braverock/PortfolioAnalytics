@@ -1593,7 +1593,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         Rglpk.mat <- rbind(
           Rglpk.mat,
           cbind(
-            matrix(returns, T),
+            matrix(R, T),
             diag(1, T),
             rep(1, T)
           )
@@ -1723,7 +1723,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         # shrinkage constraint
         Rglpk.mat <- rbind(
           Rglpk.mat,
-          c(colMeans(returns), rep(0, T + 2))
+          c(colMeans(R), rep(0, T + 2))
         )
   
         Rglpk.dir <- c(Rglpk.dir, "==")
@@ -1733,7 +1733,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         Rglpk.mat <- rbind(
           Rglpk.mat,
           cbind(
-            matrix(returns, T),
+            matrix(R, T),
             diag(1, T),
             rep(1, T),
             rep(0, T)
