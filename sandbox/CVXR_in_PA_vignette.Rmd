@@ -1,8 +1,10 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "2022/10/7"
+date: "2022/11/9"
 output: rmarkdown::pdf_document
+bibliography: PA.bib
+urlcolor: blue
 vignette: >
   %\VignetteIndexEntry{CVXR_in_PA_vignette}
   %\VignetteEngine{knitr::rmarkdown}
@@ -47,7 +49,7 @@ Different solvers support different types of portfolio optimization problems. Th
 |GLPK|$\checkmark$| | |
 |GLPK_MI|$\checkmark$| | |
 |OSQP|$\colorbox{gray}{\checkmark}$|$\colorbox{gray}{\checkmark}$| |
-|SCS|$\checkmark$|$\checkmark$|$\checkmark$|
+|SCS|$\checkmark$||$\checkmark$|
 |ECOS|$\checkmark$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
 |CPLEX|$\checkmark$|$\checkmark$|$\checkmark$|
 |GUROBI|$\checkmark$|$\checkmark$|$\checkmark$|
@@ -73,7 +75,7 @@ tsPlotMP(ret_edhec, layout = c(2, 7))
 \begin{center}
 Fig 2.1
 \end{center}
-The CRSP data set is an xts object that contains the daily returns of stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP). We select the top 30 small cap stocks based on the market capitalization, and use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
+The CRSP data set is an xts object that contains the daily returns of stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP)^[CRSP: Center for Research in Security Prices, LLC.]. We select the top 30 small cap stocks based on the market capitalization, and use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
 
 ```{r}
 # use CRSP daily data set
@@ -267,7 +269,7 @@ ES_\gamma(r_P)
 
 where $r_P$ is a random return of a portfolio $P$, and $\boldsymbol{r}$ is the loss return which is negative, and $q_\gamma$ is $\gamma$-quantile and $\gamma$ is usually a "tail" probability such as 0.01, 0.05, in which case ES is a tail risk measure. But one could also choose $\gamma=0.25$ or $\gamma=0.5$, in which case ES is just a "downside" risk measure, and if $\gamma>0.5$, the problem will take $1-\gamma$ as the tail probability.
 
-It was shown by Rockafellar and Uryasev (2000) that the optimal minimum ES portfolio is the result of the minimization:
+It was shown by @rockafellar2000optimization that the optimal minimum ES portfolio is the result of the minimization:
 $$\min \limits_{\boldsymbol{w}} ES_\gamma(\boldsymbol{w}) = \min \limits_{\boldsymbol{w}, t} F_\gamma(\boldsymbol{w}, t)$$
 where
 $$F_\gamma(\boldsymbol{w},t)=-t+\frac{1}{\gamma} \int[t-\boldsymbol{w'r}]^+ \cdot f(\boldsymbol{r})d\boldsymbol{r}$$
@@ -277,7 +279,7 @@ The positive part function, $[t-\boldsymbol{w'r_i}]^+$, can easily be converted 
 
 The ES objective is in the form of:
 $$\min\limits_{\boldsymbol{w}, t} \quad -t + \gamma^{-1}E(t-\boldsymbol{w'r_i})^+$$
-where $0<\gamma<1$ is the tail probability value, and $t$ is the value from which shortfalls are measured in the optimal solution. Many authors also use $p$ or $\alpha$ as the quantile, e.g., in Rockafellar and Uryasev (2000) and other vignettes of PortfolioAnalytics, and use $\eta$ as the risk measure variable, e.g., in Krokhmal (2007).
+where $0<\gamma<1$ is the tail probability value, and $t$ is the value from which shortfalls are measured in the optimal solution. Many authors also use $p$ or $\alpha$ as the quantile, e.g., in @rockafellar2000optimization and other vignettes of PortfolioAnalytics, and use $\eta$ as the risk measure variable, e.g., in @krokhmal2007higher.
 
 ## 6.1 Portfolio Object
 The default probability is $\gamma = 5\%$. Specific probability could be given by `arguments`.
@@ -328,7 +330,7 @@ There are three basic types of risk measures: variance or standard deviation, ES
 ## 8.1 Maximum Sharpe Ratio Portfolios
 The Sharpe Ratio of a random return $r_P$ of a portfolio $P$ is defined as:
 $$\frac{E(r_P) - r_f}{\sqrt{Var(r_P)}}_.$$
-The problem of maximizing the Sharpe Ratio can be formulated as a quadratic problem with a budget normalization constraint. It is shown in Cornuéjols, G., Peña, J., & Tütüncü, R. (2018), that this optimization problem is:
+The problem of maximizing the Sharpe Ratio can be formulated as a quadratic problem with a budget normalization constraint. It is shown in @cornuejols2018optimization, that this optimization problem is:
 \begin{equation*}
 \begin{aligned}
 \mathop{minimize}\limits_{w} \quad w'\Sigma w\\
@@ -630,7 +632,7 @@ opt_MV <- optimize.portfolio(retM_CRSP_5, pspec_MV, optimize_method = "CVXR",
 opt_MV
 chart.EfficientFrontier(opt_MV, match.col="StdDev", chart.assets = FALSE, 
                         main="Mean-StdDev Efficient Frontier",
-                        RAR.text="Sharpe Ratio", pch=1, xlim = c(0, 0.06))
+                        RAR.text="Sharpe Ratio", pch=1, xlim = c(0, 0.1))
 ```
 \begin{center}
 Fig 9.4
@@ -658,12 +660,12 @@ portf_list <- combine.portfolios(list(pspec_sc_lo, pspec_sc_lobox, pspec_sc_lsbo
 legend_labels <- c("Long Only", "Long Only Box", "Long Short Box")
 chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_list, 
                                type="mean-StdDev", match.col="StdDev", 
-                               legend.loc="topleft", chart.assets = FALSE,
+                               legend.loc="bottomright", chart.assets = FALSE,
                                legend.labels=legend_labels, cex.legend=1,
                                labels.assets=FALSE, lwd = c(3,3,3),
                                col = c("black", "dark red", "dark green"),
                                main="Overlay Mean-StdDev Efficient Frontiers",
-                               xlim = c(0.03, 0.06), ylim = c(0.005, 0.025))
+                               xlim = c(0.03, 0.11), ylim = c(0.005, 0.035))
 ```
 \begin{center}
 Fig 9.5
@@ -686,16 +688,20 @@ Generate multiple mean-ES efficient frontiers and overlay the plots.
 ```{r}
 chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_list, 
                                type="mean-ES", match.col="ES", 
-                               legend.loc="topleft", chart.assets = FALSE,
+                               legend.loc="bottomright", chart.assets = FALSE,
                                legend.labels=legend_labels, cex.legend=1,
                                labels.assets=FALSE, lwd = c(3,3,3),
                                col = c("black", "dark red", "dark green"),
                                main="Overlay Mean-ES Efficient Frontiers",
-                               xlim = c(0.04, 0.12), ylim = c(0.005, 0.03))
+                               xlim = c(0.03, 0.17), ylim = c(0.005, 0.035))
 ```
 \begin{center}
 Fig 9.7
 \end{center}
+For each mean-ES efficient frontier, the left endpoint is the global minimum ES and its corresponding mean return, the right endpoint is the maximum mean return and and its corresponding ES, that is, the minimum ES when the maximum mean return is the target return.
+
+With the same target return, the portfolio under the long-short box constraints can have a minimum ES value. It performs best, but shorting may not be possible for many real-world portfolios. The mean-ES efficient frontier of the long-only portfolio covers the widest range, that is because it can reach a larger return range than the long-box portfolio, but it is not as easy to reach the target return as the long-short portfolio, it needs to take more risks.
+
 Instead of generating efficient frontiers with different constraint types, we can also generate mean-ES efficient frontiers with different tail probability $\gamma$.
 ```{r}
 # Create long-only ES portfolios with different tail probabilities
@@ -715,17 +721,19 @@ portf_ES_list <- combine.portfolios(list(ES_05, ES_10, ES_15))
 legend_ES_labels <- c("ES (p=0.05)", "ES (p=0.1)", "ES (p=0.15)")
 chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_ES_list, 
                                type="mean-ES", match.col="ES", 
-                               legend.loc="topleft", chart.assets = FALSE,
+                               legend.loc="bottomright", chart.assets = FALSE,
                                legend.labels=legend_ES_labels, cex.legend=1,
                                labels.assets=FALSE, lwd = c(3,3,3),
                                col = c("black", "dark red", "dark green"),
                                main="Overlay Mean-ES Efficient Frontiers",
-                               xlim = c(0.03, 0.1), ylim = c(0.005, 0.025))
+                               xlim = c(0.035, 0.165), ylim = c(0.005, 0.03))
 ```
 \begin{center}
 Fig 9.8
 \end{center}
-ES portfolio with a larger tail probability will have better performance.
+ES portfolio with a larger tail probability will have better performance, but this is only because larger tail probability gives a wider ES calculation range, so the expected ES value is smaller.
+
+The same portfolio may have different ES values under different tail probabilities. For example, the portfolio that reaches the maximum return, which is the right endpoint of each mean-ES efficient frontier. They are the same portfolio, but the ES is different. This Overlay plots mainly shows the importance of tail probability for calculating ES. Different tail probabilities only focus on risks in different degrees, rather than changes in risk levels.
 
 ### 9.3.3 Mean-EQS Efficient Frontier
 ```{r, warning=FALSE}
@@ -739,3 +747,6 @@ chart.EfficientFrontier(meaneqs.ef, match.col="EQS", type="l",
 Fig 9.9
 \end{center}
 Mean-EQS efficient frontier is more like a piecewise function rather than a smooth curve.
+
+\newpage
+# Reference
