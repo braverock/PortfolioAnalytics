@@ -698,6 +698,10 @@ chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_list,
 \begin{center}
 Fig 9.7
 \end{center}
+For each mean-ES efficient frontier, the left endpoint is the global minimum ES and its corresponding mean return, the right endpoint is the maximum mean return and and its corresponding ES, that is, the minimum ES when the maximum mean return is the target return.
+
+With the same target return, the portfolio under the long-short box constraints can have a minimum ES value. It performs best, but shorting may not be possible for many real-world portfolios. The mean-ES efficient frontier of the long-only portfolio covers the widest range, that is because it can reach a larger return range than the long-box portfolio, but it is not as easy to reach the target return as the long-short portfolio, it needs to take more risks.
+
 Instead of generating efficient frontiers with different constraint types, we can also generate mean-ES efficient frontiers with different tail probability $\gamma$.
 ```{r}
 # Create long-only ES portfolios with different tail probabilities
@@ -727,7 +731,9 @@ chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_ES_list,
 \begin{center}
 Fig 9.8
 \end{center}
-ES portfolio with a larger tail probability will have better performance.
+ES portfolio with a larger tail probability will have better performance, but this is only because larger tail probability gives a wider ES calculation range, so the expected ES value is smaller.
+
+The same portfolio may have different ES values under different tail probabilities. For example, the portfolio that reaches the maximum return, which is the right endpoint of each mean-ES efficient frontier. They are the same portfolio, but the ES is different. This Overlay plots mainly shows the importance of tail probability for calculating ES. Different tail probabilities only focus on risks in different degrees, rather than changes in risk levels.
 
 ### 9.3.3 Mean-EQS Efficient Frontier
 ```{r, warning=FALSE}
