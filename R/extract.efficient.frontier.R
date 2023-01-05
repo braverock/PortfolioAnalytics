@@ -364,6 +364,104 @@ meaneqs.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
   return(structure(out, class="frontier"))
 }
 
+#' Generate multiple efficient frontiers for the same portfolio
+#' 
+#' This function generates the mean-risk efficient frontier of a portfolio
+#' specifying the constraints and objectives. The \code{risk_type} object 
+#' is for the basic mean-risk efficient frontier, other efficient frontiers
+#' will be generated with the same target returns. All mean-StdDev, mean-ES
+#' and mean-EQS efficient frontiers will be generated.
+#' 
+#' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
+#' @param R an xts or matrix of asset returns
+#' @param n.portfolios number of portfolios to generate the efficient frontier
+#' @param risk_type one of "StdDev", "ES" and "EQS", which determines the type of basic efficient frontier.
+#' @param \dots passthru parameters to \code{\link{optimize.portfolio}}
+#' @return a matrix of objective measure values and weights along the efficient frontier
+#' @author Xinran Zhao
+#' @export
+meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type="StdDev", ...){
+  if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
+  # step 1: mean-StdDev efficient frontier
+  # step 2: calculate minimum ES with target return
+  
+  if(risk_type %in% c("StdDev", "sd", "var")){
+    risk_type = "StdDev"
+    risk_compare = c("ES", "EQS")
+  } else if(risk_type %in% c("ES", "es", "ETL", "etl", "CVaR")){
+    risk_type = "ES"
+    risk_compare = c("StdDev", "EQS")
+  } else if(risk_type %in% c("EQS", "eqs")){
+    risk_type = "EQS"
+    risk_compare = c("StdDev", "ES")
+  }
+  
+  # Use the portfolio_risk_objective from the portfolio if they have it
+  risk_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == risk_type)
+  if(length(risk_idx) >= 1){
+    risk_obj <- portfolio$objectives[[risk_idx[1]]]
+  } else {
+    risk_obj <- portfolio_risk_objective(name=risk_type, arguments=list(p=0.95))
+  }
+  
+  # Clear out the objectives in portfolio and add them here to simplify checks
+  # and so we can control the optimization along the efficient frontier.
+  portfolio$objectives <- list()
+  portfolio$objectives[[1]] <- risk_obj
+  portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
+  
+  # get the objective names from the portfolio object
+  objnames <- unlist(lapply(portfolio$objectives, function(x) x$name))
+  
+  # If the user has passed in a portfolio object with return_constraint, we need to disable it
+  for(i in 1:length(portfolio$constraints)){
+    if(inherits(portfolio$constraints[[i]], "return_constraint")){
+      portfolio$constraints[[i]]$enabled <- FALSE
+    }
+  }
+  
+  # get the index number of the risk objective
+  risk_idx <- which(objnames == risk_type)
+  # get the index number of the mean objective
+  mean_idx <- which(objnames == "mean")
+  
+  # create a temporary portfolio to find the max mean return
+  ret_obj <- return_objective(name="mean")
+  tportf <- insert_objectives(portfolio, list(ret_obj))
+  
+  # run the optimization to get the maximum return
+  tmp <- optimize.portfolio(R=R, portfolio=tportf, optimize_method="CVXR", ...)
+  maxret <- extractObjectiveMeasures(tmp)$mean
+  
+  # run the optimization to get the return at the min ETL portfolio
+  tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method="CVXR", ef=TRUE, ...)
+  stats <- extractStats(tmp)
+  minret <- stats["mean"]
+  
+  # length.out is the number of portfolios to create
+  ret_seq <- seq(from=minret, to=maxret, length.out=n.portfolios)
+  
+  stopifnot("package:foreach" %in% search() || requireNamespace("foreach",quietly = TRUE))
+  stopifnot("package:iterators" %in% search() || requireNamespace("iterators",quietly = TRUE))
+  ret <- ret_seq[1]
+  out <- foreach::foreach(ret=iterators::iter(ret_seq), .inorder=TRUE, .combine=rbind, .errorhandling='remove', .packages='PortfolioAnalytics') %dopar% {
+    portfolio$objectives[[mean_idx]]$target <- ret
+    res <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="CVXR", ef=TRUE, ...=...))
+    for(rc in risk_compare){
+      tmpportfolio <- portfolio
+      tmpportfolio$objectives[[risk_idx]]$name <- rc
+      tmpw <- optimize.portfolio(R=R, portfolio=tmpportfolio, optimize_method="CVXR", ef=TRUE, ...=...)$weight
+      tmpportfolio <- add.constraint(tmpportfolio, type = "box", min=tmpw, max = rep(1, length(tmpw)))
+      tmpportfolio$objectives[[risk_idx]]$name <- risk_type
+      res <- append(res, extractStats(optimize.portfolio(R=R, portfolio=tmpportfolio, optimize_method="CVXR", ef=TRUE, ...=...))[1])
+    }
+    res
+  }
+  colnames(out) <- c(names(stats), paste(risk_compare, risk_type))
+  out <- na.omit(out)
+  return(structure(out, class="frontier"))
+}
+
 #' create an efficient frontier
 #' 
 #' @details Currently there are 4 'types' supported to create an efficient frontier:
@@ -412,7 +510,7 @@ meaneqs.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
 #' \code{\link{meanvar.efficient.frontier}}, 
 #' \code{\link{meanetl.efficient.frontier}}
 #' @export
-create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_aversion=NULL, match.col="ES", search_size=2000, ...){
+create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_type, risk_aversion=NULL, match.col="ES", search_size=2000, ...){
   # This is just a wrapper around a few functions to easily create efficient frontiers
   # given a portfolio object and other parameters
   call <- match.call()
@@ -439,6 +537,12 @@ create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_a
                                                               R=R,
                                                               n.portfolios=n.portfolios,
                                                               ...=...)
+         },
+         "mean-risk" = {frontier <- meanrisk.efficient.frontier(portfolio=portfolio,
+                                                                R=R,
+                                                                n.portfolios=n.portfolios,
+                                                                risk_type = risk_type,
+                                                                ...=...)
          },
          "random" = {tmp <- optimize.portfolio(R=R, 
                                                portfolio=portfolio, 

@@ -9,6 +9,7 @@ create.EfficientFrontier(
   portfolio,
   type,
   n.portfolios = 25,
+  risk_type,
   risk_aversion = NULL,
   match.col = "ES",
   search_size = 2000,
