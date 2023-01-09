@@ -579,7 +579,8 @@ optimize.portfolio_v1 <- function(
 #' @param rp matrix of random portfolio weights, default NULL, mostly for automated use by rebalancing optimization or repeated tests on same portfolios
 #' @param momentFUN the name of a function to call to set portfolio moments, default \code{\link{set.portfolio.moments_v2}}
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
-#' 
+#' @importFrom CVXR Variable
+#'
 #' @return a list containing the following elements
 #' \itemize{
 #'   \item{\code{weights}:}{ The optimal set weights.}
