@@ -773,37 +773,28 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
 #' @export
 chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios=25, match.col=c("StdDev", "ES"), search_size=2000, main="Efficient Frontiers", cex.axis=0.8, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
   # store in out
-  out <- create.EfficientFrontier(R=R, portfolio=portfolio, type="mean-risk", risk_type=risk_type)
-  # get the data to plot scatter of asset returns
-  asset_ret <- scatterFUN(R=R, FUN="mean")
-  asset_risk <- scatterFUN(R=R, FUN=risk_type)
+  out <- create.EfficientFrontier(R=R, portfolio=portfolio, type="mean-risk", risk_type=risk_type, compare_port = match.col)
+  n.p = dim(out$frontier)[1]
+  m.p = dim(out$frontier)[2]
   rnames <- colnames(R)
   
   # set the x and y limits
   if(is.null(xlim)){
-    xlim <- range(asset_risk)
-    # xlim[1] <- xlim[1] * 0.8
-    xlim[1] <- 0
-    xlim[2] <- xlim[2] * 1.15
+    xlim <- c(0, 0)
+    xlim[1] <- out$frontier[1,1] * 0.9
+    xlim[2] <- out$frontier[n.p, 1] * 1.1
   }
   if(is.null(ylim)){
-    ylim <- range(asset_ret)
-    # ylim[1] <- ylim[1] * 0.9
-    ylim[1] <- 0
-    ylim[2] <- ylim[2] * 1.1
+    ylim <- c(0, 0)
+    ylim[1] <- out$frontier[1,2] * 0.9
+    ylim[2] <- out$frontier[n.p, 2] * 1.1
   }
   
   # plot the assets
-  plot(x=asset_risk, y=asset_ret, xlab=risk_type, ylab="Mean", main=main, xlim=xlim, ylim=ylim, axes=FALSE, type="n", ...)
+  plot(x=1, y=1, xlab=risk_type, ylab="Mean", main=main, xlim=xlim, ylim=ylim, axes=FALSE, type="n", ...)
   axis(1, cex.axis = cex.axis, col = element.color)
   axis(2, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
-  
-  if(chart.assets){
-    # risk-return scatter of the assets
-    points(x=asset_risk, y=asset_ret, pch=pch.assets, cex=cex.assets)
-    if(labels.assets) text(x=asset_risk, y=asset_ret, labels=rnames, pos=4, cex=cex.assets)
-  }
   
   # set some basic plot parameters
   if(is.null(col)) col <- 1:length(match.col)
@@ -823,14 +814,24 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
     mtc <- pmatch(match.col[i], cnames)
     if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
     # Add the efficient frontier lines to the plot
-    lines(x=out$frontier[, mtc], y=out$frontier[, mean.mtc], col=col[i], lty=lty[i], lwd=lwd[i])
+    lines(x=out$frontier[, mtc], y=out$frontier[, mean.mtc], col=col[i], lty=lty[i], lwd=lwd[i],...)
   }
+  
+  # legend
   if(!is.null(legend.loc)){
-    if(is.null(legend.labels)){
-      legend.labels <- paste("Portfolio", 1:length(out), sep=".")
-    }
-    legend(legend.loc, legend=legend.labels, col=col, lty=lty, lwd=lwd, cex=cex.legend, bty="n") 
+    legend.loc = "bottomright"
   }
+  if(is.null(legend.labels)){
+      legend.labels <- paste("Portfolio", 1:length(match.col), sep=".")
+  }
+  if(guideline){
+    lines(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), lty=2, col=4, lwd=1)
+    legend.labels <- append(legend.labels, paste("risk diff", round(out$frontier[1,m.p] - out$frontier[1,1], 4)))
+    lcol = c(col, 4)
+    llty = c(lty, 2)
+    llwd = c(lwd, 1)
+  }
+  legend("bottomright", legend=legend.labels, col=lcol, lty=llty, lwd=llwd, cex=cex.legend, bty="n")
   return(invisible(out))
 }
 
