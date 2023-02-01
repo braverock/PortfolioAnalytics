@@ -773,7 +773,7 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
 #' @export
 chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios=25, match.col=c("StdDev", "ES"), guideline=NULL, main="Efficient Frontiers", plot_type = "l", cex.axis=0.5, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
   # store in out
-  out <- create.EfficientFrontier(R=R, portfolio=portfolio, type="mean-risk", risk_type=risk_type, compare_port = match.col)
+  out <- create.EfficientFrontier(R=R, portfolio=portfolio, type="mean-risk", risk_type=risk_type, compare_port = match.col, n.portfolios = n.portfolios, ...)
   n.p = dim(out$frontier)[1]
   m.p = dim(out$frontier)[2]
   rnames <- colnames(R)
