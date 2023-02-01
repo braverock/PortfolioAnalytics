@@ -830,11 +830,11 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
     points(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), pch=pch.assets, cex=cex.assets)
     if(labels.assets) text(x=c(out$frontier[1,1], out$frontier[1,m.p]), y=rep(out$frontier[1,2], 2), labels=round(c(out$frontier[1,1], out$frontier[1,m.p]), 4), pos=c(1,4), cex=cex.assets)
     legend.labels <- append(legend.labels, paste("risk diff", round(out$frontier[1,m.p] - out$frontier[1,1], 4)))
-    lcol = c(col, 4)
-    llty = c(lty, 2)
-    llwd = c(lwd, 1)
+    col = c(col, 4)
+    lty = c(lty, 2)
+    lwd = c(lwd, 1)
   }
-  legend("bottomright", legend=legend.labels, col=lcol, lty=llty, lwd=llwd, cex=cex.legend, bty="n")
+  legend("bottomright", legend=legend.labels, col=col, lty=lty, lwd=lwd, cex=cex.legend, bty="n")
   return(invisible(out))
 }
 
