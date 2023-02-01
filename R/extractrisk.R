@@ -14,6 +14,7 @@ extract_risk <- function(R, w, portfolio=NULL){
       alpha <- ifelse(!is.null(objective$arguments[["p"]]), objective$arguments[["p"]], alpha)
     }
   }
+  if(alpha > 0.5) alpha <- (1 - alpha)
   
   # ES/EQS by CVXR
   T <- dim(R)[1]

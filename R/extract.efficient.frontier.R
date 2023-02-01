@@ -442,7 +442,7 @@ meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type
       tmpportfolio <- portfolio
       tmpportfolio$objectives[[risk_idx]]$name <- rc
       tmpw <- optimize.portfolio(R=R, portfolio=tmpportfolio, optimize_method="CVXR", ef=TRUE, ...=...)$weight
-      res <- append(res, extract_risk(R=R, portfolio = tmpportfolio, w = tmpw)[[risk_type]])
+      res <- append(res, extract_risk(R=R, w = tmpw, portfolio = tmpportfolio)[[risk_type]])
     }
     res
   }

@@ -771,7 +771,7 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
 #' @param lwd vector of line widths with length equal to the number of portfolios in \code{portfolio_list}.
 #' @author Xinran Zhao
 #' @export
-chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios=25, match.col=c("StdDev", "ES"), search_size=2000, main="Efficient Frontiers", cex.axis=0.8, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
+chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios=25, match.col=c("StdDev", "ES"), guideline=FALSE, main="Efficient Frontiers", plot_type = "l", cex.axis=0.5, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
   # store in out
   out <- create.EfficientFrontier(R=R, portfolio=portfolio, type="mean-risk", risk_type=risk_type, compare_port = match.col)
   n.p = dim(out$frontier)[1]
@@ -786,7 +786,7 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
   }
   if(is.null(ylim)){
     ylim <- c(0, 0)
-    ylim[1] <- out$frontier[1,2] * 0.9
+    ylim[1] <- out$frontier[1,2] * 0.7
     ylim[2] <- out$frontier[n.p, 2] * 1.1
   }
   
@@ -814,7 +814,7 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
     mtc <- pmatch(match.col[i], cnames)
     if(is.na(mtc)) stop("could not match match.col with column name of extractStats output")
     # Add the efficient frontier lines to the plot
-    lines(x=out$frontier[, mtc], y=out$frontier[, mean.mtc], col=col[i], lty=lty[i], lwd=lwd[i],...)
+    lines(x=out$frontier[, mtc], y=out$frontier[, mean.mtc], col=col[i], lty=lty[i], lwd=lwd[i], type = plot_type, ...)
   }
   
   # legend
@@ -822,10 +822,15 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
     legend.loc = "bottomright"
   }
   if(is.null(legend.labels)){
-      legend.labels <- paste("Portfolio", 1:length(match.col), sep=".")
+      legend.labels <- paste("min", match.col, "Portfolio")
+  }
+  if(length(match.col) == 2){
+    guideline=TRUE
   }
   if(guideline){
     lines(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), lty=2, col=4, lwd=1)
+    points(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), pch=pch.assets, cex=cex.assets)
+    if(labels.assets) text(x=c(out$frontier[1,1], out$frontier[1,m.p]), y=rep(out$frontier[1,2], 2), labels=round(c(out$frontier[1,1], out$frontier[1,m.p]), 4), pos=c(1,4), cex=cex.assets)
     legend.labels <- append(legend.labels, paste("risk diff", round(out$frontier[1,m.p] - out$frontier[1,1], 4)))
     lcol = c(col, 4)
     llty = c(lty, 2)
