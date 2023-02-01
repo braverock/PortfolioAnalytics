@@ -9,6 +9,7 @@ meanrisk.efficient.frontier(
   R,
   n.portfolios = 25,
   risk_type = "StdDev",
+  compare_port = c("StdDev", "ES"),
   ...
 )
 }

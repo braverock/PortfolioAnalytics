@@ -2,6 +2,7 @@
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
 #' @param w the weight of the portfolio
+#' @export extract_risk
 extract_risk <- function(R, w, portfolio=NULL){
   res = list()
   res$mean = mean(R %*% w)
