@@ -380,21 +380,12 @@ meaneqs.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
 #' @return a matrix of objective measure values and weights along the efficient frontier
 #' @author Xinran Zhao
 #' @export
-meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type="StdDev", ...){
+meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type="StdDev", compare_port = c("StdDev", "ES"),...){
   if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
   # step 1: mean-StdDev efficient frontier
   # step 2: calculate minimum ES with target return
   
-  if(risk_type %in% c("StdDev", "sd", "var")){
-    risk_type = "StdDev"
-    risk_compare = c("ES", "EQS")
-  } else if(risk_type %in% c("ES", "es", "ETL", "etl", "CVaR")){
-    risk_type = "ES"
-    risk_compare = c("StdDev", "EQS")
-  } else if(risk_type %in% c("EQS", "eqs")){
-    risk_type = "EQS"
-    risk_compare = c("StdDev", "ES")
-  }
+  risk_compare <- compare_port[-which(compare_port == risk_type)]
   
   # Use the portfolio_risk_objective from the portfolio if they have it
   risk_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == risk_type)
@@ -451,9 +442,7 @@ meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type
       tmpportfolio <- portfolio
       tmpportfolio$objectives[[risk_idx]]$name <- rc
       tmpw <- optimize.portfolio(R=R, portfolio=tmpportfolio, optimize_method="CVXR", ef=TRUE, ...=...)$weight
-      tmpportfolio <- add.constraint(tmpportfolio, type = "box", min=tmpw, max = rep(1, length(tmpw)))
-      tmpportfolio$objectives[[risk_idx]]$name <- risk_type
-      res <- append(res, extractStats(optimize.portfolio(R=R, portfolio=tmpportfolio, optimize_method="CVXR", ef=TRUE, ...=...))[1])
+      res <- append(res, extract_risk(R=R, portfolio = tmpportfolio, w = tmpw)[[risk_type]])
     }
     res
   }
