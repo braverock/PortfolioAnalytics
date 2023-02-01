@@ -1,6 +1,8 @@
-w = optimize.portfolio(R=R, portfolio=portfolio, optimize_method="CVXR", ef=TRUE)$weight
-
-extract_risk <- function(R, portfolio, w){
+#' extract the risk value when knowing the weights
+#' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
+#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
+#' @param w the weight of the portfolio
+extract_risk <- function(R, w, portfolio=NULL){
   res = list()
   res$mean = mean(R %*% w)
   res$StdDev = sqrt(t(w) %*% cov(R) %*% w)
