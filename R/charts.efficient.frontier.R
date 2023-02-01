@@ -771,7 +771,7 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
 #' @param lwd vector of line widths with length equal to the number of portfolios in \code{portfolio_list}.
 #' @author Xinran Zhao
 #' @export
-chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios=25, match.col=c("StdDev", "ES"), guideline=FALSE, main="Efficient Frontiers", plot_type = "l", cex.axis=0.5, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
+chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios=25, match.col=c("StdDev", "ES"), guideline=NULL, main="Efficient Frontiers", plot_type = "l", cex.axis=0.5, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
   # store in out
   out <- create.EfficientFrontier(R=R, portfolio=portfolio, type="mean-risk", risk_type=risk_type, compare_port = match.col)
   n.p = dim(out$frontier)[1]
@@ -824,9 +824,7 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
   if(is.null(legend.labels)){
       legend.labels <- paste("min", match.col, "Portfolio")
   }
-  if(length(match.col) == 2){
-    guideline=TRUE
-  }
+  if(is.null(guideline)) guideline <- ifelse(length(match.col) == 2, TRUE, FALSE)
   if(guideline){
     lines(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), lty=2, col=4, lwd=1)
     points(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), pch=pch.assets, cex=cex.assets)
