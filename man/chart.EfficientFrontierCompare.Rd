@@ -10,9 +10,10 @@ chart.EfficientFrontierCompare(
   risk_type,
   n.portfolios = 25,
   match.col = c("StdDev", "ES"),
-  search_size = 2000,
+  guideline = NULL,
   main = "Efficient Frontiers",
-  cex.axis = 0.8,
+  plot_type = "l",
+  cex.axis = 0.5,
   element.color = "darkgray",
   legend.loc = NULL,
   legend.labels = NULL,
@@ -41,8 +42,6 @@ This is only used for objects of class \code{optimize.portfolio}}
 
 \item{match.col}{string name of column to use for portfolio object.
 Must match the name of an objective.}
-
-\item{search_size}{passed to optimize.portfolio for type="DEoptim" or type="random".}
 
 \item{main}{title used in the plot.}
 
@@ -75,6 +74,8 @@ Must match the name of an objective.}
 \item{lty}{vector of line types with length equal to the number of portfolios in \code{portfolio_list}.}
 
 \item{lwd}{vector of line widths with length equal to the number of portfolios in \code{portfolio_list}.}
+
+\item{search_size}{passed to optimize.portfolio for type="DEoptim" or type="random".}
 }
 \description{
 Overlay the efficient frontiers of different minRisk portfolio objects on a single plot.

@@ -392,8 +392,10 @@ meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type
   if(length(risk_idx) >= 1){
     risk_obj <- portfolio$objectives[[risk_idx[1]]]
   } else {
-    risk_obj <- portfolio_risk_objective(name=risk_type, arguments=list(p=0.95))
+    risk_obj <- portfolio_risk_objective(name=risk_type, arguments=list(p=0.05))
   }
+  alpha <- ifelse(is.numeric(risk_obj$arguments$p), risk_obj$arguments$p, 0.05)
+  if(alpha > 0.5) alpha <- (1 - alpha)
   
   # Clear out the objectives in portfolio and add them here to simplify checks
   # and so we can control the optimization along the efficient frontier.
@@ -442,7 +444,7 @@ meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type
       tmpportfolio <- portfolio
       tmpportfolio$objectives[[risk_idx]]$name <- rc
       tmpw <- optimize.portfolio(R=R, portfolio=tmpportfolio, optimize_method="CVXR", ef=TRUE, ...=...)$weight
-      res <- append(res, extract_risk(R=R, w = tmpw, portfolio = tmpportfolio)[[risk_type]])
+      res <- append(res, extract_risk(R=R, w = tmpw, ES_alpha = alpha, EQS_alpha = alpha)[[risk_type]])
     }
     res
   }

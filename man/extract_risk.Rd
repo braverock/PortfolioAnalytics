@@ -4,14 +4,16 @@
 \alias{extract_risk}
 \title{extract the risk value when knowing the weights}
 \usage{
-extract_risk(R, w, portfolio = NULL)
+extract_risk(R, w, ES_alpha = 0.05, EQS_alpha = 0.05)
 }
 \arguments{
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}
 
 \item{w}{the weight of the portfolio}
 
-\item{portfolio}{an object of type "portfolio" specifying the constraints and objectives for the optimization}
+\item{ES_alpha}{the default value is 0.05, but could be specified as any value between 0 and 1}
+
+\item{EQS_alpha}{the default value is 0.05, but could be specified as any value between 0 and 1}
 }
 \description{
 extract the risk value when knowing the weights

@@ -1,7 +1,8 @@
 #' extract the risk value when knowing the weights
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
-#' @param portfolio an object of type "portfolio" specifying the constraints and objectives for the optimization
 #' @param w the weight of the portfolio
+#' @param ES_alpha the default value is 0.05, but could be specified as any value between 0 and 1
+#' @param EQS_alpha the default value is 0.05, but could be specified as any value between 0 and 1
 #' @export extract_risk
 extract_risk <- function(R, w, ES_alpha = 0.05, EQS_alpha = 0.05){
   res = list()
