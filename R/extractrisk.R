@@ -22,14 +22,14 @@ extract_risk <- function(R, w, ES_alpha = 0.05, EQS_alpha = 0.05){
   obj_es <- zeta + (1/(T*ES_alpha)) * sum(z)
   con_es <- list(z >= 0, z >= -X %*% w - zeta)
   p_es <- CVXR::Problem(CVXR::Minimize(obj_es), constraints = con_es)
-  res_es = CVXR::solve(p_es)
+  res_es = CVXR::solve(p_es, solver = "ECOS")
   res$ES = res_es$value
   
   ## EQS
   obj_eqs <- zeta + (1/EQS_alpha) * CVXR::p_norm(z, p=2)
   con_eqs = list(z >= 0, z >= -X %*% w - zeta)
   p_eqs <- CVXR::Problem(CVXR::Minimize(obj_eqs), constraints = con_eqs)
-  res_eqs = CVXR::solve(p_eqs)
+  res_eqs = CVXR::solve(p_eqs, solver = "ECOS")
   res$EQS = res_eqs$value
   
   res
