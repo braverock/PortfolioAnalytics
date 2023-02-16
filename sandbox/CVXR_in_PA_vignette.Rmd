@@ -1,7 +1,7 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "2022/11/9"
+date: "2023/02/14"
 output: rmarkdown::pdf_document
 bibliography: PA.bib
 urlcolor: blue
@@ -39,9 +39,15 @@ library(PCRA)
 ```
 
 ## 2.2 Solvers
-The website https://cvxr.rbind.io/ shows that CVXR currently supports the use of 9 solvers, some of which are commercial (CBC, CPLEX, GUROBI, MOSEK) and the others are open source(GLPK, GLPK_MI, OSQP, SCS, ECOS). 
+The website https://cvxr.rbind.io/ shows that CVXR currently supports the use of 9 solvers, some of which are commercial (CBC, CPLEX, GUROBI, MOSEK)^[MOSEK ,GUROBI, and CPLEX require licenses to use them but free academic licenses are available for all three.] and the others are open source(GLPK, GLPK_MI, OSQP, SCS, ECOS). 
 
-Different solvers support different types of portfolio optimization problems. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP type portfolio optimization problems such as maximum mean return and minimum variance portfolio optimization is OSQP, and the default solver for SOCP type portfolio optimizations, such as "robust portfolio optimization" to control for alpha uncertainty, and Expected Quadratic Shortfall (EQS) portfolio optimization, is ECOS.
+The PortfolioAnalytics package provides following two main wrapper functions for constrainted optimization of portfolios by a wide variety of methods:
+
+`optimize.portfolio(R =, portfolio =, optimize_method =)`
+
+`optimize.portfolio.rebalancing(R =, portfolio =, optimize_method =, rebalance_on =, training_period =, rolling_window =)`
+
+Different solvers support different types of portfolio optimization problems and should be specified by the argument `optimize_method`. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` and `optimize.portfolio.rebalancing` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP type portfolio optimization problems such as maximum mean return and minimum variance portfolio optimization is OSQP, and the default solver for SOCP type portfolio optimizations, such as "robust portfolio optimization" to control for alpha uncertainty, and Expected Quadratic Shortfall (EQS) portfolio optimization, is ECOS.
 
 | Solver | LP | QP | SOCP |
 | :-- | :----: | :----: | :----: |
@@ -49,7 +55,7 @@ Different solvers support different types of portfolio optimization problems. Th
 |GLPK|$\checkmark$| | |
 |GLPK_MI|$\checkmark$| | |
 |OSQP|$\colorbox{gray}{\checkmark}$|$\colorbox{gray}{\checkmark}$| |
-|SCS|$\checkmark$||$\checkmark$|
+|SCS|$\checkmark$|$\checkmark$|$\checkmark$|
 |ECOS|$\checkmark$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
 |CPLEX|$\checkmark$|$\checkmark$|$\checkmark$|
 |GUROBI|$\checkmark$|$\checkmark$|$\checkmark$|
@@ -75,7 +81,7 @@ tsPlotMP(ret_edhec, layout = c(2, 7))
 \begin{center}
 Fig 2.1
 \end{center}
-The CRSP data set is an xts object that contains the daily returns of stocks from 1993-01 to 2015-12 from the Center for Research in Security Prices (CRSP)^[CRSP: Center for Research in Security Prices, LLC.]. We select the top 30 small cap stocks based on the market capitalization, and use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
+The CRSP data set is an xts object that contains the daily returns of stocks from 1993-01 to 2015-12^[CRSP: Center for Research in Security Prices, LLC.]. We select the top 30 small cap stocks based on the market capitalization, and use this larger and more frequent data set to show more meaningful and interesting results in Section 9. We don't want to use the large data set everywhere to slow down the code or distract the main point.
 
 ```{r}
 # use CRSP daily data set
@@ -686,8 +692,10 @@ Fig 9.6
 \end{center}
 Generate multiple mean-ES efficient frontiers and overlay the plots.
 ```{r}
+legend_labels <- c("Long Only ES (p=0.05)", 
+                   "Long Only Box ES (p=0.05)", "Long Short Box ES (p=0.05)")
 chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_list, 
-                               type="mean-ES", match.col="ES", 
+                               type="mean-ES", match.col="ES",
                                legend.loc="bottomright", chart.assets = FALSE,
                                legend.labels=legend_labels, cex.legend=1,
                                labels.assets=FALSE, lwd = c(3,3,3),
@@ -731,9 +739,9 @@ chart.EfficientFrontierOverlay(R=retM_CRSP_5, portfolio_list=portf_ES_list,
 \begin{center}
 Fig 9.8
 \end{center}
-ES portfolio with a larger tail probability will have better performance, but this is only because larger tail probability gives a wider ES calculation range, so the expected ES value is smaller.
+ES portfolio with a larger tail probability will have better performance, but this is only because larger tail probability gives a wider ES calculation range, so the expected ES value is smaller. Actually, these three lines cannot be compared because their x-lables are ES with different tail probabilities.
 
-The same portfolio may have different ES values under different tail probabilities. For example, the portfolio that reaches the maximum return, which is the right endpoint of each mean-ES efficient frontier. They are the same portfolio, but the ES is different. This Overlay plots mainly shows the importance of tail probability for calculating ES. Different tail probabilities only focus on risks in different degrees, rather than changes in risk levels.
+This plot mainly shows that the same portfolio will have different ES values under different tail probabilities. For example, the portfolio that reaches the maximum return, which is the right endpoint of each mean-ES efficient frontier. They are the same portfolio, but the ES values are different. It informs us the importance of tail probability for calculating ES. Different tail probabilities only focus on risks in different degrees, rather than changes in risk levels.
 
 ### 9.3.3 Mean-EQS Efficient Frontier
 ```{r, warning=FALSE}
@@ -747,6 +755,36 @@ chart.EfficientFrontier(meaneqs.ef, match.col="EQS", type="l",
 Fig 9.9
 \end{center}
 Mean-EQS efficient frontier is more like a piecewise function rather than a smooth curve.
+
+### 9.3.4 Efficient Frontiers Comparison among minStd, minES and minEQS portfolios
+In order to calculate the value of StdDev, ES and EQS of a portfolio, we provide a new function `extract_risk(R =, w =)`. Asset returns `R` and the portfolio weights `w` should be specified when using the function, `ES_alpha` and `EQS_alpha` are alternative arguments and the default values are 0.05.
+```{r}
+# usage example: minStd Portfolio
+minstd_port <- add.objective(pspec_sc, type = "risk", name = "StdDev")
+minstd_w <- optimize.portfolio(retM_CRSP_5, minstd_port, optimize_method = "CVXR")$weight
+
+# risk values with default alpha=0.05
+extract_risk(retM_CRSP_5, minstd_w)
+
+# risk values with specific alpha
+extract_risk(retM_CRSP_5, minstd_w, ES_alpha = 0.1, EQS_alpha = 0.1)
+```
+
+For comparing a specific risk type in minStd, minES and minEQS portfolios and generating multiple efficient frontiers, we provide a new function
+
+`chart.EfficientFrontierCompare(R =, portfolio =, risk_type =, match.col =, guideline =)`
+
+where `risk_type` is the risk to be compared, and `match.col` is the vector of the portfolios that participate in the comparison. If there are only two frontiers in the comparison, the default of the argument `guideline` is `TRUE`.
+```{r}
+# example 1: Compare StdDev of minStd and minES portfolios with guideline
+chart.EfficientFrontierCompare(R=retM_CRSP_5, portfolio=pspec_sc, risk_type="StdDev",
+                               match.col = c("StdDev", "ES"), lwd = c(2, 2))
+
+# example 2: Compare ES of minStd, minES and minEQS portfolios without guideline
+chart.EfficientFrontierCompare(R=retM_CRSP_5, portfolio=pspec_sc, risk_type="ES",
+                               match.col = c("StdDev", "ES", "EQS"), guideline = FALSE,
+                               col = c(1,2,4), lty = c(1, 2, 4), lwd = c(2, 2, 2))
+```
 
 \newpage
 # Reference
