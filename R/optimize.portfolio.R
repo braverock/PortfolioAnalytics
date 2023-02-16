@@ -2970,12 +2970,12 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     if(cvxr_default){
       if(risk_ES || risk_EQS || maxSTARR || EQSratio){
-        result_cvxr <- CVXR::solve(prob_cvxr, solver = "ECOS")
+        result_cvxr <- CVXR::solve(prob_cvxr, solver = "ECOS", ... = ...)
       } else {
-        result_cvxr <- CVXR::solve(prob_cvxr, solver = "OSQP")
+        result_cvxr <- CVXR::solve(prob_cvxr, solver = "OSQP", ... = ...)
       }
     } else {
-      result_cvxr <- CVXR::solve(prob_cvxr, solver = optimize_method)
+      result_cvxr <- CVXR::solve(prob_cvxr, solver = optimize_method, ... = ...)
     }
     
     cvxr_wts <- result_cvxr$getValue(wts)
