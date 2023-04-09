@@ -51,10 +51,11 @@ Suggests:
     rmarkdown,
     GSE,
     RobStatTM,
-    PCRA
+    PCRA,
+    R.rsp
 Remotes:
     git::https://github.com/robustport/PCRA.git
-VignetteBuilder: knitr
+VignetteBuilder: R.rsp
 Imports:
     methods
 License: GPL-3
