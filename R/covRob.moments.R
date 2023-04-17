@@ -9,6 +9,7 @@
 #' @param ... parameters for covRobMM
 #'
 #' @return a list contains mean and covariance matrix of the data matrix
+#' @author Yifu Kang
 #' @export
 #'
 custom.covRobMM <- function(R, ...){
@@ -34,6 +35,7 @@ custom.covRobMM <- function(R, ...){
 #' @param ... parameters for covRobRocke
 #'
 #' @return a list contains mean and covariance matrix of the data matrix
+#' @author Yifu Kang
 #' @export
 #'
 custom.covRobRocke <- function(R, ...){
