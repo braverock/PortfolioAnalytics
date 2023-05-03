@@ -1,4 +1,59 @@
-#' @title Compute moments using MCD robust method
+#' @title Compute moments using covRob.MM methods
+#'
+#' @description 
+#' This is a function that makes use of covRob from package RobStatTM to calculate
+#' robust estimators of moments, including mean and variance.
+#'
+#' @param R xts object of asset returns
+#' @param ... parameters for covRob.MM
+#'
+#' @return a list contains mean and covariance matrix of the data matrix
+#' @author Yifu Kang
+#' @export
+#'
+custom.covRob.MM <- function(R, ...){
+  out <- list()
+  if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
+  if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=50
+  
+  robustCov <- RobStatTM::covRob(X=R, tolpar=tol, maxit=maxit)
+  
+  out$sigma <- robustCov$cov
+  out$mu <- robustCov$center
+  return(out)
+}
+
+#' @title Compute moments using covRobRocke methods
+#'
+#' @description 
+#' This is a function that makes use of covRobRocke from package RobStatTM to calculate
+#' robust estimators of moments, including mean and variance.
+#'
+#' @param R xts object of asset returns
+#' @param ... parameters for covRob.Rocke
+#'
+#' @return a list contains mean and covariance matrix of the data matrix
+#' @author Yifu Kang
+#' @export
+#'
+custom.covRob.Rocke <- function(R, ...){
+  out <- list()
+  if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
+  if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=50
+  if(hasArg(initial)) initial=match.call(expand.dots=TRUE)$initial else initial='K'
+  if(hasArg(maxsteps)) maxsteps=match.call(expand.dots=TRUE)$maxsteps else maxsteps=5
+  if(hasArg(propmin)) propmin=match.call(expand.dots=TRUE)$propmin else propmin=2
+  if(hasArg(qs)) qs=match.call(expand.dots=TRUE)$qs else qs=50
+  
+  robustCov <- RobStatTM::covRobRocke(X=R, initial=initial, maxsteps=maxsteps, propmin=propmin, 
+                                      qs=qs, tol=tol, maxit=maxit)
+  
+  out$sigma <- robustCov$cov
+  out$mu <- robustCov$center
+  return(out)
+}
+
+#' @title Compute moments using covRob.MCD robust method
 #' 
 #' @description 
 #' This is a function that makes use of covMcd function from robustbase package. 
@@ -6,13 +61,11 @@
 #' robustbase on cran.
 #' 
 #' @param R  xts object of asset returns
-#' @param ... parameters for covMcd
+#' @param ... parameters for covRob.Mcd
 #'
 #' @return a list contains mean and covariance matrix of the stock return matrix
 #' @export
-#'
-#'
-custom.covMcd <- function(R, ...){
+custom.covRob.Mcd <- function(R, ...){
   
   if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MycovMcd()
   if(hasArg(alpha)) alpha=match.call(expand.dots=TRUE)$alpha else alpha=control$alpha
@@ -94,4 +147,73 @@ MycovMcd <- function(alpha = 1/2,
               tolSolve=tolSolve, scalefn=scalefn, maxcsteps=as.integer(maxcsteps),
               wgtFUN=wgtFUN, beta=beta,
               use.correction=use.correction))
+}
+
+#' @title  Compute TSGS moments
+#' 
+#' @description 
+#' This is a function making use of TSGS function from GSE package to compute
+#' the Two-Step Generalized S-Estimate, a robust estimate of location 
+#' and scatter for data with cell-wise and case-wise contamination.
+#'
+#' @param R xts object of asset returns
+#' @param ... parameters for covRob.TSGS
+#'
+#' @return a list contains mean and covariance matrix of the stock return matrix
+#' @export
+#' 
+#' @references Claudio Agostinelli, Andy Leung, "Robust estimation of multivariate 
+#'             location and scatter in the presence of cellwise and casewise contamination",
+#'             2014.
+
+custom.covRob.TSGS <- function(R, ...){
+  if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MyTSGS()
+  if(hasArg(filter)) filter=match.call(expand.dots=TRUE)$filter else filter=control$filter
+  if(hasArg(partial.impute)) partial.impute=match.call(expand.dots=TRUE)$partial.impute else partial.impute=control$partial.impute
+  if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=control$tol
+  if(hasArg(maxiter)) maxiter=match.call(expand.dots=TRUE)$maxiter else maxiter=control$maxiter
+  if(hasArg(loss)) loss=match.call(expand.dots=TRUE)$loss else loss=control$loss
+  if(hasArg(init)) init=match.call(expand.dots=TRUE)$init else init=control$init
+  
+  tsgsRob <- GSE::TSGS(x=R, filter=filter,
+                       partial.impute=partial.impute, tol=tol, 
+                       maxiter=maxiter, method=loss,
+                       init=init)
+  
+  return(list(mu = tsgsRob@mu, sigma = tsgsRob@S))
+  
+}
+
+#' @title
+#' Control settings for custom.TSGS
+#'
+#' @description 
+#' Auxiliary function for passing the estimation options as parameters 
+#' to the estimation function custom.TSGS
+#'
+#' @param filter the filter to be used in the first step. Available choices are 
+#'               "UBF-DDC","UBF","DDC","UF". The default one is "UBF-DDC".
+#' @param partial.impute whether partial imputation is used prior to estimation.
+#'                       The default is FALSE.
+#' @param tol tolerance for the convergence criterion. Default is 1e-4.
+#' @param maxiter maximum number of iterations. Default is 150.
+#' @param loss loss function to use, "bisquare" or "rocke". Default is "bisquare"
+#' @param init type of initial estimator. Options include "emve", "qc", "huber","imputed","emve_c"
+#'
+#' @return a list of passed parameters
+#' @export
+#'
+
+MyTSGS <- function(filter=c("UBF-DDC","UBF","DDC","UF"),
+                   partial.impute=FALSE, tol=1e-4, maxiter=150, 
+                   loss=c("bisquare","rocke"),
+                   init=c("emve","qc","huber","imputed","emve_c")){
+  
+  filter <- match.arg(filter)
+  loss <- match.arg(loss)
+  init <- match.arg(init)
+  
+  return(list(filter=filter, partial.impute=partial.impute, 
+              tol=tol, maxiter=as.integer(maxiter), 
+              loss=loss,init))
 }
