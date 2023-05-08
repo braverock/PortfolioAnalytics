@@ -4,6 +4,7 @@
 #' @param field ret, drawdown, or the default is both
 #' @param colorset users can design the color by providing a vector of color
 #' @param ltyset users can design lty by providing a vector of lty
+#' @author Peter Carl, Xinran Zhao, Yifu Kang
 #' @export backtest.plot
 backtest.plot <- function(R, log_return = FALSE, field='both', colorset=NULL, ltyset=NULL){
   ## Cumulative Returns

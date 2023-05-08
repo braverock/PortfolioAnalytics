@@ -26,3 +26,6 @@ backtest.plot(
 \description{
 generate plots of the cumulative returns and drawdown for back-testing
 }
+\author{
+Peter Carl, Xinran Zhao, Yifu Kang
+}
