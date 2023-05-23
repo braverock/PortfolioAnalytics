@@ -1,7 +1,7 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "2023/03/09"
+date: "2023/04/09"
 output: rmarkdown::pdf_document
 bibliography: PA.bib
 urlcolor: blue
@@ -403,12 +403,13 @@ print(head(retD_CRSP, 3))
 ```
 
 In the following part, we only show the time series of monthly returns of 10 CRSP stocks in the last five years, but you can use this code to check the time series performance of all stocks in any frequency and any time period.
+
+The entire back-testing part may be slow, occupying most of the time in this Vignette. Therefore, we print out the time for readers' reference. My computer model is MacBook Air with M2, 8-Core CPU, 8-Core GPU and 16-core Neural Engine.
 ```{r}
 # monthly return of top 30 stocks in last 5 years
-data(stocksCRSP)
-returnMat_M <- tapply(stocksCRSP[, Return], list(stocksCRSP$Date, stocksCRSP$TickerLast), I)
-stocksCRSP_M <- xts(returnMat_M, as.Date(rownames(returnMat_M)))
-retM_CRSP <- stocksCRSP_M[, sc30largest]
+ep <- endpoints(retD_CRSP, on= "months", k=1)
+prod1 <- function(x){apply(x+1, 2, prod)}
+retM_CRSP <- period.apply(retD_CRSP, INDEX = ep, FUN = prod1) - 1
 retM_CRSP_5 <- tail(retM_CRSP, 60)
 
 # time series plot of 10 stocks
@@ -421,6 +422,7 @@ Fig 9.1
 ## 9.1 Backtesting with GMV, GMES, GMEQS portfolios
 In this example, we use daily return of all the CRSP 30 stocks to generate a comparative backtesting among Global Minimum Variance, Global Minimum ES and Global Minimum EQS portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
 ```{r, warning=FALSE}
+start_time1 <- Sys.time()
 ## Generate GMV, GMES and GMEQS portfolios
 pspec_sc <- portfolio.spec(assets = sc30largest)
 pspec_sc <- add.constraint(pspec_sc, type = "full_investment")
@@ -466,60 +468,24 @@ EQS <- Return.rebalancing(retM_CRSP, wts.EQS)
 ret.comb <- na.omit(merge(GMV, ES, EQS, all=F))
 names(ret.comb) <- c("GMV", "GMES", "GMEQS")
 
-# Compute cumulative gross portfolios returns
-R <- ret.comb
-gross_cum <- TRUE
-c.xts <- if ( gross_cum ) {
-  cumprod(1+R)
-} else {
-  cumsum(R)
-}
-
-# Cumulative returns panel (Peter Carl)
-p <- xts::plot.xts(c.xts[,1], col = "black", main = "Cumulative returns",
-                   grid.ticks.lwd = 1, grid.ticks.lty = "solid", grid.ticks.on = "years",
-                   labels.col = "grey20", cex.axis = 0.8, format.labels = "%b\n%Y",
-                   lty = "dotted", ylim = c(min(c.xts), max(c.xts)))
-p <- xts::addSeries(c.xts[,2], on = 1, lwd = 2, col = "dark blue", lty = "dashed")
-p <- xts::addSeries(c.xts[,3], on = 1, lwd = 2, col = "dark green", lty = "solid")
-p <- xts::addLegend("topleft", on = 1,
-                    legend.names = names(c.xts),
-                    lty = c(3, 2, 1), lwd = rep(2, NCOL(c.xts)),
-                    col = c("black", "dark blue", "dark green"),
-                    bty = "o", box.col = "white",
-                    bg = rgb(t(col2rgb("white")), alpha = 200,
-                             maxColorValue = 255) )
-
-## Drawdowns panel(Peter Carl)
-d.xts <- PerformanceAnalytics::Drawdowns(R)
-p <- xts::addSeries(d.xts[,1], col = "black", lwd = 2, main = "Drawdown",
-                    ylim = c(min(d.xts), 0), lty = 3)
-p <- xts::addSeries(d.xts[,2], on = 2, lwd = 2, col = "dark blue", lty = 2)
-p <- xts::addSeries(d.xts[,3], on = 2, lwd = 2, col = "dark green", lty = 1)
-
-## panel 1 and 2 ylim
-ylim1 <- c(p$Env$ylim[[2]][1], p$Env$ylim[[2]][2])
-ylim2 <- c(p$Env$ylim[[4]][1], p$Env$ylim[[4]][2])
-ylim <- c(ylim1, ylim2)
-# get longest drawdown dates for xts object
-dt <- table.Drawdowns(R, top = 1) # just want to find the worst drawdown
-dt2 <- t(dt[,c("From", "To")])
-x <- as.vector(dt2[,NCOL(dt2)])
-y <- as.xts(matrix(rep(ylim, length(x)),ncol = length(ylim), byrow = TRUE), 
-            order.by = as.Date(x))
-i = 1
-p <- xts::addPolygon(y[i:(i+1),1:2], on = -1, col = "lightgrey") # top panel
-p <- xts::addPolygon(y[i:(i+1),3:4], on = -2, col = "lightgrey") # lower panel
-
-p
+backtest.plot(ret.comb, colorset = c("black", "darkblue", "darkgreen"), 
+              ltyset = c(3, 2, 1))
 ```
 \begin{center}
 Fig 9.2
 \end{center}
 
+```{r, echo=FALSE}
+end_time1 <- Sys.time()
+runningtime1 <- end_time1 - start_time1
+cat("Section 9.1 cost", format(runningtime1))
+```
+
+
 ## 9.2 Backtesting with SR, ESratio, EQSratio portfolios
 In this example, we use daily return of all the CRSP 30 stocks to generate a comparative backtesting among Maximum Sharpe Ratio, Maximum ES Ratio and Maximum EQS Ratio portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
 ```{r, warning=FALSE}
+start_time2 <- Sys.time()
 ## Generate GMV, GMES and GMEQS portfolios
 pspec_sc_ratio <- add.objective(pspec_sc, type = "return", name = "mean")
 pspec_Sr <- add.objective(pspec_sc_ratio, type = "risk", name = "var")
@@ -554,64 +520,26 @@ wts.EQSr <- extractWeights(bt.EQSr)
 wts.EQSr <- wts.EQSr[complete.cases(wts.EQSr),]
 
 ## Compute cumulative returns of three portfolios
-Sr <- Return.rebalancing(retM_CRSP, wts.Sr)
-ESr <- Return.rebalancing(retM_CRSP, wts.ESr)
-EQSr <- Return.rebalancing(retM_CRSP, wts.EQSr)
+Sr <- Return.rebalancing(retM_CRSP, wts.Sr, rebalance_on = "months")
+ESr <- Return.rebalancing(retM_CRSP, wts.ESr, rebalance_on = "months")
+EQSr <- Return.rebalancing(retM_CRSP, wts.EQSr, rebalance_on = "months")
 
 # Combine Sr, ESr and EQSr portfolio cumulative returns
 ret.comb <- na.omit(merge(Sr, ESr, EQSr, all=F))
 names(ret.comb) <- c("Sharpe ratio", "ES ratio", "EQS ratio")
 
-# Compute cumulative gross portfolios returns
-R <- ret.comb
-gross_cum <- TRUE
-c.xts <- if ( gross_cum ) {
-  cumprod(1+R)
-} else {
-  cumsum(R)
-}
-
-# Cumulative returns panel (Peter Carl)
-p <- xts::plot.xts(c.xts[,1], col = "black", main = "Cumulative returns",
-                   grid.ticks.lwd = 1, grid.ticks.lty = "solid", grid.ticks.on = "years",
-                   labels.col = "grey20", cex.axis = 0.8, format.labels = "%b\n%Y",
-                   lty = "dotted", ylim = c(min(c.xts), max(c.xts)))
-p <- xts::addSeries(c.xts[,2], on = 1, lwd = 2, col = "dark blue", lty = "dashed")
-p <- xts::addSeries(c.xts[,3], on = 1, lwd = 2, col = "dark green", lty = "solid")
-p <- xts::addLegend("topleft", on = 1,
-                    legend.names = names(c.xts),
-                    lty = c(3, 2, 1), lwd = rep(2, NCOL(c.xts)),
-                    col = c("black", "dark blue", "dark green"),
-                    bty = "o", box.col = "white",
-                    bg = rgb(t(col2rgb("white")), alpha = 200,
-                             maxColorValue = 255) )
-
-## Drawdowns panel(Peter Carl)
-d.xts <- PerformanceAnalytics::Drawdowns(R)
-p <- xts::addSeries(d.xts[,1], col = "black", lwd = 2, main = "Drawdown",
-                    ylim = c(min(d.xts), 0), lty = 3)
-p <- xts::addSeries(d.xts[,2], on = 2, lwd = 2, col = "dark blue", lty = 2)
-p <- xts::addSeries(d.xts[,3], on = 2, lwd = 2, col = "dark green", lty = 1)
-
-## panel 1 and 2 ylim
-ylim1 <- c(p$Env$ylim[[2]][1], p$Env$ylim[[2]][2])
-ylim2 <- c(p$Env$ylim[[4]][1], p$Env$ylim[[4]][2])
-ylim <- c(ylim1, ylim2)
-# get longest drawdown dates for xts object
-dt <- table.Drawdowns(R, top = 1) # just want to find the worst drawdown
-dt2 <- t(dt[,c("From", "To")])
-x <- as.vector(dt2[,NCOL(dt2)])
-y <- as.xts(matrix(rep(ylim, length(x)),ncol = length(ylim), byrow = TRUE), 
-            order.by = as.Date(x))
-i = 1
-p <- xts::addPolygon(y[i:(i+1),1:2], on = -1, col = "lightgrey") # top panel
-p <- xts::addPolygon(y[i:(i+1),3:4], on = -2, col = "lightgrey") # lower panel
-
-p
+backtest.plot(ret.comb, colorset = c("black", "darkblue", "darkgreen"), 
+              ltyset = c(3, 2, 1))
 ```
 \begin{center}
 Fig 9.3
 \end{center}
+
+```{r, echo=FALSE}
+end_time2 <- Sys.time()
+runningtime2 <- end_time2 - start_time2
+cat("Section 9.2 cost", format(runningtime2))
+```
 
 ## 9.3 Efficient Frontier
 We generate efficient frontiers with mean-StdDev, mean-ES and mean-EQS portfolios using 30 stocks from CRSP data set. For illustrative purposes, we use the last five years
