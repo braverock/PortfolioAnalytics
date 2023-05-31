@@ -1,12 +1,13 @@
 #' generate plots of the cumulative returns and drawdown for back-testing
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param log_return arithmetic return or log return, the default is arithmetic return
-#' @param field ret, drawdown, or the default is both
-#' @param colorset users can design the color by providing a vector of color
-#' @param ltyset users can design lty by providing a vector of lty
+#' @param plotType ret, drawdown, or the default is both
+#' @param colorSet users can design the color by providing a vector of color
+#' @param ltySet users can design lty by providing a vector of lty
+#' @param lwdSet users can design lwd by providing a vector of lwd
 #' @author Peter Carl, Xinran Zhao, Yifu Kang
 #' @export backtest.plot
-backtest.plot <- function(R, log_return = FALSE, field='both', colorset=NULL, ltyset=NULL){
+backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL, ltySet=NULL, lwdSet=NULL){
   ## Cumulative Returns
   c.xts <- if (log_return) {
     1 + cumsum(R)
@@ -14,6 +15,9 @@ backtest.plot <- function(R, log_return = FALSE, field='both', colorset=NULL, lt
     cumprod(1+R)
   }
   n = dim(c.xts)[2] ## number of portfolio
+  
+  ## sort xts
+  legendOrder = order(c.xts[end(c.xts)], decreasing = TRUE)
   
   ## Drawdowns
   d.xts <- PerformanceAnalytics::Drawdowns(R)
@@ -27,29 +31,31 @@ backtest.plot <- function(R, log_return = FALSE, field='both', colorset=NULL, lt
   x <- as.vector(dt2[,NCOL(dt2)])
   
   ## style set
-  if(is.null(colorset))
-    colorset <- 1:n
-  if (is.null(ltyset))
-    ltyset <- rep(1, n)
+  if (is.null(colorSet))
+    colorSet <- 1:n
+  if (is.null(ltySet))
+    ltySet <- rep(1, n)
+  if (is.null(lwdSet))
+    lwdSet <- rep(2, n)
   
   ## plots of return and drawdown
-  if (field == 'both'){
-    p <- xts::plot.xts(c.xts[,1], lwd=2, main = "Cumulative Returns",
+  if (plotType == 'both'){
+    p <- xts::plot.xts(c.xts[,1], main = "Cumulative Returns",
                        grid.ticks.lwd=1, grid.ticks.on = "years",
-                       labels.col="grey20", col = colorset[1], lty = ltyset[1],
-                       cex.axis=0.8, format.labels = "%b\n%Y", 
+                       labels.col="grey20", col = colorSet[1], lty = ltySet[1],
+                       lwd = lwdSet[1], cex.axis=0.8, format.labels = "%b\n%Y", 
                        ylim = c(min(c.xts), max(c.xts)))
-    p <- xts::addSeries(d.xts[,1], lwd=2, main="Drawdown", ylim = c(min(d.xts), 0), 
-                        col = colorset[1], lty = ltyset[1])
+    p <- xts::addSeries(d.xts[,1], main="Drawdown", ylim = c(min(d.xts), 0),
+                        col = colorSet[1], lty = ltySet[1], lwd = lwdSet[1])
     if(n > 1){
       for(i in 2:n){
-        p <- xts::addSeries(c.xts[,i], on=1, lwd=2, col = colorset[i], lty = ltyset[i])
-        p <- xts::addSeries(d.xts[,i], on=2, lwd=2, col = colorset[i], lty = ltyset[i])
+        p <- xts::addSeries(c.xts[,i], on=1, col = colorSet[i], lty = ltySet[i], lwd = lwdSet[i])
+        p <- xts::addSeries(d.xts[,i], on=2, col = colorSet[i], lty = ltySet[i], lwd = lwdSet[i])
       }
     }
-    p <- xts::addLegend("topleft", on = 1, legend.names = names(c.xts), bty = "o",
-                        lwd = rep(2, NCOL(c.xts)), box.col = "white", 
-                        col = colorset, lty = ltyset, 
+    p <- xts::addLegend("topleft", on = 1, legend.names = names(c.xts)[legendOrder], bty = "o", 
+                        box.col = "white", col = colorSet[legendOrder], lty = ltySet[legendOrder], 
+                        lwd = lwdSet[legendOrder],
                         bg=rgb(t(col2rgb("white")), alpha = 200, maxColorValue = 255))
     
     ## ylim panel
@@ -64,20 +70,20 @@ backtest.plot <- function(R, log_return = FALSE, field='both', colorset=NULL, lt
   }
   
   ## plot of returns
-  if (field == 'ret' || field == 'return'){
-    p <- xts::plot.xts(c.xts[,1], lwd=2, main = "Cumulative Returns",
-                       grid.ticks.lwd=1, grid.ticks.on = "years",
-                       cex.axis=0.8, col = colorset[1], lty = ltyset[1],
+  if (plotType == 'ret' || plotType == 'return'){
+    p <- xts::plot.xts(c.xts[,1], main = "Cumulative Returns",
+                       grid.ticks.lwd=1, grid.ticks.on = "years", cex.axis=0.8, 
+                       col = colorSet[1], lty = ltySet[1], lwd = lwdSet[1],
                        format.labels = "%b\n%Y", labels.col="grey20", 
                        ylim = c(min(c.xts), max(c.xts)))
     if(n > 1){
       for(i in 2:n){
-        p <- xts::addSeries(c.xts[,i], on=1, lwd=2, col = colorset[i], lty = ltyset[i])
+        p <- xts::addSeries(c.xts[,i], on=1, col = colorSet[i], lty = ltySet[i], lwd = lwdSet[i])
       }
     }
-    p <- xts::addLegend("topleft", on = 1, legend.names = names(c.xts), bty = "o",
-                        lwd = rep(2, NCOL(c.xts)), box.col = "white", 
-                        col = colorset, lty = ltyset, 
+    p <- xts::addLegend("topleft", on = 1, legend.names = names(c.xts)[legendOrder], bty = "o",
+                        box.col = "white", col = colorSet[legendOrder], lty = ltySet[legendOrder], 
+                        lwd = lwdSet[legendOrder],
                         bg=rgb(t(col2rgb("white")), alpha = 200, maxColorValue = 255))
     
     ## ylim panel
@@ -88,20 +94,20 @@ backtest.plot <- function(R, log_return = FALSE, field='both', colorset=NULL, lt
   }
   
   ## plot of drawdown
-  if (field == 'drawdown'){
-    p <- xts::plot.xts(d.xts[,1], lwd=2, main="Drawdown",
-                       grid.ticks.lwd=1, grid.ticks.on = "years",
-                       cex.axis=0.8, col = colorset[1], lty = ltyset[1],
+  if (plotType == 'drawdown'){
+    p <- xts::plot.xts(d.xts[,1], main="Drawdown",
+                       grid.ticks.lwd=1, grid.ticks.on = "years", cex.axis=0.8, 
+                       col = colorSet[1], lty = ltySet[1], lwd = lwdSet[1], 
                        format.labels = "%b\n%Y", labels.col="grey20", 
                        ylim = c(min(d.xts), 0.1))
     if(n > 1){
       for(i in 2:n){
-        p <- xts::addSeries(d.xts[,i], on=1, lwd=2, col = colorset[i], lty = ltyset[i])
+        p <- xts::addSeries(d.xts[,i], on=1, col = colorSet[i], lty = ltySet[i], lwd = lwdSet[i])
       }
     }
-    p <- xts::addLegend("topleft", on = 1, legend.names = names(c.xts), bty = "o",
-                        lwd = rep(2, NCOL(c.xts)), box.col = "white", 
-                        col = colorset, lty = ltyset, 
+    p <- xts::addLegend("topleft", on = 1, legend.names = names(c.xts)[legendOrder], bty = "o",
+                        box.col = "white", col = colorSet[legendOrder], lty = ltySet[legendOrder], 
+                        lwd = lwdSet[legendOrder],
                         bg=rgb(t(col2rgb("white")), alpha = 200, maxColorValue = 255))
     
     ## ylim panel
