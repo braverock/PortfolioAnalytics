@@ -79,16 +79,15 @@ The optimization method choice *CVXR* provides us the access to the solvers in p
 ## 3.1 CovRob Estimators
 The first method to compute robust estimators is based on *covRob* function from package **RobStatTM**. There are two ways for users to apply this method, either using the function we provide in the PortfolioAnalytics or custom a function themselves.
 
-In **PortfolioAnalytics**, we build a function called *custom.covRob* based on method *covRob* from package **RobStatTM**. In this way, users can apply **covRob** by setting the parameter **momentFUN** equal to "custom.covRob" in method **optimize.portfolio()**. Meanwhile, users can set other parameters of **covRob** in  **optimize.portfolio()**. See example below.
+In **PortfolioAnalytics**, we build two functions called *custom.covRob.MM* and *custom.covRob.Rocke* based on method *covRob* from package **RobStatTM**. In this way, users can apply **covRob** by setting the parameter **momentFUN** equal to "custom.covRobMM" or "custom.covRobRocke" in method **optimize.portfolio()**. The most distinct difference between MM and Rocke is that Rocke is especially desigend for data with more than 10 variables, while MM can be used for 9 variables. Meanwhile, users can set other parameters of **covRob** methods in  **optimize.portfolio()**. See examples below.
 ```{r}
-# This is the function we set up for users in advance in PortfolioAnalytics
-custom.covRob <- function(R, ...){
+# This is the function we set up for users to use covRob.MM in advance in PortfolioAnalytics 
+custom.covRob.MM <- function(R, ...){
   out <- list()
-  if(hasArg(type)) type=match.call(expand.dots=TRUE)$type else type="auto"
   if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
   if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=50
   
-  robustCov <- RobStatTM::covRob(X=R, type=type, tol=tol, maxit=maxit)
+  robustCov <- RobStatTM::covRob(X=R, tol=tol, maxit=maxit)
   
   out$sigma <- robustCov$cov
   out$mu <- robustCov$center
@@ -98,17 +97,43 @@ custom.covRob <- function(R, ...){
 # One can modify the parameter in this way
 optimize.portfolio(returns, pspec, 
                    optimize_method="CVXR", 
-                   momentFUN="custom.covRob",
-                   type="MM", maxit=100, tol=1e-5)
+                   momentFUN="custom.covRob.MM",
+                   maxit=100, tol=1e-5)
+
+
+# This is the function we set up for users to use covRob.Rocke in advance in PortfolioAnalytics 
+custom.covRob.Rocke <- function(R, ...){
+  out <- list()
+  if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
+  if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=50
+  if(hasArg(initial)) initial=match.call(expand.dots=TRUE)$initial else initial='K'
+  if(hasArg(maxsteps)) maxsteps=match.call(expand.dots=TRUE)$maxsteps else maxsteps=5
+  if(hasArg(propmin)) propmin=match.call(expand.dots=TRUE)$propmin else propmin=2
+  if(hasArg(qs)) qs=match.call(expand.dots=TRUE)$qs else qs=50
+  
+  robustCov <- RobStatTM::covRobRocke(X=R, initial=initial, maxsteps=maxsteps, propmin=propmin, 
+                                      qs=qs, tol=tol, maxit=maxit)
+  
+  out$sigma <- robustCov$cov
+  out$mu <- robustCov$center
+  return(out)
+}
+
+# One can modify the parameter in this way
+optimize.portfolio(returns, pspec, 
+                   optimize_method="CVXR", 
+                   momentFUN="custom.covRob.Rocke",
+                   maxit=100, tol=1e-5,
+                   initial='K', maxsteps=5)
 ```
 
-Alternatively, users can use existing functionality to create a function themselves. In this way, users can have more possibilities to explore while customing the covariance matrix. If they want to make some adjustments to the outcome matrix of **covRob**, or if they want to add some code based on original algorithms, this would be a better choice. The key here is the return of the function must be a list containing **mu** and **sigma**. See example below:
+Alternatively, users can use existing functionality to create a function themselves. In this way, users can have more possibilities to explore while customing the covariance matrix. If they want to make some adjustments to the outcome matrix of **covRob**, or if they want to add some code based on original algorithms, this would be a better choice. The key here is the return of the function must be a list containing **mu** and **sigma**. See example of *covRob.MM* below, which works for *covRob.Rocke* too:
 
 ```{r}
-users.covRob <- function(R){
+users.covRob.MM <- function(R){
   out <- list()
   
-  robustCov <- RobStatTM::covRob(X=R, type="MM", maxit=100, tol=1e-5)
+  robustCov <- RobStatTM::covRob(X=R, maxit=100, tol=1e-5)
   
   out$sigma <- robustCov$cov
   out$mu <- robustCov$center
@@ -117,15 +142,15 @@ users.covRob <- function(R){
 
 optimize.portfolio(returns, pspec, 
                    optimize_method="CVXR", 
-                   momentFUN="users.covRob")
+                   momentFUN="users.covRob.MM")
 ```
 
-The above code uses default settings to compute robust estimators with the *covRob* function.. The available parameters are      
+The above code uses default settings to compute robust estimators with the *covRob.MM* function.. The available parameters are      
   1. **type**: which estimator to use. Possible options are **MM**, **Rocke** and **auto**. Default is **auto**.   
   2. **maxiter**: maximum number of iterations. Default is 50.     
   3. **tol**: tolerance for covergence. Default is 1e-4.    
-  
-For more usage of *covRob*, please refer to its manual document @covRob.
+
+For *covRob.Rocke*, there are some additional parameters, including **maxsteps**, **propmin**, **inital** and etc. For more usage of *covRob.MM* and *covRob.Rocke*, please refer to its manual document @covRob.
 
 
 ## 3.2 covMcd Robust Estimators
@@ -295,8 +320,8 @@ In this section we conduct backtests for each of the three robust estimators usi
 robPlot <- function(GMV, MAERKET, plot=1){
   # Optimize Portfolio at Monthly Rebalancing and 5-Year Training
   if(plot == 1){
-    momentEstFun = 'custom.covRob'
-    name = "GmvLoCovRob"
+    momentEstFun = 'custom.covRob.Rocke'
+    name = "GmvLoCovRobRocke"
   }else if(plot == 2){
     momentEstFun = 'custom.covMcd'
     name = "GmvLoCovMcd"
@@ -323,53 +348,9 @@ robPlot <- function(GMV, MAERKET, plot=1){
   ret.comb<- na.omit(merge(GMV, GMV.rob, MARKET, all=F))
   names(ret.comb) <- c(name, "GmvLo", "MARKET")
   
-  R <- ret.comb
-  geometric = TRUE
-  c.xts <- if ( geometric ) {
-    cumprod(1+R)
-  } else {
-    1 + cumsum(R)
-  }
+  plot=backtest.plot(ret.comb)
   
-  p <- xts::plot.xts(c.xts[,1], col="black", main = "Cumulative Returns",
-                     grid.ticks.lwd=1, grid.ticks.lty = "dotted", 
-                     grid.ticks.on = "years",
-                     labels.col="grey20", cex.axis=0.8, 
-                     format.labels = "%b\n%Y",
-                     ylim = c(min(c.xts), max(c.xts)), lty="dashed")
-  p <- xts::addSeries(c.xts[,2], on=1, lwd=2, col="darkgreen")
-  p <- xts::addSeries(c.xts[,3], on=1, lwd=2, col="black", lty="dotted")
-  p <- xts::addLegend("topleft", on = 1,
-                      legend.names = names(c.xts),
-                      lty = c(1,2,3), lwd = rep(2, NCOL(c.xts)),
-                      col = c("darkgreen", "black", "black"),
-                      bty = "o", box.col = "white",
-                      bg=rgb(t(col2rgb("white")), alpha = 200,
-                             maxColorValue = 255) )
-  ## Drawdowns panel(Peter Carl)
-  d.xts <- PerformanceAnalytics::Drawdowns(R)
-  p <- xts::addSeries(d.xts[,1], col="black", lwd=2, main="Drawdown",
-                      ylim = c(min(d.xts), 0), lty="dashed")
-  p <- xts::addSeries(d.xts[,2], on=2, lwd=2, col="darkgreen")
-  p <- xts::addSeries(d.xts[,3], on=2, lwd=2, col="black", lty="dotted")
-  # panel 1 and 2 ylim
-  ylim1 <- c(p$Env$ylim[[2]][1], p$Env$ylim[[2]][2])
-  ylim2 <- c(p$Env$ylim[[4]][1], p$Env$ylim[[4]][2])
-  ylim <- c(ylim1, ylim2)
-  # get longest drawdown dates for xts object
-  dt <- table.Drawdowns(GMV.rob, top = 1) # just want to find the worst drawdown
-  
-  if(is.na(dt$To) == TRUE){
-    dt$To = index(R)[dim(R)[1]]
-  }
-  dt2 <- t(dt[,c("From", "To")])
-  x <- as.vector(dt2[,NCOL(dt2)])
-  y <- as.xts(matrix(rep(ylim, length(x)),ncol=length(ylim), byrow=TRUE), order.by=as.Date(x))
-  i=1
-  p <- xts::addPolygon(y[i:(i+1),1:2], on=-1, col="lightgrey") # top panel
-  p <- xts::addPolygon(y[i:(i+1),3:4], on=-2, col="lightgrey") # lower panel
-  
-  return(list(plot = p, ret = R[,2]))
+  return(list(ret=ret.comb, plot=plot)
 }
 
 ```
@@ -387,10 +368,10 @@ wts.gmv = extractWeights(bt.gmv)
 # Compute cumulative returns of portfolio
 GMV = Return.rebalancing(returns, wts.gmv)
   
-res.covRob = robPlot(GMV=GMV, MAERKET=MARKET, plot=1)
-res.covRob$plot
+robPlot(GMV=GMV, MAERKET=MARKET, plot=1)
 ```
-**covRob** also outperforms conventional portfolio optimization in the worst drawdown. The duration of worst drawdown for **covRob** based portfolio is 73 weeks while the other has a duration of 110 weeks.
+
+**covRob.Rocke** also outperforms conventional portfolio optimization in the worst drawdown. The duration of worst drawdown for **covRob.Rocke** based portfolio is 73 weeks while the other has a duration of 110 weeks.
 ```{r}
 # longest drawdown for robust based portfolio
 table.Drawdowns(GMV, top=1)
@@ -404,7 +385,6 @@ For *covMCD*, we set *alpha* equal to 0.5 during the process of backtest. From t
 ```{r}
 set.seed(1234)
 res.covMcd = robPlot(GMV=GMV, MAERKET=MARKET, plot=2)
-res.covMcd$plot
 ```
 The worst drawdown for *covMcd* based portfolio has a duration of 71 weeks, better than *covRob* based portfolio and the Markovitz optimized portfolio.
 ```{r}
@@ -414,7 +394,7 @@ table.Drawdowns(res.covMcd$ret, top=1)
 ## 4.3 TSGS Estimators Backtest
 For **TSGS**, we use the default settings. Similiar to *covRob*, optimized portfolios with standard sample covariance matrix and *TSGS* estimators have similar performance before the end of 2008. Furthermore, the *TSGS* based portfolio shows a better cumulative return after year 2008.
 ```{r}
-res.TSGS = robPlot(GMV=GMV, MAERKET=MARKET, plot=3)
+robPlot(GMV=GMV, MAERKET=MARKET, plot=3)
 res.TSGS$plot
 ```
 The longest drawdown for **TSGS** based portfolio lasts 68 weeks, which is the best among all the robust based portfolios.
