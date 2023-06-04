@@ -350,7 +350,7 @@ robPlot <- function(GMV, MAERKET, plot=1){
   
   plot=backtest.plot(ret.comb)
   
-  return(list(ret=ret.comb, plot=plot)
+  return(list(ret=ret.comb, plot=plot))
 }
 
 ```
