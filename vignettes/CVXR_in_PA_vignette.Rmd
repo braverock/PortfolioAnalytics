@@ -468,8 +468,8 @@ EQS <- Return.rebalancing(retM_CRSP, wts.EQS)
 ret.comb <- na.omit(merge(GMV, ES, EQS, all=F))
 names(ret.comb) <- c("GMV", "GMES", "GMEQS")
 
-backtest.plot(ret.comb, colorset = c("black", "darkblue", "darkgreen"), 
-              ltyset = c(3, 2, 1))
+backtest.plot(ret.comb, colorSet = c("black", "darkblue", "darkgreen"), 
+              ltySet = c(3, 2, 1))
 ```
 \begin{center}
 Fig 9.2
