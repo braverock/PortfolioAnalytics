@@ -22,6 +22,8 @@ meanrisk.efficient.frontier(
 
 \item{risk_type}{one of "StdDev", "ES" and "EQS", which determines the type of basic efficient frontier.}
 
+\item{compare_port}{vector composed of any risk "StdDev", "ES", "EQS", for example, compare_port=c("StdDev", "ES")}
+
 \item{\dots}{passthru parameters to \code{\link{optimize.portfolio}}}
 }
 \value{

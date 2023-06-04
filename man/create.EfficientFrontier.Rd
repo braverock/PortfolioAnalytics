@@ -34,6 +34,9 @@ of points along the efficient frontier will be equal to the length of \code{risk
 \item{search_size}{passed to \code{\link{optimize.portfolio}} for type="DEoptim" or type="random".}
 
 \item{\dots}{passthrough parameters to \code{\link{optimize.portfolio}}.}
+
+\item{compare_port}{if type="mean-risk", compare_port should be provided. 
+compare_port is a vector composed of any risk "StdDev", "ES", "EQS", for example, compare_port=c("StdDev", "ES")}
 }
 \value{
 an object of class 'efficient.frontier' with the objective measures 
@@ -59,6 +62,16 @@ Currently there are 4 'types' supported to create an efficient frontier:
   objectives, they will be added using default parameters.
   The efficient frontier is created via 
   \code{\link{meanetl.efficient.frontier}}.}
+  \item{"mean-EQS":}{ This is a special 
+  case for an efficient frontier that can be created by CVXR solvers.
+  The \code{portfolio} object should have two objectives: 1) mean
+  and 2) EQS. If the portfolio object does not contain these 
+  objectives, they will be added using default parameters.
+  The efficient frontier is created via 
+  \code{\link{meanrisk.efficient.frontier}}.}
+  \item{"mean-risk":}{ This is a special case for multiple efficient frontiers.
+  The efficient frontier is created via 
+  \code{\link{meanrisk.efficient.frontier}}.}
   \item{"DEoptim":}{ This can handle more complex constraints and objectives
   than the simple mean-var and mean-ETL cases. For this type, we actually 
   call \code{\link{optimize.portfolio}} with \code{optimize_method="DEoptim"}
@@ -78,5 +91,5 @@ Currently there are 4 'types' supported to create an efficient frontier:
 \code{\link{meanetl.efficient.frontier}}
 }
 \author{
-Ross Bennett
+Ross Bennett, Xinran Zhao
 }

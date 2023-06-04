@@ -376,6 +376,7 @@ meaneqs.efficient.frontier <- function(portfolio, R, n.portfolios=25, ...){
 #' @param R an xts or matrix of asset returns
 #' @param n.portfolios number of portfolios to generate the efficient frontier
 #' @param risk_type one of "StdDev", "ES" and "EQS", which determines the type of basic efficient frontier.
+#' @param compare_port vector composed of any risk "StdDev", "ES", "EQS", for example, compare_port=c("StdDev", "ES")
 #' @param \dots passthru parameters to \code{\link{optimize.portfolio}}
 #' @return a matrix of objective measure values and weights along the efficient frontier
 #' @author Xinran Zhao
@@ -471,6 +472,16 @@ meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type
 #'   objectives, they will be added using default parameters.
 #'   The efficient frontier is created via 
 #'   \code{\link{meanetl.efficient.frontier}}.}
+#'   \item{"mean-EQS":}{ This is a special 
+#'   case for an efficient frontier that can be created by CVXR solvers.
+#'   The \code{portfolio} object should have two objectives: 1) mean
+#'   and 2) EQS. If the portfolio object does not contain these 
+#'   objectives, they will be added using default parameters.
+#'   The efficient frontier is created via 
+#'   \code{\link{meanrisk.efficient.frontier}}.}
+#'   \item{"mean-risk":}{ This is a special case for multiple efficient frontiers.
+#'   The efficient frontier is created via 
+#'   \code{\link{meanrisk.efficient.frontier}}.}
 #'   \item{"DEoptim":}{ This can handle more complex constraints and objectives
 #'   than the simple mean-var and mean-ETL cases. For this type, we actually 
 #'   call \code{\link{optimize.portfolio}} with \code{optimize_method="DEoptim"}
@@ -491,11 +502,13 @@ meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type
 #' \code{n.portfolios} is ignored if \code{risk_aversion} is specified and the number
 #' of points along the efficient frontier will be equal to the length of \code{risk_aversion}.
 #' @param match.col column to match when extracting the efficient frontier from an objected created by \code{\link{optimize.portfolio}}.
+#' @param compare_port if type="mean-risk", compare_port should be provided. 
+#' compare_port is a vector composed of any risk "StdDev", "ES", "EQS", for example, compare_port=c("StdDev", "ES")
 #' @param search_size passed to \code{\link{optimize.portfolio}} for type="DEoptim" or type="random".
 #' @param \dots passthrough parameters to \code{\link{optimize.portfolio}}.
 #' @return an object of class 'efficient.frontier' with the objective measures 
 #' and weights of portfolios along the efficient frontier.
-#' @author Ross Bennett
+#' @author Ross Bennett, Xinran Zhao
 #' @seealso \code{\link{optimize.portfolio}}, 
 #' \code{\link{portfolio.spec}}, 
 #' \code{\link{meanvar.efficient.frontier}}, 

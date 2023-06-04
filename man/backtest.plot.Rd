@@ -7,9 +7,10 @@
 backtest.plot(
   R,
   log_return = FALSE,
-  field = "both",
-  colorset = NULL,
-  ltyset = NULL
+  plotType = "both",
+  colorSet = NULL,
+  ltySet = NULL,
+  lwdSet = NULL
 )
 }
 \arguments{
@@ -17,11 +18,13 @@ backtest.plot(
 
 \item{log_return}{arithmetic return or log return, the default is arithmetic return}
 
-\item{field}{ret, drawdown, or the default is both}
+\item{plotType}{ret, drawdown, or the default is both}
 
-\item{colorset}{users can design the color by providing a vector of color}
+\item{colorSet}{users can design the color by providing a vector of color}
 
-\item{ltyset}{users can design lty by providing a vector of lty}
+\item{ltySet}{users can design lty by providing a vector of lty}
+
+\item{lwdSet}{users can design lwd by providing a vector of lwd}
 }
 \description{
 generate plots of the cumulative returns and drawdown for back-testing
