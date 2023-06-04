@@ -70,7 +70,7 @@ backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL,
   }
   
   ## plot of returns
-  if (plotType == 'ret' || plotType == 'return'){
+  if (plotType == 'ret' || plotType == 'return' || plotType == 'cumGrossRet'){
     p <- xts::plot.xts(c.xts[,1], main = "Cumulative Returns",
                        grid.ticks.lwd=1, grid.ticks.on = "years", cex.axis=0.8, 
                        col = colorSet[1], lty = ltySet[1], lwd = lwdSet[1],
