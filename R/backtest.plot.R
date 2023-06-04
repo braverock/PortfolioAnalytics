@@ -1,7 +1,7 @@
 #' generate plots of the cumulative returns and drawdown for back-testing
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param log_return arithmetic return or log return, the default is arithmetic return
-#' @param plotType ret, drawdown, or the default is both
+#' @param plotType "ret", "drawdown", or the default is both
 #' @param colorSet users can design the color by providing a vector of color
 #' @param ltySet users can design lty by providing a vector of lty
 #' @param lwdSet users can design lwd by providing a vector of lwd
