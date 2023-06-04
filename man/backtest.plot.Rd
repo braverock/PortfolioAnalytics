@@ -18,7 +18,7 @@ backtest.plot(
 
 \item{log_return}{arithmetic return or log return, the default is arithmetic return}
 
-\item{plotType}{"ret", "drawdown", or the default is both}
+\item{plotType}{"cumRet", "drawdown", or the default is both}
 
 \item{colorSet}{users can design the color by providing a vector of color}
 

@@ -1,7 +1,7 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "2023/04/09"
+date: "2023/06/04"
 output: rmarkdown::pdf_document
 bibliography: PA.bib
 urlcolor: blue
@@ -528,8 +528,8 @@ EQSr <- Return.rebalancing(retM_CRSP, wts.EQSr, rebalance_on = "months")
 ret.comb <- na.omit(merge(Sr, ESr, EQSr, all=F))
 names(ret.comb) <- c("Sharpe ratio", "ES ratio", "EQS ratio")
 
-backtest.plot(ret.comb, colorset = c("black", "darkblue", "darkgreen"), 
-              ltyset = c(3, 2, 1))
+backtest.plot(ret.comb, colorSet = c("black", "darkblue", "darkgreen"), 
+              ltySet = c(3, 2, 1))
 ```
 \begin{center}
 Fig 9.3

@@ -1,7 +1,7 @@
 #' generate plots of the cumulative returns and drawdown for back-testing
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param log_return arithmetic return or log return, the default is arithmetic return
-#' @param plotType "ret", "drawdown", or the default is both
+#' @param plotType "cumRet", "drawdown", or the default is both
 #' @param colorSet users can design the color by providing a vector of color
 #' @param ltySet users can design lty by providing a vector of lty
 #' @param lwdSet users can design lwd by providing a vector of lwd
@@ -70,7 +70,7 @@ backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL,
   }
   
   ## plot of returns
-  if (plotType == 'ret' || plotType == 'return' || plotType == 'cumGrossRet'){
+  if (plotType == 'ret' || plotType == 'return' || plotType == 'cumRet' || plotType == 'cumret'){
     p <- xts::plot.xts(c.xts[,1], main = "Cumulative Returns",
                        grid.ticks.lwd=1, grid.ticks.on = "years", cex.axis=0.8, 
                        col = colorSet[1], lty = ltySet[1], lwd = lwdSet[1],
