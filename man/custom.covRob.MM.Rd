@@ -2,7 +2,7 @@
 % Please edit documentation in R/custom.covRob.R
 \name{custom.covRob.MM}
 \alias{custom.covRob.MM}
-\title{Compute moments using covRob.MM methods}
+\title{Compute returns mean vector and covariance matrix with covRob.MM}
 \usage{
 custom.covRob.MM(R, ...)
 }
@@ -12,11 +12,15 @@ custom.covRob.MM(R, ...)
 \item{...}{parameters for covRob.MM}
 }
 \value{
-a list contains mean and covariance matrix of the data matrix
+a list containing mean and a covariance matrix
 }
 \description{
-This is a function that makes use of covRob from package RobStatTM to calculate
-robust estimators of moments, including mean and variance.
+covRob.MM uses the RobStatTM package function covRobMM to compute a robust
+mean vector and robust covariance matrix for a portfolio's asset returns
+}
+\details{
+For the parameters of covRob.MM, see the man page for the RobStatTM
+function covRobMM
 }
 \author{
 Yifu Kang

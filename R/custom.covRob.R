@@ -1,13 +1,16 @@
-#' @title Compute moments using covRob.MM methods
-#'
+#' @title Compute returns mean vector and covariance matrix with covRob.MM
+#' 
 #' @description 
-#' This is a function that makes use of covRob from package RobStatTM to calculate
-#' robust estimators of moments, including mean and variance.
+#' covRob.MM uses the RobStatTM package function covRobMM to compute a robust
+#' mean vector and robust covariance matrix for a portfolio's asset returns
 #'
 #' @param R xts object of asset returns
 #' @param ... parameters for covRob.MM
+#' 
+#' @details For the parameters of covRob.MM, see the man page for the RobStatTM
+#' function covRobMM
 #'
-#' @return a list contains mean and covariance matrix of the data matrix
+#' @return a list containing mean and a covariance matrix
 #' @author Yifu Kang
 #' @export
 #'
@@ -16,7 +19,7 @@ custom.covRob.MM <- function(R, ...){
   if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
   if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=50
   
-  robustCov <- RobStatTM::covRob(X=R, tolpar=tol, maxit=maxit)
+  robustCov <- RobStatTM::covRobMM(X=R, tolpar=tol, maxit=maxit)
   
   out$sigma <- robustCov$cov
   out$mu <- robustCov$center
