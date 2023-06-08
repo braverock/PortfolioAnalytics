@@ -19,8 +19,8 @@ covRob.MM uses the RobStatTM package function covRobMM to compute a robust
 mean vector and robust covariance matrix for a portfolio's asset returns
 }
 \details{
-For the parameters of covRob.MM, see the man page for the RobStatTM
-function covRobMM
+For parameter details, see covRobMM in the RobStatTM Reference
+Manual at https://cran.r-project.org/web/packages/RobStatTM/index.html
 }
 \author{
 Yifu Kang

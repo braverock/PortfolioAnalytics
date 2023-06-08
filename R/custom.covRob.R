@@ -7,8 +7,8 @@
 #' @param R xts object of asset returns
 #' @param ... parameters for covRob.MM
 #' 
-#' @details For the parameters of covRob.MM, see the man page for the RobStatTM
-#' function covRobMM
+#' @details For parameter details, see covRobMM in the RobStatTM Reference
+#' Manual at https://cran.r-project.org/web/packages/RobStatTM/index.html
 #'
 #' @return a list containing mean and a covariance matrix
 #' @author Yifu Kang
