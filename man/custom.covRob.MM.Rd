@@ -20,7 +20,7 @@ mean vector and robust covariance matrix for a portfolio's asset returns
 }
 \details{
 For parameter details, see covRobMM in the RobStatTM Reference
-Manual at https://cran.r-project.org/web/packages/RobStatTM/index.html
+Manual at \url{https://cran.r-project.org/web/packages/RobStatTM/index.html}
 }
 \author{
 Yifu Kang

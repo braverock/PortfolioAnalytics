@@ -8,7 +8,7 @@
 #' @param ... parameters for covRob.MM
 #' 
 #' @details For parameter details, see covRobMM in the RobStatTM Reference
-#' Manual at https://cran.r-project.org/web/packages/RobStatTM/index.html
+#' Manual at \url{https://cran.r-project.org/web/packages/RobStatTM/index.html}
 #'
 #' @return a list containing mean and a covariance matrix
 #' @author Yifu Kang
