@@ -372,10 +372,12 @@ pspec_EQSratio <- add.objective(pspec_EQSratio, type = "risk", name = "EQS",
 optimize.portfolio(ret_edhec, pspec_EQSratio, optimize_method = "CVXR", EQSratio = TRUE)
 ```
 
-# 9 Comparative Performance of GMV, GMES, GMEQS Portfolios
+# 9 Comparative Performance of Portfolios
 CVXR solvers provide the Second-Order Cone Optimization (SOCopt) capability required to minimize EQS problem, and managing EQS is of great significance for building portfolios.
 
-In this section, we use the CRSP data set to generate GMV, ES and EQS portfolios and show their performance by plotting cumulative returns and efficient frontiers.
+In this section, we use the CRSP data set to generate different portfolios and show their performance by plotting cumulative gross returns and efficient frontiers.
+
+The entire back-testing part may be slow, occupying most of the time in this Vignette. Therefore, we print out the time for readers' reference. My computer model is MacBook Air with M2, 8-Core CPU, 8-Core GPU and 16-core Neural Engine. The backtesting in Sections 9.1 and Section 9.2 takes about 3 minutes each to run, and the average running time for generating efficient frontiers in Section 9.3 is about 30 seconds.
 
 The CRSP data set is an xts object that contains the daily returns of stocks from 1993-01 to 2015-12^[CRSP: Center for Research in Security Prices, LLC.]. We select the top 30 small cap stocks based on the market capitalization, and use this data set to show more meaningful and interesting results in this section.
 ```{r}
@@ -403,8 +405,6 @@ print(head(retD_CRSP, 3))
 ```
 
 In the following part, we only show the time series of monthly returns of 10 CRSP stocks in the last five years, but you can use this code to check the time series performance of all stocks in any frequency and any time period.
-
-The entire back-testing part may be slow, occupying most of the time in this Vignette. Therefore, we print out the time for readers' reference. My computer model is MacBook Air with M2, 8-Core CPU, 8-Core GPU and 16-core Neural Engine.
 ```{r}
 # monthly return of top 30 stocks in last 5 years
 ep <- endpoints(retD_CRSP, on= "months", k=1)
@@ -420,7 +420,7 @@ Fig 9.1
 \end{center}
 
 ## 9.1 Backtesting with GMV, GMES, GMEQS portfolios
-In this example, we use daily return of all the CRSP 30 stocks to generate a comparative backtesting among Global Minimum Variance, Global Minimum ES and Global Minimum EQS portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
+In this example, we use daily return of all the CRSP 30 stocks to generate a comparative backtesting among Global Minimum Variance (GMV), Global Minimum ES (GMES) and Global Minimum EQS (GMEQS) portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
 ```{r, warning=FALSE}
 start_time1 <- Sys.time()
 ## Generate GMV, GMES and GMEQS portfolios
@@ -478,12 +478,12 @@ Fig 9.2
 ```{r, echo=FALSE}
 end_time1 <- Sys.time()
 runningtime1 <- end_time1 - start_time1
-cat("Section 9.1 cost", format(runningtime1))
+cat("The run time for Figure 9.2 is", format(round(runningtime1, 2)))
 ```
 
 
 ## 9.2 Backtesting with SR, ESratio, EQSratio portfolios
-In this example, we use daily return of all the CRSP 30 stocks to generate a comparative backtesting among Maximum Sharpe Ratio, Maximum ES Ratio and Maximum EQS Ratio portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
+In this example, we use daily return of all the CRSP 30 stocks to generate a comparative backtesting among Maximum Sharpe Ratio (SR), Maximum ES Ratio (ESratio) and Maximum EQS Ratio (EQSratio) portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
 ```{r, warning=FALSE}
 start_time2 <- Sys.time()
 ## Generate GMV, GMES and GMEQS portfolios
@@ -538,7 +538,7 @@ Fig 9.3
 ```{r, echo=FALSE}
 end_time2 <- Sys.time()
 runningtime2 <- end_time2 - start_time2
-cat("Section 9.2 cost", format(runningtime2))
+cat("The run time for Figure 9.3 is", format(round(runningtime2, 2)))
 ```
 
 ## 9.3 Efficient Frontier
