@@ -2,7 +2,7 @@
 % Please edit documentation in R/custom.covRob.R
 \name{custom.covRob.Mcd}
 \alias{custom.covRob.Mcd}
-\title{Compute moments using covRob.MCD robust method}
+\title{Compute returns mean vector and covariance matrix with custom.covRob.Mcd}
 \usage{
 custom.covRob.Mcd(R, ...)
 }
@@ -12,10 +12,13 @@ custom.covRob.Mcd(R, ...)
 \item{...}{parameters for covRob.Mcd}
 }
 \value{
-a list contains mean and covariance matrix of the stock return matrix
+a list containing covariance matrix sigma and mean vector mu
 }
 \description{
-This is a function that makes use of covMcd function from robustbase package. 
-For more details of the parameters and function please refer to the manual of 
-robustbase on cran.
+custom.covRob.Mcd uses the robustbase package function covMcd to compute a robust
+mean vector and robust covariance matrix for a portfolio's asset returns
+}
+\details{
+For parameter details, see covMcd in the robustbase Reference
+Manual at \url{https://cran.r-project.org/web/packages/robustbase/index.html}
 }

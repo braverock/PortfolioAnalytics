@@ -2,7 +2,7 @@
 % Please edit documentation in R/custom.covRob.R
 \name{custom.covRob.MM}
 \alias{custom.covRob.MM}
-\title{Compute returns mean vector and covariance matrix with covRob.MM}
+\title{Compute returns mean vector and covariance matrix with custom.covRob.MM}
 \usage{
 custom.covRob.MM(R, ...)
 }
@@ -12,10 +12,10 @@ custom.covRob.MM(R, ...)
 \item{...}{parameters for covRob.MM}
 }
 \value{
-a list containing mean and a covariance matrix
+a list containing covariance matrix sigma and mean vector mu
 }
 \description{
-covRob.MM uses the RobStatTM package function covRobMM to compute a robust
+custom.covRob.MM uses the RobStatTM package function covRobMM to compute a robust
 mean vector and robust covariance matrix for a portfolio's asset returns
 }
 \details{

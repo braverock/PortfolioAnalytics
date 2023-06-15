@@ -2,7 +2,7 @@
 % Please edit documentation in R/custom.covRob.R
 \name{custom.covRob.Rocke}
 \alias{custom.covRob.Rocke}
-\title{Compute moments using covRobRocke methods}
+\title{Compute returns mean vector and covariance matrix with custom.covRob.Rocke}
 \usage{
 custom.covRob.Rocke(R, ...)
 }
@@ -12,11 +12,15 @@ custom.covRob.Rocke(R, ...)
 \item{...}{parameters for covRob.Rocke}
 }
 \value{
-a list contains mean and covariance matrix of the data matrix
+a list containing covariance matrix sigma and mean vector mu
 }
 \description{
-This is a function that makes use of covRobRocke from package RobStatTM to calculate
-robust estimators of moments, including mean and variance.
+custom.covRob.Rocke uses the RobStatTM package function covRobRocke to compute a robust
+mean vector and robust covariance matrix for a portfolio's asset returns
+}
+\details{
+For parameter details, see covRobRocke in the RobStatTM Reference
+Manual at \url{https://cran.r-project.org/web/packages/RobStatTM/index.html}
 }
 \author{
 Yifu Kang

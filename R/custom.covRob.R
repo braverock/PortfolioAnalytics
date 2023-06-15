@@ -1,7 +1,7 @@
-#' @title Compute returns mean vector and covariance matrix with covRob.MM
+#' @title Compute returns mean vector and covariance matrix with custom.covRob.MM
 #' 
 #' @description 
-#' covRob.MM uses the RobStatTM package function covRobMM to compute a robust
+#' custom.covRob.MM uses the RobStatTM package function covRobMM to compute a robust
 #' mean vector and robust covariance matrix for a portfolio's asset returns
 #'
 #' @param R xts object of asset returns
@@ -10,7 +10,7 @@
 #' @details For parameter details, see covRobMM in the RobStatTM Reference
 #' Manual at \url{https://cran.r-project.org/web/packages/RobStatTM/index.html}
 #'
-#' @return a list containing mean and a covariance matrix
+#' @return a list containing covariance matrix sigma and mean vector mu
 #' @author Yifu Kang
 #' @export
 #'
@@ -26,16 +26,19 @@ custom.covRob.MM <- function(R, ...){
   return(out)
 }
 
-#' @title Compute moments using covRobRocke methods
+#' @title Compute returns mean vector and covariance matrix with custom.covRob.Rocke
 #'
 #' @description 
-#' This is a function that makes use of covRobRocke from package RobStatTM to calculate
-#' robust estimators of moments, including mean and variance.
+#' custom.covRob.Rocke uses the RobStatTM package function covRobRocke to compute a robust
+#' mean vector and robust covariance matrix for a portfolio's asset returns
 #'
 #' @param R xts object of asset returns
 #' @param ... parameters for covRob.Rocke
+#' 
+#' @details For parameter details, see covRobRocke in the RobStatTM Reference
+#' Manual at \url{https://cran.r-project.org/web/packages/RobStatTM/index.html}
 #'
-#' @return a list contains mean and covariance matrix of the data matrix
+#' @return a list containing covariance matrix sigma and mean vector mu
 #' @author Yifu Kang
 #' @export
 #'
@@ -56,17 +59,19 @@ custom.covRob.Rocke <- function(R, ...){
   return(out)
 }
 
-#' @title Compute moments using covRob.MCD robust method
+#' @title Compute returns mean vector and covariance matrix with custom.covRob.Mcd
 #' 
 #' @description 
-#' This is a function that makes use of covMcd function from robustbase package. 
-#' For more details of the parameters and function please refer to the manual of 
-#' robustbase on cran.
+#' custom.covRob.Mcd uses the robustbase package function covMcd to compute a robust
+#' mean vector and robust covariance matrix for a portfolio's asset returns
 #' 
 #' @param R  xts object of asset returns
 #' @param ... parameters for covRob.Mcd
-#'
-#' @return a list contains mean and covariance matrix of the stock return matrix
+#' 
+#' @details For parameter details, see covMcd in the robustbase Reference
+#' Manual at \url{https://cran.r-project.org/web/packages/robustbase/index.html}
+#' 
+#' @return a list containing covariance matrix sigma and mean vector mu
 #' @export
 custom.covRob.Mcd <- function(R, ...){
   
@@ -135,7 +140,7 @@ custom.covRob.Mcd <- function(R, ...){
 #' @export
 #'
 
-MycovMcd <- function(alpha = 1/2,
+MycovRobMcd <- function(alpha = 1/2,
                      nsamp = 500, nmini = 300, kmini = 5,
                      scalefn = "hrv2012", maxcsteps = 200,
                      seed = NULL, tolSolve = 1e-14,
@@ -207,7 +212,7 @@ custom.covRob.TSGS <- function(R, ...){
 #' @export
 #'
 
-MyTSGS <- function(filter=c("UBF-DDC","UBF","DDC","UF"),
+MycovRobTSGS <- function(filter=c("UBF-DDC","UBF","DDC","UF"),
                    partial.impute=FALSE, tol=1e-4, maxiter=150, 
                    loss=c("bisquare","rocke"),
                    init=c("emve","qc","huber","imputed","emve_c")){
