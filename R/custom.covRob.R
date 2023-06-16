@@ -75,7 +75,7 @@ custom.covRob.Rocke <- function(R, ...){
 #' @export
 custom.covRob.Mcd <- function(R, ...){
   
-  if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MycovMcd()
+  if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MycovRobMcd()
   if(hasArg(alpha)) alpha=match.call(expand.dots=TRUE)$alpha else alpha=control$alpha
   if(hasArg(nsamp)) nsamp=match.call(expand.dots=TRUE)$nsamp else nsamp=control$nsamp
   if(hasArg(nmini)) nmini=match.call(expand.dots=TRUE)$nmini else nmini=control$nmini
@@ -101,7 +101,7 @@ custom.covRob.Mcd <- function(R, ...){
 }
 
 #' @title 
-#' Control settings for MCD robust moments
+#' Control settings for custom.covRob.Mcd
 #' 
 #' @description 
 #' Auxiliary function for passing the estimation options as parameters 
@@ -157,10 +157,10 @@ MycovRobMcd <- function(alpha = 1/2,
               use.correction=use.correction))
 }
 
-#' @title  Compute TSGS moments
+#' @title  Compute returns mean vector and covariance matrix with custom.covRob.TSGS
 #' 
 #' @description 
-#' This is a function making use of TSGS function from GSE package to compute
+#' This is a function uses the TSGS function from GSE package to compute
 #' the Two-Step Generalized S-Estimate, a robust estimate of location 
 #' and scatter for data with cell-wise and case-wise contamination.
 #'
@@ -175,7 +175,7 @@ MycovRobMcd <- function(alpha = 1/2,
 #'             2014.
 
 custom.covRob.TSGS <- function(R, ...){
-  if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MyTSGS()
+  if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MycovRobTSGS()
   if(hasArg(filter)) filter=match.call(expand.dots=TRUE)$filter else filter=control$filter
   if(hasArg(partial.impute)) partial.impute=match.call(expand.dots=TRUE)$partial.impute else partial.impute=control$partial.impute
   if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=control$tol
@@ -193,7 +193,7 @@ custom.covRob.TSGS <- function(R, ...){
 }
 
 #' @title
-#' Control settings for custom.TSGS
+#' Control settings for custom.covRob.TSGS
 #'
 #' @description 
 #' Auxiliary function for passing the estimation options as parameters 

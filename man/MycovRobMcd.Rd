@@ -2,7 +2,7 @@
 % Please edit documentation in R/custom.covRob.R
 \name{MycovRobMcd}
 \alias{MycovRobMcd}
-\title{Control settings for MCD robust moments}
+\title{Control settings for custom.covRob.Mcd}
 \usage{
 MycovRobMcd(
   alpha = 1/2,

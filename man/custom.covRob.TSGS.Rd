@@ -2,7 +2,7 @@
 % Please edit documentation in R/custom.covRob.R
 \name{custom.covRob.TSGS}
 \alias{custom.covRob.TSGS}
-\title{Compute TSGS moments}
+\title{Compute returns mean vector and covariance matrix with custom.covRob.TSGS}
 \usage{
 custom.covRob.TSGS(R, ...)
 }
@@ -15,7 +15,7 @@ custom.covRob.TSGS(R, ...)
 a list contains mean and covariance matrix of the stock return matrix
 }
 \description{
-This is a function making use of TSGS function from GSE package to compute
+This is a function uses the TSGS function from GSE package to compute
 the Two-Step Generalized S-Estimate, a robust estimate of location 
 and scatter for data with cell-wise and case-wise contamination.
 }

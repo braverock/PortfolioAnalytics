@@ -2,7 +2,7 @@
 % Please edit documentation in R/custom.covRob.R
 \name{MycovRobTSGS}
 \alias{MycovRobTSGS}
-\title{Control settings for custom.TSGS}
+\title{Control settings for custom.covRob.TSGS}
 \usage{
 MycovRobTSGS(
   filter = c("UBF-DDC", "UBF", "DDC", "UF"),
