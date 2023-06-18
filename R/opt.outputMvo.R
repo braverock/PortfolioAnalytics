@@ -1,46 +1,56 @@
-#' @title Optimal Portfolio Weights and Performance
+#' @title Optimal Portfolio Weights and Performance Values
 #' 
-#' @description Converts output of PortfolioAnalytics function
-#' optimize.portfolio which computes a minimum variance portfolio
-#' to a list containing the portfolio weights vector, mean, volatility
-#' and Sharpe Ratio.
+#' @description Converts output of `optimize.portfolio` to a list of the
+#' portfolio weights, mean, volatility and Sharpe Ratio.
 #' 
-#' @param opt List output of optimize.portfolio 
+#' @param opt List output of `optimize.portfolio` 
 #' @param returns Multivariate xts object of portfolio assets returns
 #' @param digits Integer number of significant digits with default NULL
-#' @param names Character vector of names assigned to function output list
-#' @param rf Numeric value with default 0.003
+#' @param annualize Logical with default TRUE
+#' @param frequency Returns frequency: "monthly", "weekly" or "daily"
+#' @param rf Numeric value with default 0.0
 #' 
-#' @details This functions uses the weights returned by optimize.portfolio,
-#' along with the returns to compute the portfolio mean return and volatility,
-#' and along with the risk-free rate rf it computes the Sharpe Ratio.
+#' @details This function uses the weights returned by optimize.portfolio,
+#' along with the portfolio assets returns, and a risk-free rate, to
+#' to compute the portfolio mean return, volatility, and Sharpe Ratio.
 #'
-#' @return Optimal a list containing the numeric weight vector, and the 
-#' numeric values of the portfolio return mean, volatility, and Sharpe ratio
+#' @return A list containing the portfolio numeric weights, mean value,
+#' volatility and Sharpe Ratio.
 #' 
 #' @author R. Douglas Martin
 #' @export
 #'
 #' @examples
 #' args(opt.outputMvo)
-opt.outputMvo <- function(opt, returns, digits = NULL, names = NULL, rf = 0.003){
-  wts <- opt$weights
-  sigmasq <- as.numeric(t(wts)%*%var(returns)%*%wts)
-  sigma <- sqrt(sigmasq)
-  mu.ret <- apply(returns,2,mean)
-  mu <- as.numeric(t(wts)%*%mu.ret)
-  sr <- (mu-rf)/sigma
-  if(is.null(digits))
-  {names(sigma) <- "sigma"
-  names(mu) <- "mu"
-  output <- c(wts,mu,sigma)} else
-  {if(is.null(names))
-  {output <- list(wts = wts, mean = mu, stdev = sigma, sr = sr)
-  output <- lapply(output,round,digits)}
-    else
-    {output <- list(wts,mu,sigma,sr)
-    names(output) <- names
-    output <- lapply(output,round,digits)}
+opt.outputMvo <- function(opt, returns, digits = NULL, annualize = TRUE, 
+                             frequency = "monthly", rf = 0.0) 
+{
+  if(class(returns)[1] == "xts"){
+    returns <- coredata(returns)
+  }
+  Wgts <- opt$weights
+  sigmasq <- as.numeric(t(Wgts) %*% var(returns) %*% Wgts)
+  StdDev <- sqrt(sigmasq)
+  mu.ret <- apply(returns, 2, mean)
+  Mean <- as.numeric(t(Wgts) %*% mu.ret)
+  SR <- (Mean - rf)/StdDev
+  a <- 1; b <- 1
+  if(annualize){
+    if(frequency == "monthly"){
+      a <- 12; b <- sqrt(12)
+    } else if(frequency == "weekly"){
+      a <- 52; b <- sqrt(52)
+    } else {
+      a <- 260; b <- sqrt(260)
+    }
+  }      
+  Mean <- a*Mean
+  StdDev <- b*StdDev
+  SR <- b*SR
+  
+  output <- list(Wgts = Wgts, Mean = Mean, StdDev = StdDev, SR = SR)
+  if (!is.null(digits)) {
+    output <- lapply(output, round, digits)
   }
   output
 }

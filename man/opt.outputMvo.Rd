@@ -2,35 +2,42 @@
 % Please edit documentation in R/opt.outputMvo.R
 \name{opt.outputMvo}
 \alias{opt.outputMvo}
-\title{Optimal Portfolio Weights and Performance}
+\title{Optimal Portfolio Weights and Performance Values}
 \usage{
-opt.outputMvo(opt, returns, digits = NULL, names = NULL, rf = 0.003)
+opt.outputMvo(
+  opt,
+  returns,
+  digits = NULL,
+  annualize = TRUE,
+  frequency = "monthly",
+  rf = 0
+)
 }
 \arguments{
-\item{opt}{List output of optimize.portfolio}
+\item{opt}{List output of `optimize.portfolio`}
 
 \item{returns}{Multivariate xts object of portfolio assets returns}
 
 \item{digits}{Integer number of significant digits with default NULL}
 
-\item{names}{Character vector of names assigned to function output list}
+\item{annualize}{Logical with default TRUE}
 
-\item{rf}{Numeric value with default 0.003}
+\item{frequency}{Returns frequency: "monthly", "weekly" or "daily"}
+
+\item{rf}{Numeric value with default 0.0}
 }
 \value{
-Optimal a list containing the numeric weight vector, and the 
-numeric values of the portfolio return mean, volatility, and Sharpe ratio
+A list containing the portfolio numeric weights, mean value,
+volatility and Sharpe Ratio.
 }
 \description{
-Converts output of PortfolioAnalytics function
-optimize.portfolio which computes a minimum variance portfolio
-to a list containing the portfolio weights vector, mean, volatility
-and Sharpe Ratio.
+Converts output of `optimize.portfolio` to a list of the
+portfolio weights, mean, volatility and Sharpe Ratio.
 }
 \details{
-This functions uses the weights returned by optimize.portfolio,
-along with the returns to compute the portfolio mean return and volatility,
-and along with the risk-free rate rf it computes the Sharpe Ratio.
+This function uses the weights returned by optimize.portfolio,
+along with the portfolio assets returns, and a risk-free rate, to
+to compute the portfolio mean return, volatility, and Sharpe Ratio.
 }
 \examples{
 args(opt.outputMvo)
