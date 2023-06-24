@@ -16,10 +16,10 @@
 #'
 custom.covRob.MM <- function(R, ...){
   out <- list()
-  if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
-  if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=50
+  if(hasArg(tol)) tol = match.call(expand.dots = TRUE)$tol else tol = 1e-4
+  if(hasArg(maxit)) maxit = match.call(expand.dots = TRUE)$maxit else maxit = 50
   
-  robustCov <- RobStatTM::covRobMM(X=R, tolpar=tol, maxit=maxit)
+  robustCov <- RobStatTM::covRobMM(X = R, tolpar = tol, maxit = maxit)
   
   out$sigma <- robustCov$cov
   out$mu <- robustCov$center
@@ -44,15 +44,15 @@ custom.covRob.MM <- function(R, ...){
 #'
 custom.covRob.Rocke <- function(R, ...){
   out <- list()
-  if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=1e-4
-  if(hasArg(maxit)) maxit=match.call(expand.dots=TRUE)$maxit else maxit=50
-  if(hasArg(initial)) initial=match.call(expand.dots=TRUE)$initial else initial='K'
-  if(hasArg(maxsteps)) maxsteps=match.call(expand.dots=TRUE)$maxsteps else maxsteps=5
-  if(hasArg(propmin)) propmin=match.call(expand.dots=TRUE)$propmin else propmin=2
-  if(hasArg(qs)) qs=match.call(expand.dots=TRUE)$qs else qs=50
+  if(hasArg(tol)) tol = match.call(expand.dots = TRUE)$tol else tol = 1e-4
+  if(hasArg(maxit)) maxit = match.call(expand.dots = TRUE)$maxit else maxit = 50
+  if(hasArg(initial)) initial = match.call(expand.dots = TRUE)$initial else initial = 'K'
+  if(hasArg(maxsteps)) maxsteps = match.call(expand.dots = TRUE)$maxsteps else maxsteps = 5
+  if(hasArg(propmin)) propmin = match.call(expand.dots = TRUE)$propmin else propmin = 2
+  if(hasArg(qs)) qs = match.call(expand.dots = TRUE)$qs else qs = 50
   
-  robustCov <- RobStatTM::covRobRocke(X=R, initial=initial, maxsteps=maxsteps, propmin=propmin, 
-                                      qs=qs, tol=tol, maxit=maxit)
+  robustCov <- RobStatTM::covRobRocke(X = R, initial = initial, maxsteps = maxsteps, propmin = propmin, 
+                                      qs = qs, tol = tol, maxit = maxit)
   
   out$sigma <- robustCov$cov
   out$mu <- robustCov$center
@@ -75,27 +75,27 @@ custom.covRob.Rocke <- function(R, ...){
 #' @export
 custom.covRob.Mcd <- function(R, ...){
   
-  if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MycovRobMcd()
-  if(hasArg(alpha)) alpha=match.call(expand.dots=TRUE)$alpha else alpha=control$alpha
-  if(hasArg(nsamp)) nsamp=match.call(expand.dots=TRUE)$nsamp else nsamp=control$nsamp
-  if(hasArg(nmini)) nmini=match.call(expand.dots=TRUE)$nmini else nmini=control$nmini
-  if(hasArg(kmini)) kmini=match.call(expand.dots=TRUE)$kmini else kmini=control$kmini
-  if(hasArg(scalefn)) scalefn=match.call(expand.dots=TRUE)$scalefn else scalefn=control$scalefn
-  if(hasArg(maxcsteps)) maxcsteps=match.call(expand.dots=TRUE)$maxcsteps else maxcsteps=control$maxcsteps
-  if(hasArg(initHsets)) initHsets=match.call(expand.dots=TRUE)$initHsets else initHsets=control$initHsets
-  if(hasArg(seed)) seed=match.call(expand.dots=TRUE)$seed else seed=control$seed
-  if(hasArg(tolSolve)) tolSolve=match.call(expand.dots=TRUE)$tolSolve else tolSolve=control$tolSolve
-  if(hasArg(wgtFUN)) wgtFUN=match.call(expand.dots=TRUE)$wgtFUN else wgtFUN=control$wgtFUN
-  if(hasArg(use.correction)) use.correction=match.call(expand.dots=TRUE)$use.correction else use.correction=control$use.correction
+  if(hasArg(control)) control = match.call(expand.dots = TRUE)$control else control = MycovRobMcd()
+  if(hasArg(alpha)) alpha = match.call(expand.dots = TRUE)$alpha else alpha = control$alpha
+  if(hasArg(nsamp)) nsamp = match.call(expand.dots = TRUE)$nsamp else nsamp = control$nsamp
+  if(hasArg(nmini)) nmini = match.call(expand.dots = TRUE)$nmini else nmini = control$nmini
+  if(hasArg(kmini)) kmini = match.call(expand.dots = TRUE)$kmini else kmini = control$kmini
+  if(hasArg(scalefn)) scalefn = match.call(expand.dots = TRUE)$scalefn else scalefn = control$scalefn
+  if(hasArg(maxcsteps)) maxcsteps = match.call(expand.dots = TRUE)$maxcsteps else maxcsteps = control$maxcsteps
+  if(hasArg(initHsets)) initHsets = match.call(expand.dots = TRUE)$initHsets else initHsets = control$initHsets
+  if(hasArg(seed)) seed = match.call(expand.dots = TRUE)$seed else seed = control$seed
+  if(hasArg(tolSolve)) tolSolve = match.call(expand.dots = TRUE)$tolSolve else tolSolve = control$tolSolve
+  if(hasArg(wgtFUN)) wgtFUN = match.call(expand.dots = TRUE)$wgtFUN else wgtFUN = control$wgtFUN
+  if(hasArg(use.correction)) use.correction = match.call(expand.dots = TRUE)$use.correction else use.correction = control$use.correction
   
   
-  robustMCD <- robustbase::covMcd(x=R, alpha=alpha, 
-                                  nsamp=nsamp, nmini=nmini, 
-                                  kmini=kmini, seed=seed,
-                                  tolSolve=tolSolve, scalefn=scalefn, 
-                                  maxcsteps=maxcsteps,
-                                  initHsets=initHsets, 
-                                  wgtFUN=wgtFUN, use.correction=use.correction)
+  robustMCD <- robustbase::covMcd(x = R, alpha = alpha, 
+                                  nsamp = nsamp, nmini = nmini, 
+                                  kmini = kmini, seed = seed,
+                                  tolSolve = tolSolve, scalefn = scalefn, 
+                                  maxcsteps = maxcsteps,
+                                  initHsets = initHsets, 
+                                  wgtFUN = wgtFUN, use.correction = use.correction)
   
   return(list(mu = robustMCD$center, sigma = robustMCD$cov))
 }
@@ -145,16 +145,16 @@ MycovRobMcd <- function(alpha = 1/2,
                      scalefn = "hrv2012", maxcsteps = 200,
                      seed = NULL, tolSolve = 1e-14,
                      wgtFUN = "01.original", beta,
-                     use.correction=TRUE
+                     use.correction = TRUE
 ){
   if(missing(beta) || !is.numeric(beta))
     beta <- 0.975
   
-  return(list(alpha=alpha, nsamp=nsamp, nmini=as.integer(nmini), kmini=as.integer(kmini),
+  return(list(alpha = alpha, nsamp = nsamp, nmini = as.integer(nmini), kmini = as.integer(kmini),
               seed = as.integer(seed),
-              tolSolve=tolSolve, scalefn=scalefn, maxcsteps=as.integer(maxcsteps),
-              wgtFUN=wgtFUN, beta=beta,
-              use.correction=use.correction))
+              tolSolve = tolSolve, scalefn = scalefn, maxcsteps = as.integer(maxcsteps),
+              wgtFUN = wgtFUN, beta = beta,
+              use.correction = use.correction))
 }
 
 #' @title  Compute returns mean vector and covariance matrix with custom.covRob.TSGS
@@ -175,18 +175,18 @@ MycovRobMcd <- function(alpha = 1/2,
 #'             2014.
 
 custom.covRob.TSGS <- function(R, ...){
-  if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MycovRobTSGS()
-  if(hasArg(filter)) filter=match.call(expand.dots=TRUE)$filter else filter=control$filter
-  if(hasArg(partial.impute)) partial.impute=match.call(expand.dots=TRUE)$partial.impute else partial.impute=control$partial.impute
-  if(hasArg(tol)) tol=match.call(expand.dots=TRUE)$tol else tol=control$tol
-  if(hasArg(maxiter)) maxiter=match.call(expand.dots=TRUE)$maxiter else maxiter=control$maxiter
-  if(hasArg(loss)) loss=match.call(expand.dots=TRUE)$loss else loss=control$loss
-  if(hasArg(init)) init=match.call(expand.dots=TRUE)$init else init=control$init
+  if(hasArg(control)) control = match.call(expand.dots = TRUE)$control else control = MycovRobTSGS()
+  if(hasArg(filter)) filter = match.call(expand.dots = TRUE)$filter else filter = control$filter
+  if(hasArg(partial.impute)) partial.impute = match.call(expand.dots = TRUE)$partial.impute else partial.impute = control$partial.impute
+  if(hasArg(tol)) tol = match.call(expand.dots = TRUE)$tol else tol = control$tol
+  if(hasArg(maxiter)) maxiter = match.call(expand.dots = TRUE)$maxiter else maxiter = control$maxiter
+  if(hasArg(loss)) loss = match.call(expand.dots = TRUE)$loss else loss = control$loss
+  if(hasArg(init)) init = match.call(expand.dots = TRUE)$init else init = control$init
   
-  tsgsRob <- GSE::TSGS(x=R, filter=filter,
-                       partial.impute=partial.impute, tol=tol, 
-                       maxiter=maxiter, method=loss,
-                       init=init)
+  tsgsRob <- GSE::TSGS(x = R, filter = filter,
+                       partial.impute = partial.impute, tol = tol, 
+                       maxiter = maxiter, method = loss,
+                       init = init)
   
   return(list(mu = tsgsRob@mu, sigma = tsgsRob@S))
   
@@ -212,16 +212,16 @@ custom.covRob.TSGS <- function(R, ...){
 #' @export
 #'
 
-MycovRobTSGS <- function(filter=c("UBF-DDC","UBF","DDC","UF"),
-                   partial.impute=FALSE, tol=1e-4, maxiter=150, 
-                   loss=c("bisquare","rocke"),
-                   init=c("emve","qc","huber","imputed","emve_c")){
+MycovRobTSGS <- function(filter = c("UBF-DDC","UBF","DDC","UF"),
+                   partial.impute = FALSE, tol = 1e-4, maxiter = 150, 
+                   loss = c("bisquare","rocke"),
+                   init = c("emve","qc","huber","imputed","emve_c")){
   
   filter <- match.arg(filter)
   loss <- match.arg(loss)
   init <- match.arg(init)
   
-  return(list(filter=filter, partial.impute=partial.impute, 
-              tol=tol, maxiter=as.integer(maxiter), 
-              loss=loss,init))
+  return(list(filter = filter, partial.impute = partial.impute, 
+              tol = tol, maxiter = as.integer(maxiter), 
+              loss = loss,init))
 }
