@@ -752,5 +752,18 @@ chart.EfficientFrontierCompare(R = retM_CRSP_5, portfolio = pspec_sc, risk_type 
 Fig 9.12
 \end{center}
 
-\newpage
+# Acknowledgements
+This vignette aims to show the extended functionality of PortfolioAnalytics. CVXR solvers and EQS objective in PortfolioAnalytics were implemented by me, Xinran Zhao, when I was a student in the University of Washington Department of Applied Mathematics Computational Finance and Risk Management M.S. degree program (MS-CFRM), and was supported by Google Summer of Code (GSoC 2022) in the summer of 2022 with mentors Doug Martin and Steve Murray.
+
+In the following year, I continuously generated more functions and improved this vignette, not limited to the implementation of CVXR and EQS, but more focused on their applications, such as back-testing analysis and efficient frontiers analysis. This process is very long, and I am grateful to everyone who accompanies and inspires me.
+
+Doug Martin provided a lot of guidance on the derivation, application, and subsequent research directions of EQS. He also provided feedback on the style and content of this vignette. I am very grateful for learning the habit of research in this project.
+
+Steve Murray is an expert in optimization. I'm greatly benefited by his analyzing different CVXR solvers, mathematical derivation in second-order cone optimization and mean-EQS efficient frontier, and his assistance in R coding.
+
+Yifu Kang, who is my classmate in MS-CFRM and was funded by another PortfolioAnalytics GSoC 2022 project, expanded PortfolioAnalytics in custom robust covariance matrix. We have collaborated extensively on improving existing functions and interacting with each other's functions.
+
+Finally, this project could not have been completed without the help of Brian Peterson, who is an Author
+and the Maintainer of the PortfolioAnalytics package on CRAN.
+
 # Reference
