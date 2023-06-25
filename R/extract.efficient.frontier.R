@@ -543,7 +543,6 @@ create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_a
          "mean-risk" = {frontier <- meanrisk.efficient.frontier(portfolio=portfolio,
                                                                 R=R,
                                                                 n.portfolios=n.portfolios,
-                                                                risk_type = risk_type,
                                                                 ...=...)
          },
          "random" = {tmp <- optimize.portfolio(R=R, 
