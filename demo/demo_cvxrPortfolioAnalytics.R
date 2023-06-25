@@ -8,6 +8,13 @@
 
 #' 2 GETTING STARTED
 
+#' knitr setting
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>"
+)
+Sys.setlocale("LC_TIME", "English")
 
 #' load package
 library(PortfolioAnalytics)
