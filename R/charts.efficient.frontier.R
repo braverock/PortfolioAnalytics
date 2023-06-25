@@ -752,7 +752,8 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
 #' This is only used for objects of class \code{optimize.portfolio}
 #' @param match.col string name of column to use for portfolio object.
 #' Must match the name of an objective.
-#' @param search_size passed to optimize.portfolio for type="DEoptim" or type="random".
+#' @param guideline custom the guideline, otherwise generate default guideline
+#' @param plot_type define the plot_type, default is "l"
 #' @param main title used in the plot.
 #' @param cex.axis the magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.

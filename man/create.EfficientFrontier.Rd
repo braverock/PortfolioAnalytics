@@ -9,7 +9,6 @@ create.EfficientFrontier(
   portfolio,
   type,
   n.portfolios = 25,
-  risk_type,
   risk_aversion = NULL,
   match.col = "ES",
   search_size = 2000,
@@ -34,9 +33,6 @@ of points along the efficient frontier will be equal to the length of \code{risk
 \item{search_size}{passed to \code{\link{optimize.portfolio}} for type="DEoptim" or type="random".}
 
 \item{\dots}{passthrough parameters to \code{\link{optimize.portfolio}}.}
-
-\item{compare_port}{if type="mean-risk", compare_port should be provided. 
-compare_port is a vector composed of any risk "StdDev", "ES", "EQS", for example, compare_port=c("StdDev", "ES")}
 }
 \value{
 an object of class 'efficient.frontier' with the objective measures 

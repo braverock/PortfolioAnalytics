@@ -43,7 +43,11 @@ This is only used for objects of class \code{optimize.portfolio}}
 \item{match.col}{string name of column to use for portfolio object.
 Must match the name of an objective.}
 
+\item{guideline}{custom the guideline, otherwise generate default guideline}
+
 \item{main}{title used in the plot.}
+
+\item{plot_type}{define the plot_type, default is "l"}
 
 \item{cex.axis}{the magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.}
 
@@ -74,8 +78,6 @@ Must match the name of an objective.}
 \item{lty}{vector of line types with length equal to the number of portfolios in \code{portfolio_list}.}
 
 \item{lwd}{vector of line widths with length equal to the number of portfolios in \code{portfolio_list}.}
-
-\item{search_size}{passed to optimize.portfolio for type="DEoptim" or type="random".}
 }
 \description{
 Overlay the efficient frontiers of different minRisk portfolio objects on a single plot.

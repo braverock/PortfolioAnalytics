@@ -502,8 +502,6 @@ meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type
 #' \code{n.portfolios} is ignored if \code{risk_aversion} is specified and the number
 #' of points along the efficient frontier will be equal to the length of \code{risk_aversion}.
 #' @param match.col column to match when extracting the efficient frontier from an objected created by \code{\link{optimize.portfolio}}.
-#' @param compare_port if type="mean-risk", compare_port should be provided. 
-#' compare_port is a vector composed of any risk "StdDev", "ES", "EQS", for example, compare_port=c("StdDev", "ES")
 #' @param search_size passed to \code{\link{optimize.portfolio}} for type="DEoptim" or type="random".
 #' @param \dots passthrough parameters to \code{\link{optimize.portfolio}}.
 #' @return an object of class 'efficient.frontier' with the objective measures 
@@ -514,7 +512,7 @@ meanrisk.efficient.frontier <- function(portfolio, R, n.portfolios=25, risk_type
 #' \code{\link{meanvar.efficient.frontier}}, 
 #' \code{\link{meanetl.efficient.frontier}}
 #' @export
-create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_type, risk_aversion=NULL, match.col="ES", search_size=2000, ...){
+create.EfficientFrontier <- function(R, portfolio, type, n.portfolios=25, risk_aversion=NULL, match.col="ES", search_size=2000, ...){
   # This is just a wrapper around a few functions to easily create efficient frontiers
   # given a portfolio object and other parameters
   call <- match.call()
