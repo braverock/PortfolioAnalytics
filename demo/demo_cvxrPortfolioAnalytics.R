@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 Sys.setlocale("LC_TIME", "English")
 
 #' load package
+library(knitr)
 library(PortfolioAnalytics)
 library(CVXR)
 library(data.table)
