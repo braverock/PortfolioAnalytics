@@ -5,6 +5,8 @@
 #' @param colorSet users can design the color by providing a vector of color
 #' @param ltySet users can design lty by providing a vector of lty
 #' @param lwdSet users can design lwd by providing a vector of lwd
+#' @importFrom stats end
+#' @importFrom grDevices col2rgb
 #' @author Peter Carl, Xinran Zhao, Yifu Kang
 #' @export backtest.plot
 backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL, ltySet=NULL, lwdSet=NULL){
