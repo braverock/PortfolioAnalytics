@@ -1,5 +1,9 @@
 #' @import xts
 #' @import zoo
+#' @import ROI.plugin.symphony
+#' @import pso
+#' @import GenSA
+#' @import mco
 #' @import PerformanceAnalytics
 #' @import foreach
 #' @importFrom graphics   abline axis barplot box hist image layout lines
