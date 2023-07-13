@@ -22,6 +22,7 @@ demo_min_StdDev Demonstrate objective to minimize portfolio standard deviation.
 demo_min_expected_shortfall Demonstrate objective to minimize expected shortfall.
 demo_risk_budgets Demonstrate using risk budget objectives.
 demo_roi_solvers Demonstrate specifying a solver using ROI.
+demo_cvxrPortfolioAnalytics Demonstrates use of CVXR solvers.
 chart_concentration Demonstrate chart.Concentration
 multiple_portfolio_optimization Demonstrate passing a list of portfolios to optimize.portfolio and optimize.portfolio.rebalancing
 regime_switching       Demonstrate optimization with support for regime switching to switch portfolios based on the regime.
