@@ -53,11 +53,7 @@ Remotes:
     git::https://github.com/robustport/PCRA.git
 VignetteBuilder: R.rsp
 Imports:
-    methods,
-    GenSA,
-    ROI.plugin.symphony,
-    mco,
-    pso
+    methods
 License: GPL-3
 URL: https://github.com/braverock/PortfolioAnalytics
 Copyright: (c) 2004-2021
