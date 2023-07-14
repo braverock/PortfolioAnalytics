@@ -1,11 +1,11 @@
 #' @import xts
 #' @import zoo
 #' @import ROI.plugin.symphony
-#' @import pso
 #' @import GenSA
 #' @import mco
 #' @import PerformanceAnalytics
 #' @import foreach
+#' @importFrom pso        lines plot points
 #' @importFrom graphics   abline axis barplot box hist image layout lines
 #'                        mtext par plot points segments strwidth text title
 #' @importFrom grDevices  colorRamp heat.colors rgb                      
