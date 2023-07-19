@@ -17,5 +17,4 @@ NULL
 
 "_PACKAGE"
 
-globalVariables(c('filter_constraint','Rglpk_solve_LP','solve_osqp',
-                  'osqpSettings','Rglpk_solve_LP'))
+globalVariables(c('filter_constraint'))
