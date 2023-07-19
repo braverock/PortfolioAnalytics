@@ -1488,7 +1488,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         }
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -1602,7 +1602,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         Rglpk.rhs <- c(Rglpk.rhs, rep(0, T))
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -1745,7 +1745,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -1890,7 +1890,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         }
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -2060,7 +2060,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         Rglpk.rhs <- c(Rglpk.rhs, rep(0, T))
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -2252,7 +2252,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         Rglpk.rhs <- c(Rglpk.rhs, rep(0, T))
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -2422,13 +2422,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       colnames(osqp.A) <- colnames(R)
   
       # result from solver
-      osqp.result <- try(solve_osqp(
+      osqp.result <- try(osqp::solve_osqp(
         P = osqp.P,
         q = osqp.q,
         A = osqp.A,
         l = osqp.l,
         u = osqp.u,
-        pars = osqpSettings(verbose = FALSE)
+        pars = osqp::osqpSettings(verbose = FALSE)
       ))
   
       # null result
@@ -2541,13 +2541,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       colnames(osqp.A) <- c(colnames(R), "Shrinkage")
   
       # result from solver
-      osqp.result <- try(solve_osqp(
+      osqp.result <- try(osqp::solve_osqp(
         P = osqp.P,
         q = osqp.q,
         A = osqp.A,
         l = osqp.l,
         u = osqp.u,
-        pars = osqpSettings(verbose = FALSE)
+        pars = osqp::osqpSettings(verbose = FALSE)
       ))
   
       # null result
@@ -2746,7 +2746,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
   
     # result from solver
-    mco.result <- try(nsga2(
+    mco.result <- try(mco::nsga2(
       fn = mco.fn,
       idim = mco.idim,
       odim = mco.odim,
