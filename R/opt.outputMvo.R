@@ -54,3 +54,16 @@ opt.outputMvo <- function(opt, returns, digits = NULL, annualize = TRUE,
   }
   output
 }
+
+
+###############################################################################
+# R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
+#
+# Copyright (c) 2004-2023 R. Douglas Martin
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id$
+#
+###############################################################################
