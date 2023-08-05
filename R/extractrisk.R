@@ -1,3 +1,16 @@
+###############################################################################
+# R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
+#
+# Copyright (c) 2022-2032 Xinran Zhao
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id$
+#
+###############################################################################
+
+
 #' extract the risk value when knowing the weights
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param w the weight of the portfolio

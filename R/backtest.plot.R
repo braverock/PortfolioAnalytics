@@ -1,3 +1,16 @@
+###############################################################################
+# R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
+#
+# Copyright (c) 2022-2032 Peter Carl, Yifu Kang, Xinran Zhao, Doug Martin
+#
+# This library is distributed under the terms of the GNU Public License (GPL)
+# for full details see the file COPYING
+#
+# $Id$
+#
+###############################################################################
+
+
 #' generate plots of the cumulative returns and drawdown for back-testing
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param log_return arithmetic return or log return, the default is arithmetic return

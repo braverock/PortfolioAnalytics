@@ -1,7 +1,7 @@
 ###############################################################################
 # R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2021 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt, Xiaokang Feng
+# Copyright (c) 2004-2023 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt, Xiaokang Feng, Xinran Zhao
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
