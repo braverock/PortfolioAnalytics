@@ -32,9 +32,9 @@
 #' @param labels.assets TRUE/FALSE to include the asset names in the plot.
 #' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}.
 #' @param cex.assets A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
-#' @param col vector of colors with length equal to the number of portfolios in \code{portfolio_list}.
-#' @param lty vector of line types with length equal to the number of portfolios in \code{portfolio_list}.
-#' @param lwd vector of line widths with length equal to the number of portfolios in \code{portfolio_list}.
+#' @param col vector of colors with length equal to the number of portfolios in \code{frontiers}.
+#' @param lty vector of line types with length equal to the number of portfolios in \code{frontiers}.
+#' @param lwd vector of line widths with length equal to the number of portfolios in \code{frontiers}.
 #' @author Xinran Zhao
 #' @export EfficientFrontierPlot
 #' 

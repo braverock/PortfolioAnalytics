@@ -68,11 +68,11 @@ EfficientFrontierPlot(
 
 \item{cex.assets}{A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.}
 
-\item{col}{vector of colors with length equal to the number of portfolios in \code{portfolio_list}.}
+\item{col}{vector of colors with length equal to the number of portfolios in \code{frontiers}.}
 
-\item{lty}{vector of line types with length equal to the number of portfolios in \code{portfolio_list}.}
+\item{lty}{vector of line types with length equal to the number of portfolios in \code{frontiers}.}
 
-\item{lwd}{vector of line widths with length equal to the number of portfolios in \code{portfolio_list}.}
+\item{lwd}{vector of line widths with length equal to the number of portfolios in \code{frontiers}.}
 
 \item{n.portfolios}{number of portfolios to extract along the efficient frontier.}
 }
