@@ -346,6 +346,7 @@ optimize.portfolio_v1 <- function(
     out$weights <- weights
     out$out <- roi.result$objval
     out$call <- call
+    out$moment_values = list(momentFun = moment_name,mu = mout$mu, sigma = mout$sigma)
   } ## end case for ROI
 
   
@@ -785,6 +786,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   # causing errors if clean="boudt" was specified in an objective
   # and an argument such as itermax was passed in as dots to 
   # optimize.portfolio. See r2931
+  moment_name = momentFUN
   if(!is.function(momentFUN)){
     momentFUN <- match.fun(momentFUN)
   }
@@ -1261,6 +1263,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       }
     }
+    out$moment_values = list(momentFun = moment_name,mu = mout$mu, sigma = mout$sigma)
     # Set here at the end so we get optimize.portfolio.ROI and not optimize.portfolio.{solver} classes
     optimize_method <- "ROI"
   } ## end case for ROI
@@ -3015,7 +3018,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                opt_values=obj_cvxr,
                out = obj_cvxr[[tmpname]],
                call = call,
-               solver = result_cvxr$solver)
+               solver = result_cvxr$solver,
+               moment_values = list(momentFun = moment_name,mu = mout$mu, sigma = mout$sigma))
     
     optimize_method = "CVXR"
   }## end case for CVXR

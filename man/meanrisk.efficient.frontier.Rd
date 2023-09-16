@@ -7,6 +7,7 @@
 meanrisk.efficient.frontier(
   portfolio,
   R,
+  optimize_method = "CVXR",
   n.portfolios = 25,
   risk_type = "StdDev",
   compare_port = c("StdDev", "ES"),

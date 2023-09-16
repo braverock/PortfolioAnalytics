@@ -65,7 +65,7 @@ chart.EfficientFrontier <- function(object, ...){
 #' @method chart.EfficientFrontier optimize.portfolio.CVXR
 #' @S3method chart.EfficientFrontier optimize.portfolio.CVXR
 #' @export
-chart.EfficientFrontier.optimize.portfolio.CVXR <- function(object, ..., match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
+chart.EfficientFrontier.optimize.portfolio.CVXR <- function(object, ..., optimize_method='CVXR', match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   if(!inherits(object, "optimize.portfolio.CVXR")) stop("object must be of class optimize.portfolio.CVXR")
   
   portf <- object$portfolio
@@ -106,15 +106,15 @@ chart.EfficientFrontier.optimize.portfolio.CVXR <- function(object, ..., match.c
   rnames <- colnames(R)
   
   if(match.col == "StdDev"){
-    frontier <- meanvar.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
+    frontier <- meanvar.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios, ...=...)
     rar <- "SR"
   }
   if(match.col %in% c("ETL", "ES", "CVaR")){
-    frontier <- meanetl.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
+    frontier <- meanetl.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios, ...=...)
     rar <- "STARR"
   }
   if(match.col =="EQS"){
-    frontier <- meaneqs.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
+    frontier <- meaneqs.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios, ...=...)
     rar <- "EQSratio"
   }
   
@@ -177,7 +177,7 @@ chart.EfficientFrontier.optimize.portfolio.CVXR <- function(object, ..., match.c
 #' @method chart.EfficientFrontier optimize.portfolio.ROI
 #' @S3method chart.EfficientFrontier optimize.portfolio.ROI
 #' @export
-chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, ..., match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
+chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, ..., optimize_method='ROI', match.col="ES", n.portfolios=25, xlim=NULL, ylim=NULL, cex.axis=0.8, element.color="darkgray", main="Efficient Frontier", RAR.text="SR", rf=0, tangent.line=TRUE, cex.legend=0.8, chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8){
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class optimize.portfolio.ROI")
   
   portf <- object$portfolio
@@ -218,11 +218,11 @@ chart.EfficientFrontier.optimize.portfolio.ROI <- function(object, ..., match.co
   rnames <- colnames(R)
   
   if(match.col %in% c("ETL", "ES", "CVaR")){
-    frontier <- meanetl.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
+    frontier <- meanetl.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios, ...=...)
     rar <- "STARR"
   }
   if(match.col == "StdDev"){
-    frontier <- meanvar.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios)
+    frontier <- meanvar.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios, ...=...)
     rar <- "SR"
   }
   # data points to plot the frontier
@@ -324,7 +324,7 @@ chart.EfficientFrontier.optimize.portfolio <- function(object, ..., match.col="E
   rnames <- colnames(R)
   
   # get the data of the efficient frontier
-  frontier <- extract.efficient.frontier(object=object, match.col=match.col, n.portfolios=n.portfolios)
+  frontier <- extract.efficient.frontier(object=object, match.col=match.col, n.portfolios=n.portfolios, ...=...)
   
   # data points to plot the frontier
   x.f <- frontier[, match.col]

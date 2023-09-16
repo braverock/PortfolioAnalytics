@@ -13,6 +13,7 @@ chart.EfficientFrontier(object, ...)
 \method{chart.EfficientFrontier}{optimize.portfolio.CVXR}(
   object,
   ...,
+  optimize_method = "CVXR",
   match.col = "ES",
   n.portfolios = 25,
   xlim = NULL,
@@ -33,6 +34,7 @@ chart.EfficientFrontier(object, ...)
 \method{chart.EfficientFrontier}{optimize.portfolio.ROI}(
   object,
   ...,
+  optimize_method = "ROI",
   match.col = "ES",
   n.portfolios = 25,
   xlim = NULL,

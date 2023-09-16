@@ -16,11 +16,12 @@
 #' @param w the weight of the portfolio
 #' @param ES_alpha the default value is 0.05, but could be specified as any value between 0 and 1
 #' @param EQS_alpha the default value is 0.05, but could be specified as any value between 0 and 1
+#' @param moment_setting the default is NULL, should provide moment_setting=list(mu=, sigma=) if customize momentFUN
 #' @export extract_risk
-extract_risk <- function(R, w, ES_alpha = 0.05, EQS_alpha = 0.05){
+extract_risk <- function(R, w, ES_alpha = 0.05, EQS_alpha = 0.05, moment_setting = NULL){
   res = list()
-  res$mean = mean(R %*% w)
-  res$StdDev = sqrt(t(w) %*% cov(R) %*% w)
+  if(is.null(moment_setting$mu)) res$mean = mean(R %*% w) else res$mean = moment_setting$mu %*% w
+  if(is.null(moment_setting$sigma)) res$StdDev = sqrt(t(w) %*% cov(R) %*% w) else res$StdDev = sqrt(t(w) %*% moment_setting$sigma %*% w)
   
   if(ES_alpha > 0.5) ES_alpha <- (1 - ES_alpha)
   if(EQS_alpha > 0.5) EQS_alpha <- (1 - EQS_alpha)

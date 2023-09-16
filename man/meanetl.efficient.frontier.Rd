@@ -4,7 +4,13 @@
 \alias{meanetl.efficient.frontier}
 \title{Generate the efficient frontier for a mean-etl portfolio}
 \usage{
-meanetl.efficient.frontier(portfolio, R, n.portfolios = 25, ...)
+meanetl.efficient.frontier(
+  portfolio,
+  R,
+  optimize_method = "ROI",
+  n.portfolios = 25,
+  ...
+)
 }
 \arguments{
 \item{portfolio}{a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}}

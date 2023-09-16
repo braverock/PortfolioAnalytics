@@ -7,6 +7,7 @@
 meanvar.efficient.frontier(
   portfolio,
   R,
+  optimize_method = "ROI",
   n.portfolios = 25,
   risk_aversion = NULL,
   ...

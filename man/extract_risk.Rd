@@ -4,7 +4,7 @@
 \alias{extract_risk}
 \title{extract the risk value when knowing the weights}
 \usage{
-extract_risk(R, w, ES_alpha = 0.05, EQS_alpha = 0.05)
+extract_risk(R, w, ES_alpha = 0.05, EQS_alpha = 0.05, moment_setting = NULL)
 }
 \arguments{
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}
@@ -14,6 +14,8 @@ extract_risk(R, w, ES_alpha = 0.05, EQS_alpha = 0.05)
 \item{ES_alpha}{the default value is 0.05, but could be specified as any value between 0 and 1}
 
 \item{EQS_alpha}{the default value is 0.05, but could be specified as any value between 0 and 1}
+
+\item{moment_setting}{the default is NULL, should provide moment_setting=list(mu=, sigma=) if customize momentFUN}
 }
 \description{
 extract the risk value when knowing the weights

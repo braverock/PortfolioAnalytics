@@ -8,6 +8,7 @@ create.EfficientFrontier(
   R,
   portfolio,
   type,
+  optimize_method = "CVXR",
   n.portfolios = 25,
   risk_aversion = NULL,
   match.col = "ES",
