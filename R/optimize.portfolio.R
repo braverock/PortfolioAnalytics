@@ -346,7 +346,6 @@ optimize.portfolio_v1 <- function(
     out$weights <- weights
     out$out <- roi.result$objval
     out$call <- call
-    out$moment_values = list(momentFun = moment_name,mu = mout$mu, sigma = mout$sigma)
   } ## end case for ROI
 
   

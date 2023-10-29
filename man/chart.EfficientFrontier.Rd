@@ -97,6 +97,8 @@ chart.EfficientFrontier(object, ...)
 
 \item{\dots}{passthru parameters to \code{\link{plot}}}
 
+\item{optimize_method}{the optimize method to get the efficient frontier}
+
 \item{match.col}{string name of column to use for risk (horizontal axis).
 \code{match.col} must match the name of an objective measure in the 
 \code{objective_measures} or \code{opt_values} slot in the object created 
@@ -165,5 +167,5 @@ will be plotted using a risk free rate of 0. Set \code{rf=NULL} to omit
 this from the plot.
 }
 \author{
-Ross Bennett
+Ross Bennett, Xinran Zhao
 }

@@ -23,6 +23,8 @@ create.EfficientFrontier(
 
 \item{type}{type of efficient frontier, see Details.}
 
+\item{optimize_method}{the optimize method to get the efficient frontier, default is CVXR}
+
 \item{n.portfolios}{number of portfolios to calculate along the efficient frontier}
 
 \item{risk_aversion}{vector of risk_aversion values to construct the efficient frontier.

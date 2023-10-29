@@ -19,7 +19,6 @@
 #' @param EQS_alpha the default value is 0.05, but could be specified as any value between 0 and 1
 #' @param moment_setting the default is NULL, if customize momentFUN please provide moment_setting=list(mu=, sigma=) 
 #' @param main title used in the plot.
-#' @param n.portfolios number of portfolios to extract along the efficient frontier.
 #' @param plot_type define the plot_type, default is "l"
 #' @param cex.axis the magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
 #' @param element.color provides the color for drawing less-important chart elements, such as the box lines, axis lines, etc.

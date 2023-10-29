@@ -73,8 +73,6 @@ EfficientFrontierPlot(
 \item{lty}{vector of line types with length equal to the number of portfolios in \code{frontiers}.}
 
 \item{lwd}{vector of line widths with length equal to the number of portfolios in \code{frontiers}.}
-
-\item{n.portfolios}{number of portfolios to extract along the efficient frontier.}
 }
 \description{
 Generate efficient frontiers plot by providing frontiers.

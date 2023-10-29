@@ -35,6 +35,7 @@
 #' 
 #' @param object object to chart.
 #' @param \dots passthru parameters to \code{\link{plot}}
+#' @param optimize_method the optimize method to get the efficient frontier
 #' @param match.col string name of column to use for risk (horizontal axis).
 #' \code{match.col} must match the name of an objective measure in the 
 #' \code{objective_measures} or \code{opt_values} slot in the object created 
@@ -54,7 +55,7 @@
 #' \code{chart.assets} must be \code{TRUE} to plot asset names.
 #' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}.
 #' @param cex.assets numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
-#' @author Ross Bennett
+#' @author Ross Bennett, Xinran Zhao
 #' @rdname chart.EfficientFrontier
 #' @export
 chart.EfficientFrontier <- function(object, ...){

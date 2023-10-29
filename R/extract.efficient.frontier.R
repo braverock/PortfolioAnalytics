@@ -82,6 +82,7 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=NULL, 
 #' 
 #' @param portfolio a portfolio object with constraints created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
+#' @param optimize_method the optimize method to get the efficient frontier, default is ROI
 #' @param n.portfolios number of portfolios to plot along the efficient frontier
 #' @param risk_aversion vector of risk_aversion values to construct the efficient frontier.
 #' \code{n.portfolios} is ignored if \code{risk_aversion} is specified and the number
@@ -207,6 +208,7 @@ meanvar.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.po
 #' 
 #' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
+#' @param optimize_method the optimize method to get the efficient frontier, default is ROI
 #' @param n.portfolios number of portfolios to generate the efficient frontier
 #' @param \dots passthru parameters to \code{\link{optimize.portfolio}}
 #' @return a matrix of objective measure values and weights along the efficient frontier
@@ -293,6 +295,7 @@ meanetl.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.po
 #' 
 #' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
+#' @param optimize_method the optimize method to get the efficient frontier, default is CVXR
 #' @param n.portfolios number of portfolios to generate the efficient frontier
 #' @param \dots passthru parameters to \code{\link{optimize.portfolio}}
 #' @return a matrix of objective measure values and weights along the efficient frontier
@@ -374,6 +377,7 @@ meaneqs.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.p
 #' 
 #' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
+#' @param optimize_method the optimize method to get the efficient frontier, default is CVXR
 #' @param n.portfolios number of portfolios to generate the efficient frontier
 #' @param risk_type one of "StdDev", "ES" and "EQS", which determines the type of basic efficient frontier.
 #' @param compare_port vector composed of any risk "StdDev", "ES", "EQS", for example, compare_port=c("StdDev", "ES")
@@ -497,6 +501,7 @@ meanrisk.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.
 #' @param R xts object of asset returns
 #' @param portfolio object of class 'portfolio' specifying the constraints and objectives, see \code{\link{portfolio.spec}}.
 #' @param type type of efficient frontier, see Details.
+#' @param optimize_method the optimize method to get the efficient frontier, default is CVXR
 #' @param n.portfolios number of portfolios to calculate along the efficient frontier
 #' @param risk_aversion vector of risk_aversion values to construct the efficient frontier.
 #' \code{n.portfolios} is ignored if \code{risk_aversion} is specified and the number

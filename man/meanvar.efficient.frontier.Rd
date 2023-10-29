@@ -18,6 +18,8 @@ meanvar.efficient.frontier(
 
 \item{R}{an xts or matrix of asset returns}
 
+\item{optimize_method}{the optimize method to get the efficient frontier, default is ROI}
+
 \item{n.portfolios}{number of portfolios to plot along the efficient frontier}
 
 \item{risk_aversion}{vector of risk_aversion values to construct the efficient frontier.

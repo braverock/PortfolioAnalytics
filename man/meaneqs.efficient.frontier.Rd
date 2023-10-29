@@ -17,6 +17,8 @@ meaneqs.efficient.frontier(
 
 \item{R}{an xts or matrix of asset returns}
 
+\item{optimize_method}{the optimize method to get the efficient frontier, default is CVXR}
+
 \item{n.portfolios}{number of portfolios to generate the efficient frontier}
 
 \item{\dots}{passthru parameters to \code{\link{optimize.portfolio}}}

@@ -19,6 +19,8 @@ meanrisk.efficient.frontier(
 
 \item{R}{an xts or matrix of asset returns}
 
+\item{optimize_method}{the optimize method to get the efficient frontier, default is CVXR}
+
 \item{n.portfolios}{number of portfolios to generate the efficient frontier}
 
 \item{risk_type}{one of "StdDev", "ES" and "EQS", which determines the type of basic efficient frontier.}
