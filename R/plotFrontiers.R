@@ -23,7 +23,9 @@
 #' e.g. \code{ES_alpha} for ES, \code{moment_setting} for var. Then this function 
 #' will calculate back mean and risk based on the weight, and draw a plot.
 #' 
-#' Default settings use colors to differentiate between portfolios
+#' Default settings use colors and line types to differentiate portfolios, and set 
+#' the portfolio name as 'Portfolio 1' and so on. Users could customize col, lty, 
+#' lwd and legend.labels to better the plot.
 #' 
 #' @param R an xts object of asset returns
 #' @param frontiers a list of frontiers, for example, list(ef1=meanvar.efficient.frontier(), ef2=meanvar.efficient.frontier())
