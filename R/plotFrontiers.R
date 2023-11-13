@@ -12,6 +12,19 @@
 
 #' Generate efficient frontiers plot by providing frontiers.
 #' 
+#' @details
+#' This function provides the ability to plot frontiers. 
+#' 
+#' When using \code{meanvar.efficient.frontier}, \code{meanetl.efficient.frontier} 
+#' and \code{meaneqs.efficient.frontier}, the result will be frontiers data,
+#' including the weights for each point on the mean-risk efficient frontiers. 
+#' Before using this function, user should declare which risk that they want to 
+#' compare, and what parameters that they want to use to calculate the risk, 
+#' e.g. \code{ES_alpha} for ES, \code{moment_setting} for var. Then this function 
+#' will calculate back mean and risk based on the weight, and draw a plot.
+#' 
+#' Default settings use colors to differentiate between portfolios
+#' 
 #' @param R an xts object of asset returns
 #' @param frontiers a list of frontiers, for example, list(ef1=meanvar.efficient.frontier(), ef2=meanvar.efficient.frontier())
 #' @param risk type of risk that you want to compare, could be 'StdDev', 'ES', 'EQS'
@@ -35,9 +48,9 @@
 #' @param lty vector of line types with length equal to the number of portfolios in \code{frontiers}.
 #' @param lwd vector of line widths with length equal to the number of portfolios in \code{frontiers}.
 #' @author Xinran Zhao
-#' @export EfficientFrontierPlot
+#' @export plotFrontiers
 #' 
-EfficientFrontierPlot <- function(R, frontiers, risk, ES_alpha = 0.05, EQS_alpha = 0.05, moment_setting = NULL, main="Efficient Frontiers", plot_type = "l", cex.axis=0.5, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
+plotFrontiers <- function(R, frontiers, risk, ES_alpha = 0.05, EQS_alpha = 0.05, moment_setting = NULL, main="Efficient Frontiers", plot_type = "l", cex.axis=0.5, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
   if(risk %in% c('StdDev', 'var', 'stdDev')){
     risk = 'StdDev'
   } else if(risk %in% c('etl', 'ES', 'es')){
