@@ -63,35 +63,43 @@ plotFrontiers <- function(R, frontiers, risk, ES_alpha = 0.05, EQS_alpha = 0.05,
   
   wname = paste0('w.', colnames(R))
   n = length(frontiers)
-  res = list()
+  mean_list = list()
+  risk_list = list()
+  mean_scale = list('max' = c(), 'min' = c())
+  risk_scale = list('max' = c(), 'min' = c())
+  
   for(i in 1:n){
-    w = frontiers[[i]][, wname]
-    mean_value = c()
-    risk_value = c()
-    for(j in 1:dim(w)[1]){
-      risk_measures = extract_risk(R, w[j,], ES_alpha = ES_alpha, EQS_alpha = EQS_alpha, moment_setting = moment_setting)
-      mean_value = append(mean_value, risk_measures$mean)
-      risk_value = append(risk_value, risk_measures[risk])
-    }
-    if(i == 1){
-      mean_list = matrix(mean_value)
-      risk_list = matrix(risk_value)
+    if(risk %in% colnames(frontiers[[i]])){
+      mean_value = as.numeric(frontiers[[i]][,'mean'])
+      risk_value = as.numeric(frontiers[[i]][,risk])
     } else {
-      mean_list = cbind(mean_list, mean_value)
-      risk_list = cbind(risk_list, risk_value)
+      w = frontiers[[i]][, wname]
+      mean_value = c()
+      risk_value = c()
+      for(j in 1:dim(w)[1]){
+        risk_measures = extract_risk(R, w[j,], ES_alpha = ES_alpha, EQS_alpha = EQS_alpha, moment_setting = moment_setting)
+        mean_value = append(mean_value, risk_measures$mean)
+        risk_value = append(risk_value, risk_measures[risk])
+      }
     }
+    mean_list = c(mean_list, list(mean_value))
+    risk_list = c(risk_list, list(risk_value))
+    mean_scale$max = append(mean_scale$max, max(mean_value))
+    mean_scale$min = append(mean_scale$min, min(mean_value))
+    risk_scale$max = append(risk_scale$max, max(risk_value))
+    risk_scale$min = append(risk_scale$min, min(risk_value))
   }
   
   # set the x and y limits
   if(is.null(xlim)){
     xlim <- c(0, 0)
-    xlim[1] <- min(as.numeric(risk_list)) * 0.9
-    xlim[2] <- max(as.numeric(risk_list)) * 1.1
+    xlim[1] <- min(risk_scale$min) * 0.9
+    xlim[2] <- max(risk_scale$max) * 1.1
   }
   if(is.null(ylim)){
     ylim <- c(0, 0)
-    ylim[1] <- min(as.numeric(mean_list)) * 0.7
-    ylim[2] <- max(as.numeric(mean_list)) * 1.1
+    ylim[1] <- min(mean_scale$min) * 0.7
+    ylim[2] <- max(mean_scale$max) * 1.1
   }
   
   # plot the assets
@@ -106,7 +114,7 @@ plotFrontiers <- function(R, frontiers, risk, ES_alpha = 0.05, EQS_alpha = 0.05,
   if(is.null(lwd)) lwd <- rep(1, n)
   
   for(i in 1:n){
-    lines(x=risk_list[,i], y=mean_list[,i], col=col[i], lty=lty[i], lwd=lwd[i], type = plot_type, ...)
+    lines(x=risk_list[[i]], y=mean_list[[i]], col=col[i], lty=lty[i], lwd=lwd[i], type = plot_type, ...)
   }
   
   # legend
