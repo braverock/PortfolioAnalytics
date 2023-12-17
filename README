@@ -8,7 +8,8 @@ New Basic PA Functions:
 3. extract_risk (extract the risk value when knowing the weights of portfolio)
 4. chart.EfficientFrontierCompare (Overlay the efficient frontiers of different minRisk portfolio objects on a single plot)
 5. backtest.plot (based on Peter Carl's code, generate plots of the cumulative returns and/or drawdown for back-testing)
-6.opt.outputMvo
+6. opt.outputMvo (converts output of `optimize.portfolio` to a list of the portfolio weights, mean, volatility and Sharpe Ratio)
+7. plotFrontiers (plot frontiers based on the result of `meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meaneqs.efficient.frontier`)
 
 
 Enhanced Functions:
