@@ -13,7 +13,8 @@
 #' Generate efficient frontiers plot by providing frontiers.
 #' 
 #' @details
-#' This function provides the ability to plot frontiers. 
+#' This function provides the ability to plot frontiers based on the result of 
+#' `meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meaneqs.efficient.frontier`.
 #' 
 #' When using \code{meanvar.efficient.frontier}, \code{meanetl.efficient.frontier} 
 #' and \code{meaneqs.efficient.frontier}, the result will be frontiers data,
@@ -69,19 +70,16 @@ plotFrontiers <- function(R, frontiers, risk, ES_alpha = 0.05, EQS_alpha = 0.05,
   risk_scale = list('max' = c(), 'min' = c())
   
   for(i in 1:n){
-    if(risk %in% colnames(frontiers[[i]])){
-      mean_value = as.numeric(frontiers[[i]][,'mean'])
-      risk_value = as.numeric(frontiers[[i]][,risk])
-    } else {
-      w = frontiers[[i]][, wname]
-      mean_value = c()
-      risk_value = c()
-      for(j in 1:dim(w)[1]){
-        risk_measures = extract_risk(R, w[j,], ES_alpha = ES_alpha, EQS_alpha = EQS_alpha, moment_setting = moment_setting)
-        mean_value = append(mean_value, risk_measures$mean)
-        risk_value = append(risk_value, risk_measures[risk])
-      }
+    w = frontiers[[i]][, wname]
+    mean_value = c()
+    risk_value = c()
+    for(j in 1:dim(w)[1]){
+      risk_measures = extract_risk(R, w[j,], ES_alpha = ES_alpha, EQS_alpha = EQS_alpha, moment_setting = moment_setting)
+      mean_value = append(mean_value, risk_measures$mean)
+      risk_value = append(risk_value, risk_measures[risk])
     }
+    if(class(risk_value) == 'list') risk_value = unlist(risk_value)
+    if(class(mean_value) == 'list') mean_value = unlist(mean_value)
     mean_list = c(mean_list, list(mean_value))
     risk_list = c(risk_list, list(risk_value))
     mean_scale$max = append(mean_scale$max, max(mean_value))
