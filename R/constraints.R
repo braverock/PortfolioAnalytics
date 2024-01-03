@@ -928,11 +928,11 @@ return_constraint <- function(type="return", return_target, enabled=TRUE, messag
 #' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos=3)
 #' pspec <- add.constraint(portfolio=pspec, type="position_limit", max_pos_long=3, max_pos_short=1)
 #' @export
-filter_constraint <- function(type="filter", filter_name=NULL, enabled=TRUE, message=FALSE, ...){
+position_limit_constraint <- function(type="position_limit", filter_name=NULL, enabled=TRUE, message=FALSE, ...){
   
   # check that filter_name either is a function or describes a function
   # 
-  Constraint <- constraint_v2(type, enabled=enabled, constrclass="filter_constraint", ...)
+  Constraint <- constraint_v2(type, enabled=enabled, constrclass="position_limit_constraint", ...)
   Constraint$filter_name <- filter_name
   return(Constraint)
 }

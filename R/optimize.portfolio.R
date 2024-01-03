@@ -1,7 +1,7 @@
 ###############################################################################
 # R (https://r-project.org/) Numeric Methods for Optimization of Portfolios
 #
-# Copyright (c) 2004-2021 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt, Xiaokang Feng
+# Copyright (c) 2004-2023 Brian G. Peterson, Peter Carl, Ross Bennett, Kris Boudt, Xiaokang Feng, Xinran Zhao
 #
 # This library is distributed under the terms of the GNU Public License (GPL)
 # for full details see the file COPYING
@@ -785,6 +785,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   # causing errors if clean="boudt" was specified in an objective
   # and an argument such as itermax was passed in as dots to 
   # optimize.portfolio. See r2931
+  moment_name = momentFUN
   if(!is.function(momentFUN)){
     momentFUN <- match.fun(momentFUN)
   }
@@ -1261,6 +1262,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         out <- list(weights=weights, objective_measures=obj_vals, opt_values=obj_vals, out=roi_result$out, call=call)
       }
     }
+    out$moment_values = list(momentFun = moment_name,mu = mout$mu, sigma = mout$sigma)
     # Set here at the end so we get optimize.portfolio.ROI and not optimize.portfolio.{solver} classes
     optimize_method <- "ROI"
   } ## end case for ROI
@@ -1488,7 +1490,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         }
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -1593,7 +1595,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         Rglpk.mat <- rbind(
           Rglpk.mat,
           cbind(
-            matrix(returns, T),
+            matrix(R, T),
             diag(1, T),
             rep(1, T)
           )
@@ -1602,7 +1604,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         Rglpk.rhs <- c(Rglpk.rhs, rep(0, T))
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -1723,7 +1725,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         # shrinkage constraint
         Rglpk.mat <- rbind(
           Rglpk.mat,
-          c(colMeans(returns), rep(0, T + 2))
+          c(colMeans(R), rep(0, T + 2))
         )
   
         Rglpk.dir <- c(Rglpk.dir, "==")
@@ -1733,7 +1735,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         Rglpk.mat <- rbind(
           Rglpk.mat,
           cbind(
-            matrix(returns, T),
+            matrix(R, T),
             diag(1, T),
             rep(1, T),
             rep(0, T)
@@ -1745,7 +1747,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -1890,7 +1892,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         }
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -2060,7 +2062,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         Rglpk.rhs <- c(Rglpk.rhs, rep(0, T))
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -2252,7 +2254,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         Rglpk.rhs <- c(Rglpk.rhs, rep(0, T))
   
         # result from solver
-        Rglpk.result <- try(Rglpk_solve_LP(
+        Rglpk.result <- try(Rglpk::Rglpk_solve_LP(
           obj = Rglpk.obj,
           mat = Rglpk.mat,
           dir = Rglpk.dir,
@@ -2422,13 +2424,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       colnames(osqp.A) <- colnames(R)
   
       # result from solver
-      osqp.result <- try(solve_osqp(
+      osqp.result <- try(osqp::solve_osqp(
         P = osqp.P,
         q = osqp.q,
         A = osqp.A,
         l = osqp.l,
         u = osqp.u,
-        pars = osqpSettings(verbose = FALSE)
+        pars = osqp::osqpSettings(verbose = FALSE)
       ))
   
       # null result
@@ -2541,13 +2543,13 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       colnames(osqp.A) <- c(colnames(R), "Shrinkage")
   
       # result from solver
-      osqp.result <- try(solve_osqp(
+      osqp.result <- try(osqp::solve_osqp(
         P = osqp.P,
         q = osqp.q,
         A = osqp.A,
         l = osqp.l,
         u = osqp.u,
-        pars = osqpSettings(verbose = FALSE)
+        pars = osqp::osqpSettings(verbose = FALSE)
       ))
   
       # null result
@@ -2746,7 +2748,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
   
     # result from solver
-    mco.result <- try(nsga2(
+    mco.result <- try(mco::nsga2(
       fn = mco.fn,
       idim = mco.idim,
       odim = mco.odim,
@@ -2792,9 +2794,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     ## variables
     X <- as.matrix(R)
-    wts <- Variable(N)
-    z <- Variable(T)
-    zeta <- Variable(1)
+    wts <- CVXR::Variable(N)
+    z <- CVXR::Variable(T)
+    zeta <- CVXR::Variable(1)
     
     # objective type
     target = -Inf
@@ -2804,6 +2806,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     risk_EQS <- FALSE
     maxSR <- FALSE
     maxSTARR <- FALSE
+    ESratio <- FALSE
     EQSratio <- FALSE
     alpha <- 0.05
     lambda <- 1
@@ -2850,7 +2853,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       tmpname = "mean"
     } else if(!reward & risk & !risk_ES & !risk_EQS){
       # min var/std
-      obj <- quad_form(wts, sigma_value)
+      obj <- CVXR::quad_form(wts, sigma_value)
       constraints_cvxr = list()
       tmpname = "StdDev"
     } else if(reward & risk & !risk_ES & !risk_EQS){
@@ -2859,12 +2862,12 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       
       if(!maxSR){
         # min mean-variance
-        obj <- quad_form(wts, sigma_value) - (t(mean_value) %*% wts) / lambda
+        obj <- CVXR::quad_form(wts, sigma_value) - (t(mean_value) %*% wts) / lambda
         constraints_cvxr = list()
         tmpname = "optimal value"
       } else {
         # max sharpe ratio
-        obj <- quad_form(wts, sigma_value)
+        obj <- CVXR::quad_form(wts, sigma_value)
         constraints_cvxr = list(t(mean_value) %*% wts == 1, sum(wts) >= 0)
         tmpname = "Sharpe Ratio"
       }
@@ -2895,7 +2898,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
       if(EQSratio){
         # max EQS ratio
-        obj <- zeta + (1/alpha) * p_norm(z, p=2)
+        obj <- zeta + (1/alpha) * CVXR::p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, 
                                 z >= -X %*% wts - zeta, 
                                 t(mean_value) %*% wts == 1,
@@ -2903,7 +2906,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         tmpname = "EQS ratio"
       } else {
         # min EQS
-        obj <- zeta + (1/alpha) * p_norm(z, p=2)
+        obj <- zeta + (1/alpha) * CVXR::p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
         tmpname = "EQS"
       }
@@ -2965,16 +2968,16 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     
     # problem
-    prob_cvxr <- Problem(Minimize(obj), constraints = constraints_cvxr)
+    prob_cvxr <- CVXR::Problem(CVXR::Minimize(obj), constraints = constraints_cvxr)
     
     if(cvxr_default){
       if(risk_ES || risk_EQS || maxSTARR || EQSratio){
-        result_cvxr <- CVXR::solve(prob_cvxr, solver = "SCS")
+        result_cvxr <- CVXR::solve(prob_cvxr, solver = "ECOS", ... = ...)
       } else {
-        result_cvxr <- CVXR::solve(prob_cvxr)
+        result_cvxr <- CVXR::solve(prob_cvxr, solver = "OSQP", ... = ...)
       }
     } else {
-      result_cvxr <- CVXR::solve(prob_cvxr, solver = optimize_method)
+      result_cvxr <- CVXR::solve(prob_cvxr, solver = optimize_method, ... = ...)
     }
     
     cvxr_wts <- result_cvxr$getValue(wts)
@@ -3014,7 +3017,8 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
                opt_values=obj_cvxr,
                out = obj_cvxr[[tmpname]],
                call = call,
-               solver = result_cvxr$solver)
+               solver = result_cvxr$solver,
+               moment_values = list(momentFun = moment_name,mu = mout$mu, sigma = mout$sigma))
     
     optimize_method = "CVXR"
   }## end case for CVXR

@@ -37,6 +37,7 @@
 % \VignetteIndexEntry{Custom Moment and Objective Functions}
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 \title{Custom Moment and Objective Functions}
 \author{Ross Bennett}

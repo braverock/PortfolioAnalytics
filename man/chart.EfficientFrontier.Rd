@@ -13,6 +13,7 @@ chart.EfficientFrontier(object, ...)
 \method{chart.EfficientFrontier}{optimize.portfolio.CVXR}(
   object,
   ...,
+  optimize_method = "CVXR",
   match.col = "ES",
   n.portfolios = 25,
   xlim = NULL,
@@ -33,6 +34,7 @@ chart.EfficientFrontier(object, ...)
 \method{chart.EfficientFrontier}{optimize.portfolio.ROI}(
   object,
   ...,
+  optimize_method = "ROI",
   match.col = "ES",
   n.portfolios = 25,
   xlim = NULL,
@@ -94,6 +96,8 @@ chart.EfficientFrontier(object, ...)
 \item{object}{object to chart.}
 
 \item{\dots}{passthru parameters to \code{\link{plot}}}
+
+\item{optimize_method}{the optimize method to get the efficient frontier}
 
 \item{match.col}{string name of column to use for risk (horizontal axis).
 \code{match.col} must match the name of an objective measure in the 
@@ -163,5 +167,5 @@ will be plotted using a risk free rate of 0. Set \code{rf=NULL} to omit
 this from the plot.
 }
 \author{
-Ross Bennett
+Ross Bennett, Xinran Zhao
 }
