@@ -78,8 +78,8 @@ plotFrontiers <- function(R, frontiers, risk, ES_alpha = 0.05, EQS_alpha = 0.05,
       mean_value = append(mean_value, risk_measures$mean)
       risk_value = append(risk_value, risk_measures[risk])
     }
-    if(class(risk_value) == 'list') risk_value = unlist(risk_value)
-    if(class(mean_value) == 'list') mean_value = unlist(mean_value)
+    if(is.list(risk_value)) risk_value = unlist(risk_value)
+    if(is.list(mean_value)) mean_value = unlist(mean_value)
     mean_list = c(mean_list, list(mean_value))
     risk_list = c(risk_list, list(risk_value))
     mean_scale$max = append(mean_scale$max, max(mean_value))
