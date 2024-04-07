@@ -78,7 +78,8 @@ plotFrontiers(
 Generate efficient frontiers plot by providing frontiers.
 }
 \details{
-This function provides the ability to plot frontiers. 
+This function provides the ability to plot frontiers based on the result of 
+`meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meaneqs.efficient.frontier`.
 
 When using \code{meanvar.efficient.frontier}, \code{meanetl.efficient.frontier} 
 and \code{meaneqs.efficient.frontier}, the result will be frontiers data,
