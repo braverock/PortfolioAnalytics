@@ -1,4 +1,4 @@
-Package: PortfolioAnalytics
+Package: PortfolioAnalyticsPlus
 Type: Package
 Title: Portfolio Analysis, Including Numerical Methods for Optimization
     of Portfolios
@@ -17,7 +17,7 @@ Authors@R: c(
     person(given="Yifu",family="Kang",role="ctb") )
 Version: 2.0.0
 Date: 2022-09-20
-Maintainer: Brian G. Peterson <brian@braverock.com>
+Maintainer: Xinran Zhao <zhaoxinran1228@gmail.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
     R (>= 4.0.0),
