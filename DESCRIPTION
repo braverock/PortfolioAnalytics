@@ -1,4 +1,4 @@
-Package: PortfolioAnalyticsPlus
+Package: PortfolioAnalytics
 Type: Package
 Title: Portfolio Analysis, Including Numerical Methods for Optimization
     of Portfolios
@@ -16,8 +16,8 @@ Authors@R: c(
     person(given="Xinran",family="Zhao",role="ctb") ,
     person(given="Yifu",family="Kang",role="ctb") )
 Version: 2.0.0
-Date: 2022-09-20
-Maintainer: Xinran Zhao <zhaoxinran1228@gmail.com>
+Date: 2024-04-13
+Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
     R (>= 4.0.0),
@@ -60,6 +60,6 @@ Imports:
     pso
 License: GPL-3
 URL: https://github.com/braverock/PortfolioAnalytics
-Copyright: (c) 2004-2023
+Copyright: (c) 2004-2024
 RoxygenNote: 7.2.3
 Encoding: UTF-8
