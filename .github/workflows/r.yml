@@ -32,7 +32,5 @@ jobs:
           r-version: ${{ matrix.r }}
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
-          with:
-            cache: true
       - name: Check package
         run: R CMD build . && R CMD check *tar.gz --no-manual
