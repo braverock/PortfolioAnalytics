@@ -1,10 +1,14 @@
-This release 2.0.0 contains the following new or enhancedd functions, and new Vignettes:
+Version 2.0.0 contains the following new or enhanced functions, and new Vignettes:
 
+The primary addition to PortfolioAnalytics in this release is the addition of the CVXR solver.  
+The CVXR solver adds efficient constrained conical solutions to PortfolioAnalytics to solve
+multiple common risk-weighted portfolio objectives with common constraints.  This will allow
+for fast solutions to many common portfolio constructions.
 
-New Basic PA Functions:
+New PortfolioAnalytics Functions:
 
-1. meaneqs.efficient.frontier (create mean-eqs efficient frontier)
-2. meanrisk.efficient.frontier (generate multiple efficient  frontiers for the same portfolio)
+1. meaneqs.efficient.frontier (create mean-eqs efficient frontier) utility function
+2. meanrisk.efficient.frontier (generate multiple efficient frontiers for the same portfolio) utility function
 3. extract_risk (extract the risk value when knowing the weights of portfolio)
 4. chart.EfficientFrontierCompare (Overlay the efficient frontiers of different minRisk portfolio objects on a single plot)
 5. backtest.plot (based on Peter Carl's code, generate plots of the cumulative returns and/or drawdown for back-testing)
