@@ -7,6 +7,7 @@
 \usage{
 portfolio.spec(
   assets = NULL,
+  name = "portfolio",
   category_labels = NULL,
   weight_seq = NULL,
   message = FALSE
@@ -14,6 +15,8 @@ portfolio.spec(
 }
 \arguments{
 \item{assets}{number of assets, or optionally a named vector of assets specifying seed weights. If seed weights are not specified, an equal weight portfolio will be assumed.}
+
+\item{name}{give the portfolio a name, the default name will be 'portfolio'}
 
 \item{category_labels}{character vector to categorize assets by sector, industry, geography, market-cap, currency, etc. Default NULL}
 

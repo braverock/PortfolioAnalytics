@@ -12,9 +12,11 @@ Authors@R: c(
     person(given="Hezky",family="Varon",role="ctb") ,
     person(given="Guy",family="Yollin",role="ctb") ,
     person(given="R. Douglas",family="Martin",role="ctb") ,
-    person(given="Xiaokang",family="Feng",role="ctb") )
+    person(given="Xiaokang",family="Feng",role="ctb") ,
+    person(given="Xinran",family="Zhao",role="ctb") ,
+    person(given="Yifu",family="Kang",role="ctb") )
 Version: 2.0.0
-Date: 2021-05-08
+Date: 2024-04-13
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
@@ -25,7 +27,7 @@ Depends:
     PerformanceAnalytics (>= 1.5.1)
 Suggests:
     quantmod,
-    DEoptim(>= 2.2.1),
+    DEoptim (>= 2.2.1),
     iterators,
     fGarch,
     Rglpk,
@@ -33,20 +35,31 @@ Suggests:
     ROI (>= 0.1.0),
     ROI.plugin.glpk (>= 0.0.2),
     ROI.plugin.quadprog (>= 0.0.2),
-    ROI.plugin.symphony (>= 0.0.2),
-    pso,
-    GenSA,
     corpcor,
     testthat,
     nloptr (>= 1.0.0),
     MASS,
-    robustbase, 
-    osqp, 
-    Rglpk, 
-    mco
+    robustbase,
+    osqp,
+    CVXR,
+    data.table,
+    knitr,
+    rmarkdown,
+    GSE,
+    RobStatTM,
+    PCRA,
+    R.rsp
+Remotes:
+    git::https://github.com/robustport/PCRA.git
+VignetteBuilder: R.rsp
 Imports:
-    methods
+    methods,
+    GenSA,
+    ROI.plugin.symphony,
+    mco,
+    pso
 License: GPL-3
 URL: https://github.com/braverock/PortfolioAnalytics
-Copyright: (c) 2004-2021
-RoxygenNote: 7.1.2
+Copyright: (c) 2004-2024
+RoxygenNote: 7.2.3
+Encoding: UTF-8
