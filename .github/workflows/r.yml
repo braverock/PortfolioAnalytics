@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        r: [ '4.0', '4.3']
+        r: [ '4.3']
     name: R ${{ matrix.r }} check
     steps:
       - uses: actions/checkout@v2
@@ -32,8 +32,7 @@ jobs:
           r-version: ${{ matrix.r }}
       - name: Install dependencies
       - uses: r-lib/actions/setup-r-dependencies@v2
-#        run: |
-#          Rscript -e "install.packages('remotes')"
-#          Rscript -e "remotes::install_deps(dependencies = TRUE)"
+        with:
+          cache: true
       - name: Check package
         run: R CMD build . && R CMD check *tar.gz --no-manual
