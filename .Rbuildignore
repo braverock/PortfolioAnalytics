@@ -1,6 +1,7 @@
 sandbox
 .metadata
 .svn
+.github
 ^\.Rproj\.user$
 ^.*\.Rproj$
 codeblock.txt

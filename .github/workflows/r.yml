@@ -31,8 +31,9 @@ jobs:
         with:
           r-version: ${{ matrix.r }}
       - name: Install dependencies
-        run: |
-          Rscript -e "install.packages('remotes')"
-          Rscript -e "remotes::install_deps(dependencies = TRUE)"
+      - uses: r-lib/actions/setup-r-dependencies@v2
+#        run: |
+#          Rscript -e "install.packages('remotes')"
+#          Rscript -e "remotes::install_deps(dependencies = TRUE)"
       - name: Check package
         run: R CMD build . && R CMD check *tar.gz --no-manual
