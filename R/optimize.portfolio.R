@@ -2898,7 +2898,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
       if(EQSratio){
         # max EQS ratio
-        obj <- zeta + (1/alpha) * CVXR::p_norm(z, p=2)
+        obj <- zeta + (1/(alpha * sqrt(T))) * CVXR::p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, 
                                 z >= -X %*% wts - zeta, 
                                 t(mean_value) %*% wts == 1,
@@ -2906,7 +2906,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         tmpname = "EQS ratio"
       } else {
         # min EQS
-        obj <- zeta + (1/alpha) * CVXR::p_norm(z, p=2)
+        obj <- zeta + (1/(alpha * sqrt(T))) * CVXR::p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
         tmpname = "EQS"
       }
