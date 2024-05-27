@@ -2898,7 +2898,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
       if(EQSratio){
         # max EQS ratio
-        obj <- zeta + (1/alpha) * CVXR::p_norm(z, p=2)
+        obj <- zeta + (1/(alpha* sqrt(T))) * CVXR::p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, 
                                 z >= -X %*% wts - zeta, 
                                 t(mean_value) %*% wts == 1,
@@ -2906,7 +2906,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         tmpname = "EQS ratio"
       } else {
         # min EQS
-        obj <- zeta + (1/alpha) * CVXR::p_norm(z, p=2)
+        obj <- zeta + (1/(alpha* sqrt(T))) * CVXR::p_norm(z, p=2)
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
         tmpname = "EQS"
       }
@@ -3294,6 +3294,7 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   
   #store the call for later
   call <- match.call()
+  if(length(optimize_method) == 2) optimize_method <- optimize_method[2] else optimize_method <- optimize_method[1]
   if(optimize_method=="random"){
     # get any rp related arguments passed in through dots
     if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
