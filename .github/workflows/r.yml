@@ -33,8 +33,7 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v2
       - name: add TeX deps
         run: |
-          tinytex::tlmgr_install(pkgs = "grfext")
-        shell: Rscript {0}
+          tlmgr install grfext
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
       - name: Check package
