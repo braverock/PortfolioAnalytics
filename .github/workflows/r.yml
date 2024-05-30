@@ -32,7 +32,7 @@ jobs:
           r-version: ${{ matrix.r }}
       - uses: r-lib/actions/setup-tinytex@v2
       - name: add TeX deps
-          run: |
+        run: |
           tinytex::tlmgr_install(pkgs = "grfext")
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
