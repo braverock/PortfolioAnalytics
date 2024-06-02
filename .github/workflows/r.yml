@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        r: [ '4.3']
+        r: [ 'release', 'devel' ]
     name: R ${{ matrix.r }} check
     steps:
       - uses: actions/checkout@v2
