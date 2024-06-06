@@ -1,7 +1,7 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "May 25, 2024"
+date: "June 4, 2024"
 output: rmarkdown::pdf_document
 bibliography: PA.bib
 urlcolor: blue
@@ -50,7 +50,7 @@ The PortfolioAnalytics package provides the following two main wrapper functions
 
 `optimize.portfolio.rebalancing(R =, portfolio =, optimize_method =, rebalance_on =, training_period =, rolling_window =)`
 
-Different solvers support different types of portfolio optimization problems, which should be specified by the argument `optimize_method`. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` and `optimize.portfolio.rebalancing` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP type portfolio optimization problems, such as maximum mean return and minimum variance portfolio optimization is OSQP, and the default solver for SOCP type portfolio optimizations, such as "robust portfolio optimization" to control for alpha uncertainty, and Expected Quadratic Shortfall (EQS) portfolio optimization, is ECOS.
+Different solvers support different types of portfolio optimization problems, which should be specified by the argument `optimize_method`. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` and `optimize.portfolio.rebalancing` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP type portfolio optimization problems, such as maximum mean return and minimum variance portfolio optimization is OSQP, and the default solver for SOCP type portfolio optimizations, such as "robust portfolio optimization" to control for alpha uncertainty, and Expected Quadratic Shortfall (EQS) portfolio optimization, is SCS.
 
 | Solver | LP | QP | SOCP |
 | :-- | :----: | :----: | :----: |
@@ -58,8 +58,8 @@ Different solvers support different types of portfolio optimization problems, wh
 |GLPK|$\checkmark$| | |
 |GLPK_MI|$\checkmark$| | |
 |OSQP|$\colorbox{gray}{\checkmark}$|$\colorbox{gray}{\checkmark}$| |
-|SCS|$\checkmark$|$\checkmark$|$\checkmark$|
-|ECOS|$\checkmark$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
+|SCS|$\checkmark$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
+|ECOS|$\checkmark$|$\checkmark$|$\checkmark$|
 |CPLEX|$\checkmark$|$\checkmark$|$\checkmark$|
 |GUROBI|$\checkmark$|$\checkmark$|$\checkmark$|
 |MOSEK|$\checkmark$|$\checkmark$|$\checkmark$|
@@ -282,7 +282,7 @@ opt_es_1
 # 7 Minimizing Expected Quadratic Shortfall
 Expected Quadratic Shortfall(EQS) is also called Second-Moment Coherent Risk Measure(SMCR) in some situations, for example, in @krokhmal2007higher. The objective to minimize EQS is in the form of:
 $$\min\limits_{\boldsymbol{w}, t} \quad -t + \gamma^{-1}||(t-\boldsymbol{w'r_i})^+||_2$$
-where $\gamma$ is the tail probability and $0<\gamma<1$, $t$ is the value from which quadratic shortfalls are measured in the optimal solution. The default probability is $\gamma = 5\%$. Minimizing EQS could be incorporated into a convex problem as a second-order cone constraints, and PortfolioAnalytics uses ECOS in CVXR as the default solver for Second-Order Cone Optimization(SOCopt).
+where $\gamma$ is the tail probability and $0<\gamma<1$, $t$ is the value from which quadratic shortfalls are measured in the optimal solution. The default probability is $\gamma = 5\%$. Minimizing EQS could be incorporated into a convex problem as a second-order cone constraints, and PortfolioAnalytics uses SCS in CVXR as the default solver for Second-Order Cone Optimization(SOCopt).
 
 ## 7.1 Portfolio Object
 The default probability is $\gamma = 5\%$. Specified probability could be given by `arguments`.
@@ -449,7 +449,7 @@ bt.ES <- optimize.portfolio.rebalancing(retD_CRSP, pspec_GMES,
                                            training_period = 30,
                                            rolling_window = 500)
 bt.EQS <- optimize.portfolio.rebalancing(retD_CRSP, pspec_GMEQS,
-                                           optimize_method = c("CVXR", "SCS"),
+                                           optimize_method = "CVXR",
                                            rebalance_on = "months",
                                            training_period = 30,
                                            rolling_window = 500)
@@ -513,7 +513,7 @@ bt.ESr <- optimize.portfolio.rebalancing(retD_CRSP, pspec_ESr,
                                            training_period = 30,
                                            rolling_window = 500)
 bt.EQSr <- optimize.portfolio.rebalancing(retD_CRSP, pspec_EQSr,
-                                           optimize_method = c("CVXR", "SCS"),
+                                           optimize_method = "CVXR",
                                            rebalance_on = "months",
                                            training_period = 30,
                                            rolling_window = 500)
