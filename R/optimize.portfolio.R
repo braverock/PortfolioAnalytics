@@ -2797,6 +2797,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     wts <- CVXR::Variable(N)
     z <- CVXR::Variable(T)
     zeta <- CVXR::Variable(1)
+    t <- CVXR::Variable(1)
     
     # objective type
     target = -Inf
@@ -2898,16 +2899,18 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
       if(EQSratio){
         # max EQS ratio
-        obj <- zeta + (1/(alpha * sqrt(T))) * CVXR::p_norm(z, p=2)
+        obj <- zeta + (1/(alpha* sqrt(T))) * t
         constraints_cvxr = list(z >= 0, 
                                 z >= -X %*% wts - zeta, 
                                 t(mean_value) %*% wts == 1,
-                                sum(wts) >= 0)
+                                sum(wts) >= 0,
+                                t >= CVXR::p_norm(z, p=2))
         tmpname = "EQS ratio"
       } else {
         # min EQS
-        obj <- zeta + (1/(alpha * sqrt(T))) * CVXR::p_norm(z, p=2)
-        constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
+        obj <- zeta + (1/(alpha* sqrt(T))) * t
+        constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta,
+                                t >= CVXR::p_norm(z, p=2))
         tmpname = "EQS"
       }
     } else { 
@@ -2972,7 +2975,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     if(cvxr_default){
       if(risk_ES || risk_EQS || maxSTARR || EQSratio){
-        result_cvxr <- CVXR::solve(prob_cvxr, solver = "ECOS", ... = ...)
+        result_cvxr <- CVXR::solve(prob_cvxr, solver = "SCS", ... = ...)
       } else {
         result_cvxr <- CVXR::solve(prob_cvxr, solver = "OSQP", ... = ...)
       }
@@ -3294,6 +3297,7 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
   
   #store the call for later
   call <- match.call()
+  if(length(optimize_method) == 2) optimize_method <- optimize_method[2] else optimize_method <- optimize_method[1]
   if(optimize_method=="random"){
     # get any rp related arguments passed in through dots
     if(hasArg(rp_method)) rp_method=match.call(expand.dots=TRUE)$rp_method else rp_method="sample"
