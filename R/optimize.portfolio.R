@@ -2975,7 +2975,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     if(cvxr_default){
       if(risk_ES || risk_EQS || maxSTARR || EQSratio){
-        result_cvxr <- CVXR::solve(prob_cvxr, solver = "ECOS", ... = ...)
+        result_cvxr <- CVXR::solve(prob_cvxr, solver = "SCS", ... = ...)
       } else {
         result_cvxr <- CVXR::solve(prob_cvxr, solver = "OSQP", ... = ...)
       }
