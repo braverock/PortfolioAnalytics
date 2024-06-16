@@ -36,4 +36,4 @@ jobs:
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
       - name: Check package
-        run: R CMD build . && R CMD check *tar.gz --as-cran
+        run: R CMD build --compact-vignettes=both . && R CMD check *tar.gz --as-cran
