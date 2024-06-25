@@ -27,7 +27,7 @@ This function computes the Black-Litterman formula for the moments of the poster
 A. Meucci, "Risk and Asset Allocation", Springer, 2005.
 }
 \references{
-A. Meucci - "Exercises in Advanced Risk and Portfolio Management" \url{http://symmys.com/node/170}.
+A. Meucci - "Exercises in Advanced Risk and Portfolio Management" \url{https://www.arpm.co/articles/exercises-in-advanced-risk-and-portfolio-management/}.
 
 See Meucci's script for "BlackLittermanFormula.m"
 }

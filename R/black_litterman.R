@@ -14,7 +14,7 @@
 #' @return	BLSigma  [matrix] (N x N) posterior covariance matrix.
 #'
 #' @references
-#' A. Meucci - "Exercises in Advanced Risk and Portfolio Management" \url{http://symmys.com/node/170}.
+#' A. Meucci - "Exercises in Advanced Risk and Portfolio Management" \url{https://www.arpm.co/articles/exercises-in-advanced-risk-and-portfolio-management/}.
 #'
 #' See Meucci's script for "BlackLittermanFormula.m"
 #'

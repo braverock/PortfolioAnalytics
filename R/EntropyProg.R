@@ -41,7 +41,7 @@
 #' @author Ram Ahluwalia \email{ram@@wingedfootcapital.com}
 #' @references 
 #' A. Meucci - "Fully Flexible Views: Theory and Practice". See page 22 for illustration of numerical implementation
-#' Symmys site containing original MATLAB source code \url{http://www.symmys.com}
+#' Symmys site containing original MATLAB source code \url{https://www.arpm.co/}
 #' NLOPT open-source optimization site containing background on algorithms \url{https://nlopt.readthedocs.io/en/latest/}
 #' We use the information-theoretic estimator of Kitamur and Stutzer (1997). 
 #' Reversing 'p' and 'p_' leads to the empirical likelihood" estimator of Qin and Lawless (1994). 
