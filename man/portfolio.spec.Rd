@@ -35,7 +35,7 @@ required argument to \code{portfolio.spec} is \code{assets}.
 }
 \details{
 The portfolio object contains the following elements:
-\itemize{
+\describe{
 \item{\code{assets}}{ named vector of the seed weights}
 \item{\code{category_labels}}{ character vector to categorize the assets by sector, geography, etc.}
 \item{\code{weight_seq}}{ sequence of weights used by \code{\link{random_portfolios}}. See \code{\link{generatesequence}}}

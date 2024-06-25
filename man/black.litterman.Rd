@@ -20,7 +20,7 @@ covariance is used if \code{Sigma=NULL}.}
 \item{Views}{a vector of length K of the views}
 }
 \value{
-\itemize{
+\describe{
   \item{BLMu:}{ posterior expected values}
   \item{BLSigma:}{ posterior covariance matrix}
 }

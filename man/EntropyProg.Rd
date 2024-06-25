@@ -24,7 +24,7 @@ EntropyProg(p, A = NULL, b = NULL, Aeq, beq, verbose = FALSE)
 }
 \value{
 a list with
-\itemize{ 
+\describe{ 
   \item{\code{p_}:}{ revised probabilities based on entropy pooling}
    \item{\code{optimizationPerformance}:}{ a list with status of optimization, 
    value, number of iterations, and sum of probabilities}

@@ -46,7 +46,7 @@ create an efficient frontier
 }
 \details{
 Currently there are 4 'types' supported to create an efficient frontier:
-\itemize{
+\describe{
   \item{"mean-var", "mean-sd", or "mean-StdDev":}{ This is a special case for 
   an efficient frontier that can be created by a QP solver.
   The \code{portfolio} object should have two

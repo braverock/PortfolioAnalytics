@@ -22,7 +22,7 @@ chart.GroupWeights(
 
 \item{\dots}{passthrough parameters to \code{\link{plot}}.}
 
-\item{grouping}{\itemize{
+\item{grouping}{\describe{
   \item{groups: }{group the weights by group constraints.}
   \item{category_labels: }{group the weights by category_labels in the \code{portfolio} object.}
 }}

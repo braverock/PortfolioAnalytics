@@ -3,7 +3,7 @@
 #' @param object object of class \code{optimize.portfolio}.
 #' @param \dots passthrough parameters to \code{\link{plot}}.
 #' @param grouping
-#' \itemize{
+#' \describe{
 #'   \item{groups: }{group the weights by group constraints.}
 #'   \item{category_labels: }{group the weights by category_labels in the \code{portfolio} object.}
 #' }

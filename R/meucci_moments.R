@@ -8,7 +8,7 @@
 #' @param R xts object of asset returns
 #' @param posterior_p vector of posterior probabilities
 #' @return a list with the first and second moments
-#' \itemize{
+#' \describe{
 #'   \item{\code{mu}: }{vector of expected returns}
 #'   \item{\code{sigma}: }{covariance matrix}
 #' }

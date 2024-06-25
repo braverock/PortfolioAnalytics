@@ -18,8 +18,8 @@ fn_map(weights, portfolio, relax = FALSE, verbose = FALSE, ...)
 \item{\dots}{any other passthru parameters}
 }
 \value{
-\itemize{
-\item{weights: }{vector of transformed weights meeting constraints.}
+\describe{
+\item{weights:}{vector of transformed weights meeting constraints.}
 \item{min: }{vector of min box constraints that may have been modified if relax=TRUE.}
 \item{max: }{vector of max box constraints that may have been modified if relax=TRUE.}
 \item{cLO: }{vector of lower bound group constraints that may have been modified if relax=TRUE.}

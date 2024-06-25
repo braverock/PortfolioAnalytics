@@ -18,7 +18,7 @@
 #' required argument to \code{portfolio.spec} is \code{assets}.
 #' 
 #' The portfolio object contains the following elements:
-#' \itemize{
+#' \describe{
 #' \item{\code{assets}}{ named vector of the seed weights}
 #' \item{\code{category_labels}}{ character vector to categorize the assets by sector, geography, etc.}
 #' \item{\code{weight_seq}}{ sequence of weights used by \code{\link{random_portfolios}}. See \code{\link{generatesequence}}}
@@ -138,7 +138,7 @@ is.portfolio <- function( x ) {
 #' @param portfolios list of portfolios created by
 #' \code{combine.portfolios} with corresponding regimes
 #' @return a \code{regime.portfolios} object with the following elements
-#' \itemize{
+#' \describe{
 #'     \item{regime: }{An xts object of the regime}
 #'     \item{portfolio: }{List of portfolios corresponding to the regime}
 #'   }

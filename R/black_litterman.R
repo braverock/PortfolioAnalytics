@@ -42,7 +42,7 @@ BlackLittermanFormula = function( Mu, Sigma, P, v, Omega)
 #' @param Sigma an N x N matrix of the prior covariance matrix. The sample 
 #' covariance is used if \code{Sigma=NULL}.
 #' @param Views a vector of length K of the views
-#' @return \itemize{
+#' @return \describe{
 #'   \item{BLMu:}{ posterior expected values}
 #'   \item{BLSigma:}{ posterior covariance matrix}
 #' }

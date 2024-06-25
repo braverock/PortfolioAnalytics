@@ -13,7 +13,7 @@ meucci.moments(R, posterior_p)
 }
 \value{
 a list with the first and second moments
-\itemize{
+\describe{
   \item{\code{mu}: }{vector of expected returns}
   \item{\code{sigma}: }{covariance matrix}
 }

@@ -506,7 +506,7 @@ optimize.portfolio_v1 <- function(
 #' problem will be solved via ROI using the quadprog solver.
 #' 
 #' The extension to ROI solves a limited type of convex optimization problems:
-#' \itemize{
+#' \describe{
 #' \item{Maxmimize portfolio return subject leverage, box, group, position limit, target mean return, and/or factor exposure constraints on weights.}
 #' \item{Minimize portfolio variance subject to leverage, box, group, turnover, and/or factor exposure constraints (otherwise known as global minimum variance portfolio).}
 #' \item{Minimize portfolio variance subject to leverage, box, group, and/or factor exposure constraints and a desired portfolio return.}
@@ -533,26 +533,26 @@ optimize.portfolio_v1 <- function(
 #' 
 #' The extension to CVXR solves a limited type of convex optimization problems:
 #' \itemize{
-#' \item{Maxmimize portfolio mean return subject leverage, box, group, and/or target mean return constraints}
-#' \item{Minimize portfolio variance subject to leverage, box, group, and/or target mean return constraints (otherwise known as global minimum variance portfolio).}
-#' \item{Maximize quadratic utility subject to leverage, box, group, and/or target mean return constraints and risk aversion parameter.
-#' (The default risk aversion is 1, and specified risk aversion could be given by \code{risk_aversion = 1}. 
-#' The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)}
-#' \item{Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
+#' \item Maxmimize portfolio mean return subject leverage, box, group, and/or target mean return constraints
+#' \item Minimize portfolio variance subject to leverage, box, group, and/or target mean return constraints (otherwise known as global minimum variance portfolio).
+#' \item Maximize quadratic utility subject to leverage, box, group, and/or target mean return constraints and risk aversion parameter.
+#' (The default risk aversion is 1, and specified risk aversion could be given by \code{risk_aversion = 1}.
+#' The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)
+#' \item Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
 #' (The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
-#' The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)}
-#' \item{Minimize portfolio EQS optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
+#' The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)
+#' \item Minimize portfolio EQS optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
 #' (The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
-#' The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)}
-#' \item{Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) subject to leverage, box, group, and/or target mean return constraints.
+#' The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)
+#' \item Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) subject to leverage, box, group, and/or target mean return constraints.
 #' It should be specified by \code{maxSR=TRUE} in \code{optimize.portfolio} with both mean and var/StdDev objectives.
-#' Otherwise, the default action is to maximize quadratic utility.}
-#' \item{Maximize portfolio mean return per unit ES (i.e. the ES ratio/STARR) subject to leverage, box, group, and/or target mean return constraints.
+#' Otherwise, the default action is to maximize quadratic utility.
+#' \item Maximize portfolio mean return per unit ES (i.e. the ES ratio/STARR) subject to leverage, box, group, and/or target mean return constraints.
 #' It could be specified by \code{maxSTARR=TRUE} or \code{ESratio=TRUE} in \code{optimize.portfolio} with both mean and ES objectives.
-#' The default action is to maximize ES ratio. If \code{maxSTARR=FALSE} or \code{ESratio=FALSE} is given, the action will be minimizing ES.}
-#' \item{Maximize portfolio mean return per unit EQS (i.e. the EQS ratio) subject to leverage, box, group, and/or target mean return constraints.
+#' The default action is to maximize ES ratio. If \code{maxSTARR=FALSE} or \code{ESratio=FALSE} is given, the action will be minimizing ES.
+#' \item Maximize portfolio mean return per unit EQS (i.e. the EQS ratio) subject to leverage, box, group, and/or target mean return constraints.
 #' It could be specified by \code{EQSratio=TRUE} in \code{optimize.portfolio} with both mean and EQS objectives.
-#' The default action is to maximize EQS ratio. If \code{EQSratio=FALSE} is given, the action will be minimizing EQS.}
+#' The default action is to maximize EQS ratio. If \code{EQSratio=FALSE} is given, the action will be minimizing EQS.
 #' }
 #' 
 #' Because these convex optimization problem are standardized, there is no need for a penalty term. 
@@ -581,7 +581,7 @@ optimize.portfolio_v1 <- function(
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' 
 #' @return a list containing the following elements
-#' \itemize{
+#' \describe{
 #'   \item{\code{weights}:}{ The optimal set weights.}
 #'   \item{\code{objective_measures}:}{ A list containing the value of each objective corresponding to the optimal weights.}
 #'   \item{\code{opt_values}:}{ A list containing the value of each objective corresponding to the optimal weights.}
@@ -599,10 +599,10 @@ optimize.portfolio_v1 <- function(
 #' desired solver for more information.
 #' 
 #' \code{optimize_method="random"}
-#' \itemize{
+#' \describe{
 #'   \item{\code{random_portfolios}:}{ A matrix of the random portfolios.}
 #'   \item{\code{random_portfolio_objective_results}:}{ A list of the following elements for each random portfolio.}
-#'   \itemize{
+#'   \describe{
 #'     \item{\code{out}:}{ The output value of the solver corresponding to the random portfolio weights.}
 #'     \item{\code{weights}:}{ The weights of the random portfolio.}
 #'     \item{\code{objective_measures}:}{ A list of each objective measure corresponding to the random portfolio weights.}
@@ -610,42 +610,42 @@ optimize.portfolio_v1 <- function(
 #' }
 #' 
 #' \code{optimize_method="DEoptim"}
-#' \itemize{
+#' \describe{
 #'   \item{\code{DEoutput:}}{ A list (of length 2) containing the following elements:}
 #'   \itemize{
-#'     \item{\code{optim}}
-#'     \item{\code{member}}
+#'     \item \code{optim}
+#'     \item \code{member}
 #'   }
 #'   \item{\code{DEoptim_objective_results}:}{ A list containing the following elements for each intermediate population.}
 #'   \itemize{
-#'     \item{\code{out}:}{ The output of the solver.}
-#'     \item{\code{weights}:}{ Population weights.}
-#'     \item{\code{init_weights}:}{ Initial population weights.}
-#'     \item{\code{objective_measures}:}{ A list of each objective measure corresponding to the weights}
+#'     \item \code{out}: The output of the solver.
+#'     \item \code{weights}: Population weights.
+#'     \item \code{init_weights}: Initial population weights.
+#'     \item \code{objective_measures}: A list of each objective measure corresponding to the weights
 #'   }
 #' }
 #' 
 #' \code{optimize_method="pso"}
 #' \itemize{
-#'   \item{\code{PSOoutput}:}{ A list containing the following elements:}
+#'   \item \code{PSOoutput}: A list containing the following elements:
 #'   \itemize{
-#'     \item{par}
-#'     \item{value}
-#'     \item{counts}
-#'     \item{convergence}
-#'     \item{message}
-#'     \item{stats}
+#'     \item par
+#'     \item value 
+#'     \item counts 
+#'     \item convergence
+#'     \item message
+#'     \item stats
 #'   }
 #' }
 #' 
 #' \code{optimize_method="GenSA"}
 #' \itemize{
-#'   \item{\code{GenSAoutput:}}{ A list containing the following elements:}
+#'   \item \code{GenSAoutput}: A list containing the following elements:
 #'   \itemize{
-#'     \item{value}
-#'     \item{par}
-#'     \item{trace.mat}
-#'     \item{counts}
+#'     \item value
+#'     \item par
+#'     \item trace.mat
+#'     \item counts
 #'   }
 #' }
 #' 
@@ -3116,20 +3116,20 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' The user should be aware of the following behavior when both 
 #' \code{training_period} and \code{rolling_window} are specified and have 
 #' different values
-#' \itemize{
+#' \describe{
 #'   \item{\code{training_period < rolling_window}: }{For example, if you have 
 #'   \code{rolling_window=60}, \code{training_period=50}, and the periodicity 
 #'   of the data is the same as the rebalance frequency (i.e. monthly data with 
 #'   \code{rebalance_on="months")} then the returns data used in the optimization 
 #'   at each iteration are as follows:
 #'   \itemize{
-#'   \item{1: R[1:50,]}
-#'   \item{2: R[1:51,]}
-#'   \item{...}
-#'   \item{11: R[1:60,]}
-#'   \item{12: R[1:61,]}
-#'   \item{13: R[2:62,]}
-#'   \item{...}
+#'   \item 1: R[1:50,]
+#'   \item 2: R[1:51,]
+#'   \item ...
+#'   \item 11: R[1:60,]
+#'   \item 12: R[1:61,]
+#'   \item 13: R[2:62,]
+#'   \item ...
 #'   }
 #'   This results in a growing window for several optimizations initially while
 #'   the endpoint iterator (i.e. \code{[50, 51, ...]}) is less than the 
@@ -3166,7 +3166,7 @@ optimize.portfolio.rebalancing_v1 <- function(R,constraints,optimize_method=c("D
 #' of the rolling window, the default of NULL will run the optimization 
 #' using the data from inception.
 #' @return a list containing the following elements
-#' \itemize{
+#' \describe{
 #'   \item{\code{portfolio}:}{ The portfolio object.}
 #'   \item{\code{R}:}{ The asset returns.}
 #'   \item{\code{call}:}{ The function call.}

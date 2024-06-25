@@ -26,7 +26,7 @@
 #' @param k number of factors to use
 #' @param \dots additional arguments passed to \code{prcomp}
 #' @return
-#' #' \itemize{
+#' #' \describe{
 #' \item{factor_loadings}{ N x k matrix of factor loadings (i.e. betas)}
 #' \item{factor_realizations}{ m x k matrix of factor realizations}
 #' \item{residuals}{ m x N matrix of model residuals representing idiosyncratic 

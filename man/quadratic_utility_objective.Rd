@@ -15,7 +15,7 @@ quadratic_utility_objective(risk_aversion = 1, target = NULL, enabled = TRUE)
 }
 \value{
 a list of two elements
-\itemize{
+\describe{
   \item{\code{return_objective}}
   \item{\code{portfolio_risk_objective}}
 }

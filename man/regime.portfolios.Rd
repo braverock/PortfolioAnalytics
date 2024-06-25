@@ -14,7 +14,7 @@ regime.portfolios(regime, portfolios)
 }
 \value{
 a \code{regime.portfolios} object with the following elements
-\itemize{
+\describe{
     \item{regime: }{An xts object of the regime}
     \item{portfolio: }{List of portfolios corresponding to the regime}
   }

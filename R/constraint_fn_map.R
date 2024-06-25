@@ -24,8 +24,8 @@
 #' @param verbose print error messages for debuggin purposes
 #' @param \dots any other passthru parameters
 #' @return 
-#' \itemize{
-#' \item{weights: }{vector of transformed weights meeting constraints.}
+#' \describe{
+#' \item{weights:}{vector of transformed weights meeting constraints.}
 #' \item{min: }{vector of min box constraints that may have been modified if relax=TRUE.}
 #' \item{max: }{vector of max box constraints that may have been modified if relax=TRUE.}
 #' \item{cLO: }{vector of lower bound group constraints that may have been modified if relax=TRUE.}

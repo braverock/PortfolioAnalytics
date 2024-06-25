@@ -144,7 +144,7 @@ set.portfolio.moments_v1 <- function(R, constraints, momentargs=NULL,...){
 #' Set portfolio moments for use by lower level optimization functions. Currently
 #' three methods for setting the moments are available
 #' 
-#' \itemize{
+#' \describe{
 #'   \item{sample: }{sample estimates are used for the moments}
 #'   \item{boudt: }{estimate the second, third, and fourth moments using a 
 #'   statistical factor model based on the work of Kris Boudt.}

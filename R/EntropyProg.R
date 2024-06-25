@@ -33,7 +33,7 @@
 #' ' \deqn{ \tilde{p}  \equiv  argmin_{Fx \leq f, Hx  \equiv  h}  \big\{ \sum_1^J  x_{j}  \big(ln \big( x_{j} \big) - ln \big( p_{j} \big) \big)  \big\} 
 #' \\ \ell  \big(x,  \lambda,  \nu \big)  \equiv  x'  \big(ln \big(x\big) - ln \big(p\big) \big) +   \lambda' \big(Fx - f\big)  +   \nu' \big(Hx - h\big)}
 #' @return a list with
-#' \itemize{ 
+#' \describe{ 
 #'   \item{\code{p_}:}{ revised probabilities based on entropy pooling}
 #'    \item{\code{optimizationPerformance}:}{ a list with status of optimization, 
 #'    value, number of iterations, and sum of probabilities}
