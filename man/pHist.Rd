@@ -24,7 +24,7 @@ a list with
 Generates histogram
 }
 \references{
-\url{http://www.symmys.com}
+\url{https://www.arpm.co/}
 See Meucci script pHist.m used for plotting
 }
 \author{

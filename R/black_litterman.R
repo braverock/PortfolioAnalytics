@@ -48,7 +48,7 @@ BlackLittermanFormula = function( Mu, Sigma, P, v, Omega)
 #' }
 #' @author Ross Bennett, Xavier Valls
 #' @references
-#' A. Meucci - "Exercises in Advanced Risk and Portfolio Management" \url{http://symmys.com/node/170}.
+#' A. Meucci - "Exercises in Advanced Risk and Portfolio Management" \url{https://www.arpm.co/articles/exercises-in-advanced-risk-and-portfolio-management/}.
 #' @seealso \code{\link{BlackLittermanFormula}}
 #' @export
 black.litterman <- function(R, P, Mu=NULL, Sigma=NULL, Views=NULL){

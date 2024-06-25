@@ -36,7 +36,7 @@ ac.ranking(R, c(2, 3, 1, 4))
 }
 \references{
 R. Almgren and N. Chriss, "Portfolios from Sorts" 
-\url{http://papers.ssrn.com/sol3/papers.cfm?abstract_id=720041}
+\url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=720041}
 }
 \seealso{
 \code{\link{centroid.complete.mc}} \code{\link{centroid.sectors}}

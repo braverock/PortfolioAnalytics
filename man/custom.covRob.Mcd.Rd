@@ -20,5 +20,5 @@ mean vector and robust covariance matrix for a portfolio's asset returns
 }
 \details{
 For parameter details, see covMcd in the robustbase Reference
-Manual at \url{https://cran.r-project.org/web/packages/robustbase/index.html}
+Manual at \url{https://CRAN.R-project.org/package=robustbase}
 }

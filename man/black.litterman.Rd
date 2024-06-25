@@ -33,7 +33,7 @@ This function is largely based on the work of Xavier Valls to port
 the matlab code of Attilio Meucci to \R as documented in the Meucci package.
 }
 \references{
-A. Meucci - "Exercises in Advanced Risk and Portfolio Management" \url{http://symmys.com/node/170}.
+A. Meucci - "Exercises in Advanced Risk and Portfolio Management" \url{https://www.arpm.co/articles/exercises-in-advanced-risk-and-portfolio-management/}.
 }
 \seealso{
 \code{\link{BlackLittermanFormula}}

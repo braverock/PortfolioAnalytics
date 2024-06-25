@@ -34,7 +34,7 @@ p <- rep(1 / nrow(R), nrow(R))
 meucci.ranking(R, p, c(2, 3, 1, 4))
 }
 \references{
-A. Meucci, "Fully Flexible Views: Theory and Practice" \url{http://www.symmys.com/node/158}
+A. Meucci, "Fully Flexible Views: Theory and Practice" \url{https://www.arpm.co/articles/fully-flexible-views-theory-and-practice/}
 See Meucci script for "RankingInformation/ViewRanking.m"
 }
 \seealso{

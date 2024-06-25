@@ -19,7 +19,7 @@
 #' @seealso \code{\link{meucci.moments}}
 #' 
 #' @references 
-#' A. Meucci, "Fully Flexible Views: Theory and Practice" \url{http://www.symmys.com/node/158}
+#' A. Meucci, "Fully Flexible Views: Theory and Practice" \url{https://www.arpm.co/articles/fully-flexible-views-theory-and-practice/}
 #' See Meucci script for "RankingInformation/ViewRanking.m"
 #' @examples
 #' data(edhec)

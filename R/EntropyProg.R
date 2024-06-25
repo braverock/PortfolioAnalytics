@@ -42,7 +42,7 @@
 #' @references 
 #' A. Meucci - "Fully Flexible Views: Theory and Practice". See page 22 for illustration of numerical implementation
 #' Symmys site containing original MATLAB source code \url{http://www.symmys.com}
-#' NLOPT open-source optimization site containing background on algorithms \url{http://ab-initio.mit.edu/wiki/index.php/NLopt}
+#' NLOPT open-source optimization site containing background on algorithms \url{https://nlopt.readthedocs.io/en/latest/}
 #' We use the information-theoretic estimator of Kitamur and Stutzer (1997). 
 #' Reversing 'p' and 'p_' leads to the empirical likelihood" estimator of Qin and Lawless (1994). 
 #' See Robertson et al, "Forecasting Using Relative Entropy" (2002) for more theory
@@ -243,7 +243,7 @@ EntropyProg = function( p , A = NULL , b = NULL , Aeq , beq, verbose=FALSE )
 #'             x   the midpoints of the nBins intervals
 #'
 #' @references 
-#' \url{http://www.symmys.com}
+#' \url{https://www.arpm.co/}
 #' See Meucci script pHist.m used for plotting
 #' @author Ram Ahluwalia \email{ram@@wingedfootcapital.com} and Xavier Valls \email{flamejat@@gmail.com}
 pHist = function( X , p , nBins, freq = FALSE )    
