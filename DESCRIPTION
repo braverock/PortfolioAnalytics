@@ -49,8 +49,6 @@ Suggests:
     RobStatTM,
     PCRA,
     R.rsp
-Remotes:
-    git::https://github.com/robustport/PCRA.git
 VignetteBuilder: R.rsp
 Imports:
     methods,
