@@ -94,7 +94,7 @@ chart.GroupWeights <- function(object,  ..., grouping=c("groups", "category"), p
 #' @param object object of class \code{optimize.portfolio}
 #' @param ... passthrough parameters to \code{\link{plot}}
 #' @param grouping
-#' \itemize{
+#' \describe{
 #'   \item{groups: }{group the weights by group constraints}
 #'   \item{category_labels: }{group the weights by category_labels in portfolio object}
 #' }
