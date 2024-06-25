@@ -456,9 +456,9 @@ minmax_objective <- function(name, target=NULL, arguments=NULL, multiplier=1, en
 #' @param target target mean return value
 #' @param enabled TRUE/FALSE, default enabled=TRUE
 #' @return a list of two elements
-#' \describe{
-#'   \item{\code{return_objective}}
-#'   \item{\code{portfolio_risk_objective}}
+#' \itemize{
+#'   \item \code{return_objective}
+#'   \item \code{portfolio_risk_objective}
 #' }
 #' @author Ross Bennett
 #' @export
