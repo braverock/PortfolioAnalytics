@@ -31,19 +31,19 @@ This is the main function for adding and/or updating constraints to the \code{\l
 }
 \details{
 The following constraint types may be specified:
-\describe{
- \item{\code{weight_sum}, \code{weight}, \code{leverage}}{ Specify constraint on the sum of the weights, see \code{\link{weight_sum_constraint}} }
- \item{\code{full_investment}}{ Special case to set \code{min_sum=1} and \code{max_sum=1} of weight sum constraints }
- \item{\code{dollar_neutral}, \code{active}}{ Special case to set \code{min_sum=0} and \code{max_sum=0} of weight sum constraints }
- \item{\code{box}}{ box constraints for the individual asset weights, see \code{\link{box_constraint}} }
- \item{\code{long_only}}{ Special case to set \code{min=0} and \code{max=1} of box constraints }
- \item{\code{group}}{ specify the sum of weights within groups and the number of assets with non-zero weights in groups, see \code{\link{group_constraint}} }
- \item{\code{turnover}}{ Specify a constraint for target turnover. Turnover is calculated from a set of initial weights, see \code{\link{turnover_constraint}} }
- \item{\code{diversification}}{ target diversification of a set of weights, see \code{\link{diversification_constraint}} }
- \item{\code{position_limit}}{ Specify the number of non-zero, long, and/or short positions, see \code{\link{position_limit_constraint}} }
- \item{\code{return}}{ Specify the target mean return, see \code{\link{return_constraint}}}
- \item{\code{factor_exposure}}{ Specify risk factor exposures, see \code{\link{factor_exposure_constraint}}}
- \item{\code{leverage_exposure}}{ Specify a maximum leverage exposure, see \code{\link{leverage_exposure_constraint}}}
+\itemize{
+\item{\code{weight_sum}, \code{weight}, \code{leverage}}{ Specify constraint on the sum of the weights, see \code{\link{weight_sum_constraint}} }
+\item{\code{full_investment}}{ Special case to set \code{min_sum=1} and \code{max_sum=1} of weight sum constraints }
+\item{\code{dollar_neutral}, \code{active}}{ Special case to set \code{min_sum=0} and \code{max_sum=0} of weight sum constraints }
+\item{\code{box}}{ box constraints for the individual asset weights, see \code{\link{box_constraint}} }
+\item{\code{long_only}}{ Special case to set \code{min=0} and \code{max=1} of box constraints }
+\item{\code{group}}{ specify the sum of weights within groups and the number of assets with non-zero weights in groups, see \code{\link{group_constraint}} }
+\item{\code{turnover}}{ Specify a constraint for target turnover. Turnover is calculated from a set of initial weights, see \code{\link{turnover_constraint}} }
+\item{\code{diversification}}{ target diversification of a set of weights, see \code{\link{diversification_constraint}} }
+\item{\code{position_limit}}{ Specify the number of non-zero, long, and/or short positions, see \code{\link{position_limit_constraint}} }
+\item{\code{return}}{ Specify the target mean return, see \code{\link{return_constraint}}}
+\item{\code{factor_exposure}}{ Specify risk factor exposures, see \code{\link{factor_exposure_constraint}}}
+\item{\code{leverage_exposure}}{ Specify a maximum leverage exposure, see \code{\link{leverage_exposure_constraint}}}
 }
 }
 \examples{

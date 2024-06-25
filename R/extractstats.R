@@ -704,7 +704,7 @@ extractObjectiveMeasures.opt.rebal.list <- function(object, ...){
 #' @param object object of class \code{optimize.portfolio}
 #' @param ... passthrough parameters. Not currently used
 #' @return a list with two elements
-#' \itemize{
+#' \describe{
 #'   \item{weights: }{Optimal set of weights from the \code{optimize.portfolio} object}
 #'   \item{category_weights: }{Weights by category if category_labels are supplied in the \code{portfolio} object}
 #'   \item{group_weights: }{Weights by group if group is a constraint type}

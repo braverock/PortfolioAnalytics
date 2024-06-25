@@ -21,7 +21,7 @@ barplotGroupWeights(
 
 \item{...}{passthrough parameters to \code{\link{plot}}}
 
-\item{grouping}{\itemize{
+\item{grouping}{\describe{
   \item{groups: }{group the weights by group constraints}
   \item{category_labels: }{group the weights by category_labels in portfolio object}
 }}
