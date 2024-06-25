@@ -41,6 +41,6 @@ jobs:
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
       - name: Install V8 package
-        run: install.packages('V8')
+        run: Rscript -e "install.packages('V8')"
       - name: Check package
         run: R CMD build --compact-vignettes=both . && R CMD check *tar.gz --as-cran
