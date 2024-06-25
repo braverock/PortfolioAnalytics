@@ -33,7 +33,14 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v2
       - name: add TeX deps
         run: tlmgr install grfext
+      - name: Install system dependencies
+        run: 
+          sudo apt-get update
+          sudo apt-get install -y tidy
+          sudo apt-get install -y libv8-dev
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
+      - name: Install V8 package
+        run: install.packages('V8')
       - name: Check package
         run: R CMD build --compact-vignettes=both . && R CMD check *tar.gz --as-cran
