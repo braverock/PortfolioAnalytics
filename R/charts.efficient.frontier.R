@@ -828,11 +828,11 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
   }
   if(is.null(guideline)) guideline <- ifelse(length(match.col) == 2, TRUE, FALSE)
   if(guideline){
-    lines(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), lty=3, col=4, lwd=1)
+    lines(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), lty=3, col=1, lwd=1)
     points(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), pch=pch.assets, cex=cex.assets)
-    x_diff = out$frontier[,1] - out$frontier[1,m.p]
+    x_diff = abs(out$frontier[,1] - out$frontier[1,m.p])
     x_index = min(abs(out$frontier[,1] - out$frontier[1,m.p]))
-    lines(x=c(out$frontier[which(x_diff == x_index),1], out$frontier[1,m.p]), y = c(out$frontier[which(x_diff == x_index),2], out$frontier[1,2]), lty=3, col=6, lwd=1)
+    lines(x=c(out$frontier[which(x_diff == x_index),1], out$frontier[1,m.p]), y = c(out$frontier[which(x_diff == x_index),2], out$frontier[1,2]), lty=3, col=1, lwd=1)
     points(x=c(out$frontier[which(x_diff == x_index),1], out$frontier[1,m.p]), y = c(out$frontier[which(x_diff == x_index),2], out$frontier[1,2]), pch=pch.assets, cex=cex.assets)
     if(labels.assets){
       text(out$frontier[1,1], out$frontier[1,2], labels = paste("(", round(out$frontier[1,1], 4), ",", round(out$frontier[1,2], 4), ")"), pos = 1, cex = cex.assets)
@@ -841,7 +841,7 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
     }
     legend.labels <- append(legend.labels, paste("risk difference (bps)", round((out$frontier[1,m.p] - out$frontier[1,1]) * 100, 2)))
     legend.labels <- append(legend.labels, paste("mean difference (bps)", round((out$frontier[which(x_diff == x_index),1] - out$frontier[1,2]) * 100, 2)))
-    col = c(col, 4, 6)
+    col = c(col, 1, 1)
     lty = c(lty, 3, 3)
     lwd = c(lwd, 1, 1)
   }
