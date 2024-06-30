@@ -75,7 +75,6 @@ chart.Weights.ROI <- function(object, ..., neighbors = NULL, main="Weights", las
 
 #' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.ROI
-#' @S3method chart.Weights optimize.portfolio.ROI
 #' @export
 chart.Weights.optimize.portfolio.ROI <- chart.Weights.ROI
 
@@ -147,7 +146,6 @@ chart.Scatter.ROI <- function(object, ..., neighbors=NULL, return.col="mean", ri
 
 #' @rdname chart.RiskReward
 #' @method chart.RiskReward optimize.portfolio.ROI
-#' @S3method chart.RiskReward optimize.portfolio.ROI
 #' @export
 chart.RiskReward.optimize.portfolio.ROI <- chart.Scatter.ROI
 
@@ -165,7 +163,6 @@ charts.ROI <- function(ROI, rp=FALSE, risk.col="ES", return.col="mean", chart.as
 
 #' @rdname plot
 #' @method plot optimize.portfolio.ROI
-#' @S3method plot optimize.portfolio.ROI
 #' @export
 plot.optimize.portfolio.ROI <- function(x, ..., rp=FALSE, risk.col="ES", return.col="mean", chart.assets=FALSE, element.color="darkgray", neighbors=NULL, main="ROI.Portfolios", xlim=NULL, ylim=NULL){
   charts.ROI(ROI=x, rp=rp, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, main=main, xlim=xlim, ylim=ylim, ...)

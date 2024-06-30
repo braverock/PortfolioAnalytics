@@ -21,7 +21,7 @@
 #' @author Ross Bennett
 #' @rdname print.optimize.portfolio.rebalancing
 #' @method print optimize.portfolio.rebalancing
-#' @S3method print optimize.portfolio.rebalancing
+
 #' @export
 print.optimize.portfolio.rebalancing <- function(x, ..., digits=4){
   cat(rep("*", 50) ,"\n", sep="")
@@ -99,7 +99,7 @@ summary.optimize.portfolio.rebalancing <- function(object, ...) {
 #' @seealso \code{\link{summary.optimize.portfolio.rebalancing}}
 #' @author Ross Bennett
 #' @method print summary.optimize.portfolio.rebalancing
-#' @S3method print summary.optimize.portfolio.rebalancing
+
 #' @export
 print.summary.optimize.portfolio.rebalancing <- function(x, ..., digits=4){
   cat(rep("*", 50) ,"\n", sep="")
@@ -149,7 +149,7 @@ print.summary.optimize.portfolio.rebalancing <- function(x, ..., digits=4){
 #' @seealso \code{\link{portfolio.spec}}
 #' @author Ross Bennett
 #' @method print portfolio
-#' @S3method print portfolio
+
 #' @export
 print.portfolio <- function(x, ...){
   if(!is.portfolio(x)) stop("object passed in is not of class 'portfolio'")
@@ -348,7 +348,7 @@ summary.portfolio <- function(object, ...){
 #' @param \dots any other passthru parameters
 #' @author Ross Bennett
 #' @method print constraint
-#' @S3method print constraint
+
 #' @export
 print.constraint <- function(x, ...){
   print.default(x, ...)
@@ -365,7 +365,7 @@ print.constraint <- function(x, ...){
 #' @author Ross Bennett
 #' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.ROI
-#' @S3method print optimize.portfolio.ROI
+
 #' @export
 print.optimize.portfolio.ROI <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
@@ -407,7 +407,7 @@ print.optimize.portfolio.ROI <- function(x, ..., digits=4){
 
 #' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.CVXR
-#' @S3method print optimize.portfolio.CVXR
+
 #' @export
 print.optimize.portfolio.CVXR <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
@@ -449,7 +449,7 @@ print.optimize.portfolio.CVXR <- function(x, ..., digits=4){
 
 #' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.random
-#' @S3method print optimize.portfolio.random
+
 #' @export
 print.optimize.portfolio.random <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
@@ -491,7 +491,7 @@ print.optimize.portfolio.random <- function(x, ..., digits=4){
 
 #' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.DEoptim
-#' @S3method print optimize.portfolio.DEoptim
+
 #' @export
 print.optimize.portfolio.DEoptim <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
@@ -533,7 +533,7 @@ print.optimize.portfolio.DEoptim <- function(x, ..., digits=4){
 
 #' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.GenSA
-#' @S3method print optimize.portfolio.GenSA
+
 #' @export
 print.optimize.portfolio.GenSA <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
@@ -575,7 +575,7 @@ print.optimize.portfolio.GenSA <- function(x, ..., digits=4){
 
 #' @rdname print.optimize.portfolio
 #' @method print optimize.portfolio.pso
-#' @S3method print optimize.portfolio.pso
+
 #' @export
 print.optimize.portfolio.pso <- function(x, ..., digits=4){
   cat(rep("*", 35) ,"\n", sep="")
@@ -623,7 +623,7 @@ print.optimize.portfolio.pso <- function(x, ..., digits=4){
 #' @seealso \code{\link{summary.optimize.portfolio}}
 #' @author Ross Bennett
 #' @method print summary.optimize.portfolio
-#' @S3method print summary.optimize.portfolio
+
 #' @export
 print.summary.optimize.portfolio <- function(x, ...){
   
@@ -826,7 +826,7 @@ print.summary.optimize.portfolio <- function(x, ...){
 #' @seealso \code{\link{optimize.portfolio}}
 #' @author Ross Bennett
 #' @method summary optimize.portfolio
-#' @S3method summary optimize.portfolio
+
 #' @export
 summary.optimize.portfolio <- function(object, ...){
   
@@ -958,7 +958,7 @@ summary.optimize.portfolio <- function(object, ...){
 #' @seealso \code{\link{create.EfficientFrontier}}
 #' @author Ross Bennett
 #' @method print efficient.frontier
-#' @S3method print efficient.frontier
+
 #' @export
 print.efficient.frontier <- function(x, ...){
   if(!inherits(x, "efficient.frontier")) stop("object passed in is not of class 'efficient.frontier'")
@@ -1019,7 +1019,7 @@ summary.efficient.frontier <- function(object, ..., digits=3){
 }
 
 #' @method print portfolio.list
-#' @S3method print portfolio.list
+
 #' @export
 print.portfolio.list <- function(x, ...){
   for(i in 1:length(x)){
@@ -1029,7 +1029,7 @@ print.portfolio.list <- function(x, ...){
 }
 
 #' @method print opt.list
-#' @S3method print opt.list
+
 #' @export
 print.opt.list <- function(x, ...){
   for(i in 1:length(x)){
@@ -1039,7 +1039,7 @@ print.opt.list <- function(x, ...){
 }
 
 #' @method print opt.rebal.list
-#' @S3method print opt.rebal.list
+
 #' @export
 print.opt.rebal.list <- function(x, ...){
   for(i in 1:length(x)){
@@ -1049,7 +1049,7 @@ print.opt.rebal.list <- function(x, ...){
 }
 
 #' @method print regime.portfolios
-#' @S3method print regime.portfolios
+
 #' @export
 print.regime.portfolios <- function(x, ...){
   
@@ -1067,7 +1067,7 @@ print.regime.portfolios <- function(x, ...){
 }
 
 #' @method summary optimize.portfolio.parallel
-#' @S3method summary optimize.portfolio.parallel
+
 #' @export
 summary.optimize.portfolio.parallel <- function(object, ...){
   out <- list()
@@ -1086,7 +1086,7 @@ summary.optimize.portfolio.parallel <- function(object, ...){
 }
 
 #' @method print optimize.portfolio.parallel
-#' @S3method print optimize.portfolio.parallel
+
 #' @export
 print.optimize.portfolio.parallel <- function(x, ..., probs = c(0.025, 0.975)){
   cat(rep("*", 35) ,"\n", sep="")

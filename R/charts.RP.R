@@ -90,7 +90,6 @@ chart.Weights.RP <- function(object, ..., neighbors = NULL, main="Weights", las 
 
 #' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.random
-#' @S3method chart.Weights optimize.portfolio.random
 #' @export
 chart.Weights.optimize.portfolio.random <- chart.Weights.RP
 
@@ -259,7 +258,6 @@ chart.Scatter.RP <- function(object, ..., neighbors = NULL, return.col='mean', r
 
 #' @rdname chart.RiskReward
 #' @method chart.RiskReward optimize.portfolio.random
-#' @S3method chart.RiskReward optimize.portfolio.random
 #' @export
 chart.RiskReward.optimize.portfolio.random <- chart.Scatter.RP
 
@@ -279,7 +277,6 @@ charts.RP <- function(RP, risk.col, return.col, chart.assets=FALSE, neighbors=NU
 
 #' @rdname plot
 #' @method plot optimize.portfolio.random
-#' @S3method plot optimize.portfolio.random
 #' @export
 plot.optimize.portfolio.random <- function(x, ..., return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, xlim=NULL, ylim=NULL, main='optimized portfolio plot') {
     charts.RP(RP=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
@@ -288,7 +285,6 @@ plot.optimize.portfolio.random <- function(x, ..., return.col='mean', risk.col='
 
 #' @rdname plot
 #' @method plot optimize.portfolio
-#' @S3method plot optimize.portfolio
 #' @export
 plot.optimize.portfolio <- function(x, ...,  return.col='mean', risk.col='ES',  chart.assets=FALSE, neighbors=NULL, xlim=NULL, ylim=NULL, main='optimized portfolio plot') {
     charts.RP(RP=x, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)

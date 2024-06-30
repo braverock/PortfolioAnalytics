@@ -75,7 +75,6 @@ chart.Weights.pso <- function(object, ..., neighbors = NULL, main="Weights", las
 
 #' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.pso
-#' @S3method chart.Weights optimize.portfolio.pso
 #' @export
 chart.Weights.optimize.portfolio.pso <- chart.Weights.pso
 
@@ -206,7 +205,6 @@ chart.Scatter.pso <- function(object, ..., neighbors=NULL, return.col="mean", ri
 
 #' @rdname chart.RiskReward
 #' @method chart.RiskReward optimize.portfolio.pso
-#' @S3method chart.RiskReward optimize.portfolio.pso
 #' @export
 chart.RiskReward.optimize.portfolio.pso <- chart.Scatter.pso
 
@@ -225,7 +223,6 @@ charts.pso <- function(pso, return.col="mean", risk.col="ES", chart.assets=FALSE
 
 #' @rdname plot
 #' @method plot optimize.portfolio.pso
-#' @S3method plot optimize.portfolio.pso
 #' @export
 plot.optimize.portfolio.pso <- function(x, ..., return.col="mean", risk.col="ES", chart.assets=FALSE, cex.axis=0.8, element.color="darkgray", neighbors=NULL, main="PSO.Portfolios", xlim=NULL, ylim=NULL){
   charts.pso(pso=x, return.col=return.col, risk.col=risk.col, chart.assets=FALSE, cex.axis=cex.axis, element.color=element.color, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...=...)

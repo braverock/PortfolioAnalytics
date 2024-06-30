@@ -97,7 +97,6 @@ barplotWeights <- function(object, ..., main="Weights", las=3, xlab=NULL, cex.la
 
 #' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.rebalancing
-#' @S3method chart.Weights optimize.portfolio.rebalancing
 #' @export
 chart.Weights.optimize.portfolio.rebalancing <- function(object, ..., main="Weights"){
   rebal.weights <- extractWeights(object)
