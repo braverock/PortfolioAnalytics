@@ -43,7 +43,7 @@ This is only used for objects of class \code{optimize.portfolio}}
 \item{match.col}{string name of column to use for portfolio object.
 Must match the name of an objective.}
 
-\item{guideline}{custom the guideline, otherwise generate default guideline}
+\item{guideline}{show the risk difference and mean difference between efficient frontiers}
 
 \item{main}{title used in the plot.}
 
@@ -73,11 +73,11 @@ Must match the name of an objective.}
 
 \item{cex.assets}{A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.}
 
-\item{col}{vector of colors with length equal to the number of portfolios in \code{portfolio_list}.}
+\item{col}{vector of colors with length equal to the number of portfolios in \code{portfolio_list}. Add two more to customize guideline color.}
 
-\item{lty}{vector of line types with length equal to the number of portfolios in \code{portfolio_list}.}
+\item{lty}{vector of line types with length equal to the number of portfolios in \code{portfolio_list}. Add two more to customize guideline type.}
 
-\item{lwd}{vector of line widths with length equal to the number of portfolios in \code{portfolio_list}.}
+\item{lwd}{vector of line widths with length equal to the number of portfolios in \code{portfolio_list}. Add two more to customize guideline width.}
 }
 \description{
 Overlay the efficient frontiers of different minRisk portfolio objects on a single plot.
