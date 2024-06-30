@@ -12,7 +12,7 @@ MycovRobMcd(
   scalefn = "hrv2012",
   maxcsteps = 200,
   seed = NULL,
-  tolSolve = 0.00000000000001,
+  tolSolve = 1e-14,
   wgtFUN = "01.original",
   beta,
   use.correction = TRUE

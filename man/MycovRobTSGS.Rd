@@ -7,7 +7,7 @@
 MycovRobTSGS(
   filter = c("UBF-DDC", "UBF", "DDC", "UF"),
   partial.impute = FALSE,
-  tol = 0.0001,
+  tol = 1e-04,
   maxiter = 150,
   loss = c("bisquare", "rocke"),
   init = c("emve", "qc", "huber", "imputed", "emve_c")
