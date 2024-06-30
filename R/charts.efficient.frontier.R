@@ -747,7 +747,7 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
 #' This is only used for objects of class \code{optimize.portfolio}
 #' @param match.col string name of column to use for portfolio object.
 #' Must match the name of an objective.
-#' @param guideline custom the guideline, otherwise generate default guideline
+#' @param guideline show the risk difference and mean difference between efficient frontiers
 #' @param plot_type define the plot_type, default is "l"
 #' @param main title used in the plot.
 #' @param cex.axis the magnification to be used for sizing the axis text relative to the current setting of 'cex', similar to \code{\link{plot}}.
@@ -762,12 +762,15 @@ chart.EfficientFrontierOverlay <- function(R, portfolio_list, type, n.portfolios
 #' @param labels.assets TRUE/FALSE to include the asset names in the plot.
 #' @param pch.assets plotting character of the assets, same as in \code{\link{plot}}.
 #' @param cex.assets A numerical value giving the amount by which the asset points and labels should be magnified relative to the default.
-#' @param col vector of colors with length equal to the number of portfolios in \code{portfolio_list}.
-#' @param lty vector of line types with length equal to the number of portfolios in \code{portfolio_list}.
-#' @param lwd vector of line widths with length equal to the number of portfolios in \code{portfolio_list}.
+#' @param col vector of colors with length equal to the number of portfolios in \code{portfolio_list}. Add two more to customize guideline color.
+#' @param lty vector of line types with length equal to the number of portfolios in \code{portfolio_list}. Add two more to customize guideline type.
+#' @param lwd vector of line widths with length equal to the number of portfolios in \code{portfolio_list}. Add two more to customize guideline width.
 #' @author Xinran Zhao
 #' @export
 chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios=25, match.col=c("StdDev", "ES"), guideline=NULL, main="Efficient Frontiers", plot_type = "l", cex.axis=0.5, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., chart.assets=TRUE, labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
+  # show digits
+  options(scipen = 999)
+  
   # store in out
   out <- create.EfficientFrontier(R=R, portfolio=portfolio, type="mean-risk", risk_type=risk_type, compare_port = match.col, n.portfolios = n.portfolios, ...)
   n.p = dim(out$frontier)[1]
@@ -792,10 +795,17 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
   axis(2, cex.axis = cex.axis, col = element.color)
   box(col = element.color)
   
-  # set some basic plot parameters
-  if(is.null(col)) col <- 1:length(match.col)
-  if(is.null(lty)) lty <- 1:length(match.col)
-  if(is.null(lwd)) lwd <- rep(1, length(match.col))
+  if(is.null(guideline)) guideline <- ifelse(length(match.col) == 2, TRUE, FALSE)
+  if(guideline){
+    # set some basic plot parameters
+    if(is.null(col) | length(col) == length(match.col)) col <- c(1:length(match.col), 1, 1)
+    if(is.null(lty) | length(lty) == length(match.col)) lty <- c(1:length(match.col), 3, 3)
+    if(is.null(lwd) | length(lwd) == length(match.col)) lwd <- c(rep(1, length(match.col)), 1, 1)
+  } else {
+    if(is.null(col)) col <- 1:length(match.col)
+    if(is.null(lty)) lty <- 1:length(match.col)
+    if(is.null(lwd)) lwd <- rep(1, length(match.col))
+  }
   
   # get the "mean" column
   cnames <- colnames(out$frontier)
@@ -820,24 +830,20 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
   if(is.null(legend.labels)){
       legend.labels <- paste("min", match.col, "Portfolio")
   }
-  if(is.null(guideline)) guideline <- ifelse(length(match.col) == 2, TRUE, FALSE)
   if(guideline){
-    lines(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), lty=3, col=1, lwd=1)
+    lines(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), lty=lty[3], col=col[3], lwd=lwd[3])
     points(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), pch=pch.assets, cex=cex.assets)
     x_diff = abs(out$frontier[,1] - out$frontier[1,m.p])
     x_index = min(abs(out$frontier[,1] - out$frontier[1,m.p]))
-    lines(x=c(out$frontier[which(x_diff == x_index),1], out$frontier[1,m.p]), y = c(out$frontier[which(x_diff == x_index),2], out$frontier[1,2]), lty=3, col=1, lwd=1)
+    lines(x=c(out$frontier[which(x_diff == x_index),1], out$frontier[1,m.p]), y = c(out$frontier[which(x_diff == x_index),2], out$frontier[1,2]), lty=lty[3], col=col[3], lwd=lwd[3])
     points(x=c(out$frontier[which(x_diff == x_index),1], out$frontier[1,m.p]), y = c(out$frontier[which(x_diff == x_index),2], out$frontier[1,2]), pch=pch.assets, cex=cex.assets)
     if(labels.assets){
       text(out$frontier[1,1], out$frontier[1,2], labels = paste("(", round(out$frontier[1,1], 4), ",", round(out$frontier[1,2], 4), ")"), pos = 1, cex = cex.assets)
       text(out$frontier[1,m.p], out$frontier[1,2], labels = paste("(", round(out$frontier[1,m.p], 4), ",", round(out$frontier[1,2], 4), ")"), pos = 4, cex = cex.assets)
       text(out$frontier[which(x_diff == x_index),1], out$frontier[which(x_diff == x_index),2], labels = paste("(", round(out$frontier[which(x_diff == x_index),1], 4), ",", round(out$frontier[which(x_diff == x_index),2], 4), ")"), pos = 2, cex = cex.assets)
     }
-    legend.labels <- append(legend.labels, paste("risk difference (bps)", round((out$frontier[1,m.p] - out$frontier[1,1]) * 100, 2)))
-    legend.labels <- append(legend.labels, paste("mean difference (bps)", round((out$frontier[which(x_diff == x_index),1] - out$frontier[1,2]) * 100, 2)))
-    col = c(col, 1, 1)
-    lty = c(lty, 3, 3)
-    lwd = c(lwd, 1, 1)
+    legend.labels <- append(legend.labels, paste("% Decrease in Risk =", round((out$frontier[1,m.p] - out$frontier[1,1]) * 100 / out$frontier[1,1], 2)))
+    legend.labels <- append(legend.labels, paste("% Increase in Return =", round((out$frontier[which(x_diff == x_index),2] - out$frontier[1,2]) * 100 / out$frontier[1,2], 2)))
   }
   legend("bottomright", legend=legend.labels, col=col, lty=lty, lwd=lwd, cex=cex.legend, bty="n")
   return(invisible(out))
