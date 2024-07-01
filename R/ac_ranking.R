@@ -38,7 +38,7 @@ ac.ranking  <- function(R, order, ...){
     max.value <- median(colMeans(R))
   }
   # Compute the scaled centroid
-  c_hat <- scale.range(centroid(nassets), max.value)
+  c_hat <- scale_range(centroid(nassets), max.value)
   
   # Here we reorder the vector such that the highest centroid value is assigned
   # to the asset index with the highest expected return and so on and so forth
@@ -69,8 +69,7 @@ centroid <- function(n){
 
 # What is a valid value for max.value?
 # - by default we use the median of the asset mean returns
-#' @export
-scale.range <- function(x, max.value){
+scale_range <- function(x, max.value){
   new.max <- 0.05
   new.min <- -new.max
   old.range <- max(x) - min(x)
