@@ -69,6 +69,7 @@ centroid <- function(n){
 
 # What is a valid value for max.value?
 # - by default we use the median of the asset mean returns
+#' @export
 scale.range <- function(x, max.value){
   new.max <- 0.05
   new.min <- -new.max
