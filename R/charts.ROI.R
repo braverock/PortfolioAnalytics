@@ -1,5 +1,5 @@
 
-chart.Weights.ROI <- function(object, ..., neighbors = NULL, main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, colorset=NULL, legend.loc="topright", cex.legend=0.8, plot.type="line"){
+chart.Weight.ROI <- function(object, ..., neighbors = NULL, main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, colorset=NULL, legend.loc="topright", cex.legend=0.8, plot.type="line"){
   
   if(!inherits(object, "optimize.portfolio.ROI")) stop("object must be of class 'optimize.portfolio.ROI'")
   
@@ -76,7 +76,7 @@ chart.Weights.ROI <- function(object, ..., neighbors = NULL, main="Weights", las
 #' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.ROI
 #' @export
-chart.Weights.optimize.portfolio.ROI <- chart.Weights.ROI
+chart.Weights.optimize.portfolio.ROI <- chart.Weight.ROI
 
 
 chart.Scatter.ROI <- function(object, ..., neighbors=NULL, return.col="mean", risk.col="ES", chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL, rp=FALSE){
@@ -157,7 +157,7 @@ charts.ROI <- function(ROI, rp=FALSE, risk.col="ES", return.col="mean", chart.as
   par(mar=c(4,4,4,2))
   chart.Scatter.ROI(object=ROI, rp=rp, return.col=return.col, risk.col=risk.col, ..., chart.assets=chart.assets, element.color=element.color, cex.axis=cex.axis, main=main, xlim=xlim, ylim=ylim)
   par(mar=c(2,4,0,2))
-  chart.Weights.ROI(object=ROI, neighbors=neighbors, ..., main="", las=3, xlab=NULL, cex.lab=1, element.color=element.color, cex.axis=cex.axis)
+  chart.Weight.ROI(object=ROI, neighbors=neighbors, ..., main="", las=3, xlab=NULL, cex.lab=1, element.color=element.color, cex.axis=cex.axis)
   par(op)
 }
 

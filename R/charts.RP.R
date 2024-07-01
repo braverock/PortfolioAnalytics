@@ -10,7 +10,7 @@
 #
 ###############################################################################
 
-chart.Weights.RP <- function(object, ..., neighbors = NULL, main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, colorset=NULL, legend.loc="topright", cex.legend=0.8, plot.type="line"){
+chart.Weight.RP <- function(object, ..., neighbors = NULL, main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, colorset=NULL, legend.loc="topright", cex.legend=0.8, plot.type="line"){
   # Specific to the output of the random portfolio code with constraints
   if(!inherits(object, "optimize.portfolio.random")){
     stop("object must be of class 'optimize.portfolio.random'")
@@ -91,7 +91,7 @@ chart.Weights.RP <- function(object, ..., neighbors = NULL, main="Weights", las 
 #' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.random
 #' @export
-chart.Weights.optimize.portfolio.random <- chart.Weights.RP
+chart.Weights.optimize.portfolio.random <- chart.Weight.RP
 
 chart.Scatter.RP <- function(object, ..., neighbors = NULL, return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
   # more or less specific to the output of the random portfolio code with constraints
@@ -270,7 +270,7 @@ charts.RP <- function(RP, risk.col, return.col, chart.assets=FALSE, neighbors=NU
   par(mar=c(4,4,4,2))
   chart.Scatter.RP(object=RP, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=NULL, ylim=NULL, ...)
   par(mar=c(2,4,0,2))
-  chart.Weights.RP(object=RP, main="", neighbors=neighbors, ...)
+  chart.Weight.RP(object=RP, main="", neighbors=neighbors, ...)
   par(op)
 }
 

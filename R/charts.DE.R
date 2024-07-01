@@ -11,7 +11,7 @@
 ###############################################################################
 
 
-chart.Weights.DE <- function(object, ..., neighbors = NULL, main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, colorset=NULL, legend.loc="topright", cex.legend=0.8, plot.type="line"){
+chart.Weight.DE <- function(object, ..., neighbors = NULL, main="Weights", las = 3, xlab=NULL, cex.lab = 1, element.color = "darkgray", cex.axis=0.8, colorset=NULL, legend.loc="topright", cex.legend=0.8, plot.type="line"){
   # Specific to the output of optimize.portfolio with optimize_method="DEoptim"
   if(!inherits(object, "optimize.portfolio.DEoptim")) stop("object must be of class 'optimize.portfolio.DEoptim'")
   
@@ -89,7 +89,7 @@ chart.Weights.DE <- function(object, ..., neighbors = NULL, main="Weights", las 
 #' @rdname chart.Weights
 #' @method chart.Weights optimize.portfolio.DEoptim
 #' @export
-chart.Weights.optimize.portfolio.DEoptim <- chart.Weights.DE
+chart.Weights.optimize.portfolio.DEoptim <- chart.Weight.DE
 
 
 chart.Scatter.DE <- function(object, ..., neighbors = NULL, return.col='mean', risk.col='ES', chart.assets=FALSE, element.color = "darkgray", cex.axis=0.8, xlim=NULL, ylim=NULL){
@@ -318,7 +318,7 @@ charts.DE <- function(DE, risk.col, return.col, chart.assets, neighbors=NULL, ma
     par(mar=c(4,4,4,2))
     chart.Scatter.DE(object=DE, risk.col=risk.col, return.col=return.col, chart.assets=chart.assets, neighbors=neighbors, main=main, xlim=xlim, ylim=ylim, ...)
     par(mar=c(2,4,0,2))
-    chart.Weights.DE(object=DE, main="", neighbors=neighbors, ...)
+    chart.Weight.DE(object=DE, main="", neighbors=neighbors, ...)
     par(op)
 }
 
