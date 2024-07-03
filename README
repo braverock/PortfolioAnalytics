@@ -1,22 +1,24 @@
-Version 2.0.0 contains the following new or enhanced functions, and new Vignettes:
+A primary addition to PortfolioAnalytics in this 2.0 release is the integration of the CVXR solver R package for convex optimization. See CVXR supports eleven solvers, each of which supports solvers for one or more of the following optimization problems: LP, QP, SOCP, SDP, EXP, MIP. See the Table near the beginning of the  document “Convex Optimization in R” at https://cvxr.rbind.io/ . Thus, with PortfolioAnalytics 2.0, users are able to use any one of  a large variety of solvers available in CVXR for their portfolio optimization problems.
 
-The primary addition to PortfolioAnalytics in this release is the addition of the CVXR solver.  
-The CVXR solver adds efficient constrained conical solutions to PortfolioAnalytics to solve
-multiple common risk-weighted portfolio objectives with common constraints.  This will allow
-for fast solutions to many common portfolio constructions.
+A particular use of CVXR in PortfolioAnalytics 2.0 is for computing Minimum Expected Quadratic Shortfall (MinEQS) portfolios, which is a second-order cone programming (SOCP) optimization problem. This is quite a new capability not available in other portfolio optimization software products. Details are provided in the Vignette “cvxrPortfolioAnalytics.pdf” Vignette listed near the end of this document.
+
+Another important feature of PortfolioAnalytics 2.0, is that it contains functionality for computing robust mean variance optimal (MVO) portfolios, using any one of several robust covariance matrix estimators that are not much influenced by outliers  Details are provided in the Vignette “robustCovMatForPA.pdf” listed near the end of this document.
+
+Specific new features in PortfolioAnalytics 2.0 include the following New Functions, Enhanced Functions, S3 Support Methods, Custom Moment Functions, and New Vignettes, listed below.
+
 
 New PortfolioAnalytics Functions:
 
-1. meaneqs.efficient.frontier (create mean-eqs efficient frontier) utility function
-2. meanrisk.efficient.frontier (generate multiple efficient frontiers for the same portfolio) utility function
-3. extract_risk (extract the risk value when knowing the weights of portfolio)
+1. meaneqs.efficient.frontier (create Mean-EQS efficient frontier) utility function
+2. meanrisk.efficient.frontier (generate multiple efficient frontiers for portfolios with the same constraint object.
+3. extract_risk (extract the risk value, e.g., StdDev or ES or EQS, based on the weights of a portfolio)
 4. chart.EfficientFrontierCompare (Overlay the efficient frontiers of different minRisk portfolio objects on a single plot)
 5. backtest.plot (based on Peter Carl's code, generate plots of the cumulative returns and/or drawdown for back-testing)
 6. opt.outputMvo (converts output of `optimize.portfolio` to a list of the portfolio weights, mean, volatility and Sharpe Ratio)
 7. plotFrontiers (plot frontiers based on the result of `meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meaneqs.efficient.frontier`)
 
 
-Enhanced Functions:
+Enhanced PortfolioAnalytics Functions:
 
 1. optimize.portfolio (enhanced with CVXR solvers and EQS objective)
 2. optimize.portfolio.rebalancing (enhanced with CVXR solvers and EQS objective)
@@ -46,7 +48,8 @@ New Vignettes and their Code Functions in the demo Folder:
 3. robustCovMatForPA.pdf, CRAN title = “Robust Covariance Matrices for PortfolioAnalytics”
 4. demo_robustCovMatForPA.R   
 
+Please contribute with bug fixes, comments, and testing scripts. In doing so please use data disguising it as need be, or use data sets like 'edhec' which is available in the PerformanceAnalytics package, or like ‘stocksCRSP’  and ‘factorsSPGMI’ in the PCRA package.
 
-Please contribute with bug fixes, comments, and testing scripts 
-(take your data and disguise it, or use data sets like 'edhec' like we do in the demo with your constraints and other objectives modified to demonstrate your problem on public data)
+Acknowledgements
 
+The bulk of the work in creating PortfolioAnalytics 2.0 was done by Xinran Zhao, along with contributions from Yifu Kang, under the support of a 2022 Google Summer of Code (GSOC 2022). Xinran and Yifu were mentored in GSOC 2022 by Professor Doug Martin and Professor Steve Murray in the Applied Mathematics Department at the University of Washington.
