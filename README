@@ -6,6 +6,27 @@ Another important feature of PortfolioAnalytics 2.0, is that it contains functio
 
 Specific new features in PortfolioAnalytics 2.0 include the following New Functions, Enhanced Functions, S3 Support Methods, Custom Moment Functions, and New Vignettes, listed below.
 
+<<<<<<< HEAD
+=======
+A primary addition to PortfolioAnalytics in this 2.0 release is the integration 
+of the CVXR solver R package for convex optimization. See CVXR supports eleven 
+solvers, each of which supports solvers for one or more of the following 
+optimization problems: LP, QP, SOCP, SDP, EXP, MIP. See the Table near the 
+beginning of the  document “Convex Optimization in R” at https://cvxr.rbind.io/ . 
+Thus, with PortfolioAnalytics 2.0, users are able to use any one of  a large 
+variety of solvers available in CVXR for their portfolio optimization problems.
+
+A particular use of CVXR in PortfolioAnalytics 2.0 is for computing 
+Minimum Expected Quadratic Shortfall (MinEQS) portfolios, which is a second-order 
+cone programming (SOCP) optimization problem. This is quite a new capability not 
+available in other portfolio optimization software products. Details are provided 
+in the Vignette “cvxrPortfolioAnalytics” Vignette.
+
+Another important feature of PortfolioAnalytics 2.0, is that it contains 
+functionality for computing robust mean variance optimal (MVO) portfolios, using 
+any one of several robust covariance matrix estimators that are not much influenced 
+by outliers  Details are provided in the Vignette “robustCovMatForPA”.
+>>>>>>> d922677 (merge README edits from Doug Martin ahead of CRAN submission)
 
 New PortfolioAnalytics Functions:
 
@@ -43,13 +64,32 @@ Custom Moment Functions for Robust Covariance Matrices:
 
 New Vignettes and their Code Functions in the demo Folder:
 
-1. cvxrPortfolioAnalytics.pdf, CRAN title = “CVXR for PortfolioAnalytics”.
+1. cvxrPortfolioAnalytics: CRAN title = “CVXR for PortfolioAnalytics”.
 2. demo_cvxrPortfolioAnalytics.R
-3. robustCovMatForPA.pdf, CRAN title = “Robust Covariance Matrices for PortfolioAnalytics”
+3. robustCovMatForPA: CRAN title = “Robust Covariance Matrices for PortfolioAnalytics”
 4. demo_robustCovMatForPA.R   
 
 Please contribute with bug fixes, comments, and testing scripts. In doing so please use data disguising it as need be, or use data sets like 'edhec' which is available in the PerformanceAnalytics package, or like ‘stocksCRSP’  and ‘factorsSPGMI’ in the PCRA package.
 
+<<<<<<< HEAD
 Acknowledgements
 
 The bulk of the work in creating PortfolioAnalytics 2.0 was done by Xinran Zhao, along with contributions from Yifu Kang, under the support of a 2022 Google Summer of Code (GSOC 2022). Xinran and Yifu were mentored in GSOC 2022 by Professor Doug Martin and Professor Steve Murray in the Applied Mathematics Department at the University of Washington.
+=======
+Please contribute with bug fixes, comments, and testing scripts! 
+(please take your data and disguise it, or use data sets like 'edhec' like we 
+do in the demo or or like ‘stocksCRSP’  and ‘factorsSPGMI’ in the PCRA package 
+or with your constraints and other objectives modified to demonstrate 
+your problem on public data)
+
+Please report any bugs or issues on the PortfolioAnalytics GitHub page at
+https://github.com/braverock/PortfolioAnalytics/issues
+
+Acknowledgements
+
+The bulk of the work in creating PortfolioAnalytics 2.0 was done by Xinran Zhao, 
+along with contributions from Yifu Kang, under the support of a 2022 Google 
+Summer of Code (GSOC 2022). Xinran and Yifu were mentored in GSOC 2022 by 
+Professor Doug Martin and Professor Steve Murray in the Applied Mathematics 
+Department at the University of Washington.
+>>>>>>> d922677 (merge README edits from Doug Martin ahead of CRAN submission)
