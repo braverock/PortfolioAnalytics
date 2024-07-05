@@ -59,10 +59,11 @@ New Vignettes and their Code Functions in the demo Folder:
 4. demo_robustCovMatForPA.R   
 
 Please contribute with bug fixes, comments, and testing scripts! 
-(please take your data and disguise it, or use data sets like 'edhec' like we 
-do in the demo or or like 'stocksCRSP'  and 'factorsSPGMI' in the PCRA package 
-or with your constraints and other objectives modified to demonstrate 
-your problem on public data)
+
+Please take your data and disguise it when submitting, or use data sets like 
+'edhec' like we do in the demos or or like 'stocksCRSP'  and 'factorsSPGMI' in 
+the PCRA package or with your constraints and other objectives modified to 
+demonstrate your problem on public data.
 
 Please report any bugs or issues on the PortfolioAnalytics GitHub page at
 https://github.com/braverock/PortfolioAnalytics/issues
