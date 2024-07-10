@@ -74,8 +74,11 @@ backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL,
                         bg=rgb(t(col2rgb("white")), alpha = 200, maxColorValue = 255))
     
     ## ylim panel
-    ylim1 <- c(p$Env$ylim[[2]][1], p$Env$ylim[[2]][2])
-    ylim2 <- c(p$Env$ylim[[4]][1], p$Env$ylim[[4]][2])
+    # ylim1 <- c(p$Env$ylim[[2]][1], p$Env$ylim[[2]][2])
+    # ylim2 <- c(p$Env$ylim[[4]][1], p$Env$ylim[[4]][2])
+    ylim1 <- p$Env$panels[[1]]$ylim
+    ylim2 <- p$Env$panels[[2]]$ylim
+    
     xy1 <- as.xts(matrix(rep(ylim1, length(x)),ncol=length(ylim1), byrow=TRUE), 
                        order.by=as.Date(x))
     xy2 <- as.xts(matrix(rep(ylim2, length(x)),ncol=length(ylim2), byrow=TRUE), 
@@ -102,7 +105,9 @@ backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL,
                         bg=rgb(t(col2rgb("white")), alpha = 200, maxColorValue = 255))
     
     ## ylim panel
-    ylim1 <- c(p$Env$ylim[[2]][1], p$Env$ylim[[2]][2])
+    # ylim1 <- c(p$Env$ylim[[2]][1], p$Env$ylim[[2]][2])
+    ylim1 <- p$Env$panels[[1]]$ylim
+    
     xy1 <- as.xts(matrix(rep(ylim1, length(x)),ncol=length(ylim1), byrow=TRUE), 
                   order.by=as.Date(x))
     p <- xts::addPolygon(xy1, on=-1, col="lightgrey")
@@ -126,7 +131,9 @@ backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL,
                         bg=rgb(t(col2rgb("white")), alpha = 200, maxColorValue = 255))
     
     ## ylim panel
-    ylim1 <- c(p$Env$ylim[[2]][1], p$Env$ylim[[2]][2])
+    # ylim1 <- c(p$Env$ylim[[2]][1], p$Env$ylim[[2]][2])
+    ylim1 <- p$Env$panels[[1]]$ylim
+    
     xy1 <- as.xts(matrix(rep(ylim1, length(x)),ncol=length(ylim1), byrow=TRUE), 
                   order.by=as.Date(x))
     p <- xts::addPolygon(xy1, on=-1, col="lightgrey") # top panel
