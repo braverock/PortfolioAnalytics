@@ -22,7 +22,7 @@
 #' @importFrom grDevices col2rgb
 #' @author Peter Carl, Xinran Zhao, Yifu Kang
 #' @export backtest.plot
-backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL, ltySet=NULL, lwdSet=NULL){
+backtest.plot <- function(R, log_return = FALSE, plotType='both', main = NULL, colorSet=NULL, ltySet=NULL, lwdSet=NULL){
   ## Cumulative Returns
   c.xts <- if (log_return) {
     1 + cumsum(R)
@@ -53,9 +53,18 @@ backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL,
   if (is.null(lwdSet))
     lwdSet <- rep(2, n)
   
+  # title of plot
+  if(!is.null(main))
+    main = paste(main, '\n')
+  if(plotType == 'drawdown'){
+    main = paste(main, "Drawdown", sep = "")
+  } else {
+    main = paste(main, "Cumulative Returns", sep = "")
+  }
+    
   ## plots of return and drawdown
   if (plotType == 'both'){
-    p <- xts::plot.xts(c.xts[,1], main = "Cumulative Returns",
+    p <- xts::plot.xts(c.xts[,1], main = main,
                        grid.ticks.lwd=1, grid.ticks.on = "years",
                        labels.col="grey20", col = colorSet[1], lty = ltySet[1],
                        lwd = lwdSet[1], cex.axis=0.8, format.labels = "%b\n%Y", 
@@ -89,7 +98,7 @@ backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL,
   
   ## plot of returns
   if (plotType == 'ret' || plotType == 'cumGrossRet' || plotType == 'cumRet' || plotType == 'cumret'){
-    p <- xts::plot.xts(c.xts[,1], main = "Cumulative Returns",
+    p <- xts::plot.xts(c.xts[,1], main = main,
                        grid.ticks.lwd=1, grid.ticks.on = "years", cex.axis=0.8, 
                        col = colorSet[1], lty = ltySet[1], lwd = lwdSet[1],
                        format.labels = "%b\n%Y", labels.col="grey20", 
@@ -115,7 +124,7 @@ backtest.plot <- function(R, log_return = FALSE, plotType='both', colorSet=NULL,
   
   ## plot of drawdown
   if (plotType == 'drawdown'){
-    p <- xts::plot.xts(d.xts[,1], main="Drawdown",
+    p <- xts::plot.xts(d.xts[,1], main=main,
                        grid.ticks.lwd=1, grid.ticks.on = "years", cex.axis=0.8, 
                        col = colorSet[1], lty = ltySet[1], lwd = lwdSet[1], 
                        format.labels = "%b\n%Y", labels.col="grey20", 
