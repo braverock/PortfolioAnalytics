@@ -7,7 +7,9 @@
 backtest.plot(
   R,
   log_return = FALSE,
+  drawdown_on = 1,
   plotType = "both",
+  main = NULL,
   colorSet = NULL,
   ltySet = NULL,
   lwdSet = NULL
@@ -17,6 +19,9 @@ backtest.plot(
 \item{R}{an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns}
 
 \item{log_return}{arithmetic return or log return, the default is arithmetic return}
+
+\item{drawdown_on}{the plot will shadow the full time period of the maximum drawdown and recovery of the first portfolio.
+Use number (e.g. 1, 2, 3) to indicate which portfolio drawdown interval you wish to track, or NULL to not shadow any period.}
 
 \item{plotType}{"cumRet", "drawdown", or the default is both}
 

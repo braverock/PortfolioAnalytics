@@ -14,6 +14,8 @@
 #' generate plots of the cumulative returns and drawdown for back-testing
 #' @param R an xts, vector, matrix, data frame, timeSeries or zoo object of asset returns
 #' @param log_return arithmetic return or log return, the default is arithmetic return
+#' @param drawdown_on the plot will shadow the full time period of the maximum drawdown and recovery of the first portfolio.
+#' Use number (e.g. 1, 2, 3) to indicate which portfolio drawdown interval you wish to track, or NULL to not shadow any period.
 #' @param plotType "cumRet", "drawdown", or the default is both
 #' @param colorSet users can design the color by providing a vector of color
 #' @param ltySet users can design lty by providing a vector of lty
@@ -22,7 +24,7 @@
 #' @importFrom grDevices col2rgb
 #' @author Peter Carl, Xinran Zhao, Yifu Kang
 #' @export backtest.plot
-backtest.plot <- function(R, log_return = FALSE, plotType='both', main = NULL, colorSet=NULL, ltySet=NULL, lwdSet=NULL){
+backtest.plot <- function(R, log_return = FALSE, drawdown_on = 1, plotType='both', main = NULL, colorSet=NULL, ltySet=NULL, lwdSet=NULL){
   ## Cumulative Returns
   c.xts <- if (log_return) {
     1 + cumsum(R)
@@ -38,12 +40,16 @@ backtest.plot <- function(R, log_return = FALSE, plotType='both', main = NULL, c
   d.xts <- PerformanceAnalytics::Drawdowns(R)
   
   ## get longest drawdown dates for xts object, which is the worst drawdown
-  dt <- table.Drawdowns(R, top = 1)
-  if(is.na(dt$To) == TRUE){
-    dt$To = index(R)[dim(R)[1]]
+  if (is.null(drawdown_on)){
+    x <- c(index(R)[1], index(R[1]))
+  } else {
+    dt <- table.Drawdowns(R[, drawdown_on], top = 1)
+    if(is.na(dt$To) == TRUE){
+      dt$To = index(R)[dim(R)[1]]
+    }
+    dt2 <- t(dt[,c("From", "To")])
+    x <- as.vector(dt2[,NCOL(dt2)])
   }
-  dt2 <- t(dt[,c("From", "To")])
-  x <- as.vector(dt2[,NCOL(dt2)])
   
   ## style set
   if (is.null(colorSet))
