@@ -285,11 +285,11 @@ meanetl.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.po
   return(structure(out, class="frontier"))
 }
 
-#' Generate the efficient frontier for a mean-EQS portfolio
+#' Generate the efficient frontier for a mean-CSM portfolio
 #' 
-#' This function generates the mean-EQS efficient frontier of a portfolio
+#' This function generates the mean-CSM efficient frontier of a portfolio
 #' specifying the constraints and objectives. The \code{portfolio} object 
-#' should have two objectives: 1) mean and 2) EQS. If the 
+#' should have two objectives: 1) mean and 2) CSM. If the 
 #' portfolio object does not contain these objectives, they will be added 
 #' using default parameters.
 #' 
@@ -301,7 +301,7 @@ meanetl.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.po
 #' @return a matrix of objective measure values and weights along the efficient frontier
 #' @author Xinran Zhao
 #' @export
-meaneqs.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.portfolios=25, ...){
+meancsm.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.portfolios=25, ...){
   if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
   # step 1: find the minimum return given the constraints
   # step 2: find the maximum return given the constraints
@@ -310,18 +310,18 @@ meaneqs.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.p
   
   # Use the portfolio_risk_objective from the portfolio if they have it
   # check for a ETL, ES, or cVaR objective
-  eqs_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "EQS")
-  if(length(eqs_idx) >= 1){
+  CSM_idx <- which(unlist(lapply(portfolio$objectives, function(x) x$name)) == "CSM")
+  if(length(CSM_idx) >= 1){
     # the portfolio object has a ETL, ES, CVaR objective
-    eqs_obj <- portfolio$objectives[[eqs_idx[1]]]
+    CSM_obj <- portfolio$objectives[[CSM_idx[1]]]
   } else {
-    eqs_obj <- portfolio_risk_objective(name="EQS", arguments=list(p=0.95))
+    CSM_obj <- portfolio_risk_objective(name="CSM", arguments=list(p=0.95))
   }
   
   # Clear out the objectives in portfolio and add them here to simplify checks
   # and so we can control the optimization along the efficient frontier.
   portfolio$objectives <- list()
-  portfolio$objectives[[1]] <- eqs_obj
+  portfolio$objectives[[1]] <- CSM_obj
   portfolio <- add.objective(portfolio=portfolio, type="return", name="mean")
   
   # get the objective names from the portfolio object
@@ -334,8 +334,8 @@ meaneqs.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.p
     }
   }
   
-  # get the index number of the EQS objective
-  eqs_idx <- which(objnames == "EQS")
+  # get the index number of the CSM objective
+  CSM_idx <- which(objnames == "CSM")
   # get the index number of the mean objective
   mean_idx <- which(objnames == "mean")
   
@@ -373,14 +373,14 @@ meaneqs.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.p
 #' specifying the constraints and objectives. The \code{risk_type} object 
 #' is for the basic mean-risk efficient frontier, other efficient frontiers
 #' will be generated with the same target returns. All mean-StdDev, mean-ES
-#' and mean-EQS efficient frontiers will be generated.
+#' and mean-CSM efficient frontiers will be generated.
 #' 
 #' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
 #' @param optimize_method the optimize method to get the efficient frontier, default is CVXR
 #' @param n.portfolios number of portfolios to generate the efficient frontier
-#' @param risk_type one of "StdDev", "ES" and "EQS", which determines the type of basic efficient frontier.
-#' @param compare_port vector composed of any risk "StdDev", "ES", "EQS", for example, compare_port=c("StdDev", "ES")
+#' @param risk_type one of "StdDev", "ES" and "CSM", which determines the type of basic efficient frontier.
+#' @param compare_port vector composed of any risk "StdDev", "ES", "CSM", for example, compare_port=c("StdDev", "ES")
 #' @param \dots passthru parameters to \code{\link{optimize.portfolio}}
 #' @return a matrix of objective measure values and weights along the efficient frontier
 #' @author Xinran Zhao
@@ -449,7 +449,7 @@ meanrisk.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.
       tmpportfolio <- portfolio
       tmpportfolio$objectives[[risk_idx]]$name <- rc
       tmpw <- optimize.portfolio(R=R, portfolio=tmpportfolio, optimize_method=optimize_method, ef=TRUE, ...=...)$weight
-      res <- append(res, extract_risk(R=R, w = tmpw, ES_alpha = alpha, EQS_alpha = alpha)[[risk_type]])
+      res <- append(res, extract_risk(R=R, w = tmpw, ES_alpha = alpha, CSM_alpha = alpha)[[risk_type]])
     }
     res
   }
@@ -476,10 +476,10 @@ meanrisk.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.
 #'   objectives, they will be added using default parameters.
 #'   The efficient frontier is created via 
 #'   \code{\link{meanetl.efficient.frontier}}.}
-#'   \item{"mean-EQS":}{ This is a special 
+#'   \item{"mean-CSM":}{ This is a special 
 #'   case for an efficient frontier that can be created by CVXR solvers.
 #'   The \code{portfolio} object should have two objectives: 1) mean
-#'   and 2) EQS. If the portfolio object does not contain these 
+#'   and 2) CSM. If the portfolio object does not contain these 
 #'   objectives, they will be added using default parameters.
 #'   The efficient frontier is created via 
 #'   \code{\link{meanrisk.efficient.frontier}}.}
@@ -541,8 +541,8 @@ create.EfficientFrontier <- function(R, portfolio, type, optimize_method = 'CVXR
                                                               n.portfolios=n.portfolios,
                                                               ...=...)
          },
-         "mean-eqs"=,
-         "mean-EQS" = {frontier <- meaneqs.efficient.frontier(portfolio=portfolio,
+         "mean-CSM"=,
+         "mean-CSM" = {frontier <- meancsm.efficient.frontier(portfolio=portfolio,
                                                               R=R,
                                                               n.portfolios=n.portfolios,
                                                               ...=...)

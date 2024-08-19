@@ -194,7 +194,7 @@ The risk aversion parameter is passed into \code{optimize.portfolio} as an added
 \item Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
 (The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
 The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)
-\item Minimize portfolio EQS optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
+\item Minimize portfolio CSM optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
 (The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
 The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)
 \item Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) subject to leverage, box, group, and/or target mean return constraints.
@@ -203,9 +203,9 @@ Otherwise, the default action is to maximize quadratic utility.
 \item Maximize portfolio mean return per unit ES (i.e. the ES ratio/STARR) subject to leverage, box, group, and/or target mean return constraints.
 It could be specified by \code{maxSTARR=TRUE} or \code{ESratio=TRUE} in \code{optimize.portfolio} with both mean and ES objectives.
 The default action is to maximize ES ratio. If \code{maxSTARR=FALSE} or \code{ESratio=FALSE} is given, the action will be minimizing ES.
-\item Maximize portfolio mean return per unit EQS (i.e. the EQS ratio) subject to leverage, box, group, and/or target mean return constraints.
-It could be specified by \code{EQSratio=TRUE} in \code{optimize.portfolio} with both mean and EQS objectives.
-The default action is to maximize EQS ratio. If \code{EQSratio=FALSE} is given, the action will be minimizing EQS.
+\item Maximize portfolio mean return per unit CSM (i.e. the CSM ratio) subject to leverage, box, group, and/or target mean return constraints.
+It could be specified by \code{CSMratio=TRUE} in \code{optimize.portfolio} with both mean and CSM objectives.
+The default action is to maximize CSM ratio. If \code{CSMratio=FALSE} is given, the action will be minimizing CSM.
 }
 
 Because these convex optimization problem are standardized, there is no need for a penalty term. 

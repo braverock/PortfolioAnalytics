@@ -14,10 +14,10 @@
 #' 
 #' @details
 #' This function provides the ability to plot frontiers based on the result of 
-#' `meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meaneqs.efficient.frontier`.
+#' `meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meancsm.efficient.frontier`.
 #' 
 #' When using \code{meanvar.efficient.frontier}, \code{meanetl.efficient.frontier} 
-#' and \code{meaneqs.efficient.frontier}, the result will be frontiers data,
+#' and \code{meancsm.efficient.frontier}, the result will be frontiers data,
 #' including the weights for each point on the mean-risk efficient frontiers. 
 #' Before using this function, user should declare which risk that they want to 
 #' compare, and what parameters that they want to use to calculate the risk, 
@@ -30,9 +30,9 @@
 #' 
 #' @param R an xts object of asset returns
 #' @param frontiers a list of frontiers, for example, list(ef1=meanvar.efficient.frontier(), ef2=meanvar.efficient.frontier())
-#' @param risk type of risk that you want to compare, could be 'StdDev', 'ES', 'EQS'
+#' @param risk type of risk that you want to compare, could be 'StdDev', 'ES', 'CSM'
 #' @param ES_alpha the default value is 0.05, but could be specified as any value between 0 and 1
-#' @param EQS_alpha the default value is 0.05, but could be specified as any value between 0 and 1
+#' @param CSM_alpha the default value is 0.05, but could be specified as any value between 0 and 1
 #' @param moment_setting the default is NULL, if customize momentFUN please provide moment_setting=list(mu=, sigma=) 
 #' @param main title used in the plot.
 #' @param plot_type define the plot_type, default is "l"
@@ -53,13 +53,13 @@
 #' @author Xinran Zhao
 #' @export plotFrontiers
 #' 
-plotFrontiers <- function(R, frontiers, risk, ES_alpha = 0.05, EQS_alpha = 0.05, moment_setting = NULL, main="Efficient Frontiers", plot_type = "l", cex.axis=0.5, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
+plotFrontiers <- function(R, frontiers, risk, ES_alpha = 0.05, CSM_alpha = 0.05, moment_setting = NULL, main="Efficient Frontiers", plot_type = "l", cex.axis=0.5, element.color="darkgray", legend.loc=NULL, legend.labels=NULL, cex.legend=0.8, xlim=NULL, ylim=NULL, ..., labels.assets=TRUE, pch.assets=21, cex.assets=0.8, col=NULL, lty=NULL, lwd=NULL){
   if(risk %in% c('StdDev', 'var', 'stdDev')){
     risk = 'StdDev'
   } else if(risk %in% c('etl', 'ES', 'es')){
     risk = 'ES'
-  } else if(risk %in% c('EQS', 'eqs')){
-    risk = 'EQS'
+  } else if(risk %in% c('CSM', 'csm')){
+    risk = 'CSM'
   } else {print('please give the right risk type')}
   
   wname = paste0('w.', colnames(R))
@@ -74,7 +74,7 @@ plotFrontiers <- function(R, frontiers, risk, ES_alpha = 0.05, EQS_alpha = 0.05,
     mean_value = c()
     risk_value = c()
     for(j in 1:dim(w)[1]){
-      risk_measures = extract_risk(R, w[j,], ES_alpha = ES_alpha, EQS_alpha = EQS_alpha, moment_setting = moment_setting)
+      risk_measures = extract_risk(R, w[j,], ES_alpha = ES_alpha, CSM_alpha = CSM_alpha, moment_setting = moment_setting)
       mean_value = append(mean_value, risk_measures$mean)
       risk_value = append(risk_value, risk_measures[risk])
     }

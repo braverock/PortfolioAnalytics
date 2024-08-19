@@ -9,7 +9,7 @@ plotFrontiers(
   frontiers,
   risk,
   ES_alpha = 0.05,
-  EQS_alpha = 0.05,
+  CSM_alpha = 0.05,
   moment_setting = NULL,
   main = "Efficient Frontiers",
   plot_type = "l",
@@ -34,11 +34,11 @@ plotFrontiers(
 
 \item{frontiers}{a list of frontiers, for example, list(ef1=meanvar.efficient.frontier(), ef2=meanvar.efficient.frontier())}
 
-\item{risk}{type of risk that you want to compare, could be 'StdDev', 'ES', 'EQS'}
+\item{risk}{type of risk that you want to compare, could be 'StdDev', 'ES', 'CSM'}
 
 \item{ES_alpha}{the default value is 0.05, but could be specified as any value between 0 and 1}
 
-\item{EQS_alpha}{the default value is 0.05, but could be specified as any value between 0 and 1}
+\item{CSM_alpha}{the default value is 0.05, but could be specified as any value between 0 and 1}
 
 \item{moment_setting}{the default is NULL, if customize momentFUN please provide moment_setting=list(mu=, sigma=)}
 
@@ -79,10 +79,10 @@ Generate efficient frontiers plot by providing frontiers.
 }
 \details{
 This function provides the ability to plot frontiers based on the result of 
-`meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meaneqs.efficient.frontier`.
+`meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meancsm.efficient.frontier`.
 
 When using \code{meanvar.efficient.frontier}, \code{meanetl.efficient.frontier} 
-and \code{meaneqs.efficient.frontier}, the result will be frontiers data,
+and \code{meancsm.efficient.frontier}, the result will be frontiers data,
 including the weights for each point on the mean-risk efficient frontiers. 
 Before using this function, user should declare which risk that they want to 
 compare, and what parameters that they want to use to calculate the risk, 

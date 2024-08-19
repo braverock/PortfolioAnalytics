@@ -602,7 +602,7 @@ constrained_objective <- constrained_objective_v2 <- function(w, R, portfolio, .
                  if(!inherits(objective,"risk_budget_objective") & is.null(objective$arguments$portfolio_method) & is.null(nargs$portfolio_method)) tmp_args$portfolio_method='single'
                  if(is.null(objective$arguments$invert)) tmp_args$invert = FALSE
                },
-               EQS = {}, ## xinran
+               CSM = {}, ## xinran
                turnover = {
                  fun = match.fun(turnover) # turnover function included in objectiveFUN.R
                },

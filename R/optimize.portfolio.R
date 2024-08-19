@@ -541,7 +541,7 @@ optimize.portfolio_v1 <- function(
 #' \item Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
 #' (The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
 #' The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)
-#' \item Minimize portfolio EQS optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
+#' \item Minimize portfolio CSM optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
 #' (The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
 #' The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)
 #' \item Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) subject to leverage, box, group, and/or target mean return constraints.
@@ -550,9 +550,9 @@ optimize.portfolio_v1 <- function(
 #' \item Maximize portfolio mean return per unit ES (i.e. the ES ratio/STARR) subject to leverage, box, group, and/or target mean return constraints.
 #' It could be specified by \code{maxSTARR=TRUE} or \code{ESratio=TRUE} in \code{optimize.portfolio} with both mean and ES objectives.
 #' The default action is to maximize ES ratio. If \code{maxSTARR=FALSE} or \code{ESratio=FALSE} is given, the action will be minimizing ES.
-#' \item Maximize portfolio mean return per unit EQS (i.e. the EQS ratio) subject to leverage, box, group, and/or target mean return constraints.
-#' It could be specified by \code{EQSratio=TRUE} in \code{optimize.portfolio} with both mean and EQS objectives.
-#' The default action is to maximize EQS ratio. If \code{EQSratio=FALSE} is given, the action will be minimizing EQS.
+#' \item Maximize portfolio mean return per unit CSM (i.e. the CSM ratio) subject to leverage, box, group, and/or target mean return constraints.
+#' It could be specified by \code{CSMratio=TRUE} in \code{optimize.portfolio} with both mean and CSM objectives.
+#' The default action is to maximize CSM ratio. If \code{CSMratio=FALSE} is given, the action will be minimizing CSM.
 #' }
 #' 
 #' Because these convex optimization problem are standardized, there is no need for a penalty term. 
@@ -2804,19 +2804,19 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     reward <- FALSE
     risk <- FALSE
     risk_ES <- FALSE
-    risk_EQS <- FALSE
+    risk_CSM <- FALSE
     maxSR <- FALSE
     maxSTARR <- FALSE
     ESratio <- FALSE
-    EQSratio <- FALSE
+    CSMratio <- FALSE
     alpha <- 0.05
     lambda <- 1
     
-    valid_objnames <- c("mean", "var", "sd", "StdDev", "CVaR", "ES", "ETL", "EQS")
+    valid_objnames <- c("mean", "var", "sd", "StdDev", "ES", "CVaR", "ETL", "CSM")
     for (objective in portfolio$objectives) {
       if (objective$enabled) {
         if (!(objective$name %in% valid_objnames)) {
-          stop("CVXR only solves mean, var/sd/StdDev and ETL/ES/CVaR/EQS type business objectives, 
+          stop("CVXR only solves mean, var/sd/StdDev and ETL/ES/CVaR/CSM/EQS type business objectives, 
                  choose a different optimize_method.")
         }
         # alpha
@@ -2830,7 +2830,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         reward <- ifelse(objective$name == "mean", TRUE, reward)
         risk <- ifelse(objective$name %in% valid_objnames[2:4], TRUE, risk)
         risk_ES <- ifelse(objective$name %in% valid_objnames[5:7], TRUE, risk_ES)
-        risk_EQS <- ifelse(objective$name == "EQS", TRUE, risk_EQS)
+        risk_CSM <- ifelse(objective$name %in% valid_objnames[8:9], TRUE, risk_CSM)
         arguments <- objective$arguments
       }
     }
@@ -2847,17 +2847,17 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       return_target <- portfolio$objectives[[mean_idx]]$target
     } else return_target=NULL
     
-    if(reward & !risk & !risk_ES & !risk_EQS){
+    if(reward & !risk & !risk_ES & !risk_CSM){
       # max return
       obj <- -t(mean_value) %*% wts
       constraints_cvxr = list()
       tmpname = "mean"
-    } else if(!reward & risk & !risk_ES & !risk_EQS){
+    } else if(!reward & risk & !risk_ES & !risk_CSM){
       # min var/std
       obj <- CVXR::quad_form(wts, sigma_value)
       constraints_cvxr = list()
       tmpname = "StdDev"
-    } else if(reward & risk & !risk_ES & !risk_EQS){
+    } else if(reward & risk & !risk_ES & !risk_CSM){
       # mean-var/sharpe ratio
       if(hasArg(maxSR)) maxSR=match.call(expand.dots=TRUE)$maxSR
       
@@ -2872,7 +2872,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         constraints_cvxr = list(t(mean_value) %*% wts == 1, sum(wts) >= 0)
         tmpname = "Sharpe Ratio"
       }
-    } else if(risk_ES & !risk_EQS){
+    } else if(risk_ES & !risk_CSM){
       # ES objectives
       if(reward){
         if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
@@ -2892,40 +2892,40 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
         tmpname = "ES"
       }
-    } else if(!risk_ES & risk_EQS){
-      # EQS objectives
+    } else if(!risk_ES & risk_CSM){
+      # CSM objectives
       if(reward){
-        if(hasArg(EQSratio)) EQSratio=match.call(expand.dots=TRUE)$EQSratio else EQSratio=TRUE
+        if(hasArg(CSMratio)) CSMratio=match.call(expand.dots=TRUE)$CSMratio else CSMratio=TRUE
       }
-      if(EQSratio){
-        # max EQS ratio
+      if(CSMratio){
+        # max CSM ratio
         obj <- zeta + (1/(alpha* sqrt(T))) * t
         constraints_cvxr = list(z >= 0, 
                                 z >= -X %*% wts - zeta, 
                                 t(mean_value) %*% wts == 1,
                                 sum(wts) >= 0,
                                 t >= CVXR::p_norm(z, p=2))
-        tmpname = "EQS ratio"
+        tmpname = "CSM ratio"
       } else {
-        # min EQS
+        # min CSM
         obj <- zeta + (1/(alpha* sqrt(T))) * t
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta,
                                 t >= CVXR::p_norm(z, p=2))
-        tmpname = "EQS"
+        tmpname = "CSM"
       }
     } else { 
       # wrong objective
-      stop("Wrong multiple objectives. CVXR only solves mean, var, or simple ES/EQS type business objectives, please reorganize the objectives.")
+      stop("Wrong multiple objectives. CVXR only solves mean, var, or simple ES/CSM type business objectives, please reorganize the objectives.")
     }
     
     # weight scale for maximizing return per unit risk
-    if(!maxSR & !maxSTARR & !EQSratio) weight_scale=1 else weight_scale=sum(wts)
+    if(!maxSR & !maxSTARR & !CSMratio) weight_scale=1 else weight_scale=sum(wts)
     
     # constraint type
     ## weight sum constraint
     ### Problem of maximizing return per unit risk doesn't need weight sum constraint, 
     ### because weights could be scaled proportionally.
-    if(!maxSR & !maxSTARR & !EQSratio){
+    if(!maxSR & !maxSTARR & !CSMratio){
       if(!is.null(constraints$max_sum) & !is.infinite(constraints$max_sum) & constraints$max_sum - constraints$min_sum <= 0.001){
         constraints_cvxr = append(constraints_cvxr, sum(wts) == constraints$max_sum)
       } else{
@@ -2974,7 +2974,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     prob_cvxr <- CVXR::Problem(CVXR::Minimize(obj), constraints = constraints_cvxr)
     
     if(cvxr_default){
-      if(risk_ES || risk_EQS || maxSTARR || EQSratio){
+      if(risk_ES || risk_CSM || maxSTARR || CSMratio){
         result_cvxr <- CVXR::solve(prob_cvxr, solver = "SCS", ... = ...)
       } else {
         result_cvxr <- CVXR::solve(prob_cvxr, solver = "OSQP", ... = ...)
@@ -2984,17 +2984,17 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     }
     
     cvxr_wts <- result_cvxr$getValue(wts)
-    if(maxSR | maxSTARR | EQSratio) cvxr_wts <- cvxr_wts / sum(cvxr_wts)
+    if(maxSR | maxSTARR | CSMratio) cvxr_wts <- cvxr_wts / sum(cvxr_wts)
     cvxr_wts <- as.vector(cvxr_wts)
     cvxr_wts <- normalize_weights(cvxr_wts)
     names(cvxr_wts) <- colnames(R)
     
     obj_cvxr <- list()
-    if(reward & !risk & !risk_ES & !risk_EQS){ # max return
+    if(reward & !risk & !risk_ES & !risk_CSM){ # max return
       obj_cvxr[[tmpname]] <- -result_cvxr$value
-    } else if(!reward & risk & !risk_ES & !risk_EQS){ # min var/std
+    } else if(!reward & risk & !risk_ES & !risk_CSM){ # min var/std
       obj_cvxr[[tmpname]] <- sqrt(result_cvxr$value)
-    } else if(!maxSR & !maxSTARR & !EQSratio){ # mean-var/ES/EQS
+    } else if(!maxSR & !maxSTARR & !CSMratio){ # mean-var/ES/CSM
       obj_cvxr[[tmpname]] <- result_cvxr$value
       if(reward & risk){
         obj_cvxr[["mean"]] <- cvxr_wts %*% mean_value
@@ -3008,9 +3008,9 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       } else if(maxSTARR){
         obj_cvxr[["ES"]] <- result_cvxr$value / sum(result_cvxr$getValue(wts))
         obj_cvxr[[tmpname]] <- obj_cvxr[["mean"]] / obj_cvxr[["ES"]]
-      } else if(EQSratio){
-        obj_cvxr[["EQS"]] <- result_cvxr$value / sum(result_cvxr$getValue(wts))
-        obj_cvxr[[tmpname]] <- obj_cvxr[["mean"]] / obj_cvxr[["EQS"]]
+      } else if(CSMratio){
+        obj_cvxr[["CSM"]] <- result_cvxr$value / sum(result_cvxr$getValue(wts))
+        obj_cvxr[[tmpname]] <- obj_cvxr[["mean"]] / obj_cvxr[["CSM"]]
       }
     }
     if(ef) obj_cvxr[["mean"]] <- cvxr_wts %*% mean_value

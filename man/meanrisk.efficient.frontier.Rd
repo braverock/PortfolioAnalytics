@@ -23,9 +23,9 @@ meanrisk.efficient.frontier(
 
 \item{n.portfolios}{number of portfolios to generate the efficient frontier}
 
-\item{risk_type}{one of "StdDev", "ES" and "EQS", which determines the type of basic efficient frontier.}
+\item{risk_type}{one of "StdDev", "ES" and "CSM", which determines the type of basic efficient frontier.}
 
-\item{compare_port}{vector composed of any risk "StdDev", "ES", "EQS", for example, compare_port=c("StdDev", "ES")}
+\item{compare_port}{vector composed of any risk "StdDev", "ES", "CSM", for example, compare_port=c("StdDev", "ES")}
 
 \item{\dots}{passthru parameters to \code{\link{optimize.portfolio}}}
 }
@@ -37,7 +37,7 @@ This function generates the mean-risk efficient frontier of a portfolio
 specifying the constraints and objectives. The \code{risk_type} object 
 is for the basic mean-risk efficient frontier, other efficient frontiers
 will be generated with the same target returns. All mean-StdDev, mean-ES
-and mean-EQS efficient frontiers will be generated.
+and mean-CSM efficient frontiers will be generated.
 }
 \author{
 Xinran Zhao
