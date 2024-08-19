@@ -2,12 +2,12 @@ A primary addition to PortfolioAnalytics in this 2.0 release is the integration
 of the CVXR solver R package for convex optimization. CVXR supports eleven 
 solvers, each of which supports solvers for one or more of the following 
 optimization problems: LP, QP, SOCP, SDP, EXP, MIP. See the Table near the 
-beginning of the  document "Convex Optimization in R" at https://cvxr.rbind.io/ . 
+beginning of the document "Convex Optimization in R" at https://cvxr.rbind.io/. 
 Thus, with PortfolioAnalytics 2.0, users are able to use any one of a large 
 variety of solvers available in CVXR for their portfolio optimization problems.
 
 A particular use of CVXR in PortfolioAnalytics 2.0 is for computing 
-Minimum Expected Quadratic Shortfall (MinEQS) portfolios, which is a second-order 
+Minimum Expected Quadratic Shortfall (MinCSM) portfolios, which is a second-order 
 cone programming (SOCP) optimization problem. This is quite a new capability not 
 available in other portfolio optimization software products. Details are provided 
 in the Vignette "cvxrPortfolioAnalytics".
@@ -19,20 +19,20 @@ by outliers  Details are provided in the Vignette "robustCovMatForPA".
 
 New PortfolioAnalytics Functions:
 
-1. meaneqs.efficient.frontier (create Mean-EQS efficient frontier) utility function
+1. meancsm.efficient.frontier (create Mean-CSM efficient frontier) utility function
 2. meanrisk.efficient.frontier (generate multiple efficient frontiers for portfolios with the same constraint object.
-3. extract_risk (extract the risk value, e.g., StdDev or ES or EQS, based on the weights of a portfolio)
+3. extract_risk (extract the risk value, e.g., StdDev or ES or CSM, based on the weights of a portfolio)
 4. chart.EfficientFrontierCompare (Overlay the efficient frontiers of different minRisk portfolio objects on a single plot)
 5. backtest.plot (based on Peter Carl's code, generate plots of the cumulative returns and/or drawdown for back-testing)
 6. opt.outputMvo (converts output of `optimize.portfolio` to a list of the portfolio weights, mean, volatility and Sharpe Ratio)
-7. plotFrontiers (plot frontiers based on the result of `meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meaneqs.efficient.frontier`)
+7. plotFrontiers (plot frontiers based on the result of `meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meancsm.efficient.frontier`)
 
 
 Enhanced PortfolioAnalytics Functions:
 
-1. optimize.portfolio (enhanced with CVXR solvers and EQS objective)
-2. optimize.portfolio.rebalancing (enhanced with CVXR solvers and EQS objective)
-3. create.EfficientFrontier (enhanced with mean-EQS and mean-risk)
+1. optimize.portfolio (enhanced with CVXR solvers and CSM objective)
+2. optimize.portfolio.rebalancing (enhanced with CVXR solvers and CSM objective)
+3. create.EfficientFrontier (enhanced with mean-CSM and mean-risk)
 
 
 Support S3 Methods for CVXR:
@@ -61,7 +61,7 @@ New Vignettes and their Code Functions in the demo Folder:
 Please contribute with bug fixes, comments, and testing scripts! 
 
 Please take your data and disguise it when submitting, or use data sets like 
-'edhec' like we do in the demos or or like 'stocksCRSP'  and 'factorsSPGMI' in 
+"edhec" like we do in the demos or or like "stocksCRSP" and "factorsSPGMI" in 
 the PCRA package or with your constraints and other objectives modified to 
 demonstrate your problem on public data.
 

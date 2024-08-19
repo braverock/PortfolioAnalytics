@@ -1,7 +1,7 @@
 ---
 title: "CVXR for PortfolioAnalytics"
 author: "Xinran Zhao"
-date: "June 4, 2024"
+date: "August 18, 2024"
 output: rmarkdown::pdf_document
 bibliography: PA.bib
 urlcolor: blue
@@ -24,7 +24,7 @@ Sys.setlocale("LC_TIME", "English")
 \tableofcontents
 \newpage
 # 1 Introduction
-CVXR is an R package that provides an object-oriented modeling language for convex optimization, including the Second-Order Cone Optimization(SOCopt) required to minimize Expected Quadratic Shortfall(EQS) problem, which is not supported by other solvers in PortfolioAnalytics. Hence, CVXR is a significant extension of PortfolioAnalytics.
+CVXR is an R package that provides an object-oriented modeling language for convex optimization, including the Second-Order Cone Optimization(SOCopt) required to minimize Coherent Second Moment(CSM) problem, which is not supported by other solvers in PortfolioAnalytics. Hence, CVXR is a significant extension of PortfolioAnalytics.
 
 The purpose of this vignette is to demonstrate examples of optimization problems that can be solved in PortfolioAnalytics with CVXR and its many supported solvers. The problem types covered include not only Linear Programming(LP), Quadratic Programming(QP) but also Second-Order Cone Programming(SOCP). Multiple solvers supported by CVXR can be selected according to optimization types. For example, SCS and ECOS can completely cover the types of problems that ROI can deal with, such as mean-variance and ES problem. In order to better understand the functionality and use of PortfolioAnalytics, users are recommended to read the Vignette [*Introduction to PortfolioAnalytics*](https://cran.r-project.org/web/packages/PortfolioAnalytics/vignettes/portfolio_vignette.pdf) first.
 
@@ -50,7 +50,7 @@ The PortfolioAnalytics package provides the following two main wrapper functions
 
 `optimize.portfolio.rebalancing(R =, portfolio =, optimize_method =, rebalance_on =, training_period =, rolling_window =)`
 
-Different solvers support different types of portfolio optimization problems, which should be specified by the argument `optimize_method`. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` and `optimize.portfolio.rebalancing` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP type portfolio optimization problems, such as maximum mean return and minimum variance portfolio optimization is OSQP, and the default solver for SOCP type portfolio optimizations, such as "robust portfolio optimization" to control for alpha uncertainty, and Expected Quadratic Shortfall (EQS) portfolio optimization, is SCS.
+Different solvers support different types of portfolio optimization problems, which should be specified by the argument `optimize_method`. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` and `optimize.portfolio.rebalancing` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP type portfolio optimization problems, such as maximum mean return and minimum variance portfolio optimization is OSQP, and the default solver for SOCP type portfolio optimizations, such as "robust portfolio optimization" to control for alpha uncertainty, and Coherent Second Moment (CSM) portfolio optimization, is SCS.
 
 | Solver | LP | QP | SOCP |
 | :-- | :----: | :----: | :----: |
@@ -279,30 +279,30 @@ opt_es_1 <- optimize.portfolio(ret_edhec, pspec_es_1, optimize_method = "CVXR")
 opt_es_1
 ```
 
-# 7 Minimizing Expected Quadratic Shortfall
-Expected Quadratic Shortfall(EQS) is also called Second-Moment Coherent Risk Measure(SMCR) in some situations, for example, in @krokhmal2007higher. The objective to minimize EQS is in the form of:
+# 7 Minimizing Coherent Second Moment
+Coherent Second Moment(CSM) is also called Second-Moment Coherent Risk Measure(SMCR) in some situations, for example, in @krokhmal2007higher. The objective to minimize CSM is in the form of:
 $$\min\limits_{\boldsymbol{w}, t} \quad -t + \gamma^{-1}||(t-\boldsymbol{w'r_i})^+||_2$$
-where $\gamma$ is the tail probability and $0<\gamma<1$, $t$ is the value from which quadratic shortfalls are measured in the optimal solution. The default probability is $\gamma = 5\%$. Minimizing EQS could be incorporated into a convex problem as a second-order cone constraints, and PortfolioAnalytics uses SCS in CVXR as the default solver for Second-Order Cone Optimization(SOCopt).
+where $\gamma$ is the tail probability and $0<\gamma<1$, $t$ is the value from which quadratic shortfalls are measured in the optimal solution. The default probability is $\gamma = 5\%$. Minimizing CSM could be incorporated into a convex problem as a second-order cone constraints, and PortfolioAnalytics uses SCS in CVXR as the default solver for Second-Order Cone Optimization(SOCopt).
 
 ## 7.1 Portfolio Object
 The default probability is $\gamma = 5\%$. Specified probability could be given by `arguments`.
 ```{r}
-pspec_eqs <- portfolio.spec(assets = fund_edhec)
-pspec_eqs <- add.constraint(pspec_eqs, type = "full_investment")
-pspec_eqs <- add.constraint(pspec_eqs, type = "long_only")
-# Add objective of minimizing EQS
-pspec_eqs <- add.objective(portfolio = pspec_eqs, type = "risk", name = "EQS",
+pspec_csm <- portfolio.spec(assets = fund_edhec)
+pspec_csm <- add.constraint(pspec_csm, type = "full_investment")
+pspec_csm <- add.constraint(pspec_csm, type = "long_only")
+# Add objective of minimizing CSM
+pspec_csm <- add.objective(portfolio = pspec_csm, type = "risk", name = "CSM",
                           arguments = list(p=0.05))
 ```
 
 ## 7.2 Optimization
 ```{r}
-opt_eqs <- optimize.portfolio(ret_edhec, pspec_eqs, optimize_method = "CVXR")
-opt_eqs
+opt_csm <- optimize.portfolio(ret_edhec, pspec_csm, optimize_method = "CVXR")
+opt_csm
 ```
 
 # 8 Maximizing Mean Return Per Unit Risk
-There are three basic types of risk measures: variance or standard deviation, ES and EQS. The problem of maximizing mean return per unit risk can be solved in a clever way by minimizing risk with a target return constraint, as is described below. For all three of these types of problems, both return and risk objectives should be used in PortfolioAnalytics. Then for each of these three optimization problems an appropriate argument needs to be given to the `optimize.portfolio` to specify the type of problem, as we describe below.
+There are three basic types of risk measures: variance or standard deviation, ES and CSM. The problem of maximizing mean return per unit risk can be solved in a clever way by minimizing risk with a target return constraint, as is described below. For all three of these types of problems, both return and risk objectives should be used in PortfolioAnalytics. Then for each of these three optimization problems an appropriate argument needs to be given to the `optimize.portfolio` to specify the type of problem, as we describe below.
 
 ## 8.1 Maximum Sharpe Ratio Portfolios
 The Sharpe Ratio of a random return $r_P$ of a portfolio $P$ is defined as:
@@ -354,29 +354,29 @@ pspec_ESratio <- add.objective(pspec_ESratio, type = "risk", name = "ES",
 optimize.portfolio(ret_edhec, pspec_ESratio, optimize_method = "CVXR", ESratio = TRUE)
 ```
 
-## 8.3 Maximum EQS ratio Portfolios
-The EQS ratio of a random return $r_P$ of a portfolio $P$ is defined as:
-$$\frac{E(r_P) - r_f}{EQS_{\gamma}(r_P)}$$
-Similar to maximizing Sharpe Ratio, the problem maximizing EQS ratio could be formulated as a minimizing EQS problem with a budget normalization constraint.
+## 8.3 Maximum CSM ratio Portfolios
+The CSM ratio of a random return $r_P$ of a portfolio $P$ is defined as:
+$$\frac{E(r_P) - r_f}{CSM_{\gamma}(r_P)}$$
+Similar to maximizing Sharpe Ratio, the problem maximizing CSM ratio could be formulated as a minimizing CSM problem with a budget normalization constraint.
 
-When creating the portfolio, both return and EQS objectives should be given. The argument `EQSratio = ` is used to specify the problem type and the default value is `EQSratio = TRUE`. If `EQSratio = FALSE`, the action will be to minimize EQS ignoring the return objective. The default $\gamma=0.05$, and it can be specified by `arguments`.
+When creating the portfolio, both return and CSM objectives should be given. The argument `CSMratio = ` is used to specify the problem type and the default value is `CSMratio = TRUE`. If `CSMratio = FALSE`, the action will be to minimize CSM ignoring the return objective. The default $\gamma=0.05$, and it can be specified by `arguments`.
 ```{r}
 # Create portfolio object
-pspec_EQSratio <- portfolio.spec(assets = fund_edhec)
-## Add constraints of maximizing return per unit EQS
-pspec_EQSratio <- add.constraint(pspec_EQSratio, type = "full_investment")
-pspec_EQSratio <- add.constraint(pspec_EQSratio, type = "long_only")
-## Add objectives of maximizing return per unit EQS
-pspec_EQSratio <- add.objective(pspec_EQSratio, type = "return", name = "mean")
-pspec_EQSratio <- add.objective(pspec_EQSratio, type = "risk", name = "EQS",
+pspec_CSMratio <- portfolio.spec(assets = fund_edhec)
+## Add constraints of maximizing return per unit CSM
+pspec_CSMratio <- add.constraint(pspec_CSMratio, type = "full_investment")
+pspec_CSMratio <- add.constraint(pspec_CSMratio, type = "long_only")
+## Add objectives of maximizing return per unit CSM
+pspec_CSMratio <- add.objective(pspec_CSMratio, type = "return", name = "mean")
+pspec_CSMratio <- add.objective(pspec_CSMratio, type = "risk", name = "CSM",
                                 arguments = list(p=0.05))
 
 # Optimization
-optimize.portfolio(ret_edhec, pspec_EQSratio, optimize_method = "CVXR", EQSratio = TRUE)
+optimize.portfolio(ret_edhec, pspec_CSMratio, optimize_method = "CVXR", CSMratio = TRUE)
 ```
 
-# 9 Performance of minEQS, minES and minVar Portfolios
-CVXR solvers provide the Second-Order Cone Optimization (SOCopt) capability required to compute minEQS portfolios.  In this Section we use this capability to compute a minEQS portfolio and compare its performance that of minES and minVar portfolios. For these computations, we use a CRSP$\textsuperscript{\textregistered}$ daily returns data set to generate these optimal portfolios and show their performance by plotting cumulative gross returns and efficient frontiers.^[CRSP$\textsuperscript{\textregistered}$ stands for the Center for Research in Security Prices, LLC.] Specifically, the data set consists of 30 smallcap stocks from 1993-01 to 2015-12, contained in the stocksCRSPdaily data object in the PCRA package available on CRAN.  The 30 smallcaps are the 30 of the 106 smallcap stocks with the largest market capitalization.
+# 9 Performance of minCSM, minES and minVar Portfolios
+CVXR solvers provide the Second-Order Cone Optimization (SOCopt) capability required to compute minCSM portfolios.  In this Section we use this capability to compute a minCSM portfolio and compare its performance that of minES and minVar portfolios. For these computations, we use a CRSP$\textsuperscript{\textregistered}$ daily returns data set to generate these optimal portfolios and show their performance by plotting cumulative gross returns and efficient frontiers.^[CRSP$\textsuperscript{\textregistered}$ stands for the Center for Research in Security Prices, LLC.] Specifically, the data set consists of 30 smallcap stocks from 1993-01 to 2015-12, contained in the stocksCRSPdaily data object in the PCRA package available on CRAN.  The 30 smallcaps are the 30 of the 106 smallcap stocks with the largest market capitalization.
 
 The entire back-testing part is relatively slow, and takes most of the time in this Vignette. To give a sense of typical times, I provide the computing times for my MacBook Air with M2, 8-Core CPU, 8-Core GPU and 16-core Neural Engine. The backtesting in Sections 9.1 and Section 9.2 takes about 3 minutes each to run, and the average running time for generating efficient frontiers in Section 9.3 is about 30 seconds.
 
@@ -420,22 +420,22 @@ tsPlotMP(retM_CRSP_5[, 1:10])
 Fig 9.1
 \end{center}
 
-## 9.1 Backtesting with GMV, GMES, GMEQS portfolios
-In this example, we use daily return of all the CRSP$\textsuperscript{\textregistered}$ 30 stocks to generate a comparative backtesting among Global Minimum Variance (GMV), Global Minimum ES (GMES) and Global Minimum EQS (GMEQS) portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
+## 9.1 Backtesting with GMV, GMES, GMCSM portfolios
+In this example, we use daily return of all the CRSP$\textsuperscript{\textregistered}$ 30 stocks to generate a comparative backtesting among Global Minimum Variance (GMV), Global Minimum ES (GMES) and Global Minimum CSM (GMCSM) portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
 ```{r, echo=FALSE}
 # test run time
 start_time1 <- Sys.time()
 ```
 
 ```{r, warning=FALSE}
-# Generate GMV, GMES and GMEQS portfolios
+# Generate GMV, GMES and GMCSM portfolios
 pspec_sc <- portfolio.spec(assets = sc30largest)
 pspec_sc <- add.constraint(pspec_sc, type = "full_investment")
 pspec_sc <- add.constraint(pspec_sc, type = "long_only")
 
 pspec_GMV <- add.objective(pspec_sc, type = "risk", name = "var")
 pspec_GMES <- add.objective(pspec_sc, type = "risk", name = "ES")
-pspec_GMEQS <- add.objective(pspec_sc, type = "risk", name = "EQS")
+pspec_GMCSM <- add.objective(pspec_sc, type = "risk", name = "CSM")
 
 # Optimize Portfolio at Monthly Rebalancing and 500-Day Training
 bt.GMV <- optimize.portfolio.rebalancing(retD_CRSP, pspec_GMV,
@@ -448,7 +448,7 @@ bt.ES <- optimize.portfolio.rebalancing(retD_CRSP, pspec_GMES,
                                            rebalance_on = "months",
                                            training_period = 30,
                                            rolling_window = 500)
-bt.EQS <- optimize.portfolio.rebalancing(retD_CRSP, pspec_GMEQS,
+bt.CSM <- optimize.portfolio.rebalancing(retD_CRSP, pspec_GMCSM,
                                            optimize_method = "CVXR",
                                            rebalance_on = "months",
                                            training_period = 30,
@@ -461,17 +461,17 @@ wts.GMV <- wts.GMV[complete.cases(wts.GMV),]
 wts.ES <- extractWeights(bt.ES)
 wts.ES <- wts.ES[complete.cases(wts.ES),]
 
-wts.EQS <- extractWeights(bt.EQS)
-wts.EQS <- wts.EQS[complete.cases(wts.EQS),]
+wts.CSM <- extractWeights(bt.CSM)
+wts.CSM <- wts.CSM[complete.cases(wts.CSM),]
 
 # Compute cumulative returns of three portfolios
 GMV <- Return.rebalancing(retM_CRSP, wts.GMV)
 ES <- Return.rebalancing(retM_CRSP, wts.ES)
-EQS <- Return.rebalancing(retM_CRSP, wts.EQS)
+CSM <- Return.rebalancing(retM_CRSP, wts.CSM)
 
-# Combine GMV, ES and EQS portfolio cumulative returns
-ret.comb <- na.omit(merge(GMV, ES, EQS, all=F))
-names(ret.comb) <- c("GMV", "GMES", "GMEQS")
+# Combine GMV, ES and CSM portfolio cumulative returns
+ret.comb <- na.omit(merge(GMV, ES, CSM, all=F))
+names(ret.comb) <- c("GMV", "GMES", "GMCSM")
 
 backtest.plot(ret.comb, colorSet = c("black", "darkblue", "darkgreen"), 
               ltySet = c(3, 2, 1))
@@ -487,19 +487,19 @@ cat("The run time for Figure 9.2 is", format(round(runningtime1, 2)))
 ```
 
 
-## 9.2 Backtesting with SR, ESratio, EQSratio portfolios
-In this example, we use daily return of all the CRSP$\textsuperscript{\textregistered}$ 30 stocks to generate a comparative backtesting among Maximum Sharpe Ratio (SR), Maximum ES Ratio (ESratio) and Maximum EQS Ratio (EQSratio) portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
+## 9.2 Backtesting with SR, ESratio, CSMratio portfolios
+In this example, we use daily return of all the CRSP$\textsuperscript{\textregistered}$ 30 stocks to generate a comparative backtesting among Maximum Sharpe Ratio (SR), Maximum ES Ratio (ESratio) and Maximum CSM Ratio (CSMratio) portfolio. The strategy is to rebalance the portfolio at the end of each month with a rolling window of 500 days, and the performance of backtesting could be shown as a plot of cumulative returns and a plot of drawdown.
 ```{r, echo=FALSE}
 # test run time
 start_time2 <- Sys.time()
 ```
 
 ```{r, warning=FALSE}
-# Generate GMV, GMES and GMEQS portfolios
+# Generate GMV, GMES and GMCSM portfolios
 pspec_sc_ratio <- add.objective(pspec_sc, type = "return", name = "mean")
 pspec_Sr <- add.objective(pspec_sc_ratio, type = "risk", name = "var")
 pspec_ESr <- add.objective(pspec_sc_ratio, type = "risk", name = "ES")
-pspec_EQSr <- add.objective(pspec_sc_ratio, type = "risk", name = "EQS")
+pspec_CSMr <- add.objective(pspec_sc_ratio, type = "risk", name = "CSM")
 
 # Optimize Portfolio at Monthly Rebalancing and 500-Day Training
 bt.Sr <- optimize.portfolio.rebalancing(retD_CRSP, pspec_Sr, maxSR = TRUE,
@@ -512,7 +512,7 @@ bt.ESr <- optimize.portfolio.rebalancing(retD_CRSP, pspec_ESr,
                                            rebalance_on = "months",
                                            training_period = 30,
                                            rolling_window = 500)
-bt.EQSr <- optimize.portfolio.rebalancing(retD_CRSP, pspec_EQSr,
+bt.CSMr <- optimize.portfolio.rebalancing(retD_CRSP, pspec_CSMr,
                                            optimize_method = "CVXR",
                                            rebalance_on = "months",
                                            training_period = 30,
@@ -525,17 +525,17 @@ wts.Sr <- wts.Sr[complete.cases(wts.Sr),]
 wts.ESr <- extractWeights(bt.ESr)
 wts.ESr <- wts.ESr[complete.cases(wts.ESr),]
 
-wts.EQSr <- extractWeights(bt.EQSr)
-wts.EQSr <- wts.EQSr[complete.cases(wts.EQSr),]
+wts.CSMr <- extractWeights(bt.CSMr)
+wts.CSMr <- wts.CSMr[complete.cases(wts.CSMr),]
 
 # Compute cumulative returns of three portfolios
 Sr <- Return.rebalancing(retM_CRSP, wts.Sr, rebalance_on = "months")
 ESr <- Return.rebalancing(retM_CRSP, wts.ESr, rebalance_on = "months")
-EQSr <- Return.rebalancing(retM_CRSP, wts.EQSr, rebalance_on = "months")
+CSMr <- Return.rebalancing(retM_CRSP, wts.CSMr, rebalance_on = "months")
 
-# Combine Sr, ESr and EQSr portfolio cumulative returns
-ret.comb <- na.omit(merge(Sr, ESr, EQSr, all=F))
-names(ret.comb) <- c("Sharpe ratio", "ES ratio", "EQS ratio")
+# Combine Sr, ESr and CSMr portfolio cumulative returns
+ret.comb <- na.omit(merge(Sr, ESr, CSMr, all=F))
+names(ret.comb) <- c("Sharpe ratio", "ES ratio", "CSM ratio")
 
 backtest.plot(ret.comb, colorSet = c("black", "darkblue", "darkgreen"), 
               ltySet = c(3, 2, 1))
@@ -551,7 +551,7 @@ cat("The run time for Figure 9.3 is", format(round(runningtime2, 2)))
 ```
 
 ## 9.3 Efficient Frontier
-We generate efficient frontiers with mean-StdDev, mean-ES and mean-EQS portfolios using 30 stocks from CRSP$\textsuperscript{\textregistered}$ data set. For illustrative purposes, we use the last five years
+We generate efficient frontiers with mean-StdDev, mean-ES and mean-CSM portfolios using 30 stocks from CRSP$\textsuperscript{\textregistered}$ data set. For illustrative purposes, we use the last five years
 Considering that the data may show different properties over a long period of time, we only use the monthly return in the last 5 years to generate efficient frontiers, that is from 2011-01 to 2015-12 and defined in Section 2.3 as `retM_CRSP_5`. We can use `create.EfficientFrontier` to calculate the mean value and risk value for the frontier, then use `chart.EfficientFrontier` to draw the frontier.
 
 ### 9.3.1 Mean-StdDev Efficient Frontier
@@ -702,22 +702,22 @@ ES portfolio with a larger tail probability will have better performance, but th
 
 This plot mainly shows that the same portfolio will have different ES values under different tail probabilities. For example, the portfolio that reaches the maximum return, which is the right endpoint of each mean-ES efficient frontier. They are the same portfolio, but the ES values are different. It informs us the importance of tail probability for calculating ES. Different tail probabilities only focus on risks in different degrees, rather than changes in risk levels.
 
-### 9.3.3 Mean-EQS Efficient Frontier
+### 9.3.3 Mean-CSM Efficient Frontier
 ```{r, warning=FALSE}
-# Mean-EQS Efficient Frontier
-meaneqs.ef <- create.EfficientFrontier(R = retM_CRSP_5, portfolio = pspec_sc, 
-                                       type = "mean-EQS")
-chart.EfficientFrontier(meaneqs.ef, match.col = "EQS", type = "l",
-                        chart.assets = FALSE, main = "Mean-EQS Efficient Frontier",
-                        RAR.text = "EQS ratio", pch = 1)
+# Mean-CSM Efficient Frontier
+meancsm.ef <- create.EfficientFrontier(R = retM_CRSP_5, portfolio = pspec_sc, 
+                                       type = "mean-CSM")
+chart.EfficientFrontier(meancsm.ef, match.col = "CSM", type = "l",
+                        chart.assets = FALSE, main = "Mean-CSM Efficient Frontier",
+                        RAR.text = "CSM ratio", pch = 1)
 ```
 \begin{center}
 Fig 9.10
 \end{center}
-Mean-EQS efficient frontier is more like a piecewise function rather than a smooth curve.
+Mean-CSM efficient frontier is more like a piecewise function rather than a smooth curve.
 
-### 9.3.4 Efficient Frontiers Comparison among minStd, minES and minEQS portfolios
-In order to calculate the value of StdDev, ES and EQS of a portfolio, we provide a new function `extract_risk(R =, w =)`. Asset returns `R` and the portfolio weights `w` should be specified when using the function, `ES_alpha` and `EQS_alpha` are alternative arguments and the default values are 0.05.
+### 9.3.4 Efficient Frontiers Comparison among minStd, minES and minCSM portfolios
+In order to calculate the value of StdDev, ES and CSM of a portfolio, we provide a new function `extract_risk(R =, w =)`. Asset returns `R` and the portfolio weights `w` should be specified when using the function, `ES_alpha` and `CSM_alpha` are alternative arguments and the default values are 0.05.
 ```{r}
 # usage example: minStd Portfolio
 minstd_port <- add.objective(pspec_sc, type = "risk", name = "StdDev")
@@ -727,10 +727,10 @@ minstd_w <- optimize.portfolio(retM_CRSP_5, minstd_port, optimize_method = "CVXR
 extract_risk(retM_CRSP_5, minstd_w)
 
 # risk values with specific alpha
-extract_risk(retM_CRSP_5, minstd_w, ES_alpha = 0.1, EQS_alpha = 0.1)
+extract_risk(retM_CRSP_5, minstd_w, ES_alpha = 0.1, CSM_alpha = 0.1)
 ```
 
-For comparing a specific risk type in minStd, minES and minEQS portfolios and generating multiple efficient frontiers, we provide a new function
+For comparing a specific risk type in minStd, minES and minCSM portfolios and generating multiple efficient frontiers, we provide a new function
 
 `chart.EfficientFrontierCompare(R =, portfolio =, risk_type =, match.col =, guideline =)`
 
@@ -744,9 +744,9 @@ chart.EfficientFrontierCompare(R = retM_CRSP_5, portfolio = pspec_sc, risk_type 
 Fig 9.11
 \end{center}
 ```{r}
-# example 2: Compare ES of minStd, minES and minEQS portfolios without guideline
+# example 2: Compare ES of minStd, minES and minCSM portfolios without guideline
 chart.EfficientFrontierCompare(R = retM_CRSP_5, portfolio = pspec_sc, risk_type = "ES",
-                               match.col = c("StdDev", "ES", "EQS"), guideline = FALSE,
+                               match.col = c("StdDev", "ES", "CSM"), guideline = FALSE,
                                col = c(1,2,4), lty = c(1, 2, 4), lwd = c(2, 2, 2))
 ```
 \begin{center}
@@ -754,13 +754,13 @@ Fig 9.12
 \end{center}
 
 # Acknowledgements
-This vignette aims to show the extended functionality of PortfolioAnalytics. CVXR solvers and EQS objective in PortfolioAnalytics were implemented by me, Xinran Zhao, when I was a student in the University of Washington Department of Applied Mathematics Computational Finance and Risk Management M.S. degree program (MS-CFRM), and was supported by Google Summer of Code (GSoC 2022) in the summer of 2022 with mentors Doug Martin and Steve Murray.
+This vignette aims to show the extended functionality of PortfolioAnalytics. CVXR solvers and CSM objective in PortfolioAnalytics were implemented by me, Xinran Zhao, when I was a student in the University of Washington Department of Applied Mathematics Computational Finance and Risk Management M.S. degree program (MS-CFRM), and was supported by Google Summer of Code (GSoC 2022) in the summer of 2022 with mentors Doug Martin and Steve Murray.
 
-In the following year, I continuously generated more functions and improved this vignette, not limited to the implementation of CVXR and EQS, but more focused on their applications, such as back-testing analysis and efficient frontiers analysis. This process is very long, and I am grateful to everyone who accompanies and inspires me.
+In the following year, I continuously generated more functions and improved this vignette, not limited to the implementation of CVXR and CSM, but more focused on their applications, such as back-testing analysis and efficient frontiers analysis. This process is very long, and I am grateful to everyone who accompanies and inspires me.
 
-Doug Martin provided a lot of guidance on the derivation, application, and subsequent research directions of EQS. He also provided feedback on the style and content of this vignette. I am very grateful for learning the habit of research in this project.
+Doug Martin provided a lot of guidance on the derivation, application, and subsequent research directions of CSM. He also provided feedback on the style and content of this vignette. I am very grateful for learning the habit of research in this project.
 
-Steve Murray is an expert in optimization. I'm greatly benefited by his analyzing different CVXR solvers, mathematical derivation in second-order cone optimization and mean-EQS efficient frontier, and his assistance in R coding.
+Steve Murray is an expert in optimization. I'm greatly benefited by his analyzing different CVXR solvers, mathematical derivation in second-order cone optimization and mean-CSM efficient frontier, and his assistance in R coding.
 
 Yifu Kang, who is my classmate in MS-CFRM and was funded by another PortfolioAnalytics GSoC 2022 project, expanded PortfolioAnalytics in custom robust covariance matrix. We have collaborated extensively on improving existing functions and interacting with each other's functions.
 
