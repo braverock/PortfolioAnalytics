@@ -37,9 +37,12 @@
 % \VignetteIndexEntry{An Introduction to Portfolio Optimization with PortfolioAnalytics}
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
-\title{Introduction to PortfolioAnalytics}
+\title{An Introduction to Portfolio Optimization with PortfolioAnalytics}
 \author{Ross Bennett}
+
+\date{May 17, 2018}
 
 \maketitle
 

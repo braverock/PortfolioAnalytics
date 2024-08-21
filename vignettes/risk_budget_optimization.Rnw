@@ -31,9 +31,9 @@
 % \VignetteIndexEntry{Portfolio Optimization with CVaR budgets in PortfolioAnalytics}
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
-\title{Vignette: Portfolio Optimization with CVaR budgets\\
-in PortfolioAnalytics}
+\title{Portfolio Optimization with CVaR budgets in PortfolioAnalytics}
 \author{Kris Boudt, Peter Carl and Brian Peterson }
 \date{June 1, 2010}
 

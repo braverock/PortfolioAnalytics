@@ -6,12 +6,14 @@
 \usepackage{amsmath}
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 % \VignetteIndexEntry{Portfolio Optimization with ROI in PortfolioAnalytics}
 
-\title{Using the ROI solvers with PortfolioAnalytics}
+\title{Portfolio Optimization with ROI in PortfolioAnalytics}
 \author{Ross Bennett}
 
+\date{May 17, 2018}
 \maketitle
 
 \begin{abstract}
