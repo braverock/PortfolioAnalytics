@@ -17,6 +17,7 @@
 #' @param drawdown_on the plot will shadow the full time period of the maximum drawdown and recovery of the first portfolio.
 #' Use number (e.g. 1, 2, 3) to indicate which portfolio drawdown interval you wish to track, or NULL to not shadow any period.
 #' @param plotType "cumRet", "drawdown", or the default is both
+#' @param main users can design title by providing a character of main
 #' @param colorSet users can design the color by providing a vector of color
 #' @param ltySet users can design lty by providing a vector of lty
 #' @param lwdSet users can design lwd by providing a vector of lwd

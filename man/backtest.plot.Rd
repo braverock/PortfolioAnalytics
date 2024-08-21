@@ -25,6 +25,8 @@ Use number (e.g. 1, 2, 3) to indicate which portfolio drawdown interval you wish
 
 \item{plotType}{"cumRet", "drawdown", or the default is both}
 
+\item{main}{users can design title by providing a character of main}
+
 \item{colorSet}{users can design the color by providing a vector of color}
 
 \item{ltySet}{users can design lty by providing a vector of lty}
