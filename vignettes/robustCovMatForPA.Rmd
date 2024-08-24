@@ -1,7 +1,7 @@
 ---
 title: "Using Robust Covariance Matrix Estimators in PortfolioAnalytics"
 author: "Yifu Kang and Doug Martin"
-date: 'July 26, 2023'
+date: 'August 23, 2024'
 output:
   pdf_document:
     toc: true
@@ -73,12 +73,12 @@ stocksCRSPweekly <- getPCRAData("stocksCRSPweekly")
 dateRange    <- c("2006-01-01", "2012-12-31")
 stockItems <- c("Date", "TickerLast", "CapGroupLast", "Return", "MktIndexCRSP")
 returnsAll <- selectCRSPandSPGMI("weekly",
-                                   dateRange = dateRange,
-                                   stockItems = stockItems, 
-                                   factorItems = NULL, 
-                                   subsetType = "CapGroupLast",
-                                   subsetValues = "SmallCap", 
-                                   outputType = "xts")
+                                  dateRange = dateRange,
+                                  stockItems = stockItems, 
+                                  factorItems = NULL, 
+                                  subsetType = "CapGroupLast",
+                                  subsetValues = "SmallCap", 
+                                  outputType = "xts")
 returns <- returnsAll[,1:30]
 MARKET <- returnsAll[, 107]
 returns10 <- returnsAll[140:300, 21:30]
@@ -198,10 +198,9 @@ custom.covRob.MM <- function(R, ...){
 Here is how to use the function in `optimize.portfolios`, with different optional argument parameters than the default values, and store the resulting portfolio weights and Sharpe ratio for later comparisons:\
 
 ```{r}
-opt <- optimize.portfolio(returns10, pspec, 
-                   optimize_method = "CVXR", 
-                   momentFUN = "custom.covRob.MM",
-                   maxit = 100, tol = 1e-5)
+opt <- optimize.portfolio(returns10, pspec, optimize_method = "CVXR", 
+                          momentFUN = "custom.covRob.MM",
+                          maxit = 100, tol = 1e-5)
 outCovRobMM <- opt.outputMvo(opt, returns10, digits = 3, frequency = "weekly")
 (WtsCovRobMM <- outCovRobMM$Wgts)
 ```
@@ -220,7 +219,8 @@ custom.covRob.Rocke <- function(R, ...){
   if(hasArg(propmin)) propmin = match.call(expand.dots = TRUE)$propmin else propmin = 2
   if(hasArg(qs)) qs = match.call(expand.dots = TRUE)$qs else qs = 50
   
-  robustCov <- RobStatTM::covRobRocke(X = R, initial = initial, maxsteps = maxsteps, propmin = propmin, 
+  robustCov <- RobStatTM::covRobRocke(X = R, initial = initial, 
+                                      maxsteps = maxsteps, ropmin = propmin, 
                                       qs = qs, tol = tol, maxit = maxit)
   
   out$sigma <- robustCov$cov
@@ -232,10 +232,9 @@ custom.covRob.Rocke <- function(R, ...){
 Here is how to use the function `custom.covRobRocke` in `optimize.portfolio`, with different optional argument parameters than the default values, and store the resulting portfolio weights and Sharpe ratio for later comparisons:\
 
 ```{r}
-opt <- optimize.portfolio(returns10, pspec, 
-                   optimize_method = "CVXR", 
-                   momentFUN = "custom.covRob.Rocke",
-                   tol = 1e-5, maxit =100, maxsteps = 7)
+opt <- optimize.portfolio(returns10, pspec, optimize_method = "CVXR", 
+                          momentFUN = "custom.covRob.Rocke",
+                          tol = 1e-5, maxit =100, maxsteps = 7)
 outCovRobRocke <- opt.outputMvo(opt, returns10, digits = 3, frequency = "weekly")
 (WtsCovRobRocke <- outCovRobRocke$Wgts)
 ```
@@ -254,16 +253,16 @@ custom.covRob.Mcd <- function(R, ...){
   if(hasArg(nsamp)) nsamp = match.call(expand.dots = TRUE)$nsamp else nsamp = control$nsamp
   if(hasArg(nmini)) nmini = match.call(expand.dots = TRUE)$nmini else nmini = control$nmini
   if(hasArg(kmini)) kmini = match.call(expand.dots = TRUE)$kmini else kmini = control$kmini
-  if(hasArg(scalefn)) scalefn = match.call(expand.dots = TRUE)$scalefn else scalefn = control$scalefn
+  if(hasArg(scalefn)) scalefn=match.call(expand.dots=TRUE)$scalefn else scalefn=control$scalefn
   if(hasArg(maxcsteps)) maxcsteps = match.call(expand.dots = TRUE)$maxcsteps 
   else maxcsteps = control$maxcsteps
   
   if(hasArg(initHsets)) initHsets = match.call(expand.dots = TRUE)$initHsets 
   else initHsets = control$initHsets
   
-  if(hasArg(seed)) seed = match.call(expand.dots = TRUE)$seed else seed = control$seed
-  if(hasArg(tolSolve)) tolSolve = match.call(expand.dots = TRUE)$tolSolve else tolSolve = control$tolSolve
-  if(hasArg(wgtFUN)) wgtFUN = match.call(expand.dots = TRUE)$wgtFUN else wgtFUN = control$wgtFUN
+  if(hasArg(seed)) seed=match.call(expand.dots=TRUE)$seed else seed=control$seed
+  if(hasArg(tolSolve)) tolSolve=match.call(expand.dots=TRUE)$tolSolve else tolSolve=control$tolSolve
+  if(hasArg(wgtFUN)) wgtFUN=match.call(expand.dots=TRUE)$wgtFUN else wgtFUN=control$wgtFUN
   
   if(hasArg(use.correction)) use.correction = match.call(expand.dots = TRUE)$use.correction 
   else use.correction = control$use.correction
@@ -283,10 +282,9 @@ custom.covRob.Mcd <- function(R, ...){
 The above function allows you to substitute any of the many default parameters with your alternative choices. For example, you can use the following code to compute a robust MVO portfolio with the custom.covRob.Mcd estimator, based on the choice of 0.75 for `alpha` and the choice 600 for `nsamp`.\
 
 ```{r}
-opt <- optimize.portfolio(returns10, pspec, 
-                   optimize_method = "CVXR", 
-                   momentFUN = "custom.covRob.Mcd", 
-                   alpha = 0.75, nsamp = 600)
+opt <- optimize.portfolio(returns10, pspec, optimize_method = "CVXR", 
+                          momentFUN = "custom.covRob.Mcd", 
+                          alpha = 0.75, nsamp = 600)
 outCovRobMcd <- opt.outputMvo(opt, returns10, digits = 3, frequency = "weekly")
 (WtsCovRobMcd <- outCovRobMcd$Wgts)
 ```
@@ -294,12 +292,10 @@ outCovRobMcd <- opt.outputMvo(opt, returns10, digits = 3, frequency = "weekly")
 A challenge in using `custom.covRob.Mcd` is that it has a large set of optional argument parameter choices. In some studies one may want to use several or many different sets of such parameters, and in that case the following `MycovRobMcd` "helper" function can be useful.\
 
 ```{r, eval = FALSE}
-MycovRobMcd <- function(alpha = 1/2,
-           nsamp = 500, nmini = 300, kmini = 5,
-           scalefn = "hrv2012", maxcsteps = 200,
-           seed = NULL, tolSolve = 1e-14,
-           wgtFUN = "01.original", beta,
-           use.correction = TRUE
+MycovRobMcd <- function(alpha = 1/2, nsamp = 500, nmini = 300, kmini = 5,
+                        scalefn = "hrv2012", maxcsteps = 200,
+                        seed = NULL, tolSolve = 1e-14,
+                        wgtFUN = "01.original", beta, use.correction = TRUE
   ){
     if(missing(beta) || !is.numeric(beta))
       beta <- 0.975
@@ -318,10 +314,9 @@ So for example, you could use `MycovMcd` to specify the choices 0.75 for `alpha`
 
 ```{r, eval = FALSE}
 covMcd.params <- MycovRobMcd(alpha = 0.75, nsamp = 600)
-opt <- optimize.portfolio(returns, pspec, 
-                   optimize_method = "CVXR", 
-                   momentFUN = "custom.covRob.Mcd", 
-                   control = covMcd.params)
+opt <- optimize.portfolio(returns, pspec, optimize_method = "CVXR", 
+                          momentFUN = "custom.covRob.Mcd",
+                          control = covMcd.params)
 ```
 
 ## Custom covRob.TSGS Estimator
@@ -334,14 +329,14 @@ Here is the `custom.covRob.TSGS function`:\
 
 ```{r, eval = FALSE}
 custom.covRob.TSGS <- function(R, ...){
- if(hasArg(control)) control = match.call(expand.dots = TRUE)$control else control = MycovRobTSGS()
- if(hasArg(filter)) filter = match.call(expand.dots = TRUE)$filter else filter = control$filter
+ if(hasArg(control)) control=match.call(expand.dots=TRUE)$control else control=MycovRobTSGS()
+ if(hasArg(filter)) filter=match.call(expand.dots=TRUE)$filter else filter=control$filter
  
  if(hasArg(partial.impute)) partial.impute = match.call(expand.dots = TRUE)$partial.impute 
  else partial.impute = control$partial.impute
  
  if(hasArg(tol)) tol = match.call(expand.dots=TRUE)$tol else tol=control$tol
- if(hasArg(maxiter)) maxiter = match.call(expand.dots = TRUE)$maxiter else maxiter = control$maxiter
+ if(hasArg(maxiter)) maxiter=match.call(expand.dots=TRUE)$maxiter else maxiter=control$maxiter
  if(hasArg(loss)) loss = match.call(expand.dots = TRUE)$loss else loss = control$loss
  if(hasArg(init)) init = match.call(expand.dots = TRUE)$init else init = control$init
              
@@ -356,9 +351,8 @@ custom.covRob.TSGS <- function(R, ...){
 ```
 
 ```{r}
-opt <- optimize.portfolio(returns10, pspec, 
-                   optimize_method = "CVXR", 
-                   momentFUN = "custom.covRob.TSGS")
+opt <- optimize.portfolio(returns10, pspec, optimize_method = "CVXR", 
+                          momentFUN = "custom.covRob.TSGS")
 outCovRobTSGS <- opt.outputMvo(opt, returns10, digits = 3, frequency = "weekly")
 (WtsCovRobTSGS <- outCovRobTSGS$Wgts)
 ```
@@ -387,7 +381,7 @@ The following table compares the portfolio weights of the covClassic, covRobMM, 
 
 ```{r}
 dat <- data.frame(rbind(WtsCovClassic, WtsCovRobMM, WtsCovRobRocke,
-                 WtsCovRobMcd, WtsCovRobTSGS))
+                        WtsCovRobMcd, WtsCovRobTSGS))
 print.data.frame(dat)
 ```
 
@@ -433,10 +427,10 @@ robPlot <- function(GMV, MARKET, plot=1){
   }
   
   bt.gmv.rob <- optimize.portfolio.rebalancing(returns, pspec,
-                                            optimize_method = "CVXR",
-                                            rebalance_on = "weeks",
-                                            training_period = 100, 
-                                            momentFUN = momentEstFun)
+                                               optimize_method = "CVXR",
+                                               rebalance_on = "weeks",
+                                               training_period = 100, 
+                                               momentFUN = momentEstFun)
   
   # Extract time series of portfolio weights
   wts.gmv.rob <- extractWeights(bt.gmv.rob)
@@ -570,9 +564,16 @@ user.covRob.OGK <- function(R){
 Then the function `user.covRob.OGK` would be used for example in `portfolio.optimize` as follows (try it out):\
 
 ```{r, eval = FALSE}
-opt <- optimize.portfolio(returns, pspec, 
-                   optimize_method = "CVXR", 
-                   momentFUN = "user.covMcd.OGK")
+opt <- optimize.portfolio(returns, pspec, optimize_method = "CVXR", 
+                          momentFUN = "user.covMcd.OGK")
+```
+
+## Print the Value of Moment Settings
+
+This is how you see the numerical values of the mean vector `mu` and the covariance matrix `sigma`. Even if you don't provide any `momentFUN=`, this command will print out the default moment setting values for you.
+
+```{r}
+opt$moment_values
 ```
 
 # Acknowledgements {.unnumbered}
