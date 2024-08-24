@@ -30,8 +30,8 @@ New PortfolioAnalytics Functions:
 
 Enhanced PortfolioAnalytics Functions:
 
-1. optimize.portfolio (enhanced with CVXR solvers and CSM objective)
-2. optimize.portfolio.rebalancing (enhanced with CVXR solvers and CSM objective)
+1. optimize.portfolio (enhanced with CVXR solvers, CSM objective and customizable arg `momentFUN=`)
+2. optimize.portfolio.rebalancing (enhanced with CVXR solvers, CSM objective and customizable arg `momentFUN=`)
 3. create.EfficientFrontier (enhanced with mean-CSM and mean-risk)
 
 
