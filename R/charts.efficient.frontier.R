@@ -835,7 +835,7 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
     points(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), pch=pch.assets, cex=cex.assets)
     x_diff = abs(out$frontier[,1] - out$frontier[1,m.p])
     x_index = min(abs(out$frontier[,1] - out$frontier[1,m.p]))
-    lines(x=c(out$frontier[which(x_diff == x_index),1], out$frontier[1,m.p]), y = c(out$frontier[which(x_diff == x_index),2], out$frontier[1,2]), lty=lty[3], col=col[3], lwd=lwd[3])
+    lines(x=c(out$frontier[which(x_diff == x_index),1], out$frontier[1,m.p]), y = c(out$frontier[which(x_diff == x_index),2], out$frontier[1,2]), lty=lty[4], col=col[4], lwd=lwd[4])
     points(x=c(out$frontier[which(x_diff == x_index),1], out$frontier[1,m.p]), y = c(out$frontier[which(x_diff == x_index),2], out$frontier[1,2]), pch=pch.assets, cex=cex.assets)
     if(labels.assets){
       text(out$frontier[1,1], out$frontier[1,2], labels = paste("(", round(out$frontier[1,1], 4), ",", round(out$frontier[1,2], 4), ")"), pos = 1, cex = cex.assets)
