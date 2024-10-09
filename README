@@ -2,7 +2,7 @@ This V2.1 version of PortfolioAnalytics is an update to the substantial V2.0
 version that was released on 2024-07-03. We first describe the V2.0 features,
 then discuss the R demo capability, and finally we describe the V2.1 features.
 
-XXX Test commit again again
+XXX Test commit again again again.
 
 A primary addition to PortfolioAnalytics in this 2.0 release is the integration 
 of the CVXR solver R package for convex optimization. CVXR supports eleven 
