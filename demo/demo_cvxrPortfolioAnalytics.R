@@ -153,20 +153,20 @@ opt_es_1 <- optimize.portfolio(ret_edhec, pspec_es_1, optimize_method = "CVXR")
 opt_es_1
 
 
-#' 7 MINIMIZING EXPECTED QUADRATIC SHORTFALL
+#' 7 MINIMIZING COHERENT SECOND MOMENT
 
 
-#' Generate min-EQS portfolio
-pspec_eqs <- portfolio.spec(assets = fund_edhec)
-pspec_eqs <- add.constraint(pspec_eqs, type = "full_investment")
-pspec_eqs <- add.constraint(pspec_eqs, type = "long_only")
-#' Add objective of minimizing EQS
-pspec_eqs <- add.objective(portfolio = pspec_eqs, type = "risk", name = "EQS",
+#' Generate min-CSM portfolio
+pspec_csm <- portfolio.spec(assets = fund_edhec)
+pspec_csm <- add.constraint(pspec_csm, type = "full_investment")
+pspec_csm <- add.constraint(pspec_csm, type = "long_only")
+#' Add objective of minimizing CSM
+pspec_csm <- add.objective(portfolio = pspec_csm, type = "risk", name = "CSM",
                           arguments = list(p=0.05))
 
-#' GMEQS with default gamma=0.05
-opt_eqs <- optimize.portfolio(ret_edhec, pspec_eqs, optimize_method = "CVXR")
-opt_eqs
+#' GMCSM with default gamma=0.05
+opt_csm <- optimize.portfolio(ret_edhec, pspec_csm, optimize_method = "CVXR")
+opt_csm
 
 
 #' 8 MAXIMIZING MEAN RETURN PER UNIT RISK
@@ -198,17 +198,17 @@ pspec_ESratio <- add.objective(pspec_ESratio, type = "risk", name = "ES",
 optimize.portfolio(ret_edhec, pspec_ESratio, optimize_method = "CVXR", ESratio = TRUE)
 
 #' Create portfolio object
-pspec_EQSratio <- portfolio.spec(assets = fund_edhec)
-#' Add constraints of maximizing return per unit EQS
-pspec_EQSratio <- add.constraint(pspec_EQSratio, type = "full_investment")
-pspec_EQSratio <- add.constraint(pspec_EQSratio, type = "long_only")
-#' Add objectives of maximizing return per unit EQS
-pspec_EQSratio <- add.objective(pspec_EQSratio, type = "return", name = "mean")
-pspec_EQSratio <- add.objective(pspec_EQSratio, type = "risk", name = "EQS",
+pspec_CSMratio <- portfolio.spec(assets = fund_edhec)
+#' Add constraints of maximizing return per unit CSM
+pspec_CSMratio <- add.constraint(pspec_CSMratio, type = "full_investment")
+pspec_CSMratio <- add.constraint(pspec_CSMratio, type = "long_only")
+#' Add objectives of maximizing return per unit CSM
+pspec_CSMratio <- add.objective(pspec_CSMratio, type = "return", name = "mean")
+pspec_CSMratio <- add.objective(pspec_CSMratio, type = "risk", name = "CSM",
                                 arguments = list(p=0.05))
 
 #' Optimization
-optimize.portfolio(ret_edhec, pspec_EQSratio, optimize_method = "CVXR", EQSratio = TRUE)
+optimize.portfolio(ret_edhec, pspec_CSMratio, optimize_method = "CVXR", CSMratio = TRUE)
 
 
 #' 9 COMPARATIVE PERFORMANCE OF PORTFOLIOS
@@ -244,16 +244,16 @@ retM_CRSP_5 <- tail(retM_CRSP, 60)
 #' time series plot of 10 stocks
 tsPlotMP(retM_CRSP_5[, 1:10])
 
-#' Test run time for Backtesting with GMV, GMES, GMEQS portfolios
+#' Test run time for Backtesting with GMV, GMES, GMCSM portfolios
 start_time1 <- Sys.time() 
 
-#' Generate GMV, GMES and GMEQS portfolios
+#' Generate GMV, GMES and GMCSM portfolios
 pspec_sc <- portfolio.spec(assets = sc30largest)
 pspec_sc <- add.constraint(pspec_sc, type = "full_investment")
 pspec_sc <- add.constraint(pspec_sc, type = "long_only")
 pspec_GMV <- add.objective(pspec_sc, type = "risk", name = "var")
 pspec_GMES <- add.objective(pspec_sc, type = "risk", name = "ES")
-pspec_GMEQS <- add.objective(pspec_sc, type = "risk", name = "EQS")
+pspec_GMCSM <- add.objective(pspec_sc, type = "risk", name = "CSM")
 
 #' Optimize Portfolio at Monthly Rebalancing and 500-Day Training
 bt.GMV <- optimize.portfolio.rebalancing(retD_CRSP, pspec_GMV,
@@ -266,7 +266,7 @@ bt.ES <- optimize.portfolio.rebalancing(retD_CRSP, pspec_GMES,
                                            rebalance_on = "months",
                                            training_period = 30,
                                            rolling_window = 500)
-bt.EQS <- optimize.portfolio.rebalancing(retD_CRSP, pspec_GMEQS,
+bt.CSM <- optimize.portfolio.rebalancing(retD_CRSP, pspec_GMCSM,
                                            optimize_method = "CVXR",
                                            rebalance_on = "months",
                                            training_period = 30,
@@ -277,34 +277,34 @@ wts.GMV <- extractWeights(bt.GMV)
 wts.GMV <- wts.GMV[complete.cases(wts.GMV),]
 wts.ES <- extractWeights(bt.ES)
 wts.ES <- wts.ES[complete.cases(wts.ES),]
-wts.EQS <- extractWeights(bt.EQS)
-wts.EQS <- wts.EQS[complete.cases(wts.EQS),]
+wts.CSM <- extractWeights(bt.CSM)
+wts.CSM <- wts.CSM[complete.cases(wts.CSM),]
 
 #' Compute cumulative returns of three portfolios
 GMV <- Return.rebalancing(retM_CRSP, wts.GMV)
 ES <- Return.rebalancing(retM_CRSP, wts.ES)
-EQS <- Return.rebalancing(retM_CRSP, wts.EQS)
+CSM <- Return.rebalancing(retM_CRSP, wts.CSM)
 
-#' Combine GMV, ES and EQS portfolio cumulative returns
-ret.comb <- na.omit(merge(GMV, ES, EQS, all=F))
-names(ret.comb) <- c("GMV", "GMES", "GMEQS")
+#' Combine GMV, ES and CSM portfolio cumulative returns
+ret.comb <- na.omit(merge(GMV, ES, CSM, all=F))
+names(ret.comb) <- c("GMV", "GMES", "GMCSM")
 
 backtest.plot(ret.comb, colorSet = c("black", "darkblue", "darkgreen"), 
               ltySet = c(3, 2, 1))
 
-#' Return run-time for Backtesting with GMV, GMES, GMEQS portfolios
+#' Return run-time for Backtesting with GMV, GMES, GMCSM portfolios
 end_time1 <- Sys.time()
 runningtime1 <- end_time1 - start_time1
 cat("The run time for Figure 9.2 is", format(round(runningtime1, 2)))
 
-#' Test run-time for Backtesting with SR, ESratio, EQSratio portfolios
+#' Test run-time for Backtesting with SR, ESratio, CSMratio portfolios
 start_time2 <- Sys.time()
 
-#' Generate GMV, GMES and GMEQS portfolios
+#' Generate GMV, GMES and GMCSM portfolios
 pspec_sc_ratio <- add.objective(pspec_sc, type = "return", name = "mean")
 pspec_Sr <- add.objective(pspec_sc_ratio, type = "risk", name = "var")
 pspec_ESr <- add.objective(pspec_sc_ratio, type = "risk", name = "ES")
-pspec_EQSr <- add.objective(pspec_sc_ratio, type = "risk", name = "EQS")
+pspec_CSMr <- add.objective(pspec_sc_ratio, type = "risk", name = "CSM")
 
 #' Optimize Portfolio at Monthly Rebalancing and 500-Day Training
 bt.Sr <- optimize.portfolio.rebalancing(retD_CRSP, pspec_Sr, maxSR = TRUE,
@@ -317,7 +317,7 @@ bt.ESr <- optimize.portfolio.rebalancing(retD_CRSP, pspec_ESr,
                                            rebalance_on = "months",
                                            training_period = 30,
                                            rolling_window = 500)
-bt.EQSr <- optimize.portfolio.rebalancing(retD_CRSP, pspec_EQSr,
+bt.CSMr <- optimize.portfolio.rebalancing(retD_CRSP, pspec_CSMr,
                                            optimize_method = "CVXR",
                                            rebalance_on = "months",
                                            training_period = 30,
@@ -328,21 +328,21 @@ wts.Sr <- extractWeights(bt.Sr)
 wts.Sr <- wts.Sr[complete.cases(wts.Sr),]
 wts.ESr <- extractWeights(bt.ESr)
 wts.ESr <- wts.ESr[complete.cases(wts.ESr),]
-wts.EQSr <- extractWeights(bt.EQSr)
-wts.EQSr <- wts.EQSr[complete.cases(wts.EQSr),]
+wts.CSMr <- extractWeights(bt.CSMr)
+wts.CSMr <- wts.CSMr[complete.cases(wts.CSMr),]
 
 #' Compute cumulative returns of three portfolios
 Sr <- Return.rebalancing(retM_CRSP, wts.Sr, rebalance_on = "months")
 ESr <- Return.rebalancing(retM_CRSP, wts.ESr, rebalance_on = "months")
-EQSr <- Return.rebalancing(retM_CRSP, wts.EQSr, rebalance_on = "months")
+CSMr <- Return.rebalancing(retM_CRSP, wts.CSMr, rebalance_on = "months")
 
-#' Combine Sr, ESr and EQSr portfolio cumulative returns
-ret.comb <- na.omit(merge(Sr, ESr, EQSr, all=F))
-names(ret.comb) <- c("Sharpe ratio", "ES ratio", "EQS ratio")
+#' Combine Sr, ESr and CSMr portfolio cumulative returns
+ret.comb <- na.omit(merge(Sr, ESr, CSMr, all=F))
+names(ret.comb) <- c("Sharpe ratio", "ES ratio", "CSM ratio")
 backtest.plot(ret.comb, colorSet = c("black", "darkblue", "darkgreen"), 
               ltySet = c(3, 2, 1))
 
-#' Return run-time for Backtesting with SR, ESratio, EQSratio portfolios
+#' Return run-time for Backtesting with SR, ESratio, CSMratio portfolios
 end_time2 <- Sys.time()
 runningtime2 <- end_time2 - start_time2
 cat("The run time for Figure 9.3 is", format(round(runningtime2, 2)))
@@ -444,29 +444,46 @@ chart.EfficientFrontierOverlay(R = retM_CRSP_5, portfolio_list = portf_ES_list,
                                main = "Overlay Mean-ES Efficient Frontiers",
                                xlim = c(0.035, 0.165), ylim = c(0.005, 0.03))
 
-#' Mean-EQS Efficient Frontier
-meaneqs.ef <- create.EfficientFrontier(R = retM_CRSP_5, portfolio = pspec_sc, 
-                                       type = "mean-EQS")
-chart.EfficientFrontier(meaneqs.ef, match.col = "EQS", type = "l",
-                        chart.assets = FALSE, main = "Mean-EQS Efficient Frontier",
-                        RAR.text = "EQS ratio", pch = 1)
+#' Mean-CSM Efficient Frontier
+meancsm.ef <- create.EfficientFrontier(R = retM_CRSP_5, portfolio = pspec_sc, 
+                                       type = "mean-CSM")
+chart.EfficientFrontier(meancsm.ef, match.col = "CSM", type = "l",
+                        chart.assets = FALSE, main = "Mean-CSM Efficient Frontier",
+                        RAR.text = "CSM ratio", pch = 1)
 
-#' usage example: minStd Portfolio
+#' minStd Portfolio
 minstd_port <- add.objective(pspec_sc, type = "risk", name = "StdDev")
-minstd_w <- optimize.portfolio(retM_CRSP_5, minstd_port, optimize_method = "CVXR")$weight
+minstd_opt <- optimize.portfolio(retM_CRSP_5, minstd_port, optimize_method = "CVXR")
+minstd_w <- minstd_opt$weight
 
-#' risk values with default alpha = 0.05
+#' extract risk example 1: risk values with default alpha = 0.05
 extract_risk(retM_CRSP_5, minstd_w)
 
-#' risk values with specific alpha
-extract_risk(retM_CRSP_5, minstd_w, ES_alpha = 0.1, EQS_alpha = 0.1)
+#' extract risk example 2: risk values with specific alpha
+extract_risk(retM_CRSP_5, minstd_w, ES_alpha = 0.1, CSM_alpha = 0.1)
 
-#' example 1: Compare StdDev of minStd and minES portfolios with guideline
+#' extract risk example 3: risk values with customized momentFUN
+minstd_opt_custM <- optimize.portfolio(retM_CRSP_5, minstd_port, optimize_method = "CVXR", 
+                                       momentFUN = 'custom.covRob.Mcd')
+extract_risk(retM_CRSP_5, minstd_w, moment_setting = minstd_opt_custM$moment_values)
+
+#' EFCompare example 1: Compare StdDev of minStd and minES portfolios with guideline
 chart.EfficientFrontierCompare(R = retM_CRSP_5, portfolio = pspec_sc, risk_type = "StdDev",
                                match.col = c("StdDev", "ES"), lwd = c(2, 2))
 
-#' example 2: Compare ES of minStd, minES and minEQS portfolios without guideline
+#' EFCompare example 2: Compare ES of minStd, minES and minCSM portfolios without guideline
 chart.EfficientFrontierCompare(R = retM_CRSP_5, portfolio = pspec_sc, risk_type = "ES",
-                               match.col = c("StdDev", "ES", "EQS"), guideline = FALSE,
+                               match.col = c("StdDev", "ES", "CSM"), guideline = FALSE,
                                col = c(1,2,4), lty = c(1, 2, 4), lwd = c(2, 2, 2))
 
+#' plotFrontiers example 1: Compare mean-CSM frontiers for minvar, minES, minCSM portfolio
+ef1 = meancsm.efficient.frontier(pspec_sc, retM_CRSP_5, optimize_method = 'CVXR')
+ef2 = meanetl.efficient.frontier(pspec_sc, retM_CRSP_5, optimize_method = 'CVXR')
+ef3 = meanvar.efficient.frontier(pspec_sc, retM_CRSP_5, optimize_method = 'CVXR')
+plotFrontiers(R=retM_CRSP_5, frontiers=list(ef1, ef2, ef3), risk='CSM')
+
+#' plotFrontiers example 2: Compare mean-var frontiers with different moment settings
+ef4 = meanvar.efficient.frontier(pspec_sc, retM_CRSP_5, optimize_method = 'CVXR')
+ef5 = meanvar.efficient.frontier(pspec_sc, retM_CRSP_5, optimize_method = 'CVXR',
+                                 momentFUN = 'custom.covRob.TSGS')
+plotFrontiers(R=retM_CRSP_5, frontiers=list(ef4, ef5), risk='StdDev')
