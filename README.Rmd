@@ -1,3 +1,8 @@
+---
+title: "README"
+output: github_document
+---
+
 This V2.1 version of PortfolioAnalytics is an update to the substantial V2.0
 version that was released on 2024-07-03. We first describe the V2.0 features,
 then discuss the R demo capability, and finally we describe the additional
@@ -99,3 +104,4 @@ along with contributions from Yifu Kang, under the support of a 2022 Google
 Summer of Code (GSOC 2022). Xinran and Yifu were mentored in GSOC 2022 by 
 Professor Doug Martin and Professor Steve Murray in the Applied Mathematics 
 Department at the University of Washington.
+

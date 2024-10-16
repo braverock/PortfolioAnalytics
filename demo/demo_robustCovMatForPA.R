@@ -359,3 +359,4 @@ table.Drawdowns(res.TSGS$ret$GmvLOTSGS, top=1)
 ##                    optimize_method = "CVXR",
 ##                    momentFUN = "user.covMcd.OGK")
 
+## opt$moment_values
