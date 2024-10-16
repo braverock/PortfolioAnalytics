@@ -26,20 +26,20 @@ portfolios based on any one of several robust covariance matrix estimators
 that are not much influenced by outliers  Details are provided in the Vignette
 "robustCovMatForPA".
 
-New PortfolioAnalytics Functions:
+New PortfolioAnalytics 2.0 Functions:
 
 1. meancsm.efficient.frontier (create Mean-CSM efficient frontier) utility function
 2. meanrisk.efficient.frontier (generate multiple efficient frontiers for portfolios with the same constraint object.
 3. extract_risk (extract the risk value, e.g., StdDev or ES or CSM, based on the weights of a portfolio)
 4. chart.EfficientFrontierCompare (Overlay the efficient frontiers of different minRisk portfolio objects on a single plot)
-5. backtest.plot (based on Peter Carl's code, generate plots of the cumulative returns and/or drawdown for back-testing)
+5. backtest.plot (generate plots of the cumulative returns and/or drawdown for back-testing)
 6. opt.outputMvo (converts output of `optimize.portfolio` to a list of the portfolio weights, mean, volatility and Sharpe Ratio)
 7. plotFrontiers (plot frontiers based on the result of `meanvar.efficient.frontier`, `meanetl.efficient.frontier` or `meancsm.efficient.frontier`)
 
 
 Enhanced PortfolioAnalytics Functions:
 
-1. optimize.portfolio (enhanced with CVXR solvers, CSM objective, customizable arg `momentFUN=` and output `~$moment_values`)
+1. optimize.portfolio (enhanced with CVXR solvers, CSM objective, customizable argument `momentFUN=` and output `~$moment_values`)
 2. optimize.portfolio.rebalancing (enhanced with CVXR solvers, CSM objective and customizable arg `momentFUN=`)
 3. create.EfficientFrontier (enhanced with type `mean-CSM` and `mean-risk`, and customizable arg `momentFUN=`)
 
@@ -60,12 +60,21 @@ Custom Moment Functions for Robust Covariance Matrices:
 6. MycovRobTSGS
  
 
-New Vignettes and their Code Functions in the demo Folder:
+Two New Vignettes:
 
 1. cvxrPortfolioAnalytics: CRAN title = "CVXR for PortfolioAnalytics".
 2. demo_cvxrPortfolioAnalytics.R
 3. robustCovMatForPA: CRAN title = "Robust Covariance Matrices for PortfolioAnalytics"
 4. demo_robustCovMatForPA.R
+
+# PortfolioAnalytics Demo Scripts
+
+Prior to the PortfolioAnalytics 2.0 release, the demo folder contained 31
+R scripts.  You can view the names and function of R scripts in the demo
+in the demo folder (if it exists and is not empty) of any R package with
+the function demo(package = "packageName").  
+
+For example use of demo(package = "PortfolioAnalytics")
 
 # New 2.1 Features
 

@@ -436,7 +436,7 @@ wts.MES05TOC <- TOcontrol(wts.MES05, 0.9) # Optimal for 1-30
 # Export weights
 wts.comb21 <- list(wts.MV = wts.MV, wts.MES05 = wts.MES05, 
                    wts.MES05TOC = wts.MES05TOC)
-save(wts.comb21, file = "wts.comb21.rda")
+#  save(wts.comb21, file = "wts.comb21.rda")
 
 # Compute cumulative returns of the portfolios
 MV <- Return.rebalancing(ret, wts.MV)
@@ -449,7 +449,7 @@ names(ret.comb) <- c("MV", "MES05", "MES05-TOC", "Market")
 
 # Export returns
 ret.comb21 <- ret.comb[ , -4]
-save(ret.comb21, file = "ret.comb21.rda")
+## save(ret.comb21, file = "ret.comb21.rda")
 
 backtest.plot(ret.comb, plotType = "cumRet",
               main = "MV, MES05, MES05-TOC(0.9), Stocks 1-30",
@@ -461,10 +461,10 @@ backtest.plot(ret.comb, plotType = "cumRet",
 
 # Create TO and DIV values data frame
 # source("Functions/ToDivMES.R")
-load("wts.comb21.rda")
+## load("wts.comb21.rda")
 muSdTO_DIV <- ToDivMeanSd(wts.comb21)
 
-load("ret.comb21.rda")
+## load("ret.comb21.rda")
 ret.comb21Short <- ret.comb21["2006/2014", ]
 
 dat <- ret.comb21Short
@@ -514,7 +514,7 @@ wts.MES05TOC <- TOcontrol(wts.MES05, 0.5) # Optimal for 31-60
 # Export weights
 wts.comb22 <- list(wts.MV = wts.MV, wts.MES05 = wts.MES05, 
                    wts.MES05TOC = wts.MES05TOC)
-save(wts.comb22, file = "wts.comb22.rda")
+## save(wts.comb22, file = "wts.comb22.rda")
 
 
 # Compute cumulative returns of the portfolios
@@ -528,7 +528,7 @@ names(ret.comb) <- c("MV", "MES05", "MES05-TOC", "Market")
 
 # Export returns
 ret.comb22 <- ret.comb[ , -4]
-save(ret.comb22, file = "ret.comb22.rda")
+## save(ret.comb22, file = "ret.comb22.rda")
 
 backtest.plot(ret.comb, plotType = "cumRet",
               main = "MV, MES05, MES05-TOC(0.5), Stocks 31-60",
@@ -540,10 +540,10 @@ backtest.plot(ret.comb, plotType = "cumRet",
 
 # Create TO and DIV values data frame
 # source("Functions/ToDivMES.R")
-load("wts.comb22.rda")
+## load("wts.comb22.rda")
 muSdTO_DIV <- ToDivMeanSd(wts.comb22)
 
-load("ret.comb22.rda")
+## load("ret.comb22.rda")
 ret.comb22Short <- ret.comb22["2006/2014", ]
 
 dat <- ret.comb22Short
@@ -593,7 +593,7 @@ wts.MES05TOC <- TOcontrol(wts.MES05, 0.5) # Optimal for 61-90
 # Export weights
 wts.comb23 <- list(wts.MV = wts.MV, wts.MES05 = wts.MES05, 
                    wts.MES05TOC = wts.MES05TOC)
-save(wts.comb23, file = "wts.comb23.rda")
+## save(wts.comb23, file = "wts.comb23.rda")
 
 # Compute cumulative returns of the portfolios
 MV <- Return.rebalancing(ret, wts.MV)
@@ -606,7 +606,7 @@ names(ret.comb) <- c("MV", "MES05", "MES05-TOC", "Market")
 
 # Export returns
 ret.comb23 <- ret.comb[ , -4]
-save(ret.comb23, file = "ret.comb23.rda")
+## save(ret.comb23, file = "ret.comb23.rda")
 
 backtest.plot(ret.comb, plotType = "cumRet",
               main = "MV, MES05, MES05-TOC(0.5), Stocks 61-90",
@@ -620,10 +620,10 @@ backtest.plot(ret.comb, plotType = "cumRet",
 # Create TO and DIV values data frame
 
 # source("Functions/ToDivMES.R")
-load("wts.comb23.rda")
+## load("wts.comb23.rda")
 muSdTO_DIV <- ToDivMeanSd(wts.comb23)
 
-load("ret.comb23.rda")
+## load("ret.comb23.rda")
 ret.comb23Short <- ret.comb23["2006/2014", ]
 dat <- ret.comb23Short
 SR <- RPESE::SR.SE(dat)$SR
@@ -703,7 +703,7 @@ wts.MES05TOC <- TOcontrol(wts.MES05, 0.5)
 # Export weights
 wts.comb24 <- list(wts.MV = wts.MV, wts.MES05 = wts.MES05, 
                    wts.MES05TOC = wts.MES05TOC)
-save(wts.comb24, file = "wts.comb24.rda")
+##  save(wts.comb24, file = "wts.comb24.rda")
 
 #' Compute cumulative returns of the portfolios
 MV <- Return.rebalancing(ret, wts.MV)
@@ -716,7 +716,7 @@ names(ret.comb) <- c("MV", "MES05", "MES05-TOC", "Market")
 
 # Export returns
 ret.comb24 <- ret.comb[ , -4]
-save(ret.comb24, file = "ret.comb24.rda")
+## save(ret.comb24, file = "ret.comb24.rda")
 
 backtest.plot(ret.comb, plotType = "cumRet",
               main = "MV, MES05, MES05-TOC(0.5), 34 Microcap Stocks",
@@ -730,10 +730,10 @@ backtest.plot(ret.comb, plotType = "cumRet",
 
 # Create TO and DIV values data frame
 # source("Functions/ToDivMES.R")
-load("wts.comb24.rda")
+## load("wts.comb24.rda")
 muSdTO_DIV <- ToDivMeanSd(wts.comb24)
 
-load("ret.comb24.rda")
+## load("ret.comb24.rda")
 ret.comb24Short <- ret.comb24["2006/2014", ]
 dat <- ret.comb24Short
 SR <- RPESE::SR.SE(dat)$SR
@@ -823,7 +823,7 @@ wts.MCSM15TOC <- TOcontrol(wts.MCSM15, 0.8)
 # Export weights
 wts.comb31TOC <- list(wts.MV = wts.MV, wts.MES05TOC = wts.MES05TOC, 
                       wts.MCSM15TOC = wts.MCSM15TOC)
-save(wts.comb31TOC, file = "wts.comb31TOC.rda")
+## save(wts.comb31TOC, file = "wts.comb31TOC.rda")
 
 #' Compute cumulative returns of the portfolios
 MV <- Return.rebalancing(ret, wts.MV)
@@ -837,7 +837,7 @@ names(ret.comb) <- c("MV", "MES05-TOC", "MCSM15-TOC", "Market")
 
 # Export returns
 ret.comb31TOC <- ret.comb[ , -4]
-save(ret.comb31TOC, file = "ret.comb31TOC.rda")
+## save(ret.comb31TOC, file = "ret.comb31TOC.rda")
 
 backtest.plot(ret.comb, plotType = "cumRet",
               main = "MV, MES05-TOC(0.9), MCSM05-TOC(0.8), Stocks 1-30",
@@ -849,10 +849,10 @@ backtest.plot(ret.comb, plotType = "cumRet",
 
 # Create TO and DIV values data frame
 # source("Functions/ToDivMCSM.R")
-load("wts.comb31TOC.rda")
+## load("wts.comb31TOC.rda")
 muSdTO_DIV <- ToDivMeanSd(wts.comb31TOC)
 
-load("ret.comb31TOC.rda")
+## load("ret.comb31TOC.rda")
 ret.comb31TOCShort <- ret.comb31TOC["2006/2014", ]
 dat <- ret.comb31TOCShort
 SR <- RPESE::SR.SE(dat)$SR
@@ -900,7 +900,7 @@ wts.MCSM15TOC <- TOcontrol(wts.MCSM15, 0.6)
 # Export weights
 wts.comb32TOC <- list(wts.MV = wts.MV, wts.MES05TOC = wts.MES05TOC, 
                       wts.MCSM15TOC = wts.MCSM15TOC)
-save(wts.comb32TOC, file = "wts.comb32TOC.rda")
+## save(wts.comb32TOC, file = "wts.comb32TOC.rda")
 
 # Compute cumulative returns of the portfolios
 MV <- Return.rebalancing(ret, wts.MV)
@@ -914,7 +914,7 @@ names(ret.comb) <- c("MV", "MES05-TOC", "MCSM15-TOC", "Market")
 
 # Export returns
 ret.comb32TOC <- ret.comb[ , -4]
-save(ret.comb32TOC, file = "ret.comb32TOC.rda")
+## save(ret.comb32TOC, file = "ret.comb32TOC.rda")
 
 backtest.plot(ret.comb, plotType = "cumRet",
               main = "MV, MES05-TOC(0.5), MCSM05-TOC(0.6), Stocks 31-60",
@@ -927,10 +927,10 @@ backtest.plot(ret.comb, plotType = "cumRet",
 
 # Create TO and DIV values data frame
 # source("Functions/ToDivMCSM.R")
-load("wts.comb32TOC.rda")
+## load("wts.comb32TOC.rda")
 muSdTO_DIV <- ToDivMeanSd(wts.comb32TOC)
 
-load("ret.comb32TOC.rda")
+## load("ret.comb32TOC.rda")
 ret.comb32TOCShort <- ret.comb32TOC["2006/2014", ]
 dat <- ret.comb32TOCShort
 SR <- RPESE::SR.SE(dat)$SR
@@ -988,7 +988,7 @@ wts.MCSM15TOC <- TOcontrol(wts.MCSM15, 0.8) # Use this value of delta
 # Export weights
 wts.comb33TOC <- list(wts.MV = wts.MV, wts.MES05TOC = wts.MES05TOC, 
                       wts.MCSM15TOC = wts.MCSM15TOC)
-save(wts.comb33TOC, file = "wts.comb33TOC.rda")
+## save(wts.comb33TOC, file = "wts.comb33TOC.rda")
 
 # Compute cumulative returns of the portfolios
 MV <- Return.rebalancing(ret, wts.MV)
@@ -1002,7 +1002,7 @@ names(ret.comb) <- c("MV", "MES05-TOC", "MCSM15-TOC", "Market")
 
 # Export returns
 ret.comb33TOC <- ret.comb[ , -4]
-save(ret.comb33TOC, file = "ret.comb33TOC.rda")
+## save(ret.comb33TOC, file = "ret.comb33TOC.rda")
 
 backtest.plot(ret.comb, plotType = "cumRet",
               main = "MV, MES05-TOC(0.6), MCSM05-TOC(0.8), Stocks 61-90",
@@ -1015,10 +1015,10 @@ backtest.plot(ret.comb, plotType = "cumRet",
 
 # Create TO and DIV values data frame
 # source("Functions/ToDivMCSM.R")
-load("wts.comb33TOC.rda")
+## load("wts.comb33TOC.rda")
 muSdTO_DIV <- ToDivMeanSd(wts.comb33TOC)
 
-load("ret.comb33TOC.rda")
+## load("ret.comb33TOC.rda")
 ret.comb33TOCShort <- ret.comb33TOC["2006/2014", ]
 dat <- ret.comb33TOCShort
 SR <- RPESE::SR.SE(dat)$SR
