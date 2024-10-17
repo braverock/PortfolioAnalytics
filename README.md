@@ -79,10 +79,12 @@ New Vignettes and their Code Functions in the demo Folder:
     PortfolioAnalytics”
 4.  demo_robustCovMatForPA.R
 
-# PortfolioAnalytics Demo Scrips
-PortfolioAnalytics has contained a substantial number of demo R scripts in the *demo* folder for a long time.  Assuming that PortfolioAnalytics is installed, but not necessarily loaded, you can view a list of the names of al the demo folder R scripts with the following R command
+# PortfolioAnalytics Demo Scripts
+PortfolioAnalytics has contained a substantial number of demo R scripts in the *demo* folder for a long time.  Assuming that an R package is installed, but not necessarily loaded, you can view a list of the names of al the demo folder R scripts with the following R command
 
-demo(package = “PortfolioAnalytics”)
+demo(package = “packageName”)
+
+which you can easily verify for the case of PortfolioAnalytics.
 
 
 # New 2.1 Features
