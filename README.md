@@ -96,7 +96,8 @@ results in a Help tab display with the followng two links:
 
 * *PortfolioAnalytics::demo_cvxrPortfolioAnalytics*
 * (*Run demo*).
-We recommend to only use the first link, which results in a display of the entire R script in the Help tab.  You can copy/paste the script into your own new R file, and run it in chunks that are of interest to you, and take a reasonably short time, e.g., less than 2-3 minutes, and often considerably less. We recommend doing this for the demo_cvxrPortfolioAnalytics.R and demo_robustCovMatForPA.R scripts.
+
+Use the first link, which results in a display of the entire R script in the Help tab.  You can copy/paste the script into your own new R file, and run it in chunks that are of interest to you, and take a reasonably short time, e.g., less than 2-3 minutes, and often considerably less. Doing so for the demo_cvxrPortfolioAnalytics.R will help you learn some PortfolioAnalytics basics, and how to use some new capabilities in Versions 2.0 and 2.1. Running the demo_robustCovMatForPA.R scripts will show you how to compute *robust minimum variance* (robMV) portfolios, based on returns *robust covariance matrix estimators* that are not much influenced by returns outliers.
 
 NOTE: We do not recommend general use of (*Run demo*). This is because it runs the entire demo script, which will often take much too long. Furthermore, some scripts may fail to execute properly when run this way. That said, the (*Run demo*) link is none-the-less handy for running R demo scripts that execute quickly.
 
