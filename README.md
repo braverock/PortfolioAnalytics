@@ -69,7 +69,7 @@ Custom Moment Functions for Robust Covariance Matrices:
 5.  MycovRobMcd
 6.  MycovRobTSGS
 
-Two Vignette pdf files downloadable from PortfolioAnalytics at CRAN:
+Two New Vignettes, the pdf files of which are downloadable from PortfolioAnalytics at
 <https://cran.r-project.org/web/packages/PortfolioAnalytics/index.html>:
 1.  cvxrPortfolioAnalytics, with CRAN title “CVXR for PortfolioAnalytics”.
 2.  robustCovMatForPA, with CRAN title “Robust Covariance Matrices for
@@ -80,33 +80,41 @@ PortfolioAnalytics has contained a substantial number of demo R scripts in the *
 
 demo(package = “packageName”)
 
-which you can easily verify for the case of PortfolioAnalytics.
-Among the long list of demo scripts, you will see the two demo scripts:
+Use the above for the PortfolioAnalytics package, and you will see a list of over 30 demo scripts,
+among which you will see the the following two demo scripts
 
 1.  demo_cvxrPortfolioAnalytics.R
 2.  demo_robustCovMatForPA.R
 
-You can view the documentation (man pages) for any demo R script with the command “??” (but not with “help” command).  For example, in RStudio, use of the command
+which runs the code for the corresponding two Vignettes listed above.
+
+You can view the code for any demo R script with the command “??” (but not with “help” command).  For example, in RStudio, use of the command
 
 ?? demo_cvxrPortfolioAnalytics
 
 results in a Help tab display with the followng two links:
 
-*PortfolioAnalytics::demo_cvxrPortfolioAnalytics* and (*Run demo*). We recommend to only use the first link, which results in a display of the entire R script in the Help tab.  You should copy/paste the script into your own new R file, and run it in chunks that are of interest to you. We recommend doing this for the demo_cvxrPortfolioAnalytics.R and demo_robustCovMatForPA.R scripts.
+* *PortfolioAnalytics::demo_cvxrPortfolioAnalytics*
+* (*Run demo*).
+We recommend to only use the first link, which results in a display of the entire R script in the Help tab.  You can copy/paste the script into your own new R file, and run it in chunks that are of interest to you, and take a reasonably short time, e.g., less than 2-3 minutes, and often considerably less. We recommend doing this for the demo_cvxrPortfolioAnalytics.R and demo_robustCovMatForPA.R scripts.
 
-NOTE: We do not recommend running the entire scripts above because they take a fairly long time, and this is the case for many of the demo scripts in PortfoloAnalytics. For this reason we do not recommend general use of the (*Run demo*) script, as well as for the further reason that some scripts fails to execute properly when run this way. On the other hand the (*Run demo*) link is handy for R demo scripts that run quickly.
+NOTE: We do not recommend general use of (*Run demo*). This is because it runs the entire demo script, which will often take much too long. Furthermore, some scripts may fail to execute properly when run this way. That said, the (*Run demo*) link is none-the-less handy for running R demo scripts that execute quickly.
 
 # New 2.1 Features
 
-This version contains the following new demo scripts:
+The 2.1 version of PortfolioAnalytics contains the following new demo scripts:
 
 1. demo_JPM2024MinDownsideRisk.R
 2. demo_JPM2024MinDownsideRiskCVXR.R
 
-The first script above replicates all the Exhibits (Figures and Tables) in the Journal of Portfolio Management paper “Minimum Downside Risk Portfolios, published in October 2024.  This first script uses CVXR optimization methods “under the hood” in PortfolioAnalytics.  The second script replicates just the back-test in Exhibits 6, 8, 10, 12, 14, 16, 18, in the above paper, and reveals the CVXR code directly.  
+The first script replicates all the Exhibits (Figures and Tables) in the Journal of Portfolio Management paper “Minimum Downside Risk Portfolios", published in October 2024, using the CVXR package “under the hood” in PortfolioAnalytics.  The second script replicates just the back-test in Exhibits 6, 8, 10, 12, 14, 16, 18, in the above paper, but it uses the CVXR code directly, thereby allowing the user to easily see the CVXR details.
+
+The PortfolioAnalytics 2.0 Vignettes, and their demo scripts, have been updated in PortfolioAnalytics 2.1.
+
+Xinran:  What other 2.1 features need to be included, if any???
 
 
-# Bug Reportin
+# Bug Reporting
 
 Please contribute with bug fixes, comments, and testing scripts!
 
