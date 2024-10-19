@@ -1,14 +1,15 @@
-# ---
-# title: "Minimum Downside Risk Portfolios JPM paper exhibits"
-# date: "10/9/2024"
-# ---
+## This R script reproduces all the Exhibits in the paper 
+## "Minimum Downside Risk Portfolios", published in the 
+## Journal of Portfolio Management, Oct. 2024.
+##
+## Copy/paste this script into your own computer R file. Then
+## run code lines 15 to 221, which creates functions needed in
+## subsequent code that replicates the Exhibits. We recommend
+## running the subsequent code in chunks to replicate each of
+## the Exhibits in the JPM paper.
 
-# The R functions below, and the R script that follows,
-# replicate the Exhibits in the Journal of Portfolio Management
-# article "Minimum Downside Risk Portfolios"
-
-
-## Load needed R functions
+#### Load needed R functions
+####
 
 ## divHHImat.R
 divHHImat <- function(wtsmat){
@@ -219,11 +220,10 @@ thresholdFromTailProbTdist <- function(qtl, df = 5,
   uniroot(obj, interval = interval, q = qtl, check.conv = TRUE, tol = 1e-8)$root
 }
 
-# End of functions needed for the following R script.
-##########
-##########
+#### End of functions needed for the following R script.
+####
 
-## Load data for Exhiits 1 - 5
+## Load data for Exhibits 1 - 5
 library(PCRA)
 library(xts)
 stocksCRSPweekly <- getPCRAData("stocksCRSPweekly")

@@ -7,6 +7,7 @@ demo_DEoptim Demonstrate solving portfolio optimization problems using DEoptim a
 demo_efficient_frontier Demonstrate how to create and chart efficient frontiers.
 demo_factor_exposure Demonstrate how to use the factor_exposure constraint.
 demo_JPM2024MinDownsideRisk Replicates all Exhibits in JPM 2024 paper Minimm Downside Risk Portfolios.
+demo_JPM2024MinDownsideRiskCVXR Replicates selected Exhibits in JPM 2024 paper Minimm Downside Risk Portfolios.
 demo_opt_combine Demonstrate how to combine and chart the optimal weights for multiple optimizations.
 demo_weight_concentration Demonstrate how to use the weight concentration objective.
 backwards_compat Demonstrate how to solve optimization problems using v1 specification with a v1_constraint object.
