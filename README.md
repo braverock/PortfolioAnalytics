@@ -112,7 +112,7 @@ The first script replicates all the Exhibits (Figures and Tables) in the Journal
 
 The PortfolioAnalytics 2.0 Vignettes, and their demo scripts, have been updated in PortfolioAnalytics 2.1.
 
-Xinran:  What other 2.1 features need to be included, if any???
+Xinran:  Version 2.0 primarily includes the outcomes from the GSOC period. In Version 2.1, we have extended functionalities related to efficient frontiers visualization and moment settings, along with a major decision to use CSM instead of EQS. These are the main changes compared to Version 2.0.
 
 
 # Bug Reporting
