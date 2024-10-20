@@ -1,9 +1,11 @@
 ## This R script reproduces all the Exhibits in the paper 
-## "Minimum Downside Risk Portfolios", published in the 
-## Journal of Portfolio Management, Oct. 2024.
+## "Minimum Downside Risk Portfolios" by R.D. Martin,
+## S. Stoyanov, X. Zhao and P. Sarker, published in the 
+## Oct. 2024 issue of the Journal of Portfolio Management.
+
 ##
 ## Copy/paste this script into your own computer R file. Then
-## run code lines 15 to 221, which creates functions needed in
+## run code lines 23 to 229, which creates functions needed in
 ## subsequent code that replicates the Exhibits. We recommend
 ## running the subsequent code in chunks to replicate each of
 ## the Exhibits in the JPM paper.
