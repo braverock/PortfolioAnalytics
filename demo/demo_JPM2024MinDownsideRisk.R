@@ -8,6 +8,12 @@
 ## running the subsequent code in chunks to replicate each of
 ## the Exhibits in the JPM paper.
 
+## Running Times for an Intel(R) Core(TM) i7-10750H Processor:
+## Exhibits 1-5: 10 seconds, with 9 seconds for Exhibit 5
+## Exhibits 6,8,10,12: Approximately 2 minutes each
+## Exhibits 14,16,18: Approximately 3.5 minutes each
+## Other Exhibits: Negligible
+
 #### Load needed R functions
 ####
 
@@ -319,10 +325,10 @@ pspecES25 <- add.objective(portfolio = pspecLO, type = "risk", name = "ES",
 pspecES50 <- add.objective(portfolio = pspecLO, type = "risk", name = "ES", 
                            arguments = list(p=0.50))
 
-#' Combine the portfolios into a list
+# Combine the portfolios into a list
 portfESlist <- combine.portfolios(list(pspecES50, pspecES25, pspecES05))
 
-#' Plot the efficient frontier overlay of the portfolios with varying tail probabilities
+# Plot the efficient frontier overlay of the portfolios with varying tail probabilities
 legendESlabels <- c("ES (p = 0.50)", "ES (p = 0.25)", "ES (p = 0.05)")
 
 portfList <- combine.portfolios(list(pspecESLSbox, pspecESLO, pspecESLObox))
@@ -338,7 +344,7 @@ chart.EfficientFrontierOverlay(returns, portfolio_list = portfESlist,
                                xlim = xlim, ylim = ylim, main = NULL)
 
 
-## Exhibit 5 (35 seconds)
+## Exhibit 5 (9 seconds)
 
 pspecESLO_050 <- add.objective(pspecLO, type = "risk", name = "ES",
                                arguments = list(p = 0.050))
@@ -348,15 +354,16 @@ pspecESLO_050 <- add.objective(pspecLO, type = "risk", name = "ES",
 chart.EfficientFrontierCompare(returns, pspecESLO_050, risk_type = "ES", 
                                guideline = TRUE,  cex.axis = 1.2,
                                match.col = c("StdDev", "ES"),
-                               n.portfolios = 50,
+                               n.portfolios = 10,
                                lwd=c(1.2, 1.2, 1.0, 1.0),
                                col = c(2,1,1,1), lty = c(2,1,4,4),
                                xlim = c(0.00, 0.08), ylim = c(0.0, 0.013), 
                                legend.loc = "topleft", main = NULL)
+# A slightly better plot is obtained with larger n.portfolios, with very
+# small % changes in Risk and Return
 
 
-
-## Load weekly smallcap returns for back-tests
+## Load packages
 
 library(PortfolioAnalytics)
 library(CVXR)
@@ -364,7 +371,8 @@ library(data.table)
 library(xts)
 library(PCRA)
 
-# use CRSP daily data set
+# Load CRSP daily smallcap returns for Exhibits 6-7, 8-9, 10-11
+
 stocksCRSPdaily <- getPCRAData(dataset = "stocksCRSPdaily")
 dateRange <- c("1993-01-01","2015-12-31")
 smallcapTS <- selectCRSPandSPGMI(
@@ -391,7 +399,7 @@ smallcapTS <- smallcapTS[ , -c(107,108)]
 
 ret <- smallcapTS[ , 1:30]
 
-# Generate GMV, and GMES portfolios
+# Generate MV, and MES portfolios
 pspec <- portfolio.spec(assets = names(ret))
 pspecFI <- add.constraint(pspec, type = "full_investment")
 pspecLO <- add.constraint(pspecFI, type = "long_only")
@@ -428,7 +436,7 @@ MV <- Return.rebalancing(ret, wts.MV)
 MES05 <- Return.rebalancing(ret, wts.MES05)
 MES05TOC <- Return.rebalancing(ret, wts.MES05TOC)
 
-#' Combine MV, MES05, MES05_TOC gross cumulative returns
+# Combine MV, MES05, MES05_TOC gross cumulative returns
 ret.comb <- na.omit(merge(MV, MES05, MES05TOC, Market))
 names(ret.comb) <- c("MV", "MES05", "MES05-TOC", "Market")
 
@@ -463,7 +471,7 @@ portStats
 
 ret <- smallcapTS[ , 31:60]
 
-# Generate GMV, and GMES portfolios
+# Generate MV, and MES portfolios
 pspec <- portfolio.spec(assets = names(ret))
 pspecFI <- add.constraint(pspec, type = "full_investment")
 pspecLO <- add.constraint(pspecFI, type = "long_only")
@@ -535,7 +543,7 @@ portStats
 
 ret <- smallcapTS[ , 61:90]
 
-# Generate GMV, and GMES portfolios
+# Generate MV, and MES portfolios
 pspec <- portfolio.spec(assets = names(ret))
 pspecFI <- add.constraint(pspec, type = "full_investment")
 pspecLO <- add.constraint(pspecFI, type = "long_only")
@@ -603,16 +611,15 @@ portStats <- data.frame(muSdTO_DIV, SR_DSR)
 row.names(portStats) <- names(dat)
 portStats
 
-## Exhibit 12 (xx)
-
-## Load daily data for 34 microcaps
+## Load packages again (not necessary)
 library(PortfolioAnalytics)
 library(CVXR)
 library(data.table)
 library(xts)
 library(PCRA)
 
-#' use CRSP daily data set
+## Load daily microcap returns for Exhibits 12-13
+
 stocksCRSPdaily <- getPCRAData(dataset = "stocksCRSPdaily")
 dateRange <- c("1993-01-01","2015-12-31")
 microcapTS <- selectCRSPandSPGMI(
@@ -639,7 +646,7 @@ microcapTS <- microcapTS[ , -c(35, 36)]
 ## Exhibit 12 (1 minute and 58 seconds)
 ret <- microcapTS
 
-#' Generate GMV, and GMES portfolios
+# Generate MV, and MES portfolios
 pspec <- portfolio.spec(assets = names(ret))
 pspecFI <- add.constraint(pspec, type = "full_investment")
 pspecLO <- add.constraint(pspecFI, type = "long_only")
@@ -647,7 +654,7 @@ pspecMV <- add.objective(pspecLO, type = "risk", name = "var")
 pspecMES05 <- add.objective(pspecLO, type = "risk", name = "ES",
                             arguments = list(p=0.05))
 
-#' Optimize Portfolio at Monthly Rebalancing
+# Optimize Portfolio at Monthly Rebalancing
 window <- 260
 bt.MV <- optimize.portfolio.rebalancing(ret, pspecMV,
                                         optimize_method = "CVXR",
@@ -676,7 +683,7 @@ MV <- Return.rebalancing(ret, wts.MV)
 MES05 <- Return.rebalancing(ret, wts.MES05)
 MES05TOC <- Return.rebalancing(ret, wts.MES05TOC)
 
-#' Combine MV, MES05, MES05_TOC gross cumulative returns
+# Combine MV, MES05, MES05_TOC gross cumulative returns
 ret.comb <- na.omit(merge(MV, MES05, MES05TOC, Market, all=F))
 names(ret.comb) <- c("MV", "MES05", "MES05-TOC", "Market")
 
@@ -708,8 +715,7 @@ row.names(portStats) <- names(dat)
 portStats
 
 
-## Load smallcap data again
-## Repeat of lines 302 - 328
+## Load packages again (not necessary to repeat)
 
 library(PortfolioAnalytics)
 library(CVXR)
@@ -717,7 +723,8 @@ library(data.table)
 library(xts)
 library(PCRA)
 
-# use CRSP daily data set
+# Load CRSP smallcap returns for Exhibits 14-15, 16-17, 18-19
+
 stocksCRSPdaily <- getPCRAData(dataset = "stocksCRSPdaily")
 dateRange <- c("1993-01-01","2015-12-31")
 smallcapTS <- selectCRSPandSPGMI(
@@ -743,7 +750,7 @@ smallcapTS <- smallcapTS[ , -c(107,108)]
 ## Exhibit 14 (3 minutes and 28 seconds)
 ret <- smallcapTS[ , 1:30]
 
-# Generate GMV, and GMES portfolios
+# Generate MV, and MES portfolios
 pspec <- portfolio.spec(assets = names(ret))
 pspecFI <- add.constraint(pspec, type = "full_investment")
 pspecLO <- add.constraint(pspecFI, type = "long_only")
@@ -753,7 +760,7 @@ pspecMES05 <- add.objective(pspecLO, type = "risk", name = "ES",
 pspecMCSM15 <- add.objective(pspecLO, type = "risk", name = "CSM", 
                              arguments = list(p=0.15))
 
-#' Optimize Portfolio with Monthly Rebalancing 
+# Optimize Portfolio with Monthly Rebalancing 
 window <- 260
 bt.MV <- optimize.portfolio.rebalancing(ret, pspecMV,
                                         optimize_method = "CVXR",
@@ -770,7 +777,7 @@ bt.MCSM15 <- optimize.portfolio.rebalancing(ret, pspecMCSM15,
                                             rebalance_on = "months",
                                             rolling_window = window)
 
-#' Extract time series of portfolio weights
+# Extract time series of portfolio weights
 wts.MV <- extractWeights(bt.MV)
 wts.MV <- wts.MV[complete.cases(wts.MV),]
 wts.MES05 <- extractWeights(bt.MES05)
@@ -785,13 +792,13 @@ wts.MCSM15TOC <- TOcontrol(wts.MCSM15, 0.8)
 wts.comb31TOC <- list(wts.MV = wts.MV, wts.MES05TOC = wts.MES05TOC, 
                       wts.MCSM15TOC = wts.MCSM15TOC)
 
-#' Compute cumulative returns of the portfolios
+# Compute cumulative returns of the portfolios
 MV <- Return.rebalancing(ret, wts.MV)
 MES05TOC <- Return.rebalancing(ret, wts.MES05TOC)
 MCSM15TOC <- Return.rebalancing(ret, wts.MCSM15TOC)
 
 
-#' Combine MV, MES05, MES05_TOC gross cumulative returns
+# Combine MV, MES05, MES05_TOC gross cumulative returns
 ret.comb <- na.omit(merge(MV, MES05TOC, MCSM15TOC, Market, all=F))
 names(ret.comb) <- c("MV", "MES05-TOC", "MCSM15-TOC", "Market")
 
@@ -896,7 +903,7 @@ portStats
 ## Exhibit 18 (3 minutes and 41 seconds)
 ret <- smallcapTS[ , 61:90]
 
-# Generate GMV, and GMES portfolios
+# Generate MV, and MES portfolios
 pspec <- portfolio.spec(assets = names(ret))
 pspecFI <- add.constraint(pspec, type = "full_investment")
 pspecLO <- add.constraint(pspecFI, type = "long_only")
