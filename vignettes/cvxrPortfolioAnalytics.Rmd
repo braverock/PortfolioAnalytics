@@ -50,15 +50,15 @@ The PortfolioAnalytics package provides the following two main wrapper functions
 
 `optimize.portfolio.rebalancing(R =, portfolio =, optimize_method =, rebalance_on =, training_period =, rolling_window =)`
 
-Different solvers support different types of portfolio optimization problems, which should be specified by the argument `optimize_method`. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` and `optimize.portfolio.rebalancing` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for LP and QP type portfolio optimization problems, such as maximum mean return and minimum variance portfolio optimization is OSQP, and the default solver for SOCP type portfolio optimizations, such as "robust portfolio optimization" to control for alpha uncertainty, and Coherent Second Moment (CSM) portfolio optimization, is SCS.
+Different solvers support different types of portfolio optimization problems, which should be specified by the argument `optimize_method`. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` and `optimize.portfolio.rebalancing` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for QP type portfolio optimization problems, such as minimum variance portfolio optimization is OSQP, and the default solver for LP and SOCP type portfolio optimizations, such as maximum mean return, "robust portfolio optimization" to control for alpha uncertainty, and Coherent Second Moment (CSM) portfolio optimization, is SCS.
 
 | Solver | LP | QP | SOCP |
 | :-- | :----: | :----: | :----: |
 |CBC|$\checkmark$| | |
 |GLPK|$\checkmark$| | |
 |GLPK_MI|$\checkmark$| | |
-|OSQP|$\colorbox{gray}{\checkmark}$|$\colorbox{gray}{\checkmark}$| |
-|SCS|$\checkmark$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
+|OSQP|$\checkmark$|$\colorbox{gray}{\checkmark}$| |
+|SCS|$\colorbox{gray}{\checkmark}$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
 |ECOS|$\checkmark$|$\checkmark$|$\checkmark$|
 |CPLEX|$\checkmark$|$\checkmark$|$\checkmark$|
 |GUROBI|$\checkmark$|$\checkmark$|$\checkmark$|
@@ -120,7 +120,7 @@ pspec_maxret
 ```
 
 ## 3.2 Optimization
-The next step is to run the optimization. Note that `optimize_method = c("CVXR", {CVXRsolver})` should be specified in the function `optimize.portfolio` to use CVXR solvers for the optimization, or use the default solver by giving `optimize_method = "CVXR"`. For maximizing mean return problem, which is a linear programming, the default solver is `OSQP`.
+The next step is to run the optimization. Note that `optimize_method = c("CVXR", {CVXRsolver})` should be specified in the function `optimize.portfolio` to use CVXR solvers for the optimization, or use the default solver by giving `optimize_method = "CVXR"`. For maximizing mean return problem, which is a linear programming, the default solver is `SCS`.
 ```{r}
 # Run the optimization with default solver
 opt_maxret <- optimize.portfolio(R = ret_edhec, portfolio = pspec_maxret, 
