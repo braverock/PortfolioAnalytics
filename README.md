@@ -97,9 +97,9 @@ results in a Help tab display with the followng two links:
 * *PortfolioAnalytics::demo_cvxrPortfolioAnalytics*
 * (*Run demo*).
 
-Use the first link, which results in a display of the entire R script in the Help tab.  You can copy/paste the script into your own new R file, and run it in chunks that are of interest to you, and take a reasonably short time, e.g., less than 2-3 minutes, and often considerably less. Doing so for the demo_cvxrPortfolioAnalytics.R will help you learn some PortfolioAnalytics basics, and how to use some new capabilities in Versions 2.0 and 2.1. Running the demo_robustCovMatForPA.R scripts will show you how to compute *robust minimum variance* (robMV) portfolios, based on returns *robust covariance matrix estimators* that are not much influenced by returns outliers.
+Use the first link, which results in a display of the entire R script in the Help tab.  Then copy/paste the script into your own new R file, and run it in chunks that are of interest to you. Many of the chunks will run quite quickly, e.g., a few seconds, but a few of them may take 2-4 minutes. Doing so for the demo_cvxrPortfolioAnalytics.R will help you learn some PortfolioAnalytics basics, as well as learn how to use new capabilities in Versions 2.0 and 2.1. Running the demo_robustCovMatForPA.R scripts will show you how to compute *robust minimum variance* portfolios based on returns *robust covariance matrix estimators* that are not much influenced by returns outliers.
 
-NOTE: We do not recommend general use of (*Run demo*). This is because it runs the entire demo script, which will often take much too long. Furthermore, some scripts may fail to execute properly when run this way. That said, the (*Run demo*) link is none-the-less handy for running R demo scripts that execute quickly.
+NOTE: We do not recommend general use of (*Run demo*). This is because it runs the entire demo script, which will often take much too long. Furthermore, some scripts may fail to execute properly when run this way. That said, the (*Run demo*) link can be handy for running R demo scripts that execute quickly.
 
 # New 2.1 Features
 
@@ -108,12 +108,13 @@ The 2.1 version of PortfolioAnalytics contains the following new demo scripts:
 1. demo_JPM2024MinDownsideRisk.R
 2. demo_JPM2024MinDownsideRiskCVXR.R
 
-The first script replicates all the Exhibits (Figures and Tables) in the Journal of Portfolio Management paper “Minimum Downside Risk Portfolios", published in October 2024, using the CVXR package “under the hood” in PortfolioAnalytics.  The second script replicates just the back-test in Exhibits 6, 8, 10, 12, 14, 16, 18, in the above paper, but it uses the CVXR code directly, thereby allowing the user to easily see the CVXR details.
+The first script replicates all the Exhibits (Figures and Tables) in the Journal of Portfolio Management paper “Minimum Downside Risk Portfolios", published in October 2024. This first script uses CVXR package solvers “under the hood”, i.e., not directly visible, in PortfolioAnalytics.  The second script replicates just the back-test results in Exhibits 6, 8, 10, 12, 14, 16, 18, in the above paper, but it uses the CVXR code directly in the script, where on can easily see the CVXR code details.
 
-The PortfolioAnalytics 2.0 Vignettes, and their demo scripts, have been updated in PortfolioAnalytics 2.1.
+The 2.1 release also contains:
 
-Xinran:  Version 2.0 primarily includes the outcomes from the GSOC period. In Version 2.1, we have extended functionalities related to efficient frontiers visualization and moment settings, along with a major decision to use CSM instead of EQS. These are the main changes compared to Version 2.0.
-
+1. Extended functionalities for graphical displays of multiple efficient frontiers, and robust covariance estimator settings
+2. The term EQS for *expected quadratic shortfall* was replaced with CSM for *coherent second moment* risk.
+3. Updates to the vignettes cvxrPortfolioAnalytics and robustCovMatForPA, and their demo scripts.
 
 # Bug Reporting
 
