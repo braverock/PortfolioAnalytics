@@ -8,19 +8,19 @@ the additional V2.1 features.
 
 # 2.0 Features
 
-A major feature of 2.0 is the integration of the CVXR solver R package
+A major feature of 2.0 was the integration of the CVXR solver R package
 for convex optimization. CVXR supports eleven solver packages, each of
 which supports solvers for one or more of the following optimization
 problems: LP, QP, SOCP, SDP, EXP, MIP. See the Table near the beginning
 of the document “Convex Optimization in R” at <https://cvxr.rbind.io/>.
 Thus, with PortfolioAnalytics 2.0, users are able to use any one of a
-variety of solvers available in CVXR for their portfolio optimization
+large variety of solvers available in CVXR for their portfolio optimization
 problems.
 
 A particular use of CVXR in PortfolioAnalytics 2.0 is for computing
-Minimum Coherent Second Moment (MinCSM) portfolios, which are
+Minimum Coherent Second Moment (MCSM) portfolios, which are
 second-order cone programming (SOCP) optimization problems. This is
-quite a new capability that is not available in other portfolio
+a quite new capability that is not available in other portfolio
 optimization software products. Details are provided in the Vignette
 “cvxrPortfolioAnalytics”.
 
