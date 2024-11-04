@@ -178,8 +178,8 @@ Because these convex optimization problem are standardized, there is no need for
 The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ignored by the ROI solver.
 
 If \code{optimize_method="CVXR"} is specified, a default solver will be selected based on the optimization problem.
-The default solver for Linear Problem and Quadratic Programming will be \code{OSQP}, 
-and the default solver for Second-Order Cone Programming will be \code{SCS}.
+The default solver for Quadratic Programming will be \code{OSQP}, 
+and the default solver for Linear Problem and Second-Order Cone Programming will be \code{SCS}.
 Specified CVXR solver can be given by using \code{optimize_method=c("CVXR", "CVXRsolver")}.
 CVXR supports some commercial solvers, including CBC, CPLEX, GUROBI and MOSEK, and some open source solvers, including GLPK, GLPK_MI, OSQP, SCS and ECOS.
 For example, \code{optimize_method = c("CVXR", "ECOS")} can be specified and the optimization problem will be solved via CVXR using the ECOS solver.

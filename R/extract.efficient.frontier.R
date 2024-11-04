@@ -214,7 +214,7 @@ meanvar.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.po
 #' @return a matrix of objective measure values and weights along the efficient frontier
 #' @author Ross Bennett
 #' @export
-meanetl.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.portfolios=25, ...){
+meanetl.efficient.frontier <- meanes.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.portfolios=25, ...){
   if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
   # step 1: find the minimum return given the constraints
   # step 2: find the maximum return given the constraints
