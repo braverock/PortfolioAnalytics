@@ -16,7 +16,7 @@ Authors@R: c(
     person(given="Xiaokang",family="Feng",role="ctb") ,
     person(given="Yifu",family="Kang",role="ctb") )
 Version: 3.0.0
-Date: 2024-10-11
+Date: 2024-11-30
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
