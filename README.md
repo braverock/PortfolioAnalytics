@@ -70,7 +70,7 @@ Custom Moment Functions for Robust Covariance Matrices:
 6.  MycovRobTSGS
 
 Two New Vignettes, the pdf files of which are downloadable from PortfolioAnalytics at
-<https://cran.r-project.org/web/packages/PortfolioAnalytics/index.html>:
+<https://CRAN.R-project.org/package=PortfolioAnalytics>:
 1.  cvxrPortfolioAnalytics, with CRAN title “CVXR for PortfolioAnalytics”.
 2.  robustCovMatForPA, with CRAN title “Robust Covariance Matrices for
     PortfolioAnalytics”
