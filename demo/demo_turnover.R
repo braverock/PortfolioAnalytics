@@ -25,6 +25,7 @@ print(riskFree)
 funds <- colnames(midcap10)
 
 ## ----echo=F-------------------------------------------------------------------
+# obj ES, given weight initial
 pspec = portfolio.spec(assets=funds)
 pspec.fi = add.constraint(pspec,type = "full_investment")
 pspec.lo = add.constraint(pspec.fi, type="long_only")
@@ -34,11 +35,22 @@ optTO20default = optimize.portfolio(midcap10, pspec.TO20default, optimize_method
 round(optTO20default$weights, 4)
 optTO20default$opt_values
 
+# obj var, default weight initial
 pspec = portfolio.spec(assets=funds)
 pspec.fi = add.constraint(pspec,type = "full_investment")
 pspec.lo = add.constraint(pspec.fi, type="long_only")
-pspec.TO50default = add.constraint(pspec.lo, type="turnover", turnover_target = 0.1)
+pspec.TO50default = add.constraint(pspec.lo, type="turnover", turnover_target = 0.5)
 pspec.TO50default = add.objective(portfolio=pspec.TO50default, type="risk", name="var")
 optTO50default = optimize.portfolio(midcap10, pspec.TO50default, optimize_method="CVXR")
 round(optTO50default$weights, 4)
 optTO50default$opt_values
+
+# obj CSM, given weight initial
+pspec = portfolio.spec(assets=funds)
+pspec.fi = add.constraint(pspec,type = "full_investment")
+pspec.lo = add.constraint(pspec.fi, type="long_only")
+pspec.TO10w = add.constraint(pspec.lo, type="turnover", turnover_target = 0.1, weight_initial = optTO50default$weights)
+pspec.TO10w = add.objective(portfolio=pspec.TO10w , type="risk", name="CSM")
+optTO10w = optimize.portfolio(midcap10, pspec.TO10w, optimize_method="CVXR")
+round(optTO10w$weights, 4)
+optTO10w$opt_values
