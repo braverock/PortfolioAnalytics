@@ -759,6 +759,7 @@ get_constraints <- function(portfolio){
       }
       if(inherits(constraint, "turnover_constraint")){
         out$turnover_target <- constraint$turnover_target
+        out$weight_initial <- constraint$weight_initial
       }
       if(inherits(constraint, "diversification_constraint")){
         out$div_target <- constraint$div_target
@@ -836,9 +837,10 @@ get_constraints <- function(portfolio){
 #' 
 #' pspec <- add.constraint(portfolio=pspec, type="turnover", turnover_target=0.6)
 #' @export
-turnover_constraint <- function(type="turnover", turnover_target, enabled=TRUE, message=FALSE, ...){
+turnover_constraint <- function(type="turnover", turnover_target, weight_initial=NULL, enabled=TRUE, message=FALSE, ...){
   Constraint <- constraint_v2(type, enabled=enabled, constrclass="turnover_constraint", ...)
   Constraint$turnover_target <- turnover_target
+  Constraint$weight_initial <- weight_initial
   return(Constraint)
 }
 
@@ -1223,6 +1225,7 @@ check_constraints <- function(weights, portfolio){
   group_pos <- constraints$group_pos
   div_target <- constraints$div_target
   turnover_target <- constraints$turnover_target
+  weight_initial <- constraints$weight_initial
   max_pos <- constraints$max_pos
   max_pos_long <- constraints$max_pos_long
   max_pos_short <- constraints$max_pos_short

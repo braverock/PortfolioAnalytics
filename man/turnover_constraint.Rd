@@ -7,6 +7,7 @@
 turnover_constraint(
   type = "turnover",
   turnover_target,
+  weight_initial = NULL,
   enabled = TRUE,
   message = FALSE,
   ...

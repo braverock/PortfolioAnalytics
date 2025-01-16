@@ -23,7 +23,7 @@ optimize.portfolio(
   constraints = NULL,
   objectives = NULL,
   optimize_method = c("DEoptim", "random", "ROI", "pso", "GenSA", "Rglpk", "osqp", "mco",
-    "CVXR", ...),
+    "CVXR", "cvxr", ...),
   search_size = 20000,
   trace = FALSE,
   ...,
