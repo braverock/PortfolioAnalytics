@@ -9,7 +9,7 @@ Authors@R: c(
     email="peter@braverock.com") ,
     person(given="Ross",family="Bennett",role=c("ctb","cph")) ,
     person(given="Kris",family="Boudt",role=c("ctb","cph")) ,
-    person(given="Xinran",family="Zhao",role="cph") ,
+    person(given="Xinran",family="Zhao",role=c("ctb", "cph")),
     person(given="R. Douglas",family="Martin",role="ctb") ,
     person(given="Guy",family="Yollin",role="ctb") ,
     person(given="Hezky",family="Varon",role="ctb") ,
