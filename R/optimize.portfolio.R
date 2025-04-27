@@ -3020,7 +3020,10 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       obj_cvxr[[tmpname]] <- -result_cvxr$value
     } else if(!reward & risk & !risk_ES & !risk_CSM & !risk_HHI){ # min var/std
       obj_cvxr[[tmpname]] <- sqrt(result_cvxr$value)
-    } else if(!maxSR & !maxSTARR & !CSMratio){ # mean-var/ES/CSM/HHI
+    } else if(!reward & risk & !risk_ES & !risk_CSM & risk_HHI){ # min HHI
+      obj_cvxr[["StdDev"]] <- sqrt(t(cvxr_wts) %*% sigma_value %*% cvxr_wts)
+      obj_cvxr[[tmpname]] <- (result_cvxr$value - t(cvxr_wts) %*% sigma_value %*% cvxr_wts)/lambda_hhi
+    } else if(!maxSR & !maxSTARR & !CSMratio){ # mean-var/ES/CSM
       obj_cvxr[[tmpname]] <- result_cvxr$value
       if(reward & risk){
         obj_cvxr[["mean"]] <- cvxr_wts %*% mean_value

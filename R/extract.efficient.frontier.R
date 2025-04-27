@@ -91,7 +91,7 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=NULL, 
 #' @return a matrix of objective measure values and weights along the efficient frontier
 #' @author Ross Bennett
 #' @export
-meanvar.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.portfolios=25, risk_aversion=NULL, ...){
+meanvar.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.portfolios=25, risk_aversion=NULL, ...){
   if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
   # step 1: find the minimum return given the constraints
   # step 2: find the maximum return given the constraints
@@ -146,7 +146,7 @@ meanvar.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.po
   # run the optimization to get the maximum return
   tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method=optimize_method, ...=...)
   mean_ret <- colMeans(R)
-  maxret <- sum(extractWeights(tmp) * mean_ret)
+  maxret <- extract_risk(R, tmp$weights)$mean
   
   ##### Get the return at the minimum variance portfolio #####
   
@@ -162,7 +162,7 @@ meanvar.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.po
   # Do we want to disable the turnover or transaction costs constraints here?
   tmp <- optimize.portfolio(R=R, portfolio=portfolio, optimize_method=optimize_method, ...=...)
   stats <- extractStats(tmp)
-  minret <- sum(extractWeights(tmp) * mean_ret)
+  minret <- extract_risk(R, tmp$weights)$mean
   
   # length.out is the number of portfolios to create
   ret_seq <- seq(from=minret, to=maxret, length.out=n.portfolios)
@@ -214,7 +214,7 @@ meanvar.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.po
 #' @return a matrix of objective measure values and weights along the efficient frontier
 #' @author Ross Bennett
 #' @export
-meanetl.efficient.frontier <- meanes.efficient.frontier <- function(portfolio, R, optimize_method='ROI', n.portfolios=25, ...){
+meanetl.efficient.frontier <- meanes.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.portfolios=25, ...){
   if(!is.portfolio(portfolio)) stop("portfolio object must be of class 'portfolio'")
   # step 1: find the minimum return given the constraints
   # step 2: find the maximum return given the constraints
