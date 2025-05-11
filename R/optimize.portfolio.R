@@ -2988,10 +2988,20 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     
     ## turnover constraint
     if(!is.null(constraints$turnover_target)){
+      # set weight initial
       if(is.null(constraints$weight_initial)){
         weight_initial <- rep(1/N, N)
       } else {
         weight_initial <- constraints$weight_initial
+      }
+      # penalty for minvar
+      if(tmpname == "StdDev"){
+        if(is.null(constraints$turnover_penalty)){
+          sigma_value_penalty = nearPD(sigma_value)$mat
+        } else {
+          sigma_value_penalty = sigma_value + diag(constraints$turnover_penalty, N)
+        }
+        obj <- CVXR::quad_form(wts - weight_initial, sigma_value_penalty) + 2 * t(wts - weight_initial) %*% sigma_value %*% weight_initial + t(weight_initial) %*% sigma_value %*% weight_initial
       }
       constraints_cvxr = append(constraints_cvxr, sum(abs(wts - weight_initial)) <= constraints$turnover_target)
     }
@@ -3349,22 +3359,56 @@ optimize.portfolio.rebalancing <- function(R, portfolio=NULL, constraints=NULL, 
     training_period <- rolling_window
   
   if(is.null(training_period)) {if(nrow(R)<36) training_period=nrow(R) else training_period=36}
-  if (is.null(rolling_window)){
-    # define the index endpoints of our periods
-    ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
-    # now apply optimize.portfolio to the periods, in parallel if available
-    ep <- ep.i[1]
-    out_list<-foreach::foreach(ep=iterators::iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
-      optimize.portfolio(R[1:ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
+  
+  # turnover weight_initial is previous time point optimal weight
+  turnover_idx <- which(sapply(portfolio$constraints, function(x) x$type == "turnover"))
+  if(length(turnover_idx) > 0){
+    turnover_idx <- turnover_idx[1]
+    # original weight_initial
+    if(is.null(portfolio$constraints[[turnover_idx]]$weight_initial)){
+      portfolio$constraints[[turnover_idx]]$weight_initial <- rep(1/length(portfolio$assets), length(portfolio$assets))
+    }
+    
+    # rebalancing
+    if (is.null(rolling_window)){
+      # define the index endpoints of our periods
+      ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
+      # now apply optimize.portfolio to the periods, in parallel if available
+      ep <- ep.i[1]
+      out_list<-foreach::foreach(ep=iterators::iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+        opt <- optimize.portfolio(R[1:ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
+        portfolio$constraints[[turnover_idx]]$weight_initial <- opt$weights
+        opt
+      }
+    } else {
+      # define the index endpoints of our periods
+      ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
+      # now apply optimize.portfolio to the periods, in parallel if available
+      out_list<-foreach::foreach(ep=iterators::iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+        opt <- optimize.portfolio(R[(ifelse(ep-rolling_window>=1,ep-rolling_window,1)):ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
+        portfolio$constraints[[turnover_idx]]$weight_initial <- opt$weights
+        opt
+      }
     }
   } else {
-    # define the index endpoints of our periods
-    ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
-    # now apply optimize.portfolio to the periods, in parallel if available
-    out_list<-foreach::foreach(ep=iterators::iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
-      optimize.portfolio(R[(ifelse(ep-rolling_window>=1,ep-rolling_window,1)):ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
+    if (is.null(rolling_window)){
+      # define the index endpoints of our periods
+      ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
+      # now apply optimize.portfolio to the periods, in parallel if available
+      ep <- ep.i[1]
+      out_list<-foreach::foreach(ep=iterators::iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+        optimize.portfolio(R[1:ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
+      }
+    } else {
+      # define the index endpoints of our periods
+      ep.i<-endpoints(R,on=rebalance_on)[which(endpoints(R, on = rebalance_on)>=training_period)]
+      # now apply optimize.portfolio to the periods, in parallel if available
+      out_list<-foreach::foreach(ep=iterators::iter(ep.i), .errorhandling='pass', .packages='PortfolioAnalytics') %dopar% {
+        optimize.portfolio(R[(ifelse(ep-rolling_window>=1,ep-rolling_window,1)):ep,], portfolio=portfolio, optimize_method=optimize_method, search_size=search_size, trace=trace, rp=rp, parallel=FALSE, ...=...)
+      }
     }
   }
+  
   # out_list is a list where each element is an optimize.portfolio object
   # at each rebalance date
   names(out_list)<-index(R[ep.i])
