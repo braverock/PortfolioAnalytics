@@ -52,7 +52,8 @@ Suggests:
     PCRA,
     R.rsp,
     RPESE,
-    TTR
+    TTR,
+    Matrix
 VignetteBuilder: R.rsp
 Imports:
     methods,
