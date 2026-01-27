@@ -15,8 +15,8 @@ Authors@R: c(
     person(given="Hezky",family="Varon",role="ctb") ,
     person(given="Xiaokang",family="Feng",role="ctb") ,
     person(given="Yifu",family="Kang",role="ctb") )
-Version: 2.1.0
-Date: 2024-12-04
+Version: 2.1.1
+Date: 2026-01-26
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
@@ -29,6 +29,8 @@ Suggests:
     quantmod,
     DEoptim (>= 2.2.1),
     iterators,
+    doParallel,
+    doMC,
     fGarch,
     Rglpk,
     quadprog,
@@ -48,7 +50,9 @@ Suggests:
     GSE,
     RobStatTM,
     PCRA,
-    R.rsp
+    R.rsp,
+    RPESE,
+    TTR
 VignetteBuilder: R.rsp
 Imports:
     methods,
