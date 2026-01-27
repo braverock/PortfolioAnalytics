@@ -824,6 +824,8 @@ get_constraints <- function(portfolio){
 #' 
 #' @param type character type of the constraint
 #' @param turnover_target target turnover value
+#' @param turnover_penalty optional penalty parameter for turnover constraint
+#' @param weight_initial optional initial weights vector to compute turnover from
 #' @param enabled TRUE/FALSE
 #' @param message TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.
 #' @param \dots any other passthru parameters to specify box and/or group constraints

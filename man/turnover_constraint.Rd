@@ -19,6 +19,10 @@ turnover_constraint(
 
 \item{turnover_target}{target turnover value}
 
+\item{turnover_penalty}{optional penalty parameter for turnover constraint}
+
+\item{weight_initial}{optional initial weights vector to compute turnover from}
+
 \item{enabled}{TRUE/FALSE}
 
 \item{message}{TRUE/FALSE. The default is message=FALSE. Display messages if TRUE.}
