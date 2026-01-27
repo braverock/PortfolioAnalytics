@@ -2998,7 +2998,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       if(tmpname == "StdDev"){
         if(is.null(constraints$turnover_penalty)){
           stopifnot("package:Matrix" %in% search()  ||  requireNamespace("Matrix",quietly = TRUE))
-          sigma_value_penalty = nearPD(sigma_value)$mat
+          sigma_value_penalty = Matrix::nearPD(sigma_value)$mat
         } else {
           sigma_value_penalty = sigma_value + diag(constraints$turnover_penalty, N)
         }
