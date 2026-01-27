@@ -82,7 +82,7 @@ extract.efficient.frontier <- function (object=NULL, match.col='ES', from=NULL, 
 #' 
 #' @param portfolio a portfolio object with constraints created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
-#' @param optimize_method the optimize method to get the efficient frontier, default is ROI
+#' @param optimize_method the optimize method to get the efficient frontier, default is CVXR
 #' @param n.portfolios number of portfolios to plot along the efficient frontier
 #' @param risk_aversion vector of risk_aversion values to construct the efficient frontier.
 #' \code{n.portfolios} is ignored if \code{risk_aversion} is specified and the number
@@ -208,7 +208,7 @@ meanvar.efficient.frontier <- function(portfolio, R, optimize_method='CVXR', n.p
 #' 
 #' @param portfolio a portfolio object with constraints and objectives created via \code{\link{portfolio.spec}}
 #' @param R an xts or matrix of asset returns
-#' @param optimize_method the optimize method to get the efficient frontier, default is ROI
+#' @param optimize_method the optimize method to get the efficient frontier, default is CVXR
 #' @param n.portfolios number of portfolios to generate the efficient frontier
 #' @param \dots passthru parameters to \code{\link{optimize.portfolio}}
 #' @return a matrix of objective measure values and weights along the efficient frontier
@@ -271,7 +271,7 @@ meanetl.efficient.frontier <- meanes.efficient.frontier <- function(portfolio, R
   #   out <- matrix(0, nrow=length(ret_seq), ncol=length(extractStats(tmp)))
   #   for(i in 1:length(ret_seq)){
   #     portfolio$objectives[[mean_idx]]$target <- ret_seq[i]
-  #     out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="ROI"))
+  #     out[i, ] <- extractStats(optimize.portfolio(R=R, portfolio=portfolio, optimize_method="CVXR"))
   #   }
   stopifnot("package:foreach" %in% search() || requireNamespace("foreach",quietly = TRUE))
   stopifnot("package:iterators" %in% search() || requireNamespace("iterators",quietly = TRUE))

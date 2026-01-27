@@ -7,7 +7,7 @@
 meanvar.efficient.frontier(
   portfolio,
   R,
-  optimize_method = "ROI",
+  optimize_method = "CVXR",
   n.portfolios = 25,
   risk_aversion = NULL,
   ...
@@ -18,7 +18,7 @@ meanvar.efficient.frontier(
 
 \item{R}{an xts or matrix of asset returns}
 
-\item{optimize_method}{the optimize method to get the efficient frontier, default is ROI}
+\item{optimize_method}{the optimize method to get the efficient frontier, default is CVXR}
 
 \item{n.portfolios}{number of portfolios to plot along the efficient frontier}
 
