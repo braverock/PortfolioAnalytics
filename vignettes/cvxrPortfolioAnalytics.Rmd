@@ -26,7 +26,7 @@ Sys.setlocale("LC_TIME", "English")
 # 1 Introduction
 CVXR is an R package that provides an object-oriented modeling language for convex optimization, including the Second-Order Cone (SOCP) Optimization required to minimize Coherent Second Moment(CSM) problem, which is not supported by other solvers in PortfolioAnalytics. Hence, CVXR is a significant extension of PortfolioAnalytics.
 
-The purpose of this vignette is to demonstrate examples of optimization problems that can be solved in PortfolioAnalytics with CVXR and its many supported solvers. The problem types covered include not only Linear Programming(LP), Quadratic Programming(QP) but also Second-Order Cone Programming(SOCP). Multiple solvers supported by CVXR can be selected according to optimization types. For example, SCS and ECOS can completely cover the types of problems that ROI can deal with, such as mean-variance and ES problem. In order to better understand the functionality and use of PortfolioAnalytics, users are recommended to read the Vignette [*Introduction to PortfolioAnalytics*](https://cran.r-project.org/web/packages/PortfolioAnalytics/vignettes/portfolio_vignette.pdf) first.
+The purpose of this vignette is to demonstrate examples of optimization problems that can be solved in PortfolioAnalytics with CVXR and its many supported solvers. The problem types covered include not only Linear Programming(LP), Quadratic Programming(QP) but also Second-Order Cone Programming(SOCP). Multiple solvers supported by CVXR can be selected according to optimization types. For example, SCS and ECOS can completely cover the types of problems that ROI can deal with, such as mean-variance and ES problem. In order to better understand the functionality and use of PortfolioAnalytics, users are recommended to read the Vignette [*Introduction to PortfolioAnalytics*](https://cran.r-project.orgpackage=PortfolioAnalytics/vignettes/portfolio_vignette.pdf) first.
 
 The R code `demo_cvxrPortfolioAnalytics.R` in the PortfolioAnalytics `demo` folder, reproduces the results in this Vignette.
 
@@ -105,7 +105,7 @@ Fig 2.1 EDHEC hedge fund style indexes returns from November  2014 to November 2
 \end{center}
 
 ## 2.4 Optimization Problems
-In this Vignette, all mean vectors and covariance matrices in the optimization formula will use standard sample based estimates. All optimization problems treated will use linear constraints unless stated otherwise. There will be one equality constraint, i.e., the full-investment constraint, and one or more inequality constraints such as the long-only and box constraints. More comprehensive constraint types can be found in Ross Bennett (2018) [*Introduction to PortfolioAnalytics*](https://cran.r-project.org/web/packages/PortfolioAnalytics/vignettes/portfolio_vignette.pdf). 
+In this Vignette, all mean vectors and covariance matrices in the optimization formula will use standard sample based estimates. All optimization problems treated will use linear constraints unless stated otherwise. There will be one equality constraint, i.e., the full-investment constraint, and one or more inequality constraints such as the long-only and box constraints. More comprehensive constraint types can be found in Ross Bennett (2018) [*Introduction to PortfolioAnalytics*](https://cran.r-project.orgpackage=PortfolioAnalytics/vignettes/portfolio_vignette.pdf). 
 
 # 3 Maximizing Mean Return
 The objective to maximize mean return is a linear problem of the form:

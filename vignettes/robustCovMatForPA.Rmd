@@ -41,7 +41,7 @@ The following "custom" robust mean vector and covariance matrix estimator functi
 3.  `custom.covRob.Mcd`, using the function `covMcd` in the robustbase package
 4.  `custom.covRob.TSGS`, using the function `TSGS` in the GSE package.
 
-The above "custom" functions were are made possible by existence of a very useful "custom moments" functionality in PortfolioAnalytics, which is described in the Vignette "Custom Moment and Objective Functions" by Ross Bennett (2018), available on CRAN at <https://cran.r-project.org/web/packages/PortfolioAnalytics/index.html>. In the context of a returns mean vector and covariance matrix, the latter are thought of as the moments of orders one and two, loosely speaking the "mean" and "variance".
+The above "custom" functions were are made possible by existence of a very useful "custom moments" functionality in PortfolioAnalytics, which is described in the Vignette "Custom Moment and Objective Functions" by Ross Bennett (2018), available on CRAN at <https://cran.r-project.org/package=PortfolioAnalytics/index.html>. In the context of a returns mean vector and covariance matrix, the latter are thought of as the moments of orders one and two, loosely speaking the "mean" and "variance".
 
 It is important to keep in mind that the methods described herein for using robust covariance matrix estimators, implicitly including corresponding robust mean vector estimators, may be used for other important covariance matrix estimators, such as shrinkage covariance matrix estimators, and covariance matrix estimators for unequal asset returns histories.
 
@@ -241,7 +241,7 @@ outCovRobRocke <- opt.outputMvo(opt, returns10, digits = 3, frequency = "weekly"
 
 ## Custom covRob.Mcd Estimator
 
-This custom estimator is based on the *robustbase* package function `covMcd`, which is a highly developed and well-documented robust covariance matrix estimator. The *Mcd* in `covMcd` stands for *Minimum Covariance Determinant* (MCD). This robust covariance matrix estimator uses a sophisticated fast algorithm to search for ***h*** observations out of ***n*** whose classical covariance matrix has the smallest possible determinant. See @RousseeuwDriessen1999. Then the raw MCD estimates of location and scatter are computed based on the sample mean vector and sample covariance matrix of those ***h*** points. Then covMcd uses a "refinement step" to compute the final robust covariance matrix and mean vector. For more details concerning the covMcd function and its parameters, and its "fast" computation, please see the Reference Manual and the Vignette "covMcd-Generalizing the FastMCD" downloadable from the CRAN robustbase package at <https://cran.r-project.org/web/packages/robustbase/index.html>.
+This custom estimator is based on the *robustbase* package function `covMcd`, which is a highly developed and well-documented robust covariance matrix estimator. The *Mcd* in `covMcd` stands for *Minimum Covariance Determinant* (MCD). This robust covariance matrix estimator uses a sophisticated fast algorithm to search for ***h*** observations out of ***n*** whose classical covariance matrix has the smallest possible determinant. See @RousseeuwDriessen1999. Then the raw MCD estimates of location and scatter are computed based on the sample mean vector and sample covariance matrix of those ***h*** points. Then covMcd uses a "refinement step" to compute the final robust covariance matrix and mean vector. For more details concerning the covMcd function and its parameters, and its "fast" computation, please see the Reference Manual and the Vignette "covMcd-Generalizing the FastMCD" downloadable from the CRAN robustbase package at <https://cran.r-project.org/package=robustbase/index.html>.
 
 Here is the custom.covRob.Mcd function:\
 
@@ -552,7 +552,7 @@ opt <- optimize.portfolio(returns, pspec,
 
 ## A User Custom Function for covRobOGK in `robustbase`
 
-The user function `covRobOGK` presented below computes portfolio assets pairwise robust covariance matrix estimates. This method was originally introduced by @GnanadesikanKettenring1972, and improved with an "orthogonalizing step" by @MaronnaZamar2002. For details, see the `covRobOGK` page in the robustbase Reference Manual at <https://cran.r-project.org/web/packages/robustbase/index.html>. Here is the user function based on the robustbase function `covOGK` with default argument values:\
+The user function `covRobOGK` presented below computes portfolio assets pairwise robust covariance matrix estimates. This method was originally introduced by @GnanadesikanKettenring1972, and improved with an "orthogonalizing step" by @MaronnaZamar2002. For details, see the `covRobOGK` page in the robustbase Reference Manual at <https://cran.r-project.org/package=robustbase/index.html>. Here is the user function based on the robustbase function `covOGK` with default argument values:\
 
 ```{r, eval = FALSE}
 user.covRob.OGK <- function(R){

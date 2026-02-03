@@ -16,7 +16,7 @@ Authors@R: c(
     person(given="Xiaokang",family="Feng",role="ctb") ,
     person(given="Yifu",family="Kang",role="ctb") )
 Version: 2.1.1
-Date: 2026-01-27
+Date: 2026-02-02
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
@@ -64,5 +64,5 @@ Imports:
 License: GPL-3
 URL: https://github.com/braverock/PortfolioAnalytics
 Copyright: (c) 2004-2026
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Encoding: UTF-8
