@@ -319,7 +319,7 @@ summary(pspec)
 The PortfolioAnalytics package currently supports random portfolios, DEoptim, pso, GenSA, and ROI as back ends. Note that some of the QP/LP problems are solved directly with Rglpk and quadprog. The solver can be specified with the \code{optimize\_method} argument in \code{optimize.portfolio} and \code{optimize.portfolio.rebalancing}.
 
 \subsection{DEoptim}
-PortfolioAnalytics uses the \code{DEoptim} function from the R package \verb"DEoptim". Differential evolution is a stochastic global optimization algorithm. See \code{?DEoptim} and the references contained therein for more information. See also \href{https://cran.r-project.org/package=DEoptim/vignettes/DEoptimPortfolioOptimization.pdf}{Large scale portfolio optimization with DEoptim}.
+PortfolioAnalytics uses the \code{DEoptim} function from the R package \verb"DEoptim". Differential evolution is a stochastic global optimization algorithm. See \code{?DEoptim} and the references contained therein for more information. 
 \subsection{Random Portfolios}
 PortfolioAnalytics has three methods to generate random portfolios.
 \begin{enumerate}
