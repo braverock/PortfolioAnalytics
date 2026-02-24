@@ -2813,7 +2813,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     alpha <- 0.05
     lambda <- 1
     
-    valid_objnames <- c("mean", "var", "sd", "StdDev", "ES", "CVaR", "ETL", "CSM", "HHI", "hhi")
+    valid_objnames <- c("mean", "var", "sd", "StdDev", "ES", "CVaR", "ETL", "CSM", "HHI", "hhi", "EQS")
     for (objective in portfolio$objectives) {
       if (objective$enabled) {
         if (!(objective$name %in% valid_objnames)) {
@@ -2832,6 +2832,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         risk <- ifelse(objective$name %in% valid_objnames[2:4], TRUE, risk)
         risk_ES <- ifelse(objective$name %in% valid_objnames[5:7], TRUE, risk_ES)
         risk_CSM <- ifelse(objective$name %in% valid_objnames[8:8], TRUE, risk_CSM)
+        risk_EQS <- ifelse(objective$name %in% valid_objnames[11:11], TRUE, risk_EQS)
         if(objective$name %in% valid_objnames[9:11]){
           risk_HHI <- TRUE
           lambda_hhi <- objective$conc_aversion
@@ -2852,22 +2853,22 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       return_target <- portfolio$objectives[[mean_idx]]$target
     } else return_target=NULL
     
-    if(reward & !risk & !risk_ES & !risk_CSM & !risk_HHI){
+    if(reward & !risk & !risk_ES & !risk_CSM & !risk_HHI & !risk_EQS){
       # max return
       obj <- -t(mean_value) %*% wts
       constraints_cvxr = list()
       tmpname = "mean"
-    } else if(!reward & risk & !risk_ES & !risk_CSM & !risk_HHI){
+    } else if(!reward & risk & !risk_ES & !risk_CSM & !risk_HHI & !risk_EQS){
       # min var/std
       obj <- CVXR::quad_form(wts, sigma_value)
       constraints_cvxr = list()
       tmpname = "StdDev"
-    } else if(!reward & risk & !risk_ES & !risk_CSM & risk_HHI){
+    } else if(!reward & risk & !risk_ES & !risk_CSM & risk_HHI & !risk_EQS){
       # min HHI
       obj <- CVXR::quad_form(wts, sigma_value) + lambda_hhi * CVXR::cvxr_norm(wts, 2) **2
       constraints_cvxr = list()
       tmpname = "HHI"
-    } else if(reward & risk & !risk_ES & !risk_CSM & !risk_HHI){
+    } else if(reward & risk & !risk_ES & !risk_CSM & !risk_HHI & !risk_EQS){
       # mean-var/sharpe ratio
       if(hasArg(maxSR)) maxSR=match.call(expand.dots=TRUE)$maxSR
       
@@ -2882,7 +2883,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         constraints_cvxr = list(t(mean_value) %*% wts == 1, sum(wts) >= 0)
         tmpname = "Sharpe Ratio"
       }
-    } else if(risk_ES & !risk_CSM){
+    } else if(risk_ES & !risk_CSM & !risk_EQS){
       # ES objectives
       if(reward){
         if(hasArg(maxSTARR)) maxSTARR=match.call(expand.dots=TRUE)$maxSTARR else maxSTARR=TRUE
@@ -2902,7 +2903,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta)
         tmpname = "ES"
       }
-    } else if(!risk_ES & risk_CSM){
+    } else if(!risk_ES & risk_CSM & !risk_EQS){
       # CSM objectives
       if(reward){
         if(hasArg(CSMratio)) CSMratio=match.call(expand.dots=TRUE)$CSMratio else CSMratio=TRUE
@@ -2922,6 +2923,22 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         constraints_cvxr = list(z >= 0, z >= -X %*% wts - zeta,
                                 t >= CVXR::p_norm(z, p=2))
         tmpname = "CSM"
+      }
+    } else if(!risk_ES & !risk_CSM & risk_EQS){
+      # EQS objectives
+      if(reward){
+        if(hasArg(EQSratio)) EQSratio=match.call(expand.dots=TRUE)$EQSratio else EQSratio=TRUE
+      }
+      if(EQSratio){
+        # max EQS ratio
+        obj <- zeta + (1/(alpha * T)) * sum(pos(square(pos(X %*% wts)) - zeta))
+        constraints_cvxr = list(t(mean_value) %*% wts == 1, sum(wts) >= 0)
+        tmpname = "EQS ratio"
+      } else {
+        # min EQS
+        obj <- zeta + (1/(alpha * T)) * sum(pos(square(pos(X %*% wts)) - zeta))
+        constraints_cvxr <- list()
+        tmpname = "EQS"
       }
     } else { 
       # wrong objective
