@@ -2810,6 +2810,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     maxSTARR <- FALSE
     ESratio <- FALSE
     CSMratio <- FALSE
+    EQSratio <- FALSE
     alpha <- 0.05
     lambda <- 1
     
