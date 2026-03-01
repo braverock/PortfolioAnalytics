@@ -140,11 +140,20 @@ scatterFUN <- function(R, FUN, arguments=NULL){
            if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
            if(is.null(nargs$invert)) nargs$invert = FALSE
          },
-         # CSM = {
-           # fun = match.fun(CSM)
-           # if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
-           # if(is.null(nargs$invert)) nargs$invert = FALSE
-         # },
+         csm =,
+         mCSM =,
+         CSM = {
+         fun = match.fun(CSM)
+         if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+         if(is.null(nargs$invert)) nargs$invert = FALSE
+         },
+         eqs =,
+         mEQS =,
+         EQS = {
+           fun = match.fun(CSM)
+           if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+           if(is.null(nargs$invert)) nargs$invert = FALSE
+         },
 {   # see 'S Programming p. 67 for this matching
   fun <- try(match.fun(FUN))
 }
