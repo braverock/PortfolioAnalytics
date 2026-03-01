@@ -2806,6 +2806,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
     risk_ES <- FALSE
     risk_CSM <- FALSE
     risk_HHI <- FALSE
+    risk_EQS <- FALSE
     maxSR <- FALSE
     maxSTARR <- FALSE
     ESratio <- FALSE
