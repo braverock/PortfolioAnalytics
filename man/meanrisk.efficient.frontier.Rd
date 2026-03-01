@@ -36,8 +36,8 @@ a matrix of objective measure values and weights along the efficient frontier
 This function generates the mean-risk efficient frontier of a portfolio
 specifying the constraints and objectives. The \code{risk_type} object 
 is for the basic mean-risk efficient frontier, other efficient frontiers
-will be generated with the same target returns. All mean-StdDev, mean-ES
-and mean-CSM efficient frontiers will be generated.
+will be generated with the same target returns. All mean-StdDev, mean-ES,
+mean-CSM, and mean-EQS efficient frontiers will be generated.
 }
 \author{
 Xinran Zhao

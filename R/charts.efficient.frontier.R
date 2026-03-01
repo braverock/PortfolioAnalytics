@@ -117,6 +117,10 @@ chart.EfficientFrontier.optimize.portfolio.CVXR <- function(object, ..., optimiz
     frontier <- meancsm.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios, ...=...)
     rar <- "CSMratio"
   }
+  if(match.col =="EQS"){
+    frontier <- meaneqs.efficient.frontier(portfolio=portf, R=R, n.portfolios=n.portfolios, ...=...)
+    rar <- "EQSratio"
+  }
   
   # data points to plot the frontier
   x.f <- frontier[, match.col]
