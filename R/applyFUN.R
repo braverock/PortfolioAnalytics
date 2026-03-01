@@ -143,9 +143,9 @@ scatterFUN <- function(R, FUN, arguments=NULL){
          csm =,
          mCSM =,
          CSM = {
-         fun = match.fun(CSM)
-         if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
-         if(is.null(nargs$invert)) nargs$invert = FALSE
+           fun = match.fun(CSM)
+           if(is.null(nargs$portfolio_method)) nargs$portfolio_method='single'
+           if(is.null(nargs$invert)) nargs$invert = FALSE
          },
          eqs =,
          mEQS =,
