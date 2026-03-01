@@ -2933,12 +2933,12 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       }
       if(EQSratio){
         # max EQS ratio
-        obj <- zeta + (1/(alpha * T)) * sum(pos(square(pos(X %*% wts)) - zeta))
+        obj <- zeta + (1/(alpha * T)) * sum(CVXR::pos(square(CVXR::pos(X %*% wts)) - zeta))
         constraints_cvxr = list(t(mean_value) %*% wts == 1, sum(wts) >= 0)
         tmpname = "EQS ratio"
       } else {
         # min EQS
-        obj <- zeta + (1/(alpha * T)) * sum(pos(square(pos(X %*% wts)) - zeta))
+        obj <- zeta + (1/(alpha * T)) * sum(CVXR::pos(square(CVXR::pos(X %*% wts)) - zeta))
         constraints_cvxr <- list()
         tmpname = "EQS"
       }
