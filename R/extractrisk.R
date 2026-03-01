@@ -16,15 +16,17 @@
 #' @param w the weight of the portfolio
 #' @param ES_alpha the default value is 0.05, but could be specified as any value between 0 and 1
 #' @param CSM_alpha the default value is 0.05, but could be specified as any value between 0 and 1
+#' @param EQS_alpha the default value is 0.05, but could be specified as any value between 0 and 1
 #' @param moment_setting the default is NULL, should provide moment_setting=list(mu=, sigma=) if customize momentFUN
 #' @export extract_risk
-extract_risk <- function(R, w, ES_alpha = 0.05, CSM_alpha = 0.05, moment_setting = NULL){
+extract_risk <- function(R, w, ES_alpha = 0.05, CSM_alpha = 0.05, EQS_alpha = 0.05, moment_setting = NULL){
   res = list()
   if(is.null(moment_setting$mu)) res$mean = mean(R %*% w) else res$mean = moment_setting$mu %*% w
   if(is.null(moment_setting$sigma)) res$StdDev = sqrt(t(w) %*% cov(R) %*% w) else res$StdDev = sqrt(t(w) %*% moment_setting$sigma %*% w)
   
   if(ES_alpha > 0.5) ES_alpha <- (1 - ES_alpha)
   if(CSM_alpha > 0.5) CSM_alpha <- (1 - CSM_alpha)
+  if(EQS_alpha > 0.5) EQS_alpha <- (1 - EQS_alpha)
   
   # ES/CSM by CVXR
   T <- dim(R)[1]
@@ -45,6 +47,13 @@ extract_risk <- function(R, w, ES_alpha = 0.05, CSM_alpha = 0.05, moment_setting
   p_CSM <- CVXR::Problem(CVXR::Minimize(obj_CSM), constraints = con_CSM)
   res_CSM = CVXR::solve(p_CSM, solver = "ECOS")
   res$CSM = res_CSM$value
+  
+  ## EQS
+  obj_EQS <- zeta + (1/EQS_alpha) * sum(CVXR::pos(square(CVXR::pos(X %*% w)) - zeta))
+  con_EQS = list()
+  p_EQS <- CVXR::Problem(CVXR::Minimize(obj_EQS), constraints = con_EQS)
+  res_EQS = CVXR::solve(p_EQS, solver = "ECOS")
+  res$EQS = res_EQS$value
   
   res
 }
