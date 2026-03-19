@@ -15,8 +15,8 @@ Authors@R: c(
     person(given="Hezky",family="Varon",role="ctb") ,
     person(given="Xiaokang",family="Feng",role="ctb") ,
     person(given="Yifu",family="Kang",role="ctb") )
-Version: 2.1.1
-Date: 2026-02-02
+Version: 2.1.2
+Date: 2026-03-18
 Maintainer: Brian G. Peterson <brian@braverock.com>
 Description: Portfolio optimization and analysis routines and graphics.
 Depends:
