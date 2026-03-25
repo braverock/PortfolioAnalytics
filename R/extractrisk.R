@@ -38,21 +38,21 @@ extract_risk <- function(R, w, ES_alpha = 0.05, CSM_alpha = 0.05, EQS_alpha = 0.
   obj_es <- zeta + (1 / (T * ES_alpha)) * sum(z)
   con_es <- list(z >= 0, z >= -X %*% w - zeta)
   p_es <- CVXR::Problem(CVXR::Minimize(obj_es), constraints = con_es)
-  res_es <- CVXR::psolve(p_es, solver = "ECOS")
+  res_es <- CVXR::psolve(p_es)
   res$ES <- res_es # $value update for psolve
 
   ## CSM
   obj_CSM <- zeta + (1 / CSM_alpha) * CVXR::p_norm(z, p = 2)
   con_CSM <- list(z >= 0, z >= -X %*% w - zeta)
   p_CSM <- CVXR::Problem(CVXR::Minimize(obj_CSM), constraints = con_CSM)
-  res_CSM <- CVXR::psolve(p_CSM, solver = "ECOS")
+  res_CSM <- CVXR::psolve(p_CSM)
   res$CSM <- res_CSM # $value
 
   ## EQS
-  obj_EQS <- zeta + (1 / (T * EQS_alpha)) * sum(CVXR::pos(square(CVXR::pos(X %*% w)) - zeta))
+  obj_EQS <- zeta + (1 / (T * EQS_alpha)) * sum(CVXR::pos(CVXR::square(CVXR::pos(X %*% w)) - zeta))
   con_EQS <- list()
   p_EQS <- CVXR::Problem(CVXR::Minimize(obj_EQS), constraints = con_EQS)
-  res_EQS <- CVXR::psolve(p_EQS, solver = "ECOS")
+  res_EQS <- CVXR::psolve(p_EQS)
   res$EQS <- res_EQS # $value
 
   res

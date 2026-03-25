@@ -42,24 +42,24 @@ optimize.portfolio.rebalancing(
 
 \item{search_size}{integer, how many portfolios to test, default 20,000}
 
-\item{trace}{TRUE/FALSE if TRUE will attempt to return additional 
+\item{trace}{TRUE/FALSE if TRUE will attempt to return additional
 information on the path or portfolios searched}
 
 \item{\dots}{any other passthru parameters to \code{\link{optimize.portfolio}}}
 
 \item{rp}{a set of random portfolios passed into the function to prevent recalculation}
 
-\item{rebalance_on}{character string of period to rebalance on. See 
+\item{rebalance_on}{character string of period to rebalance on. See
 \code{\link[xts]{endpoints}} for valid names.}
 
-\item{training_period}{an integer of the number of periods to use as 
+\item{training_period}{an integer of the number of periods to use as
 a training data in the front of the returns data}
 
 \item{rolling_window}{an integer of the width (i.e. number of periods)
-of the rolling window, the default of NULL will run the optimization 
+of the rolling window, the default of NULL will run the optimization
 using the data from inception.}
 
-\item{portfolio}{an object of type "portfolio" specifying the constraints 
+\item{portfolio}{an object of type "portfolio" specifying the constraints
 and objectives for the optimization}
 
 \item{objectives}{default NULL, a list of objective objects}
@@ -70,37 +70,37 @@ a list containing the following elements
   \item{\code{portfolio}:}{ The portfolio object.}
   \item{\code{R}:}{ The asset returns.}
   \item{\code{call}:}{ The function call.}
-  \item{\code{elapsed_time:}}{ The amount of time that elapses while the 
+  \item{\code{elapsed_time:}}{ The amount of time that elapses while the
   optimization is run.}
-  \item{\code{opt_rebalancing:}}{ A list of \code{optimize.portfolio} 
+  \item{\code{opt_rebalancing:}}{ A list of \code{optimize.portfolio}
   objects computed at each rebalancing period.}
 }
 }
 \description{
-Portfolio optimization with support for rebalancing periods for 
+Portfolio optimization with support for rebalancing periods for
 out-of-sample testing (i.e. backtesting)
 }
 \details{
-Run portfolio optimization with periodic rebalancing at specified time periods. 
-Running the portfolio optimization with periodic rebalancing can help 
+Run portfolio optimization with periodic rebalancing at specified time periods.
+Running the portfolio optimization with periodic rebalancing can help
 refine the constraints and objectives by evaluating the out of sample
 performance of the portfolio based on historical data.
 
-If both \code{training_period} and \code{rolling_window} are \code{NULL}, 
-then \code{training_period} is set to a default value of 36. 
+If both \code{training_period} and \code{rolling_window} are \code{NULL},
+then \code{training_period} is set to a default value of 36.
 
-If \code{training_period} is \code{NULL} and a \code{rolling_window} is 
-specified, then \code{training_period} is set to the value of 
+If \code{training_period} is \code{NULL} and a \code{rolling_window} is
+specified, then \code{training_period} is set to the value of
 \code{rolling_window}.
 
-The user should be aware of the following behavior when both 
-\code{training_period} and \code{rolling_window} are specified and have 
+The user should be aware of the following behavior when both
+\code{training_period} and \code{rolling_window} are specified and have
 different values
 \describe{
-  \item{\code{training_period < rolling_window}: }{For example, if you have 
-  \code{rolling_window=60}, \code{training_period=50}, and the periodicity 
-  of the data is the same as the rebalance frequency (i.e. monthly data with 
-  \code{rebalance_on="months")} then the returns data used in the optimization 
+  \item{\code{training_period < rolling_window}: }{For example, if you have
+  \code{rolling_window=60}, \code{training_period=50}, and the periodicity
+  of the data is the same as the rebalance frequency (i.e. monthly data with
+  \code{rebalance_on="months")} then the returns data used in the optimization
   at each iteration are as follows:
   \itemize{
   \item 1: R[1:50,]
@@ -112,16 +112,16 @@ different values
   \item ...
   }
   This results in a growing window for several optimizations initially while
-  the endpoint iterator (i.e. \code{[50, 51, ...]}) is less than the 
+  the endpoint iterator (i.e. \code{[50, 51, ...]}) is less than the
   rolling window width.}
-  \item{\code{training_period > rolling_window}: }{The data used in the initial 
-  optimization is \code{R[(training_period - rolling_window):training_period,]}. 
-  This results in some of the data being "thrown away", i.e. periods 1 to 
+  \item{\code{training_period > rolling_window}: }{The data used in the initial
+  optimization is \code{R[(training_period - rolling_window):training_period,]}.
+  This results in some of the data being "thrown away", i.e. periods 1 to
   \code{(training_period - rolling_window - 1)} are not used in the optimization.}
 }
 
-This function is a essentially a wrapper around \code{optimize.portfolio} 
-and thus the discussion in the Details section of the 
+This function is a essentially a wrapper around \code{optimize.portfolio}
+and thus the discussion in the Details section of the
 \code{\link{optimize.portfolio}} help file is valid here as well.
 
 This function is massively parallel and requires the 'foreach' package. It
@@ -130,26 +130,28 @@ is suggested to register a parallel backend.
 \examples{
 \dontrun{
 data(edhec)
-R <- edhec[,1:4]
+R <- edhec[, 1:4]
 funds <- colnames(R)
 
 portf <- portfolio.spec(funds)
-portf <- add.constraint(portf, type="full_investment")
-portf <- add.constraint(portf, type="long_only")
-portf <- add.objective(portf, type="risk", name="StdDev")
+portf <- add.constraint(portf, type = "full_investment")
+portf <- add.constraint(portf, type = "long_only")
+portf <- add.objective(portf, type = "risk", name = "StdDev")
 
 # Quarterly rebalancing with 5 year training period
 bt.opt1 <- optimize.portfolio.rebalancing(R, portf,
-optimize_method="ROI",
-rebalance_on="quarters",
-training_period=60)
+  optimize_method = "ROI",
+  rebalance_on = "quarters",
+  training_period = 60
+)
 
 # Monthly rebalancing with 5 year training period and 4 year rolling window
 bt.opt2 <- optimize.portfolio.rebalancing(R, portf,
-optimize_method="ROI",
-rebalance_on="months",
-training_period=60,
-rolling_window=48)
+  optimize_method = "ROI",
+  rebalance_on = "months",
+  training_period = 60,
+  rolling_window = 48
+)
 }
 }
 \seealso{

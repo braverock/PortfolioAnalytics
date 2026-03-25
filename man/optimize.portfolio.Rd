@@ -70,8 +70,8 @@ a list containing the following elements
   \item{\code{elapsed_time:}}{ The amount of time that elapses while the optimization is run.}
   \item{\code{end_t:}}{ The date and time the optimization completed.}
 }
-When Trace=TRUE is specified, the following elements will be returned in 
-addition to the elements above. The output depends on the optimization 
+When Trace=TRUE is specified, the following elements will be returned in
+addition to the elements above. The output depends on the optimization
 method and is specific to each solver. Refer to the documentation of the
 desired solver for more information.
 
@@ -107,8 +107,8 @@ desired solver for more information.
   \item \code{PSOoutput}: A list containing the following elements:
   \itemize{
     \item par
-    \item value 
-    \item counts 
+    \item value
+    \item counts
     \item convergence
     \item message
     \item stats
@@ -127,33 +127,33 @@ desired solver for more information.
 }
 }
 \description{
-This function aims to provide a wrapper for constrained optimization of 
+This function aims to provide a wrapper for constrained optimization of
 portfolios that specify constraints and objectives.
 }
 \details{
 This function currently supports DEoptim, random portfolios, pso, GenSA, ROI, osqp, Rglpk, mco, and CVXR solvers as back ends.
 Additional back end contributions for Rmetrics, ghyp, etc. would be welcome.
 
-When using random portfolios, search_size is precisely that, how many 
-portfolios to test.  You need to make sure to set your feasible weights 
-in generatesequence to make sure you have search_size unique 
-portfolios to test, typically by manipulating the 'by' parameter 
-to select something smaller than .01 
+When using random portfolios, search_size is precisely that, how many
+portfolios to test.  You need to make sure to set your feasible weights
+in generatesequence to make sure you have search_size unique
+portfolios to test, typically by manipulating the 'by' parameter
+to select something smaller than .01
 (I often use .002, as .001 seems like overkill)
 
-When using DE, search_size is decomposed into two other parameters 
+When using DE, search_size is decomposed into two other parameters
 which it interacts with, NP and itermax.
 
-NP, the number of members in each population, is set to cap at 2000 in 
+NP, the number of members in each population, is set to cap at 2000 in
 DEoptim, and by default is the number of parameters (assets/weights) * 10.
 
 itermax, if not passed in dots, defaults to the number of parameters (assets/weights) * 50.
 
-When using GenSA and want to set \code{verbose=TRUE}, instead use \code{trace}. 
+When using GenSA and want to set \code{verbose=TRUE}, instead use \code{trace}.
 
-If \code{optimize_method="ROI"} is specified, a default solver will be 
+If \code{optimize_method="ROI"} is specified, a default solver will be
 selected based on the optimization problem. The \code{glpk} solver is the
-default solver for LP and MILP optimization problems. The \code{quadprog} 
+default solver for LP and MILP optimization problems. The \code{quadprog}
 solver is the default solver for QP optimization problems. For example,
 \code{optimize_method = "quadprog"} can be specified and the optimization
 problem will be solved via ROI using the quadprog solver.
@@ -165,20 +165,20 @@ The extension to ROI solves a limited type of convex optimization problems:
 \item Minimize portfolio variance subject to leverage, box, group, and/or factor exposure constraints and a desired portfolio return.
 \item Maximize quadratic utility subject to leverage, box, group, target mean return, turnover, and/or factor exposure constraints and risk aversion parameter.
 (The risk aversion parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object).
-\item Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) can be done by specifying \code{maxSR=TRUE} in \code{optimize.portfolio}. 
+\item Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) can be done by specifying \code{maxSR=TRUE} in \code{optimize.portfolio}.
 If both mean and StdDev are specified as objective names, the default action is to maximize quadratic utility, therefore \code{maxSR=TRUE} must be specified to maximize Sharpe Ratio.
 \item Minimize portfolio ES/ETL/CVaR optimization subject to leverage, box, group, position limit, target mean return, and/or factor exposure constraints and target portfolio return.
-\item Maximize portfolio mean return per unit ES/ETL/CVaR (i.e. the STARR Ratio) can be done by specifying \code{maxSTARR=TRUE} in \code{optimize.portfolio}. 
+\item Maximize portfolio mean return per unit ES/ETL/CVaR (i.e. the STARR Ratio) can be done by specifying \code{maxSTARR=TRUE} in \code{optimize.portfolio}.
 If both mean and ES/ETL/CVaR are specified as objective names, the default action is to maximize mean return per unit ES/ETL/CVaR.
 }
 These problems also support a weight_concentration objective where concentration
 of weights as measured by HHI is added as a penalty term to the quadratic objective.
 
-Because these convex optimization problem are standardized, there is no need for a penalty term. 
+Because these convex optimization problem are standardized, there is no need for a penalty term.
 The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ignored by the ROI solver.
 
 If \code{optimize_method="CVXR"} is specified, a default solver will be selected based on the optimization problem.
-The default solver for Quadratic Programming will be \code{OSQP}, 
+The default solver for Quadratic Programming will be \code{OSQP},
 and the default solver for Linear Problem and Second-Order Cone Programming will be \code{SCS}.
 Specified CVXR solver can be given by using \code{optimize_method=c("CVXR", "CVXRsolver")}.
 CVXR supports some commercial solvers, including CBC, CPLEX, GUROBI and MOSEK, and some open source solvers, including GLPK, GLPK_MI, OSQP, SCS and ECOS.
@@ -208,15 +208,15 @@ It could be specified by \code{CSMratio=TRUE} in \code{optimize.portfolio} with 
 The default action is to maximize CSM ratio. If \code{CSMratio=FALSE} is given, the action will be minimizing CSM.
 }
 
-Because these convex optimization problem are standardized, there is no need for a penalty term. 
+Because these convex optimization problem are standardized, there is no need for a penalty term.
 The \code{multiplier} argument in \code{\link{add.objective}} passed into the complete constraint object are ignored by the CVXR solver.
 }
 \note{
 An object of class \code{v1_constraint} can be passed in for the \code{constraints} argument.
-The \code{v1_constraint} object was used in the previous 'v1' specification to specify the 
-constraints and objectives for the optimization problem, see \code{\link{constraint}}. 
-We will attempt to detect if the object passed into the constraints argument 
-is a \code{v1_constraint} object and update to the 'v2' specification by adding the 
+The \code{v1_constraint} object was used in the previous 'v1' specification to specify the
+constraints and objectives for the optimization problem, see \code{\link{constraint}}.
+We will attempt to detect if the object passed into the constraints argument
+is a \code{v1_constraint} object and update to the 'v2' specification by adding the
 constraints and objectives to the \code{portfolio} object.
 }
 \seealso{

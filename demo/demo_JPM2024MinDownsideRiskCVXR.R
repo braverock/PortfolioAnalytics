@@ -58,16 +58,16 @@ optimize_portfolio_MV_rebalance <- function(returns, training_period=NULL, rolli
     
     # Solve the MV portfolio optimization problem
     prob_mv <- Problem(Minimize(objective_mv), constraints_mv)
-    result_mv <- solve(prob_mv, solver = 'OSQP')
+    result_mv <- psolve(prob_mv, solver = 'OSQP')
     # cat("\nMV Status of the solution: ", result_mv$status)
     # cat("\nMV Solver used: ", result_mv$solver)
     
     # Evaluate risk and return for current solution
-    optimal_risk <- sqrt(result_mv$value)
-    optimal_ret <- result_mv$getValue(ret)
+    optimal_risk <- sqrt(result_mv)
+    optimal_ret <- value(ret)
     
     # Get the optimal weights
-    wts <- as.vector(result_mv$getValue(wts_mv))
+    wts <- as.vector(value(wts_mv))
     names(wts) <- asset_names
     mv_portfolio_wts[j, ] <- t(wts)
   }
@@ -141,12 +141,12 @@ optimize_portfolio_MES_rebalance <- function(returns, alpha, training_period=NUL
     
     # Solve the MES portfolio optimization problem
     prob_mes <- Problem(Minimize(objective_mes), constraints = constraints_mes)
-    result_mes <- solve(prob_mes, solver = 'SCS')
+    result_mes <- psolve(prob_mes, solver = 'SCS')
     # cat("\nMES Status of the solution: ", result_mes$status)
     # cat("\nMES Solver used: ", result_mes$solver)
     
     # Get the optimal weights
-    wts <- as.vector(result_mes$getValue(wts_mes))
+    wts <- as.vector(value(wts_mes))
     names(wts) <- asset_names
     mes_portfolio_wts[j, ] <- t(wts)
   }
@@ -222,12 +222,12 @@ optimize_portfolio_MCSM_rebalance <- function(returns, alpha, training_period=NU
     
     # Solve the MCSM portfolio optimization problem
     prob_mcsm <- Problem(Minimize(objective_mcsm), constraints = constraints_mcsm)
-    result_mcsm <- solve(prob_mcsm, solver = 'SCS')
+    result_mcsm <- psolve(prob_mcsm, solver = 'SCS')
     # cat("\nMCSM Status of the solution: ", result_mcsm$status)
     # cat("\nMCSM solver used: ", result_mcsm$solver)
     
     # Get the optimal weights
-    wts <- as.vector(result_mcsm$getValue(wts_mcsm))
+    wts <- as.vector(value(wts_mcsm))
     names(wts) <- asset_names
     mcsm_portfolio_wts[j, ] <- t(wts)
   }
