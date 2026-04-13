@@ -64,7 +64,7 @@ This vignette provides:
 ## Solver Overview
 
 PortfolioAnalytics supports solvers spanning three categories: **convex
-solvers** that exploit problem structure for exact solutions, **metaheuristic
+solvers** that exploit problem structure for exact solutions, **global metaheuristic
 solvers** that use stochastic search for arbitrary objectives, and a
 **multi-objective solver** for Pareto optimization.
 
@@ -131,6 +131,13 @@ supported via MILP formulations with binary variables.
 
 ### Metaheuristic Solvers
 
+Metaheuristic solvers are general-purpose optimization algorithms that do
+not require convexity or explicit mathematical formulations.  They are
+also called global optimization solvers or global stochastic solvers or
+mumerical optimization solvers. PortfolioAnalytics includes Differential
+Evolution (DEoptim), Generalized Simulated Annealing (GenSA), Particle
+Swarm Optimization (pso), and a built-in random search method.
+
 Metaheuristic solvers minimize `constrained_objective()`, a penalty-based
 wrapper that evaluates *any* R function as an objective and adds penalty
 terms for constraint violations.  This makes them suitable for non-convex or
@@ -139,20 +146,32 @@ global optimality.
 
 | Solver | Package | Method | Key parameters |
 |--------|---------|--------|----------------|
-| DEoptim | `DEoptim` | Differential Evolution | `itermax`, `NP`, `strategy` (default: JADE) |
+| DEoptim | `DEoptim` | Differential Evolution | `itermax`, `NP`, `strategy` (default: 2 DE/local-to-best/1/bin) |
 | GenSA | `GenSA` | Generalized Simulated Annealing | `maxit`, `temperature` |
 | pso | `pso` | Particle Swarm Optimization | `maxit`, `s` (swarm size) |
 | random | built-in | Random portfolio search | `search_size`, `rp_method` |
 
 DEoptim uses `fnMap` (the `fn_map()` function) to project candidate solutions
-back to feasible space after each mutation step, while GenSA and pso rely on
-internal normalization via `fn_map()` inside `constrained_objective()`.
+back to feasible space after each mutation step, ensuring that each generation
+of candidate portfolios are actually feasible given the constraints, while
+GenSA and pso rely on internal normalization via `fn_map()` inside `constrained_objective()`.
 The `fn_map()` function enforces box, leverage, group, position limit, and
 factor exposure constraints.  For factor exposure, `fn_map()` uses a QP
 projection step (via `quadprog::solve.QP`) that finds the nearest feasible
 weight vector satisfying all linear constraints simultaneously.
+
 The `random` method generates a matrix of feasible random portfolios up front
-and evaluates them all, selecting the best.
+and evaluates them all, selecting the best. The `rp_method` argument controls
+the random portfolio generation method, with options for uniform random sampling
+(`rp_method="sample"`), grid search (`rp_method="grid"`), and Simplex
+(`rp_method="simplex"`) solutions which try to sample the outer vertex bounds
+of the combinations. The random portfolio method is also used as an initial
+population for the DEoptim, GenSA, and pso solvers when `initial_pop = TRUE`
+(the default) to supply the global solvers with a starting point that meets all
+or almost all of the constraints on the portfolio so that the solver engine
+starts with a full set of feasible portfolios rather than only using box
+constraints, which is typically the only constraint the global solvers
+support natively.
 
 ::: {.callout-note}
 Metaheuristic solvers should generally **not** be used for problems that have
@@ -168,8 +187,18 @@ The worked examples in this vignette use a small number of iterations
 solvers.  In practice, increasing the number of generations/iterations and
 tuning solver-specific hyperparameters (e.g., `NP` and `strategy` for
 DEoptim, `temperature` for GenSA, swarm size `s` for pso) can be expected to
-improve convergence speed and solution quality.
+improve convergence speed and solution quality. PortfolioAnalytics attempts
+to set reasonable defaults for all solvers, but users should experiment with
+these settings for their specific problem and computational budget.
 :::
+
+The global solvers are also suitable for many multi-objective problems that
+do not have a convex formulation, such as maximizing return subject to a
+risk budget constraint or minimizing a custom risk measure subject to factor
+exposure limits and other corner limits which break convexity. They may also
+be the best choice for significantly non-normal distributions where the
+convex approximations of variance and ES may not be good representations of
+future risk and reward.
 
 ### Multi-Objective
 
@@ -230,9 +259,9 @@ mathematical formulation.  **Penalty** means the solver uses
 
 ### Constraint Support
 
-| Constraint | CVXR | ROI | osqp | Rglpk | Metaheuristic |
+| Constraint | CVXR | ROI | osqp | Rglpk | Metaheuristic^5^ |
 |-----------|:----:|:---:|:----:|:-----:|:------------:|
-| Box (min/max per asset) | Yes | Yes | Yes | Yes | Yes (penalty) |
+| Box (min/max per asset) | Yes | Yes | Yes | Yes | Yes |
 | Weight sum / leverage | Yes | Yes | Yes | Yes | Yes (penalty) |
 | Full investment | Yes | Yes | Yes | Yes | Yes (penalty) |
 | Long only | Yes | Yes | Yes | Yes | Yes (penalty) |
@@ -250,7 +279,7 @@ mathematical formulation.  **Penalty** means the solver uses
 ^2^ QP problems only, via `gmv_opt_ptc()`.
 ^3^ Via MILP formulation with binary variables.
 ^4^ QP problems only, via `gmv_opt_leverage()`.
-
+^5^ additional constraints supported via `fn_map()` projection step.
 
 ## Worked Examples
 
@@ -311,7 +340,7 @@ minvar.osqp
 
 #### DEoptim
 
-Metaheuristic solvers require slightly relaxed leverage constraints because
+Global solvers require slightly relaxed leverage constraints because
 they work with continuous weight vectors that may not sum to exactly 1.
 
 ```{r}
@@ -366,6 +395,13 @@ minvar.weights <- round(cbind(
 knitr::kable(minvar.weights, caption = "Minimum Variance Weights")
 ```
 
+::: {.callout-note}
+
+All convex solvers produce identical or near-identical results for minimum
+variance, while global solvers vary widely, DEoptim coming close, and GenSA
+and pso taking significantly longer and being farther from the optimal solution.
+
+:::
 
 ### Minimum ES / CVaR
 

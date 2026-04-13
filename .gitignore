@@ -52,3 +52,6 @@ test_results.txt
 tests/testthat/_problems/
 *.pdf
 Rplots.pdf
+.aider*
+.temp*
+.tmp*
