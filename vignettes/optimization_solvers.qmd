@@ -11,6 +11,7 @@ format:
     code-fold: false
     code-overflow: wrap
     df-print: kable
+    embed-resources: true
   pdf:
     toc: true
     toc-depth: 3
@@ -134,7 +135,7 @@ supported via MILP formulations with binary variables.
 Metaheuristic solvers are general-purpose optimization algorithms that do
 not require convexity or explicit mathematical formulations.  They are
 also called global optimization solvers or global stochastic solvers or
-mumerical optimization solvers. PortfolioAnalytics includes Differential
+numerical optimization solvers. PortfolioAnalytics includes Differential
 Evolution (DEoptim), Generalized Simulated Annealing (GenSA), Particle
 Swarm Optimization (pso), and a built-in random search method.
 
@@ -497,7 +498,7 @@ knitr::kable(mines.weights, caption = "Minimum ES Weights")
 ### Minimum CSM
 
 Minimize the Coherent Second Moment, a downside risk measure that combines
-VaR and the second moment of losses beyond VaR.  This is an SOCP problem
+VaR and the second moment of losses beyond VaR.  This is a SOCP problem
 available only through CVXR among the convex solvers.
 
 ```{r}
