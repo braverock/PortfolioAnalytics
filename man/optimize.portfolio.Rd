@@ -179,9 +179,10 @@ The \code{multiplier} argument in \code{\link{add.objective}} passed into the co
 
 If \code{optimize_method="CVXR"} is specified, a default solver will be selected based on the optimization problem.
 The default solver for Quadratic Programming will be \code{OSQP},
-and the default solver for Linear Problem and Second-Order Cone Programming will be \code{SCS}.
+and the default solver for Linear Problem and Second-Order Cone Programming will be \code{CLARABEL}.
 Specified CVXR solver can be given by using \code{optimize_method=c("CVXR", "CVXRsolver")}.
-CVXR supports some commercial solvers, including CBC, CPLEX, GUROBI and MOSEK, and some open source solvers, including GLPK, GLPK_MI, OSQP, SCS and ECOS.
+CVXR supports some commercial solvers, including FICO Xpress, CPLEX, GUROBI and MOSEK, 
+and some open source solvers, including CLARABEL, GLPK/GLPK_MI, OSQP, SCS and ECOS/ECOS_BB, HiGHS, CVXOPT, PIQP, SCIP.
 For example, \code{optimize_method = c("CVXR", "ECOS")} can be specified and the optimization problem will be solved via CVXR using the ECOS solver.
 
 The extension to CVXR solves a limited type of convex optimization problems:
@@ -197,6 +198,9 @@ The tail probability parameter is passed into \code{optimize.portfolio} as an ad
 \item Minimize portfolio CSM optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
 (The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
 The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)
+\item Minimize portfolio EQS optimization subject to leverage, box, group, and/or target mean return constraints and tail probability parameter.
+(The default tail probability is 0.05, and specified tail probability could be given by \code{arguments = list(p=0.95)}.
+The tail probability parameter is passed into \code{optimize.portfolio} as an added argument to the \code{portfolio} object.)
 \item Maximize portfolio mean return per unit standard deviation (i.e. the Sharpe Ratio) subject to leverage, box, group, and/or target mean return constraints.
 It should be specified by \code{maxSR=TRUE} in \code{optimize.portfolio} with both mean and var/StdDev objectives.
 Otherwise, the default action is to maximize quadratic utility.
@@ -206,6 +210,9 @@ The default action is to maximize ES ratio. If \code{maxSTARR=FALSE} or \code{ES
 \item Maximize portfolio mean return per unit CSM (i.e. the CSM ratio) subject to leverage, box, group, and/or target mean return constraints.
 It could be specified by \code{CSMratio=TRUE} in \code{optimize.portfolio} with both mean and CSM objectives.
 The default action is to maximize CSM ratio. If \code{CSMratio=FALSE} is given, the action will be minimizing CSM.
+\item Maximize portfolio mean return per unit EQS (i.e. the EQS ratio) subject to leverage, box, group, and/or target mean return constraints.
+It could be specified by \code{EQSratio=TRUE} in \code{optimize.portfolio} with both mean and EQS objectives.
+The default action is to maximize EQS ratio. If \code{EQSratio=FALSE} is given, the action will be minimizing EQS.
 }
 
 Because these convex optimization problem are standardized, there is no need for a penalty term.
