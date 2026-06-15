@@ -42,7 +42,7 @@ library(PCRA)
 ```
 
 ## 2.2 Solvers
-The website https://cvxr.rbind.io/ shows that CVXR currently supports the use of 9 solvers, some of which are commercial (CBC, CPLEX, GUROBI, MOSEK)^[MOSEK ,GUROBI, and CPLEX require licenses to use, but free academic licenses are available for all three.] and the others are open source(GLPK, GLPK_MI, OSQP, SCS, ECOS). 
+The website https://cvxr.rbind.io/ shows that CVXR currently supports the use of 9 solvers, some of which are commercial (CBC, CPLEX, GUROBI, MOSEK)^[MOSEK ,GUROBI, and CPLEX require licenses to use, but free academic licenses are available for all three.] and the others are open source(CLARABEL, GLPK, GLPK_MI, OSQP, SCS, ECOS). 
 
 The PortfolioAnalytics package provides the following two main wrapper functions for constrained optimization of portfolios using a wide variety of methods:
 
@@ -50,7 +50,7 @@ The PortfolioAnalytics package provides the following two main wrapper functions
 
 `optimize.portfolio.rebalancing(R =, portfolio =, optimize_method =, rebalance_on =, training_period =, rolling_window =)`
 
-Different solvers support different types of portfolio optimization problems, which should be specified by the argument `optimize_method`. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` and `optimize.portfolio.rebalancing` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for QP type portfolio optimization problems, such as minimum variance portfolio optimization is OSQP, and the default solver for LP and SOCP type portfolio optimizations, such as maximum mean return, "robust portfolio optimization" to control for alpha uncertainty, and Coherent Second Moment (CSM) portfolio optimization, is SCS.
+Different solvers support different types of portfolio optimization problems, which should be specified by the argument `optimize_method`. The `optimize_method=c("CVXR", {CVXRsolver})` argument of the function `optimize.portfolio` and `optimize.portfolio.rebalancing` allows the user to specify the solver to use with CVXR. If the argument is `optimize_method="CVXR"`, the default solver for QP type portfolio optimization problems, such as minimum variance portfolio optimization is OSQP, and the default solver for LP and SOCP type portfolio optimizations, such as maximum mean return, "robust portfolio optimization" to control for alpha uncertainty, and Coherent Second Moment (CSM) portfolio optimization, is CLARABEL.
 \newpage
 
 | Solver | LP | QP | SOCP |
@@ -59,7 +59,8 @@ Different solvers support different types of portfolio optimization problems, wh
 |GLPK|$\checkmark$| | |
 |GLPK_MI|$\checkmark$| | |
 |OSQP|$\checkmark$|$\colorbox{gray}{\checkmark}$| |
-|SCS|$\colorbox{gray}{\checkmark}$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
+|CLARABEL|$\colorbox{gray}{\checkmark}$|$\checkmark$|$\colorbox{gray}{\checkmark}$|
+|SCS|$\checkmark$|$\checkmark$|$\checkmark$|
 |ECOS|$\checkmark$|$\checkmark$|$\checkmark$|
 |CPLEX|$\checkmark$|$\checkmark$|$\checkmark$|
 |GUROBI|$\checkmark$|$\checkmark$|$\checkmark$|
