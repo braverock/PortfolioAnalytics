@@ -40,7 +40,9 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v2
 
       - name: Add TeX deps
-        run: tlmgr install grfext
+        run:  |
+          tlmgr update --self
+          tlmgr install grfext
 
       - name: Install system dependencies
         run: |
