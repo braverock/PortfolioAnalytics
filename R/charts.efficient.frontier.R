@@ -828,6 +828,13 @@ chart.EfficientFrontierCompare <- function(R, portfolio, risk_type, n.portfolios
   }
   
   # legend
+  # The guideline block below is the only place create.legend.labels is built,
+  # but it is used unconditionally when legend.labels is NULL. Without this
+  # initialisation the function fails with "object 'create.legend.labels' not
+  # found" for guideline = FALSE. NULL is the right empty value: append() drops
+  # it, leaving one label per match.col, which is exactly the number of colours,
+  # line types and widths the guideline = FALSE branch sets above.
+  create.legend.labels <- NULL
   if(guideline){
     lines(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), lty=lty[3], col=col[3], lwd=lwd[3])
     points(x=c(out$frontier[1,1], out$frontier[1,m.p]), y = rep(out$frontier[1,2], 2), pch=pch.assets, cex=cex.assets)
