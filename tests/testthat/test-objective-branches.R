@@ -48,22 +48,35 @@ assets5 <- colnames(edhec[, 1:5])
 # 1. objective() error stops
 # ===========================================================================
 
+# objective() is qualified in this block. ROI exports a function of the same
+# name, 27 of the test files attach ROI, and library() does not move an
+# already-attached package back up the search path. In a full-suite run
+# objective() therefore resolves to ROI's, which takes a single argument x, and
+# these tests exercise that instead of the one they are written for. They pass
+# when this file is run on its own and fail when the suite is run, which is what
+# they did before this change: an error on the valid call, and the wrong error
+# message on the non-list call.
+#
+# The expected message is pinned for the same reason. "name" alone also appears
+# in R's "unused arguments (name = NULL, ...)", so the first test passed under
+# masking without testing anything.
+
 test_that("objective(): NULL name triggers stop", {
   expect_error(
-    objective(name = NULL, arguments = list()),
-    regexp = "name"
+    PortfolioAnalytics::objective(name = NULL, arguments = list()),
+    regexp = "you must specify an objective name"
   )
 })
 
 test_that("objective(): non-list arguments triggers stop", {
   expect_error(
-    objective(name = "mean", arguments = "not_a_list"),
-    regexp = "named list"
+    PortfolioAnalytics::objective(name = "mean", arguments = "not_a_list"),
+    regexp = "arguments must be passed as a named list"
   )
 })
 
 test_that("objective(): valid call returns correct class", {
-  obj <- objective(name = "mean", arguments = list())
+  obj <- PortfolioAnalytics::objective(name = "mean", arguments = list())
   expect_s3_class(obj, "objective")
   expect_equal(obj$name, "mean")
 })
