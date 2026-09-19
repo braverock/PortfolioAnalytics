@@ -4,7 +4,7 @@
 \alias{statistical.factor.model}
 \title{Statistical Factor Model}
 \usage{
-statistical.factor.model(R, k = 1, ...)
+statistical.factor.model(R, k = 1, ..., allow.fewer.obs = FALSE)
 }
 \arguments{
 \item{R}{xts of asset returns}
@@ -12,6 +12,11 @@ statistical.factor.model(R, k = 1, ...)
 \item{k}{number of factors to use}
 
 \item{\dots}{additional arguments passed to \code{prcomp}}
+
+\item{allow.fewer.obs}{logical. Fit the model even when there are fewer
+observations than assets. \code{FALSE} by default; see Details for when
+lifting the restriction is defensible and what it costs. Must be named, as
+it follows \code{\dots}.}
 }
 \value{
 #' \describe{
@@ -30,4 +35,75 @@ Fit a statistical factor model using Principal Component Analysis (PCA)
 The statistical factor model is fitted using \code{prcomp}. The factor
 loadings, factor realizations, and residuals are computed and returned
 given the number of factors used for the model.
+
+By default the model is not fitted when there are fewer observations than
+assets. The decomposition itself does not require it -- \code{prcomp}
+returns \code{min(m, N)} components and the fit uses \code{k} of them --
+but a short, wide panel is where sample second moments are least
+trustworthy. The largest sample eigenvalues are biased upward and the
+smallest downward as \code{N/m} grows, so a factor structure extracted
+there can be mostly noise, and any instability in the underlying series is
+harder to detect in a short window than in a long one. This is the standard
+guidance and it is the default.
+
+\code{allow.fewer.obs = TRUE} lifts the restriction. The case for lifting it
+is the asymptotic principal components literature, which was built for this
+shape: Connor and Korajczyk (1986, 1988) show that the factor realizations
+are consistently estimated as the cross-section grows with the time series
+held fixed, which is the opposite of the usual asymptotics and the reason
+the method exists. Bai and Ng (2002) give criteria for choosing \code{k} in
+that regime, and Fan, Liao and Mincheva (2013) build a covariance estimator
+on top of it for exactly the case \code{N > m}.
+
+The case against lifting it is not that the fit fails but that it succeeds
+quietly. The covariance returned is full rank by construction, which is not
+the same as being well estimated: it will invert, and an optimizer will take
+the inverse at face value. That is the error-maximizing behaviour Michaud
+(1989) describes, and the reason shrinkage (Ledoit and Wolf 2004) and
+factor-based regularization (Fan, Fan and Lv 2008) exist. DeMiguel,
+Garlappi and Uppal (2009) is the reminder that a portfolio built on a badly
+estimated covariance can lose to equal weighting out of sample.
+
+Set it to \code{TRUE} when the factors are wanted as a low-dimensional
+summary rather than as an estimate of every pairwise correlation, when
+\code{k} is small relative to the number of observations, and when the
+result is judged out of sample rather than in it. Do not set it merely to
+obtain an invertible covariance matrix from data that does not support one.
+
+With the restriction lifted, \code{k} is bounded by \code{m - 2}:
+\code{extractCovariance} divides the residual sums of squares by
+\code{m - k - 1}, so \code{k = m - 1} would return an infinite covariance
+rather than an error. The number of assets does not enter, because on this
+path there are more of them than observations. The bound applies only here;
+behaviour when \code{m >= N} is unchanged in every respect.
+}
+\references{
+Bai, J. and Ng, S. (2002). Determining the Number of Factors in Approximate
+Factor Models. \emph{Econometrica}, 70(1), 191-221.
+
+Connor, G. and Korajczyk, R. A. (1986). Performance Measurement with the
+Arbitrage Pricing Theory: A New Framework for Analysis. \emph{Journal of
+Financial Economics}, 15(3), 373-394.
+
+Connor, G. and Korajczyk, R. A. (1988). Risk and Return in an Equilibrium
+APT: Application of a New Test Methodology. \emph{Journal of Financial
+Economics}, 21(2), 255-289.
+
+DeMiguel, V., Garlappi, L. and Uppal, R. (2009). Optimal Versus Naive
+Diversification: How Inefficient is the 1/N Portfolio Strategy?
+\emph{Review of Financial Studies}, 22(5), 1915-1953.
+
+Fan, J., Fan, Y. and Lv, J. (2008). High Dimensional Covariance Matrix
+Estimation Using a Factor Model. \emph{Journal of Econometrics}, 147(1),
+186-197.
+
+Fan, J., Liao, Y. and Mincheva, M. (2013). Large Covariance Estimation by
+Thresholding Principal Orthogonal Complements. \emph{Journal of the Royal
+Statistical Society: Series B}, 75(4), 603-680.
+
+Ledoit, O. and Wolf, M. (2004). Honey, I Shrunk the Sample Covariance
+Matrix. \emph{Journal of Portfolio Management}, 30(4), 110-119.
+
+Michaud, R. O. (1989). The Markowitz Optimization Enigma: Is Optimized
+Optimal? \emph{Financial Analysts Journal}, 45(1), 31-42.
 }
