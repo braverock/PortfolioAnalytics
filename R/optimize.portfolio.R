@@ -1206,7 +1206,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         }
       } else {
         # if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
-        if (hasArg(maxSR)) maxSR <- match.call(expand.dots = TRUE)$maxSR else maxSR <- FALSE
+        maxSR <- isTRUE(list(...)$maxSR)
         if (maxSR) {
           target <- max_sr_opt(R = R, constraints = constraints, moments = moments, lambda_hhi = lambda_hhi, conc_groups = conc_groups, solver = solver, control = control)
           # need to set moments$mean=0 here because quadratic utility and target return is sensitive to returning no solution
@@ -3019,7 +3019,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       tmpname <- "HHI"
     } else if (reward & risk & !risk_ES & !risk_CSM & !risk_HHI & !risk_EQS) {
       # mean-var/sharpe ratio
-      if (hasArg(maxSR)) maxSR <- match.call(expand.dots = TRUE)$maxSR
+      maxSR <- isTRUE(list(...)$maxSR)
 
       if (!maxSR) {
         # min mean-variance
