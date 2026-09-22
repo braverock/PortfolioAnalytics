@@ -1207,13 +1207,20 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
       } else {
         # if(hasArg(ef)) ef=match.call(expand.dots=TRUE)$ef else ef=FALSE
         if (hasArg(maxSR)) maxSR <- match.call(expand.dots = TRUE)$maxSR else maxSR <- FALSE
+        target_mean <- NULL
         if (maxSR) {
           target <- max_sr_opt(R = R, constraints = constraints, moments = moments, lambda_hhi = lambda_hhi, conc_groups = conc_groups, solver = solver, control = control)
           # need to set moments$mean=0 here because quadratic utility and target return is sensitive to returning no solution
           tmp_moments_mean <- moments$mean
           moments$mean <- rep(0, length(moments$mean))
+          # target was computed from tmp_moments_mean, so the target return
+          # constraint has to be imposed with those same expected returns.
+          # Without this, gmv_opt() sees an all-zero moments$mean and falls
+          # back to colMeans(R), which differs from tmp_moments_mean whenever
+          # momentFUN supplies estimated (e.g. excess return) means.
+          target_mean <- tmp_moments_mean
         }
-        roi_result <- gmv_opt(R = R, constraints = constraints, moments = moments, lambda = lambda, target = target, lambda_hhi = lambda_hhi, conc_groups = conc_groups, solver = solver, control = control)
+        roi_result <- gmv_opt(R = R, constraints = constraints, moments = moments, lambda = lambda, target = target, lambda_hhi = lambda_hhi, conc_groups = conc_groups, solver = solver, control = control, target_mean = target_mean)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         obj_vals <- roi_result$obj_vals
