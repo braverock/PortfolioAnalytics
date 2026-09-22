@@ -1223,7 +1223,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
           names(port.mean) <- "mean"
           obj_vals$mean <- port.mean
         }
-        out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = roi_result$out, call = call)
+        out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = roi_result$out, call = call, solver_status = roi_result$solver_status)
       }
     }
     if (length(names(moments)) == 1 & "mean" %in% names(moments)) {
@@ -1242,14 +1242,14 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         obj_vals <- roi_result$obj_vals
-        out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = roi_result$out, call = call)
+        out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = roi_result$out, call = call, solver_status = roi_result$solver_status)
       } else {
         # Maximize return LP problem
         roi_result <- maxret_opt(R = R, constraints = constraints, moments = moments, target = target, solver = solver, control = control)
         weights <- roi_result$weights
         # obj_vals <- constrained_objective(w=weights, R=R, portfolio, trace=TRUE, normalize=FALSE)$objective_measures
         obj_vals <- roi_result$obj_vals
-        out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = roi_result$out, call = call)
+        out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = roi_result$out, call = call, solver_status = roi_result$solver_status)
       }
     }
     if (any(c("CVaR", "ES", "ETL") %in% names(moments))) {
@@ -1282,7 +1282,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         obj_vals <- list()
         if (meanetl) obj_vals$mean <- sum(weights * moments$mean)
         obj_vals[[tmpnames[idx]]] <- roi_result$out
-        out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = roi_result$out, call = call)
+        out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = roi_result$out, call = call, solver_status = roi_result$solver_status)
       } else {
         # Minimize sample ETL/ES/CVaR LP Problem
         roi_result <- etl_opt(R = R, constraints = constraints, moments = moments, target = target, alpha = alpha, solver = solver, control = control)
@@ -1292,7 +1292,7 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
         obj_vals <- list()
         if (meanetl) obj_vals$mean <- sum(weights * moments$mean)
         obj_vals[[tmpnames[idx]]] <- roi_result$out
-        out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = roi_result$out, call = call)
+        out <- list(weights = weights, objective_measures = obj_vals, opt_values = obj_vals, out = roi_result$out, call = call, solver_status = roi_result$solver_status)
       }
     }
     out$moment_values <- list(momentFun = moment_name, mu = mout$mu, sigma = mout$sigma)
@@ -3283,6 +3283,67 @@ optimize.portfolio <- optimize.portfolio_v2 <- function(
   return(out)
 }
 
+# A rebalancing period whose optimisation failed is not an optimize.portfolio
+# object. The foreach loops in optimize.portfolio.rebalancing() are run with
+# .errorhandling = "pass", so the condition object is stored in its place and
+# the run completes. Everything that walks opt_rebalancing has to expect that.
+is.failed.period <- function(x) !inherits(x, "optimize.portfolio")
+
+# Index of the first period that did produce a portfolio. The extractors need
+# one to learn how many columns to build, and it cannot be assumed to be the
+# first period.
+first.successful.period <- function(lst){
+  ok <- which(!vapply(lst, is.failed.period, logical(1)))
+  if(length(ok) == 0L)
+    stop("every rebalancing period failed; there is nothing to extract. ",
+         "Inspect the conditions in object$opt_rebalancing to see why.")
+  ok[1L]
+}
+
+# A period can come back without a usable answer in two ways: the optimisation
+# raised, or it returned NA weights. ROI reports solver failure the second way,
+# by returning a solution of NAs rather than by signalling, so a run can be full
+# of holes with nothing raised anywhere.
+has.no.weights <- function(x){
+  if(is.failed.period(x)) return(TRUE)
+  w <- x$weights
+  is.null(w) || all(is.na(w))
+}
+
+# Report the periods that failed. Called once per run, right after the loop,
+# because a condition raised inside %dopar% never reaches the user, and NA
+# weights raise nothing at all.
+# Why a period came back without an answer. A raised condition carries its own
+# message; a period that returned NA weights carries the solver status that
+# gmv_opt() kept for exactly this purpose.
+failure.reason <- function(x){
+  if(is.failed.period(x)){
+    r <- tryCatch(conditionMessage(x), error = function(e) NA_character_)
+    return(if(is.na(r) || !nzchar(r)) "the optimisation raised" else r)
+  }
+  st <- x$solver_status
+  if(!is.null(st) && !is.na(st) && nzchar(st)) st else "the solver returned no solution"
+}
+
+warn.failed.periods <- function(lst){
+  failed <- vapply(lst, has.no.weights, logical(1))
+  if(!any(failed)) return(invisible(FALSE))
+  nm <- names(lst)[failed]
+  shown <- if(length(nm) > 5L) c(nm[1:5], sprintf("and %d more", length(nm) - 5L)) else nm
+
+  why <- vapply(lst[failed], failure.reason, character(1))
+  why <- sub("[[:space:]]+$", "", gsub("[\r\n]+", " ", why))
+  tab <- sort(table(why), decreasing = TRUE)
+  reasons <- paste(sprintf('"%s" (%d)', names(tab), as.integer(tab)), collapse = "; ")
+
+  warning(sprintf(
+    paste0("%d of %d rebalancing periods did not produce a portfolio and are NA ",
+           "in the extracted results.\n  Reason: %s\n  Periods: %s"),
+    sum(failed), length(failed), reasons, paste(shown, collapse = ", ")), call. = FALSE)
+  invisible(TRUE)
+}
+
+
 #' @rdname optimize.portfolio.rebalancing
 #' @name optimize.portfolio.rebalancing
 #' @export
@@ -3349,6 +3410,7 @@ optimize.portfolio.rebalancing_v1 <- function(R, constraints, optimize_method = 
     }
   }
   names(out_list) <- index(R[ep.i])
+  warn.failed.periods(out_list)
 
   end_t <- Sys.time()
   message(c("overall elapsed time:", end_t - start_t))
@@ -3434,7 +3496,10 @@ optimize.portfolio.rebalancing_v1 <- function(R, constraints, optimize_method = 
 #'   \item{\code{elapsed_time:}}{ The amount of time that elapses while the
 #'   optimization is run.}
 #'   \item{\code{opt_rebalancing:}}{ A list of \code{optimize.portfolio}
-#'   objects computed at each rebalancing period.}
+#'   objects computed at each rebalancing period. A period whose optimisation
+#'   failed holds the condition that was raised instead, because the loop runs
+#'   with \code{.errorhandling = "pass"}; such periods are reported by a warning
+#'   and appear as \code{NA} in the extracted results.}
 #' }
 #' @author Kris Boudt, Peter Carl, Brian G. Peterson
 #' @name optimize.portfolio.rebalancing
@@ -3655,9 +3720,10 @@ optimize.portfolio.rebalancing <- function(R, portfolio = NULL, constraints = NU
     }
   }
 
-  # out_list is a list where each element is an optimize.portfolio object
-  # at each rebalance date
+  # out_list is a list with one element per rebalance date. Each is an
+  # optimize.portfolio object, or the condition raised by a period that failed.
   names(out_list) <- index(R[ep.i])
+  warn.failed.periods(out_list)
 
   end_t <- Sys.time()
   elapsed_time <- end_t - start_t

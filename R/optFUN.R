@@ -145,6 +145,11 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   out <- list()
   out$weights <- weights
   out$out <- result$objval
+  # ROI reports solver failure by returning a solution of NAs rather than by
+  # raising, and its status message says why. Keep it: without it a caller that
+  # finds NA weights has no way to learn what went wrong.
+  if(anyNA(weights)) out$solver_status <-
+    tryCatch(as.character(result$status$msg$message), error = function(e) NA_character_)
   obj_vals <- list()
   # Calculate the objective values here so that we can use the moments$mean
   # and moments$var that might be passed in by the user. This will avoid
