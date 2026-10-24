@@ -18,6 +18,7 @@
 #' Use number (e.g. 1, 2, 3) to indicate which portfolio drawdown interval you wish to track, or NULL to not shadow any period.
 #' @param plotType "cumRet", "drawdown", or the default is both
 #' @param main users can design title by providing a character of main
+#' @param default_main logical; whether to display the default subtitle for plots. Defaults to \code{TRUE}
 #' @param colorSet users can design the color by providing a vector of color
 #' @param ltySet users can design lty by providing a vector of lty
 #' @param lwdSet users can design lwd by providing a vector of lwd
@@ -25,7 +26,7 @@
 #' @importFrom grDevices col2rgb
 #' @author Peter Carl, Xinran Zhao, Yifu Kang
 #' @export backtest.plot
-backtest.plot <- function(R, log_return = FALSE, drawdown_on = 1, plotType='both', main = NULL, colorSet=NULL, ltySet=NULL, lwdSet=NULL){
+backtest.plot <- function(R, log_return = FALSE, drawdown_on = 1, plotType='both', main = NULL, default_main = TRUE, colorSet=NULL, ltySet=NULL, lwdSet=NULL){
   ## Cumulative Returns
   c.xts <- if (log_return) {
     1 + cumsum(R)
@@ -63,12 +64,14 @@ backtest.plot <- function(R, log_return = FALSE, drawdown_on = 1, plotType='both
   # title of plot
   if(!is.null(main))
     main = paste(main, '\n')
-  if(plotType == 'drawdown'){
-    main = paste(main, "Drawdown", sep = "")
-  } else {
-    main = paste(main, "Cumulative Returns", sep = "")
+  if(default_main){
+    if(plotType == 'drawdown'){
+      main = paste(main, "Drawdown", sep = "")
+    } else {
+      main = paste(main, "Cumulative Gross Returns", sep = "")
+    }
   }
-    
+  
   ## plots of return and drawdown
   if (plotType == 'both'){
     p <- xts::plot.xts(c.xts[,1], main = main,
@@ -76,7 +79,8 @@ backtest.plot <- function(R, log_return = FALSE, drawdown_on = 1, plotType='both
                        labels.col="grey20", col = colorSet[1], lty = ltySet[1],
                        lwd = lwdSet[1], cex.axis=0.8, format.labels = "%b\n%Y", 
                        ylim = c(min(c.xts), max(c.xts)))
-    p <- xts::addSeries(d.xts[,1], main="Drawdown", ylim = c(min(d.xts), 0),
+    if(default_main) default_drawdown = "Drawdown" else default_drawdown = ""
+    p <- xts::addSeries(d.xts[,1], main=default_drawdown, ylim = c(min(d.xts), 0),
                         col = colorSet[1], lty = ltySet[1], lwd = lwdSet[1])
     if(n > 1){
       for(i in 2:n){
@@ -96,9 +100,9 @@ backtest.plot <- function(R, log_return = FALSE, drawdown_on = 1, plotType='both
     ylim2 <- p$Env$panels[[2]]$ylim
     
     xy1 <- as.xts(matrix(rep(ylim1, length(x)),ncol=length(ylim1), byrow=TRUE), 
-                       order.by=as.Date(x))
+                  order.by=as.Date(x))
     xy2 <- as.xts(matrix(rep(ylim2, length(x)),ncol=length(ylim2), byrow=TRUE), 
-                       order.by=as.Date(x))
+                  order.by=as.Date(x))
     p <- xts::addPolygon(xy1, on=-1, col="lightgrey") # top panel
     p <- xts::addPolygon(xy2, on=-2, col="lightgrey") # lower panel
   }
@@ -126,7 +130,6 @@ backtest.plot <- function(R, log_return = FALSE, drawdown_on = 1, plotType='both
     
     xy1 <- as.xts(matrix(rep(ylim1, length(x)),ncol=length(ylim1), byrow=TRUE), 
                   order.by=as.Date(x))
-    p <- xts::addPolygon(xy1, on=-1, col="lightgrey")
   }
   
   ## plot of drawdown
