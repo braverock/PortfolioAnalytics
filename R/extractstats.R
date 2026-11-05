@@ -276,7 +276,10 @@ extractStats.optimize.portfolio.rebalancing <- function(object, prefix=NULL, ...
   if(inherits(object$portfolio, "regime.portfolios")){
     return(extractStatsRegime(object, prefix=prefix))
   } else {
-    return(lapply(object$opt_rebal, extractStats, ...))
+    # A failed period has no statistics; return NULL for it rather than
+    # letting extractStats() fail on a condition object.
+    return(lapply(object$opt_rebal, function(x)
+      if(is.failed.period(x)) NULL else extractStats(x, ...)))
   }
 }
 
@@ -419,15 +422,20 @@ extractWeights.optimize.portfolio.rebalancing <- function(object, ...){
     stop("Object passed in must be of class 'optimize.portfolio.rebalancing'")
   }
   rebal_object <- object$opt_rebal
-  numColumns = length(rebal_object[[1]]$weights)
+  # A failed period holds a condition, not a portfolio, so the reference period
+  # for the shape of the result cannot be assumed to be the first one.
+  ref = first.successful.period(rebal_object)
+  numColumns = length(rebal_object[[ref]]$weights)
   numRows = length(rebal_object)
 
-  result <- matrix(nrow=numRows, ncol=numColumns)
+  result <- matrix(NA_real_, nrow=numRows, ncol=numColumns)
 
-  for(i in 1:numRows)
+  for(i in 1:numRows){
+    if(is.failed.period(rebal_object[[i]])) next
     result[i,] = unlist(rebal_object[[i]]$weights)
+  }
 
-  colnames(result) = names(unlist(rebal_object[[1]]$weights))
+  colnames(result) = names(unlist(rebal_object[[ref]]$weights))
   rownames(result) = names(rebal_object)
   result = as.xts(result, dateFormat="Date")
   return(result)
@@ -519,13 +527,15 @@ extractObjectiveMeasures.optimize.portfolio.rebalancing <- function(object){
     result <- extractObjRegime(object)
   } else {
     rebal_object <- object$opt_rebal
-    num.columns <- length(unlist(extractObjectiveMeasures(rebal_object[[1]])))
+    ref <- first.successful.period(rebal_object)
+    num.columns <- length(unlist(extractObjectiveMeasures(rebal_object[[ref]])))
     num.rows <- length(rebal_object)
-    result <- matrix(nrow=num.rows, ncol=num.columns)
+    result <- matrix(NA_real_, nrow=num.rows, ncol=num.columns)
     for(i in 1:num.rows){
+      if(is.failed.period(rebal_object[[i]])) next
       result[i,] <- unlist(extractObjectiveMeasures(rebal_object[[i]]))
     }
-    colnames(result) <- name.replace(names(unlist(extractObjectiveMeasures(rebal_object[[1]]))))
+    colnames(result) <- name.replace(names(unlist(extractObjectiveMeasures(rebal_object[[ref]]))))
     rownames(result) <- names(rebal_object)
     result <- as.xts(result)
   }
