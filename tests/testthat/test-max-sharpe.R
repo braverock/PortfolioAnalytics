@@ -85,3 +85,45 @@ test_that("maxSR.lo.DE objective measure mean is numeric", {
 test_that("maxSR.lo.DE objective measure StdDev is numeric", {
   expect_true(is.numeric(extractObjectiveMeasures(maxSR.lo.DE)$StdDev))
 })
+
+# --- maxSR must be read as a value, not as an expression --------------------
+#
+# maxSR arrives through `...` and was recovered with
+# match.call(expand.dots = TRUE)$maxSR, which yields the unevaluated
+# expression.  A literal TRUE happens to work; anything else does not.
+# `if (maxSR)` on a symbol raises "argument is not interpretable as logical",
+# so driving maxSR from a variable -- what a loop or a backtest does -- failed.
+
+sr.portf <- add.objective(
+  add.objective(
+    add.constraint(
+      add.constraint(portfolio.spec(assets = funds), type = "full_investment"),
+      type = "long_only"),
+    type = "return", name = "mean"),
+  type = "risk", name = "StdDev")
+
+test_that("maxSR accepts a variable, not only a literal TRUE", {
+  flag <- TRUE
+  lit <- optimize.portfolio(R = R, portfolio = sr.portf,
+                            optimize_method = "ROI", maxSR = TRUE, trace = TRUE)
+  var <- optimize.portfolio(R = R, portfolio = sr.portf,
+                            optimize_method = "ROI", maxSR = flag, trace = TRUE)
+  expect_equal(as.numeric(var$weights), as.numeric(lit$weights), tolerance = 1e-10)
+})
+
+test_that("maxSR accepts an expression that evaluates to TRUE", {
+  opt <- optimize.portfolio(R = R, portfolio = sr.portf, optimize_method = "ROI",
+                            maxSR = isTRUE(TRUE), trace = TRUE)
+  ref <- optimize.portfolio(R = R, portfolio = sr.portf, optimize_method = "ROI",
+                            maxSR = TRUE, trace = TRUE)
+  expect_equal(as.numeric(opt$weights), as.numeric(ref$weights), tolerance = 1e-10)
+})
+
+test_that("a maxSR variable holding FALSE is not read as TRUE", {
+  flag <- FALSE
+  off <- optimize.portfolio(R = R, portfolio = sr.portf,
+                            optimize_method = "ROI", maxSR = flag, trace = TRUE)
+  ref <- optimize.portfolio(R = R, portfolio = sr.portf,
+                            optimize_method = "ROI", maxSR = FALSE, trace = TRUE)
+  expect_equal(as.numeric(off$weights), as.numeric(ref$weights), tolerance = 1e-10)
+})
