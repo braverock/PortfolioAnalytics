@@ -14,8 +14,15 @@
 #' @param conc_groups list of vectors specifying the groups of the assets.
 #' @param solver solver to use
 #' @param control list of solver control parameters
+#' @param target_mean optional vector of expected returns used to impose the
+#' target return constraint. This is required when the linear term of the
+#' quadratic objective is deliberately zeroed out (as the maximum Sharpe Ratio
+#' solver does) but the target return must still be imposed with the expected
+#' returns that the target was derived from. If \code{NULL} (the default) the
+#' expected returns in \code{moments$mean} are used, falling back to the sample
+#' column means of \code{R} when \code{moments$mean} is all zero.
 #' @author Ross Bennett
-gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups, solver="quadprog", control=NULL){
+gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_groups, solver="quadprog", control=NULL, target_mean=NULL){
   if (!"package:ROI" %in% search() && !requireNamespace("ROI", quietly = TRUE))
     stop("Package 'ROI' is required but not installed. ",
          "Install it with: install.packages('ROI')", call. = FALSE)
@@ -32,8 +39,23 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   
   # Check for a target return constraint
   if(!is.na(target)) {
-    # If var is the only objective specified, then moments$mean won't be calculated
-    if(all(moments$mean==0)){
+    if(!is.null(target_mean)){
+      # gmv_opt() is internal, but target_mean feeds straight into the
+      # constraint matrix, where a wrong length would be recycled and a
+      # non-numeric coerced. Either way the target return constraint would
+      # be silently wrong, which is the failure mode this argument exists
+      # to remove.
+      if(!is.numeric(target_mean) || length(target_mean) != N)
+        stop(sprintf(paste("target_mean must be a numeric vector with one entry per asset:",
+                           "got %s of length %d, expected length %d"),
+                     class(target_mean)[1], length(target_mean), N))
+      # The caller has zeroed out moments$mean for the objective function, but
+      # the target return must still be imposed with the expected returns the
+      # target was derived from. Otherwise the target is picked on one frontier
+      # and imposed on another.
+      tmp_means <- target_mean
+    } else if(all(moments$mean==0)){
+      # If var is the only objective specified, then moments$mean won't be calculated
       tmp_means <- colMeans(R)
     } else {
       tmp_means <- moments$mean
@@ -47,11 +69,25 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   rhs.vec <- target
   meq <- 1
   
-  # Set up initial A matrix for leverage constraints
-  Amat <- rbind(Amat, rep(1, N), rep(-1, N))
-  dir.vec <- c(dir.vec, ">=",">=")
-  rhs.vec <- c(rhs.vec, constraints$min_sum, -constraints$max_sum)
-  
+  # Set up initial A matrix for leverage constraints.
+  # If min_sum == max_sum (e.g. a full investment constraint) the two
+  # inequality rows are always simultaneously active and linearly dependent.
+  # That makes the active set rank deficient and quadprog fails with
+  # "constraints are inconsistent, no solution!" for many right hand sides,
+  # in which case ROI returns a vector of NA weights. Encoding the leverage
+  # constraint as a single equality row avoids the degeneracy.
+  if(!is.null(constraints$min_sum) && !is.null(constraints$max_sum) &&
+     is.finite(constraints$min_sum) && is.finite(constraints$max_sum) &&
+     isTRUE(constraints$min_sum == constraints$max_sum)){
+    Amat <- rbind(Amat, rep(1, N))
+    dir.vec <- c(dir.vec, "==")
+    rhs.vec <- c(rhs.vec, constraints$max_sum)
+  } else {
+    Amat <- rbind(Amat, rep(1, N), rep(-1, N))
+    dir.vec <- c(dir.vec, ">=",">=")
+    rhs.vec <- c(rhs.vec, constraints$min_sum, -constraints$max_sum)
+  }
+
   # Add min box constraints
   Amat <- rbind(Amat, diag(N))
   dir.vec <- c(dir.vec, rep(">=", N))

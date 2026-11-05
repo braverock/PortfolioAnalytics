@@ -13,7 +13,8 @@ gmv_opt(
   lambda_hhi,
   conc_groups,
   solver = "quadprog",
-  control = NULL
+  control = NULL,
+  target_mean = NULL
 )
 }
 \arguments{
@@ -34,6 +35,14 @@ gmv_opt(
 \item{solver}{solver to use}
 
 \item{control}{list of solver control parameters}
+
+\item{target_mean}{optional vector of expected returns used to impose the
+target return constraint. This is required when the linear term of the
+quadratic objective is deliberately zeroed out (as the maximum Sharpe Ratio
+solver does) but the target return must still be imposed with the expected
+returns that the target was derived from. If \code{NULL} (the default) the
+expected returns in \code{moments$mean} are used, falling back to the sample
+column means of \code{R} when \code{moments$mean} is all zero.}
 }
 \description{
 This function is called by optimize.portfolio to solve minimum variance or 
