@@ -47,11 +47,25 @@ gmv_opt <- function(R, constraints, moments, lambda, target, lambda_hhi, conc_gr
   rhs.vec <- target
   meq <- 1
   
-  # Set up initial A matrix for leverage constraints
-  Amat <- rbind(Amat, rep(1, N), rep(-1, N))
-  dir.vec <- c(dir.vec, ">=",">=")
-  rhs.vec <- c(rhs.vec, constraints$min_sum, -constraints$max_sum)
-  
+  # Set up initial A matrix for leverage constraints.
+  # If min_sum == max_sum (e.g. a full investment constraint) the two
+  # inequality rows are always simultaneously active and linearly dependent.
+  # That makes the active set rank deficient and quadprog fails with
+  # "constraints are inconsistent, no solution!" for many right hand sides,
+  # in which case ROI returns a vector of NA weights. Encoding the leverage
+  # constraint as a single equality row avoids the degeneracy.
+  if(!is.null(constraints$min_sum) && !is.null(constraints$max_sum) &&
+     is.finite(constraints$min_sum) && is.finite(constraints$max_sum) &&
+     isTRUE(constraints$min_sum == constraints$max_sum)){
+    Amat <- rbind(Amat, rep(1, N))
+    dir.vec <- c(dir.vec, "==")
+    rhs.vec <- c(rhs.vec, constraints$min_sum)
+  } else {
+    Amat <- rbind(Amat, rep(1, N), rep(-1, N))
+    dir.vec <- c(dir.vec, ">=",">=")
+    rhs.vec <- c(rhs.vec, constraints$min_sum, -constraints$max_sum)
+  }
+
   # Add min box constraints
   Amat <- rbind(Amat, diag(N))
   dir.vec <- c(dir.vec, rep(">=", N))
